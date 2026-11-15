@@ -69,6 +69,9 @@ extension KiwiCore {
         let provenance = arrivalProvenance(of: event)  // #2630
         let pocketClaim = claimPocketArrival(event, provenance: provenance)
         state.pocketClaimed = pocketClaim  // #2612
+        // A late titled match's gate (#3341).
+        let watched = provenance?.watchedCreate == true
+        state.arrivalStamp = watched ? wallClock() : nil
         let anchorBeforeFold =
             event.goneWindowID == nil ? nil : focusedWindowID  // #2888
         let effects = state.apply(event)
@@ -257,6 +260,11 @@ extension KiwiCore {
             )
         case .windowTitleChanged(let id, _):
             noteVisionTitleChanged(id)
+            // A late titled filing retiles, which rebuilds the bars.
+            let filed = effects.lateTitledRule.map(payLateTitledRule)
+            if filed == true {
+                break
+            }
             if effects.floatFlipped {
                 retile()
             } else {

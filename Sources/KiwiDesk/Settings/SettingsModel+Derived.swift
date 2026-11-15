@@ -20,7 +20,8 @@ extension SettingsModel {
     /// App Rules in the draft — pins and floats — counted once for
     /// Home's card and Simple's header (#2737).
     var appRuleCount: Int {
-        config.appRules.count + config.floatRules.count
+        config.appRules.count + config.titledAppRules.count
+            + config.floatRules.count
     }
 
     /// The count stepper's ▲ bound (#1382): Core's count of the

@@ -23,6 +23,7 @@ extension KiwiCore {
     ) throws {
         guard snapshot.isEdited else { return }
         let app = snapshot.appRules
+        let titled = snapshot.titledAppRules
         let float = snapshot.floatRules
         let scroll = snapshot.scrollGestures
         let gesture = snapshot.gestures
@@ -41,6 +42,7 @@ extension KiwiCore {
                 original: original
             )
             let appTouched = !(app.touched[name] ?? []).isEmpty
+            let titledTouched = !(titled.touched[name] ?? []).isEmpty
             let keyTouched =
                 name != page
                 && (!(snapshot.keyLayers.touched[name] ?? []).isEmpty
@@ -65,7 +67,8 @@ extension KiwiCore {
             let lensTouched =
                 lensMarks != (snapshot.fileLensReach[name] ?? [:])
             guard
-                appTouched || keyTouched || scrollTouched || gestureTouched
+                appTouched || titledTouched || keyTouched || scrollTouched
+                    || gestureTouched
                     || historyTouched || cycleTouched || wrapTouched
                     || floatOverride != original
                     || tileOverride != tileOriginal || automaticTouched
@@ -74,6 +77,9 @@ extension KiwiCore {
             var profile = try profiles.read(name: name)
             if appTouched {
                 profile.appRules = app.appRuleOverride(for: name)
+            }
+            if titledTouched {
+                profile.titledAppRules = titled.appRuleOverride(for: name)
             }
             if keyTouched {
                 profile.layers = snapshot.keyLayers.keyLayerOverride(
@@ -130,6 +136,7 @@ extension KiwiCore {
                 snapshot.fileKeyBase
             )
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
+            || !titled.baseTouched.isEmpty
             || !scroll.baseTouched.isEmpty
             || !gesture.baseTouched.isEmpty
             || !history.baseTouched.isEmpty
@@ -142,6 +149,9 @@ extension KiwiCore {
             }
             stored.appRules = app.appRuleBase(
                 original: snapshot.storedAppBase
+            )
+            stored.titledAppRules = titled.titledAppRuleBase(
+                original: snapshot.storedTitledAppBase
             )
             stored.floatRules = float.floatRuleBase(
                 original: snapshot.storedFloatBase

@@ -42,6 +42,17 @@ public struct AppliedEffects: Sendable {
     /// the popup may ride its app's launch follow (#3189).
     var popupSkippedRule: SpaceID?
 
+    /// A titled Space rule's one late match (#3341): the window,
+    /// the Space its first matching title names, and when it
+    /// arrived. KiwiCore judges the press and the bound, and files.
+    var lateTitledRule: LateTitledRule?
+
+    struct LateTitledRule: Sendable, Equatable {
+        let window: WindowID
+        let space: SpaceID
+        let arrivedAt: Date
+    }
+
     /// Whether the create paid a Desktop return's owed focus
     /// (`ReturningFocusFoldTests`, #1207).
     var paidReturningFocus = false

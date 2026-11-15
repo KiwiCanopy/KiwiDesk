@@ -201,9 +201,10 @@ editing AX code:
   structure keeps outranking a Float rule, whose label would
   take a raised window's overlay status (#300,
   `RaisedLayerLatchTests`).
-- **A float rule is read only through `FloatRules.parse` and
-  spelled only through `FloatRules.rule(app:title:)` (#2345).**
-  The engine, the profile reach and the Settings Float list all
+- **A float or titled Space rule is read only through
+  `AppTitleRule.parse` and spelled only through
+  `AppTitleRule.rule(app:title:)` (#2345, #3341).**
+  The engine, the profile reach and the Settings lists all
   read the same `app` / `app:title` grammar, and every split or
   colon test written beside that reading has disagreed with it on
   some input — a mixed-case app, a bare trailing colon. So a

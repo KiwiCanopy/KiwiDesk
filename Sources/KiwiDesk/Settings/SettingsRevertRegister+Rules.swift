@@ -11,6 +11,12 @@ extension SettingsRevertRegister {
         ).then { model, app in
             settle(model, .space, app.map(RuleFamily.space.key))
         },
+        .appRules(.titledAppRules): RevertWriter.entry(
+            \.titledAppRules,
+            key: { $0 }
+        ).then { model, rule in
+            settle(model, .titledSpace, rule.map(RuleFamily.titledSpace.key))
+        },
         .appRules(.floatRules): ruleList(\.floatRules, .float),
         .appRules(.floatRulesPattern): ruleList(\.floatRules, .float),
         .appRules(.tileRules): ruleList(\.tileRules, .tile),
@@ -85,6 +91,13 @@ extension SettingsRevertRegister {
             let mine = { family.key($0) == subject }
             config.appRules = config.appRules.filter { !mine($0.key) }
                 .merging(clean.appRules.filter { mine($0.key) }) { $1 }
+        case .titledSpace:
+            let mine = { family.key($0) == subject }
+            config.titledAppRules = config.titledAppRules
+                .filter { !mine($0.key) }
+                .merging(clean.titledAppRules.filter { mine($0.key) }) {
+                    $1
+                }
         case .float:
             config.floatRules = merged(
                 config.floatRules,
@@ -250,6 +263,10 @@ extension SettingsRevertRegister {
         switch family {
         case .space:
             return config.appRules.filter { family.key($0.key) == subject }
+                .map { $0.key + "=" + $0.value.raw }.sorted()
+        case .titledSpace:
+            return config.titledAppRules
+                .filter { family.key($0.key) == subject }
                 .map { $0.key + "=" + $0.value.raw }.sorted()
         case .float:
             return config.floatRules.filter {

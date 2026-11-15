@@ -10,7 +10,7 @@ extension SettingsHeaderBar {
             editingStoredProfile: model.editingStoredProfile,
             spaces: model.config.spaces.map(\.raw),
             profiles: model.profileSummaries.map(\.name),
-            appRules: model.config.appRules.keys.sorted(),
+            appRules: SpaceRuleRows.apps(model.config).sorted(),
             palettes: model.userPalettes.map(\.name)
         )
     }

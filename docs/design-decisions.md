@@ -23050,8 +23050,8 @@ rule #1810 left for when someone asked, and the "Float windows
 automatically" switch is its every-app form.
 
 **One list per rule, because the rules have different scopes.**
-A Space is title-blind — every new window of the app opens in
-it — while floating may match windows by title. Drawn as two
+A Space rule and a float rule scope windows differently, and each
+row carries its own scope. Drawn as two
 facets of one row, the title pattern's editor sat under the
 whole row and read as scoping the Space too — *only the titled
 window goes to that Space* (#1608). No wording fixes that,
@@ -23062,6 +23062,28 @@ cards, **Open in a Space** and **Float**, each over its own store
 the Float row it qualifies (`AppRuleListsWiringTests` ▸
 `patternEditorScopesToFloat`). An app may sit in both lists.
 This is the storage's own shape, so it costs the engine nothing.
+
+:::unreleased
+*The Space card stops being title-blind (#3341, owner,
+2026-11-15).* A Chromium browser's profiles share one bundle id, so
+a title-blind Space could not give one profile its own Space, and
+the profile shows only in the title. The two cards and their stores
+stay: titled Space rules live in their own `titled_app_rules`
+store, never as keys of `app_rules`, whose readers all treat a key
+as a bare app. What #1608 taught still holds, in a narrower form:
+a title pattern scopes exactly the row it sits in, beside that
+row's own Space menu. So the Space card draws one row per app and
+pattern, each with its Space, reach and trash, and no editor hangs
+under a row that holds a Space. Its rows read in the order the
+engine evaluates them, longest pattern first and alphabetical
+between equals, the bare row last as "All other windows", so the
+first row that matches is the rule that applies. An app with only
+titled rows draws no line for its other windows: that would draw
+an absent rule as a row. A titled rule files a window once, at its
+creation or at its first matching title before the user acts, and
+never on a later title change: a tab switch would take every other
+tab with it.
+:::
 A third card, **Automatic floating**, carries the escape for a
 guess (#2173): its checkbox on top and the **Tile instead** list
 it gates below it, so the Tile rows read as the checkbox's
@@ -23140,7 +23162,13 @@ float whatever a rule says, which the
 complete rule and never a row with a defaulted facet
 ([Settings UI patterns](ui-patterns.md)). A picker excludes only
 the apps its own list holds, since an app may carry both rules
-(`AppRuleListsWiringTests` ▸ `pickersExcludeTheirOwnList`).
+(`AppRulesSectionWiringTests` ▸ `cardsTakeTheirOwnState`).
+
+:::unreleased
+The Space card's picker excludes only the apps that hold a bare
+Space rule, so an app with only titled rows can have its bare row
+added back (#3341).
+:::
 
 **Matching windows by title is never withheld.** *Windows
 titled…* is a peer of *All windows* in the Float menu, not a

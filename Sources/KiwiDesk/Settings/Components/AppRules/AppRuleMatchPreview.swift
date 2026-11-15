@@ -108,7 +108,7 @@ struct AppRuleMatchPreview: View {
         var staged = model.config.floatRules
         let typed = pending.trimmed
         if !typed.isEmpty {
-            staged.append(FloatRules.rule(app: app, title: typed))
+            staged.append(AppTitleRule.rule(app: app, title: typed))
         }
         if FloatRules(staged)
             .matches(app: app, title: window.title)

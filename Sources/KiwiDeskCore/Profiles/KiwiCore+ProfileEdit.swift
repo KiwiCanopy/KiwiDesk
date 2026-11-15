@@ -34,6 +34,7 @@ extension KiwiCore {
         applyProfileEdits(from: config, onto: &existing)
         if !writingRules {
             existing.appRules = stored.appRules
+            existing.titledAppRules = stored.titledAppRules
             existing.floatRules = stored.floatRules
             existing.scrollGesture = stored.scrollGesture
             existing.gesture = stored.gesture
@@ -172,12 +173,19 @@ extension KiwiCore {
             )
             profile.appRules = AppRuleOverride.diff(
                 base: sidecar?.appRules ?? globalRuleBase.appRules,
-                edited: config.appRules
+                edited: config.appRules,
+                normalizing: AppRuleOverride.bareKey
+            )
+            profile.titledAppRules = AppRuleOverride.diff(
+                base: sidecar?.titledAppRules
+                    ?? globalRuleBase.titledAppRules,
+                edited: config.titledAppRules,
+                normalizing: AppTitleRule.normalizedRule
             )
             profile.floatRules = RuleListOverride.diff(
                 base: sidecar?.floatRules ?? globalRuleBase.floatRules,
                 edited: config.floatRules,
-                normalizing: FloatRules.normalizedRule
+                normalizing: AppTitleRule.normalizedRule
             )
             profile.scrollGesture = ScrollGestureOverride.diff(
                 base: base.scrollGesture,

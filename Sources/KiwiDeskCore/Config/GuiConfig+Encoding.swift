@@ -10,6 +10,12 @@ extension GuiConfig {
         try container.encode(format, forKey: .format)
         try container.encode(spaces, forKey: .spaces)
         try container.encode(appRules, forKey: .appRules)
+        if !titledAppRules.isEmpty {
+            try container.encode(
+                titledAppRules,
+                forKey: .titledAppRules
+            )
+        }
         try container.encode(floatRules, forKey: .floatRules)
         try container.encode(ignoreRules, forKey: .ignoreRules)
         try container.encode(layers, forKey: .layers)

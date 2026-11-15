@@ -23,6 +23,13 @@ extension SettingsModel {
                 editing: editing
             ) { $0.raw }
             + rows(
+                .appRules(.titledAppRules),
+                .titledSpace,
+                stored.titledAppRules,
+                encoded.titledAppRules,
+                editing: editing
+            ) { $0.raw }
+            + rows(
                 .appRules(.floatRules),
                 .float,
                 stored.floatRules,
@@ -74,7 +81,7 @@ extension SettingsModel {
     /// A float rule set in the Float menu's own words.
     static func floatWords(_ rules: [String]) -> String {
         rules.contains { !FloatFacet.isTitled($0) }
-            ? L("app_rules.float.scope.all", "All windows")
+            ? AppRuleScopeWords.all
             : L("app_rules.float.scope.titled.resting", "Windows titled")
     }
 
@@ -212,12 +219,14 @@ extension SettingsModel {
     /// named by what the entry is (owner eyeball, 2026-10-20).
     static func newProfilesNote(_ family: RuleFamily, _ gets: Bool) -> String {
         switch (family, gets) {
-        case (.space, true), (.float, true), (.tile, true):
+        case (.space, true), (.titledSpace, true), (.float, true),
+            (.tile, true):
             L(
                 "app_rules.reach.diff.new_profiles_get",
                 "New profiles get this rule"
             )
-        case (.space, false), (.float, false), (.tile, false):
+        case (.space, false), (.titledSpace, false), (.float, false),
+            (.tile, false):
             L(
                 "app_rules.reach.diff.new_profiles_lose",
                 "New profiles won't get this rule"

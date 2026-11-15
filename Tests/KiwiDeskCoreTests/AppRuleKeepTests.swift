@@ -63,7 +63,11 @@ struct AppRuleKeepTests {
         )
         #expect(kept(keep(core, ids(removed))) == ["/app_rules/com.x"])
         let stored = try core.profiles.read(name: "Odd")
-        #expect(stored.appRules?.normalizedRules["com.x"] == nil)
+        let bare = AppRuleOverride.bareKey
+        #expect(
+            stored.appRules?.normalizedRules(normalizing: bare)["com.x"]
+                == nil
+        )
         #expect(core.guiConfigStore.load()?.appRules["com.x"] == nil)
     }
 
@@ -170,7 +174,9 @@ struct AppRuleKeepTests {
         #expect(core.guiConfigStore.load()?.appRules["com.x"] == "1")
         #expect(
             try core.profiles.read(name: "Odd").appRules?
-                .normalizedRules["com.x"] == nil
+                .normalizedRules(normalizing: AppRuleOverride.bareKey)[
+                    "com.x"
+                ] == nil
         )
     }
 

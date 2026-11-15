@@ -4,8 +4,8 @@ import Testing
 /// The seams the cross-session restore leans on (#1385), held over
 /// Core's comment-stripped source: every membership add is
 /// classified (a user filing must stamp the match through the one
-/// seam, or the title pass may undo it), the restore policy has
-/// one caller, and every window-removal arm reports its departure
+/// seam, or the title pass may undo it), the restore policy is the
+/// two title passes' alone, and every window-removal arm reports its departure
 /// to the logout rollback. The census sees `workspaces.add(` only:
 /// an order primitive inside `withSpace { … }` is review's.
 @Suite("Cross-session seams (#1385)")
@@ -77,10 +77,18 @@ struct CrossSessionSeamTests {
         #expect(stamp.lowerBound < move.lowerBound)
     }
 
-    @Test("the restore policy has one caller, the title pass")
-    func restoringHasOneCaller() throws {
+    /// The cross-session title pass and a titled rule's late match
+    /// (#3341) file a window the user has not filed, so neither
+    /// stamps a user filing.
+    @Test("the restore policy is the two title passes' alone")
+    func restoringIsTheTitlePasses() throws {
         let found = try counts(of: "restoring: true")
-        #expect(found == ["KiwiCore+CrossSession.swift": 1])
+        #expect(
+            found == [
+                "KiwiCore+CrossSession.swift": 1,
+                "KiwiCore+LateTitledRule.swift": 1,
+            ]
+        )
     }
 
     /// Each removal arm reaches the rollback's ledger: the gone

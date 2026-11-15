@@ -692,6 +692,35 @@ editing here:
   consumer inside the fold takes the value `handle` read, never a
   read of its own (`ArrivalProvenanceSeamTests`,
   `LifecycleArrivalReasonTests`).
+- **An app rule files a window at most once, and never after the
+  user acted on it (#3341).** The create fold reads the rule through
+  the one `StateCoordinator.appRuleSpace(of:)` — a titled rule over
+  the bare one. A window whose title matched no titled rule there is
+  recorded in `titledRulePending`, and only where the fold's rule
+  gate was open, no follow was owed, neither a Pocket key's claim
+  nor a quiet open held the window, and the arrival's provenance
+  read `.created` or `.awaitingCreate` (the stamp `handle` mirrors
+  in), so a boot
+  sweep, a re-track or a heal records nothing. A match found while
+  the arrival's create is still due waits for `settleArrival`,
+  whose arm runs after the pocket claim's, pays it on a created
+  settle and ends the record past the bound; a departing settle
+  leaves the record to the departure's own fold. A host whose
+  create route is not live records nothing, every arrival reading
+  `.unreported`. Its first matching title
+  report files it through `payLateTitledRule`, which reads the press
+  and the `CrossSessionMatch.titleSettle` bound against the arrival
+  stamp mirrored in like `arrivalDisplay`, and stands down for the
+  focused window, which a move without a follow would strand. A
+  late filing goes through `fileMembership(restoring: true)`, never
+  `moveWindow`, and sets no `placedByAppRule`, so it owes no follow
+  and stamps no user filing (review's). A user filing
+  (`stampUserFiling`), a destroy, the app's exit and the #634 reset
+  end the record, a rekey moves it (`WindowRekeyParityTests`) save
+  for an arrival whose create is still due, which it ends, and a
+  new door that
+  files a window for a rule ends it the same way
+  (`TitledRuleLateMatchTests`, `TitledSpaceRulesTests`).
 - **An app's windows are walked through ONE ring (#637, #3131).**
   Open or Focus's repeat press and `focus_app_window` step it through
   the one `cycleAppWindow`, which builds it with `cycleRing`; a verb

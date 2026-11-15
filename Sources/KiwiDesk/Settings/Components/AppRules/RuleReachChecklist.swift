@@ -33,6 +33,7 @@ struct RuleReachChecklist: View {
     private var reading: RuleReachReading? {
         switch family {
         case .space: model.spaceReach(app)
+        case .titledSpace: model.titledSpaceReach(app)
         case .float:
             model.floatReach(app, describe: SettingsModel.floatWords)
         case .key: model.keyReach(app)

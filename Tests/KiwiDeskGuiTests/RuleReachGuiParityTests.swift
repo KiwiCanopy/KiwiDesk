@@ -20,6 +20,7 @@ struct RuleReachGuiParityTests {
     /// Each family → the `GuiConfig` field the draft edits it in.
     private static let draftField: [String: String] = [
         "appRules": "appRules",
+        "titledAppRules": "titledAppRules",
         "floatRules": "floatRules",
         "keyLayers": "layers",
         "scrollGestures": "scrollGesture",
@@ -85,26 +86,33 @@ struct RuleReachGuiParityTests {
 
     @Test("each draft site names every family's field")
     func everySiteNamesEveryFamily() throws {
-        let file = "SettingsModel+RuleReach.swift"
-        let sites: [(String, String, (String) -> String)] = [
-            ("encodeReach", "func encodeReach()", { "config.\($0)" }),
+        let reach = "SettingsModel+RuleReach.swift"
+        let half = "SettingsModel+RuleHalf.swift"
+        let sites: [(String, String, String, (String) -> String)] = [
             (
-                "resolveLoadedRules", "func resolveLoadedRules(",
+                "encodeReach", "func encodeReach()", reach,
+                { "config.\($0)" }
+            ),
+            (
+                "resolveLoadedRules", "func resolveLoadedRules(", reach,
                 { "config.\($0) =" }
             ),
-            ("sidecarConfig", "var sidecarConfig:", { "sidecar.\($0) =" }),
             (
-                "adoptRuleHalf", "func adoptRuleHalf()",
+                "sidecarConfig", "var sidecarConfig:", reach,
+                { "sidecar.\($0) =" }
+            ),
+            (
+                "adoptRuleHalf", "func adoptRuleHalf()", half,
                 { "cleanConfig.\($0) = config.\($0)" }
             ),
             (
-                "dropRuleHalf", "func dropRuleHalf()",
+                "dropRuleHalf", "func dropRuleHalf()", half,
                 { "config.\($0) = cleanConfig.\($0)" }
             ),
         ]
         let families = try families()
         #expect(!families.isEmpty)
-        for (name, declaration, needle) in sites {
+        for (name, declaration, file, needle) in sites {
             let text = try body(declaration, in: file)
             for family in families {
                 let field = try #require(Self.draftField[family])
@@ -149,6 +157,53 @@ struct RuleReachGuiParityTests {
                     || text.contains(".\(field) == $1.\(field)"),
                 "RuleFamilyField never names \(family) (\(field))"
             )
+        }
+    }
+
+    /// The app rule families: the reach families the App Rules
+    /// census names, so a new app rule store joins this guard by
+    /// joining both (#3341).
+    private func appRuleFamilies() throws -> [String] {
+        let census = Set(AppRulesKey.allCases.map { "\($0)" })
+        return try families().filter(census.contains)
+    }
+
+    /// Families a site skips by design, with the reason.
+    private static let appSiteSkips: [String: Set<String>] = [
+        // No keep root writes a Tile rule, so no keep reaches one.
+        "takeKeptRules": ["tileRules"],
+        // Only the Space and float stores draw a per-app reach row
+        // (`reachDiffRows`); the rest revert with their row.
+        "revertRuleReach": ["tileRules", "floatAutomatically"],
+    ]
+
+    @Test("a kept rule and a reach row's revert name each app family")
+    func appRuleSitesNameEveryAppFamily() throws {
+        let found = try appRuleFamilies()
+        #expect(found.count >= 4, "app families found: \(found)")
+        let sites: [(String, String, String, (String) -> String)] = [
+            (
+                "takeKeptRules", "static func takeKeptRules(",
+                "SettingsModel+LiveWrite.swift", { "stored.\($0)." }
+            ),
+            (
+                "revertRuleReach", "private func revertRuleReach(",
+                "SettingsModel+RowRevert.swift",
+                { "case .appRules(.\($0)):" }
+            ),
+        ]
+        for (name, declaration, file, needle) in sites {
+            for skip in Self.appSiteSkips[name] ?? [] {
+                #expect(found.contains(skip), "stale skip: \(skip)")
+            }
+            let text = try body(declaration, in: file)
+            for family in found {
+                let skipped = Self.appSiteSkips[name]?.contains(family)
+                #expect(
+                    text.contains(needle(family)) != (skipped == true),
+                    "\(name) and \(family): named or skipped, not both"
+                )
+            }
         }
     }
 

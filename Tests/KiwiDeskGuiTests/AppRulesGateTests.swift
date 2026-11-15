@@ -97,7 +97,7 @@ struct AppRulesGateTests {
             // needle to that control, not an assertion.
             (
                 "role: .space, name: $newSpaceApp, "
-                    + "exclude: Set(spaceApps), "
+                    + "exclude: bareSpaceApps, "
                     + "onCommit: addWithSpace, openAppsOf: model.core) "
                     + ".disabled(!gates.hasSpaces)",
                 lists, "the Space add picker"

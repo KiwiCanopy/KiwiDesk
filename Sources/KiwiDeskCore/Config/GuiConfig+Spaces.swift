@@ -45,6 +45,9 @@ extension GuiConfig {
         for (app, space) in appRules where space == from {
             appRules[app] = to
         }
+        for (rule, space) in titledAppRules where space == from {
+            titledAppRules[rule] = to
+        }
         // A sequence's end keys are renamed too (#1871).
         layers = layers.map { layer in
             layer.mappingActions { binding in
@@ -68,7 +71,7 @@ extension GuiConfig {
     /// and the next authoritative load resurrects it. Deliberately
     /// does NOT touch `appRules` (unlike `renameSpace`): app rules
     /// are global, and another profile may still declare a space
-    /// of this name.
+    /// of this name. `titledAppRules` likewise.
     public mutating func removeSpace(_ space: SpaceID) {
         spaces.removeAll { $0 == space }
         spaceModes[space] = nil

@@ -46,7 +46,7 @@ struct GuiConfigParityTests {
         #expect(
             fields == [
                 "format", "settings", "spaces", "spaceModes",
-                "appRules", "spacePins", "mainSpaces",
+                "appRules", "titledAppRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
                 "scrollGesture", "gesture",

@@ -70,7 +70,7 @@ struct TitlePatternDraftTests {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Common/"
-                    + "WindowTitleEditor.swift"
+                    + "TitlePatternComposer.swift"
             )
         let text = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
@@ -80,7 +80,7 @@ struct TitlePatternDraftTests {
                 after: "private var addWindowMenu",
                 in: text
             ),
-            "addWindowMenu is gone from WindowTitleEditor"
+            "addWindowMenu is gone from TitlePatternComposer"
         )
         let squashed = menu.split(whereSeparator: \.isWhitespace)
             .joined()
@@ -89,7 +89,7 @@ struct TitlePatternDraftTests {
             "a picked title no longer opens the pattern field"
         )
         #expect(
-            !squashed.contains("addPattern("),
+            !squashed.contains("onCommit("),
             "the add menu stores a pattern without the field again"
         )
         let start = try #require(
@@ -97,7 +97,7 @@ struct TitlePatternDraftTests {
                 after: "private func startDraft",
                 in: text
             ),
-            "startDraft is gone from WindowTitleEditor"
+            "startDraft is gone from TitlePatternComposer"
         )
         #expect(
             start.contains("draft.start(with: title)"),
@@ -108,10 +108,10 @@ struct TitlePatternDraftTests {
                 after: "private func commitDraft",
                 in: text
             ),
-            "commitDraft is gone from WindowTitleEditor"
+            "commitDraft is gone from TitlePatternComposer"
         )
         #expect(
-            commit.contains("addPattern(pattern)"),
+            commit.contains("onCommit(pattern)"),
             "Return or Add no longer stores the pattern"
         )
         let field = try #require(
@@ -119,7 +119,7 @@ struct TitlePatternDraftTests {
                 after: "private var patternField",
                 in: text
             ),
-            "patternField is gone from WindowTitleEditor"
+            "patternField is gone from TitlePatternComposer"
         )
         let squashedField = field.split(whereSeparator: \.isWhitespace)
             .joined()

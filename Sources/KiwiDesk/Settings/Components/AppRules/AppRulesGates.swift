@@ -21,7 +21,7 @@ struct AppRulesGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
-        case .appRules(.appRules):
+        case .appRules(.appRules), .appRules(.titledAppRules):
             return config.spaces.isEmpty ? .noSpaces : nil
         case .appRules(.tileRules), .appRules(.appRulesAddTile):
             return config.floatAutomatically ? nil : .automaticOff
@@ -48,6 +48,7 @@ struct AppRulesGates {
     /// (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
         .appRules(.appRules),
+        .appRules(.titledAppRules),
         .appRules(.tileRules),
         .appRules(.appRulesAddTile),
     ]

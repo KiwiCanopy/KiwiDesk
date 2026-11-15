@@ -6,6 +6,9 @@ import Foundation
 /// therefore cannot serve as the next profile's base.
 struct GlobalRuleBase {
     var appRules: [String: SpaceID] = [:]
+    /// `titled_app_rules`, keyed through `AppTitleRule.normalizedRule`
+    /// (#3341).
+    var titledAppRules: [String: SpaceID] = [:]
     var floatRules: [String] = []
     var ignoreRules: [String] = []
     var tileRules: [String] = []

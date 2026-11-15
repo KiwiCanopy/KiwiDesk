@@ -12,6 +12,7 @@ struct RuleFamilyField {
 
     static let all: [RuleFamilyField] = [
         field(.space, \.appRules),
+        field(.titledSpace, \.titledAppRules),
         field(.float, \.floatRules),
         // The Desktop base is drafted beside the layers it moves
         // (#1870): never kept or dropped without them.
@@ -60,6 +61,6 @@ extension RuleFamily {
     /// The table key a float or Tile rule files its app under: the
     /// rule's app, keyed as the family keys a subject (#2345).
     func subject(ofRule rule: String) -> String {
-        key(FloatRules.app(of: rule))
+        key(AppTitleRule.app(of: rule))
     }
 }

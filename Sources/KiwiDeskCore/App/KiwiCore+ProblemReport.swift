@@ -36,7 +36,7 @@ extension KiwiCore {
     static let headerListed = KeepRoot.spaceModes
     /// A rule list is one leaf, so a diff would print it whole.
     static let headerLeftOut: Set<String> = [
-        KeepRoot.appRules, KeepRoot.floatRules,
+        KeepRoot.appRules, KeepRoot.floatRules, KeepRoot.titledAppRules,
     ]
 
     /// Each Space's layout, `id = layout`, by id.

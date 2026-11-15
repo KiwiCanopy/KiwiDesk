@@ -259,7 +259,7 @@ struct RuleReachTableTests {
         #expect(base == ["com.calc", "zoom", "zoom:Share"])
         let resolved = encoded?.resolved(
             onto: base,
-            normalizing: FloatRules.normalizedRule
+            normalizing: AppTitleRule.normalizedRule
         ).sorted()
         #expect(resolved == ["com.calc", "zoom:Meeting"])
     }

@@ -12,6 +12,19 @@ extension SettingsModel {
         ) { $0.raw }
     }
 
+    /// The checklist of a titled Space row, keyed by its
+    /// `app:title` rule (#3341).
+    func titledSpaceReach(_ rule: String) -> RuleReachReading? {
+        guard let reach = encodedReach else { return nil }
+        let key = AppTitleRule.normalizedRule(rule)
+        return reading(
+            reach.titledAppRules,
+            key,
+            reach.unreadable,
+            picked: reachEdits.reach[.titledSpace]?[key]
+        ) { $0.raw }
+    }
+
     /// The checklist of a Float-list row, each other value
     /// described by `describe`.
     func floatReach(
@@ -21,9 +34,9 @@ extension SettingsModel {
         guard let reach = encodedReach else { return nil }
         return reading(
             reach.floatRules,
-            FloatRules.appKey(app),
+            AppTitleRule.appKey(app),
             reach.unreadable,
-            picked: reachEdits.reach[.float]?[FloatRules.appKey(app)],
+            picked: reachEdits.reach[.float]?[AppTitleRule.appKey(app)],
             describe
         )
     }
@@ -181,16 +194,24 @@ extension SettingsModel {
     }
 
     /// Moves the reach `old` has now — picked or stored — to `new`,
-    /// a pick equal to `new`'s own default being no pick (#3124).
-    func carryPick(_ family: RuleFamily, from old: String, to new: String) {
+    /// a pick equal to `new`'s own default being no pick (#3124);
+    /// `target` is `new`'s family where the move changes family
+    /// (#3341).
+    func carryPick(
+        _ family: RuleFamily,
+        from old: String,
+        to new: String,
+        in target: RuleFamily? = nil
+    ) {
+        let target = target ?? family
         guard let row = reading(family, old) else { return }
         let carried = reach(family, old, row: row)
         reachEdits.reach[family]?[family.key(old)] = nil
         reachEdits.removal[family]?[family.key(old)] = nil
-        if storedDefault(family, new) == carried {
-            reachEdits.reach[family]?[family.key(new)] = nil
+        if storedDefault(target, new) == carried {
+            reachEdits.reach[target]?[target.key(new)] = nil
         } else {
-            setReach(family, new, carried)
+            setReach(target, new, carried)
         }
     }
 
@@ -211,6 +232,7 @@ extension SettingsModel {
     ) -> RuleReachReading? {
         switch family {
         case .space: spaceReach(app)
+        case .titledSpace: titledSpaceReach(app)
         case .float: floatReach(app) { $0.joined(separator: ", ") }
         case .key: keyReach(app)
         case .scroll: scrollReach(app)

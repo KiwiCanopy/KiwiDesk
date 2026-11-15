@@ -19,6 +19,7 @@ struct RuleReachFamilyParityTests {
     /// with the reason it does neither.
     private static let profileField: [String: [String]?] = [
         "appRules": ["appRules"],
+        "titledAppRules": ["titledAppRules"],
         "floatRules": ["floatRules"],
         "scrollGestures": ["scrollGesture"],
         "gestures": ["gesture"],

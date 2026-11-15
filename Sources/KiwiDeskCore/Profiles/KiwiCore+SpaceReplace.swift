@@ -82,12 +82,16 @@ extension KiwiCore {
         return writeSpaces(baseline.spaces)
     }
 
-    /// The app rules that send an app to a Space `set` drops, by
-    /// that Space: such an app opens a Space of its own (#3294).
+    /// The app rules, titled ones included (#3341), that send an app
+    /// to a Space `set` drops, by that Space: such an app opens a
+    /// Space of its own (#3294).
     public func appRulesLeftBehind(by set: SpaceSet) -> [SpaceID: Int] {
         let kept = Set(set.spaces)
         var counts: [SpaceID: Int] = [:]
-        for target in state.appRules.values where !kept.contains(target) {
+        let targets =
+            Array(state.appRules.values)
+            + state.titledAppRules.rawRules.values
+        for target in targets where !kept.contains(target) {
             counts[target, default: 0] += 1
         }
         return counts

@@ -24,6 +24,11 @@ extension KeepJudge {
         switch path.first {
         case KeepRoot.appRules?:
             shared = rules.appRules.keepIsShared(path[1], editing: page)
+        case KeepRoot.titledAppRules?:
+            shared = rules.titledAppRules.keepIsShared(
+                AppTitleRule.normalizedRule(path[1]),
+                editing: page
+            )
         case KeepRoot.floatRules?:
             shared = rules.floatRules.keepIsShared(
                 RuleReachTable<[String]>.app(of: path[1]),

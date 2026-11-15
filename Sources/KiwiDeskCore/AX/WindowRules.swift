@@ -1,14 +1,5 @@
 import Foundation
 
-/// Whether a window title matches a rule's fragment: a
-/// case-sensitive substring, the one reading App Rules' Float rows
-/// and a KiwiVision lens member share (#2103 ruling 32).
-public enum WindowTitleMatch {
-    public static func matches(_ title: String, _ fragment: String) -> Bool {
-        title.contains(fragment)
-    }
-}
-
 /// Float rules matching an app's rule key — its bundle id, or its
 /// process name where it has none (#3211) — and optional
 /// case-sensitive title fragments.
@@ -19,70 +10,25 @@ public struct FloatRules: Sendable, Equatable {
 
     public init(_ rules: [String] = [], guess: FloatGuess = FloatGuess()) {
         self.guess = guess
-        self.rules = rules.map(Self.parse)
-    }
-
-    /// A float rule's grammar, read once: `app`, or `app:title`
-    /// with a non-empty title fragment — a rule ending in a bare
-    /// colon is a bare app whose name keeps the colon, so it
-    /// matches no bundle id. The app is case-folded through
-    /// `appKey`; the fragment keeps its case. Every reading of a
-    /// rule — the engine's, the profile reach's, the Float list's
-    /// — derives from this, so none can split it differently
-    /// (#2345).
-    public static func parse(
-        _ rule: String
-    ) -> (app: String, title: String?) {
-        let parts = rule.split(separator: ":", maxSplits: 1)
-        guard parts.count == 2 else { return (appKey(rule), nil) }
-        return (appKey(String(parts[0])), String(parts[1]))
-    }
-
-    /// The app a float rule names (`parse`).
-    public static func app(of rule: String) -> String {
-        parse(rule).app
-    }
-
-    /// The title fragment a float rule matches, nil for a rule
-    /// that floats every window of its app (`parse`).
-    public static func title(of rule: String) -> String? {
-        parse(rule).title
-    }
-
-    /// A rule spelled from its parts, the grammar `parse` reads.
-    public static func rule(app: String, title: String?) -> String {
-        title.map { "\(app):\($0)" } ?? app
-    }
-
-    /// A bundle id as a float rule's app is keyed.
-    public static func appKey(_ bundleID: String) -> String {
-        bundleID.lowercased()
-    }
-
-    /// Canonical identity used by profile sparse diffs: bundle
-    /// ids compare case-insensitively, while title fragments
-    /// keep their case-sensitive matching semantics.
-    public static func normalizedRule(_ rule: String) -> String {
-        let parsed = parse(rule)
-        return Self.rule(app: parsed.app, title: parsed.title)
+        self.rules = rules.map(AppTitleRule.parse)
     }
 
     /// Rules as normalized for matching and config seeding.
     public var rawRules: [String] {
-        rules.map { Self.rule(app: $0.app, title: $0.title) }
+        rules.map { AppTitleRule.rule(app: $0.app, title: $0.title) }
     }
 
     /// `bundleID`'s own rules, spelled as `rawRules` spells them.
     public func rules(of bundleID: String) -> [String] {
-        let app = Self.appKey(bundleID)
+        let app = AppTitleRule.appKey(bundleID)
         return rules.filter { $0.app == app }
-            .map { Self.rule(app: $0.app, title: $0.title) }
+            .map { AppTitleRule.rule(app: $0.app, title: $0.title) }
     }
 
     /// Cheap gate before title-change float detection; `app` is
     /// the window's `AppRef.listKey` (#3211).
     public func hasTitleRule(app: String?) -> Bool {
-        guard let app = app.map(Self.appKey) else { return false }
+        guard let app = app.map(AppTitleRule.appKey) else { return false }
         return rules.contains { $0.app == app && $0.title != nil }
     }
 
@@ -92,7 +38,7 @@ public struct FloatRules: Sendable, Equatable {
         app: String?,
         title: String
     ) -> Bool {
-        guard let app = app.map(Self.appKey) else { return false }
+        guard let app = app.map(AppTitleRule.appKey) else { return false }
         return rules.contains { rule in
             guard rule.app == app else { return false }
             guard let fragment = rule.title else { return true }

@@ -43,10 +43,14 @@ extension KiwiCore {
             base: config.appRules,
             profile: profile.appRules
         )
+        config.titledAppRules = ConfigResolver.resolvedTitledAppRules(
+            base: config.titledAppRules,
+            profile: profile.titledAppRules
+        )
         config.floatRules =
             profile.floatRules?.resolved(
                 onto: config.floatRules,
-                normalizing: FloatRules.normalizedRule
+                normalizing: AppTitleRule.normalizedRule
             ) ?? config.floatRules
         config.ignoreRules =
             profile.ignoreRules?.resolved(
@@ -193,6 +197,7 @@ extension KiwiCore {
         var config = GuiConfig()
         config.settings = tiler.settings
         config.appRules = globalRuleBase.appRules
+        config.titledAppRules = globalRuleBase.titledAppRules
         config.spacePins = capturedPins(alsoOf: [])
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace

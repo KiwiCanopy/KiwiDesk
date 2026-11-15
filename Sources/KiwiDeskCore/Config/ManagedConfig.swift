@@ -12,6 +12,7 @@ public enum ManagedConfig {
     /// loader resets.
     public static let managedTokens: [String] = [
         "app_rules",
+        "titled_app_rules",
         "float_rules",
         "tile_rules",
         "ignore_rules",

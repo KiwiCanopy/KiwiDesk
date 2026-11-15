@@ -18,6 +18,7 @@ extension Profile {
         case savedAt = "saved_at"
         case layers
         case appRules = "app_rules"
+        case titledAppRules = "titled_app_rules"
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case scrollGesture = "scroll_gesture"

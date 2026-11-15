@@ -26,11 +26,11 @@ extension AppRulesSection {
         )
     }
 
-    /// Says the Space is title-blind (#1608).
+    /// What a row does, true of a bare and a titled row (#3341).
     static var spaceCaption: String {
         L(
             "app_rules.space_list.caption",
-            "Every new window of the app opens in its Space."
+            "New windows of the app open in its Space."
         )
     }
 
@@ -54,6 +54,20 @@ extension AppRulesSection {
                 + "minimized. Launching the app, or opening another "
                 + "window of it, also takes you to its Space."
         )
+            + "\n\n"
+            + L(
+                "app_rules.space_list.help.titles",
+                "**%1$@** matches a fragment of a window's title, so "
+                    + "an app's windows can open in different Spaces, "
+                    + "such as one browser profile per Space. The "
+                    + "first row that matches decides. A window is "
+                    + "placed once, when it opens; a later title "
+                    + "change does not move it.",
+                L(
+                    "app_rules.float.scope.titled.resting",
+                    "Windows titled"
+                )
+            )
     }
 
     /// The Float card's `?`. `app_rules.float.help` is the one

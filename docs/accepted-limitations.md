@@ -155,6 +155,20 @@ happens once per app. Press the switch again, or click.
 :::
 
 :::unreleased
+A [titled app rule](lua-reference.md#titled_app_rules) files a
+window when it opens, never later: a window whose title comes to
+match only after you click or press a key, after 30 seconds, or
+while it has the focus, stays where it is. Switching tabs changes a browser window's title,
+and moving the window then would take every other tab with it. A
+web app installed to open **as a tab** opens no window, so no rule
+runs: it opens in its profile's window, and KiwiDesk takes you to the
+Space of the browser window macOS brings forward, which is the one
+you used last and can be another profile's. Install it to open **in
+a window** to give it a Space of its own
+([#3341](https://github.com/KiwiCanopy/KiwiDesk/issues/3341)).
+:::
+
+:::unreleased
 While **Secure Input** is on (a password field, Terminal's Secure
 Keyboard Entry), macOS hides key presses from KiwiDesk, so a key
 typed between two taps of a modifier cannot end the count: ⌘, a

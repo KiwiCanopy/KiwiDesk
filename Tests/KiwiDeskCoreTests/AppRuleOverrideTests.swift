@@ -12,6 +12,8 @@ import Testing
 @Suite("AppRuleOverride (#109)")
 struct AppRuleOverrideTests {
 
+    private let bare = AppRuleOverride.bareKey
+
     private let base: [String: SpaceID] = [
         "Mail": SpaceID(1),
         "Music": SpaceID(2),
@@ -32,7 +34,8 @@ struct AppRuleOverrideTests {
             ) == normalized
         )
         #expect(
-            AppRuleOverride().resolved(onto: base) == normalized
+            AppRuleOverride().resolved(onto: base, normalizing: bare)
+                == normalized
         )
     }
 
@@ -46,7 +49,7 @@ struct AppRuleOverrideTests {
             // …and un-pin a base app (tombstone).
             "Music": nil,
         ])
-        let resolved = over.resolved(onto: base)
+        let resolved = over.resolved(onto: base, normalizing: bare)
         #expect(resolved["mail"] == SpaceID(3))
         #expect(resolved["safari"] == SpaceID(4))
         #expect(resolved["music"] == nil)
@@ -64,11 +67,12 @@ struct AppRuleOverrideTests {
         ]
         let over = AppRuleOverride.diff(
             base: base,
-            edited: edited
+            edited: edited,
+            normalizing: bare
         )
         #expect(
-            over?.resolved(onto: base)
-                == AppRuleOverride.normalized(edited)
+            over?.resolved(onto: base, normalizing: bare)
+                == AppRuleOverride.normalized(edited, normalizing: bare)
         )
         // Shape: sparse — one change, one add, one tombstone.
         let rules = try #require(over).rules
@@ -81,7 +85,11 @@ struct AppRuleOverrideTests {
     @Test("No divergence diffs to nil (never persisted empty)")
     func identicalDiffIsNil() {
         #expect(
-            AppRuleOverride.diff(base: base, edited: base)
+            AppRuleOverride.diff(
+                base: base,
+                edited: base,
+                normalizing: bare
+            )
                 == nil
         )
     }
@@ -90,7 +98,7 @@ struct AppRuleOverrideTests {
     func mixedCaseTombstone() {
         let over = AppRuleOverride(rules: ["MAIL": nil])
 
-        let resolved = over.resolved(onto: base)
+        let resolved = over.resolved(onto: base, normalizing: bare)
 
         #expect(resolved["mail"] == nil)
         #expect(resolved["music"] == SpaceID(2))

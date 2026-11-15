@@ -15,6 +15,11 @@ extension KiwiCore {
         old: WindowID,
         new: WindowID
     ) {
+        // An arrival whose create never landed owes no late titled
+        // match under its new id either (#3341).
+        if arrivals.waiting[old] != nil {
+            state.titledRulePending[new] = nil
+        }
         flushHeldArrival(old)  // #2630
         if let stamp = selfRaiseStamps.removeValue(
             forKey: old

@@ -23,14 +23,17 @@ struct RuleKeepDraftTests {
         base.appRules = ["com.a": "1", "com.b": "4", "com.k": "1"]
         base.floatRules = ["com.f", "com.n"]
         base.floatAutomatically = false
+        base.titledAppRules = ["com.t:Work": "2"]
         try core.guiConfigStore.save(base)
         let stored = try #require(core.ruleReachSnapshot())
         var old = GuiConfig()
         old.appRules = ["com.a": "1", "com.b": "2", "com.r": "5"]
         old.floatRules = ["com.f", "com.g"]
         old.floatAutomatically = true
+        old.titledAppRules = ["com.t:Gone": "1"]
         var draft = old
         draft.appRules["com.d"] = "3"
+        draft.titledAppRules["com.t:Own"] = "3"
         draft.floatRules.append("com.h")
         // The user's own spelling of the rule the keep adds.
         draft.floatRules.append("Com.N")
@@ -44,10 +47,14 @@ struct RuleKeepDraftTests {
             draft.appRules
                 == ["com.a": "1", "com.b": "4", "com.k": "1", "com.d": "3"]
         )
-        let normalized = draft.floatRules.map(FloatRules.normalizedRule)
+        let normalized = draft.floatRules.map(AppTitleRule.normalizedRule)
         #expect(Set(normalized) == ["com.f", "com.h", "com.n"])
         #expect(normalized.count == 3)
         #expect(draft.floatAutomatically == false)
+        // The titled family too (#3341).
+        #expect(
+            draft.titledAppRules == ["com.t:Work": "2", "com.t:Own": "3"]
+        )
         var clean = old
         SettingsModel.takeKeptRules(
             stored,

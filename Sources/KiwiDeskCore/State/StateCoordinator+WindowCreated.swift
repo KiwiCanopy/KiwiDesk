@@ -9,6 +9,9 @@ extension StateCoordinator {
         // Forget record to test if window was minimized (#40, #673).
         effects.appearedWasMinimized = forgetMinimized(window.id)
         unjudgedFilings.remove(window.id)
+        // Consumed on every arrival, like `arrivalDisplay`.
+        let arrivedAt = arrivalStamp
+        arrivalStamp = nil
         // A close return is placed as NEW (#1414/#1561): memory,
         // slot and any restore filed over it dropped FIRST, so
         // every reader below sees one fact; consumed on every arrival.
@@ -70,7 +73,7 @@ extension StateCoordinator {
         // window a Pocket key claims (#2612 ▸ 7); a Space a quiet
         // open named stands in for the rule, through its gate (#3152).
         let popup = windows[window.id]?.isPopup ?? false
-        let rule = window.appRef.listKey.flatMap { appRules[$0] }
+        let rule = appRuleSpace(of: window)
         let ruled =
             held == nil && !popup && !claimed ? named ?? rule : nil
         // Only the rule's own verdict may earn the launch follow
@@ -82,6 +85,14 @@ extension StateCoordinator {
         if mayFollow, let ruled, ruled != active {
             effects.placedByAppRule = ruled
         }
+        // No late titled match for a Pocket key's candidate or a
+        // quiet open, whose own arms place the window (#3341).
+        noteTitledRulePending(
+            window,
+            arrivedAt: arrivedAt,
+            ruleGateOpen: held == nil && !popup && !claimed && mayFollow,
+            followed: effects.placedByAppRule != nil
+        )
         // A popup the rule skipped may ride that follow (#3189).
         if mayFollow, held == nil, popup, !claimed, let rule,
             rule != active

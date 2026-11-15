@@ -40,6 +40,8 @@ struct AnnouncedValueTests {
     /// File basename → how many labelled pickers/menus it holds.
     private static let labelled: [String: Int] = [
         "AppRuleSpaceRow.swift": 1,
+        // A Space row's scope menu (#3341).
+        "AppRuleSpaceRow+Scope.swift": 1,
         "AppRuleFloatRow.swift": 1,
         // A lens app's All windows / Windows titled… menu (#2103).
         "KiwiVisionLensAppsCard.swift": 1,

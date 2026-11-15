@@ -49,7 +49,10 @@ enum MCPWording {
 
     /// Whether a leaf is an app rule or the automatic-float switch.
     private static func isRule(_ leaf: TouchedLeaf) -> Bool {
-        ["/app_rules/", "/float_rules/", "/float_automatically"].contains {
+        [
+            "/app_rules/", "/titled_app_rules/", "/float_rules/",
+            "/float_automatically",
+        ].contains {
             leaf.id.hasPrefix($0)
         }
     }

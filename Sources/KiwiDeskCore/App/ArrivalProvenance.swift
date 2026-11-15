@@ -26,6 +26,15 @@ enum ArrivalProvenance: Equatable {
         case .awaitingCreate: nil
         }
     }
+
+    /// Whether WindowServer reported the window's create, or may
+    /// still report it within the bound.
+    var watchedCreate: Bool {
+        switch self {
+        case .created, .awaitingCreate: true
+        case .own, .unreported, .existing: false
+        }
+    }
 }
 
 /// The one door every reader of "was this arrival created" goes

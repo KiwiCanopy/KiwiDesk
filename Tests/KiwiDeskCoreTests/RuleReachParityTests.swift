@@ -22,9 +22,10 @@ struct RuleReachParityTests {
             overrides: appOverrides
         )
         for (name, override) in appOverrides {
+            let bare = AppRuleOverride.bareKey
             let engine =
-                override?.resolved(onto: appBase)
-                ?? AppRuleOverride.normalized(appBase)
+                override?.resolved(onto: appBase, normalizing: bare)
+                ?? AppRuleOverride.normalized(appBase, normalizing: bare)
             #expect(table.resolved(for: name) == engine, "\(name)")
         }
     }
@@ -61,7 +62,7 @@ struct RuleReachParityTests {
             let engine =
                 encoded?.resolved(
                     onto: base,
-                    normalizing: FloatRules.normalizedRule
+                    normalizing: AppTitleRule.normalizedRule
                 ) ?? base
             let expected = table.resolved(for: name).values
                 .flatMap { $0 }

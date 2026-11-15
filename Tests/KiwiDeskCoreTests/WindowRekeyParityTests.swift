@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -85,6 +86,7 @@ private func trackedFixture() -> StateCoordinator {
     state.departedSlots[old] = .init(rank: 0)
     state.closedDepartures.insert(old)
     state.unjudgedFilings.insert(old)
+    state.titledRulePending[old] = Date(timeIntervalSince1970: 1)
     state.focusRecency[old] = .init(pid: 7, tick: 1)
     state.visionFill.drawn.insert(old)
     // A bare id inside a record VALUE (#1387) — the scan's net,
@@ -107,7 +109,8 @@ private func trackedFixture() -> StateCoordinator {
 /// `floatAspects` (#2973), `tiledOverRule` (#2975),
 /// `maximizedFloatReturn` (#3036), `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414),
-/// `unjudgedFilings` (#1646), `focusRecency` (#1840),
+/// `unjudgedFilings` (#1646), `titledRulePending` (#3341),
+/// `focusRecency` (#1840),
 /// `crossSession.placed` (#1385), `visionFill.drawn` (#3064), plus
 /// each space's `windows`, `stackWeights`, `runSizes` (#2709),
 /// `trackBreaks`,
@@ -119,7 +122,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 24
+private let expectedContainerCount = 25
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.

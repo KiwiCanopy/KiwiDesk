@@ -93,7 +93,7 @@ struct AppRulesSectionWiringTests {
         )
         #expect(
             space.contains(
-                "exclude:Set(spaceApps),onCommit:addWithSpace"
+                "exclude:bareSpaceApps,onCommit:addWithSpace"
             )
                 && float.contains(
                     "exclude:Set(floatApps),onCommit:addFloating"
@@ -102,7 +102,8 @@ struct AppRulesSectionWiringTests {
                 rawValue:
                     "a picker no longer excludes exactly its own "
                     + "list — excluding the other one stops an app "
-                    + "ever carrying both rules"
+                    + "ever carrying both rules, and the Space "
+                    + "picker excludes bare rules alone (#3341)"
             )
         )
         // The area-wide empty note, read from both lists.
@@ -154,10 +155,11 @@ struct AppRulesSectionWiringTests {
                 .contains(
                     Self.squashed(
                         ".onChange(of: model.cleanConfig) "
-                            + "{ composingTitles = nil }"
+                            + "{ composingTitles = nil "
+                            + "composingSpace = nil }"
                     )
                 ),
-            "a reload no longer releases the composing slot"
+            "a reload no longer releases the composing slots"
         )
     }
 }
