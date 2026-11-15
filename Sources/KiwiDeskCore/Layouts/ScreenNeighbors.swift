@@ -7,6 +7,10 @@ public struct ScreenNeighbors: Sendable, Equatable {
     public var right: Bool
     public var top: Bool
     public var bottom: Bool
+    /// The corner a park takes, scored over the screen rects by
+    /// `TilingEngine.screenNeighbors` (#3335); nil where no rects
+    /// were read, and the flags decide.
+    var parkCorner: TilingEngine.HideCorner?
 
     public init(
         left: Bool = false,

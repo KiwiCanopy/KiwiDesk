@@ -240,10 +240,9 @@ struct ScreenNeighborsPlumbingTests {
             space: Space(id: "1", mode: .scrolling),
             screen: screen
         )
-        #expect(
-            input.context.screenNeighbors
-                == ScreenNeighbors(right: true)
-        )
+        var expected = ScreenNeighbors(right: true)
+        expected.parkCorner = .bottomLeft
+        #expect(input.context.screenNeighbors == expected)
     }
 
     @Test("makeTestCore pins the single-screen verdict")
