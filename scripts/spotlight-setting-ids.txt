@@ -226,6 +226,7 @@ settings.pocketStyle.color
 settings.kiwishelf.pocketEdge
 settings.kiwishelf.pocketPosition
 settings.kiwishelf.pocketVisibility
+settings.kiwishelf.maximizedVisibility
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone
