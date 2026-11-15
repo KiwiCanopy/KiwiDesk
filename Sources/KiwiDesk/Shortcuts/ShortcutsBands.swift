@@ -34,6 +34,7 @@ struct ShortcutRowView: View {
                     .foregroundStyle(.secondary)
                     .help(row.accessoryHelp)
             }
+            ShortcutGestureBadgeView(badges: row.gestures)
             Text(row.combo)
                 .font(.callout)
                 .foregroundStyle(.secondary)
