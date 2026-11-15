@@ -21,6 +21,8 @@ final class OnboardingModel {
         case looks
         case bars
         case keys
+        /// Trackpad Macs only (#1873 ▸ Ruling 2026-11-15).
+        case gestures
         case done
 
         /// The one place closing beats are enumerated; the close seam
@@ -28,7 +30,7 @@ final class OnboardingModel {
         var isClosingBeat: Bool {
             switch self {
             case .grant, .spaces, .looks, .bars: false
-            case .keys, .done: true
+            case .keys, .gestures, .done: true
             }
         }
     }
@@ -78,8 +80,20 @@ final class OnboardingModel {
         looksBaseline = nil
         bars.reset()
         start.reset()
-        plannedSteps = OnboardingEntry.plannedSteps(from: step)
+        gestureFamilies = hasTrackpad() ? gestureRows() : []
+        plannedSteps = OnboardingEntry.plannedSteps(
+            from: step,
+            gestures: !gestureFamilies.isEmpty
+        )
     }
+
+    /// Whether this Mac has a trackpad, read once per presentation;
+    /// a Mac without one gets no Gestures step and no pip (#1873).
+    var hasTrackpad: () -> Bool = { false }
+    /// The Gestures step's rows, from the live bindings.
+    var gestureRows: () -> [OnboardingKeyFamily] = { [] }
+    /// The rows this presentation teaches, read when it planned.
+    private(set) var gestureFamilies: [OnboardingKeyFamily] = []
 
     /// Zero-based index of current step in `plannedSteps`.
     var progressIndex: Int? {
