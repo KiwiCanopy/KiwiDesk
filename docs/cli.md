@@ -830,6 +830,10 @@ every lens with why it cannot turn on.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
+`scroll_gesture.set_long_swipes` defaults to `true`.
+:::
+
+:::unreleased
 The defaults of `set_space_slide_duration`,
 `animations.set_expand_duration` and `animations.set_reveal_duration`
 are the Medium speed's

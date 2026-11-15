@@ -13865,8 +13865,11 @@ binding may run a reader of the trackpad on a default install.**
 The bound above, "a default install, and one that never records a
 side, sees no keystroke", is retired for one seed only: #1873's
 seeded gesture slots, which ship bound and on — a four-finger tap
-opens KiwiHub's shortcuts panel and a three-finger tap goes to the
-last Space you were on (`focus_space_last`). It cannot be anything
+turns KiwiVision on or off and a three-finger tap goes to the
+last Space you were on (`focus_space_last`) (#1873 ▸ 2026-11-15,
+which moved the four-finger tap off KiwiHub: an accidental tap
+dims or clears the screen and the same tap undoes it, and KiwiHub
+keeps ⌃⌥K). It cannot be anything
 else: a pinch or a tap
 is a trackpad reader or nothing. And a seed nobody can find is no
 seed: putting it behind a switch first would make the tour teach a
@@ -13926,9 +13929,12 @@ different ground:
   gestures keep working through their public tap.
 - **The gesture-event consumer** on `PointerTap` serves spread,
   pinch together, rotate, the four-finger pinch and spread and the
-  swipes. Its mask arms only for a user's own binding, since #3199
-  dropped the spread and rotate seeds. The mask is CG types 29 and
-  30. A probe at `.cgSessionEventTap`
+  swipes. A default install arms it (owner, 2026-11-15): the seeds
+  bind ⌃⌥ rotate, spread, pinch together and four-finger pinch
+  together, and the ⌃⌥ three- and four-finger swipes, so the mask
+  and the touch reader run without a binding of the user's own,
+  and unbinding every such slot stops both. The mask is CG types
+  29 and 30. A probe at `.cgSessionEventTap`
   (2026-11-14, macOS 27.2) asked tccd for `PostEvent` alone, the
   grab mask's signature, and swallowing ⌃⌥ magnifications and
   rotations there kept Preview from zooming and rotating while a
@@ -17410,6 +17416,27 @@ burst: a notch too close behind the previous one in the same
 direction moves nothing, so notches clicked one at a time each
 count and a spin cannot race down the row (the Space step's
 paragraph below argues the number).
+
+:::unreleased
+**Amended (#1873, owner 2026-11-15): long swipes are on by
+default, and each step re-decides its axis.** The seeded ladder
+puts focus on two fingers, Spaces on three and screens on four,
+so a two-finger swipe is the one gesture that moves between
+windows, and stepping across several in one movement is what
+it is for; the first window still comes at the swipe's start,
+so one window stays easy to hit. After the first step the meter
+reads the travel since the last step on both axes and steps along
+the one that leads, so right, right, down is one movement — the
+meter stays the one reader of a swipe's axis, and a consumer
+projects nothing of its own. Only focus and the walk repeat
+within a touch: a Space or a screen moved twice by one swipe is
+a jump nobody aimed. A stored `long_swipes: false` turns on once
+(`migratingLongSwipesOn`), since the base encodes whole and a
+stored false is almost always 4.x's default; no stored signal
+tells a deliberate off apart, so a user who chose off gets on
+once and turns it off again. A profile's override is sparse, so
+its false is a choice and stays.
+:::
 
 :::unreleased
 **A multi-finger swipe also fires on a quick flick, decided at

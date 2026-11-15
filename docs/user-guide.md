@@ -1278,6 +1278,22 @@ is never taken over.
 
 A new layer also carries the `⌃⌥,` Open Settings row.
 
+:::unreleased
+### Gestures
+
+Settings ▸ Shortcuts ▸ Mouse & Trackpad lists every gesture, and
+⌃⌥K lists them beside your shortcuts. A gesture KiwiDesk takes
+works only with its keys held; with no keys held, macOS and your
+apps keep the gesture.
+
+- **Two-finger swipes** step after a short travel and keep
+  stepping while your fingers move, with **Long swipes move more windows** on. Each
+  step goes the way your fingers lead, so right, right, down is one
+  movement. They follow macOS's Natural scrolling.
+- **Three- to five-finger swipes** step after a longer travel, or
+  on a quick flick, and take one step per touch.
+:::
+
 ## macOS Desktops (Mission Control)
 
 **Profiles ▸ Profiles per macOS Desktop** lists the Desktops on

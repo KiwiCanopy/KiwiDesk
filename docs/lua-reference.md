@@ -5355,6 +5355,13 @@ bound the other, with the same keys, reaches neither the binding
 nor the app. The same gesture with other keys, or none, reaches
 the app as it is.
 
+`rotate` has two directions, `clockwise` and `counter_clockwise`,
+and takes the `layout` family: clockwise is the next layout and
+counter-clockwise the previous, as [`cycle_mode`](#cycle_mode) and
+`cycle_mode("prev")` do. A table of the two directions gives each
+its own action. A rotation fires once per gesture, the way its
+fingers first turn.
+
 `spread4` and `pinch_together4` take the four-finger pinch and
 spread the same way, so macOS shows neither Apps nor the desktop.
 A `swipe3` or `swipe4` binding takes its swipe from macOS on the
@@ -5395,7 +5402,13 @@ A binding does one of four things:
   [Natural scrolling](#scroll_gestureset_natural_scrolling) says:
   `up` is fingers up. On a scroll it runs once per motion, and
   again only after the scroll pauses or turns; on a multi-finger
-  swipe, once per swipe.
+  swipe, once per swipe. On a swipe the table may also name an
+  axis, `left_right` or `up_down`, with a family, which covers
+  that axis's two directions and follows Natural scrolling as a
+  whole family does:
+  `{ left_right = "space", up = "kiwihub.show(\"desktops\")" }`.
+  A family name under a direction is Lua, and Lua under an axis is
+  refused.
 
 The families:
 
@@ -5406,6 +5419,7 @@ The families:
 | `swap` | [`swap`](#swap) with the window that way |
 | `display` | [`focus_display`](#focus_display_last--focus_display) that way |
 | `track` | [`move_to_track`](#move_to_track): fingers moving left or up go to the previous track |
+| `layout` | [`cycle_mode`](#cycle_mode): clockwise the next layout, counter-clockwise the previous; `rotate`'s only family |
 | `space` | The next or previous Space: on a multi-finger swipe, fingers moving left or up show the next one, as a macOS Desktop swipe does; on a scroll, the [Space step](#scroll-focus-and-space-step) |
 
 On `swipe2`, `wheel` and `wheel_x`, `focus`, `walk` and `space`
@@ -5454,7 +5468,7 @@ Out of the box these are bound:
 
 | Input | Keys | Action |
 |---|---|---|
-| `tap4` | none | Open KiwiHub's shortcuts panel |
+| `tap4` | none | Turn KiwiVision on or off ([`kiwivision.toggle`](#kiwivisiontoggle)) |
 | `tap3` | none | Go to the last Space, toggling between two ([`focus_space_last`](#focus_space_last)) |
 | `drag` | ⌃⌘ | `move` |
 | `drag` | ⌃⌥ | `resize` |
@@ -5462,6 +5476,12 @@ Out of the box these are bound:
 | `wheel` | ⌃⌥ | `walk` |
 | `wheel_x` | ⌃⌥ | `space` |
 | `swipe2` | ⌃⌥⌘ | `space` |
+| `swipe3` | ⌃⌥ | `left_right` `space`, `up` the Desktop overview, `down` nothing |
+| `swipe4` | ⌃⌥ | `display` |
+| `rotate` | ⌃⌥ | `layout` |
+| `spread` | ⌃⌥ | Toggle maximized ([`toggle_maximized`](#toggle_maximized)) |
+| `pinch_together` | ⌃⌥ | The Desktop overview |
+| `pinch_together4` | ⌃⌥ | The window switcher |
 
 `hover_move`, the clicks and the side buttons are unbound.
 :::
@@ -5575,7 +5595,8 @@ inherits, and `null` turns it off, a default included. A binding
 stores Lua under `lua`, with the shortcut row's optional `kind`,
 `desc`, `group` and `symbol`; a family under `family`; a grab
 under `grab`; and a table of directions under `split`, each
-direction holding a Lua binding:
+direction holding a Lua binding and each axis (`left_right`,
+`up_down`) a family:
 
 ```json
 "gesture": {
@@ -5583,6 +5604,12 @@ direction holding a Lua binding:
   "tap5": { "lua": "KiwiDesk.cycle_mode()", "kind": "custom" },
   "swipe3:control+option": { "family": "focus" },
   "hover_move:control+command": { "grab": "move" },
+  "swipe3:control+option": {
+    "split": {
+      "left_right": { "family": "space" },
+      "up": { "lua": "kiwihub.show(\"desktops\")" }
+    }
+  },
   "wheel:control+option+command": {
     "split": { "up": { "lua": "KiwiDesk.focus_space_back()" } }
   }
@@ -5593,7 +5620,10 @@ Any of these makes the file unreadable: a key spelled any other way
 — an alias such as `ctrl`, the keys in another order, a `:` with no
 keys after it; an unknown input, modifier, family, grab or
 direction; a body naming no action, or two; a body carrying a field
-its action does not take; and an empty table of directions. A
+its action does not take; an empty table of directions; and a
+table spelled other than its one form — a direction under an axis
+that holds a family, or both axes on one family, which is that
+family whole. A
 binding [`gesture.bind`](#gesturebind) would refuse is kept and
 does nothing.
 
@@ -5787,6 +5817,14 @@ after its first, on every layout; off, a swipe moves one window
 however long it is. A mouse wheel moves one window per notch
 either way, as the section above qualifies. The Space step
 always steps one Space per swipe.
+
+:::unreleased
+Long swipes are on by default. Each step after the first goes
+along the axis its own travel leads, so right, right, down is one
+movement. Only `focus` and `walk` step more than once in a
+touch; every other family, and every three- to five-finger
+swipe, takes one step per touch.
+:::
 
 **Example:**
 
