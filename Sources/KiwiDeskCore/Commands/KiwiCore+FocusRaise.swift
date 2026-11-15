@@ -54,6 +54,7 @@ extension KiwiCore {
     /// The one AX raise call behind both the immediate and the
     /// deferred focus paths.
     func raiseWindow(_ id: WindowID) {
+        if pendingFocusRaise == id { pendingFocusRaise = nil }  // paid
         raiseFlight?.raised(id, at: wallClock())
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
@@ -117,8 +118,7 @@ extension KiwiCore {
                     tiled: state.effectiveTiledMembers(of: sp)
                 )
             }
-        // Read before this focus drops the last step's raise (#2985).
-        let previousUnraised = previousFocused.map { $0 == pendingFocusRaise }
+        let previousUnraised = leftWindowOwesRaise(previousFocused)
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
@@ -261,25 +261,15 @@ extension KiwiCore {
         // arming above it would drain a pile onto `zOrderQueue`
         // before `pendingFocusRaise` was even set, and the
         // immediate `runPendingFocusRaise` would then race it.
-        // Deliberately NOT guarded on `zOrderRestoresInFlight`
-        // — the same semantic refusal as the monocle arm above
-        // (#689): the restore's own closing re-assert targets
-        // the focus that is current, so the jump distance is
-        // zero and the jump test refuses it. The counter would
-        // only ever suppress a REAL jump: a pile drain holds it
-        // for as long as the sequence takes to verify its
-        // landings — bounded since #684 at
-        // `ZOrderDrain.landingLimit` a window and `restoreBudget`
-        // a sequence — so a user stepping back and forth across
-        // the row lands inside that window constantly and would
-        // see every second jump silently skip its restack
-        // (owner device QA, 2026-08-02).
+        // Never gated on `zOrderRestoresInFlight` (#689): the closing
+        // re-assert is refused semantically, and a drain-long counter
+        // would skip genuine restacks (state-and-layout.md).
         if scrollFocusJumpsSlots(to: id, from: previousFocused)
             || scrollFocusMoveOwesRestore(
                 to: id,
                 from: previousFocused,
                 offsetBefore: offsetBefore,
-                previousUnraised: previousUnraised == true
+                previousUnraised: previousUnraised
             )
         {
             scheduleScrollingZOrderRestoreIfOverflowing()

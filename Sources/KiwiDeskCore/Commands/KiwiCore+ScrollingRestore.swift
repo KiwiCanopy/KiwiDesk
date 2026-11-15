@@ -96,6 +96,13 @@ extension KiwiCore {
             )
     }
 
+    /// Whether the window a focus move leaves still owes its deferred
+    /// raise, so no step has put it in front (#2985). A door reads it
+    /// before it drops or replaces `pendingFocusRaise`.
+    func leftWindowOwesRaise(_ previous: WindowID?) -> Bool {
+        previous != nil && pendingFocusRaise == previous
+    }
+
     /// The focus report's arm (#2985): a click or an app's activation
     /// pans the row with no command behind it. Our own raise's echo
     /// moved no focus, so the ask refuses it, save a tiled sticky

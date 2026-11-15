@@ -114,6 +114,20 @@ struct ZOrderScrollingUnraisedLeaveTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
+    /// A later immediate raise of the window left, say a step back
+    /// onto it whose frame moves, pays the debt the step left.
+    @Test("A raise of the window left pays its debt")
+    func raisePaysTheDebt() throws {
+        let core = try makeCore()
+        try startDummyPan(core)
+        core.pendingFocusRaise = WindowID(4)
+        core.raiseWindow(WindowID(4))
+        #expect(core.pendingFocusRaise == nil)
+        core.focusWindow(WindowID(5), warp: false)
+        #expect(!core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
     /// The device sequence: the second step lands inside the first
     /// one's pan, so the first step's raise never ran. Echoes landed,
     /// so 3, which stays where it is, takes the deferred raise.
@@ -128,6 +142,38 @@ struct ZOrderScrollingUnraisedLeaveTests {
         #expect(core.pendingFocusRaise == WindowID(3))
         #expect(!core.pendingZOrderRestore)
         core.focusWindow(WindowID(2), warp: false)
+        #expect(core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// Where `target` lands when the chain steps 4 → 3 → `target`,
+    /// read off a probe core of the same shape.
+    private func landing(of target: UInt32) throws -> CGRect {
+        let probe = try makeCore()
+        probe.focusWindow(WindowID(3), warp: false)
+        probe.focusWindow(WindowID(target), warp: false)
+        probe.tiler.animation.cancelAll(snapToTargets: true)
+        return try #require(
+            probe.tiler.placedFrames(state: probe.state)[WindowID(target)]
+        )
+    }
+
+    /// The wall-pinned shape: 2 already stands at its landing, so the
+    /// second step defers too, and its own debt replaces the first
+    /// one's before the arm asks.
+    @Test("A deferring step past an unraised window arms")
+    func deferringSecondStepArms() throws {
+        let landing = try landing(of: 2)
+        let core = try makeCore()
+        for (id, frame) in core.tiler.placedFrames(state: core.state) {
+            core.state.apply(.windowResized(id, frame))
+        }
+        core.state.apply(.windowResized(WindowID(2), landing))
+        try startDummyPan(core)
+        core.focusWindow(WindowID(3), warp: false)
+        #expect(core.pendingFocusRaise == WindowID(3))
+        core.focusWindow(WindowID(2), warp: false)
+        #expect(core.pendingFocusRaise == WindowID(2))
         #expect(core.pendingZOrderRestore)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }

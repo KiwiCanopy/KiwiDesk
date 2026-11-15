@@ -1472,10 +1472,12 @@ editing here:
   through `scrollFocusMoveOwesRestore`** — the row moved, by
   `Space.scrollRest`'s offset read ahead of the pass, and
   `scrollingRowShowsOthers` answers, whose area share is its own and
-  not the App Bar's strip test; the window left is passed over only
-  once its deferred raise ran, since a step inside the last step's
-  pan drops that raise (`ZOrderScrollingUnraisedLeaveTests`) — or,
-  on a focused close, through
+  not the App Bar's strip test, handed whether the window it left
+  still owes its deferred raise through `leftWindowOwesRaise`, read
+  before the door drops or replaces `pendingFocusRaise`, since a step
+  inside the last step's pan drops that raise and a raise of that
+  window pays it (`ZOrderScrollingUnraisedLeaveTests`) — or, on a
+  focused close, through
   `scrollingRowShowsOthers` alone, with the float raise the close
   owes. **A door that keeps the focus arms nothing**: a restore ends
   in a focus re-assert, and under a tiled focus owes no float raise
