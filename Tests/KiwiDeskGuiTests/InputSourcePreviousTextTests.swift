@@ -140,8 +140,9 @@ struct InputSourcePreviousTextTests {
     }
 
     /// Measured by hand 2026-11-15 (#3331 amendment), macOS 27.2: a
-    /// plain `KiwiDesk.bind("ctrl+space", …)` fired its action and
-    /// the keyboard language did not switch.
+    /// plain `KiwiDesk.bind("ctrl+space", …)` fired on each of two
+    /// presses and the keyboard language did not switch. So it wins
+    /// whether hotkey 60 is on or off, as ⌃⌥Space does.
     @Test("a Carbon row on ⌃Space takes it from macOS")
     func carbonRowWins() throws {
         let row = KeyBinding(combo: "control+space", lua: "a")
@@ -155,5 +156,17 @@ struct InputSourcePreviousTextTests {
             )
         )
         #expect(reading.severity == .winsFromMacOS(.inputSourcePrevious))
+        let found = try #require(
+            KeybindingConflicts.conflict(
+                for: row,
+                in: [row],
+                distinguishingSides: false
+            )
+        )
+        for disabled: Set<SystemShortcut> in [[], [.inputSourcePrevious]] {
+            let severity = ConflictSeverity.of(found, disabled: disabled)
+            #expect(severity == .winsFromMacOS(.inputSourcePrevious))
+            #expect(!severity.isDead)
+        }
     }
 }

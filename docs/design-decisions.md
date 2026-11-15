@@ -14356,7 +14356,8 @@ every path: a posted ⌥⌘Esc opens no Force Quit, so the measurement
 cannot decide it (#1275 measured it dead for Carbon), and Zoom,
 Invert colours, contrast and the Desktop switches ship off and were
 not turned on to measure. A Carbon hotkey
-still loses every other chord macOS answers (#1126); posted presses
+still loses every other chord macOS answers save the two input-source
+chords (#1126; #3239, #3331); posted presses
 never fire Carbon, so this measurement says nothing about that path
 (`PressPathSeverityTests`, `PressPathConflictTests`).
 :::
@@ -14397,8 +14398,9 @@ Keyboard ▸ Keyboard Shortcuts ▸ Input Sources place, and hotkey 61's
 live chord as still switching while macOS answers it and no row holds
 it. Posted presses never fire Carbon, so a Carbon row was measured
 by hand (2026-11-15): a plain `KiwiDesk.bind("ctrl+space", …)` fired
-its action twice and the keyboard language did not switch. So a
-Carbon row wins ⌃Space too, as it wins ⌃⌥Space. An open sequence
+on each of two presses and the keyboard language did not switch. So
+a Carbon row wins ⌃Space too, with hotkey 60 on or off, as it wins
+⌃⌥Space. An open sequence
 now passes ⌃Space and closes, as it does ⌃⌥Space. No seed binds
 ⌃Space, so an existing install gains no conflict on Home; a user's own
 row on the chord gains its caption, and the keyboard board marks

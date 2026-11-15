@@ -16,8 +16,8 @@ import SwiftUI
 /// the symbolic table, are macOS's too (#1275, 2026-10-10): dead,
 /// and no setting switches them off. A row the keyboard tap
 /// decides — a leader, a step key, a sided row — wins them, save
-/// ⌥⌘Esc, and `⌃⌥space` is KiwiDesk's on either path (#3239,
-/// #3311; `SystemShortcut.losesToKiwiDesk(on:)`).
+/// ⌥⌘Esc, and `⌃⌥space` and `⌃space` are KiwiDesk's on either path
+/// (#3239, #3311, #3331; `SystemShortcut.losesToKiwiDesk(on:)`).
 enum ConflictSeverity: Equatable {
     /// A chord macOS answers first — a symbolic hotkey it has
     /// switched on, or ⌘Tab / ⌥⌘Esc: the row never fires.
