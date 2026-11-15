@@ -34,7 +34,7 @@ struct GestureListCard: View {
             VStack(alignment: .leading, spacing: 10) {
                 naturalRow
                 Divider()
-                revealed(bindings)
+                revealed(boundRows)
             }
         }
         .onAppear(perform: snapshot)
@@ -59,7 +59,7 @@ struct GestureListCard: View {
 
     /// The binding rows and their footer, one reveal target: the
     /// footer keeps it laid out while a card has no rows.
-    private var bindings: some View {
+    private var boundRows: some View {
         VStack(alignment: .leading, spacing: 10) {
             ForEach($entries) { $entry in
                 GestureListRow(

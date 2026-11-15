@@ -70,11 +70,11 @@ struct GestureBindingsRevealTests {
                 )
             )
         )
-        #expect(body.contains("naturalRowDivider()revealed(bindings)"))
+        #expect(body.contains("naturalRowDivider()revealed(boundRows)"))
         let rows = Self.squashed(
             try #require(
                 SourceScan.declarationBody(
-                    after: "private var bindings: some View",
+                    after: "private var boundRows: some View",
                     in: text
                 )
             )
