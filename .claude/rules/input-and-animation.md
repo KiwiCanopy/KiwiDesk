@@ -110,6 +110,20 @@ editing here:
     onto an axis of its own, nor takes a second reading of the
     travel (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel`,
     `longSwipeTurns`; a projection returning is review's).
+  - **Finger travel and point travel meet in `ScrollStepMeter`
+    and nowhere else** (#1873 ▸ Ruling 2026-11-16). A consumer
+    hands the meter the touch reading beside the event and does
+    no unit arithmetic of its own. Finger mm sets only a long
+    swipe's step budget: never take a step's axis or sign from
+    the reading, since the point delta carries Natural
+    scrolling's one flip and the pad's axes do not. Fix a
+    touch's unit at the latch: a reading lost mid-touch steps
+    nothing rather than switching to points, and a touch with no
+    reading at the latch counts points at
+    `ScrollStepMeter.pointsPerMM` (`ScrollStepMeterFingerTests`;
+    a second meeting place is review's). The argument is
+    `docs/design-decisions.md` ▸ *Amended (#1873, owner
+    2026-11-16)*.
   - **On the two-finger path a split's axis family runs through
     the whole family's runner** — the pan or the Space step — for
     that gesture, chosen once the travel names its axis, never a
@@ -1175,7 +1189,7 @@ editing here:
   `TouchReader`, reached only through `MouseTracker.trackpad`
   (#1873).** MultitouchSupport delivers every frame with no
   permission (probed 2026-10-31, macOS 27) and swallows nothing.
-  Five obligations:
+  Six obligations:
   - **Resolve the bindings in ONE home, `KiwiCore.applyScrollGestures`,
     the one caller of `TouchGestures.resolve`**, which hands it the
     trackpad's bindings from `applyGestures`; the config load's
@@ -1237,3 +1251,16 @@ editing here:
     built, and is rebuilt only at a resolve that needs it and at
     the session's return (`rearm`); a trackpad paired mid-session
     waits for one of those. Neither path is measured on a device.
+  - **Read the finger travel only through `MouseTracker.trackpad`
+    (`TouchGestures.travel`, nil while no reader runs), and let
+    the reader be its one writer**, feeding `TouchTravel` under
+    its lock on the framework's thread (#1873 ▸ Ruling
+    2026-11-16; `TouchTravelTests` for the sum). A long swipe
+    never starts the reader: where none runs, the meter counts
+    points (the meter bullet under the scroll tap, above). The
+    pad size that scales the sum comes from
+    `MTDeviceGetSensorSurfaceDimensions`, which is optional: keep
+    it out of `MultitouchSupport.isAvailable`, so a missing
+    symbol costs the reading alone and never the taps and
+    swipes. Nothing pins the door or the exclusion, so both are
+    review's.

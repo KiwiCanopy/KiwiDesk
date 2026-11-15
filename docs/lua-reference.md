@@ -5432,7 +5432,7 @@ swipe or wheel notch, and its direction follows
 [Natural scrolling](#scroll_gestureset_natural_scrolling), save
 `layout`'s, which follows the rotation alone. On `swipe2`,
 `focus` and `walk` also take a step per
-[step distance](#scroll_gestureset_step_distance) with
+[step length](#scroll_gestureset_step_length) with
 [long swipes](#scroll_gestureset_long_swipes) on.
 
 `move` moves the window under the pointer, as a drag by its title
@@ -5544,6 +5544,15 @@ travel, which macOS's own Scrolling speed scales. The direction
 follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
 per input.
 
+:::unreleased
+On a trackpad, each window after the first costs a
+[step length](#scroll_gestureset_step_length) of finger travel on
+the pad, in mm, whatever the swipe's speed; macOS's Scrolling
+speed does not change it. Where KiwiDesk reads no finger travel —
+no three- to five-finger tap or swipe is bound, or the trackpad
+reports no size — every 6 pt of scroll counts as 1 mm.
+:::
+
 Hold **⌃⌥⌘** (the default;
 [`set_space_step`](#scroll_gestureset_space_step) changes it) and
 scroll to switch to the next or previous Space on the screen under
@@ -5651,12 +5660,14 @@ off.
 
 The other scroll settings are stored in `gui.json` as the
 `scroll_gesture` object — `natural_scrolling` (`trackpad`,
-`mouse`), `long_swipes`, `step_distance` — which a profile's
-sparse `scroll_gesture` object overrides field by field; a
-`step_distance` outside 10–1000 is clamped to the range. In the
-Settings app they are under **Shortcuts ▸ Mouse & Trackpad**,
-where each row's **Applies to** checklist writes the base or
-chosen profiles' overrides.
+`mouse`), `long_swipes`, `step_length` — which a profile's
+sparse `scroll_gesture` object overrides field by field, save
+`step_length`, which is `gui.json`'s alone; a `step_length`
+outside 3–60 is clamped to the range. In the
+Settings app the first two are under **Shortcuts ▸ Mouse &
+Trackpad**, where each row's **Applies to** checklist writes the
+base or chosen profiles' overrides; `step_length` has no row. A
+stored `step_distance` is removed when the file loads.
 
 The verbs below change the running base only: a profile's own
 value still wins, nothing reaches `gui.json`, and the value lasts
@@ -5825,10 +5836,11 @@ either way, as the section above qualifies. The Space step
 always steps one Space per swipe.
 
 :::unreleased
-Long swipes are on by default. Only `focus` and `walk` step more
-than once in a touch, whole or on one axis of a table; every
-other family, and every three- to five-finger swipe, takes one
-step per touch.
+Long swipes are on by default, and each window after the first
+costs a [step length](#scroll_gestureset_step_length) of finger
+travel. Only `focus` and `walk` step more than once in a touch,
+whole or on one axis of a table; every other family, and every
+three- to five-finger swipe, takes one step per touch.
 :::
 
 **Example:**
@@ -5851,6 +5863,30 @@ does nothing, while long swipes are off.
 ```lua
 scroll_gesture.set_step_distance(120)
 ```
+
+:::unreleased
+`scroll_gesture.set_step_distance` is retired and fails, naming
+[`scroll_gesture.set_step_length`](#scroll_gestureset_step_length).
+:::
+
+### scroll_gesture.set_step_length
+
+:::unreleased
+**Expects:** mm, 3–60 (default `10`); a value outside the range
+fails.
+
+**Does:** sets the finger travel on the trackpad per extra window
+of a [long swipe](#scroll_gestureset_long_swipes), the same at
+every swipe speed. It applies in every profile, since no profile
+overrides it. It is kept, and does nothing, while long swipes are
+off.
+
+**Example:**
+
+```lua
+scroll_gesture.set_step_length(14)
+```
+:::
 
 ## When Windows No Longer Fit
 

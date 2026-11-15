@@ -797,6 +797,21 @@ holds the secondary-switch decision including its nil case.
   the old number was never what they meant. The scrolling pitch
   share is the precedent (#1382, `ScrollingPitchTests`); a
   re-scale that fails either bound takes the crossing above.
+  **A crossing carries the user's value; dropping it instead is
+  an owner ruling whose cost the design entry names.** The one
+  such drop is `scroll_gesture.step_distance`, whose unit changed
+  with its key: the step removes it from every `scroll_gesture`
+  group, profiles included, and carries nothing, since the base
+  encodes whole and a point value has no mm reading (#1873,
+  `migratingStepDistanceOut`, `StepLengthMigrationTests`;
+  `docs/design-decisions.md` ▸ *Amended (#1873, owner
+  2026-11-16)*). Its replacement took a new key, so `init.lua`
+  fails loudly through `APIReference.retired` instead of
+  silently re-scaling. A further drop is a ruling, never a
+  precedent this one sets. A `ScrollGestureBase` field no
+  profile overrides, as `step_length` is, joins
+  `ScrollGestureConfigParityTests`' `globalOnly`; it is never
+  simply left out of `ScrollGestureOverride`.
 - **A default flip on a leaf the encoder writes WHOLE owes no
   step (#1359) — re-defaulting the stored old value is a ruling,
   bounded.** A step may turn a stored old default into the new

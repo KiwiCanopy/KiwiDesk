@@ -17356,7 +17356,7 @@ direction of a swipe or scroll row on a family shows that family's
 one-shot step — `focus` that way for `focus`, `focus_space_window`
 for `walk` — so opening the directions changes nothing. A family is
 more than its steps: it slides a Scrolling row with the fingers,
-adds a step per step distance on a long two-finger swipe (focus
+adds a step per step length on a long two-finger swipe (focus
 and walk), and follows Natural scrolling, and a direction's Lua
 does none of these. So arms that still match a family's steps
 save as that family — the whole row's, or on a swipe an axis's
@@ -17472,6 +17472,59 @@ owner ruling, at this one cost.
 :::
 
 :::unreleased
+**Amended (#1873, owner 2026-11-16): a long swipe's later steps
+count finger travel in mm.** The first step still fires at the
+24 pt latch. After it, each step costs `step_length` mm of
+finger travel on the pad (default 10, 3–60), read from the touch
+reader. A point count cannot give even spacing: the scroll deltas
+the meter counted are accelerated by finger speed. 80 pt was
+tried first, picked by feel at a device sitting (2026-11-15) from
+60, 75, 90 and 120. At 80, later steps cost 10–14 mm of finger on
+a fast swipe and 5–7 mm on a slow one (measured 2026-11-16), so
+the first step felt long and the rest came at once. No point
+value fixes that, since the same points stand for a different
+hand at each speed. In mm a step costs the same movement at any
+speed.
+
+The finger travel sets only the step budget. Each step still
+takes its axis and sign from the point deltas, because those
+have had Natural scrolling's one flip and the pad's own axes have
+not, and two sources of sign would let a step disagree with its
+direction. A touch counts in one unit, fixed at the latch. If it
+could switch, a reader starting or stopping mid-touch would make
+the spacing jump, so a reading lost mid-touch steps nothing while
+it is gone, and never falls back to points.
+With no reading at the latch, the steps count points at 6 pt per
+mm (`ScrollStepMeter.pointsPerMM`). That happens when no reader
+runs, because no three- to five-finger tap or swipe is bound, or
+when no pad reports its size. At that rate the default 10 mm is
+60 pt, 4.2's own default, so a Mac without a reading keeps the
+spacing 4.2 shipped.
+
+The value is a new key, `step_length`, not a re-scale of
+`step_distance`, so a Lua line setting the old verb fails loudly
+by name (`scroll_gesture.set_step_distance` is retired for
+`set_step_length`) instead of silently meaning millimetres. It is
+Lua-only. The *Travel per window* field existed because macOS's
+Scrolling speed scales point travel, and nothing scales finger
+travel. It is global only, because a profile's override is
+written by a row's **Applies to** checklist, and with no row
+nothing would write it.
+
+A stored `step_distance` is dropped from every `scroll_gesture`
+group, profiles included (`migratingStepDistanceOut`), and its
+value is not carried. The base encodes whole, so a stored 60
+records a save, not a choice, and a point value has no
+millimetre equivalent, since the points it counted depended on
+speed. The cost: a user who tuned the old value loses it once and
+sets `step_length` again. Moving the default to 80 pt would have
+raised whether a stored 60 should move with it, as the
+`long_swipes` re-default moved a stored false. The drop answers
+that: no stored value survives, so every user gets the new
+default.
+:::
+
+:::unreleased
 **A swipe splits by axis, and a split has one stored spelling**
 (#1873, owner 2026-11-15; ui-designer and architect consulted). A
 swipe's four directions sit on two levels below the whole family:
@@ -17572,7 +17625,8 @@ finger count changes, so a lifting finger's jump of the centre is
 no flick, and the flick
 distance stays above the tap's 4%, so a tap rolling one way still
 taps. The values are fixed: no macOS preference scales touch
-travel, which is what earned *Travel per window* its field above.
+travel, the same reason a long swipe's step length has no row
+(*Amended (#1873, owner 2026-11-16)*, above).
 The Dock's own stream is not read for the verdict: it exists for
 the Dock's axes alone, never for five fingers. And no gauge shows
 a swipe's progress, since the step it fires is its own feedback.
@@ -17593,7 +17647,7 @@ profile's override.
 :::unreleased
 *Amended (#3199): the chords left these settings for the binding
 list above.* `scroll_gesture` keeps Natural scrolling, long swipes
-and the step distance, which still store every field in the base;
+and the step length, which still store every field in the base;
 turning a gesture off in one profile is that profile's `null` on
 its key.
 :::
