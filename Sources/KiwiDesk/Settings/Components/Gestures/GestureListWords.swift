@@ -206,7 +206,8 @@ enum GestureListWords {
         case nil: SettingsValueReadout.onOff(false)
         case .family(let family): Self.family(family)
         case .grab(let grab): Self.grab(grab)
-        case .split: input.map(perDirection) ?? perDirection(.swipe2)
+        case .split(let split):
+            face(split, on: input ?? .swipe2)
         case .run(let run): runName(run)
         }
     }

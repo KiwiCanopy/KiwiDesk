@@ -89,7 +89,7 @@ public final class ScrollGestures {
     var host = HostNaturalScrolling.live
     /// The cached host value a `.system` input follows: read at the
     /// first start and on each change notice, never per event.
-    private(set) var hostNatural = true
+    public private(set) var hostNatural = true
     private var followingHost = false
     /// Re-runs the resolve; wired once at bootstrap.
     var onHostChange: @MainActor () -> Void = {}
