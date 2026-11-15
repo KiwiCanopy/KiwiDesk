@@ -227,6 +227,17 @@ struct ScreenShiftOfferTests {
         )
     }
 
+    @Test("Simple lists the open offer, and not once kept")
+    func simpleListsTheOffer() {
+        let model = makeTestModel()
+        model.refreshScreenOffer(desk)
+        #expect(SimpleMacChecklist.openRows(model).contains(.parkCorners))
+        model.keepArrangement()
+        #expect(!SimpleMacChecklist.openRows(model).contains(.parkCorners))
+        model.refreshScreenOffer([])
+        #expect(SimpleMacChecklist.openConditional(model).isEmpty)
+    }
+
     @Test("an answer survives its store")
     func answerRoundTrip() {
         let shifted = ScreenShiftAnswer.shifted(["a", "b"])

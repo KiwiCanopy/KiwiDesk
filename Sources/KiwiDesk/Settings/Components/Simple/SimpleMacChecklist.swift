@@ -13,12 +13,7 @@ struct SimpleMacChecklist: View {
     static let anchor = "simple.mac_checklist"
 
     var body: some View {
-        let open =
-            Self.openEssentials(
-                states: model.macChecklistStates,
-                ticks: model.macChecklistTicks
-            )
-            + Self.openConditional(model)
+        let open = Self.openRows(model)
         Group {
             if open.isEmpty {
                 allDone
@@ -33,6 +28,17 @@ struct SimpleMacChecklist: View {
             }
         }
         .id(Self.anchor)
+    }
+
+    /// Every essential the block draws: those macOS does not yet
+    /// report set, then the conditional ones still open.
+    @MainActor static func openRows(
+        _ model: SettingsModel
+    ) -> [MacChecklistKey] {
+        openEssentials(
+            states: model.macChecklistStates,
+            ticks: model.macChecklistTicks
+        ) + openConditional(model)
     }
 
     /// The conditional essentials shown and still open (#2756).
