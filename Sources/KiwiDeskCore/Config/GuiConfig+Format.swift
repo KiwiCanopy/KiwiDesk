@@ -108,5 +108,9 @@ extension GuiConfig {
     /// **26 (#1873)**: the `gesture` map may hold the four-finger
     /// pinch and spread slots, which an older build cannot decode;
     /// no step, the bump is the refusal.
-    public static let currentFormat = 26
+    ///
+    /// **27 (#1873)**: a stored `long_swipes: false` in the
+    /// scroll-gesture base turns on, the new default
+    /// (`migratingLongSwipesOn`).
+    public static let currentFormat = 27
 }

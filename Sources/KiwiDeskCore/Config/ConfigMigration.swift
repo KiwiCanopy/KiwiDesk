@@ -62,6 +62,7 @@ public enum ConfigMigration {
         migratingLookPaceOut,
         migratingLensFadeOut,
         migratingAbsentSlideAndFade,
+        migratingLongSwipesOn,
     ]
 
     /// Runs after `steps`, and is skipped by

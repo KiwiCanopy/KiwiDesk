@@ -117,7 +117,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 50 = the `gesture` map may hold the four-finger pinch and
     /// spread slots (#1873), in a bundle's `config` and its
     /// `[Profile]` alike, with no step.
-    public static let currentFormat = 50
+    /// 51 = a stored `long_swipes: false` in a bundle's `config`
+    /// turns on (#1873); a profile's override keeps its own.
+    public static let currentFormat = 51
 
     public let format: Int
 

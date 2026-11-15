@@ -7,7 +7,7 @@
 
   ],
   "focus_wrap" : "all_screens",
-  "format" : 26,
+  "format" : 27,
   "ignore_rules" : [
 
   ],
@@ -354,7 +354,7 @@
     "floating"
   ],
   "scroll_gesture" : {
-    "long_swipes" : false,
+    "long_swipes" : true,
     "natural_scrolling" : {
       "mouse" : "system",
       "trackpad" : "system"
