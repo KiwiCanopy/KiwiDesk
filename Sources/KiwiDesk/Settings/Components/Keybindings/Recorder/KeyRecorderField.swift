@@ -44,7 +44,8 @@ struct KeyRecorderField: View {
     /// A single tap this field just recorded (#3257), until its next
     /// edit; local state, no timer.
     @State var tapOnceNote: KeyCombo?
-    /// The refused chord while no `ShortcutKeyRow` hosts it.
+    /// The refused chord where no `ShortcutKeyRow` hosts the field:
+    /// a standalone or test mount.
     @State var ownRejection: RecorderRejection?
     @Environment(\.recorderConflictSlot) var conflictSlot
     @State private var flashing = false
@@ -89,14 +90,17 @@ struct KeyRecorderField: View {
             recorder.stop()
             preview = ""
         }
-        .onChange(of: liveRejection == nil) { _, clear in
-            if clear { rejection = nil }
+        // The drawn offer is the re-checked one: its holder and its
+        // Steal follow the bindings, and nil ends it (#34).
+        .onChange(of: liveRejection.map(Offer.init)) { _, _ in
+            rejection = liveRejection
         }
         .onChange(of: combo) { _, now in keepTapOnceNote(now) }
         .onAppear { if armsOnAppear, combo.isEmpty { start() } }
         .onDisappear {
             stop()
             tapOnceNote = nil
+            if conflictSlot != nil { rejection = nil }
         }
     }
 

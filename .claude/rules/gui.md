@@ -2241,6 +2241,14 @@ only with its reason (`ShortcutSettingRowSeamTests` ▸
 wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
 the key rows' ink, never a topic glyph of its own**
 (`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
+**A Shortcuts row that mounts a `KeyRecorderField` lays out
+through `ShortcutKeyRow`**, so a refused chord's Steal / Go to is
+one line under the row and the title stays beside the well; a
+title with lines under it aligns through `.shortcutLineTitle()`,
+and a new mount joins `ShortcutKeyRowSeamTests`' register with
+its host (#3258; `ShortcutKeyRowSeamTests` ▸ `registerIsComplete`,
+`rowsTakeTheDoor`). The line draws the field's re-checked offer
+(#34), never the one stored at the refusal.
 
 **An app's Pocket key row is read through
 `PocketAppLuaArg.bundleID(of:)` alone** — profiles.md ▸ *A verb

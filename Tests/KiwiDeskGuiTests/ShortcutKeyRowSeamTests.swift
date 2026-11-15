@@ -13,21 +13,58 @@ struct ShortcutKeyRowSeamTests {
     private static let tree = SourceScan.repoRoot(from: #filePath)
         .appendingPathComponent("Sources/KiwiDesk")
 
-    /// Recorder mount → the file drawing the row around it.
-    private static let mounts: [String: String] = [
-        "Settings/Components/Keybindings/KeybindingNavRow.swift":
+    /// Recorder mount → the file drawing the row around it, and the
+    /// recorder's call as that row's content spells it. A mount whose
+    /// recorder sits in a helper names the helper: the scan follows
+    /// one hop by name and does not read the helper's body.
+    private static let mounts: [String: (host: String, inside: String)] = [
+        "Settings/Components/Keybindings/KeybindingNavRow.swift": (
             "Settings/Components/Keybindings/KeybindingNavRow.swift",
-        "Settings/Components/Keybindings/KeybindingAppGroup+Row.swift":
+            "KeyRecorderField("
+        ),
+        "Settings/Components/Keybindings/KeybindingAppGroup+Row.swift": (
             "Settings/Components/Keybindings/KeybindingAppGroup+Row.swift",
-        "Settings/Components/Keybindings/PocketAppRows.swift":
+            "KeyRecorderField("
+        ),
+        "Settings/Components/Keybindings/PocketAppRows.swift": (
             "Settings/Components/Keybindings/PocketAppRows.swift",
-        "Settings/Components/Lua/AdvancedLuaGroup+Row.swift":
+            "KeyRecorderField("
+        ),
+        "Settings/Components/Lua/AdvancedLuaGroup+Row.swift": (
             "Settings/Components/Lua/AdvancedLuaGroup+Row.swift",
+            "recorder(binding,name:name)"
+        ),
         "Settings/Components/Keybindings/Sequences/"
-            + "SequenceNodeRow+Recorder.swift":
-            "Settings/Components/Keybindings/Sequences/"
-            + "SequenceNodeRow.swift",
+            + "SequenceNodeRow+Recorder.swift": (
+                "Settings/Components/Keybindings/Sequences/"
+                    + "SequenceNodeRow.swift",
+                "{leaderLine}else{keyLine}"
+            ),
     ]
+
+    /// The content of the first `ShortcutKeyRow` call in `source`,
+    /// whitespace dropped, nil where there is none.
+    private static func rowContent(_ source: String) -> String? {
+        let text = source.filter { !$0.isWhitespace }
+        guard let call = text.range(of: "ShortcutKeyRow"),
+            let open = text[call.upperBound...].firstIndex(of: "{")
+        else { return nil }
+        var depth = 0
+        var index = open
+        while index < text.endIndex {
+            switch text[index] {
+            case "{": depth += 1
+            case "}":
+                depth -= 1
+                if depth == 0 {
+                    return String(text[text.index(after: open)..<index])
+                }
+            default: break
+            }
+            index = text.index(after: index)
+        }
+        return nil
+    }
 
     private static func source(_ path: String) throws -> String {
         SourceScan.stripComments(
@@ -52,15 +89,11 @@ struct ShortcutKeyRowSeamTests {
         #expect(found == Set(Self.mounts.keys))
     }
 
-    @Test("each mount's row lays out through ShortcutKeyRow")
+    @Test("each mount's recorder is inside its ShortcutKeyRow")
     func rowsTakeTheDoor() throws {
-        for (mount, host) in Self.mounts {
-            let row = try Self.source(host)
-            #expect(
-                row.contains("ShortcutKeyRow {")
-                    || row.contains("ShortcutKeyRow(spacing:"),
-                "\(mount)"
-            )
+        for (mount, row) in Self.mounts {
+            let content = Self.rowContent(try Self.source(row.host))
+            #expect(content?.contains(row.inside) == true, "\(mount)")
         }
     }
 }

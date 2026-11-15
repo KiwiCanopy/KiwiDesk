@@ -18,6 +18,21 @@ extension KeyRecorderField {
         }
     }
 
+    /// What an offer says, compared to tell a new holder apart.
+    struct Offer: Equatable {
+        let combo: String
+        let holder: String
+        let holderRowID: String
+        let inStep: Bool
+
+        init(_ rejection: RecorderRejection) {
+            combo = rejection.combo
+            holder = rejection.holder
+            holderRowID = rejection.holderRowID
+            inStep = rejection.inStep
+        }
+    }
+
     /// Live re-validation of the pending rejection (#34).
     var liveRejection: RecorderRejection? {
         guard let rejection, let preflight else { return nil }

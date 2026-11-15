@@ -35,7 +35,6 @@ struct ShortcutKeyRow<Content: View>: View {
     let spacing: CGFloat?
     let content: Content
     @State private var conflict: RecorderRejection?
-    @EnvironmentObject private var coordinator: RecorderCoordinator
 
     init(
         spacing: CGFloat? = nil,
@@ -65,10 +64,9 @@ struct ShortcutKeyRow<Content: View>: View {
             }
             .environment(\.recorderConflictSlot, $conflict)
             if let conflict {
-                KeyRecorderRejectionRow.wired(
-                    conflict,
-                    coordinator: coordinator
-                ) { self.conflict = nil }
+                RecorderConflictLine(rejection: conflict) {
+                    self.conflict = nil
+                }
                 .padding(.leading, SettingsMetrics.shortcutTextIndent)
             }
         }

@@ -29,11 +29,21 @@ struct ShortcutKeyRowLayoutTests {
     }
 
     /// Row B at Left ⌘H; its preflight refuses Right ⌘H, row A's.
-    private func field() -> KeyRecorderField {
+    /// A dead row draws a caption under its well, so the field's
+    /// stack is taller than its well.
+    private static let dead = ConflictReading(
+        severity: .sidesTaken([]),
+        sentence: "Dead row"
+    )
+
+    private func field(
+        armed: Bool = false,
+        reading: ConflictReading? = nil
+    ) -> KeyRecorderField {
         KeyRecorderField(
             name: "Row B",
-            combo: "lcmd+h",
-            reading: nil,
+            combo: armed ? "" : "lcmd+h",
+            reading: reading,
             narrowing: nil,
             preflight: { combo in
                 guard combo == "rcmd+h" else { return nil }
@@ -45,19 +55,23 @@ struct ShortcutKeyRowLayoutTests {
                 )
             },
             onRecord: { _ in },
-            onClear: {}
+            onClear: {},
+            armsOnAppear: armed
         )
     }
 
-    private func host<V: View>(_ view: V) -> (NSWindow, NSView) {
+    private func host<V: View>(
+        _ view: V,
+        width: CGFloat = 640
+    ) -> (NSWindow, NSView) {
         let rooted =
             view
-            .frame(width: 640, height: 160, alignment: .topLeading)
+            .frame(width: width, height: 160, alignment: .topLeading)
             .coordinateSpace(name: "host")
             .environmentObject(RecorderCoordinator())
             .environment(\.recorderSides, RecorderSides(hyperKey: nil))
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 160),
+            contentRect: NSRect(x: 0, y: 0, width: width, height: 160),
             styleMask: [.titled],
             backing: .buffered,
             defer: false
@@ -84,9 +98,9 @@ struct ShortcutKeyRowLayoutTests {
         return out
     }
 
-    /// The Sides menu sits on the well's line.
+    /// The record well's focus ring, the well's own frame.
     private func wellLine(in host: NSView) throws -> CGRect {
-        try #require(frames(of: "SwiftUIPopupButton", in: host).first)
+        try #require(frames(of: "_FocusRingView", in: host).first)
     }
 
     /// The conflict line's buttons: Steal, Go to, dismiss.
@@ -127,7 +141,7 @@ struct ShortcutKeyRowLayoutTests {
             ShortcutKeyRow(seeded: refused) {
                 titled(probe)
                 Spacer()
-                field()
+                field(reading: Self.dead)
             }
         )
         defer { Self.close(window) }
@@ -154,12 +168,81 @@ struct ShortcutKeyRowLayoutTests {
             ShortcutKeyRow {
                 titled(probe)
                 Spacer()
-                field()
+                field(reading: Self.dead)
             }
         )
         defer { Self.close(window) }
         let line = try wellLine(in: host)
         #expect(lineButtons(below: line, in: host).isEmpty)
         #expect(abs(probe.title.midY - line.midY) < 2)
+    }
+
+    /// A narrow row wraps the sentence, its holder whole, and moves
+    /// the actions under it rather than cutting the name.
+    @Test("a narrow row wraps the line instead of truncating")
+    func narrowRowWraps() throws {
+        LocalizationManager.shared.select("en")
+        let long = RecorderRejection(
+            combo: "rcmd+h",
+            holder: "Show or hide the Space Bar on every screen",
+            holderRowID: "a",
+            steal: {}
+        )
+        let (window, host) = host(
+            ShortcutKeyRow(seeded: long) {
+                Text(verbatim: "Row B title")
+                Spacer()
+                field()
+            },
+            width: 360
+        )
+        defer { Self.close(window) }
+        let line = try wellLine(in: host)
+        let buttons = lineButtons(below: line, in: host)
+        #expect(buttons.count == 3)
+        // The actions start their own line, under the sentence's
+        // start, past a wrapped sentence.
+        let first = try #require(buttons.min { $0.minX < $1.minX })
+        #expect(first.minX < SettingsMetrics.shortcutTextIndent + 4)
+        #expect(first.minY - line.maxY > 24)
+    }
+
+    /// Right ⌘H pressed into the armed field: the field's own
+    /// refusal must reach the row's line (`recorderConflictSlot`).
+    @Test("the field's refusal lands on the row's line")
+    func fieldWritesTheRow() throws {
+        LocalizationManager.shared.select("en")
+        let (window, host) = host(
+            ShortcutKeyRow {
+                Text(verbatim: "Row B title")
+                Spacer()
+                field(armed: true)
+            }
+        )
+        defer { Self.close(window) }
+        let rightCommand = NSEvent.ModifierFlags(
+            rawValue: NSEvent.ModifierFlags.command.rawValue | 0x10
+        )
+        let press = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: rightCommand,
+                timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: window.windowNumber,
+                context: nil,
+                characters: "h",
+                charactersIgnoringModifiers: "h",
+                isARepeat: false,
+                keyCode: 4
+            )
+        )
+        NSApp.sendEvent(press)
+        spin()
+        let line = try wellLine(in: host)
+        let buttons = lineButtons(below: line, in: host)
+        #expect(buttons.count == 3)
+        let first = try #require(buttons.min { $0.minX < $1.minX })
+        #expect(first.maxX < line.minX)
     }
 }

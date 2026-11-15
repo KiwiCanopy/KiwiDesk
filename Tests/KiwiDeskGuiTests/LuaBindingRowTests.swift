@@ -66,7 +66,7 @@ struct LuaBindingRowTests {
         let row = try Self.source("Lua/AdvancedLuaGroup+Row.swift")
         #expect(
             row.contains(
-                "VStack(alignment:.leading,spacing:6){HStack{"
+                "VStack(alignment:.leading,spacing:6){ShortcutKeyRow{"
                     + "ShortcutSymbolPicker.lua(binding.symbol,name:name)"
                     + "TextField("
             )
