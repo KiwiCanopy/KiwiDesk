@@ -144,14 +144,16 @@ struct ZOrderScrollingArmTests {
             !core.scrollFocusMoveOwesRestore(
                 to: WindowID(7),
                 from: WindowID(4),
-                offsetBefore: moved
+                offsetBefore: moved,
+                previousUnraised: false
             )
         )
         #expect(
             !core.scrollFocusMoveOwesRestore(
                 to: WindowID(4),
                 from: WindowID(7),
-                offsetBefore: moved
+                offsetBefore: moved,
+                previousUnraised: false
             )
         )
         // The control: the same stale offset between two tiles asks.
@@ -159,7 +161,8 @@ struct ZOrderScrollingArmTests {
             core.scrollFocusMoveOwesRestore(
                 to: WindowID(3),
                 from: WindowID(4),
-                offsetBefore: moved
+                offsetBefore: moved,
+                previousUnraised: false
             )
         )
     }

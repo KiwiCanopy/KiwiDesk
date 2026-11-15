@@ -70,11 +70,14 @@ extension KiwiCore {
     /// row, as `scrollFocusJumpsSlots` is: no evidence of a move along
     /// it, and a spurious restack buries floats (#418). A held pass
     /// pans later, and a drain still running was planned for the old
-    /// focus.
+    /// focus. `previousUnraised`: the window left still owed its
+    /// deferred raise, so it is no front window the step can pass
+    /// over (#2985).
     func scrollFocusMoveOwesRestore(
         to target: WindowID,
         from previous: WindowID?,
-        offsetBefore: CGFloat?
+        offsetBefore: CGFloat?,
+        previousUnraised: Bool
     ) -> Bool {
         guard let previous, previous != target, let space = activeSpace,
             space.mode == .scrolling
@@ -87,7 +90,17 @@ extension KiwiCore {
             space.scrollRest?.offset != offsetBefore
             || tiler.motionGate.owed != nil
             || floatRaiseDebt.restoresInFlight > 0
-        return moved && scrollingRowShowsOthers(leaving: previous)
+        return moved
+            && scrollingRowShowsOthers(
+                leaving: previousUnraised ? nil : previous
+            )
+    }
+
+    /// Whether the window a focus move leaves still owes its deferred
+    /// raise, so no step has put it in front (#2985). A door reads it
+    /// before it drops or replaces `pendingFocusRaise`.
+    func leftWindowOwesRaise(_ previous: WindowID?) -> Bool {
+        previous != nil && pendingFocusRaise == previous
     }
 
     /// The focus report's arm (#2985): a click or an app's activation
@@ -101,6 +114,7 @@ extension KiwiCore {
         to id: WindowID,
         from previous: WindowID?,
         offsetBefore: CGFloat?,
+        previousUnraised: Bool,
         now: Date
     ) {
         guard !eventLoop.isWithinSpaceSwitchGrace(now: now),
@@ -108,7 +122,8 @@ extension KiwiCore {
             scrollFocusMoveOwesRestore(
                 to: id,
                 from: previous,
-                offsetBefore: offsetBefore
+                offsetBefore: offsetBefore,
+                previousUnraised: previousUnraised
             )
         else { return }
         scheduleScrollingZOrderRestoreIfOverflowing()
