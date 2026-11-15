@@ -74,22 +74,48 @@ public enum GestureSeeds {
     static var pan: ScrollChord { panKeys }
     static var step: ScrollChord { stepKeys }
 
+    /// The seeds (#1873 ▸ Ruling 2026-11-15). The trackpad ladder:
+    /// two fingers move between windows, three between Spaces and
+    /// their overview, four between screens; every consumed slot
+    /// holds ⌃⌥, so a bare macOS gesture stays macOS's.
     public static let seeds: [GestureKey: GestureAction] = [
-        GestureKey(.tap4): .run(
-            LuaAction(lua: KiwiHubSide.shortcuts.lua, kind: .navigation)
-        ),
-        GestureKey(.tap3): .run(
-            LuaAction(lua: "KiwiDesk.focus_space_last()", kind: .navigation)
-        ),
+        // A stray four-finger tap dims or clears the screen, and the
+        // same tap undoes it; KiwiHub keeps ⌃⌥K.
+        GestureKey(.tap4): navigation("kiwivision.toggle()"),
+        GestureKey(.tap3): navigation("KiwiDesk.focus_space_last()"),
         GestureKey(.drag, [.control, .command]): .grab(.move),
         GestureKey(.drag, pan): .grab(.resize),
         GestureKey(.swipe2, pan): .family(.focus),
+        GestureKey(.swipe3, pan): .split(
+            GestureSplit(
+                axes: [.leftRight: .space],
+                arms: [.up: step(KiwiHubSide.desktops.lua)]
+            )
+        ),
+        GestureKey(.swipe4, pan): .family(.display),
         GestureKey(.wheel, pan): .family(.walk),
         // ⌃⌥ alone on a mouse: the wheel walks, sideways switches
         // Spaces (#3281); the trackpad keeps ⌃⌥⌘ for the step.
         GestureKey(.wheelX, pan): .family(.space),
         GestureKey(.swipe2, step): .family(.space),
+        // Clockwise the next layout, counter-clockwise the previous.
+        GestureKey(.rotate, pan): .family(.layout),
+        GestureKey(.spread, pan): navigation("KiwiDesk.toggle_maximized()"),
+        GestureKey(.pinchTogether, pan): navigation(
+            KiwiHubSide.desktops.lua
+        ),
+        GestureKey(.pinchTogether4, pan): navigation(
+            KiwiHubSide.windows.lua
+        ),
     ]
+
+    private static func step(_ lua: String) -> LuaAction {
+        LuaAction(lua: lua, kind: .navigation)
+    }
+
+    private static func navigation(_ lua: String) -> GestureAction {
+        .run(step(lua))
+    }
 
     /// The bound keys once `base` lies over the seeds and `profile`
     /// over that. A refused binding is dropped, since a hand-edited

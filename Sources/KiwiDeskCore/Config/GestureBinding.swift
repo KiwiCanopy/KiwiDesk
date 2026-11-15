@@ -63,6 +63,10 @@ public enum GestureFamily: String, CaseIterable, Codable, Sendable {
     case space
     /// The window list in order (#3200: a wheel's walk).
     case walk
+    /// The layout cycle: clockwise the next layout, counter-clockwise
+    /// the previous, as ⌃⌥C and ⌃⌥⇧C (#1873 ▸ owner ruling
+    /// 2026-11-15). A rotation's family alone.
+    case layout
 }
 
 /// A built-in or Lua action as an end key stores it (#3199 ▸ the

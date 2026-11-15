@@ -21,7 +21,7 @@ public enum GestureAxis: String, CaseIterable, Codable, Sendable {
         switch direction {
         case .left, .right: self = .leftRight
         case .up, .down: self = .upDown
-        case .back, .forward: return nil
+        case .back, .forward, .clockwise, .counterClockwise: return nil
         }
     }
 }

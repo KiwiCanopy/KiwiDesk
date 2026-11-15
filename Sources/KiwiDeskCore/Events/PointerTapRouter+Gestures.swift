@@ -137,7 +137,17 @@ extension PointerTapRouter {
         } else {
             stream.rotated += g.value
             if abs(stream.rotated) >= Self.rotateStep {
-                fires += firing(.rotate, &stream, settings, now)
+                // Positive degrees turn counter-clockwise, as
+                // NSEvent's rotation does (#1873; read on the device).
+                let way: GestureDirection =
+                    stream.rotated > 0 ? .counterClockwise : .clockwise
+                fires += firing(
+                    .rotate,
+                    &stream,
+                    settings,
+                    now,
+                    kind: .rotation(way)
+                )
             }
         }
         if g.ended { stream.open.remove(g.subtype) }
@@ -194,14 +204,15 @@ extension PointerTapRouter {
         _ input: GestureInput,
         _ stream: inout GestureEventStream,
         _ settings: GestureEventSettings,
-        _ now: CFAbsoluteTime
+        _ now: CFAbsoluteTime,
+        kind: TrackpadGestureEvent.Kind? = nil
     ) -> [TrackpadGestureEvent] {
         guard !stream.fired.contains(input) else { return [] }
         stream.fired.insert(input)
         guard settings.binds(input, stream.chord) else { return [] }
         return [
             TrackpadGestureEvent(
-                kind: .gesture(input),
+                kind: kind ?? .gesture(input),
                 fingers: 2,
                 modifiers: stream.chord,
                 time: now

@@ -165,8 +165,11 @@ extension KiwiCore {
         _ event: TrackpadGestureEvent
     ) {
         var direction: GestureDirection?
-        if case .swipe(let swipe) = event.kind {
+        switch event.kind {
+        case .swipe(let swipe):
             direction = GestureDirection(rawValue: swipe.rawValue)
+        case .rotation(let way): direction = way
+        case .tap, .gesture: break
         }
         runGestureStep(key, action, toward: direction)
     }
@@ -217,7 +220,7 @@ extension KiwiCore {
                 by: step,
                 swipe: family == .focus ? horizontal : nil
             )
-        case .space, .swap, .display, .track:
+        case .space, .swap, .display, .track, .layout:
             runGestureLua(family.lua(direction), key.spelling)
         }
     }
@@ -244,7 +247,7 @@ extension GestureFamily {
         // The list scrolls against the hand: fingers up or left
         // show the next window, as macOS's Desktop swipe does.
         case .walk, .space: direction.isBackward
-        case .track: !direction.isBackward
+        case .track, .layout: !direction.isBackward
         case .focus, .swap, .display: nil
         }
     }
@@ -271,6 +274,9 @@ extension GestureFamily {
         case .walk:
             let step = next ? "next" : "prev"
             return "KiwiDesk.focus_space_window(\"\(step)\")"
+        case .layout:
+            return next
+                ? "KiwiDesk.cycle_mode()" : "KiwiDesk.cycle_mode(\"prev\")"
         }
     }
 }

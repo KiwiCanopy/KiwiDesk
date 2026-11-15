@@ -116,7 +116,7 @@ struct GestureDirectionRow: View {
 
     var body: some View {
         HStack(spacing: GestureListRow.columnGap) {
-            Image(systemName: GestureListWords.direction(symbol: direction))
+            GlyphImage(GestureListWords.direction(symbol: direction))
                 .foregroundStyle(SettingsTheme.ink2)
                 .frame(width: GestureIcon.width)
                 .accessibilityHidden(true)

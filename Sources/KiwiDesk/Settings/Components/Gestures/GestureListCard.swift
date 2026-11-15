@@ -233,13 +233,18 @@ struct GestureListCard: View {
                     + "button, KiwiDesk sees what that app sends."
             )
         case .trackpad:
+            // The ladder is stated here once, for swipes (#1873 ▸
+            // Ruling 2026-11-15).
             L(
-                "shortcuts.gestures.list.trackpad_help",
-                "Bind a tap or a swipe to an action; a tap may take "
-                    + "no keys. With one action for every direction, a "
-                    + "swipe slides with your fingers and steps as far "
-                    + "as you swipe; give one direction its own action "
-                    + "and each direction acts once per swipe instead."
+                "shortcuts.gestures.list.trackpad_help_ladder",
+                "Bind a tap, a swipe, a pinch or a rotation to an "
+                    + "action; a tap may take no keys. Two fingers move "
+                    + "between windows, three between Spaces and their "
+                    + "overview, four between screens. A two-finger "
+                    + "swipe steps as far as you swipe; three to five "
+                    + "fingers take one step per swipe. Give one "
+                    + "direction its own action and it acts once per "
+                    + "swipe."
             )
         }
     }

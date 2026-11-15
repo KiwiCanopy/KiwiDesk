@@ -18,8 +18,11 @@ enum CustomGlyph: Hashable {
     case pinch(Int)
     /// A swipe's direction badge: `n` dots and one arrow (#1873).
     case swipe(Int, GestureDirection)
-    /// `hand.pinch` under a two-way arc; macOS 15 and later.
+    /// `hand.pinch` beside a two-way arc; macOS 15 and later.
     case rotate
+    /// The same with one head, the way a rotation turns: true is
+    /// clockwise (#1873 ▸ owner ruling 2026-11-15).
+    case turn(clockwise: Bool)
 
     static let prefix = "kiwi."
 
@@ -36,6 +39,9 @@ enum CustomGlyph: Hashable {
         case .pinch(let n): "kiwi.pinch.\(n)"
         case .swipe(let n, let way): "kiwi.swipe.\(n).\(way.rawValue)"
         case .rotate: "kiwi.rotate"
+        case .turn(let clockwise):
+            clockwise
+                ? "kiwi.rotate.clockwise" : "kiwi.rotate.counter_clockwise"
         }
     }
 
@@ -47,7 +53,7 @@ enum CustomGlyph: Hashable {
             + (2...4).flatMap { n in
                 CustomGlyph.badgeDirections.map { .swipe(n, $0) }
             }
-            + [.rotate]
+            + [.rotate, .turn(clockwise: true), .turn(clockwise: false)]
         guard let glyph = all.first(where: { $0.name == name }) else {
             return nil
         }
@@ -86,7 +92,11 @@ enum CustomGlyph: Hashable {
         case .spread(let n): Self.pinchArrows(n, outward: true)
         case .pinch(let n): Self.pinchArrows(n, outward: false)
         case .swipe(let n, let way): Self.swipeBadge(n, way)
-        case .rotate: Self.rotateHand()
+        case .rotate: Self.rotateHand(heads: [.clockwise, .counterClockwise])
+        case .turn(let clockwise):
+            Self.rotateHand(
+                heads: [clockwise ? .clockwise : .counterClockwise]
+            )
         }
     }
 

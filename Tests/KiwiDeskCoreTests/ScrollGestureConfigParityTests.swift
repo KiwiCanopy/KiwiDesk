@@ -28,7 +28,7 @@ struct ScrollGestureConfigParityTests {
         let edited = ScrollGestureBase(
             naturalTrackpad: .off,
             naturalMouse: .off,
-            longSwipes: true,
+            longSwipes: false,
             stepDistance: 120
         )
         let over = ScrollGestureOverride.diff(base: base, edited: edited)
@@ -49,7 +49,7 @@ struct ScrollGestureConfigParityTests {
         let edited = ScrollGestureBase(
             naturalTrackpad: .off,
             naturalMouse: .off,
-            longSwipes: true,
+            longSwipes: false,
             stepDistance: 120
         )
         #expect(ScrollGestureField.allCases.count == labels(base).count)
@@ -66,7 +66,7 @@ struct ScrollGestureConfigParityTests {
         let edited = ScrollGestureBase(
             naturalTrackpad: .off,
             naturalMouse: .off,
-            longSwipes: true,
+            longSwipes: false,
             stepDistance: 120
         )
         // Every field off its default, derived rather than

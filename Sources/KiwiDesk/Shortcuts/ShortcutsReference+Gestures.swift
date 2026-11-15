@@ -96,8 +96,7 @@ extension ShortcutsReferenceBuilder {
     }
 
     /// `row` with the badges of the motions that run its action
-    /// taken from `open`. A folded row that every way of one
-    /// gesture reaches wears that gesture once, with no way.
+    /// taken from `open`.
     private static func attached(
         _ row: ShortcutRow,
         from open: inout [GestureReach]
@@ -109,11 +108,11 @@ extension ShortcutsReferenceBuilder {
         open.removeAll { !$0.lua.isEmpty && ids.contains($0.lua) }
         var badges: [ShortcutGestureBadge] = []
         let byKey = Dictionary(grouping: hits, by: \.badge.key)
+        // A gesture reaching the row more than one way — a family
+        // whose up and left both step to the next Space, or every way
+        // of a folded set — wears its glyph once, with no way.
         for (key, reached) in byKey {
-            let whole =
-                row.members.count > 1
-                && reached.count == key.input.directions.count
-            if whole {
+            if reached.count > 1 {
                 badges.append(ShortcutGestureBadge(key: key, direction: nil))
             } else {
                 badges += reached.map(\.badge)

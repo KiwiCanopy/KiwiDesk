@@ -42,6 +42,7 @@ struct OnboardingProgressTests {
             case .looks: model.continueAfterLooks()
             case .bars: model.continueAfterBars()
             case .keys: model.continueAfterKeys()
+            case .gestures: model.continueAfterGestures()
             case .done: break
             }
             walked.append(model.step)
@@ -149,6 +150,7 @@ struct OnboardingProgressTests {
             case .looks: model.continueAfterLooks()
             case .bars: model.continueAfterBars()
             case .keys: model.continueAfterKeys()
+            case .gestures: model.continueAfterGestures()
             case .done: break
             }
             seen.append(model.progressIndex)

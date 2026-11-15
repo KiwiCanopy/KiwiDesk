@@ -41,7 +41,7 @@ extension OnboardingView {
             }
         } action: {
             Button(L("onboarding.continue", "Continue")) {
-                model.advance()
+                model.continueAfterGestures()
             }
             .kiwiProminentButton()
             .keyboardShortcut(.defaultAction)

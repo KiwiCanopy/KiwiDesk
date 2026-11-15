@@ -61,11 +61,42 @@ struct GestureBindingTests {
         }
     }
 
-    @Test("the seeds are the eight default rows")
+    @Test("the seeds are the fourteen default rows")
     func seeds() {
         let step: ScrollChord = [.control, .option, .command]
         let resolved = GestureSeeds.resolved(base: GestureMap(), profile: nil)
-        #expect(resolved.count == 8)
+        #expect(resolved.count == 14)
+        // The trackpad ladder (#1873 ▸ Ruling 2026-11-15): two
+        // fingers windows, three Spaces and their overview, four
+        // screens.
+        #expect(
+            resolved[GestureKey(.swipe3, hyper)]
+                == .split(
+                    GestureSplit(
+                        axes: [.leftRight: .space],
+                        arms: [
+                            .up: LuaAction(
+                                lua: KiwiHubSide.desktops.lua,
+                                kind: .navigation
+                            )
+                        ]
+                    )
+                )
+        )
+        #expect(resolved[GestureKey(.swipe4, hyper)] == .family(.display))
+        #expect(resolved[GestureKey(.spread4, hyper)] == nil)
+        #expect(
+            resolved[GestureKey(.tap4)]
+                == .run(
+                    LuaAction(lua: "kiwivision.toggle()", kind: .navigation)
+                )
+        )
+        for input in [
+            GestureInput.rotate, .spread, .pinchTogether, .pinchTogether4,
+        ] {
+            #expect(resolved[GestureKey(input, hyper)] != nil, "\(input)")
+            #expect(resolved[GestureKey(input)] == nil, "\(input)")
+        }
         #expect(resolved[GestureKey(.swipe2, hyper)] == .family(.focus))
         #expect(resolved[GestureKey(.swipe2, step)] == .family(.space))
         // A mouse holds ⌃⌥ alone (#3281): the wheel walks the

@@ -1,27 +1,35 @@
 import AppKit
+import KiwiDeskCore
 
-/// The rotate glyph (#1873 ▸ Ruling amendment 2026-11-13, owner):
-/// Apple's `hand.pinch`, thumb and index, under a two-way arc around
-/// the fingertips. `hand.pinch` needs macOS 15, so the floor draws
+/// The rotate glyph (#1873 ▸ Ruling amendment 2026-11-13; shape
+/// picked by the owner from renders, 2026-11-15): Apple's
+/// `hand.pinch`, thumb and index, with a two-way arc turning about
+/// the fingertips along the hand's left side, clear of the symbol's
+/// own motion marks. `hand.pinch` needs macOS 15, so the floor draws
 /// `GestureListWords.rotateFloor`'s symbol instead.
 extension CustomGlyph {
     /// The hand's box on the 20 pt grid, bottom right, and the
-    /// fingertips' centre the arc turns about.
-    private static let handBox = NSRect(x: 4, y: 6.6, width: 16, height: 13)
-    private static let pivot = NSPoint(x: 10.9, y: 10.2)
+    /// point the arc turns about.
+    private static let handBox = NSRect(
+        x: 5,
+        y: 6.8,
+        width: 15,
+        height: 12.2
+    )
+    private static let pivot = NSPoint(x: 11, y: 12)
 
     /// Drawn black at full strength, as the arc is: a symbol image
     /// otherwise draws in the label colour's lighter ink.
-    static func rotateHand() {
+    static func rotateHand(heads: Set<GestureDirection>) {
         let config = NSImage.SymbolConfiguration(
             pointSize: 12,
             weight: .semibold
         ).applying(.init(paletteColors: [.black]))
-        if let hand = NSImage(
-            systemSymbolName: "hand.pinch",
-            accessibilityDescription: nil
-        )?.withSymbolConfiguration(config) {
-            hand.draw(
+        // A fixed name; the floor's macOS has none and draws the arc
+        // alone, where `GestureListWords.rotate` draws SF's arrow.
+        NSImage(systemSymbolName: "hand.pinch", accessibilityDescription: nil)?
+            .withSymbolConfiguration(config)?
+            .draw(
                 in: handBox,
                 from: .zero,
                 operation: .sourceOver,
@@ -29,17 +37,17 @@ extension CustomGlyph {
                 respectFlipped: true,
                 hints: nil
             )
-        }
-        arcArrows(radius: 7.6, from: 215, to: 345)
+        arcArrows(radius: 8, from: 150, to: 255, heads: heads)
     }
 
-    /// An arc over the pivot, clockwise on screen from `from` to
-    /// `to` degrees (y down, so 270 is straight up), a head at each
-    /// end.
+    /// An arc about the pivot, clockwise on screen from `from` to
+    /// `to` degrees (y down, so 180 is left and 270 straight up), a
+    /// head at each end.
     private static func arcArrows(
         radius: CGFloat,
         from: CGFloat,
-        to: CGFloat
+        to: CGFloat,
+        heads: Set<GestureDirection>
     ) {
         let arc = NSBezierPath()
         arc.appendArc(
@@ -52,7 +60,11 @@ extension CustomGlyph {
         arc.lineWidth = 1.5
         arc.lineCapStyle = .round
         arc.stroke()
-        for (angle, sign) in [(from, CGFloat(-1)), (to, 1)] {
+        // The arc runs clockwise on screen from `from` to `to`.
+        let ends: [(CGFloat, CGFloat, GestureDirection)] = [
+            (from, -1, .counterClockwise), (to, 1, .clockwise),
+        ]
+        for (angle, sign, way) in ends where heads.contains(way) {
             let a = angle * .pi / 180
             let tip = NSPoint(
                 x: pivot.x + radius * cos(a),

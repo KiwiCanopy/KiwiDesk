@@ -20,6 +20,8 @@ struct KeySequenceGuiReaderCensusTests {
     /// File under `Sources/KiwiDesk` → (reads, why a sequence row
     /// is right there).
     private static let readers: [String: (Int, String)] = [
+        "Jump/JumpPanelController+Shortcuts.swift":
+            (1, "names a gesture's action by catalogue (#1873)"),
         "Onboarding/OnboardingKeys+Chords.swift":
             (2, "chord by Lua: a leader's empty Lua never matches"),
         "Onboarding/OnboardingKeys+Toggles.swift":

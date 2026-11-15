@@ -43,6 +43,17 @@ extension GestureListWords {
         floor: "rotate.right"
     )
 
+    /// A rotation's one-way glyphs, a direction row's and a badge's,
+    /// with SF's arrows on the floor (#1873 ▸ owner 2026-11-15).
+    static let turnClockwise = ShortcutsReferenceBuilder.FloorSymbol(
+        name: CustomGlyph.turn(clockwise: true).name,
+        floor: "arrow.clockwise"
+    )
+    static let turnCounterClockwise = ShortcutsReferenceBuilder.FloorSymbol(
+        name: CustomGlyph.turn(clockwise: false).name,
+        floor: "arrow.counterclockwise"
+    )
+
     /// The gesture pop-up's groups, in the order a card lists them
     /// (#3281, owner and ui-designer): each keeps `offered`'s order,
     /// and a group with nothing offered is left out.

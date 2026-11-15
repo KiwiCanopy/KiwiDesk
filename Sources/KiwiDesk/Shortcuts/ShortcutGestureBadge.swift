@@ -41,6 +41,10 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
         {
             return CustomGlyph.swipe(fingers, direction).name
         }
+        // A rotation's badge turns its way (#1873 ▸ owner 2026-11-15).
+        if let direction, key.input == .rotate {
+            return GestureListWords.direction(symbol: direction)
+        }
         return GestureListWords.symbol(key.input)
     }
 

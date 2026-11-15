@@ -276,6 +276,10 @@ final class OnboardingModel {
         advance()
     }
 
+    func continueAfterGestures() {
+        advance()
+    }
+
     /// Commits `openAtLogin` and runs the given exit action (#342).
     func commitLoginItemThen(_ exit: () -> Void) {
         onSetLoginItem(openAtLogin)

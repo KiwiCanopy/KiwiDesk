@@ -123,6 +123,7 @@ public final class TouchGestures {
         case .swipe: return .swipe(fingers: event.fingers)
         case .gesture(let input):
             return input.isGestureEvent ? input : nil
+        case .rotation: return .rotate
         }
     }
 

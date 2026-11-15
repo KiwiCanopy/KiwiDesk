@@ -80,13 +80,21 @@ struct PointerTapGestureTests {
         #expect(closing.gestures.isEmpty)
     }
 
-    @Test("a bound rotation fires past its degrees")
+    /// Positive degrees turn counter-clockwise, as NSEvent's
+    /// rotation does (#1873 ▸ owner ruling 2026-11-15).
+    @Test("a bound rotation fires past its degrees, by its way")
     func rotationFires() {
         var r = router([.rotate: [Self.keys]])
         #expect(r.route(g(Self.turn, 1, 1), now: 1).swallow)
         #expect(r.route(g(Self.turn, 2, 3), now: 1.01).gestures.isEmpty)
         let fired = r.route(g(Self.turn, 2, 2), now: 1.02)
-        #expect(fired.gestures.map(\.kind) == [.gesture(.rotate)])
+        #expect(
+            fired.gestures.map(\.kind) == [.rotation(.counterClockwise)]
+        )
+        var back = router([.rotate: [Self.keys]])
+        _ = back.route(g(Self.turn, 1, -1), now: 2)
+        let turned = back.route(g(Self.turn, 2, -5), now: 2.01)
+        #expect(turned.gestures.map(\.kind) == [.rotation(.clockwise)])
     }
 
     @Test("other keys, no keys, or no binding: every gesture passes")
