@@ -19,6 +19,7 @@ struct KeyRecorderRejectionRow: View {
                 .accessibilityHidden(true)
             Text(assigned)
                 .foregroundStyle(SettingsTheme.danger)
+                .lineLimit(1)
             Button(L("key_recorder.steal", "Steal"), action: onSteal)
                 .buttonStyle(.link)
                 .pointingHandCursor()
@@ -38,6 +39,27 @@ struct KeyRecorderRejectionRow: View {
             )
         }
         .font(.caption)
+    }
+
+    /// The row with its actions, each of which ends the offer
+    /// through `clear` first: Steal, Go to and the dismissal.
+    static func wired(
+        _ rejection: RecorderRejection,
+        coordinator: RecorderCoordinator,
+        clear: @escaping () -> Void
+    ) -> Self {
+        KeyRecorderRejectionRow(
+            rejection: rejection,
+            onSteal: {
+                clear()
+                rejection.steal()
+            },
+            onGoTo: {
+                clear()
+                coordinator.scrollTarget = rejection.holderRowID
+            },
+            onDismiss: clear
+        )
     }
 
     private var assigned: String {

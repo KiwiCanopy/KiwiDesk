@@ -44,7 +44,9 @@ struct KeyRecorderField: View {
     /// A single tap this field just recorded (#3257), until its next
     /// edit; local state, no timer.
     @State var tapOnceNote: KeyCombo?
-    @State private var rejection: RecorderRejection?
+    /// The refused chord while no `ShortcutKeyRow` hosts it.
+    @State var ownRejection: RecorderRejection?
+    @Environment(\.recorderConflictSlot) var conflictSlot
     @State private var flashing = false
     @State var conflictPopoverShown = false
 
@@ -60,6 +62,7 @@ struct KeyRecorderField: View {
                 recordButton
                 clearButton
             }
+            .alignmentGuide(.shortcutLine) { $0[VerticalAlignment.center] }
             deadCaption
             narrowingCaption
             if recording, let pendingTap,
@@ -73,8 +76,11 @@ struct KeyRecorderField: View {
                     .foregroundStyle(SettingsTheme.ink2)
             }
             tapOnceCaption
-            if let rejection = liveRejection {
-                rejectionRow(rejection)
+            if conflictSlot == nil, let rejection = liveRejection {
+                KeyRecorderRejectionRow.wired(
+                    rejection,
+                    coordinator: coordinator
+                ) { self.rejection = nil }
             }
         }
         .onChange(of: coordinator.generation) { _, _ in
@@ -196,32 +202,6 @@ struct KeyRecorderField: View {
 
     private var recordHelp: String {
         recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
-    }
-
-    // MARK: - Rejection UI (#34)
-
-    /// Live re-validation of pending rejection (#34).
-    private var liveRejection: RecorderRejection? {
-        guard let rejection, let preflight else { return nil }
-        return preflight(rejection.combo)
-    }
-
-    private func rejectionRow(
-        _ rejection: RecorderRejection
-    ) -> some View {
-        KeyRecorderRejectionRow(
-            rejection: rejection,
-            onSteal: {
-                self.rejection = nil
-                rejection.steal()
-            },
-            onGoTo: {
-                self.rejection = nil
-                coordinator.scrollTarget =
-                    rejection.holderRowID
-            },
-            onDismiss: { self.rejection = nil }
-        )
     }
 
     /// A Hyper chord while no Hyper key is set: it cannot fire.

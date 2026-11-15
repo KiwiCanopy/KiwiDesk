@@ -115,7 +115,7 @@ struct NavRow: View, Equatable {
     }
 
     var body: some View {
-        HStack {
+        ShortcutKeyRow {
             // Icon slot reserved unconditionally (#264); the
             // panel's glyph (#2670).
             Color.clear
@@ -134,6 +134,7 @@ struct NavRow: View, Equatable {
                 }
             VStack(alignment: .leading, spacing: 2) {
                 Text(drawn.title)
+                    .shortcutLineTitle()
                 if let detail = drawn.detail {
                     Text(detail)
                         .font(.caption)
