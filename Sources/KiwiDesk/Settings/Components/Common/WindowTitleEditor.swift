@@ -17,6 +17,7 @@ struct WindowTitleEditor<Preview: View>: View {
     @ViewBuilder let preview: (String) -> Preview
     @State private var draft = TitlePatternDraft()
     @FocusState private var fieldFocused: Bool
+    @FocusState private var menuFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -27,6 +28,7 @@ struct WindowTitleEditor<Preview: View>: View {
             }
             HStack(spacing: 8) {
                 addWindowMenu
+                    .focused($menuFocused)
                 if draft.isOpen {
                     patternField
                     Button(L("app_rules.add", "Add")) {
@@ -43,7 +45,9 @@ struct WindowTitleEditor<Preview: View>: View {
         }
     }
 
-    /// The pending pattern (#3340): Return adds, Escape drops.
+    /// The pending pattern (#3340): Return, a blur or a Save adds
+    /// it; Escape drops it. Focus and the selection wait for the
+    /// field to mount, then select only its own text.
     private var patternField: some View {
         TextField(
             L(
@@ -54,9 +58,13 @@ struct WindowTitleEditor<Preview: View>: View {
         )
         .textFieldStyle(.roundedBorder)
         .frame(maxWidth: 200)
-        .focused($fieldFocused)
-        .onSubmit { commitDraft() }
-        .onExitCommand { draft.cancel() }
+        .commitsOnSave($fieldFocused) { commitDraft() }
+        .onExitCommand {
+            draft.cancel()
+            menuFocused = true
+        }
+        .onAppear(perform: focusPick)
+        .onChange(of: draft.picks) { focusPick() }
     }
 
     /// Deduplicated, because the chips are identified by VALUE.
@@ -151,18 +159,34 @@ struct WindowTitleEditor<Preview: View>: View {
     }
 
     /// A picked title opens the field on it, selected, so Return
-    /// keeps it whole and an arrow key trims it (#3340). The field
-    /// editor selects a turn later, once the field holds the text.
+    /// keeps it whole and an arrow key trims it (#3340).
     private func startDraft(with title: String = "") {
         draft.start(with: title)
-        fieldFocused = true
+    }
+
+    /// Focus lands a turn after the field mounts, and the field
+    /// editor selects a turn after that — only while it holds the
+    /// picked text, never another field's.
+    private func focusPick() {
         DispatchQueue.main.async {
-            (NSApp.keyWindow?.firstResponder as? NSText)?.selectAll(nil)
+            fieldFocused = true
+            DispatchQueue.main.async {
+                guard
+                    let editor = NSApp.keyWindow?.firstResponder
+                        as? NSText,
+                    editor.string == draft.text
+                else { return }
+                editor.selectAll(nil)
+            }
         }
     }
 
+    /// Adds the pending pattern. Focus returns to the add menu only
+    /// from the field itself, never from a blur to another control.
     private func commitDraft() {
+        let fromField = fieldFocused
         guard let pattern = draft.commit() else { return }
         addPattern(pattern)
+        if fromField { menuFocused = true }
     }
 }

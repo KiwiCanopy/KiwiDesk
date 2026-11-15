@@ -15,13 +15,15 @@ struct TitlePatternDraftTests {
         #expect(draft.text == "Amazon.de - Brave - Shop")
     }
 
-    @Test("a second pick replaces the text being typed")
+    @Test("a second pick replaces the text and counts as a pick")
     func secondPickReplaces() {
         var draft = TitlePatternDraft()
         draft.start(with: "First")
         draft.text = "Fir"
+        let picks = draft.picks
         draft.start(with: "Second")
         #expect(draft.text == "Second")
+        #expect(draft.picks == picks + 1)
     }
 
     @Test("Other (Specify)… opens the field empty")
@@ -90,6 +92,28 @@ struct TitlePatternDraftTests {
             !squashed.contains("addPattern("),
             "the add menu stores a pattern without the field again"
         )
+        let start = try #require(
+            SourceScan.declarationBody(
+                after: "private func startDraft",
+                in: text
+            ),
+            "startDraft is gone from WindowTitleEditor"
+        )
+        #expect(
+            start.contains("draft.start(with: title)"),
+            "a picked title opens an empty field"
+        )
+        let commit = try #require(
+            SourceScan.declarationBody(
+                after: "private func commitDraft",
+                in: text
+            ),
+            "commitDraft is gone from WindowTitleEditor"
+        )
+        #expect(
+            commit.contains("addPattern(pattern)"),
+            "Return or Add no longer stores the pattern"
+        )
         let field = try #require(
             SourceScan.declarationBody(
                 after: "private var patternField",
@@ -97,9 +121,17 @@ struct TitlePatternDraftTests {
             ),
             "patternField is gone from WindowTitleEditor"
         )
+        let squashedField = field.split(whereSeparator: \.isWhitespace)
+            .joined()
         #expect(
-            field.contains(".onExitCommand { draft.cancel() }"),
+            squashedField.contains(".onExitCommand{draft.cancel()"),
             "Escape no longer drops the pending pattern"
+        )
+        #expect(
+            squashedField.contains(
+                ".commitsOnSave($fieldFocused){commitDraft()}"
+            ),
+            "a Save or a blur drops a pending pattern again"
         )
     }
 }

@@ -8,12 +8,16 @@ struct TitlePatternDraft: Equatable {
     var text = ""
     /// Whether the field is shown.
     private(set) var isOpen = false
+    /// Counts `start` calls, so the field re-selects on each pick
+    /// while it stays mounted.
+    private(set) var picks = 0
 
     /// Opens the field on `title`, replacing any text being typed;
     /// an empty title is Other (Specify)….
     mutating func start(with title: String = "") {
         text = title
         isOpen = true
+        picks &+= 1
     }
 
     /// Closes the field and drops its text.
