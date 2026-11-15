@@ -116,6 +116,21 @@ struct SettingsAnchorPairingTests {
         }
     }
 
+    /// The echo is the wash half alone (#3301): it washes its
+    /// control's id and mounts no scroll target, so a second `.id`
+    /// never joins the anchored view's.
+    @Test("the echo washes its control and anchors nothing")
+    func echoIsTheWashAlone() throws {
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func searchFlashEcho(",
+                in: try source(of: revealFile)
+            )
+        )
+        #expect(body.contains("searchFlash(control.id)"))
+        #expect(!body.contains("searchAnchor("))
+    }
+
     /// An echo washes without scrolling (#3301), so its control
     /// must be anchored beside it: each file applying the echo
     /// anchors every control it echoes with `searchAnchored`.
