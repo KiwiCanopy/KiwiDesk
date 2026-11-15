@@ -151,3 +151,43 @@ extension PointerRestTests {
         #expect(armed == [WindowID(1)])
     }
 }
+
+extension PointerRestTests {
+    /// A click inside the dwell is the user's own act: a rest
+    /// after the release raised the window the click had just
+    /// minimized, which came back (#3344).
+    @Test("A press spends the armed dwell; the next move re-arms")
+    func pressSpendsTheDwell() {
+        let rest = PointerRest()
+        var rests = 0
+        rest.onRest = { _, _ in rests += 1 }
+        rest.location = { CGPoint(x: 10, y: 10) }
+        rest.moved(to: CGPoint(x: 10, y: 10))
+        rest.pressed()
+        #expect(!rest.isArmed)
+        rest.moved(to: CGPoint(x: 12, y: 11))
+        #expect(!rest.isArmed, "jitter around the press is no travel")
+        rest.moved(to: CGPoint(x: 40, y: 10))
+        #expect(rest.isArmed)
+        rest.location = { CGPoint(x: 40, y: 10) }
+        rest.rest()
+        #expect(rests == 1)
+    }
+
+    @Test("The monitor's press reaches the dwell")
+    func monitorPressIsHeard() {
+        let rest = PointerRest()
+        var deliver: ((PointerRest.Input) -> Void)?
+        rest.makeMonitor = { sink in
+            deliver = sink
+            return NSObject()
+        }
+        rest.location = { CGPoint(x: 10, y: 10) }
+        rest.setEnabled(true)
+        rest.start()
+        deliver?(.moved(CGPoint(x: 10, y: 10)))
+        #expect(rest.isArmed)
+        deliver?(.pressed)
+        #expect(!rest.isArmed)
+    }
+}

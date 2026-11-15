@@ -61,8 +61,12 @@ editing here:
   `movedFocusStands`). And after a focus the pointer did not make,
   the windows it is left over are held until a move leaves them,
   read from state frames on the move (`PointerRest.held`,
-  `HoverFocusHoldTests`). A new trigger for hover focus is a user
-  event too, never a reading of where the pointer IS.
+  `HoverFocusHoldTests`). And a mouse press spends an armed dwell,
+  so no rest fires after a click the user aimed — one that
+  minimized the window under it came straight back (#3344,
+  `PointerRestTests` ▸ `pressSpendsTheDwell`). A new trigger for
+  hover focus is a user event too, never a reading of where the
+  pointer IS.
   While KiwiDesk is active, the local monitor hears the pointer
   leave Settings only because that window accepts mouse-moved
   events (#2381), and the flag breaks SwiftUI hover in a popover
