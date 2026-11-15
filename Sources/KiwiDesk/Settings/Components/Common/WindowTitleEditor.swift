@@ -15,8 +15,8 @@ struct WindowTitleEditor<Preview: View>: View {
     let caption: String
     /// What the patterns match, handed the pattern being typed.
     @ViewBuilder let preview: (String) -> Preview
-    @State private var customPattern = ""
-    @State private var addingCustom = false
+    @State private var draft = TitlePatternDraft()
+    @FocusState private var fieldFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -27,29 +27,36 @@ struct WindowTitleEditor<Preview: View>: View {
             }
             HStack(spacing: 8) {
                 addWindowMenu
-                if addingCustom {
-                    TextField(
-                        L(
-                            "app_rules.title_contains",
-                            "Title contains…"
-                        ),
-                        text: $customPattern
-                    )
-                    .textFieldStyle(.roundedBorder)
-                    .frame(maxWidth: 200)
-                    .onSubmit { commitCustom() }
+                if draft.isOpen {
+                    patternField
                     Button(L("app_rules.add", "Add")) {
-                        commitCustom()
+                        commitDraft()
                     }
-                    .disabled(customPattern.trimmed.isEmpty)
+                    .disabled(draft.text.trimmed.isEmpty)
                     .settingsActionButton()
                 }
             }
-            preview(addingCustom ? customPattern : "")
+            preview(draft.isOpen ? draft.text : "")
             Text(caption)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    /// The pending pattern (#3340): Return adds, Escape drops.
+    private var patternField: some View {
+        TextField(
+            L(
+                "app_rules.title_contains",
+                "Title contains…"
+            ),
+            text: $draft.text
+        )
+        .textFieldStyle(.roundedBorder)
+        .frame(maxWidth: 200)
+        .focused($fieldFocused)
+        .onSubmit { commitDraft() }
+        .onExitCommand { draft.cancel() }
     }
 
     /// Deduplicated, because the chips are identified by VALUE.
@@ -90,18 +97,18 @@ struct WindowTitleEditor<Preview: View>: View {
     }
 
     /// Lists the app's currently open, not-yet-covered window
-    /// titles, plus the free-text escape for windows that
-    /// aren't open right now.
+    /// titles, each opened in the pattern field to trim, plus the
+    /// free-text escape for windows that aren't open right now.
     private var addWindowMenu: some View {
         Menu {
             ForEach(openTitles, id: \.self) { title in
-                Button(title) { addPattern(title) }
+                Button(title) { startDraft(with: title) }
             }
             if !openTitles.isEmpty { Divider() }
             Button(
                 L("app_rules.other_specify", "Other (Specify)…")
             ) {
-                addingCustom = true
+                startDraft()
             }
         } label: {
             Label(
@@ -143,11 +150,19 @@ struct WindowTitleEditor<Preview: View>: View {
         patterns.removeAll { $0 == pattern }
     }
 
-    private func commitCustom() {
-        let pattern = customPattern.trimmed
-        guard !pattern.isEmpty else { return }
+    /// A picked title opens the field on it, selected, so Return
+    /// keeps it whole and an arrow key trims it (#3340). The field
+    /// editor selects a turn later, once the field holds the text.
+    private func startDraft(with title: String = "") {
+        draft.start(with: title)
+        fieldFocused = true
+        DispatchQueue.main.async {
+            (NSApp.keyWindow?.firstResponder as? NSText)?.selectAll(nil)
+        }
+    }
+
+    private func commitDraft() {
+        guard let pattern = draft.commit() else { return }
         addPattern(pattern)
-        customPattern = ""
-        addingCustom = false
     }
 }

@@ -1,0 +1,33 @@
+import Foundation
+
+/// The pattern `WindowTitleEditor` holds before Add (#3340): a
+/// picked open title or a typed one, never stored until committed,
+/// so the caller's preview checks every pattern first.
+struct TitlePatternDraft: Equatable {
+    /// The field's text.
+    var text = ""
+    /// Whether the field is shown.
+    private(set) var isOpen = false
+
+    /// Opens the field on `title`, replacing any text being typed;
+    /// an empty title is Other (Specify)….
+    mutating func start(with title: String = "") {
+        text = title
+        isOpen = true
+    }
+
+    /// Closes the field and drops its text.
+    mutating func cancel() {
+        text = ""
+        isOpen = false
+    }
+
+    /// The trimmed pattern to add, closing the field — nil, with
+    /// the field left open, while it holds nothing to add.
+    mutating func commit() -> String? {
+        let pattern = text.trimmed
+        guard !pattern.isEmpty else { return nil }
+        cancel()
+        return pattern
+    }
+}
