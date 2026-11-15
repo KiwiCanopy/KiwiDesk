@@ -193,6 +193,9 @@ struct RuleReachGuiParityTests {
             ),
         ]
         for (name, declaration, file, needle) in sites {
+            for skip in Self.appSiteSkips[name] ?? [] {
+                #expect(found.contains(skip), "stale skip: \(skip)")
+            }
             let text = try body(declaration, in: file)
             for family in found {
                 let skipped = Self.appSiteSkips[name]?.contains(family)

@@ -85,8 +85,8 @@ extension StateCoordinator {
         if mayFollow, let ruled, ruled != active {
             effects.placedByAppRule = ruled
         }
-        // A Pocket key's candidate and a quiet open have arms of
-        // their own at the arrival's settle (#3341).
+        // No late titled match for a Pocket key's candidate or a
+        // quiet open, whose own arms place the window (#3341).
         noteTitledRulePending(
             window,
             arrivedAt: arrivedAt,

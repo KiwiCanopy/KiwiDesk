@@ -190,6 +190,7 @@ struct TitledRuleLateMatchTests {
         let core = makeCore()
         core.windowCreates.noteDestroyed(late)
         open(core, title: "")
+        #expect(core.state.titledRulePending[late] != nil)
         let tab = WindowID(900_102)
         core.handle(.windowRekeyed(late, tab))
         #expect(core.state.titledRulePending[tab] == nil)
