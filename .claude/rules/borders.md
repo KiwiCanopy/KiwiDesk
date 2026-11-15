@@ -612,13 +612,13 @@ Obligations:
   (`WindowServerWatchTests` ▸ `phaseOrder`,
   `WindowServerWatchSeamTests`). A new consumer rules its
   position in the change that adds it.
-- **Read the stand-down from the shelf's covered half**, filed once
-  per pass by `updateBars()` through `noteVisionStandDown`, never a
+- **Read the stand-down from the shelf's**, filed once per pass by
+  `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a
-  WindowServer round trip per screen on the switch path. The half
-  is `overlaysStandDown` — a native fullscreen Space or a
-  presentation — never the shelf's maximize arm: a screen showing
-  a Maximize keeps its plate, so the menu-bar band beside the notch
+  WindowServer round trip per screen on the switch path. It is a
+  native fullscreen Space or a presentation alone, never a
+  Maximize, which reads the bars Hidden (#3346): a screen showing a
+  Maximize keeps its plate, so the menu-bar band beside the notch
   stays dimmed (#3061, `FullscreenStandDownTests` ▸
   `maximizeKeepsThePlate`).
 - **Stand the blur down under Reduce transparency at the one

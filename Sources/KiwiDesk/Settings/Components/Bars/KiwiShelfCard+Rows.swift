@@ -126,6 +126,9 @@ extension KiwiShelfCard {
         // Drawn in the Show drawer (`showRow`).
         case .pocketVisibility:
             EmptyView()
+        // Drawn in Layout Defaults ▸ Maximize (`MaximizeCard`).
+        case .maximizedVisibility:
+            EmptyView()
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
             .fillFade, .tintHubAndPlates, .readingContrast,
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,

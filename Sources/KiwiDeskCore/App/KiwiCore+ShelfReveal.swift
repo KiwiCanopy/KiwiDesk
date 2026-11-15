@@ -46,6 +46,7 @@ extension KiwiCore {
             items: [SpaceBarOverlay.Item]?,
             appWindows: Int? = nil,
             reveal: ShelfRevealer,
+            hover: Set<ShelfBar> = [],
             gaps: Gaps,
             settings: TilingSettings
         ) {
@@ -62,6 +63,7 @@ extension KiwiCore {
                     items: items,
                     appWindows: appWindows,
                     reveal: reveal,
+                    hover: hover,
                     gaps: gaps,
                     settings: settings
                 )
@@ -82,6 +84,7 @@ extension KiwiCore {
             items: [SpaceBarOverlay.Item]?,
             appWindows: Int?,
             reveal: ShelfRevealer,
+            hover: Set<ShelfBar>,
             gaps: Gaps,
             settings: TilingSettings
         ) {
@@ -127,12 +130,19 @@ extension KiwiCore {
                 bars.filter { plan.shelfEdge.shown($0) == .auto },
                 shelf
             )
+            // Over a maximized window a bar has a band and no mark
+            // (#3346).
+            let bands = Self.maximizedBands(
+                bars.intersection(hover),
+                of: plan,
+                shelf: shelf
+            )
             for bar in bars where !auto.contains(bar) {
                 targets[barKey(bar)] = ShelfRevealer.Target(
                     edge: plan.edge,
                     strip: strip,
                     screen: screen.frame,
-                    band: nil,
+                    band: bands[bar],
                     section: section(bar)
                 )
             }

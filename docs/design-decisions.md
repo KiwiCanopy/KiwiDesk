@@ -6573,6 +6573,13 @@ hide the menu bar or the Dock for another app's window, which
 is why the frame stops between them — Apple's Window ▸ Fill
 frame.
 
+:::unreleased
+*The bars read Hidden or Auto, not stood down (#3346).* Only the
+ring and the marks still stand down for a Maximize; the bars follow
+[A Maximize reads its bars Hidden or
+Auto](#a-maximize-reads-its-bars-hidden-or-auto-it-does-not-stand-them-down-3346).
+:::
+
 Switching the Space to Monocle with the bars hidden was the
 other candidate and is refused: it retiles and parks every
 window on the Space, needs a remembered previous layout, shows
@@ -6743,8 +6750,7 @@ hours, and it adds no layout. The Monocle row of the App Bar
 turned off (#2099) is not enough either: it reaches only the App
 Bar, never the Space Bar, the pocket, the ring or the marks.
 
-Real Maximize stands the shelf down (`shelfStandsDown`); this
-does not, and the difference is deliberate. A stand-down refuses
+A stand-down was weighed for this and refused. A stand-down refuses
 the bar's shortcut, makes arriving on the Space instant while
 leaving it slides, and leaves nothing naming the Space. Read as
 Hidden instead, the shortcut still shows a bar over the window with
@@ -6764,6 +6770,111 @@ and the marks step aside through the one set of windows that fill
 their screen, `screenFillers(of:)`, which a full Maximize joins too,
 rather than through the Hidden reading, which never reaches them. It applies on
 every Monocle Space; a per-Space override waits for someone to ask.
+:::
+
+:::unreleased
+### A Maximize reads its bars Hidden or Auto, it does not stand them down (#3346)
+
+**[Rationale]**
+
+**While a window is maximized, the bars stay off the window at rest
+and come in on demand: the bar's shortcut always shows one, and by
+default resting the pointer at the bar's screen edge brings it in
+over the window.** One profile value, `kiwishelf.maximized_visibility`
+(Auto or Hidden, default Auto), covers every maximize: the command
+(#2448), Height and Width where their frame reaches a bar's strip
+(#3062), Monocle's "Maximize windows" (#2976) and KiwiVision's
+derived fill (#3064). This amends #2448, which stood the bars down
+on that screen. With them stood down there was no way to see which
+Space you were on or to jump to a window from a bar, and the
+shortcut answered with a refusal. The default changes for existing
+users too (owner, 2026-11-15); Hidden is the old look, now with a
+working shortcut. The value is a new leaf no older build wrote, so
+no `ConfigMigration` step is owed, and it sits under `kiwishelf`,
+not `maximize`, because it covers Monocle as well.
+
+*Both values read Hidden.* A maximize reads every bar and the Pocket
+Hidden through the one `KiwiCore.shelfSettings(on:)` door, as
+#3151's tiling-off tick does; Monocle's reading stays
+`TilingSettings.barVisibilities(in:)`. So nothing is drawn at rest,
+no Space dots and no line, and an Always sibling cannot keep a bar
+shown or refuse its shortcut. Auto adds only a band at the edge,
+the Dock's auto-hide: `TilingSettings.maximizedRevealLive` is the
+leaf's one reader, `maximizedHoverBars(in:)` lists the bars it opens
+over it, and the revealer reads that, never `layoutBounds`. Every
+reader asks whether a screen is maximized through the one
+`screenMaximizes(on:)`. Auto must never come
+out of the bar reading as `.auto`, because an `.auto` edge reserves
+its sliver and draws its handle, and a reveal would then retile the
+maximized window. The fill and `maximizedBounds` stay as they are,
+so a reveal floats over the window and moves nothing.
+
+*The band runs along the whole edge and never over the window.*
+This amends #761's fixed 64-point band for this case alone. With no
+handle on screen, a short band in the middle of an edge is a target
+nobody can find, while users aim at an edge, not at a spot on it,
+as they do for the Dock. So a lone bar answers along its whole edge,
+and two bars on one edge split it where their #761 row bands meet,
+so a point still opens one bar. The band reaches only outward from
+the shelf's screen side: at a bare screen edge only a push opens
+the bar, and where a menu bar or a Dock stands between the bar and
+the edge, resting in its last few points does. An inward band would
+lie across the maximized window's tab bar, toolbar and title bar,
+and #761's short dwell would drop the bar over them on any pause
+(ui-designer, 2026-11-15). The residue is accepted: with the Dock
+set to hide on the bar's edge, one push brings in both.
+
+*The user's own bar setting wins downward.* A bar stored as Hidden
+gets no band under a maximize: it never showed unprompted, and a
+maximize should not make it. A bar stored as Always or Auto gets the
+band. A tiling-off Space whose tick hides the bars gets none either,
+since the tick asks for Hidden.
+
+*The Pocket follows the same value* (owner, 2026-11-15). It rests on
+the shelf, so it reads Hidden through the same door: nothing of it
+rests over the window. Under Auto a bar revealed on the Pocket's
+edge brings it in as that shelf's section, floating with the bar,
+unless the Pocket is stored Hidden; under Hidden it stays away. The
+Pocket keys pocket and take out as before. One answer per screen,
+`maximizedPocketRides(on:)`, decides it, and the bar pass files the
+screens where it rode, which the Pocket's stand reads, so a pocket
+never stands for a reveal no bar made.
+
+*The row greys only when nothing could come in* (owner, 2026-11-15):
+the Space Bar, every layout's App Bar and the Pocket all stored
+Hidden. Its reason names the KiwiShelf card where those are set,
+through one reason value that picks both the grey and its sentence.
+Where even one could show, the row is live and reveals only what is
+not Hidden. It is independent of "Maximize follows focus": both are
+per-profile values in one card, and neither greys on the other.
+
+*Only a covered screen still stands the shelf down.* A native
+full-screen Space (#670) and a presentation in front (#1787) keep
+`shelfStandsDown`, since nothing of KiwiDesk's may draw over them.
+A maximize leaves it, and its other readers each take what #2976
+gave a Hidden shelf:
+
+- **The Space slide** (`SpaceSlide`) plays onto and off a maximized
+  Space. The plates cover the window as they cover any other, and a
+  switch onto it was instant while the switch off it slid.
+- **The Pocket list key** (`PocketList`) opens the list over the
+  window, as it does where the Pocket reads Hidden. It refused
+  before, which left the windows on the Pocket out of reach.
+- **The Space cue** (`SpaceSwitchCue`), **the layout cue**
+  (`ModeCycleCue`) and **the Desktop cue** (`DesktopCue`) play. With
+  the bars gone they are what names where a switch landed, which is
+  the reason #2976 kept them.
+- **The slow-boot notice** (`BootNotice`) shows. It hangs from the
+  status item, and a maximize leaves the menu bar on screen.
+
+The menu-bar item names the Space while a maximize hides the Space
+Bar, as for any bar that draws nothing at rest. The focus ring and
+the on-window marks still step aside through `screenFillers(of:)`,
+unchanged: the Hidden reading never reaches them. The overflow marks,
+drawn on windows the maximize covers, stand down on the bar pass's
+own set for any screen `screenMaximizes(on:)` names. KiwiVision's plate keeps
+dimming under a maximize (#3061). A per-Space value waits for
+someone to ask.
 :::
 
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
@@ -8932,7 +9043,7 @@ Lua-set value is the script's to clear.
 On a tiling-off Space with the tick on, every bar and the Pocket act
 as if set to Hidden: gone at rest, while a bar's shortcut still
 shows it, since the user paused tiling and not the shelf. A full-
-screen window or a Maximize still stands the shelf down. So the row
+screen window still stands the shelf down. So the row
 greys exactly where every bar is already Hidden in every layout on
 every screen: the tick then changes nothing.
 :::

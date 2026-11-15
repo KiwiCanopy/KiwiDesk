@@ -176,7 +176,7 @@ struct TilingOffPlacementSeamTests {
         // Space hides its bars as Hidden, not as a full screen.
         let standDown = try SourceScan.functionBody(
             of: "shelfStandsDown",
-            labeled: "on display: DisplayID, covered",
+            labeled: "on display: DisplayID",
             in: "KiwiCore+ScreenCovering.swift",
             under: "App"
         )

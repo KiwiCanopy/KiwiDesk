@@ -47,22 +47,37 @@ struct MaximizedReaderCensusTests {
         "Commands/KiwiCore+ResetLayoutSizing.swift": 1,
     ]
 
-    /// The shelf's one stand-down door asks the maximize arm —
-    /// once, since the door's native-fullscreen read is live and no
-    /// fixture can drive the door itself.
-    @Test("The shelf stand-down asks the maximize")
+    /// A maximize reads the bars Hidden through the shelf's one
+    /// settings door, never the stand-down (#3346): the door asks
+    /// the maximize, and the stand-down asks only the covered half.
+    @Test("The shelf's settings door asks the maximize")
     func shelfAsksTheMaximize() throws {
-        let file = coreRoot.appendingPathComponent(
-            "App/KiwiCore+ScreenCovering.swift"
+        let edges = try SourceScan.strippedSource(
+            at: coreRoot.appendingPathComponent(
+                "App/KiwiCore+ScreenEdges.swift"
+            )
         )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
+        let door = try #require(
+            SourceScan.declarationBody(
+                after: "func shelfSettings(on display: DisplayID)",
+                in: edges
+            )
         )
-        #expect(
-            source.components(
-                separatedBy: "|| showsMaximized(on: display)"
-            ).count == 2
+        #expect(door.contains("screenMaximizes(on: display)"))
+        let covering = try SourceScan.strippedSource(
+            at: coreRoot.appendingPathComponent(
+                "App/KiwiCore+ScreenCovering.swift"
+            )
         )
+        let standDown = try #require(
+            SourceScan.declarationBody(
+                after: "func shelfStandsDown(on display: DisplayID)",
+                in: covering
+            )
+        )
+        #expect(standDown.contains("overlaysStandDown(on: display)"))
+        #expect(!standDown.contains("showsMaximized("))
+        #expect(!standDown.contains("screenMaximizes("))
     }
 
     @Test("Only the allowlisted files spell the stored maximize")

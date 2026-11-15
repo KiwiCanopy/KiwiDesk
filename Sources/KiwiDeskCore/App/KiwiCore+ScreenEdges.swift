@@ -22,15 +22,59 @@ extension KiwiCore {
     }
 
     /// The settings `display`'s shelf reads: each bar's edge as
-    /// that screen has it, and on a tiling-off Space whose tick
-    /// hides the bars every bar and the Pocket read Hidden, so a
-    /// shortcut still shows one (#3151). The one door a reader of a
-    /// screen's bar or Pocket visibility takes
-    /// (`TilingOffBarsHiddenSeamTests`).
+    /// that screen has it, and every bar and the Pocket Hidden on a
+    /// tiling-off Space whose tick hides the bars (#3151) or where
+    /// the screen shows a maximized window (#3346), so a shortcut
+    /// still shows one. The one door a reader of a screen's bar or
+    /// Pocket visibility takes (`TilingOffBarsHiddenSeamTests`).
     func shelfSettings(on display: DisplayID) -> TilingSettings {
         let shown = settings(on: display)
         return tilingOffHidesShelf(on: display)
+            || screenMaximizes(on: display)
             ? shown.hidingEveryBar() : shown
+    }
+
+    /// Whether `display` shows a maximized window: a Maximize over
+    /// the shelf (`showsMaximized`, the command, a Height or Width
+    /// reaching a strip, KiwiVision's fill) or a Monocle that
+    /// maximizes its windows (#2976). The one "maximized here"
+    /// predicate the shelf, its bands and the overflow marks ask
+    /// (#3346).
+    func screenMaximizes(on display: DisplayID) -> Bool {
+        showsMaximized(on: display)
+            || settings(on: display).maximizesWindows(
+                in: shownMode(on: display)
+            )
+    }
+
+    /// The bars resting at their edge brings in over the window
+    /// `display` shows maximized — by the command, a Height or
+    /// Width reaching the shelf, KiwiVision, or Monocle's "Maximize
+    /// windows" (#3346) — read off the stored bars through
+    /// `TilingSettings.maximizedHoverBars(in:)`.
+    func maximizedHoverBars(on display: DisplayID) -> Set<ShelfBar> {
+        maximizedStored(on: display).map {
+            $0.settings.maximizedHoverBars(in: $0.mode)
+        } ?? []
+    }
+
+    /// Whether `display`'s Pocket comes in with a bar revealed over
+    /// its maximized window (#3346 ▸ 8).
+    func maximizedPocketRides(on display: DisplayID) -> Bool {
+        maximizedStored(on: display)?.settings.maximizedPocketRides
+            == true
+    }
+
+    /// The stored settings and layout of a screen showing a
+    /// maximized window, nil elsewhere and where the tiling-off tick
+    /// hides the bars, which asks for Hidden.
+    private func maximizedStored(
+        on display: DisplayID
+    ) -> (settings: TilingSettings, mode: LayoutMode)? {
+        guard !tilingOffHidesShelf(on: display),
+            screenMaximizes(on: display)
+        else { return nil }
+        return (settings(on: display), shownMode(on: display))
     }
 
     /// The axis a Space switch's plates slide along on `display`:

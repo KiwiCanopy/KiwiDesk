@@ -139,6 +139,8 @@ public struct KiwiShelf: Sendable, Equatable {
     /// Auto its handle, Hidden nothing until a drag, a window going
     /// in or out, or its list key brings it out.
     public var pocketVisibility = ShelfVisibility.always
+    /// How the bars read while a window is maximized (#3346).
+    public var maximizedVisibility = MaximizedVisibility.auto
 
     public init() {}
 

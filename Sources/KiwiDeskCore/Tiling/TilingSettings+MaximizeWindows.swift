@@ -22,6 +22,46 @@ extension TilingSettings {
         return (.hidden, app.map { _ in .hidden })
     }
 
+    /// Whether the edge reveal is live over a maximized window
+    /// (#3346 ▸ 4): `maximized_visibility` reads Auto. The leaf's one
+    /// reader; the revealer's answers below derive from it, and
+    /// `layoutBounds` never asks, since every bar still reads Hidden.
+    public var maximizedRevealLive: Bool {
+        kiwishelf.maximizedVisibility == .auto
+    }
+
+    /// The bars a pointer resting at their edge brings in over a
+    /// maximized window in `mode` (#3346): none while the reveal is
+    /// not live, else each bar whose stored visibility shows
+    /// unprompted, so a stored Hidden bar stays Hidden.
+    public func maximizedHoverBars(in mode: LayoutMode) -> Set<ShelfBar> {
+        guard maximizedRevealLive else { return [] }
+        var bars: Set<ShelfBar> = []
+        if spaceBarStyle.visibility.showsUnprompted { bars.insert(.space) }
+        if appBarVisibility(in: mode)?.showsUnprompted == true {
+            bars.insert(.app)
+        }
+        return bars
+    }
+
+    /// Whether `maximized_visibility` could reveal anything (#3346 ▸
+    /// 9): the Space Bar, some layout's App Bar or the Pocket is
+    /// stored to show unprompted. What Settings asks to grey its row.
+    public var maximizedRevealsAnything: Bool {
+        spaceBarStyle.visibility.showsUnprompted
+            || kiwishelf.pocketVisibility.showsUnprompted
+            || LayoutMode.allCases.contains {
+                appBarVisibility(in: $0)?.showsUnprompted == true
+            }
+    }
+
+    /// Whether the Pocket comes in with a revealed bar over a
+    /// maximized window (#3346 ▸ 8): Auto, and its stored Show is not
+    /// Hidden. It never rests there.
+    public var maximizedPocketRides: Bool {
+        maximizedRevealLive && kiwishelf.pocketVisibility.showsUnprompted
+    }
+
     /// These settings with every bar and the Pocket set to Hidden in
     /// every layout: what a tiling-off Space whose tick hides the
     /// bars draws (#3151).

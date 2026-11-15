@@ -84,6 +84,8 @@ struct GateReasonPlacementTests {
                 // both on other pages, so each links there.
                 .behaviour(.tilingOffHidesBorders),
                 .behaviour(.tilingOffHidesBars),
+                // #3346: greyed by the bars' and the Pocket's Show.
+                .kiwishelf(.maximizedVisibility),
                 // #2524, #2971: the Space switch pickers, the same
                 // shape on Colors ▸ Animations, one sentence for the
                 // group under its first row.

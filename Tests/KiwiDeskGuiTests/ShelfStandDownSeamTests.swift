@@ -6,8 +6,8 @@ import Testing
 /// (#670) or a presentation in front (#1787). A bar surface
 /// gating on a user-space read of its own would hide on the
 /// first and draw over a slide show, so the bar-building files
-/// spell none, bar the `allowed` map's. KiwiVision's plate reads
-/// the covered half alone, `overlaysStandDown` (#3061).
+/// spell none, bar the `allowed` map's. A maximize is no stand-down
+/// (#3346), so KiwiVision's plate files the bar pass's set (#3061).
 @Suite("Shelf stand-down seam (#1787)")
 struct ShelfStandDownSeamTests {
     /// The bar-building files, by path prefix under
@@ -94,18 +94,16 @@ struct ShelfStandDownSeamTests {
         }
     }
 
-    /// Who may ask the overlays' half of the verdict, and why
-    /// (#3061). Any other surface asks `shelfStandsDown`, so a
-    /// bar or a cue cannot stay up over a Maximize.
+    /// Who may ask the covered-screen read the verdict is (#3061,
+    /// #3346): the verdict alone. The bar pass, the cues and the
+    /// KiwiVision plate's filing ask `shelfStandsDown`.
     private static let overlayReaders: [String: Int] = [
-        // The one-arg `shelfStandsDown`, composing the whole verdict.
-        "KiwiCore+ScreenCovering.swift": 1,
-        // `updateBars()`, filing the KiwiVision plate's stand-down.
-        "KiwiCore+Shelf.swift": 1,
+        // The one-arg `shelfStandsDown`, the whole verdict.
+        "KiwiCore+ScreenCovering.swift": 1
     ]
 
-    @Test("only the verdict and the plate read the overlays' half")
-    func overlaysHalfHasTwoReaders() throws {
+    @Test("only the verdict reads the covered screen")
+    func overlaysHalfHasOneReader() throws {
         let core = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDeskCore")
         var readers: [String: Int] = [:]

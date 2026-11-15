@@ -44,6 +44,10 @@ struct LayoutDefaultsControls: Sendable {
         "layout_defaults.maximize.follow_focus",
         "Maximize follows focus"
     )
+    let maximizeShowBars = SettingsControl(
+        "layout_defaults.maximize.show_bars",
+        "Show bars at the screen edge"
+    )
     let maximizeOtherShapes = SettingsDrawer(
         "layout_defaults.maximize.other_shapes",
         "Other screen shapes"

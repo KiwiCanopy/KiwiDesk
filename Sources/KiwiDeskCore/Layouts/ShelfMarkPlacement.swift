@@ -99,4 +99,32 @@ public enum ShelfMarkPlacement {
         if pocketLeansEnd == true { pocket = take() }
         return Row(bars: bands, pocket: pocket)
     }
+
+    /// The band of each of `bars` over a maximized window (#3346),
+    /// which draws no handle: the whole edge for a lone bar, and two
+    /// bars on one edge split it where their `row` bands meet, so a
+    /// point still opens one bar. Offsets from the edge's start.
+    public static func maximizedBands(
+        for bars: Set<ShelfBar>,
+        length: CGFloat,
+        shelf: KiwiShelf
+    ) -> [ShelfBar: ClosedRange<CGFloat>] {
+        let ordered = ShelfArrangement.ordered(bars, shelf)
+        let row = row(
+            for: bars,
+            pocketLeansEnd: nil,
+            length: length,
+            shelf: shelf
+        ).bars
+        var bands: [ShelfBar: ClosedRange<CGFloat>] = [:]
+        for (index, bar) in ordered.enumerated() {
+            guard let band = row[bar] else { continue }
+            let low = index == 0 ? 0 : band.lowerBound
+            let high =
+                index == ordered.count - 1
+                ? max(length, low) : band.upperBound
+            bands[bar] = low...high
+        }
+        return bands
+    }
 }

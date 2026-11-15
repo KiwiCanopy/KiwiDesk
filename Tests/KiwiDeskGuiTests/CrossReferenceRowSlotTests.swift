@@ -93,18 +93,17 @@ struct CrossReferenceRowSlotTests {
     /// with its coverage guard, but two `Self.`-scoped entries
     /// remain and the collision is still reachable).
     ///
-    /// Whitespace is stripped rather than collapsed for a duller reason:
-    /// collapsing leaves a space where a line break was, so `swift format`
-    /// re-wrapping a call — which a rename past 79 chars forces — redded a
-    /// guard that nothing had broken.
+    /// Whitespace is stripped, not collapsed: collapsing leaves a space
+    /// where a line break was, so `swift format` re-wrapping a call — a
+    /// rename past 79 chars forces one — redded a guard nothing broke.
     ///
     /// One entry names a BINDING rather than a producer, and the
     /// file+expression key does not close the hole there: `LayoutCard`'s row
     /// needs `if let` for an optional sentence, so the scan sees `appBarProse`
     /// and re-pointing that binding at a different producer would leave this
     /// comparison identical while `theAppBarProsePlacesItsLink` went on
-    /// asserting an orphaned `LayoutCardText.appBarState`. Named, not papered
-    /// over: the others carry their producer; only this row can't.
+    /// asserting an orphaned `LayoutCardText.appBarState`. Named: the
+    /// others carry their producer; only this row can't.
     private static let asserted: Set<String> = [
         "MotionCard.swift:Self.scrollingXrefProse",
         "MotionCard.swift:Self.barsXrefProse",
@@ -136,6 +135,8 @@ struct CrossReferenceRowSlotTests {
         "MaximizeCard.swift:prose",  // MaximizeCaptionSlotTests (#3062)
         "MaximizeShareCaption.swift:Self.prose(axis:axis)",
         "KiwiShelfCard+Placement.swift:Self.monocleMaximizesProse",  // #2976
+        "LayoutCard+Rows.swift:LayoutHelp.monocleMaximizeBarsProse",
+        "MaximizeCard.swift:LayoutDefaultsGateHelp.sentence(for:reason)",
     ]
 
     // MARK: - The values

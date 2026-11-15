@@ -149,7 +149,7 @@ struct TilingToggleTests {
         #expect(core.tilingOffHidesRings(on: space))
         #expect(core.tilingOffHidesShelf(on: display))
         // The bars read Hidden rather than standing down (#3151).
-        #expect(!core.shelfStandsDown(on: display, covered: false))
+        #expect(!core.shelfStandsDown(on: display))
         core.execute("set_tiling", args: [.bool(true)])
         #expect(!core.tilingOffHidesRings(on: space))
         #expect(!core.tilingOffHidesShelf(on: display))

@@ -107,6 +107,7 @@
       "item_color" : "#EAF3EE",
       "item_gap" : 6,
       "liquid_glass" : true,
+      "maximized_visibility" : "auto",
       "minimum" : 30,
       "order" : "spaces_first",
       "outer_margin" : 0,

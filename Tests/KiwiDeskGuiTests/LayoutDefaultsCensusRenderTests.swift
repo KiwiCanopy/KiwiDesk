@@ -98,7 +98,10 @@ struct LayoutDefaultsCensusRenderTests {
         #expect(Array(all.prefix(columns.count)) == columns)
         #expect(
             MaximizeCard.rowsBelowTable
-                == [.behaviour(.maximizeFollowFocus)]
+                == [
+                    .behaviour(.maximizeFollowFocus),
+                    .kiwishelf(.maximizedVisibility),
+                ]
         )
     }
 

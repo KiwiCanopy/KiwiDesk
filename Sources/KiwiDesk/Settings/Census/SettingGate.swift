@@ -26,6 +26,9 @@ enum SettingRuntimeGate: Hashable {
     /// No bar rests on screen in any layout or on any screen, so
     /// the tiling-off bars tick hides nothing (#3089).
     case noBarShows
+    /// The Space Bar, every App Bar and the Pocket are Hidden, so
+    /// the maximized edge reveal brings nothing in (#3346 ▸ 9).
+    case nothingRevealsMaximized
     /// The focus border is off, so the tiling-off border tick
     /// hides nothing (#3089).
     case focusBorderOff
