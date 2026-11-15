@@ -13,10 +13,13 @@ struct SimpleMacChecklist: View {
     static let anchor = "simple.mac_checklist"
 
     var body: some View {
-        let open = Self.openEssentials(
-            states: model.macChecklistStates,
-            ticks: model.macChecklistTicks
-        )
+        let open =
+            Self.openEssentials(
+                states: model.macChecklistStates,
+                ticks: model.macChecklistTicks
+            )
+            + (model.screenShiftChecklistDone == false
+                ? [.parkCorners] : [])
         Group {
             if open.isEmpty {
                 allDone
@@ -56,7 +59,7 @@ struct SimpleMacChecklist: View {
     private var progress: String {
         MacChecklistText.cardProgress(
             done: model.macChecklistDone,
-            total: MacChecklistProgress.total
+            total: model.macChecklistTotal
         )
     }
 
@@ -130,7 +133,12 @@ struct SimpleMacChecklist: View {
                 index,
                 key in
                 if index > 0 { Divider() }
-                if let setting = key.setting,
+                if key == .parkCorners {
+                    ScreenShiftChecklistRow(
+                        model: model,
+                        chipWidth: chipWidth
+                    )
+                } else if let setting = key.setting,
                     let control = MacChecklistSection.control(for: key)
                 {
                     MacSettingRow(

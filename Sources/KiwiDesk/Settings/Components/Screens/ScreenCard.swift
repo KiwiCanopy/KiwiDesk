@@ -64,7 +64,7 @@ struct ScreenCard: View {
             targeted = hovering
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(display.name)
+        .accessibilityLabel(model.screenLabel(display))
         .accessibilityValue(readout)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .accessibilityAction(named: selectActionName) {
@@ -91,7 +91,7 @@ struct ScreenCard: View {
     /// the capsules below already provide.
     private var header: some View {
         HStack(spacing: 4) {
-            Text(display.name)
+            Text(model.screenLabel(display))
                 .font(.caption)
                 .bold()
                 .lineLimit(1)

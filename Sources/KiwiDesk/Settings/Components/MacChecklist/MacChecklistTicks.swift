@@ -7,6 +7,8 @@ import SwiftUI
 /// Hidden from VoiceOver; the count beside it speaks.
 struct MacChecklistTicks: View {
     let verdicts: [(setting: MacSetting, done: Bool)]
+    /// The boxed-in row's tick while it shows (#2756).
+    let screenShift: Bool?
     let font: Font
 
     @MainActor init(_ model: SettingsModel, font: Font) {
@@ -14,24 +16,25 @@ struct MacChecklistTicks: View {
             states: model.macChecklistStates,
             ticks: model.macChecklistTicks
         )
+        screenShift = model.screenShiftChecklistDone
         self.font = font
     }
 
     var body: some View {
         HStack(spacing: 6) {
             ForEach(verdicts, id: \.setting) { verdict in
-                Image(
-                    systemName: verdict.done
-                        ? "checkmark.circle.fill" : "circle"
-                )
-                .font(font)
-                .foregroundStyle(
-                    verdict.done
-                        ? SettingsTheme.groupHeading
-                        : SettingsTheme.ink3
-                )
+                tick(verdict.done)
             }
+            if let screenShift { tick(screenShift) }
         }
         .accessibilityHidden(true)
+    }
+
+    private func tick(_ done: Bool) -> some View {
+        Image(systemName: done ? "checkmark.circle.fill" : "circle")
+            .font(font)
+            .foregroundStyle(
+                done ? SettingsTheme.groupHeading : SettingsTheme.ink3
+            )
     }
 }

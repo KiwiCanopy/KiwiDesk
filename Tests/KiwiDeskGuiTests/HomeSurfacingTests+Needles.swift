@@ -47,10 +47,19 @@ extension HomeSurfacingTests {
             // one snapshot: on appear, and again when the window
             // comes forward from System Settings. Either line
             // alone leaves a card that never updates.
-            ".onAppear{model.refreshMacChecklist()}",
+            // The boxed-in offer (#2756) refreshes beside it, and
+            // again on every screen change; its alert is the
+            // shell's, so Screens and both checklists ask one.
+            ".onAppear{model.refreshMacChecklist()"
+                + "model.refreshScreenOffer()}",
             ".onReceive(NotificationCenter.default.publisher("
                 + "for:NSApplication.didBecomeActiveNotification"
-                + ")){_inmodel.refreshMacChecklist()}",
+                + ")){_inmodel.refreshMacChecklist()"
+                + "model.refreshScreenOffer()}",
+            ".onReceive(NotificationCenter.default.publisher("
+                + "for:NSApplication.didChangeScreenParametersNotification"
+                + ")){_inmodel.refreshScreenOffer()}",
+            ".screenShiftAlert(model)",
         ],
         "Settings/SettingsView+Chrome.swift": [
             // The save pill FLOATS over the content (#678

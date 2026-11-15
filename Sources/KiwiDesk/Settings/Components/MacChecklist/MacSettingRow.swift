@@ -129,6 +129,7 @@ struct MacSettingRow: View {
             [
                 L("mac_checklist.state.set", "Set"),
                 L("mac_checklist.state.not_yet", "Not yet"),
+                ScreenShiftChecklistRow.keptWord,
             ]
             .map { ($0 as NSString).size(withAttributes: [.font: font]).width }
             .max() ?? 0

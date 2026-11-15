@@ -10,6 +10,9 @@ enum MacChecklistKey: String, CaseIterable, Hashable {
         "(readonly) mac_checklist.switch_on_activate"
     case stageManager = "(readonly) mac_checklist.stage_manager"
     case edgeTiling = "(readonly) mac_checklist.edge_tiling"
+    /// The boxed-in screen offer (#2756), shown only while one
+    /// is open.
+    case parkCorners = "(readonly) mac_checklist.park_corners"
     case clickWallpaper = "(readonly) mac_checklist.click_wallpaper"
     case doubleClickTitle =
         "(readonly) mac_checklist.double_click_title"
@@ -25,7 +28,7 @@ extension MacChecklistKey {
     var placement: SettingPlacement {
         switch self {
         case .rearrangeSpaces, .switchOnActivate, .stageManager,
-            .edgeTiling:
+            .edgeTiling, .parkCorners:
             return .row(.macChecklist, .essentialSettings, .atRest)
         case .clickWallpaper, .doubleClickTitle:
             return .row(.macChecklist, .optionalSettings, .atRest)
@@ -42,8 +45,8 @@ extension MacChecklistKey {
         case .selfTicks:
             return .none
         case .rearrangeSpaces, .switchOnActivate, .stageManager,
-            .edgeTiling, .clickWallpaper, .doubleClickTitle,
-            .habitHide, .habitBigWindows, .habitKeyboard,
+            .edgeTiling, .parkCorners, .clickWallpaper,
+            .doubleClickTitle, .habitHide, .habitBigWindows, .habitKeyboard,
             .habitFloat, .habitDock:
             return .text(labelKey, caption: labelKey + ".caption")
         }

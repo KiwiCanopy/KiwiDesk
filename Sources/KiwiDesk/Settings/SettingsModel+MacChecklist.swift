@@ -47,6 +47,13 @@ extension SettingsModel {
         MacChecklistProgress.done(
             states: macChecklistStates,
             ticks: macChecklistTicks
-        )
+        ) + (screenShiftChecklistDone == true ? 1 : 0)
+    }
+
+    /// Essentials in all: the boxed-in row counts only while it
+    /// shows (#2756).
+    var macChecklistTotal: Int {
+        MacChecklistProgress.total
+            + (screenShiftChecklistDone == nil ? 0 : 1)
     }
 }

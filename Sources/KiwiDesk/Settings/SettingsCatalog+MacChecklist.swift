@@ -20,6 +20,10 @@ struct MacChecklistControls: Sendable {
         "Turn off \u{201C}When switching to an application, switch "
             + "to a Space with open windows for the application\u{201D}"
     )
+    let parkCorners = SettingsControl(
+        "mac_checklist.park_corners",
+        "Screens without a free corner for parked windows"
+    )
     let stageManager = SettingsControl(
         "mac_checklist.stage_manager",
         "Turn off Stage Manager"

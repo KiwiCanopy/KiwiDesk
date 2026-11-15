@@ -11,6 +11,7 @@ enum MacChecklistRowOrder {
         .macChecklist(.switchOnActivate),
         .macChecklist(.stageManager),
         .macChecklist(.edgeTiling),
+        .macChecklist(.parkCorners),
     ]
 
     static let optionalSettings: [SettingKey] = [
@@ -47,8 +48,8 @@ extension MacChecklistKey {
         case .edgeTiling: return .edgeTiling
         case .clickWallpaper: return .clickWallpaper
         case .doubleClickTitle: return .doubleClickTitle
-        case .habitHide, .habitBigWindows, .habitKeyboard,
-            .habitFloat, .habitDock, .selfTicks:
+        case .parkCorners, .habitHide, .habitBigWindows,
+            .habitKeyboard, .habitFloat, .habitDock, .selfTicks:
             return nil
         }
     }
@@ -65,7 +66,8 @@ extension MacChecklistKey {
         case .habitDock: return .systemSettings
         case .habitHide, .rearrangeSpaces,
             .switchOnActivate, .stageManager, .edgeTiling,
-            .clickWallpaper, .doubleClickTitle, .selfTicks:
+            .parkCorners, .clickWallpaper, .doubleClickTitle,
+            .selfTicks:
             return nil
         }
     }

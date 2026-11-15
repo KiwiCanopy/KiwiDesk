@@ -348,6 +348,15 @@ A screen between two taller screens has both corners covered, and
 its parked windows show on the side screen they cover less of.
 Raising either side screen in System Settings ▸ Displays until its
 bottom sits more than about 48 pt above that corner clears it.
+
+KiwiDesk offers that move itself. While a screen has no free corner,
+Settings ▸ Screens and the Mac Checklist say which screens cover it,
+and Shift Screen… asks before it moves one screen in your macOS
+screen arrangement, never the screen on your desk. The pointer then
+crosses between the moved screen and its neighbours by that many
+points off, and the arrangement stays yours to change in System
+Settings ▸ Displays. Keep as Is is remembered until the arrangement
+changes.
 :::
 
 A parked window's top sits about 48 pt above the bottom of the

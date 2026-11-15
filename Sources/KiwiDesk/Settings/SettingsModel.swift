@@ -250,6 +250,8 @@ final class SettingsModel: ObservableObject {
     /// seeded at init and written beside the store
     /// (`setMacChecklistTick`), the `appearance` shape.
     @Published var macChecklistTicks: Set<MacSetting> = []
+    /// The boxed-in offer's live state (#2756, `+ScreenShift`).
+    @Published var screenShift = ScreenShiftState()
 
     /// Why window management is not running, if it is not; drives
     /// the paused and not-started banners and the save gates
@@ -338,9 +340,7 @@ final class SettingsModel: ObservableObject {
         SettingsSearchIndex.canDriveDesktops =
             core.canDriveDesktops
         self.macChecklistTicks = Self.storedTicks(in: preferences)
-        self.appearance = AppearancePreference.read(
-            from: preferences
-        )
+        self.appearance = AppearancePreference.read(from: preferences)
         self.settingsRoot = SettingsRootPreference.read(from: preferences)
         reload()
     }

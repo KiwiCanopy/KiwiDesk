@@ -32,7 +32,7 @@ struct MacChecklistSection: View {
             SettingsCatalog.macChecklist.essentialsCard,
             trailing: MacChecklistText.progress(
                 done: model.macChecklistDone,
-                total: MacChecklistProgress.total
+                total: model.macChecklistTotal
             )
         ) {
             settingRows(MacChecklistRowOrder.essentialSettings)
@@ -74,11 +74,18 @@ struct MacChecklistSection: View {
 
     private func settingRows(_ rows: [SettingKey]) -> some View {
         let chipWidth = MacSettingRow.chipWidth
+        // The boxed-in row shows only while its offer is open.
+        let rows = rows.filter {
+            $0 != .macChecklist(.parkCorners)
+                || model.screenShiftChecklistDone != nil
+        }
         return ForEach(Array(rows.enumerated()), id: \.element.id) {
             index,
             row in
             if index > 0 { Divider() }
-            if case .macChecklist(let key) = row,
+            if row == .macChecklist(.parkCorners) {
+                ScreenShiftChecklistRow(model: model, chipWidth: chipWidth)
+            } else if case .macChecklist(let key) = row,
                 let setting = key.setting,
                 let control = Self.control(for: key)
             {
@@ -102,6 +109,7 @@ struct MacChecklistSection: View {
         case .switchOnActivate: return catalog.switchOnActivate
         case .stageManager: return catalog.stageManager
         case .edgeTiling: return catalog.edgeTiling
+        case .parkCorners: return catalog.parkCorners
         case .clickWallpaper: return catalog.clickWallpaper
         case .doubleClickTitle: return catalog.doubleClickTitle
         case .habitHide: return catalog.habitHide
