@@ -300,7 +300,11 @@ bite large test PRs:
   (`pinRevealLength`, `pinShelfGlide`) rather than inheriting
   what the last core left, since any core at Off or an instant
   pace is a writer and none can be listed (#3307,
-  `ShelfRevealStartTests`). Neither a `--filter` run nor a `guard-prover`
+  `ShelfRevealStartTests`). An event posted through
+  `NSApp.sendEvent` is the third: every live local monitor in the
+  process hears it, another suite's `ChordRecorder` included, so a
+  test drives a recorder through a seam of its own, never a posted
+  key (#3258, `ShortcutKeyRowOfferTests`). Neither a `--filter` run nor a `guard-prover`
   mutation can reach this class: both observe the test on its
   own, which is the state it passes in. CI's full run on the PR
   is the full run this needs — a PR-gated change leaves it there

@@ -34,6 +34,8 @@ struct NavRowRenderSeamTests {
         for path in [
             "Keybindings/KeybindingNavRow.swift",
             "AppRules/RuleReachControl.swift",
+            // Its host's root, inside every nav row (#3258).
+            "Keybindings/Recorder/ShortcutKeyRow.swift",
         ] {
             let text = try source(path)
             for observer in Self.observers {

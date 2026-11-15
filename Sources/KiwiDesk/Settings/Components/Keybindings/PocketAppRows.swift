@@ -38,7 +38,7 @@ struct PocketAppRows: View {
     private func row(_ binding: Binding<KeyBinding>) -> some View {
         let current = binding.wrappedValue
         let name = Self.name(current)
-        return HStack {
+        return ShortcutKeyRow {
             AppRuleIdentity(
                 app: PocketAppLuaArg.bundleID(of: current.lua) ?? "",
                 name: name

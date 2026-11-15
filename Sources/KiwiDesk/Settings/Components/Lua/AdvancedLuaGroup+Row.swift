@@ -9,7 +9,7 @@ extension AdvancedLuaGroup {
     func row(_ binding: Binding<KeyBinding>) -> some View {
         let name = rowName(binding.wrappedValue)
         return VStack(alignment: .leading, spacing: 6) {
-            HStack {
+            ShortcutKeyRow {
                 ShortcutSymbolPicker.lua(binding.symbol, name: name)
                 TextField(
                     descPlaceholder(binding.wrappedValue),

@@ -34,7 +34,7 @@ struct SequenceNodeRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
+            ShortcutKeyRow(spacing: 8) {
                 if isLeader { leaderLine } else { keyLine }
             }
             if node.isSequence, node.steps?.isEmpty ?? true {
