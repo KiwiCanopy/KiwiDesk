@@ -14328,8 +14328,9 @@ way a menu chord says the apps lose theirs. A hotkey macOS has off
 still reads that way, not dormant: dormant's words promise the row
 dies when the hotkey comes back on, which here it does not, while the
 aggregate count still leaves a switched-off chord out. Read as dead,
-the row told the user a shortcut that works would not. Every other chord macOS
-answers first stays a dead row for a Carbon hotkey
+the row told the user a shortcut that works would not. Every other
+chord macOS answers first, save ⌃Space (#3331 below), stays a dead
+row for a Carbon hotkey
 (`SystemShortcut.losesToKiwiDesk(on:)`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`).
 :::
@@ -14384,9 +14385,9 @@ not dead, and an open sequence no longer lets its old chord through
 :::
 
 :::unreleased
-*Amended (#3331, measured 2026-11-14): ⌃Space is macOS's other
-input-source shortcut, and KiwiDesk reads it the way it reads
-⌃⌥Space.* "Select the previous input source" (hotkey 60) is a
+*Amended (#3331, measured 2026-11-14 and 2026-11-15): ⌃Space is
+macOS's other input-source shortcut, and KiwiDesk reads it the way it
+reads ⌃⌥Space.* "Select the previous input source" (hotkey 60) is a
 `SystemShortcut` on ⌃Space. On macOS 27.2 a posted ⌃Space switched
 the input source with nothing bound, while a sequence leader, a step
 key and a sided row on the chord each fired with no switch. So a row
@@ -14394,13 +14395,16 @@ the keyboard tap answers reads as taking the shortcut from macOS, and
 its caption mirrors the next-source one: the plain meaning, the same
 Keyboard ▸ Keyboard Shortcuts ▸ Input Sources place, and hotkey 61's
 live chord as still switching while macOS answers it and no row holds
-it. A Carbon row was not measured, since posted presses never fire
-Carbon, so it stays a dead row while hotkey 60 is on. An open sequence
+it. Posted presses never fire Carbon, so a Carbon row was measured
+by hand (2026-11-15): a plain `KiwiDesk.bind("ctrl+space", …)` fired
+its action twice and the keyboard language did not switch. So a
+Carbon row wins ⌃Space too, as it wins ⌃⌥Space. An open sequence
 now passes ⌃Space and closes, as it does ⌃⌥Space. No seed binds
 ⌃Space, so an existing install gains no conflict on Home; a user's own
 row on the chord gains its caption, and the keyboard board marks
 Space as macOS's under a ⌃ layer (`InputSourcePreviousTextTests`,
-`InputSourcePreviousInstallTests`, `PressPathConflictTests`).
+`InputSourcePreviousInstallTests`, `PressPathConflictTests`,
+`ConflictSeverityTests`).
 :::
 
 **One recorder at a time.** Starting a recording snaps any

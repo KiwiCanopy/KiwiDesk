@@ -17,12 +17,12 @@ extension SystemShortcut {
     /// ▸ the #3311 amendment.
     public func losesToKiwiDesk(on path: PressPath) -> Bool {
         switch self {
-        case .inputSourceNext:
+        case .inputSourceNext, .inputSourcePrevious:
             return true
         case .spotlight, .appSwitcher, .missionControlSpaceLeft,
             .missionControlSpaceRight, .missionControl, .appWindows,
             .screenshot, .screenshotSelection, .screenshotTools,
-            .dockHiding, .finderSearch, .inputSourcePrevious:
+            .dockHiding, .finderSearch:
             return path == .keyboardTap
         case .forceQuit, .zoomToggle, .zoomIn, .zoomOut, .invertColors,
             .increaseContrast, .decreaseContrast, .switchToDesktop1,
