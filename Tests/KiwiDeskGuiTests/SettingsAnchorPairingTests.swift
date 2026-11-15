@@ -116,6 +116,53 @@ struct SettingsAnchorPairingTests {
         }
     }
 
+    /// The echo is the wash half alone (#3301): it washes its
+    /// control's id and mounts no scroll target, so a second `.id`
+    /// never joins the anchored view's.
+    @Test("the echo washes its control and anchors nothing")
+    func echoIsTheWashAlone() throws {
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func searchFlashEcho(",
+                in: try source(of: revealFile)
+            )
+        )
+        #expect(body.contains("searchFlash(control.id)"))
+        #expect(!body.contains("searchAnchor("))
+    }
+
+    /// An echo washes without scrolling (#3301), so its control
+    /// must be anchored beside it: each file applying the echo
+    /// anchors every control it echoes with `searchAnchored`.
+    @Test("an echo's file anchors what it echoes")
+    func echoStandsBesideItsAnchor() throws {
+        var echoes = 0
+        for file in try SourceScan.swiftSources(under: settingsDir)
+        where file.lastPathComponent != "SettingsReveal.swift" {
+            let echoed = try arguments(
+                of: ".searchFlashEcho(",
+                in: file
+            )
+            echoes += echoed.count
+            let anchored = try arguments(
+                of: ".searchAnchored(",
+                in: file
+            )
+            #expect(
+                echoed.isSubset(of: anchored),
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) echoes "
+                        + "\(echoed.subtracting(anchored).sorted()) "
+                        + "with no searchAnchored of it — a hit "
+                        + "would wash with nothing to scroll to"
+                )
+            )
+        }
+        // Non-vacuity: a rename would otherwise check nothing.
+        #expect(echoes >= 1)
+    }
+
     // MARK: - Shared assertion
 
     private func arguments(

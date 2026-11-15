@@ -109,7 +109,8 @@ struct GesturesPart: View {
 
 extension GesturesPart {
     /// The Mouse and Trackpad binding lists (#3183, #3199 ▸ Ruling),
-    /// over one catalogue.
+    /// over one catalogue; each card washes its own rows, the Mouse
+    /// card's carrying the anchor (#3301).
     var gestureCards: some View {
         let catalog = SequenceActionCatalog(expander: expander)
         let children = SettingsCatalog.shortcuts.gestures.children
@@ -127,9 +128,6 @@ extension GesturesPart {
                 catalog: catalog
             )
         }
-        .searchAnchored(
-            SettingsCatalog.shortcuts.gestures.children.gestureBindings
-        )
     }
 
     /// How long the pointer rests first (#2379): indented under the

@@ -23,8 +23,8 @@ enum ShortcutsRowOrder {
     /// are not settings.
     static let gesturesMore: [SettingKey] = [
         .shortcuts(.scrollNaturalMouse),
-        .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.gestureBindings),
+        .shortcuts(.scrollNaturalTrackpad),
         .behaviour(.mouseHoverFocus),
         .behaviour(.mouseHoverFocusDelay),
         .behaviour(.mouseFollowsFocus),
