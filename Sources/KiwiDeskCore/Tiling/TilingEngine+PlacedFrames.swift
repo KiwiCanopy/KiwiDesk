@@ -111,6 +111,7 @@ extension TilingEngine {
         )
         var issued = SplitOverflow.placed(
             mode: input.space.mode,
+            windows: input.tiled,
             frames: slots,
             context: input.context
         )

@@ -148,9 +148,10 @@ extension TrackLayout {
         of id: WindowID,
         in context: LayoutContext
     ) -> CGFloat? {
-        let bound = context.sizeBounds[id]
-        return context.track.axis == .vertical
-            ? bound?.maxWidth : bound?.maxHeight
+        context.learnedCeiling(
+            of: id,
+            horizontal: context.track.axis == .vertical
+        )
     }
 
     /// One TRACK's ceiling on the cross span (#1488): the widest

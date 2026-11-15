@@ -19,3 +19,18 @@ extension LayoutContext {
         )
     }
 }
+
+extension LayoutContext {
+    /// `learnedFloor`'s mirror (#1488, #3217): one window's
+    /// corroborated learned maximum along one axis, nil where
+    /// none — no configured ceiling stands in the way
+    /// `min_window_size` does for the floor. Track's heal and the
+    /// split layouts' ceiling pass both read it.
+    public func learnedCeiling(
+        of id: WindowID,
+        horizontal: Bool
+    ) -> CGFloat? {
+        let bound = sizeBounds[id]
+        return horizontal ? bound?.maxWidth : bound?.maxHeight
+    }
+}

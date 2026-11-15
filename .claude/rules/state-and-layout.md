@@ -2394,6 +2394,18 @@ editing here:
   `SplitFloorCueTests` the cue and the inward landing over a
   real core, `SplitFloorHealNeedleTests` the routing; the
   ruling is in `docs/design-decisions.md`.
+  **A learned CEILING's slack is shared on the same issued
+  frames, never in a store (#3217, owner ruling 2026-11-11)**:
+  `SplitCeiling`, called from inside `SplitOverflow.placed`
+  ahead of the inward pass, lets a Stack column, a BSP side or a
+  Grid track whose every member is capped yield, down to its
+  widest member's ceiling, to a neighbour that can grow; a
+  member with no ceiling keeps the container's share, a forced
+  pass stands it down, and no ratio or weight is written, so a
+  forgotten ceiling hands the slack back on the next pass. A new
+  split layout or container joins it there
+  (`SplitCeilingTests`, `SplitCeilingLayoutTests`,
+  `SplitCeilingShareTests` ▸ `wiredIntoIssuedFrames`).
   And the AUTOMATIC track count is
   derived from the members' corroborated floors on the cross
   axis, never from `min_window_size` alone (#1355): the one
