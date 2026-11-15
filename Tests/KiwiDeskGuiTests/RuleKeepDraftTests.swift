@@ -33,6 +33,7 @@ struct RuleKeepDraftTests {
         old.titledAppRules = ["com.t:Gone": "1"]
         var draft = old
         draft.appRules["com.d"] = "3"
+        draft.titledAppRules["com.t:Own"] = "3"
         draft.floatRules.append("com.h")
         // The user's own spelling of the rule the keep adds.
         draft.floatRules.append("Com.N")
@@ -51,7 +52,9 @@ struct RuleKeepDraftTests {
         #expect(normalized.count == 3)
         #expect(draft.floatAutomatically == false)
         // The titled family too (#3341).
-        #expect(draft.titledAppRules == ["com.t:Work": "2"])
+        #expect(
+            draft.titledAppRules == ["com.t:Work": "2", "com.t:Own": "3"]
+        )
         var clean = old
         SettingsModel.takeKeptRules(
             stored,

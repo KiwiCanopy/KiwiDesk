@@ -703,14 +703,14 @@ editing here:
   report files it through `payLateTitledRule`, which reads the press
   and the `CrossSessionMatch.titleSettle` bound against the arrival
   stamp mirrored in like `arrivalDisplay`, and stands down for the
-  focused window, which a move without a follow would strand. A late filing goes through
-  `fileMembership(restoring: true)`, never `moveWindow`, and sets no
-  `placedByAppRule`, so it owes no follow and stamps no user filing
-  (review's). A user filing (`stampUserFiling`), a destroy and the
-  #634 reset end the record, a rekey moves it
-  (`WindowRekeyParityTests`), and a new door that files a window for a
-  rule ends it the same way (`TitledRuleLateMatchTests`,
-  `TitledSpaceRulesTests`).
+  focused window, which a move without a follow would strand. A
+  late filing goes through `fileMembership(restoring: true)`, never
+  `moveWindow`, and sets no `placedByAppRule`, so it owes no follow
+  and stamps no user filing (review's). A user filing
+  (`stampUserFiling`), a destroy and the #634 reset end the record,
+  a rekey moves it (`WindowRekeyParityTests`), and a new door that
+  files a window for a rule ends it the same way
+  (`TitledRuleLateMatchTests`, `TitledSpaceRulesTests`).
 - **An app's windows are walked through ONE ring (#637, #3131).**
   Open or Focus's repeat press and `focus_app_window` step it through
   the one `cycleAppWindow`, which builds it with `cycleRing`; a verb

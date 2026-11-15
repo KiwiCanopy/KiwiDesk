@@ -50,7 +50,7 @@ extension AppRulesSection {
     /// Each app's rows in the engine's order, a new titled row being
     /// composed first in its group, where its composer opens.
     var spaceGroups: [[SpaceRuleRow]] {
-        let groups = SpaceRuleRows.groups(model.config, apps: spaceApps)
+        let groups = storedSpaceGroups
         guard let composing = composingSpace, composing.row == nil else {
             return groups
         }
@@ -58,6 +58,11 @@ extension AppRulesSection {
             guard group.first?.app == composing.app else { return group }
             return [SpaceRuleRow(app: composing.app, fragment: "")] + group
         }
+    }
+
+    /// The stored rows alone, the composer's draft row aside.
+    var storedSpaceGroups: [[SpaceRuleRow]] {
+        SpaceRuleRows.groups(model.config, apps: spaceApps)
     }
 
     /// The picker leaves out only apps with a bare Space rule, so an
@@ -87,8 +92,7 @@ extension AppRulesSection {
     private func deleteSpace(_ row: SpaceRuleRow, _ removal: RuleRemoval) {
         // The stored rows alone: a new row being composed draws no
         // control that could hold the focus.
-        let keys = SpaceRuleRows.groups(model.config, apps: spaceApps)
-            .flatMap { $0 }.map(\.key)
+        let keys = storedSpaceGroups.flatMap { $0 }.map(\.key)
         let neighbour = DeletionFocus.neighbour(after: row.key, in: keys)
         if row.fragment == nil {
             model.recordRemoval(.space, row.app, removal)

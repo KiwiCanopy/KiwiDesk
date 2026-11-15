@@ -126,6 +126,26 @@ struct SettingsRowRevertTests {
         #expect(model.reachEdits.reach[.space]?["com.apple.notes"] == nil)
     }
 
+    @Test("a titled reach row takes its rule and its reach back")
+    func titledReachReverts() {
+        let model = model()
+        let rule = "com.brave.browser:Work"
+        model.config.titledAppRules[rule] = SpaceID("2")
+        model.reachEdits.reach[.titledSpace] = [rule: .shared(joining: [])]
+        var row = SettingsDiffRow.note(
+            .appRules(.titledAppRules),
+            instance: "reach.new.\(rule)",
+            label: "Brave",
+            note: ""
+        )
+        row.revert = .ruleReach(app: rule)
+        model.revert(row)
+        #expect(
+            model.config.titledAppRules == model.cleanConfig.titledAppRules
+        )
+        #expect(model.reachEdits.reach[.titledSpace]?[rule] == nil)
+    }
+
     /// The real drift producer's row: a row no producer marked
     /// offers nothing, and drift is never the draft's to revert.
     @Test("a drift row offers no ↺")

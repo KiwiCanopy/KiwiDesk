@@ -194,16 +194,24 @@ extension SettingsModel {
     }
 
     /// Moves the reach `old` has now — picked or stored — to `new`,
-    /// a pick equal to `new`'s own default being no pick (#3124).
-    func carryPick(_ family: RuleFamily, from old: String, to new: String) {
+    /// a pick equal to `new`'s own default being no pick (#3124);
+    /// `target` is `new`'s family where the move changes family
+    /// (#3341).
+    func carryPick(
+        _ family: RuleFamily,
+        from old: String,
+        to new: String,
+        in target: RuleFamily? = nil
+    ) {
+        let target = target ?? family
         guard let row = reading(family, old) else { return }
         let carried = reach(family, old, row: row)
         reachEdits.reach[family]?[family.key(old)] = nil
         reachEdits.removal[family]?[family.key(old)] = nil
-        if storedDefault(family, new) == carried {
-            reachEdits.reach[family]?[family.key(new)] = nil
+        if storedDefault(target, new) == carried {
+            reachEdits.reach[target]?[target.key(new)] = nil
         } else {
-            setReach(family, new, carried)
+            setReach(target, new, carried)
         }
     }
 
