@@ -106,5 +106,12 @@ struct SplitCeilingShareTests {
         // at a slot centre sitting past its 400 pt edge.
         let warp = try #require(core.warpFrame(of: w1))
         #expect(abs(warp.width - 400) < 0.01)
+        // A press on the edge the window draws reads as a resize
+        // gesture, though it sits far inside the slot.
+        core.mouse.seedPress(
+            at: CGPoint(x: placed.maxX - 2, y: placed.midY)
+        )
+        core.mouse.seedRelease(at: core.wallClock())
+        #expect(core.isResizeGesture(w1))
     }
 }

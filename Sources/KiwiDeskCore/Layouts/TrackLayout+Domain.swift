@@ -148,10 +148,9 @@ extension TrackLayout {
         of members: ArraySlice<WindowID>,
         in context: LayoutContext
     ) -> CGFloat? {
-        SplitCeiling.ceiling(
+        context.learnedCeiling(
             of: members,
-            horizontal: context.track.axis == .vertical,
-            context
+            horizontal: context.track.axis == .vertical
         )
     }
 

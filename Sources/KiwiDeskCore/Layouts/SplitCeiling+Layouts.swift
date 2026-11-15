@@ -77,7 +77,10 @@ extension SplitCeiling {
         _ context: LayoutContext
     ) -> CGFloat? {
         guard zone.vertical != horizontal else {
-            return ceiling(of: zone.members, horizontal: horizontal, context)
+            return context.learnedCeiling(
+                of: zone.members,
+                horizontal: horizontal
+            )
         }
         var sum: CGFloat = 0
         for member in zone.members {
@@ -241,7 +244,7 @@ extension SplitCeiling {
                     held.append(id)
                 }
                 guard !held.isEmpty else { return lengths[track] }
-                return ceiling(of: held, horizontal: horizontal, context)
+                return context.learnedCeiling(of: held, horizontal: horizontal)
             }
         }
         let shared = (

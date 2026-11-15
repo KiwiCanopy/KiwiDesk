@@ -72,7 +72,9 @@ struct FrameSetReaderCensusTests {
             .slots, "a crossing is between regions"
         ),
         "KiwiCore+MouseResizeEnd.swift": (
-            .slots, "the drag's ratio translation classifies sides"
+            .issued,
+            "a resize press is judged at the edge the window is "
+                + "issued, off its slot under a ceiling (#3217)"
         ),
         "KiwiCore+MouseWarp.swift": (
             .issued,
@@ -138,8 +140,6 @@ struct FrameSetReaderCensusTests {
             "a ring's fallback is its own window's slot, never a pile",
         "KiwiCore+DragCrossing.swift":
             "a crossing is between screens, never a pile test",
-        "KiwiCore+MouseResizeEnd.swift":
-            "the dragged window's own side; a hidden one is not dragged",
         "KiwiCore+ZOrder.swift":
             "a whole-zone pile's cascade; a run takes its own restore",
         "KiwiCore+ScrollingRestore.swift": "Scrolling draws no run",

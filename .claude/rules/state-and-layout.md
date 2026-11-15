@@ -2410,8 +2410,9 @@ editing here:
   re-derives its structure from the layout's own doors, never a
   copy of their walk. This is a second way the two frame sets
   part: a receiver draws over part of the yielder's slot without
-  any overlap, so a reader aiming the pointer AT a window (the
-  mouse warp) takes `placedFrames`, while a drop target keeps
+  any overlap, so a reader that aims the pointer at a window or
+  hit-tests its drawn edge (the mouse warp, the resize-press
+  test) takes `placedFrames`, while a drop target keeps
   classifying slots and a drop over that strip lands on the
   yielder — the accepted residue (`SplitCeilingTests`,
   `SplitCeilingLayoutTests`, `SplitCeilingShareTests` ▸

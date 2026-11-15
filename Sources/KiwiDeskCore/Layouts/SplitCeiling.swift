@@ -35,28 +35,6 @@ public enum SplitCeiling {
         return shared ?? frames
     }
 
-    /// One container's ceiling along an axis: the widest of its
-    /// members' learned maxima, nil where any member has none —
-    /// that member can still grow, so the container keeps its
-    /// share. Track's `trackCeiling` reads it too (#1488).
-    static func ceiling(
-        of members: some Sequence<WindowID>,
-        horizontal: Bool,
-        _ context: LayoutContext
-    ) -> CGFloat? {
-        var widest: CGFloat?
-        for member in members {
-            guard
-                let ceiling = context.learnedCeiling(
-                    of: member,
-                    horizontal: horizontal
-                )
-            else { return nil }
-            widest = max(widest ?? 0, ceiling)
-        }
-        return widest
-    }
-
     /// `spans` with the slack redistributed, their sum kept: a
     /// span above its ceiling yields, a span below its ceiling (or
     /// with none) receives, filling the receivers in proportion to
