@@ -113,10 +113,11 @@ class — see
 
 :::unreleased
 For a screen with **no free bottom corner**, Settings ▸ Screens and
-the Mac Checklist offer to move a screen in your macOS screen
-arrangement so every screen has one, after you say yes
-([#2756](https://github.com/KiwiCanopy/KiwiDesk/issues/2756)). The
-pointer then crosses between the moved screen and its neighbours
+the Mac Checklist offer to move one or more screens in your macOS
+screen arrangement so every screen has one, after you say yes
+([With more than one screen](spaces-and-desktops.md#with-more-than-one-screen),
+[#2756](https://github.com/KiwiCanopy/KiwiDesk/issues/2756)). The
+pointer then crosses between a moved screen and its neighbours
 where the new arrangement puts them, not where they stand on the
 desk.
 :::

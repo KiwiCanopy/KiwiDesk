@@ -15,13 +15,23 @@ struct ScreenShiftNote: View {
             VStack(alignment: .leading, spacing: 8) {
                 Divider()
                 if offer.shifts.isEmpty {
-                    sentences(offer, state)
+                    HStack(alignment: .firstTextBaseline) {
+                        sentences(offer, state)
+                        Spacer()
+                        HelpButton(
+                            explanation: ScreenShiftText.help,
+                            subject: ScreenShiftText.helpSubject
+                        )
+                    }
                     caption(ScreenShiftText.unfixable)
                 } else {
                     HStack(alignment: .firstTextBaseline) {
                         sentences(offer, state)
                         Spacer()
-                        HelpButton(explanation: ScreenShiftText.help)
+                        HelpButton(
+                            explanation: ScreenShiftText.help,
+                            subject: ScreenShiftText.helpSubject
+                        )
                         Button(ScreenShiftText.button(offer)) {
                             model.askScreenShift(offer)
                         }

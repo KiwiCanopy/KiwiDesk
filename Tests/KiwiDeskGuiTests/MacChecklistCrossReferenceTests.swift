@@ -73,7 +73,9 @@ struct MacChecklistCrossReferenceTests {
             }
             // The boxed-in row (#2756) draws live sentences and a
             // KiwiDesk button, never a System Settings path.
-            if key == .parkCorners { continue }
+            if MacChecklistRowOrder.conditionalRows.contains(row) {
+                continue
+            }
             #expect(
                 MacChecklistText.caption(for: key).contains(Self.slot),
                 "\(key) never places its path"

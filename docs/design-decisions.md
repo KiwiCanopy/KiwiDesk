@@ -9298,6 +9298,54 @@ ruling: the next tiled space on that screen re-tiles the window,
 and a remembered per-window float frame is a separate decision,
 ruled only if the transience shows on a device.
 
+### A boxed-in screen gets one offer, and KiwiDesk picks the move (#2756)
+
+**[Rationale]**
+
+:::unreleased
+A screen whose two bottom corners both have another screen beside,
+below or past them parks its hidden windows on a neighbour
+([Accepted limitations](accepted-limitations.md)). KiwiDesk fixes
+the arrangement by moving a screen in macOS's Displays arrangement,
+and asks first (owner rulings 2026-11-15 on #2756):
+
+- **Ask, never silently.** A move changes where the pointer crosses
+  between two screens by the move's distance, and #2764's routing,
+  which would have hidden that, is stopped. So nothing moves at
+  launch, on a screen change or after sleep: Settings ▸ Screens and
+  the Mac Checklist show one offer per arrangement, and only its
+  alert's Shift moves anything.
+- **KiwiDesk picks the move; the user says yes or no.** The original
+  ask had the user pick among candidates, since only they know the
+  desk. With the yes stating the move, the distance and each
+  crossing it changes, a choice among candidates adds a decision
+  without adding information. The pick is the set of moves that
+  leaves every screen a free bottom corner and every neighbour
+  touching, ranked by the fewest changed crossings over the whole
+  arrangement, then a move of no main screen (the main screen stays
+  at the global origin, so moving it moves every other screen's
+  origin and retiles every screen), then the smallest total
+  distance. A neighbour may move instead of the boxed-in screen,
+  since raising one side screen changes one crossing where lowering
+  the boxed-in screen changes two.
+- **No countdown, no Undo, no stored origins.** macOS keeps a
+  `.permanently` move per screen combination and restores it on
+  reconnect and after a display sleep (spike, 2026-11-15). After a
+  yes the arrangement is the user's, changed back in System
+  Settings ▸ Displays like any other. A countdown guards against a
+  change that could leave the user unable to answer, and nothing
+  here can.
+- **A no is remembered per arrangement**, keyed by every screen's
+  UUID, origin and size, so the offer stays in Screens as a choice
+  and the checklist reads it as kept, and it is asked afresh only
+  when the arrangement changes. A display's `CGDirectDisplayID`
+  changes on every reconnect, so it keys nothing.
+
+Rejected: `kCGConfigureForAppOnly`, which reverts the moment
+KiwiDesk exits, so the arrangement would change at every launch and
+quit.
+:::
+
 ### KiwiVision's blur is Liquid Glass clear, behind one switch (#2103)
 
 **[Rationale]**
@@ -9730,54 +9778,6 @@ because the user did not ask for the change. A switch back does
 not turn the lens on again, since a switch is not a press. Plain
 KiwiVision is app-wide and has no reach, so it stays on across
 every switch.
-
-### A boxed-in screen gets one offer, and KiwiDesk picks the move (#2756)
-
-*[Rationale]*
-
-:::unreleased
-A screen whose two bottom corners both have another screen beside,
-below or past them parks its hidden windows on a neighbour
-([Accepted limitations](accepted-limitations.md)). KiwiDesk fixes
-the arrangement by moving a screen in macOS's Displays arrangement,
-and asks first (owner rulings 2026-11-15 on #2756):
-
-- **Ask, never silently.** A move changes where the pointer crosses
-  between two screens by the move's distance, and #2764's routing,
-  which would have hidden that, is stopped. So nothing moves at
-  launch, on a screen change or after sleep: Settings ▸ Screens and
-  the Mac Checklist show one offer per arrangement, and only its
-  alert's Shift moves anything.
-- **KiwiDesk picks the move; the user says yes or no.** The original
-  ask had the user pick among candidates, since only they know the
-  desk. With the yes stating the move, the distance and each
-  crossing it changes, a choice among candidates adds a decision
-  without adding information. The pick is the set of moves that
-  leaves every screen a free bottom corner and every neighbour
-  touching, ranked by the fewest changed crossings over the whole
-  arrangement, then a move of no main screen (the main screen stays
-  at the global origin, so moving it moves every other screen's
-  origin and retiles every screen), then the smallest total
-  distance. A neighbour may move instead of the boxed-in screen,
-  since raising one side screen changes one crossing where lowering
-  the boxed-in screen changes two.
-- **No countdown, no Undo, no stored origins.** macOS keeps a
-  `.permanently` move per screen combination and restores it on
-  reconnect and after a display sleep (spike, 2026-11-15). After a
-  yes the arrangement is the user's, changed back in System
-  Settings ▸ Displays like any other. A countdown guards against a
-  change that could leave the user unable to answer, and nothing
-  here can.
-- **A no is remembered per arrangement**, keyed by every screen's
-  UUID, origin and size, so the offer stays in Screens as a choice
-  and the checklist reads it as kept, and it is asked afresh only
-  when the arrangement changes. A display's `CGDirectDisplayID`
-  changes on every reconnect, so it keys nothing.
-
-Rejected: `kCGConfigureForAppOnly`, which reverts the moment
-KiwiDesk exits, so the arrangement would change at every launch and
-quit.
-:::
 
 ## Settings GUI & UX
 

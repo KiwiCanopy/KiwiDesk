@@ -44,16 +44,19 @@ extension SettingsModel {
 
     /// Essentials done, the one count both surfaces read.
     var macChecklistDone: Int {
-        MacChecklistProgress.done(
-            states: macChecklistStates,
-            ticks: macChecklistTicks
-        ) + (screenShiftChecklistDone == true ? 1 : 0)
+        macChecklistVerdicts.filter { $0 }.count
     }
 
-    /// Essentials in all: the boxed-in row counts only while it
-    /// shows (#2756).
-    var macChecklistTotal: Int {
-        MacChecklistProgress.total
-            + (screenShiftChecklistDone == nil ? 0 : 1)
+    /// Essentials in all, the one list's length.
+    var macChecklistTotal: Int { macChecklistVerdicts.count }
+
+    /// Every essential's verdict in order, the boxed-in row
+    /// (#2756) last and only while it shows: the one list the
+    /// count, the total and the ticks read.
+    var macChecklistVerdicts: [Bool] {
+        MacChecklistProgress.verdicts(
+            states: macChecklistStates,
+            ticks: macChecklistTicks
+        ).map(\.done) + [screenShiftChecklistDone].compactMap { $0 }
     }
 }

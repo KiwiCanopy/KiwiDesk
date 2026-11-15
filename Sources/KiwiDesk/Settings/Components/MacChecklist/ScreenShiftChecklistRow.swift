@@ -22,7 +22,10 @@ struct ScreenShiftChecklistRow: View {
                 ScreenShiftSentences(offer: offer, state: state)
                     .accessibilityValue(spoken(kept: kept))
                 Spacer(minLength: 0)
-                HelpButton(explanation: ScreenShiftText.help)
+                HelpButton(
+                    explanation: ScreenShiftText.help,
+                    subject: ScreenShiftText.helpSubject
+                )
                 Button(ScreenShiftText.button(offer)) {
                     model.askScreenShift(offer)
                 }
@@ -64,6 +67,6 @@ struct ScreenShiftChecklistRow: View {
     }
 
     static var notYetWord: String {
-        L("mac_checklist.state.not_yet", "Not yet")
+        L("mac_checklist.state.not_yet.offer", "Not yet")
     }
 }

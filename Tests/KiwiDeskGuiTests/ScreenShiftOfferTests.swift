@@ -1,9 +1,9 @@
 import CoreGraphics
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The boxed-in offer in Settings (#2756): its words, the answer
 /// remembered per arrangement, and the Mac Checklist row it adds
@@ -78,9 +78,47 @@ struct ScreenShiftOfferTests {
         )
         #expect(
             ScreenShiftText.alertMessage(offer, in: state)
-                == "The pointer will then enter DELL U2720Q 212 pt "
-                + "lower than now, and Built-in Retina Display 212 pt "
-                + "higher."
+                == "Between DELL U2720Q and Built-in Retina Display, "
+                + "the pointer will cross 212 pt further down on DELL "
+                + "U2720Q and further up on Built-in Retina Display than "
+                + "it does now."
+        )
+    }
+
+    @Test(
+        "each direction says where the pointer lands",
+        arguments: [
+            (CGVector(dx: 0, dy: 9), "further up on A and further down on B"),
+            (
+                CGVector(dx: -9, dy: 0),
+                "further right on A and further left on B"
+            ),
+            (
+                CGVector(dx: 9, dy: 0),
+                "further left on A and further right on B"
+            ),
+        ]
+    )
+    func crossingDirections(_ along: CGVector, _ words: String) {
+        pinEnglish()
+        defer { reset() }
+        var state = ScreenShiftState()
+        state.screens = [
+            screen("a", "A", CGRect(x: 0, y: 0, width: 10, height: 10)),
+            screen("b", "B", CGRect(x: 10, y: 0, width: 10, height: 10)),
+        ]
+        let offer = ScreenOffer(
+            boxed: [],
+            shifts: [
+                ScreenShift(
+                    screen: "a",
+                    delta: along,
+                    crossings: [ScreenCrossing(screen: "b", delta: along)]
+                )
+            ]
+        )
+        #expect(
+            ScreenShiftText.alertMessage(offer, in: state).contains(words)
         )
     }
 
@@ -132,6 +170,63 @@ struct ScreenShiftOfferTests {
         #expect(model.macChecklistDone == done + 1)
         model.refreshScreenOffer([])
         #expect(model.macChecklistTotal == total)
+    }
+
+    @Test("a screen change closes the alert unanswered")
+    func staleAlertCloses() throws {
+        let model = makeTestModel()
+        model.refreshScreenOffer(desk)
+        let offer = try #require(model.screenShift.openOffer)
+        model.askScreenShift(offer)
+        model.refreshScreenOffer(desk)
+        #expect(model.screenShift.asking == offer)
+        var moved = desk
+        moved[2].frame.origin.y -= 20
+        model.refreshScreenOffer(moved)
+        #expect(model.screenShift.asking == nil)
+    }
+
+    @Test("Shift writes the moves and files the yes")
+    func shiftWritesAndFiles() throws {
+        let model = makeTestModel()
+        let tiler = model.core.tiler
+        tiler.displayFrames = {
+            [
+                (
+                    DisplayID(3),
+                    CGRect(x: 1728, y: -159, width: 2560, height: 1440)
+                )
+            ]
+        }
+        tiler.readArrangement = { _ in
+            [
+                DisplayReading(
+                    id: DisplayID(3),
+                    uuid: "dell",
+                    bounds: CGRect(
+                        x: 1728,
+                        y: -159,
+                        width: 2560,
+                        height: 1440
+                    ),
+                    isMain: false
+                )
+            ]
+        }
+        var written: [DisplayID: CGPoint] = [:]
+        tiler.writeArrangement = {
+            written = $0
+            return true
+        }
+        model.refreshScreenOffer(desk)
+        let offer = try #require(model.screenShift.openOffer)
+        model.askScreenShift(offer)
+        model.applyScreenShift(offer)
+        #expect(written == [DisplayID(3): CGPoint(x: 1728, y: -371)])
+        #expect(model.screenShift.asking == nil)
+        #expect(
+            model.screenShift.answers.values.contains("shifted:dell")
+        )
     }
 
     @Test("an answer survives its store")

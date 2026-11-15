@@ -76,7 +76,7 @@ struct MacChecklistSection: View {
         let chipWidth = MacSettingRow.chipWidth
         // The boxed-in row shows only while its offer is open.
         let rows = rows.filter {
-            $0 != .macChecklist(.parkCorners)
+            !MacChecklistRowOrder.conditionalRows.contains($0)
                 || model.screenShiftChecklistDone != nil
         }
         return ForEach(Array(rows.enumerated()), id: \.element.id) {

@@ -71,9 +71,14 @@ enum ScreenShiftText {
             "Parked windows are the windows from the Spaces you "
                 + "aren't looking at. KiwiDesk tucks them into a "
                 + "bottom corner of their screen, out of sight. Where "
-                + "both bottom corners touch another screen, they "
-                + "land on that screen instead."
+                + "other screens cover both bottom corners, they show "
+                + "on one of those screens instead."
         )
+    }
+
+    /// What the `?` explains, so VoiceOver names the button.
+    static var helpSubject: String {
+        L("screens.shift.help_subject", "Parked windows")
     }
 
     static func button(_ offer: ScreenOffer) -> String {
@@ -93,12 +98,10 @@ enum ScreenShiftText {
     {
         L(
             "screens.shift.shifted",
-            "KiwiDesk moved %1$@ in your macOS screen arrangement, so "
-                + "parked windows stay on their own screen. Change it "
-                + "back in %2$@.",
-            ListFormatter.localizedString(
-                byJoining: ids.map(state.name(of:))
-            ),
+            "KiwiDesk shifted %1$@ in your macOS screen arrangement, "
+                + "so parked windows stay on their own screen. To "
+                + "change it back, use %2$@.",
+            LocalizedList.join(ids.map(state.name(of:))),
             CrossReferenceRow.linkSlot
         )
     }
@@ -107,8 +110,8 @@ enum ScreenShiftText {
     static var unfixable: String {
         L(
             "screens.shift.unfixable",
-            "No move of a screen frees a corner here; arrange the "
-                + "screens in %1$@ so each has one.",
+            "KiwiDesk can't free a corner here by shifting a screen. "
+                + "To give each screen one, arrange them in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

@@ -27,6 +27,13 @@ enum MacChecklistRowOrder {
         .macChecklist(.habitDock),
     ]
 
+    /// Rows shown only while their condition holds: the boxed-in
+    /// offer's while one is open (#2756). Readers skip a row by
+    /// this set, never by naming it.
+    static let conditionalRows: Set<SettingKey> = [
+        .macChecklist(.parkCorners)
+    ]
+
     static let byContainer: [SettingsContainer: [SettingKey]] = [
         .essentialSettings: essentialSettings,
         .optionalSettings: optionalSettings,

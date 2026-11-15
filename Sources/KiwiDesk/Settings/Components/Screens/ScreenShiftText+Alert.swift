@@ -31,10 +31,9 @@ extension ScreenShiftText {
         in state: ScreenShiftState
     ) -> String {
         guard
-            offer.shifts.count == 1,
+            namesTheMove(offer),
             let shift = offer.shifts.first,
-            let step = steps(shift.delta).first,
-            steps(shift.delta).count == 1
+            let step = steps(shift.delta).first
         else {
             return L(
                 "screens.shift.alert.title.many",
@@ -78,14 +77,14 @@ extension ScreenShiftText {
         }
     }
 
-    /// The moves, one line each where several screens move, then
-    /// one line per crossing that changes.
+    /// The moves, one line each wherever the title names none,
+    /// then one line per shared edge whose crossing moves.
     static func alertMessage(
         _ offer: ScreenOffer,
         in state: ScreenShiftState
     ) -> String {
         var lines: [String] = []
-        if offer.shifts.count > 1 {
+        if !namesTheMove(offer) {
             for shift in offer.shifts {
                 for step in steps(shift.delta) {
                     lines.append(move(step, state.name(of: shift.screen)))
@@ -93,19 +92,25 @@ extension ScreenShiftText {
             }
         }
         for shift in offer.shifts {
-            for neighbour in shift.crossings {
-                for step in steps(shift.delta) {
+            for crossing in shift.crossings {
+                for step in steps(crossing.delta) {
                     lines.append(
-                        crossing(
+                        cross(
                             step,
                             moved: state.name(of: shift.screen),
-                            beside: state.name(of: neighbour)
+                            beside: state.name(of: crossing.screen)
                         )
                     )
                 }
             }
         }
         return lines.joined(separator: "\n")
+    }
+
+    /// Whether the title states the one move, in one direction.
+    static func namesTheMove(_ offer: ScreenOffer) -> Bool {
+        offer.shifts.count == 1
+            && steps(offer.shifts[0].delta).count == 1
     }
 
     private static func move(_ step: Step, _ name: String) -> String {
@@ -141,10 +146,10 @@ extension ScreenShiftText {
         }
     }
 
-    /// Where the pointer lands crossing the changed edge: a screen
-    /// moved up is entered lower on it, and the screen beside it
-    /// higher, by the move's distance.
-    private static func crossing(
+    /// Where the pointer lands crossing a shifted edge, on each of
+    /// its two screens: a screen moved up is entered further down
+    /// on it, and the screen across the edge further up.
+    private static func cross(
         _ step: Step,
         moved: String,
         beside: String
@@ -152,36 +157,40 @@ extension ScreenShiftText {
         switch step {
         case .up(let pt):
             return L(
-                "screens.shift.alert.crossing.up",
-                "The pointer will then enter %1$@ %3$d pt lower than "
-                    + "now, and %2$@ %3$d pt higher.",
+                "screens.shift.alert.cross.up",
+                "Between %1$@ and %2$@, the pointer will cross %3$d pt "
+                    + "further down on %1$@ and further up on %2$@ than "
+                    + "it does now.",
                 moved,
                 beside,
                 pt
             )
         case .down(let pt):
             return L(
-                "screens.shift.alert.crossing.down",
-                "The pointer will then enter %1$@ %3$d pt higher than "
-                    + "now, and %2$@ %3$d pt lower.",
+                "screens.shift.alert.cross.down",
+                "Between %1$@ and %2$@, the pointer will cross %3$d pt "
+                    + "further up on %1$@ and further down on %2$@ than "
+                    + "it does now.",
                 moved,
                 beside,
                 pt
             )
         case .left(let pt):
             return L(
-                "screens.shift.alert.crossing.left",
-                "The pointer will then enter %1$@ %3$d pt further "
-                    + "right than now, and %2$@ %3$d pt further left.",
+                "screens.shift.alert.cross.left",
+                "Between %1$@ and %2$@, the pointer will cross %3$d pt "
+                    + "further right on %1$@ and further left on %2$@ "
+                    + "than it does now.",
                 moved,
                 beside,
                 pt
             )
         case .right(let pt):
             return L(
-                "screens.shift.alert.crossing.right",
-                "The pointer will then enter %1$@ %3$d pt further "
-                    + "left than now, and %2$@ %3$d pt further right.",
+                "screens.shift.alert.cross.right",
+                "Between %1$@ and %2$@, the pointer will cross %3$d pt "
+                    + "further left on %1$@ and further right on %2$@ "
+                    + "than it does now.",
                 moved,
                 beside,
                 pt

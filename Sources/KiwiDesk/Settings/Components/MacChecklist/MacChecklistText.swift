@@ -58,9 +58,9 @@ enum MacChecklistText {
             return L(
                 "mac_checklist.park_corners.caption",
                 "A screen with both bottom corners covered shows its "
-                    + "parked windows on the screen beside it. Shifting "
-                    + "a screen in your macOS screen arrangement frees "
-                    + "a corner."
+                    + "parked windows on another screen. Shifting a "
+                    + "screen in your macOS screen arrangement frees a "
+                    + "corner."
             )
         case .clickWallpaper:
             return L(

@@ -1,4 +1,3 @@
-import CoreGraphics
 import Foundation
 import KiwiDeskCore
 
@@ -10,8 +9,10 @@ struct ScreenShiftState: Equatable {
     var offer: ScreenOffer?
     /// The answer per arrangement key (`ScreenShiftAnswer`).
     var answers: [String: String] = [:]
-    /// The offer the alert asks about; nil while it is shut.
+    /// The offer the alert asks about, with the arrangement it was
+    /// planned for; nil while it is shut.
     var asking: ScreenOffer?
+    var askingKey: String?
 
     var arrangementKey: String {
         ScreenShiftPlan.arrangementKey(screens)
@@ -32,8 +33,9 @@ struct ScreenShiftState: Equatable {
     /// The screen's name as copy says it, its position added where
     /// another screen shares the name.
     func name(of id: String) -> String {
+        // Core hands over no unnamed screen (`arrangedScreens`).
         guard let screen = screens.first(where: { $0.id == id }) else {
-            return id
+            return ""
         }
         let positions = ScreenShiftPlan.namePositions(
             screens.map { (key: $0.id, name: $0.name, frame: $0.frame) }
@@ -89,35 +91,47 @@ extension SettingsModel {
         state.answers =
             preferences.dictionary(forKey: Self.screenShiftAnswersKey)
             as? [String: String] ?? [:]
+        // An open alert asks about the arrangement it was planned
+        // for; a screen change under it closes it unanswered.
+        if state.askingKey != state.arrangementKey {
+            state.asking = nil
+            state.askingKey = nil
+        }
         guard state != screenShift else { return }
         screenShift = state
     }
 
     /// Opens the alert over `offer`.
     func askScreenShift(_ offer: ScreenOffer) {
+        screenShift.askingKey = screenShift.arrangementKey
         screenShift.asking = offer
     }
 
-    /// The alert's Keep as Is: remembered for this arrangement.
+    /// The alert's Keep as Is: remembered for the arrangement it
+    /// asked about.
     func keepArrangement() {
+        let key = screenShift.askingKey ?? screenShift.arrangementKey
         screenShift.asking = nil
-        storeScreenShiftAnswer(.kept, for: screenShift.arrangementKey)
+        screenShift.askingKey = nil
+        storeScreenShiftAnswer(.kept, for: key)
     }
 
     /// The alert's Shift: the moves, then the answer filed under
     /// the arrangement they produced.
+    /// The plan itself waits for macOS's screen-change notice,
+    /// since the usable areas it scores are AppKit's and change
+    /// only then.
     func applyScreenShift(_ offer: ScreenOffer) {
         screenShift.asking = nil
+        screenShift.askingKey = nil
         guard core.applyScreenShifts(offer.shifts) else {
             refreshScreenOffer()
             return
         }
-        let after = core.arrangedScreens()
         storeScreenShiftAnswer(
             .shifted(offer.shifts.map(\.screen)),
-            for: ScreenShiftPlan.arrangementKey(after)
+            for: ScreenShiftPlan.arrangementKey(core.arrangedScreens())
         )
-        refreshScreenOffer(after)
     }
 
     private func storeScreenShiftAnswer(
@@ -141,29 +155,16 @@ extension SettingsModel {
 }
 
 extension SettingsModel {
-    /// A screen card's name: its position added where another
-    /// connected screen shares the name, as the offer's sentences
-    /// say it (#2756 ▸ the preview questions, 6).
+    /// A screen card's name, from the same screens the offer's
+    /// sentences name, so the two say one name (#2756 ▸ the
+    /// preview questions, 6).
     func screenLabel(_ display: Display) -> String {
-        let positions = ScreenShiftPlan.namePositions(
-            displays.map {
-                // AppKit frames grow up; the positions read y-down.
-                let f = $0.frame
-                return (
-                    key: $0.id,
-                    name: $0.name,
-                    frame: CGRect(
-                        x: f.minX,
-                        y: -f.maxY,
-                        width: f.width,
-                        height: f.height
-                    )
-                )
-            }
-        )
-        return ScreenShiftText.named(
-            display.name,
-            at: positions[display.id]
-        )
+        let state = screenShift
+        guard
+            let screen = state.screens.first(where: {
+                $0.display == display.id
+            })
+        else { return display.name }
+        return state.name(of: screen.id)
     }
 }

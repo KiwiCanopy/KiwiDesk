@@ -7,9 +7,10 @@ extension ScreenShiftPlan {
     /// The ruled pick among every set of moves that frees every
     /// boxed-in screen: each step frees the first screen still
     /// boxed in, by any of its candidate moves, and the leaves are
-    /// ranked whole. nil when no set frees them all.
+    /// ranked whole. nil when no set frees them all. Each step
+    /// frees a screen and boxes in none, so the depth is at most
+    /// the number of boxed-in screens.
     static func bestPlan(for screens: [ArrangedScreen]) -> [ScreenShift]? {
-        let original = touchingPairs(screens)
         var best: (moves: [ScreenShift], rank: Rank)?
         func search(_ now: [ArrangedScreen], _ moves: [ScreenShift]) {
             guard
@@ -17,14 +18,13 @@ extension ScreenShiftPlan {
                     !hasFreeCorner($0, in: now)
                 })
             else {
-                let merged = merge(moves, over: original, in: screens)
-                let rank = Rank(merged, original, screens)
+                let merged = merge(moves, in: screens)
+                let rank = Rank(merged, screens)
                 if best.map({ rank < $0.rank }) ?? true {
                     best = (merged, rank)
                 }
                 return
             }
-            guard moves.count < screens.count else { return }
             for candidate in candidates(freeing: boxed, in: now) {
                 guard
                     let move = shortest(
@@ -52,13 +52,9 @@ extension ScreenShiftPlan {
         let movesMain: Int
         let distance: CGFloat
 
-        init(
-            _ moves: [ScreenShift],
-            _ pairs: Set<Set<String>>,
-            _ screens: [ArrangedScreen]
-        ) {
+        init(_ moves: [ScreenShift], _ screens: [ArrangedScreen]) {
             let moved = Set(moves.map(\.screen))
-            crossings = pairs.filter { !$0.isDisjoint(with: moved) }.count
+            crossings = moves.reduce(0) { $0 + $1.crossings.count }
             movesMain =
                 screens.contains { $0.isMain && moved.contains($0.id) }
                 ? 1 : 0
@@ -73,28 +69,47 @@ extension ScreenShiftPlan {
         }
     }
 
-    /// One move per screen, its steps summed, each naming every
-    /// screen it shared an edge with before the moves.
+    /// One move per screen, its steps summed. Each shared edge the
+    /// moves shift is listed once, under the first moved screen of
+    /// its pair, with the two screens' relative move along it: two
+    /// screens moving together shift no crossing.
     static func merge(
         _ moves: [ScreenShift],
-        over pairs: Set<Set<String>>,
         in screens: [ArrangedScreen]
     ) -> [ScreenShift] {
-        let order = screens.map(\.id).filter { id in
-            moves.contains { $0.screen == id }
-        }
-        return order.map { id in
-            let delta = moves.filter { $0.screen == id }.reduce(
-                CGVector.zero
-            ) { CGVector(dx: $0.dx + $1.delta.dx, dy: $0.dy + $1.delta.dy) }
-            let crossings = pairs.compactMap { pair -> String? in
-                pair.contains(id) ? pair.first { $0 != id } : nil
-            }
-            return ScreenShift(
-                screen: id,
-                delta: delta,
-                crossings: crossings.sorted()
+        var deltas: [String: CGVector] = [:]
+        for move in moves {
+            let sum = deltas[move.screen] ?? .zero
+            deltas[move.screen] = CGVector(
+                dx: sum.dx + move.delta.dx,
+                dy: sum.dy + move.delta.dy
             )
+        }
+        let order = screens.map(\.id).filter { deltas[$0] != nil }
+        var listed: Set<Set<String>> = []
+        return order.map { id in
+            let own = deltas[id] ?? .zero
+            var crossings: [ScreenCrossing] = []
+            for other in screens where other.id != id {
+                let pair: Set<String> = [id, other.id]
+                guard
+                    !listed.contains(pair),
+                    let me = screens.first(where: { $0.id == id }),
+                    touches(me.frame, other.frame)
+                else { continue }
+                let theirs = deltas[other.id] ?? .zero
+                let sideBySide = sideBySide(me.frame, other.frame)
+                let along = CGVector(
+                    dx: sideBySide ? 0 : own.dx - theirs.dx,
+                    dy: sideBySide ? own.dy - theirs.dy : 0
+                )
+                listed.insert(pair)
+                guard along != .zero else { continue }
+                crossings.append(
+                    ScreenCrossing(screen: other.id, delta: along)
+                )
+            }
+            return ScreenShift(screen: id, delta: own, crossings: crossings)
         }
     }
 
@@ -128,7 +143,9 @@ extension ScreenShiftPlan {
 
     /// The smallest whole-point move of `id` along `unit` that
     /// frees a corner of `boxed`, takes no screen's free corner
-    /// away and keeps every touching pair touching.
+    /// away, keeps exactly the touching pairs there were and lays
+    /// no screen over another. A pair pulled apart stays apart as
+    /// the move goes on, so the search stops there.
     static func shortest(
         moving id: String,
         along unit: CGVector,
@@ -147,17 +164,34 @@ extension ScreenShiftPlan {
             let after = screens.map {
                 $0.id == id ? $0.moved(by: delta) : $0
             }
+            let now = touchingPairs(after)
+            // An early stop, no rule: the `now == pairs` check
+            // below refuses the same steps, a step at a time.
+            guard pairs.isSubset(of: now) else { return nil }
             guard
+                now == pairs,
+                !overlaps(after),
                 let moved = after.first(where: { $0.id == boxed.id }),
                 hasFreeCorner(moved, in: after),
                 after.allSatisfy({
                     !hadFree.contains($0.id) || hasFreeCorner($0, in: after)
-                }),
-                pairs.isSubset(of: touchingPairs(after))
+                })
             else { continue }
             return ScreenShift(screen: id, delta: delta, crossings: [])
         }
         return nil
+    }
+
+    /// Whether any two screens share an area, which macOS would
+    /// resolve by rearranging them itself.
+    static func overlaps(_ screens: [ArrangedScreen]) -> Bool {
+        for (index, a) in screens.enumerated() {
+            for b in screens.dropFirst(index + 1)
+            where !a.frame.intersection(b.frame).isEmpty {
+                return true
+            }
+        }
+        return false
     }
 
     /// Every pair of screens that touch, as two-element sets.
@@ -172,6 +206,11 @@ extension ScreenShiftPlan {
             }
         }
         return pairs
+    }
+
+    /// Whether two touching screens meet at a vertical edge.
+    static func sideBySide(_ a: CGRect, _ b: CGRect) -> Bool {
+        abs(a.maxX - b.minX) <= 1 || abs(b.maxX - a.minX) <= 1
     }
 
     /// Whether `other` sits to the side of `screen` rather than

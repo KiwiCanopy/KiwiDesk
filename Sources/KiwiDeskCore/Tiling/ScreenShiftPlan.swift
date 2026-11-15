@@ -12,19 +12,23 @@ public struct ArrangedScreen: Sendable, Equatable {
     /// The usable area the stash parks against.
     public var visible: CGRect
     public let isMain: Bool
+    /// The display this is, for a GUI matching it to its card.
+    public let display: DisplayID?
 
     public init(
         id: String,
         name: String,
         frame: CGRect,
         visible: CGRect? = nil,
-        isMain: Bool = false
+        isMain: Bool = false,
+        display: DisplayID? = nil
     ) {
         self.id = id
         self.name = name
         self.frame = frame
         self.visible = visible ?? frame
         self.isMain = isMain
+        self.display = display
     }
 
     func moved(by delta: CGVector) -> ArrangedScreen {
@@ -41,9 +45,19 @@ public struct ScreenShift: Sendable, Equatable {
     public let screen: String
     /// Points, y growing down: a positive `dy` lowers the screen.
     public let delta: CGVector
-    /// The screens whose shared edge with the moved one shifts,
-    /// so the pointer crosses there at another place.
-    public let crossings: [String]
+    /// The shared edges this move shifts, so the pointer crosses
+    /// there at another place; each edge is listed once, under the
+    /// first moved screen of its pair.
+    public let crossings: [ScreenCrossing]
+}
+
+/// A shared edge whose crossing moves: the screen across it, and
+/// how far the moved screen shifts against it along the edge.
+public struct ScreenCrossing: Sendable, Equatable {
+    public let screen: String
+    /// Points along the shared edge, y growing down; the other
+    /// axis is zero.
+    public let delta: CGVector
 }
 
 /// A screen whose parked windows land on another screen,
@@ -128,7 +142,13 @@ public enum ScreenShiftPlan {
         at corner: TilingEngine.HideCorner,
         in screens: [ArrangedScreen]
     ) -> String? {
-        let scored = screens.filter { $0.id != screen.id }.map {
+        // As `optimalHideCorner` does, a screen overlapping this
+        // one is itself or its mirror, never a neighbour.
+        let others = screens.filter {
+            $0.id != screen.id
+                && $0.visible.intersection(screen.visible).isEmpty
+        }
+        let scored = others.map {
             (
                 $0.id,
                 TilingEngine.parkOverlap(

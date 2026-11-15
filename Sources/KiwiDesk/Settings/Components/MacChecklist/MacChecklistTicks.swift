@@ -2,30 +2,23 @@ import KiwiDeskCore
 import SwiftUI
 
 /// One tick per essential in the rows' own vocabulary, off the one
-/// `MacChecklistProgress.verdicts` value the count reads (#1365):
+/// `SettingsModel.macChecklistVerdicts` list the count reads (#1365):
 /// the Home card's preview and Simple's checklist header (#3290).
 /// Hidden from VoiceOver; the count beside it speaks.
 struct MacChecklistTicks: View {
-    let verdicts: [(setting: MacSetting, done: Bool)]
-    /// The boxed-in row's tick while it shows (#2756).
-    let screenShift: Bool?
+    let verdicts: [Bool]
     let font: Font
 
     @MainActor init(_ model: SettingsModel, font: Font) {
-        verdicts = MacChecklistProgress.verdicts(
-            states: model.macChecklistStates,
-            ticks: model.macChecklistTicks
-        )
-        screenShift = model.screenShiftChecklistDone
+        verdicts = model.macChecklistVerdicts
         self.font = font
     }
 
     var body: some View {
         HStack(spacing: 6) {
-            ForEach(verdicts, id: \.setting) { verdict in
-                tick(verdict.done)
+            ForEach(Array(verdicts.enumerated()), id: \.offset) {
+                tick($0.element)
             }
-            if let screenShift { tick(screenShift) }
         }
         .accessibilityHidden(true)
     }

@@ -84,7 +84,7 @@ struct ScreenShiftPlanTests {
         // a parked window's top sits above the bottom edge.
         #expect(shift.screen == "dell")
         #expect(shift.delta == CGVector(dx: 0, dy: -212))
-        #expect(shift.crossings == ["laptop"])
+        #expect(shift.crossings.map(\.screen) == ["laptop"])
     }
 
     @Test("The shift frees the corner and no other screen's")
@@ -110,7 +110,7 @@ struct ScreenShiftPlanTests {
         // corner, the nearer of the two.
         #expect(shift.screen == "wide")
         #expect(shift.delta == CGVector(dx: 601, dy: 0))
-        #expect(shift.crossings == ["laptop"])
+        #expect(shift.crossings.map(\.screen) == ["laptop"])
     }
 
     @Test("At an equal count and distance a non-main screen moves")
@@ -154,7 +154,7 @@ struct ScreenShiftPlanTests {
         #expect(abs(lowered.delta.dy) < abs(raised.delta.dy))
         let shift = try onlyShift(desk)
         #expect(shift.screen == "right")
-        #expect(shift.crossings == ["middle"])
+        #expect(shift.crossings.map(\.screen) == ["middle"])
     }
 
     @Test("Two boxed-in screens get one offer freeing both")

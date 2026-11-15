@@ -317,10 +317,9 @@ extension HomeSurfacingTests {
             "MacChecklistTicks(model,"
         ],
         "Settings/Components/MacChecklist/MacChecklistTicks.swift": [
-            "verdicts=MacChecklistProgress.verdicts("
-                + "states:model.macChecklistStates,"
-                + "ticks:model.macChecklistTicks)",
-            "ForEach(verdicts,id:\\.setting){verdictin",
+            "verdicts=model.macChecklistVerdicts",
+            "ForEach(Array(verdicts.enumerated()),id:\\.offset){"
+                + "tick($0.element)}",
         ],
         "Settings/SettingsSearchRow.swift": [
             // Enrichment is a surfacing branch: consulting the

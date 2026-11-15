@@ -345,5 +345,13 @@ Every one of the following binds whoever touches them:
     `PrivatePathSelfTestTests` ▸ `readRosterIsPinned`, and a
     bridge write dispatched from inside a read's verification in
     `PrivatePathSelfTestTests` ▸ `writesAreNeverDispatched`.
+- **macOS's Displays arrangement is written only on the user's
+  yes, and only through `TilingEngine.writeArrangement` (#2756).**
+  The write is public CoreGraphics and lands `.permanently`, so it
+  outlives the process: nothing writes it at launch, on a screen
+  change or after sleep, and a new writer goes through that seam,
+  which `makeTestCore` pins to a refusal beside `readArrangement`
+  (`ScreenShiftEdgeTests` ▸ `doorsTakeTheSeams`). A write is
+  verified by re-reading the bounds, as above.
 - No Accessibility trust is needed for any bridge operation
   (#889 item 2); do not add a permission prompt for one.

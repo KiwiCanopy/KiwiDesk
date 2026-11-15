@@ -1,36 +1,42 @@
 import CoreGraphics
 
-/// The boxed-in screen offer's Core doors (#2756): the verdict
-/// the Screens page and the Mac Checklist read, and the one write
-/// the offer's yes makes. Core names the screens; the GUI words
-/// them (core-boundaries.md).
+/// The boxed-in screen offer's Core doors (#2756): the arrangement
+/// the Screens page and the Mac Checklist plan over, and the one
+/// write the offer's yes makes. Both go through `TilingEngine`'s
+/// arrangement seams. Core names the screens; the GUI words them
+/// (core-boundaries.md).
 extension KiwiCore {
-    /// The live arrangement: every screen the tiler parks on,
-    /// with its usable area from `TilingEngine.displayFrames`, so
-    /// the verdict scores the corners the stash parks in.
+    /// The live arrangement: every screen the tiler parks on, with
+    /// its usable area from `TilingEngine.displayFrames`, so the
+    /// plan scores the corners the stash parks in. Empty when any
+    /// screen cannot be read or named, so no plan moves screens
+    /// around one it cannot see.
     public func arrangedScreens() -> [ArrangedScreen] {
+        let frames = tiler.displayFrames()
         let names = Dictionary(
             state.workspaces.allDisplays.map { ($0.id, $0.name) },
             uniquingKeysWith: { first, _ in first }
         )
-        return tiler.displayFrames().compactMap { id, visible in
-            guard let uuid = DisplayArrangement.uuid(of: id) else {
-                return nil
-            }
-            return ArrangedScreen(
-                id: uuid,
-                name: names[id] ?? uuid,
-                frame: DisplayArrangement.bounds(of: id),
-                visible: visible,
-                isMain: DisplayArrangement.isMain(id)
+        guard let readings = tiler.readArrangement(frames.map(\.id))
+        else { return [] }
+        var screens: [ArrangedScreen] = []
+        for (id, visible) in frames {
+            guard
+                let reading = readings.first(where: { $0.id == id }),
+                let name = names[id]
+            else { return [] }
+            screens.append(
+                ArrangedScreen(
+                    id: reading.uuid,
+                    name: name,
+                    frame: reading.bounds,
+                    visible: visible,
+                    isMain: reading.isMain,
+                    display: id
+                )
             )
         }
-    }
-
-    /// The arrangement's one offer; nil while no screen is boxed
-    /// in.
-    public func screenOffer() -> ScreenOffer? {
-        ScreenShiftPlan.offer(arrangedScreens())
+        return screens
     }
 
     /// Applies the offer's moves after the user's yes, in one
@@ -40,16 +46,21 @@ extension KiwiCore {
     @discardableResult
     public func applyScreenShifts(_ shifts: [ScreenShift]) -> Bool {
         let ids = tiler.displayFrames().map(\.id)
+        guard let readings = tiler.readArrangement(ids) else {
+            return false
+        }
         var moves: [DisplayID: CGVector] = [:]
         for shift in shifts {
             guard
-                let display = ids.first(where: {
-                    DisplayArrangement.uuid(of: $0) == shift.screen
+                let reading = readings.first(where: {
+                    $0.uuid == shift.screen
                 })
             else { return false }
-            moves[display] = shift.delta
+            moves[reading.id] = shift.delta
         }
-        let landed = DisplayArrangement.shift(moves, among: ids)
+        let landed = tiler.writeArrangement(
+            DisplayArrangement.targets(moves: moves, in: readings)
+        )
         let words = shifts.map {
             "\($0.screen) (\(Int($0.delta.dx)), \(Int($0.delta.dy)))"
         }
