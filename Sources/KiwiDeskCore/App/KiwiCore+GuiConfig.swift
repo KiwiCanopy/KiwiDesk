@@ -64,7 +64,22 @@ extension KiwiCore {
         guard let rules = guiConfigStore.load()?.appRules else {
             return globalRuleBase.appRules
         }
-        return AppRuleOverride.normalized(rules)
+        return AppRuleOverride.normalized(
+            rules,
+            normalizing: AppRuleOverride.bareKey
+        )
+    }
+
+    /// The base titled Space rules, `baseAppRules()`'s titled
+    /// sibling (#3341).
+    public func baseTitledAppRules() -> [String: SpaceID] {
+        guard isGuiManaged,
+            let rules = guiConfigStore.load()?.titledAppRules
+        else { return globalRuleBase.titledAppRules }
+        return AppRuleOverride.normalized(
+            rules,
+            normalizing: AppTitleRule.normalizedRule
+        )
     }
 
     /// Global float-rule base for the stored-profile editor.
@@ -113,6 +128,7 @@ extension KiwiCore {
         let profile = try profiles.read(name: name)
         var config = guiConfigStore.load() ?? guiConfigSeed()
         config.appRules = baseAppRules()
+        config.titledAppRules = baseTitledAppRules()
         config.floatRules = baseFloatRules()
         config.ignoreRules = baseIgnoreRules()
         if !isGuiManaged {

@@ -54,6 +54,9 @@ extension KiwiCore {
             KeepRoot.spaceModes: .object(modes),
             KeepRoot.appWide: appWide.groupsJSON,
             KeepRoot.appRules: Self.appRuleJSON(state.appRules),
+            KeepRoot.titledAppRules: Self.appRuleJSON(
+                state.titledAppRules.rawRules
+            ),
             KeepRoot.floatRules: Self.floatRuleJSON(
                 eventLoop.floatRules.rawRules
             ),
@@ -76,6 +79,9 @@ extension KiwiCore {
         )
         return [
             KeepRoot.appRules: appRuleJSON(rules.appRules.resolved(for: page)),
+            KeepRoot.titledAppRules: appRuleJSON(
+                rules.titledAppRules.resolved(for: page)
+            ),
             KeepRoot.floatRules: floatRuleJSON(floats),
             KeepRoot.focusWrap: .string(
                 (rules.focusWrap.resolved(
@@ -100,7 +106,7 @@ extension KiwiCore {
         .object(
             Dictionary(
                 rules.map {
-                    (FloatRules.normalizedRule($0), JSONValue.bool(true))
+                    (AppTitleRule.normalizedRule($0), JSONValue.bool(true))
                 },
                 uniquingKeysWith: { first, _ in first }
             )
@@ -230,7 +236,8 @@ struct KeepJudge {
         case KeepRoot.appWide?: known = !rest.isEmpty
         case KeepRoot.settings?: known = !rest.isEmpty
         case KeepRoot.spaceModes?: known = rest.count == 1
-        case KeepRoot.appRules?, KeepRoot.floatRules?:
+        case KeepRoot.appRules?, KeepRoot.floatRules?,
+            KeepRoot.titledAppRules?:
             known = rest.count == 1
         case KeepRoot.floatAutomatically?, KeepRoot.focusWrap?:
             known = rest.isEmpty
@@ -250,7 +257,9 @@ struct KeepJudge {
             return declared.contains(SpaceID(rest[0]))
                 ? leaf(.profile) : leaf(.none, .temporarySpace)
         }
-        if path.first == KeepRoot.appRules {
+        if path.first == KeepRoot.appRules
+            || path.first == KeepRoot.titledAppRules
+        {
             if let space = liveValue?.stringValue,
                 !declared.contains(SpaceID(space))
             {
@@ -302,6 +311,8 @@ enum KeepRoot {
     static let spaceModes = "space_modes"
     static let appWide = "app_wide"
     static let appRules = "app_rules"
+    /// The titled Space rules (#3341), one `app:title` leaf each.
+    static let titledAppRules = "titled_app_rules"
     static let floatRules = "float_rules"
     static let floatAutomatically = "float_automatically"
     /// The focus-wrap setting (#2493), a rule-reach family.

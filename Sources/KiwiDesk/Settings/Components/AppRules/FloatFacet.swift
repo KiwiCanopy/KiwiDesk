@@ -6,7 +6,7 @@ import KiwiDeskCore
 /// bundle identifier cannot contain one, so `app` floats every
 /// window and `app:fragment` floats the windows whose title
 /// contains that fragment. A rule's app
-/// is keyed through `FloatRules.app(of:)`, the engine's own
+/// is keyed through `AppTitleRule.app(of:)`, the engine's own
 /// case-folded key (#2345).
 enum FloatFacet: Equatable {
     case never
@@ -15,15 +15,15 @@ enum FloatFacet: Equatable {
 
     /// Whether a float rule matches by title rather than floating
     /// every window, read through the engine's own
-    /// `FloatRules.parse` (#2345). The one spelling of the marker
+    /// `AppTitleRule.parse` (#2345). The one spelling of the marker
     /// test (architect review, 2026-09-22).
     static func isTitled(_ rule: String) -> Bool {
-        FloatRules.title(of: rule) != nil
+        AppTitleRule.title(of: rule) != nil
     }
 
     /// The app a float rule names, as the engine keys it.
     static func appSegment(of rule: String) -> String {
-        FloatRules.app(of: rule)
+        AppTitleRule.app(of: rule)
     }
 
     static func current(
@@ -42,7 +42,7 @@ enum FloatFacet: Equatable {
         _ rules: [String],
         app: String
     ) -> [String] {
-        Self.rules(rules, app: app).compactMap(FloatRules.title(of:))
+        Self.rules(rules, app: app).compactMap(AppTitleRule.title(of:))
     }
 
     /// `rules` with `app`'s title patterns set to `patterns`: a
@@ -54,23 +54,23 @@ enum FloatFacet: Equatable {
         of app: String,
         in rules: [String]
     ) -> [String] {
-        let app = FloatRules.appKey(app)
+        let app = AppTitleRule.appKey(app)
         let old = Self.patterns(rules, app: app)
         let dropped = Set(old.filter { !patterns.contains($0) })
         var kept = rules.filter { rule in
-            let parsed = FloatRules.parse(rule)
+            let parsed = AppTitleRule.parse(rule)
             guard parsed.app == app else { return true }
             return parsed.title.map { !dropped.contains($0) } ?? false
         }
         for pattern in patterns where !old.contains(pattern) {
-            kept.append(FloatRules.rule(app: app, title: pattern))
+            kept.append(AppTitleRule.rule(app: app, title: pattern))
         }
         return kept
     }
 
     /// `app`'s own rules, in stored order and spelling.
     static func rules(_ rules: [String], app: String) -> [String] {
-        let app = FloatRules.appKey(app)
+        let app = AppTitleRule.appKey(app)
         return rules.filter { appSegment(of: $0) == app }
     }
 
@@ -79,7 +79,7 @@ enum FloatFacet: Equatable {
         of app: String,
         from rules: [String]
     ) -> [String] {
-        let app = FloatRules.appKey(app)
+        let app = AppTitleRule.appKey(app)
         return rules.filter { appSegment(of: $0) != app }
     }
 }

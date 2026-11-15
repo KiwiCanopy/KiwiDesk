@@ -5,7 +5,18 @@ import Foundation
 /// Bespoke on that seam, NOT a generic sparse-override primitive
 /// (AGENTS.md §5, `.claude/rules/parity-tests.md`); guarded by
 /// round-trip + resolve + diff-inverse in `AppRuleOverrideTests`.
+///
+/// Every key read takes a canonicalizer, `normalizing`: the bare
+/// family's default lowercases a bundle id, and the titled family
+/// passes `AppTitleRule.normalizedRule`, which keeps a title
+/// fragment's case (#3341).
 public struct AppRuleOverride: Sendable, Equatable {
+    /// A rule key's canonical spelling.
+    public typealias Canonical = @Sendable (String) -> String
+
+    /// The bare family's key: a bundle id, case-insensitive.
+    public static let bareKey: Canonical = { $0.lowercased() }
+
     /// Sparse app overrides where stored `nil` indicates a tombstone unpin.
     public var rules: [String: SpaceID?]
 
@@ -18,10 +29,11 @@ public struct AppRuleOverride: Sendable, Equatable {
 
     /// Resolves override onto global base rules (#109).
     public func resolved(
-        onto base: [String: SpaceID]
+        onto base: [String: SpaceID],
+        normalizing key: Canonical
     ) -> [String: SpaceID] {
-        var result = Self.normalized(base)
-        for (app, target) in normalizedRules {
+        var result = Self.normalized(base, normalizing: key)
+        for (app, target) in normalizedRules(normalizing: key) {
             if let target {
                 result[app] = target
             } else {
@@ -36,10 +48,11 @@ extension AppRuleOverride {
     /// Computes sparse difference from base to edited rules (#109).
     public static func diff(
         base: [String: SpaceID],
-        edited: [String: SpaceID]
+        edited: [String: SpaceID],
+        normalizing key: Canonical
     ) -> AppRuleOverride? {
-        let base = normalized(base)
-        let edited = normalized(edited)
+        let base = normalized(base, normalizing: key)
+        let edited = normalized(edited, normalizing: key)
         var rules: [String: SpaceID?] = [:]
         for (app, space) in edited where base[app] != space {
             rules[app] = space
@@ -51,26 +64,29 @@ extension AppRuleOverride {
         return over.isEmpty ? nil : over
     }
 
-    /// Canonical lowercase bundle-id map shared across resolve and diff.
+    /// The canonical map shared across resolve and diff.
     public static func normalized(
-        _ rules: [String: SpaceID]
+        _ rules: [String: SpaceID],
+        normalizing key: Canonical
     ) -> [String: SpaceID] {
         var result: [String: SpaceID] = [:]
         for (app, target) in rules.sorted(by: {
             $0.key < $1.key
         }) {
-            result[app.lowercased()] = target
+            result[key(app)] = target
         }
         return result
     }
 
-    /// Lowercased entries, a tombstone winning over a pin.
-    var normalizedRules: [String: SpaceID?] {
+    /// Canonical entries, a tombstone winning over a pin.
+    func normalizedRules(
+        normalizing key: Canonical
+    ) -> [String: SpaceID?] {
         var result: [String: SpaceID?] = [:]
         for (app, target) in rules.sorted(by: {
             $0.key < $1.key
         }) {
-            let app = app.lowercased()
+            let app = key(app)
             if target == nil {
                 result.updateValue(nil, forKey: app)
             } else if result[app] != .some(nil) {
@@ -141,7 +157,26 @@ extension ConfigResolver {
         base: [String: SpaceID],
         profile: AppRuleOverride?
     ) -> [String: SpaceID] {
-        profile?.resolved(onto: base)
-            ?? AppRuleOverride.normalized(base)
+        profile?.resolved(onto: base, normalizing: AppRuleOverride.bareKey)
+            ?? AppRuleOverride.normalized(
+                base,
+                normalizing: AppRuleOverride.bareKey
+            )
+    }
+
+    /// Resolves the effective titled Space rules (#3341), keyed
+    /// through `AppTitleRule.normalizedRule`.
+    public static func resolvedTitledAppRules(
+        base: [String: SpaceID],
+        profile: AppRuleOverride?
+    ) -> [String: SpaceID] {
+        profile?.resolved(
+            onto: base,
+            normalizing: AppTitleRule.normalizedRule
+        )
+            ?? AppRuleOverride.normalized(
+                base,
+                normalizing: AppTitleRule.normalizedRule
+            )
     }
 }

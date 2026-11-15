@@ -39,6 +39,9 @@ public struct Profile: Codable, Sendable, Equatable {
     public var layers: KeyLayerOverride?
     /// Sparse app-to-space rule overrides (#109).
     public var appRules: AppRuleOverride?
+    /// Sparse `titled_app_rules` overrides (#3341), keyed through
+    /// `AppTitleRule.normalizedRule`.
+    public var titledAppRules: AppRuleOverride?
     /// Sparse additions/removals over global `float_rules`.
     public var floatRules: RuleListOverride?
     /// Sparse additions/removals over global `ignore_rules`.
@@ -82,6 +85,7 @@ public struct Profile: Codable, Sendable, Equatable {
         savedAt: Date = .now,
         layers: KeyLayerOverride? = nil,
         appRules: AppRuleOverride? = nil,
+        titledAppRules: AppRuleOverride? = nil,
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
@@ -110,6 +114,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.savedAt = savedAt
         self.layers = layers
         self.appRules = appRules
+        self.titledAppRules = titledAppRules
         self.floatRules = floatRules
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
@@ -219,6 +224,10 @@ public struct Profile: Codable, Sendable, Equatable {
         appRules = try container.decodeIfPresent(
             AppRuleOverride.self,
             forKey: .appRules
+        )
+        titledAppRules = try container.decodeIfPresent(
+            AppRuleOverride.self,
+            forKey: .titledAppRules
         )
         floatRules = try container.decodeIfPresent(
             RuleListOverride.self,

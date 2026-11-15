@@ -19,6 +19,7 @@ extension KiwiCore {
     func captureGlobalWindowRuleBase(from config: GuiConfig) {
         captureGlobalWindowRuleBase(
             appRules: config.appRules,
+            titledAppRules: config.titledAppRules,
             floatRules: config.floatRules,
             ignoreRules: config.ignoreRules,
             tileRules: config.tileRules,
@@ -28,12 +29,20 @@ extension KiwiCore {
 
     func captureGlobalWindowRuleBase(
         appRules: [String: SpaceID],
+        titledAppRules: [String: SpaceID],
         floatRules: [String],
         ignoreRules: [String],
         tileRules: [String],
         floatAutomatically: Bool
     ) {
-        globalRuleBase.appRules = AppRuleOverride.normalized(appRules)
+        globalRuleBase.appRules = AppRuleOverride.normalized(
+            appRules,
+            normalizing: AppRuleOverride.bareKey
+        )
+        globalRuleBase.titledAppRules = AppRuleOverride.normalized(
+            titledAppRules,
+            normalizing: AppTitleRule.normalizedRule
+        )
         globalRuleBase.floatRules = FloatRules(floatRules).rawRules
         globalRuleBase.ignoreRules = IgnoreRules(ignoreRules).rawRules
         globalRuleBase.tileRules =
@@ -107,10 +116,14 @@ extension KiwiCore {
             base: globalRuleBase.appRules,
             override: profile.appRules
         )
+        setResolvedTitledAppRules(
+            base: globalRuleBase.titledAppRules,
+            override: profile.titledAppRules
+        )
         let resolvedFloat =
             profile.floatRules?.resolved(
                 onto: globalRuleBase.floatRules,
-                normalizing: FloatRules.normalizedRule
+                normalizing: AppTitleRule.normalizedRule
             ) ?? globalRuleBase.floatRules
         let resolvedIgnore =
             profile.ignoreRules?.resolved(
@@ -237,12 +250,26 @@ extension KiwiCore {
             profile: override
         )
     }
+
+    /// The one writer of `state.titledAppRules` (#3341).
+    func setResolvedTitledAppRules(
+        base: [String: SpaceID],
+        override: AppRuleOverride?
+    ) {
+        state.titledAppRules = TitledSpaceRules(
+            ConfigResolver.resolvedTitledAppRules(
+                base: base,
+                profile: override
+            )
+        )
+    }
 }
 
 /// A profile's sparse overrides of the window-rule families, read
 /// together so a resolve cannot leave one behind.
 struct WindowRuleOverrides {
     var appRules: AppRuleOverride?
+    var titledAppRules: AppRuleOverride?
     var floatRules: RuleListOverride?
     var ignoreRules: RuleListOverride?
     /// `tile_rules` and `float_automatically` (#2173).
@@ -255,6 +282,7 @@ extension WindowRuleOverrides {
     init(_ profile: Profile?) {
         self.init(
             appRules: profile?.appRules,
+            titledAppRules: profile?.titledAppRules,
             floatRules: profile?.floatRules,
             ignoreRules: profile?.ignoreRules,
             tileRules: profile?.tileRules,

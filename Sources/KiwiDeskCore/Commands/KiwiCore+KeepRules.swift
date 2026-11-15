@@ -15,6 +15,7 @@ extension KiwiCore {
     static func isRulePath(_ path: [String]) -> Bool {
         let root = path.first
         return root == KeepRoot.appRules || root == KeepRoot.floatRules
+            || root == KeepRoot.titledAppRules
             || root == KeepRoot.floatAutomatically
             || root == KeepRoot.focusWrap
     }
@@ -28,6 +29,7 @@ extension KiwiCore {
         else { return [] }
         let before = snapshot
         var appKeys: Set<String> = []
+        var titledKeys: Set<String> = []
         var floatEdits: [String: [String: Bool]] = [:]
         let autoKey = RuleReachTable<Bool>.floatAutomaticallyKey
         var autoKept = false
@@ -55,6 +57,14 @@ extension KiwiCore {
                 appKeys.insert(path[1])
                 snapshot.appRules.keep(
                     path[1],
+                    value: value?.stringValue.map { SpaceID($0) },
+                    editing: page
+                )
+            case (KeepRoot.titledAppRules?, 2):
+                let key = AppTitleRule.normalizedRule(path[1])
+                titledKeys.insert(key)
+                snapshot.titledAppRules.keep(
+                    key,
                     value: value?.stringValue.map { SpaceID($0) },
                     editing: page
                 )
@@ -86,6 +96,12 @@ extension KiwiCore {
             snapshot.appRules.profilesChanged(
                 from: before.appRules,
                 keys: appKeys
+            )
+        )
+        reached.formUnion(
+            snapshot.titledAppRules.profilesChanged(
+                from: before.titledAppRules,
+                keys: titledKeys
             )
         )
         reached.formUnion(

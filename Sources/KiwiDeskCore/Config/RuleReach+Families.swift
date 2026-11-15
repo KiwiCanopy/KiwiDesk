@@ -11,12 +11,39 @@ extension RuleReachTable where Value == SpaceID {
         base: [String: SpaceID],
         overrides: [(profile: String, override: AppRuleOverride?)]
     ) -> Self {
+        spaceRules(
+            base: base,
+            overrides: overrides,
+            normalizing: AppRuleOverride.bareKey
+        )
+    }
+
+    /// The titled Space family (#3341): `app:title` keys, canonical
+    /// through `AppTitleRule.normalizedRule`.
+    public static func titledAppRules(
+        base: [String: SpaceID],
+        overrides: [(profile: String, override: AppRuleOverride?)]
+    ) -> Self {
+        spaceRules(
+            base: base,
+            overrides: overrides,
+            normalizing: AppTitleRule.normalizedRule
+        )
+    }
+
+    /// A rule→Space family whose keys are canonical through `key`.
+    static func spaceRules(
+        base: [String: SpaceID],
+        overrides: [(profile: String, override: AppRuleOverride?)],
+        normalizing key: AppRuleOverride.Canonical
+    ) -> Self {
         var entries: [String: [String: SpaceID?]] = [:]
         for (profile, override) in overrides {
-            entries[profile] = override?.normalizedRules ?? [:]
+            entries[profile] =
+                override?.normalizedRules(normalizing: key) ?? [:]
         }
         return Self(
-            base: AppRuleOverride.normalized(base),
+            base: AppRuleOverride.normalized(base, normalizing: key),
             entries: entries,
             profiles: overrides.map(\.profile)
         )
@@ -25,12 +52,31 @@ extension RuleReachTable where Value == SpaceID {
     /// The base app rules: `original` with only the touched keys
     /// replaced, so an untouched rule keeps its stored spelling.
     public func appRuleBase(original: [String: SpaceID]) -> [String: SpaceID] {
+        spaceRuleBase(original: original, normalizing: AppRuleOverride.bareKey)
+    }
+
+    /// The base titled Space rules, `appRuleBase`'s titled sibling.
+    public func titledAppRuleBase(
+        original: [String: SpaceID]
+    ) -> [String: SpaceID] {
+        spaceRuleBase(
+            original: original,
+            normalizing: AppTitleRule.normalizedRule
+        )
+    }
+
+    /// `original` with each touched key, canonical through `key`,
+    /// replaced by the table's.
+    func spaceRuleBase(
+        original: [String: SpaceID],
+        normalizing key: AppRuleOverride.Canonical
+    ) -> [String: SpaceID] {
         guard !baseTouched.isEmpty else { return original }
         var result = original.filter {
-            !baseTouched.contains($0.key.lowercased())
+            !baseTouched.contains(key($0.key))
         }
-        for key in baseTouched {
-            if let value = base[key] { result[key] = value }
+        for touched in baseTouched {
+            if let value = base[touched] { result[touched] = value }
         }
         return result
     }
@@ -68,7 +114,7 @@ extension RuleReachTable where Value == [String] {
                 let resolved = RuleListOverride(rules: subset)
                     .resolved(
                         onto: inherited,
-                        normalizing: FloatRules.normalizedRule
+                        normalizing: AppTitleRule.normalizedRule
                     ).sorted()
                 if !resolved.isEmpty {
                     own[app] = resolved
@@ -121,7 +167,7 @@ extension RuleReachTable where Value == [String] {
             let encoded = RuleListOverride.diff(
                 base: base[app] ?? [],
                 edited: entry ?? [],
-                normalizing: FloatRules.normalizedRule
+                normalizing: AppTitleRule.normalizedRule
             )
             rules.merge(encoded?.rules ?? [:]) { _, new in new }
         }
@@ -129,16 +175,16 @@ extension RuleReachTable where Value == [String] {
         return override.isEmpty ? nil : override
     }
 
-    /// The app a float rule names (`FloatRules.app(of:)`).
+    /// The app a float rule names (`AppTitleRule.app(of:)`).
     public static func app(of rule: String) -> String {
-        FloatRules.app(of: rule)
+        AppTitleRule.app(of: rule)
     }
 
     /// A flat rule list as the table's per-app values.
     public static func groupedByApp(_ rules: [String]) -> [String: [String]] {
         var grouped: [String: [String]] = [:]
         for rule in rules {
-            let normalized = FloatRules.normalizedRule(rule)
+            let normalized = AppTitleRule.normalizedRule(rule)
             guard !normalized.isEmpty else { continue }
             grouped[app(of: normalized), default: []].append(normalized)
         }

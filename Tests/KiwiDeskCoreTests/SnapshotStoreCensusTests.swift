@@ -103,6 +103,7 @@ struct SnapshotStoreCensusTests {
         )
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
+        core.state.titledRulePending[WindowID(1)] = core.wallClock()
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.ownFronts[WindowID(1)] = core.wallClock()

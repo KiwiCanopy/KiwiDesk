@@ -30,6 +30,7 @@ struct GlobalsFieldParityTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("alpha"), SpaceID("beta")]
         config.appRules = ["com.example.app": SpaceID("beta")]
+        config.titledAppRules = ["com.example.app:Work": SpaceID("alpha")]
         config.floatRules = ["com.example.floaty"]
         config.ignoreRules = ["com.example.ignored"]
         config.profileBindings = [

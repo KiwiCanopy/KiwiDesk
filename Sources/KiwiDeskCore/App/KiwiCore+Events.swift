@@ -50,6 +50,8 @@ extension KiwiCore {
             state.returningFocus = desktopMemory.returnFocus.owed()
             // How it may take the focus (#3122, #3152), likewise.
             state.arrivalFocus = arrivalFocus(of: window)
+            // When it arrived, for a titled rule's late match (#3341).
+            state.arrivalStamp = wallClock()
             claimCrossSessionArrival(window)  // #1385
         }
         // Read BEFORE the fold below overwrites/removes them —
@@ -257,6 +259,11 @@ extension KiwiCore {
             )
         case .windowTitleChanged(let id, _):
             noteVisionTitleChanged(id)
+            // A late titled filing retiles, which rebuilds the bars.
+            let filed = effects.lateTitledRule.map(payLateTitledRule)
+            if filed == true {
+                break
+            }
             if effects.floatFlipped {
                 retile()
             } else {

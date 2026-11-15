@@ -119,6 +119,12 @@ extension SnapshotStoreCensusTests {
             (.behind, "which window was focused last (#1840); a residue"),
         "state.closedDepartures":
             (.behind, "a close's mark, consumed at the next arrival"),
+        "state.titledRulePending":
+            (
+                .behind,
+                "a titled rule's late match, owed a new window for "
+                    + "the title settle (#3341)"
+            ),
         "state.awayWindows":
             (.behind, "re-seeded from the compositor at boot (#1146)"),
         "ownFronts":

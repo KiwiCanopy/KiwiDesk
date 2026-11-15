@@ -15,6 +15,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
+    /// `app:title` -> space assignment (`titled_app_rules`, #3341):
+    /// keyed in the float grammar, a title fragment's case kept.
+    public var titledAppRules: [String: SpaceID] = [:]
     /// Space -> monitor fingerprint pin (profile-scoped).
     public var spacePins: [SpaceID: String] = [:]
     /// Spaces following the main display (profile-scoped).
@@ -120,6 +123,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case format
         case spaces
         case appRules = "app_rules"
+        case titledAppRules = "titled_app_rules"
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case layers
@@ -174,6 +178,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.decodeIfPresent(
                 [String: SpaceID].self,
                 forKey: .appRules
+            ) ?? [:]
+        titledAppRules =
+            try container.decodeIfPresent(
+                [String: SpaceID].self,
+                forKey: .titledAppRules
             ) ?? [:]
         floatRules =
             try container.decodeIfPresent(
@@ -305,5 +314,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         // filter stays separate.
         removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
+        titledAppRules = titledAppRules.filter { !$0.value.raw.isEmpty }
     }
 }

@@ -60,8 +60,9 @@ struct AppRuleListsWiringTests {
         return Self.squashed(found)
     }
 
-    /// The scope fix itself: a title pattern's editor hangs under
-    /// the FLOAT row, and the Space row mounts none.
+    /// The scope fix itself: the chip editor hangs under the FLOAT
+    /// row, and the Space row mounts none — its one pattern is
+    /// composed in its own scope cell (#1608 ▸ amended by #3341).
     @Test("the pattern editor lives in the Float row alone")
     func patternEditorScopesToFloat() throws {
         #expect(
@@ -82,9 +83,9 @@ struct AppRuleListsWiringTests {
             !spaceRow.isEmpty && !spaceRow.contains("WindowTitleEditor"),
             Comment(
                 rawValue:
-                    "the Space row draws a title pattern again — "
-                    + "the Space is title-blind, and a pattern "
-                    + "under it reads as scoping it (#1608)"
+                    "the Space row mounts the chip editor — a "
+                    + "pattern list under it reads as scoping the "
+                    + "whole row (#1608, #3341)"
             )
         )
     }
@@ -92,9 +93,11 @@ struct AppRuleListsWiringTests {
     /// A rule must say something, by construction: the Space
     /// menu offers only Spaces, and the one way out of a list is
     /// its trash — which the section, not the row, performs. So
-    /// the row's ONE write to the store is the pick of a Space;
-    /// counted, so a `= .none` or a `removeValue` reds as surely
-    /// as a `= nil`.
+    /// the row's own writes to the stores are the pick of a Space,
+    /// one per store (#3341); counted, so a `= .none` or a
+    /// `removeValue` reds as surely as a `= nil`. A move between
+    /// the stores takes `SpaceRuleEdit`, whose every drop is paired
+    /// with a write of the same Space (`SpaceRuleEditTests`).
     @Test("the Space row never writes an absent Space")
     func spaceRowWritesNoAbsence() throws {
         // Comparisons blanked first: `appRules[app] == base` is a
@@ -103,15 +106,20 @@ struct AppRuleListsWiringTests {
         // up to its closing brace.
         let row = try source("AppRuleSpaceRow.swift")
             .replacingOccurrences(of: "==", with: "≡")
-        let writes = try NSRegularExpression(
-            pattern: #"appRules\[[^\]]*\]="#
-        ).numberOfMatches(
+            .replacingOccurrences(of: "!=", with: "≠")
+        let store = try NSRegularExpression(
+            pattern: #"[aA]ppRules\[[^\]]*\]="#
+        )
+        let writes = store.numberOfMatches(
             in: row,
             range: NSRange(row.startIndex..., in: row)
         )
         #expect(
-            writes == 1
-                && row.contains("{model.config.appRules[app]=space}")
+            writes == 2
+                && row.contains("model.config.appRules[row.app]=space}")
+                && row.contains(
+                    "model.config.titledAppRules[row.key]=space}"
+                )
                 && !row.contains("removeValue")
                 && !row.contains("$model")
                 && !row.contains("config.appRules="),
@@ -121,6 +129,19 @@ struct AppRuleListsWiringTests {
                     + "picking a Space — a row left saying nothing "
                     + "is the state #1022 and #1608 forbid"
             )
+        )
+        // The scope cell moves a rule only through `SpaceRuleEdit`.
+        let scope = try source("AppRuleSpaceRow+Scope.swift")
+            .replacingOccurrences(of: "==", with: "≡")
+            .replacingOccurrences(of: "!=", with: "≠")
+        let scopeWrites = store.numberOfMatches(
+            in: scope,
+            range: NSRange(scope.startIndex..., in: scope)
+        )
+        #expect(
+            scopeWrites == 0 && !scope.contains("removeValue")
+                && scope.contains("SpaceRuleEdit.setFragment("),
+            "the scope cell writes a Space store beside SpaceRuleEdit"
         )
     }
 
@@ -136,14 +157,16 @@ struct AppRuleListsWiringTests {
                 in: file
             ).contains(
                 Self.squashed(
-                    "menu == gates.hasSpaces ? app : app + \"\\u{0}\""
+                    "menu == gates.hasSpaces ? row.key : row.key + "
+                        + "\"\\u{0}\""
                 )
             ),
             "the focus no longer follows the Space menu's grey"
         )
         // Contiguous with each control's own chain, so a binding
-        // moved onto another control reds.
-        let row = try body(of: "var body: some View", in: file)
+        // moved onto another control reds. The controls a row draws
+        // past its scope cell (#3341).
+        let row = try body(of: "private var controls: some View", in: file)
         #expect(
             row.contains(
                 Self.squashed(

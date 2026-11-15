@@ -13,7 +13,15 @@ extension SettingsValueReadout {
             return appRulesSpaceRows(
                 census,
                 old: old.appRules,
-                new: new.appRules
+                new: new.appRules,
+                family: .space
+            )
+        case .titledAppRules:
+            return appRulesSpaceRows(
+                census,
+                old: old.titledAppRules,
+                new: new.titledAppRules,
+                family: .titledSpace
             )
         case .floatRules:
             return appRulesListNotes(
@@ -75,9 +83,10 @@ extension SettingsValueReadout {
     private static func appRulesSpaceRows(
         _ census: SettingKey,
         old: [String: SpaceID],
-        new: [String: SpaceID]
+        new: [String: SpaceID],
+        family: RuleFamily
     ) -> [SettingsDiffRow] {
-        let base = label(for: census)
+        let base = label(for: SettingKey.appRules(.appRules))
         let touched = Set(old.keys).union(new.keys)
             .filter { old[$0] != new[$0] }
             .sorted()
@@ -85,16 +94,28 @@ extension SettingsValueReadout {
             var row = SettingsDiffRow.change(
                 census,
                 instance: app,
-                label: instanceLabel(base, app),
+                label: spaceRuleLabel(base, app),
                 old: old[app]?.raw ?? unset,
                 new: new[app]?.raw ?? unset
             )
             row.subject = ReachSubject(
-                family: .space,
-                key: RuleFamily.space.key(app)
+                family: family,
+                key: family.key(app)
             )
             return row
         }
+    }
+
+    /// A Space rule's row label: the app, and a titled rule's scope
+    /// as its row draws it (#3341).
+    private static func spaceRuleLabel(
+        _ base: String,
+        _ rule: String
+    ) -> String {
+        let parsed = AppTitleRule.parse(rule)
+        let app = instanceLabel(base, parsed.app)
+        guard let fragment = parsed.title else { return app }
+        return instanceLabel(app, AppRuleScopeWords.titled(fragment))
     }
 
     /// Structural notes for a rule list: one Added/Removed row

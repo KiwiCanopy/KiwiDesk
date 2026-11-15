@@ -10,6 +10,11 @@ public struct StateCoordinator: Sendable {
     /// `app_rules` routing new windows of these apps to a fixed space.
     public var appRules: [String: SpaceID] = [:]
 
+    /// `titled_app_rules`: a new window whose title contains a
+    /// rule's fragment opens in its Space, ahead of `appRules`
+    /// (#3341).
+    public var titledAppRules = TitledSpaceRules()
+
     /// `new_window_placement` per layout mode, from tiler settings.
     public var spawnPlacements: [LayoutMode: SpawnPlacement] = [
         .bsp: BspParams().newWindowPlacement,
@@ -33,6 +38,14 @@ public struct StateCoordinator: Sendable {
     public var returningFocus: WindowID?
     /// How the arrival may take the focus (#3122, #3152), likewise.
     public var arrivalFocus = ArrivalFocus.foreground
+    /// When the arrival was created, mirrored likewise (#3341): the
+    /// stamp a titled rule's late match is judged against.
+    public var arrivalStamp: Date?
+    /// New windows a titled Space rule may still file once, on
+    /// their first matching title (#3341), each with its arrival
+    /// stamp. Written by the create fold, consumed by the title
+    /// fold, ended by a destroy and a user filing.
+    var titledRulePending: [WindowID: Date] = [:]
 
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
@@ -174,58 +187,6 @@ public struct StateCoordinator: Sendable {
         placeholderSpace = defaultSpace
     }
 
-    /// Swaps a window ID across every ID-keyed map for native tab
-    /// switches (#308) — the hand-mirrored list §5 warns about, so
-    /// `WindowRekeyParityTests` discovers the containers by
-    /// reflection. `minimizeOrder`'s element is a struct the
-    /// reflection cannot see; the `String(describing:)` scan and
-    /// `MinimizeOrderTests` are its nets (#673).
-    /// `rememberedFloating` is keyed by app+title and deliberately
-    /// untouched.
-    mutating func rekey(_ old: WindowID, to new: WindowID) {
-        windows.rekey(old, to: new)
-        workspaces.rekey(old, to: new)
-        if let space = rememberedSpaces.removeValue(forKey: old) {
-            rememberedSpaces[new] = space
-        }
-        if closedDepartures.remove(old) != nil {
-            closedDepartures.insert(new)
-        }
-        if unjudgedFilings.remove(old) != nil {
-            unjudgedFilings.insert(new)
-        }
-        if let owed = restoredFrames.removeValue(forKey: old) {
-            restoredFrames[new] = owed
-        }
-        if crossSession.placed.remove(old) != nil {
-            crossSession.placed.insert(new)
-        }
-        if let slot = departedSlots.removeValue(forKey: old) {
-            departedSlots[new] = slot
-        }
-        for (id, slot) in departedSlots where slot.handedTo == old {
-            departedSlots[id]?.handedTo = new
-        }
-        if let away = awayWindows.removeValue(forKey: old) {
-            awayWindows[new] = away.withID(new)
-        }
-        if let index = minimizeOrder.firstIndex(where: { $0.id == old }) {
-            minimizeOrder[index].id = new
-        }
-        if userFloated.remove(old) != nil {
-            userFloated.insert(new)
-        }
-        if let reach = stickyReachOverrides.removeValue(forKey: old) {
-            stickyReachOverrides[new] = reach
-        }
-        rekeyFloatMemory(old, to: new)
-        if let rank = focusRecency.removeValue(forKey: old) {
-            focusRecency[new] = rank
-        }
-        rekeyPocket(old, to: new)
-        rekeyVisionFill(old, to: new)
-    }
-
     /// Folds an event into state and returns side-effect facts (#166).
     @discardableResult
     public mutating func apply(
@@ -298,6 +259,7 @@ public struct StateCoordinator: Sendable {
         case .windowTitleChanged(let id, let title):
             let floatBefore = windows[id]?.isFloating
             windows.updateTitle(id, title: title)
+            effects.lateTitledRule = consumeTitledRule(id, title: title)
             // Retry lazy-title app overrides once real title lands (#160).
             if let window = windows[id], pocketPhase(of: id) == nil {
                 restoreFloatOverride(of: window)

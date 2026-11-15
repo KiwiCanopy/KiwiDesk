@@ -18,6 +18,13 @@ extension SettingsModel {
                 editing: editing,
                 isLoaded: reachIsLoaded
             )
+        case .titledSpace:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.titledAppRules,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
         case .float:
             return RuleReachDraft.defaultReach(
                 of: key,

@@ -243,6 +243,7 @@ struct EncodedReachCache {
     struct Key: Equatable {
         let edits: RuleReachEdits
         let appRules: [String: SpaceID]
+        let titledAppRules: [String: SpaceID]
         let floatRules: [String]
         let layers: [KeyLayer]
         let scrollGesture: ScrollGestureBase

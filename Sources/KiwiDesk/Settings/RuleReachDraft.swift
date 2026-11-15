@@ -3,6 +3,9 @@ import KiwiDeskCore
 /// The rule families an "Applies to" checklist edits (#1393).
 enum RuleFamily: Hashable {
     case space
+    /// A titled Space rule, keyed `app:title` through
+    /// `AppTitleRule.normalizedRule` (#3341).
+    case titledSpace
     case float
     /// A shortcut: one action in one layer, keyed by
     /// `RuleReachTable.keyID`.
@@ -35,14 +38,15 @@ enum RuleFamily: Hashable {
 
     /// How a row's subject keys its table: app rules by the
     /// lowercased bundle id — a float rule's app by the engine's
-    /// own `FloatRules.appKey` (#2345) — a shortcut's action and a
+    /// own `AppTitleRule.appKey` (#2345) — a shortcut's action and a
     /// scroll setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
         case .key, .scroll, .gesture, .history, .wrap, .cycle, .autoFloat,
             .tilingStart, .tilingOffHides:
             subject
-        case .float: FloatRules.appKey(subject)
+        case .float: AppTitleRule.appKey(subject)
+        case .titledSpace: AppTitleRule.normalizedRule(subject)
         case .space, .tile: subject.lowercased()
         }
     }

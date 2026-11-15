@@ -44,7 +44,7 @@ struct RuleKeepDraftTests {
             draft.appRules
                 == ["com.a": "1", "com.b": "4", "com.k": "1", "com.d": "3"]
         )
-        let normalized = draft.floatRules.map(FloatRules.normalizedRule)
+        let normalized = draft.floatRules.map(AppTitleRule.normalizedRule)
         #expect(Set(normalized) == ["com.f", "com.h", "com.n"])
         #expect(normalized.count == 3)
         #expect(draft.floatAutomatically == false)

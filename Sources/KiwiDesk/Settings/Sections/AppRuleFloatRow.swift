@@ -202,6 +202,6 @@ struct AppRuleFloatRow: View {
             of: app,
             from: model.config.floatRules
         )
-        model.config.floatRules = others + [FloatRules.appKey(app)]
+        model.config.floatRules = others + [AppTitleRule.appKey(app)]
     }
 }

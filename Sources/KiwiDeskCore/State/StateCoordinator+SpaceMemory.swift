@@ -55,6 +55,8 @@ extension StateCoordinator {
     /// by the user filing seams, `KiwiCore.addFocusedToSpace` and
     /// the trade's `fileTrade` (#2509).
     mutating func stampUserFiling(_ id: WindowID) {
+        // A window the user filed is no titled rule's (#3341).
+        titledRulePending[id] = nil
         guard crossSession.isOpen else { return }
         crossSession.placed.insert(id)
     }
@@ -273,6 +275,7 @@ extension StateCoordinator {
         rememberedSpaces = [:]
         closedDepartures = []
         unjudgedFilings = []
+        titledRulePending = [:]
         restoredFrames = [:]
         departedSlots = [:]
         awayWindows = [:]

@@ -13,21 +13,26 @@ extension AppRulesSection {
             help: Self.spaceHelp
         ) {
             if hasNoRules { emptyNote }
-            ForEach(spaceApps, id: \.self) { app in
-                AppRuleSpaceRow(
-                    model: model,
-                    app: app,
-                    gates: gates,
-                    showsReach: showsReach,
-                    onDelete: { deleteSpace(app, $0) },
-                    returningRow: $returningSpaceRow
-                )
+            ForEach(spaceGroups, id: \.self) { group in
+                ForEach(group) { row in
+                    AppRuleSpaceRow(
+                        model: model,
+                        row: row,
+                        first: row == group.first,
+                        siblings: titledFragments(of: row.app),
+                        gates: gates,
+                        showsReach: showsReach,
+                        composing: $composingSpace,
+                        onDelete: { deleteSpace(row, $0) },
+                        returningRow: $returningSpaceRow
+                    )
+                }
                 Divider()
             }
             AppSelector(
                 role: .space,
                 name: $newSpaceApp,
-                exclude: Set(spaceApps),
+                exclude: bareSpaceApps,
                 onCommit: addWithSpace,
                 openAppsOf: model.core
             )
@@ -37,9 +42,34 @@ extension AppRulesSection {
     }
 
     /// Apps this list draws: every rule the edited profile
-    /// resolves (#1393).
+    /// resolves (#1393), bare or titled (#3341).
     var spaceApps: [String] {
-        sortedByName(Set(model.config.appRules.keys))
+        sortedByName(SpaceRuleRows.apps(model.config))
+    }
+
+    /// Each app's rows in the engine's order, a new titled row being
+    /// composed first in its group, where its composer opens.
+    var spaceGroups: [[SpaceRuleRow]] {
+        let groups = SpaceRuleRows.groups(model.config, apps: spaceApps)
+        guard let composing = composingSpace, composing.row == nil else {
+            return groups
+        }
+        return groups.map { group in
+            guard group.first?.app == composing.app else { return group }
+            return [SpaceRuleRow(app: composing.app, fragment: "")] + group
+        }
+    }
+
+    /// The picker leaves out only apps with a bare Space rule, so an
+    /// app with titled rows alone can have its bare row back (#3341).
+    var bareSpaceApps: Set<String> {
+        Set(model.config.appRules.keys)
+    }
+
+    /// `app`'s titled fragments.
+    func titledFragments(of app: String) -> [String] {
+        TitledSpaceRules(model.config.titledAppRules).order(of: app)
+            .map(\.fragment)
     }
 
     /// Pins the picked app to the Space a new pin takes. Picking
@@ -48,16 +78,21 @@ extension AppRulesSection {
         // Cleared whatever happens: `AppPickerButton` draws what
         // `name` holds, so a refused pick would stay drawn.
         defer { newSpaceApp = "" }
-        guard let app = normalized(picked, in: spaceApps),
+        guard let app = normalized(picked, in: Array(bareSpaceApps)),
             let space = AppRulePin.engagedSpace(model.config)
         else { return }
         model.config.appRules[app] = space
     }
 
-    private func deleteSpace(_ app: String, _ removal: RuleRemoval) {
-        let neighbour = DeletionFocus.neighbour(after: app, in: spaceApps)
-        model.recordRemoval(.space, app, removal)
-        model.config.appRules[app] = nil
+    private func deleteSpace(_ row: SpaceRuleRow, _ removal: RuleRemoval) {
+        let keys = spaceGroups.flatMap { $0 }.map(\.key)
+        let neighbour = DeletionFocus.neighbour(after: row.key, in: keys)
+        if row.fragment == nil {
+            model.recordRemoval(.space, row.app, removal)
+        } else {
+            model.recordRemoval(.titledSpace, row.key, removal)
+        }
+        SpaceRuleEdit.drop(row, from: &model.config)
         returningSpaceRow = neighbour
     }
 

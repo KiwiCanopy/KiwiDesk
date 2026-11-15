@@ -25,6 +25,7 @@ extension SettingsModel {
         let key = EncodedReachCache.Key(
             edits: reachEdits,
             appRules: config.appRules,
+            titledAppRules: config.titledAppRules,
             floatRules: config.floatRules,
             layers: config.layers,
             scrollGesture: config.scrollGesture,
@@ -57,11 +58,25 @@ extension SettingsModel {
         var pageTemplates: [String: KeyBinding] = [:]
         snapshot.appRules = RuleReachDraft.encode(
             snapshot.appRules,
-            current: AppRuleOverride.normalized(config.appRules),
+            current: AppRuleOverride.normalized(
+                config.appRules,
+                normalizing: AppRuleOverride.bareKey
+            ),
             editing: editing,
             isLoaded: reachIsLoaded,
             reach: reachEdits.reach[.space] ?? [:],
             removal: reachEdits.removal[.space] ?? [:]
+        )
+        snapshot.titledAppRules = RuleReachDraft.encode(
+            snapshot.titledAppRules,
+            current: AppRuleOverride.normalized(
+                config.titledAppRules,
+                normalizing: AppTitleRule.normalizedRule
+            ),
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.titledSpace] ?? [:],
+            removal: reachEdits.removal[.titledSpace] ?? [:]
         )
         snapshot.floatRules = RuleReachDraft.encode(
             snapshot.floatRules,
@@ -212,6 +227,7 @@ extension SettingsModel {
             stored.appRules.profiles.contains(loaded)
         else { return }
         config.appRules = stored.appRules.resolved(for: loaded)
+        config.titledAppRules = stored.titledAppRules.resolved(for: loaded)
         config.floatRules = stored.floatRules.resolved(for: loaded)
             .sorted { $0.key < $1.key }
             .flatMap(\.value)
@@ -266,6 +282,9 @@ extension SettingsModel {
         sidecar.appRules = reach.appRules.appRuleBase(
             original: reach.storedAppBase
         )
+        sidecar.titledAppRules = reach.titledAppRules.titledAppRuleBase(
+            original: reach.storedTitledAppBase
+        )
         sidecar.floatRules = reach.floatRules.floatRuleBase(
             original: reach.storedFloatBase
         )
@@ -294,47 +313,5 @@ extension SettingsModel {
             )
         }
         return sidecar
-    }
-
-    /// Takes a rule half that landed as the draft's baseline, so
-    /// only what did not land stays unsaved.
-    func adoptRuleHalf() {
-        suppressDirty = true
-        cleanConfig.appRules = config.appRules
-        cleanConfig.floatRules = config.floatRules
-        cleanConfig.scrollGesture = config.scrollGesture
-        cleanConfig.gesture = config.gesture
-        cleanConfig.spaceHistory = config.spaceHistory
-        cleanConfig.modeCycle = config.modeCycle
-        cleanConfig.focusWrap = config.focusWrap
-        cleanConfig.tileRules = config.tileRules
-        cleanConfig.floatAutomatically = config.floatAutomatically
-        cleanConfig.settings.tiling = config.settings.tiling
-        // Not the layers: a stored page's own shortcut diff is the
-        // tiling write's, which is what failed.
-        ruleReachStored = core.ruleReachSnapshot()
-        reachEdits = RuleReachEdits()
-        suppressDirty = false
-        recomputeDirty()
-    }
-
-    /// Drops the draft's rule half, so a globals write after a
-    /// failed or refused rule write carries the stored rules.
-    func dropRuleHalf() {
-        config.appRules = cleanConfig.appRules
-        config.floatRules = cleanConfig.floatRules
-        config.layers = cleanConfig.layers
-        // Drafted beside the layers it moves (#1870): never kept
-        // without them.
-        config.shortcutBase = cleanConfig.shortcutBase
-        config.scrollGesture = cleanConfig.scrollGesture
-        config.gesture = cleanConfig.gesture
-        config.spaceHistory = cleanConfig.spaceHistory
-        config.modeCycle = cleanConfig.modeCycle
-        config.focusWrap = cleanConfig.focusWrap
-        config.tileRules = cleanConfig.tileRules
-        config.floatAutomatically = cleanConfig.floatAutomatically
-        config.settings.tiling = cleanConfig.settings.tiling
-        reachEdits = RuleReachEdits()
     }
 }

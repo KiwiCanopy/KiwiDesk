@@ -58,6 +58,12 @@ extension KiwiCore {
             --   ["com.spotify.client"] = "music"
             -- }
 
+            -- Send windows whose title contains a fragment to
+            -- their own Space (beats app_rules):
+            -- titled_app_rules = {
+            --   ["com.brave.browser:Work"] = "work"
+            -- }
+
             -- Load a saved profile per macOS Desktop
             -- (the Mission Control number):
             -- KiwiDesk.bind_profile_to_desktop(

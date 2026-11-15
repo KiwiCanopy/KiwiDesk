@@ -162,7 +162,7 @@ struct TileRefusalSeamTests {
         // float verbs' `setFloating` and the reopen memory.
         #expect(
             Self.census("userFloated.insert(", in: sources) == [
-                "State/StateCoordinator.swift": 1,
+                "State/StateCoordinator+Rekey.swift": 1,
                 "State/StateCoordinator+Intents.swift": 2,
             ]
         )

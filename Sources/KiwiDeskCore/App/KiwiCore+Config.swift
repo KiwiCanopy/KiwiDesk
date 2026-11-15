@@ -230,6 +230,7 @@ extension KiwiCore {
     /// params) are always overwritten, so they need no reset.
     private func resetDeclarativeState() {
         state.appRules = [:]
+        state.titledAppRules = TitledSpaceRules()
         globalRuleBase.liveFloatAutomatically = nil
         // The guess stays: the load's tail judges the one it builds
         // against the live one, once.
@@ -238,6 +239,7 @@ extension KiwiCore {
         )
         eventLoop.ignoreRules = IgnoreRules([])
         globalRuleBase.appRules = [:]
+        globalRuleBase.titledAppRules = [:]
         globalRuleBase.floatRules = []
         globalRuleBase.ignoreRules = []
         globalRuleBase.tileRules = []
@@ -310,8 +312,18 @@ extension KiwiCore {
             }
             state.appRules = mapped
         }
+        if case .table(let rules) = lua.global("titled_app_rules") {
+            var mapped: [String: SpaceID] = [:]
+            for (rule, value) in rules {
+                if let space = value.stringValue {
+                    mapped[AppTitleRule.normalizedRule(rule)] = SpaceID(space)
+                }
+            }
+            state.titledAppRules = TitledSpaceRules(mapped)
+        }
         captureGlobalWindowRuleBase(
             appRules: state.appRules,
+            titledAppRules: state.titledAppRules.rawRules,
             floatRules: eventLoop.floatRules.rawRules,
             ignoreRules: eventLoop.ignoreRules.rawRules,
             tileRules: tileRules,

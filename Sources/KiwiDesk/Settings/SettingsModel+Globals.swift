@@ -20,6 +20,7 @@ extension SettingsModel {
         target.modeCycle = source.modeCycle
         target.focusWrap = source.focusWrap
         target.appRules = source.appRules
+        target.titledAppRules = source.titledAppRules
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules
         target.tileRules = source.tileRules

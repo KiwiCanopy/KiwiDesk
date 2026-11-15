@@ -325,6 +325,8 @@ extension InterpolatedLabelTests {
         "onboarding.looks.hint_ai": 2,
         // The Float card's `?` names its float VALUE (#1022, #1608).
         "app_rules.section.help.titles": 1,
+        // The Space card's `?` names the same value (#3341).
+        "app_rules.space_list.help.titles": 1,
         // Automatic floating's `?` points at Tile instead (#2486).
         "app_rules.auto_float.help": 1,
         // The front-app indicator row (#1856): its `?` names the

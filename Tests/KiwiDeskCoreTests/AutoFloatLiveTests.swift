@@ -298,6 +298,7 @@ struct AutoFloatLiveTests {
             spaceModes: [:],
             settings: TilingSettings(),
             appRules: AppRuleOverride(rules: ["a": SpaceID("1")]),
+            titledAppRules: AppRuleOverride(rules: ["a:T": SpaceID("1")]),
             floatRules: RuleListOverride(rules: ["f": true]),
             ignoreRules: RuleListOverride(rules: ["i": true]),
             floatAutomatically: false,

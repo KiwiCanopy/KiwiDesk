@@ -1,8 +1,9 @@
 import Foundation
 import Testing
 
-/// A float rule is read only through `FloatRules.parse` and spelled
-/// only through `FloatRules.rule(app:title:)` (#2345): two readings
+/// A float or titled Space rule is read only through
+/// `AppTitleRule.parse` and spelled only through
+/// `AppTitleRule.rule(app:title:)` (#2345, #3341): two readings
 /// of its colon disagreeing is the whole defect, and it shipped in
 /// three rounds — a case fold, a title split, a marker test. Every
 /// colon split, colon test and `\(…):\(…)` spelling in either tree
@@ -20,7 +21,7 @@ struct FloatRuleGrammarSeamTests {
     /// Files that may spell a needle, with the count each carries.
     private static let allowed: [String: Int] = [
         // The grammar's one reading and one spelling.
-        "WindowRules.swift": 2,
+        "AppTitleRule.swift": 2,
         // A bundle-id ARGUMENT refused for carrying a colon, for
         // every app-rule family; no float rule is read.
         "KiwiCore+AppRuleCommands.swift": 1,
@@ -35,7 +36,7 @@ struct FloatRuleGrammarSeamTests {
         "ConfigMigration+Gestures.swift": 4,
     ]
 
-    @Test("the grammar is read and spelled only through FloatRules")
+    @Test("the grammar is read and spelled only through AppTitleRule")
     func grammarHasOneHome() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         var counts: [String: Int] = [:]
@@ -64,7 +65,7 @@ struct FloatRuleGrammarSeamTests {
         let strays = counts.keys.filter { Self.allowed[$0] == nil }
         #expect(
             strays.isEmpty,
-            "float-rule grammar beside FloatRules: \(strays.sorted())"
+            "rule grammar beside AppTitleRule: \(strays.sorted())"
         )
     }
 }

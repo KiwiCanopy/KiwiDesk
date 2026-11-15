@@ -8,6 +8,7 @@ extension StateCoordinator {
         effects: inout AppliedEffects
     ) {
         effects.removedWindow = removalFacts(id)
+        titledRulePending[id] = nil
         // The holder THIS departure records, marked below once
         // the door has handed to it (#1387); a minimize records
         // nothing and marks nothing.

@@ -3,11 +3,10 @@ import SwiftUI
 
 /// Whole App ▸ App Rules settings section (#68 §3.11, #1608).
 ///
-/// Two lists, matching the two stores `GuiConfig` keeps: which
-/// Space an app's windows open in, and which of its windows
-/// float. The Space is title-blind, so a title pattern belongs
-/// to the Float list alone (`docs/design-decisions.md` ▸ App
-/// rules).
+/// Two lists over their own stores: which Space an app's windows
+/// open in — one row per app and title pattern (#3341) — and which
+/// of its windows float. A pattern scopes the row it sits in
+/// (`docs/design-decisions.md` ▸ App rules).
 struct AppRulesSection: View {
     @ObservedObject var model: SettingsModel
     /// Restore keyboard focus after deleting a row (#816), one
@@ -21,6 +20,9 @@ struct AppRulesSection: View {
     /// store — without this the list drops the row mid-gesture
     /// (#1022). It names at most one row and holds no value.
     @State var composingTitles: String?
+    /// The Space card's one open composer (#3341), owned here for the
+    /// same reason: a new titled row holds no stored rule yet.
+    @State var composingSpace: SpaceComposer?
     @State var newSpaceApp = ""
     @State var newFloatingApp = ""
     @State var newTileApp = ""
@@ -39,7 +41,10 @@ struct AppRulesSection: View {
         // Every reload — an edit-target switch, a Revert — replaces
         // the draft's baseline, and a slot carried across one lists
         // an empty row, editor open, in a draft that never had it.
-        .onChange(of: model.cleanConfig) { composingTitles = nil }
+        .onChange(of: model.cleanConfig) {
+            composingTitles = nil
+            composingSpace = nil
+        }
     }
 
     /// The list card holding `app`'s rule — the Space list first —
@@ -53,11 +58,11 @@ struct AppRulesSection: View {
         in model: SettingsModel
     ) -> SettingsControl? {
         let app = app.lowercased()
-        if model.config.appRules.keys.contains(app) {
+        if SpaceRuleRows.apps(model.config).contains(app) {
             return SettingsCatalog.appRules.spaceList
         }
         let floats = model.config.floatRules.map(FloatFacet.appSegment(of:))
-        if floats.contains(FloatRules.appKey(app)) {
+        if floats.contains(AppTitleRule.appKey(app)) {
             return SettingsCatalog.appRules.floatList
         }
         let tiles = model.config.tileRules.map(FloatGuess.normalizedRule)

@@ -2,6 +2,8 @@
 
 enum AppRulesKey: String, CaseIterable, Hashable {
     case appRules = "config.appRules[app]"
+    /// A titled Space row's Space menu (#3341), one per rule.
+    case titledAppRules = "config.titledAppRules[app]"
     case floatRules = "config.floatRules"
     case floatRulesPattern = "config.floatRules[].pattern"
     case ignoreRules = "config.ignoreRules"
@@ -20,7 +22,7 @@ extension AppRulesKey {
     /// and a float rule are separate lists.
     var placement: SettingPlacement {
         switch self {
-        case .appRules:
+        case .appRules, .titledAppRules:
             // Gated by the SPACE LIST, on another destination
             // (#1022), so `GateReasonPlacement` resolves it
             // `.remote` and the card owes the `CrossReferenceRow`
@@ -71,7 +73,7 @@ extension AppRulesKey {
                 "app_rules.float",
                 help: "app_rules.float.help"
             )
-        case .floatRulesPattern:
+        case .floatRulesPattern, .titledAppRules:
             return .dynamic
         case .ignoreRules:
             return .none

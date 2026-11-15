@@ -23,10 +23,22 @@ extension KiwiCore {
             guard state.workspaces[SpaceID(raw)] != nil else {
                 return .fail("unknown space: \(raw)")
             }
-            state.appRules[app] = SpaceID(raw)
+            if let title = ruleTitle(args, at: 2) {
+                setLiveTitledRule(app, title, SpaceID(raw))
+            } else {
+                state.appRules[app] = SpaceID(raw)
+            }
             return .ok()
         case "app_rule.remove_space":
             guard let app = ruleApp(args) else { return noApp }
+            if let title = ruleTitle(args, at: 1) {
+                let rule = AppTitleRule.rule(app: app, title: title)
+                guard state.titledAppRules.rawRules[rule] != nil else {
+                    return .fail("no app rule for \(rule)")
+                }
+                setLiveTitledRule(app, title, nil)
+                return .ok()
+            }
             guard state.appRules[app] != nil else {
                 return .fail("no app rule for \(app)")
             }
@@ -57,6 +69,9 @@ extension KiwiCore {
         let floats = eventLoop.floatRules
         return .object([
             "app_rules": .object(state.appRules.mapValues { .string($0.raw) }),
+            "titled_app_rules": .object(
+                state.titledAppRules.rawRules.mapValues { .string($0.raw) }
+            ),
             "float_rules": .array(
                 floats.rawRules.sorted().map(JSONValue.string)
             ),
@@ -82,6 +97,12 @@ extension KiwiCore {
         return .object([
             "space": state.appRules[app].map { .string($0.raw) }
                 ?? .null,
+            "titled_app_rules": .object(
+                Dictionary(
+                    uniqueKeysWithValues: state.titledAppRules
+                        .order(of: app).map { ($0.key, .string($0.space.raw)) }
+                )
+            ),
             "float_rules": .array(mine.sorted().map(JSONValue.string)),
             "tile_rule": .bool(floats.guess.tileRules.contains(app)),
             "float_automatically": .bool(floats.guess.enabled),
@@ -111,13 +132,33 @@ extension KiwiCore {
         return app
     }
 
+    /// The non-empty title argument at `index`, nil where absent.
+    private func ruleTitle(_ args: [JSONValue], at index: Int) -> String? {
+        guard args.count > index, let title = args[index].stringValue,
+            !title.isEmpty
+        else { return nil }
+        return title
+    }
+
+    /// Sets `app`'s titled Space rule for `title` live, or removes
+    /// it for a nil `space` (#3341).
+    private func setLiveTitledRule(
+        _ app: String,
+        _ title: String,
+        _ space: SpaceID?
+    ) {
+        var rules = state.titledAppRules.rawRules
+        rules[AppTitleRule.rule(app: app, title: title)] = space
+        state.titledAppRules = TitledSpaceRules(rules)
+    }
+
     /// `app` or `app:title`, normalized as the resolver stores it.
     private func floatRule(_ args: [JSONValue]) -> String? {
         guard let app = ruleApp(args) else { return nil }
         guard let title = args.dropFirst().first?.stringValue,
             !title.isEmpty
         else { return app }
-        return FloatRules.rule(app: app, title: title)
+        return AppTitleRule.rule(app: app, title: title)
     }
 
     private var noApp: CommandResponse {

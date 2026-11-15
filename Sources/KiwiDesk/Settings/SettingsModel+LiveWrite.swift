@@ -132,14 +132,14 @@ extension SettingsModel {
         where old.appRules[app] != apps[app] {
             config.appRules[app] = apps[app]
         }
-        let was = Set(old.floatRules.map(FloatRules.normalizedRule))
+        let was = Set(old.floatRules.map(AppTitleRule.normalizedRule))
         let now = Set(stored.floatRules.resolved(for: page).values.joined())
         let gone = was.subtracting(now)
         var floats = config.floatRules.filter {
-            !gone.contains(FloatRules.normalizedRule($0))
+            !gone.contains(AppTitleRule.normalizedRule($0))
         }
         floats += now.subtracting(was)
-            .subtracting(floats.map(FloatRules.normalizedRule)).sorted()
+            .subtracting(floats.map(AppTitleRule.normalizedRule)).sorted()
         config.floatRules = floats
         let auto =
             stored.floatAutomatically.resolved(

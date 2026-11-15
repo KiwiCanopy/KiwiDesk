@@ -4,6 +4,8 @@ import Foundation
 /// readable profile (#1393), as the Settings checklist edits them.
 public struct RuleReachSnapshot: Equatable, Sendable {
     public var appRules: RuleReachTable<SpaceID>
+    /// The titled Space rules, one `app:title` key each (#3341).
+    public var titledAppRules: RuleReachTable<SpaceID>
     public var floatRules: RuleReachTable<[String]>
     /// Shortcuts, one action per layer (#1393's second half).
     public var keyLayers: RuleReachTable<String>
@@ -45,6 +47,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// The stored bases and float overrides, re-encoded only
     /// where a change reached (`appRuleBase`, `floatRuleOverride`).
     public let storedAppBase: [String: SpaceID]
+    public let storedTitledAppBase: [String: SpaceID]
     public let storedFloatBase: [String]
     public let storedFloatOverrides: [String: RuleListOverride]
     /// Profiles whose file could not be read, listed so a shared
@@ -59,6 +62,10 @@ public struct RuleReachSnapshot: Equatable, Sendable {
 
     public init(
         appRules: RuleReachTable<SpaceID>,
+        titledAppRules: RuleReachTable<SpaceID> = .titledAppRules(
+            base: [:],
+            overrides: []
+        ),
         floatRules: RuleReachTable<[String]>,
         keyLayers: RuleReachTable<String>,
         scrollGestures: RuleReachTable<ScrollGestureValue>,
@@ -87,12 +94,14 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedKeyOverrides: [String: KeyLayerOverride],
         keyTemplates: [String: KeyBinding],
         storedAppBase: [String: SpaceID],
+        storedTitledAppBase: [String: SpaceID] = [:],
         storedFloatBase: [String],
         storedFloatOverrides: [String: RuleListOverride],
         unreadable: [String],
         lensReach: [String: [String: Bool]] = [:]
     ) {
         self.appRules = appRules
+        self.titledAppRules = titledAppRules
         self.floatRules = floatRules
         self.keyLayers = keyLayers
         self.scrollGestures = scrollGestures
@@ -114,6 +123,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.fileKeyOverrides = storedKeyOverrides
         self.keyTemplates = keyTemplates
         self.storedAppBase = storedAppBase
+        self.storedTitledAppBase = storedTitledAppBase
         self.storedFloatBase = storedFloatBase
         self.storedFloatOverrides = storedFloatOverrides
         self.unreadable = unreadable
@@ -124,6 +134,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// Whether a change reached any file.
     public var isEdited: Bool {
         !appRules.baseTouched.isEmpty || !floatRules.baseTouched.isEmpty
+            || !titledAppRules.baseTouched.isEmpty
             || !keyLayers.baseTouched.isEmpty
             || !scrollGestures.baseTouched.isEmpty
             || !gestures.baseTouched.isEmpty
@@ -137,6 +148,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
             || storedKeyOverrides != fileKeyOverrides
             || appRules.touched.values.contains { !$0.isEmpty }
+            || titledAppRules.touched.values.contains { !$0.isEmpty }
             || floatRules.touched.values.contains { !$0.isEmpty }
             || keyLayers.touched.values.contains { !$0.isEmpty }
             || scrollGestures.touched.values.contains { !$0.isEmpty }
@@ -211,6 +223,10 @@ extension KiwiCore {
                 base: sidecar.appRules,
                 overrides: stored.map { ($0.name, $0.appRules) }
             ),
+            titledAppRules: .titledAppRules(
+                base: sidecar.titledAppRules,
+                overrides: stored.map { ($0.name, $0.titledAppRules) }
+            ),
             floatRules: .floatRules(
                 base: sidecar.floatRules,
                 overrides: stored.map { ($0.name, $0.floatRules) }
@@ -266,6 +282,7 @@ extension KiwiCore {
             storedKeyOverrides: keys,
             keyTemplates: templates,
             storedAppBase: sidecar.appRules,
+            storedTitledAppBase: sidecar.titledAppRules,
             storedFloatBase: sidecar.floatRules,
             storedFloatOverrides: floats,
             unreadable: profiles.brokenProfiles().map(\.name),

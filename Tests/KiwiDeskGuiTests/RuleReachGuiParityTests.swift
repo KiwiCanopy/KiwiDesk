@@ -20,6 +20,7 @@ struct RuleReachGuiParityTests {
     /// Each family → the `GuiConfig` field the draft edits it in.
     private static let draftField: [String: String] = [
         "appRules": "appRules",
+        "titledAppRules": "titledAppRules",
         "floatRules": "floatRules",
         "keyLayers": "layers",
         "scrollGestures": "scrollGesture",
@@ -85,26 +86,33 @@ struct RuleReachGuiParityTests {
 
     @Test("each draft site names every family's field")
     func everySiteNamesEveryFamily() throws {
-        let file = "SettingsModel+RuleReach.swift"
-        let sites: [(String, String, (String) -> String)] = [
-            ("encodeReach", "func encodeReach()", { "config.\($0)" }),
+        let reach = "SettingsModel+RuleReach.swift"
+        let half = "SettingsModel+RuleHalf.swift"
+        let sites: [(String, String, String, (String) -> String)] = [
             (
-                "resolveLoadedRules", "func resolveLoadedRules(",
+                "encodeReach", "func encodeReach()", reach,
+                { "config.\($0)" }
+            ),
+            (
+                "resolveLoadedRules", "func resolveLoadedRules(", reach,
                 { "config.\($0) =" }
             ),
-            ("sidecarConfig", "var sidecarConfig:", { "sidecar.\($0) =" }),
             (
-                "adoptRuleHalf", "func adoptRuleHalf()",
+                "sidecarConfig", "var sidecarConfig:", reach,
+                { "sidecar.\($0) =" }
+            ),
+            (
+                "adoptRuleHalf", "func adoptRuleHalf()", half,
                 { "cleanConfig.\($0) = config.\($0)" }
             ),
             (
-                "dropRuleHalf", "func dropRuleHalf()",
+                "dropRuleHalf", "func dropRuleHalf()", half,
                 { "config.\($0) = cleanConfig.\($0)" }
             ),
         ]
         let families = try families()
         #expect(!families.isEmpty)
-        for (name, declaration, needle) in sites {
+        for (name, declaration, file, needle) in sites {
             let text = try body(declaration, in: file)
             for family in families {
                 let field = try #require(Self.draftField[family])

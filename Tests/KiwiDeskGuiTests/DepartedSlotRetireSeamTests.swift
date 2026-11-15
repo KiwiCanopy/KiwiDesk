@@ -37,7 +37,7 @@ struct DepartedSlotRetireSeamTests {
             hits == [
                 "State/StateCoordinator+SpaceMemory.swift": 1,
                 // `rekey` moves the entry to the fresh id.
-                "State/StateCoordinator.swift": 1,
+                "State/StateCoordinator+Rekey.swift": 1,
             ],
             "a record drop outside `retireDepartureRecord`: \(hits)"
         )
