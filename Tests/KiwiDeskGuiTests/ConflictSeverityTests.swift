@@ -100,7 +100,7 @@ struct ConflictSeverityTests {
         #expect(
             SystemShortcut.allCases.filter {
                 $0.losesToKiwiDesk(on: .carbon)
-            } == [.inputSourceNext]
+            } == [.inputSourceNext, .inputSourcePrevious]
         )
     }
 

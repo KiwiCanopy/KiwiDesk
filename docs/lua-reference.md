@@ -1376,6 +1376,11 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
+:::unreleased
+Save the two input-source shortcuts, which a KiwiDesk row wins
+([Modifiers and Keys](#modifiers-and-keys)).
+:::
+
 When that mapping is exactly the one KiwiDesk would write for the
 chosen key, the Hyper key row's **Take Over** and
 [`take_over_hyper_remap`](cli.md#commands) make it KiwiDesk's.
@@ -7773,6 +7778,13 @@ end)
 any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
 its chord without `hyper`, so an enabled macOS shortcut on that
 chord (`hyper+cmd+space` is Spotlight's) still wins.
+
+:::unreleased
+The two input-source shortcuts are the exception: a KiwiDesk row
+on **⌃Space** or **⌃⌥Space**, a Hyper combo held to either
+included, fires, and macOS does not switch the input source while
+it is bound.
+:::
 
 A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
 `lopt` / `ropt`, `lalt` / `ralt`, `lshift` / `rshift`, `lctrl` /
