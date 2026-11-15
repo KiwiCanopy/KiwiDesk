@@ -114,35 +114,31 @@ struct ZOrderScrollingUnraisedLeaveTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
-    /// A later immediate raise of the window left, say a step back
-    /// onto it whose frame moves, pays the debt the step left.
-    @Test("A raise of the window left pays its debt")
+    /// A step back onto the window left whose frame moves raises it
+    /// at once with the floats, which pays the debt the step left.
+    @Test("A step back that raises the window pays its debt")
     func raisePaysTheDebt() throws {
         let core = try makeCore()
+        let space = try #require(core.activeSpace)
+        core.state.workspaces.focus(WindowID(3), in: space.id)
         try startDummyPan(core)
         core.pendingFocusRaise = WindowID(4)
-        core.raiseWindow(WindowID(4))
+        core.focusWindow(WindowID(4), warp: false)
         #expect(core.pendingFocusRaise == nil)
         core.focusWindow(WindowID(5), warp: false)
         #expect(!core.pendingZOrderRestore)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
-    /// The device sequence: the second step lands inside the first
-    /// one's pan, so the first step's raise never ran. Echoes landed,
-    /// so 3, which stays where it is, takes the deferred raise.
-    @Test("Two steps inside one pan arm")
-    func chainedStepsArm() throws {
+    /// A re-assert of the same window lifts no floats, so the debt
+    /// stands for the settle to pay with them (#2284).
+    @Test("A re-assert of the window keeps its debt")
+    func reassertKeepsTheDebt() throws {
         let core = try makeCore()
-        for (id, frame) in core.tiler.placedFrames(state: core.state) {
-            core.state.apply(.windowResized(id, frame))
-        }
         try startDummyPan(core)
-        core.focusWindow(WindowID(3), warp: false)
-        #expect(core.pendingFocusRaise == WindowID(3))
-        #expect(!core.pendingZOrderRestore)
-        core.focusWindow(WindowID(2), warp: false)
-        #expect(core.pendingZOrderRestore)
+        core.pendingFocusRaise = WindowID(4)
+        core.focusWindow(WindowID(4), warp: false)
+        #expect(core.pendingFocusRaise == WindowID(4))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 

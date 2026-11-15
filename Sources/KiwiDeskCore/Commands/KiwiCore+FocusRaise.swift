@@ -54,7 +54,6 @@ extension KiwiCore {
     /// The one AX raise call behind both the immediate and the
     /// deferred focus paths.
     func raiseWindow(_ id: WindowID) {
-        if pendingFocusRaise == id { pendingFocusRaise = nil }  // paid
         raiseFlight?.raised(id, at: wallClock())
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
@@ -159,7 +158,10 @@ extension KiwiCore {
             // A commanded focus reports back as our own echo, which
             // the focus handler skips; a re-assert of the same
             // window — the raise's hand-back — owes none (#2284).
+            // It pays a deferred raise owed to `id`, floats and all,
+            // so no arm reads that debt as standing (#2985).
             if previousFocused != id {
+                if pendingFocusRaise == id { pendingFocusRaise = nil }
                 raiseFloatsAbove(afterFocusing: id)
             }
         }
