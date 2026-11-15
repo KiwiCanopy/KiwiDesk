@@ -59,7 +59,7 @@ extension TilingEngine {
             // adjacency is an input, never a cache, so a screen
             // plugged in or out is correct from the retile the
             // display change already triggers.
-            screenNeighbors: Self.screenNeighbors(
+            screenNeighbors: ScreenNeighbors.detect(
                 around: visible,
                 among: allScreenBounds()
             ),

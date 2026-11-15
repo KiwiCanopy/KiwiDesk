@@ -7,10 +7,10 @@ public struct ScreenNeighbors: Sendable, Equatable {
     public var right: Bool
     public var top: Bool
     public var bottom: Bool
-    /// The corner a park takes, scored over the screen rects by
-    /// `TilingEngine.screenNeighbors` (#3335); nil where no rects
-    /// were read, and the flags decide.
-    var parkCorner: TilingEngine.HideCorner?
+    /// The corner a park takes, scored over the screen rects
+    /// (`TilingEngine.optimalHideCorner(for:among:)`, #3335);
+    /// bottom-right, a lone screen's, where no rects were read.
+    var parkCorner: TilingEngine.HideCorner = .bottomRight
 
     public init(
         left: Bool = false,
@@ -25,7 +25,7 @@ public struct ScreenNeighbors: Sendable, Equatable {
     }
 
     /// Detects screen neighbors around screen in AX visible frame coordinates
-    /// (#410, #878).
+    /// (#410, #878), and scores its park corner (#3335).
     public static func detect(
         around screen: CGRect,
         among others: [CGRect]
@@ -37,6 +37,10 @@ public struct ScreenNeighbors: Sendable, Equatable {
             other.minX < screen.maxX && other.maxX > screen.minX
         }
         var found = ScreenNeighbors()
+        found.parkCorner = TilingEngine.optimalHideCorner(
+            for: screen,
+            among: others
+        )
         for other in others {
             if other.maxX <= screen.minX + 1, overlapsY(other) {
                 found.left = true

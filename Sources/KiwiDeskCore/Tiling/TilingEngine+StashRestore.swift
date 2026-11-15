@@ -215,7 +215,7 @@ extension TilingEngine {
     /// the exact corner is indistinguishable and keeps its
     /// capture — harmless: the next activation restores it.
     /// Checks both bottom corners of every screen (which one a
-    /// window parked in depends on its monitor's neighbors,
+    /// window parked in depends on the screen arrangement,
     /// `optimalHideCorner`), read over the topology seam the
     /// stash parks through (#878) so the two cannot disagree
     /// about the screens — the echo classifier and the strand

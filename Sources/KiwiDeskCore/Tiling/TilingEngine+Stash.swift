@@ -100,13 +100,13 @@ extension TilingEngine {
             shown: visible,
             forcing: forcesDepartures
         )
-        // The corner scan's screen list comes from the SAME
-        // topology seam the scrolling walls read (#878), so the
-        // two consumers of `ScreenNeighbors.detect` can never
-        // disagree about the arrangement, and a pinned fixture
-        // pins them together. The per-window screen PICK below
-        // legitimately stays on `ScreenList.all` — it needs
-        // screen objects, not rects.
+        // The corner score's screen list comes from the SAME
+        // topology seam `ScreenNeighbors.detect` scores the
+        // layouts' park over (#878, #3335), so the stash and a
+        // layout can never disagree about the arrangement, and a
+        // pinned fixture pins them together. The per-window
+        // screen PICK below legitimately stays on
+        // `ScreenList.all` — it needs screen objects, not rects.
         let allVisible = allScreenBounds()
         for space in state.workspaces.allSpaces
         where !visible.contains(space.id) {
@@ -161,8 +161,7 @@ extension TilingEngine {
 
     /// The screen bounds and corner `window` parks at: `screen`,
     /// else the screen it sits on, else `fallback`. `allVisible`
-    /// may hold the screen itself; the corner score counts it on
-    /// both corners alike (#3335).
+    /// may hold the screen itself, which the corner score skips.
     private func parkTarget(
         of window: ManagedWindow,
         on screen: NSScreen? = nil,

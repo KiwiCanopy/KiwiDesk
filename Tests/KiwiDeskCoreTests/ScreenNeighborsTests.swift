@@ -7,6 +7,15 @@ import Testing
 
 private let screenA = CGRect(x: 0, y: 0, width: 1920, height: 1080)
 
+infix operator ~~ : ComparisonPrecedence
+
+/// Same edge flags; the park corner `detect` also scores is
+/// `ParkCornerScoringTests`' (#3335).
+private func ~~ (lhs: ScreenNeighbors, rhs: ScreenNeighbors) -> Bool {
+    (lhs.left, lhs.right, lhs.top, lhs.bottom)
+        == (rhs.left, rhs.right, rhs.top, rhs.bottom)
+}
+
 /// The four-edge adjacency scan (#878) that decides which
 /// scrolling edges are walls. All rects are AX visible frames
 /// (y grows downward), matching what the engine feeds it.
@@ -42,32 +51,32 @@ struct ScreenNeighborsTests {
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [right]
-            ) == ScreenNeighbors(right: true)
+            ) ~~ ScreenNeighbors(right: true)
         )
         #expect(
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [left]
-            ) == ScreenNeighbors(left: true)
+            ) ~~ ScreenNeighbors(left: true)
         )
         #expect(
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [below]
-            ) == ScreenNeighbors(bottom: true)
+            ) ~~ ScreenNeighbors(bottom: true)
         )
         #expect(
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [above]
-            ) == ScreenNeighbors(top: true)
+            ) ~~ ScreenNeighbors(top: true)
         )
         #expect(
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [left, right, above, below]
             )
-                == ScreenNeighbors(
+                ~~ ScreenNeighbors(
                     left: true,
                     right: true,
                     top: true,
@@ -92,7 +101,7 @@ struct ScreenNeighborsTests {
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [diagonal]
-            ) == ScreenNeighbors()
+            ) ~~ ScreenNeighbors()
         )
     }
 
@@ -113,7 +122,7 @@ struct ScreenNeighborsTests {
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [insetRight]
-            ) == ScreenNeighbors(right: true)
+            ) ~~ ScreenNeighbors(right: true)
         )
     }
 
@@ -158,7 +167,7 @@ struct ScreenNeighborsTests {
                     insideRight, insideLeft, insideBottom,
                     insideTop,
                 ]
-            ) == ScreenNeighbors()
+            ) ~~ ScreenNeighbors()
         )
     }
 
@@ -177,7 +186,7 @@ struct ScreenNeighborsTests {
             ScreenNeighbors.detect(
                 around: screenA,
                 among: [screenA, right]
-            ) == ScreenNeighbors(right: true)
+            ) ~~ ScreenNeighbors(right: true)
         )
     }
 }
@@ -229,10 +238,12 @@ struct ScreenNeighborsPlumbingTests {
             NSScreen.main ?? NSScreen.screens.first
         )
         core.tiler.visibleBounds = { _ in screenA }
+        // A screen below screenA's right half: the edge flags
+        // alone would park bottom-right onto it (#3335).
         core.tiler.allScreenBounds = {
             [
                 screenA,
-                CGRect(x: 1920, y: 0, width: 1920, height: 1080),
+                CGRect(x: 960, y: 1080, width: 960, height: 1080),
             ]
         }
         let input = core.tiler.layoutInput(
@@ -240,7 +251,7 @@ struct ScreenNeighborsPlumbingTests {
             space: Space(id: "1", mode: .scrolling),
             screen: screen
         )
-        var expected = ScreenNeighbors(right: true)
+        var expected = ScreenNeighbors(bottom: true)
         expected.parkCorner = .bottomLeft
         #expect(input.context.screenNeighbors == expected)
     }

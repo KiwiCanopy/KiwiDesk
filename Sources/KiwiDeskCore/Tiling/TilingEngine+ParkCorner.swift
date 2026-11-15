@@ -12,40 +12,51 @@ extension TilingEngine {
         case bottomRight
     }
 
-    /// Picks the bottom corner whose parked window covers the
-    /// least of every other screen (#3335). Each corner is scored
-    /// by the area a screen-sized window parked there by
-    /// `stashFrame` overlaps on the other screens — beside, below
-    /// or diagonal. Ties, a lone screen and a screen boxed in on
-    /// both corners alike park bottom-right, so a desk that
-    /// parked clear under the #410 flags keeps its corner. Pure
-    /// geometry over AX visible frames; `others` may hold
-    /// `screen` itself, which adds its own 1 pt sliver to both
-    /// scores alike.
+    /// Picks the bottom corner whose parked windows cover the
+    /// least of the other screens (#3335), beside, below or
+    /// diagonal. First by the column every parked window hangs
+    /// (`stashPeekX` wide), then by a screen-sized window, so a
+    /// corner every window lands on loses to one only wide
+    /// windows reach. Ties, a lone screen and a screen boxed in
+    /// alike park bottom-right, so a desk that parked clear under
+    /// the #410 flags keeps its corner. Pure geometry over AX
+    /// visible frames; a rect equal to `screen` is the screen
+    /// itself and is not scored.
     nonisolated static func optimalHideCorner(
         for screen: CGRect,
         among others: [CGRect]
     ) -> HideCorner {
-        let left = parkOverlap(of: screen, at: .bottomLeft, on: others)
-        let right = parkOverlap(
-            of: screen,
-            at: .bottomRight,
-            on: others
-        )
-        return left < right ? .bottomLeft : .bottomRight
+        let others = others.filter { $0 != screen }
+        func score(_ corner: HideCorner) -> (CGFloat, CGFloat) {
+            (
+                parkOverlap(
+                    of: screen,
+                    at: corner,
+                    width: stashPeekX,
+                    on: others
+                ),
+                parkOverlap(
+                    of: screen,
+                    at: corner,
+                    width: screen.width,
+                    on: others
+                )
+            )
+        }
+        return score(.bottomLeft) < score(.bottomRight)
+            ? .bottomLeft : .bottomRight
     }
 
-    /// Area a screen-sized window parked at `corner` of `screen`
-    /// covers on `others`. The screen's size stands in for the
-    /// largest window a layout places there, so one corner serves
-    /// every window on the screen.
+    /// Area a window `width` wide and as tall as `screen`, parked
+    /// at `corner` by `stashFrame`, covers on `others`.
     nonisolated static func parkOverlap(
         of screen: CGRect,
         at corner: HideCorner,
+        width: CGFloat,
         on others: [CGRect]
     ) -> CGFloat {
         let parked = stashFrame(
-            CGRect(origin: .zero, size: screen.size),
+            CGRect(x: 0, y: 0, width: width, height: screen.height),
             in: screen,
             corner: corner
         )
@@ -55,29 +66,12 @@ extension TilingEngine {
         }
     }
 
-    /// The engine's per-retile neighbor read: `ScreenNeighbors`'
-    /// edge flags plus the scored park corner, so a layout's park
-    /// (#881) and the stash answer one arrangement alike.
-    nonisolated static func screenNeighbors(
-        around screen: CGRect,
-        among others: [CGRect]
-    ) -> ScreenNeighbors {
-        var found = ScreenNeighbors.detect(around: screen, among: others)
-        found.parkCorner = optimalHideCorner(for: screen, among: others)
-        return found
-    }
-
-    /// The corner PREFERENCE, one copy: the stash scores screen
-    /// rects above, while `MonocleLayout`'s park (#881) arrives
-    /// with the neighbors threaded through its context (#878),
-    /// which carry that score. Neighbors built without screen
-    /// rects (previews, fixtures) fall back to the #410 flags.
+    /// The corner a layout's park takes (#881): the one
+    /// `ScreenNeighbors.detect` scored over the screen rects, so
+    /// it and the stash answer one arrangement alike.
     nonisolated static func optimalHideCorner(
         neighbors: ScreenNeighbors
     ) -> HideCorner {
-        if let scored = neighbors.parkCorner { return scored }
-        if !neighbors.right { return .bottomRight }
-        if !neighbors.left { return .bottomLeft }
-        return .bottomRight
+        neighbors.parkCorner
     }
 }

@@ -1772,12 +1772,14 @@ editing here:
   rightly omit it and get every edge open. The wall verdicts
   are an input detected fresh each retile, never a cache —
   which is also why a stash or corner consumer reads the same
-  seam rather than enumerating screens itself. And a corner
-  consumer takes the corner PREFERENCE from
-  `TilingEngine.optimalHideCorner(neighbors:)` — the one copy
-  the stash and monocle's park share (#881) — never a
-  re-derivation beside the flags, or the two answer one
-  arrangement differently.
+  seam rather than enumerating screens itself. And a park
+  corner comes from the one scorer over the screen rects,
+  `TilingEngine.optimalHideCorner(for:among:)` — the stash
+  asks it, `detect` stores its answer for a layout's park
+  (#881, #3335), read through
+  `TilingEngine.optimalHideCorner(neighbors:)` — never from the
+  edge flags, which answer a screen stacked above another
+  differently (`ParkCornerScoringTests`).
   `ScreenNeighborsPlumbingTests` pins the threading and the
   default; `ScrollingBlockedEdgeTests` the clamp forms.
 - **An app-enforced size bound is learned, never assumed
