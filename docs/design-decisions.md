@@ -3513,7 +3513,10 @@ window" undoes every focus change the pointer did not make: a
 shortcut, a scroll-gesture step, a close-return or a Space switch
 leaves the pointer where it was, and 200 ms later the old window
 takes the focus back. So only a global mouse-moved event arms the
-dwell, and a focus that moves while it runs stands. That closes
+dwell, and a focus that moves while it runs stands. A press
+spends the dwell: the click is the user's own act on what lies
+under the pointer, and a rest after the release raised a window
+that click had just minimized, which came back (#3344). That closes
 the still pointer, and a small nudge needs the same answer: after
 the focus moves without the pointer — a shortcut, a new window, a
 Space switch — the windows the pointer is left over are HELD, and

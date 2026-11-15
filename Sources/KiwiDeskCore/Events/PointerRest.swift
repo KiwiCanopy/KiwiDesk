@@ -4,9 +4,10 @@ import AppKit
 /// focus's one trigger (#1869). Only a global mouse-moved event
 /// arms it, so a warp, a keyboard focus change or a pointer that
 /// merely sits over a window never fires it, and jitter within
-/// `stillRadius` of the last rest is not travel. KiwiDesk's own
-/// warp posts no mouse event, and a rest carries the focus its
-/// move armed with (input-and-animation.md).
+/// `stillRadius` of the last rest is not travel; a mouse press
+/// spends an armed dwell (#3344). KiwiDesk's own warp posts no
+/// mouse event, and a rest carries the focus its move armed with
+/// (input-and-animation.md).
 @MainActor
 public final class PointerRest {
     /// How long the pointer rests before the consumer is asked —
@@ -37,12 +38,18 @@ public final class PointerRest {
     /// lands outside all of them, so a nudge never takes the focus
     /// back to the window the pointer was merely left over.
     public private(set) var held: Set<WindowID> = []
-    /// Installs the mouse-moved monitors, live in production and
-    /// pinned inert by both `makeTestCore` twins as the scroll tap
-    /// is (tests.md ▸ machine touch). A move delivered without a
-    /// point is read through `location`.
+    /// What the monitors hear: a user pointer move — without a
+    /// point, read through `location` — or a mouse button press.
+    enum Input {
+        case moved(CGPoint?)
+        case pressed
+    }
+
+    /// Installs the mouse-moved and press monitors, live in
+    /// production and pinned inert by both `makeTestCore` twins as
+    /// the scroll tap is (tests.md ▸ machine touch).
     var makeMonitor:
-        @MainActor (@escaping @MainActor (CGPoint?) -> Void) -> Any? =
+        @MainActor (@escaping @MainActor (Input) -> Void) -> Any? =
             live
     var removeMonitor: (Any) -> Void = { monitors in
         for monitor in monitors as? [Any] ?? [monitors] {
@@ -122,6 +129,17 @@ public final class PointerRest {
         arm(at: point)
     }
 
+    /// A mouse button went down: the click is the user's own act
+    /// on what lies under the pointer, so an armed dwell is spent
+    /// — firing after the release raised a window the click had
+    /// just minimized (#3344). Jitter around the press is no
+    /// travel; the next real move re-arms.
+    func pressed() {
+        timer?.cancel()
+        timer = nil
+        lastRest = location()
+    }
+
     /// Takes the hold at the first move after the focus moved
     /// without a rest, and releases it once a move leaves every held
     /// window — the hold is the window the pointer was left over,
@@ -176,9 +194,14 @@ public final class PointerRest {
     private func sync() {
         if running, isEnabled {
             guard monitor == nil else { return }
-            monitor = makeMonitor { [weak self] point in
+            monitor = makeMonitor { [weak self] input in
                 guard let self else { return }
-                self.moved(to: point ?? self.location())
+                switch input {
+                case .moved(let point):
+                    self.moved(to: point ?? self.location())
+                case .pressed:
+                    self.pressed()
+                }
             }
         } else {
             if let monitor { removeMonitor(monitor) }
@@ -196,24 +219,39 @@ public final class PointerRest {
     /// Both arms (#2378): moves go to the ACTIVE app, so while
     /// KiwiDesk is active — its Settings window key — only the
     /// local monitor hears the pointer leaving for another window.
+    /// Presses take both arms for the same reason.
     private static func live(
-        _ deliver: @escaping @MainActor (CGPoint?) -> Void
+        _ deliver: @escaping @MainActor (Input) -> Void
     ) -> Any? {
         // A global monitor's event location is in screen space.
         let global = NSEvent.addGlobalMonitorForEvents(
             matching: .mouseMoved
         ) {
             let point = $0.locationInWindow
-            Task { @MainActor in deliver(point) }
+            Task { @MainActor in deliver(.moved(point)) }
         }
         // A local event's location is its window's, so the rest
         // reads the pointer itself.
         let local = NSEvent.addLocalMonitorForEvents(
             matching: .mouseMoved
         ) { event in
-            Task { @MainActor in deliver(nil) }
+            Task { @MainActor in deliver(.moved(nil)) }
             return event
         }
-        return [global, local].compactMap { $0 }
+        let presses: NSEvent.EventTypeMask = [
+            .leftMouseDown, .rightMouseDown, .otherMouseDown,
+        ]
+        let globalPress = NSEvent.addGlobalMonitorForEvents(
+            matching: presses
+        ) { _ in
+            Task { @MainActor in deliver(.pressed) }
+        }
+        let localPress = NSEvent.addLocalMonitorForEvents(
+            matching: presses
+        ) { event in
+            Task { @MainActor in deliver(.pressed) }
+            return event
+        }
+        return [global, local, globalPress, localPress].compactMap { $0 }
     }
 }

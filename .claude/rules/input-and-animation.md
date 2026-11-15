@@ -46,7 +46,7 @@ editing here:
   like every control"). The recorder's suspend (#213) is the one
   live touch, and it resumes the saved table.
 - **Hover focus is armed by USER pointer motion alone (#1869),
-  held by two safeguards that both stay.** The `PointerRest` dwell
+  held by safeguards that all stay.** The `PointerRest` dwell
   starts on a global mouse-moved event, and KiwiDesk moves the
   pointer with a bare `CGWarpMouseCursorPosition`, which posts none
   — a change that synthesizes a mouse event (a moved event after
@@ -61,8 +61,13 @@ editing here:
   `movedFocusStands`). And after a focus the pointer did not make,
   the windows it is left over are held until a move leaves them,
   read from state frames on the move (`PointerRest.held`,
-  `HoverFocusHoldTests`). A new trigger for hover focus is a user
-  event too, never a reading of where the pointer IS.
+  `HoverFocusHoldTests`). And a mouse press spends an armed dwell,
+  so no rest fires after a click the user aimed — one that
+  minimized the window under it came straight back (#3344,
+  `PointerRestTests` ▸ `pressSpendsTheDwell`,
+  `HoverFocusWiringTests` ▸ `pressesAreHeard`). A new trigger for
+  hover focus is a user event too, never a reading of where the
+  pointer IS.
   While KiwiDesk is active, the local monitor hears the pointer
   leave Settings only because that window accepts mouse-moved
   events (#2381), and the flag breaks SwiftUI hover in a popover
@@ -331,10 +336,13 @@ editing here:
     deafens, through that listener's own door.** A consumer that
     swallows a press re-delivers it through
     `MouseTracker.deliverPress` and the press record (`recordDown`
-    and its `recordUp`); one that swallows a left drag re-delivers
+    and its `recordUp`), and any button's press to
+    `PointerRest.pressed()`, which spends hover focus's dwell
+    (#3344); one that swallows a left drag re-delivers
     it to `ShelfRevealer.moved(to:dragging:)`; a consumer whose
     swallow reaches a listener not named here names it here, with
-    its door or why none is owed (`ModifierGrabWiringTests`). The
+    its door or why none is owed (`ModifierGrabWiringTests`,
+    `PointerButtonWiringTests`). The
     keyboard tap's listen-only mouse-down, which ends a modifier
     tap's count and closes an open key sequence (#1871), has no
     door: a grab or a bound button swallowed ahead of it leaves a

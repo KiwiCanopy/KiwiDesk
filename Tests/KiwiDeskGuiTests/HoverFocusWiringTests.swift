@@ -221,4 +221,63 @@ struct HoverFocusWiringTests {
         #expect(window.contains("let window = SettingsWindow("))
         #expect(window.contains("window.syncMouseMoves()"))
     }
+
+    /// A press spends the dwell (#3344) only if the live monitor
+    /// hears it: `PointerRestTests` drives a fake monitor, so a
+    /// press arm deleted here leaves them green.
+    @Test("the rest hears presses on both arms")
+    func pressesAreHeard() throws {
+        let rest = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDeskCore/Events/PointerRest.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        let live = try #require(
+            rest.range(of: "private static func live(")
+        )
+        let body = String(rest[live.lowerBound...])
+        let presses = try #require(body.range(of: "let presses"))
+        let mask = String(body[presses.lowerBound...])
+        let literal = try #require(mask.range(of: "]"))
+        let buttons = mask[..<literal.lowerBound]
+        #expect(buttons.contains(".leftMouseDown"))
+        #expect(buttons.contains(".rightMouseDown"))
+        #expect(buttons.contains(".otherMouseDown"))
+        #expect(
+            mask.range(
+                of: #"addGlobalMonitorForEvents\(\s*matching:\s*presses"#
+                    + #"[\s\S]{0,120}?deliver\(\.pressed\)"#,
+                options: .regularExpression
+            ) != nil,
+            "no global press arm"
+        )
+        #expect(
+            mask.range(
+                of: #"addLocalMonitorForEvents\(\s*matching:\s*presses"#
+                    + #"[\s\S]{0,120}?deliver\(\.pressed\)"#,
+                options: .regularExpression
+            ) != nil,
+            "no local press arm"
+        )
+        #expect(
+            rest.range(
+                of: #"case\s+\.pressed:\s*self\.pressed\(\)"#,
+                options: .regularExpression
+            ) != nil,
+            "the monitor's press no longer reaches pressed()"
+        )
+        // An arm left out of the returned list is never removed.
+        let returned = try #require(
+            mask.range(
+                of: #"return\s*\[[^\]]*\]"#,
+                options: .regularExpression
+            )
+        )
+        #expect(mask[returned].contains("globalPress"))
+        #expect(mask[returned].contains("localPress"))
+    }
 }

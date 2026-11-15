@@ -9,6 +9,10 @@ extension KiwiCore {
         if event.key.input == .click {
             redeliverClick(event)
         }
+        // Any swallowed press spends hover focus's dwell (#3344).
+        if event.phase == .pressed {
+            mouse.rest.pressed()
+        }
         guard event.phase == .pressed,
             let action = mouse.gestures.resolved[event.key]
         else { return }
