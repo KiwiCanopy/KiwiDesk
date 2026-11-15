@@ -233,7 +233,11 @@ extension KiwiCore {
         // echo that matches the intended focus supersedes the
         // deferred raise (#143): the OS already raised whatever
         // the user reached, and a stale raise firing after the
-        // pan would steal focus back.
+        // pan would steal focus back. The window left keeps that
+        // debt for the arm below (#2985).
+        let previousUnraised =
+            effects.focusBefore != nil
+            && pendingFocusRaise == effects.focusBefore
         pendingFocusRaise = nil
         // State and the OS agree again (#1130).
         disarmWakeFocusHeal()
@@ -308,6 +312,7 @@ extension KiwiCore {
                 to: id,
                 from: effects.focusBefore,
                 offsetBefore: offsetBefore,
+                previousUnraised: previousUnraised,
                 now: now
             )
         } else if filedHere {

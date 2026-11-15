@@ -117,6 +117,8 @@ extension KiwiCore {
                     tiled: state.effectiveTiledMembers(of: sp)
                 )
             }
+        // Read before this focus drops the last step's raise (#2985).
+        let previousUnraised = previousFocused.map { $0 == pendingFocusRaise }
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
@@ -276,7 +278,8 @@ extension KiwiCore {
             || scrollFocusMoveOwesRestore(
                 to: id,
                 from: previousFocused,
-                offsetBefore: offsetBefore
+                offsetBefore: offsetBefore,
+                previousUnraised: previousUnraised == true
             )
         {
             scheduleScrollingZOrderRestoreIfOverflowing()
