@@ -122,6 +122,15 @@ struct ModifierGrabWiringTests {
         )
     }
 
+    @Test("a press grab spends hover focus's dwell (#3344)")
+    func pressGrabSpendsTheDwell() {
+        let core = make(Log())
+        core.mouse.rest.moved(to: CGPoint(x: 10, y: 10))
+        #expect(core.mouse.rest.isArmed)
+        send(core, .began, at: CGPoint(x: 200, y: 150))
+        #expect(!core.mouse.rest.isArmed)
+    }
+
     @Test("a hover grab re-delivers no press")
     func hoverTakesNoPress() {
         let log = Log()

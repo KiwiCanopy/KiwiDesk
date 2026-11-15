@@ -116,6 +116,20 @@ struct PointerButtonWiringTests {
         #expect(lua.global("kiwi_side") == .number(4))
     }
 
+    @Test("a swallowed side press spends hover focus's dwell (#3344)")
+    func sidePressSpendsTheDwell() throws {
+        let core = try core()
+        let key = GestureKey(.sideButtons)
+        bind(core, [key: .family(.space)])
+        core.mouse.pointer.start()
+        core.mouse.rest.moved(to: CGPoint(x: 10, y: 10))
+        #expect(core.mouse.rest.isArmed)
+        press(core, key, .released, direction: .back)
+        #expect(core.mouse.rest.isArmed, "a release spends nothing")
+        press(core, key, direction: .back)
+        #expect(!core.mouse.rest.isArmed)
+    }
+
     @Test("Back is the previous one, Forward the next, whatever list")
     func buttonsStepTheWayTheyAreNamed() {
         for family in [GestureFamily.space, .walk, .track] {

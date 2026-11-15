@@ -242,9 +242,11 @@ struct HoverFocusWiringTests {
         let body = String(rest[live.lowerBound...])
         let presses = try #require(body.range(of: "let presses"))
         let mask = String(body[presses.lowerBound...])
-        #expect(mask.contains(".leftMouseDown"))
-        #expect(mask.contains(".rightMouseDown"))
-        #expect(mask.contains(".otherMouseDown"))
+        let literal = try #require(mask.range(of: "]"))
+        let buttons = mask[..<literal.lowerBound]
+        #expect(buttons.contains(".leftMouseDown"))
+        #expect(buttons.contains(".rightMouseDown"))
+        #expect(buttons.contains(".otherMouseDown"))
         #expect(
             mask.range(
                 of: #"addGlobalMonitorForEvents\(\s*matching:\s*presses"#
@@ -268,5 +270,14 @@ struct HoverFocusWiringTests {
             ) != nil,
             "the monitor's press no longer reaches pressed()"
         )
+        // An arm left out of the returned list is never removed.
+        let returned = try #require(
+            mask.range(
+                of: #"return\s*\[[^\]]*\]"#,
+                options: .regularExpression
+            )
+        )
+        #expect(mask[returned].contains("globalPress"))
+        #expect(mask[returned].contains("localPress"))
     }
 }

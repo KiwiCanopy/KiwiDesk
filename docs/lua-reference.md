@@ -5196,6 +5196,11 @@ focused. A window on another screen makes that screen's Space
 the active one. The pointer is never warped by it, so it works
 beside [`mouse.set_follows_focus`](#mouseset_follows_focus).
 
+:::unreleased
+A click made before those 200 ms run out cancels the rest: the
+pointer has to move again before hover focus fires.
+:::
+
 Also togglable in the Settings app under **Shortcuts ▸
 Mouse & Trackpad**.
 

@@ -135,7 +135,6 @@ public final class PointerRest {
     /// just minimized (#3344). Jitter around the press is no
     /// travel; the next real move re-arms.
     func pressed() {
-        guard timer != nil else { return }
         timer?.cancel()
         timer = nil
         lastRest = location()

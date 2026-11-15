@@ -69,7 +69,8 @@ struct MouseButtonSeamGuardTests {
         // (#2229); its suites pin `currentPointer`.
         "JumpModel.swift",
         // The pointer rest's location at a rest (#1869), read
-        // only after a monitor both twins pin inert delivered a move.
+        // only after a monitor both twins pin inert delivered a move
+        // or a press.
         "PointerRest.swift",
         // A searchable dropdown's cursor moves on a real pointer
         // move (owner ruling 2026-10-17); `DropdownCursorTests`

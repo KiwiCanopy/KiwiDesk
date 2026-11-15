@@ -119,6 +119,7 @@ extension KiwiCore {
             let cocoa = GeometryUtils.axPoint(point)
             mouse.deliverPress(at: cocoa, from: .otherApp)
             mouse.recordDown(at: cocoa, from: .otherApp, clickCount: 1)
+            mouse.rest.pressed()
         }
         modifierGrab.released = nil
         guard let window = frontTrackedWindow(at: point)?.window else {
