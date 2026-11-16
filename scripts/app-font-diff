@@ -95,9 +95,12 @@ class Table:
         return None
 
     def probes(self):
-        """Every name this table can tell apart: each exact name
-        and each prefix's stem."""
-        return set(self.exact) | {p for p, _ in self.prefixes}
+        """Every name this table can tell apart: each exact name,
+        each prefix's stem, and the stem plus a character no exact
+        name carries, which reaches the prefix where the stem is
+        also an exact name."""
+        stems = {p for p, _ in self.prefixes}
+        return set(self.exact) | stems | {p + TAIL for p in stems}
 
 
 class Font:
@@ -198,6 +201,13 @@ class Font:
 
 
 NONE = '<span class="none">app icon</span>'
+# Appended to a prefix's stem to probe the prefix itself; shown as
+# the prefix's own spelling.
+TAIL = "\u0000"
+
+
+def shown(name):
+    return name.replace(TAIL, "*")
 
 
 def classify(old, new, old_sigs, new_sigs, extra_probes=()):
@@ -266,7 +276,7 @@ def quiet(text):
 
 
 def cell(text):
-    return quiet(text).replace("|", "\\|").replace("<", "&lt;")
+    return quiet(shown(text)).replace("|", "\\|").replace("<", "&lt;")
 
 
 def apps(table, ligature):
@@ -435,19 +445,20 @@ def sheet(old, new, result):
             f"<td>{before}</td><td>{after}</td></tr>"
         )
 
-    shown = set()
+    pictured = set()
     for name, was, now, reason in result["redrawn"]:
+        name = shown(name)
         label = f"{name}: {was}" if was == now else (
             f"{name}: {was} → {now or '—'}")
         row(reason, label,
             old.svg(was), new.svg(now) if now else NONE)
-        shown.add(was)
+        pictured.add(was)
     for lig in result["removed"]:
         row("removed", lig, old.svg(lig), NONE)
     for lig, twin in result["renamed"]:
         row("renamed", f"{lig} → {twin}", old.svg(lig), new.svg(twin))
     for lig in result["changed"]:
-        if lig not in shown:
+        if lig not in pictured:
             row("changed", f"{lig} ({apps(new.table, lig)})",
                 old.svg(lig), new.svg(lig))
     for lig in result["added"]:

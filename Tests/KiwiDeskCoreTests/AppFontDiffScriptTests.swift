@@ -131,6 +131,21 @@ struct AppFontDiffScriptTests {
         #expect(verdict.redraws("Code - Insiders"))
     }
 
+    /// The stem of `Adobe Photoshop*` is also an exact name, so a
+    /// probe of the bare stem never reaches the new prefix.
+    @Test("A prefix whose stem is also an exact name is probed")
+    func prefixBehindExactStem() throws {
+        var old = Self.base
+        old.rows.append((":ps:", ["Adobe Photoshop"]))
+        old.sigs[":ps:"] = "P"
+        var new = old
+        new.rows.append((":psnew:", ["Adobe Photoshop*"]))
+        new.sigs[":psnew:"] = "N"
+        let verdict = try run(old, new)
+        #expect(verdict.look)
+        #expect(verdict.redraws("Adobe Photoshop\u{0}"))
+    }
+
     @Test("A changed outline, a lost shape and an unmapped app look")
     func drawnGlyphChanges() throws {
         var outline = Self.base

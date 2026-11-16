@@ -9,12 +9,12 @@ name: Update App Font
 # This workflow runs that same script — it is not a second copy of
 # the vendoring logic — and opens a PR. It never writes to main
 # and never merges its PR or arms a merge: the orchestrator lands
-# it. The PR
-# says whether it needs the owner's look: scripts/app-font-diff
-# compares the base branch's font with the new one per app name,
-# and a drop that changes no glyph an app drew is labelled
-# `app-font: additions only` and may land on green. The upstream
-# release notes since the vendored tag ride along, collapsed.
+# it. The PR says whether it needs the owner's look:
+# scripts/app-font-diff compares the base branch's font with the
+# new one per app name, and a drop that changes no glyph an app
+# drew is labelled `app-font: additions only` and may land on
+# green. The upstream release notes since the vendored tag ride
+# along, collapsed.
 #
 # The PR is opened with RELEASE_SYNC_TOKEN, the owner's PAT
 # changelog.yml threads for the same reason (#1154): a real actor's
