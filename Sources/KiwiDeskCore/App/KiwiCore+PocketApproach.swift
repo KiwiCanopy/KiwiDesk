@@ -66,7 +66,8 @@ extension KiwiCore {
     }
 
     /// Whether the pointer is on `display`'s tab: its approach's hover
-    /// band.
+    /// band, as the revealer last filed it — a pass behind where the
+    /// tab moves, which a rise never outlasts.
     func pocketPointerOnTab(on display: DisplayID) -> Bool {
         let reveal = shelves.reveal
         guard let tab = reveal.targets[pocketApproachKey(on: display)]?.handle

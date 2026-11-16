@@ -7263,7 +7263,12 @@ cross-fade of the risen pocket was set aside: it puts two marks on
 screen at once, and a dissolve stand-in is what Reduce Motion here
 never takes. Under KiwiDesk's Off nothing shows during the wait,
 as Off drops the bars' fill, and the pocket stands when the dwell
-ends.
+ends. While the rise runs its panel holds the risen pocket's room
+and takes its clicks as the risen pocket does (owner, 2026-11-16):
+one panel carries the tab and the room, and passing clicks through
+the room cost the tab its own click and hover; a click there in
+the 0.4 s opens the pocket rather than reaching the window under
+it.
 :::
 
 **The pocket is the mark alone: faded while empty, in full colour

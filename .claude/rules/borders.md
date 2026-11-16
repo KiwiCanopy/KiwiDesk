@@ -518,9 +518,9 @@ the pocket holding its resting room (#3368 amended;
 `PocketApproachTests` ▸ `reducedFillsTheTab`,
 `PocketRiseTimelineTests`). A sink keeps the risen room until its
 landing, through the overlay's `afterLeave`, whatever shows meanwhile
-(`PocketApproachTests` ▸ `leaveSinks`); that room passes clicks
-through until the pocket stands, and while the rise runs only the
-pointer on the tab lights it (`PocketApproachTests` ▸
+(`PocketApproachTests` ▸ `leaveSinks`); that room takes the
+pocket's clicks as the risen pocket does (owner, 2026-11-16), and
+while the rise runs only the pointer on the tab lights it (`PocketApproachTests` ▸
 `riseLightsOnlyTheTab`). Its hover lifts nothing: the tab goes to
 the fill strength in place, through the one
 `PocketHandleView.tabCore` (#3366, `PocketApproachTests` ▸

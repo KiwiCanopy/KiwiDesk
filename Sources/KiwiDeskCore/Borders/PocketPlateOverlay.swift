@@ -217,10 +217,6 @@ final class PocketPlateOverlay {
             {
                 Self.place(shown, at: spec.frame)
             }
-            // The room a rise or a sink holds is no pocket yet: clicks
-            // pass to the window under it (#3368).
-            shown.panel?.ignoresMouseEvents =
-                spec.rise != nil || shown.view.sinking
         }
         if enters, let edge = spec.handle {
             BarMotion.playPocketEntrance(

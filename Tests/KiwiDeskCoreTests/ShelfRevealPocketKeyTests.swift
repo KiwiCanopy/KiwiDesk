@@ -62,4 +62,15 @@ struct ShelfRevealPocketKeyTests {
         timers.fireAll()
         #expect(revealer.reveal(of: pocket) == .hidden)
     }
+
+    @Test("a shelf surface holds the bars, never the pocket")
+    func holdSkipsTheRisenPocket() {
+        let (revealer, timers, pointer) = Suite.make()
+        revealer.sync([Suite.key: Suite.flush, pocket: Suite.flush])
+        revealer.holds = { _ in true }
+        revealer.set(.hover, for: pocket)
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 300))
+        timers.fireAll()
+        #expect(revealer.reveal(of: pocket) == .hidden)
+    }
 }

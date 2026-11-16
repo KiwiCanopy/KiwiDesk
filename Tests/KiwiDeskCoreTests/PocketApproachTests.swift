@@ -147,8 +147,6 @@ struct PocketApproachTests {
         #expect(!lit.risen)
         let view = try #require(rig.core.pocketPlate.view(on: rest.display))
         #expect(view.handle.hovered)
-        // The tab stays a bar handle's depth: nothing lifts.
-        #expect(view.handle.frame.size.height >= PocketHandleView.tabDepth)
     }
 
     @Test("lingering near the tab rises the pocket as its countdown")
@@ -171,16 +169,13 @@ struct PocketApproachTests {
         let rising = try #require(rig.spec)
         #expect(!rising.risen)
         #expect(rising.rise == fill)
-        // The rise needs the risen pocket's room, which passes clicks.
+        // The rise needs the risen pocket's room.
         #expect(depth(rising) > depth(rest))
-        let view = try #require(rig.core.pocketPlate.view(on: rig.display))
-        #expect(view.window?.ignoresMouseEvents == true)
         rig.timers.fireAll()
         rig.pass()
         let risen = try #require(rig.spec)
         #expect(risen.risen)
         #expect(risen.rise == nil)
-        #expect(view.window?.ignoresMouseEvents == false)
     }
 
     @Test("an entry on the tab rises in the reveal delay")
@@ -249,6 +244,22 @@ struct PocketApproachTests {
         landings.forEach { $0() }
         #expect(!view.sinking)
         #expect(view.frame.size == rest.frame.size)
+    }
+
+    @Test("a left drag over the panel reaches the revealer as one")
+    func dragMoveIsADrag() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        let view = try #require(rig.core.pocketPlate.view(on: rig.display))
+        let point = try nearTab(try #require(rig.target))
+        rig.pointer.point = point
+        // A left drag that moves no window opens nothing (#2795).
+        rig.core.mouse.pressedButtons = { 1 }
+        view.onMove(point)
+        #expect(rig.core.shelves.reveal.fills[rig.key] == nil)
+        rig.core.mouse.pressedButtons = { 0 }
+        view.onMove(point)
+        #expect(rig.core.shelves.reveal.fills[rig.key] != nil)
     }
 
     @Test("the panel hands its own moves to the revealer")

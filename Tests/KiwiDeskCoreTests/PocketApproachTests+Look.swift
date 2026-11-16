@@ -15,7 +15,8 @@ extension PocketApproachTests {
         // Reduce Motion, then KiwiDesk's Off (no reveal length).
         for off in [false, true] {
             let rig = try rig()
-            BarMotion.reducedOverride = true
+            // Off alone: macOS asks for no less motion.
+            BarMotion.reducedOverride = !off
             if off { BarMotion.revealLength = 0 }
             defer { pinRevealLength() }
             let rest = try #require(rig.spec)
