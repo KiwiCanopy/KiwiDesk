@@ -37,12 +37,21 @@ public enum ColorPaletteKeys {
     /// Whether path permits the empty "Automatic" value: a mark's
     /// adaptive tint (`StickyStyle.color`), derived from the path
     /// so a third mark struct cannot join the surface without
-    /// joining this too, or a `followers` colour. Without it the
+    /// joining this too, an `adaptive` colour, or a `followers`
+    /// colour. Without it the
     /// surface is one-directional: a palette could paint the
     /// colour but never hand it back to Automatic.
     public static func allowsAutomatic(_ path: String) -> Bool {
-        path.hasSuffix(".color") || followers[path] != nil
+        path.hasSuffix(".color") || adaptive.contains(path)
+            || followers[path] != nil
     }
+
+    /// Colours outside a mark struct whose Automatic is an
+    /// adaptive system ink (#3357): an Auto bar's resting handle
+    /// in the label colour. Bundled palettes leave them out.
+    public static let adaptive: Set<String> = [
+        "kiwishelf.handle_color"
+    ]
 
     /// Colours whose Automatic is ANOTHER colour of the palette
     /// rather than an adaptive tint, keyed to the path they follow

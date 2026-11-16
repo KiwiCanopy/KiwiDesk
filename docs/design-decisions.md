@@ -18435,6 +18435,18 @@ default is a pairing the palette's own colours define, so a
 palette that left it out would keep the last palette's ring
 beside its own text.
 
+A third kind joined with
+[#3357](https://github.com/KiwiCanopy/KiwiDesk/issues/3357): an
+**adaptive** colour, `ColorPaletteKeys.adaptive`, a `_color` key
+outside a mark struct whose Automatic is a system ink, as a mark
+tint's is — an Auto bar's resting handle in the label colour. It
+takes a mark tint's rule, not a follower's: the authored palettes
+leave it out, so a bundled palette keeps the handle following
+light and dark, and the derived default palette carries it empty
+so a reset reaches it. A colour joins only where its Automatic is
+that kind of adaptive ink; one whose Automatic is another palette
+colour is a follower.
+
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
 colors, bundled or user-saved) reads as one system when its

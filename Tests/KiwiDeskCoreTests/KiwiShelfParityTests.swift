@@ -163,7 +163,7 @@ struct KiwiShelfCommandParityTests {
             return [.number(30)]
         case .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .fillColor, .borderColor,
-            .groupBadgeColor, .groupBadgeTextColor:
+            .groupBadgeColor, .groupBadgeTextColor, .handleColor:
             return [.string("#010203")]
         }
     }

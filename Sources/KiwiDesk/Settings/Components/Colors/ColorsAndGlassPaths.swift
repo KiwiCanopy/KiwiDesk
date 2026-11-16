@@ -24,6 +24,7 @@ enum ColorsAndGlassPaths {
         case .kiwishelf(.groupBadgeTextColor):
             return \.kiwishelf.groupBadgeTextColor
         case .kiwishelf(.borderColor): return \.kiwishelf.borderColor
+        case .kiwishelf(.handleColor): return \.kiwishelf.handleColor
         case .spaceBar(.spaceBarFocusedItemColor):
             return \.spaceBarStyle.focusedItemColor
         case .spaceBar(.spaceBarFocusedHighlightColor):

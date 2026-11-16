@@ -69,6 +69,23 @@ extension ColorsAndGlassRow {
                 label: L("kiwishelf.color.badge_text", "Badge text"),
                 hex: shelf.groupBadgeTextColor
             )
+        case .handleColor:
+            HexColorField(
+                label: L("kiwishelf.color.handle", "Handle"),
+                a11yLabel: L(
+                    "kiwishelf.color.handle.a11y",
+                    "Bar handle color"
+                ),
+                automatic: true,
+                hex: shelf.handleColor
+            )
+            .help(
+                L(
+                    "kiwishelf.color.handle.help",
+                    "The handle rests in this color and fills with it "
+                        + "as the bar opens."
+                )
+            )
         case .borderColor:
             HexColorField(
                 label: L("kiwishelf.color.border", "Border"),

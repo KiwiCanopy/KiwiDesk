@@ -227,6 +227,12 @@ extension SettingsValueReadout {
             .groupBadgeColor, .groupBadgeTextColor:
             let path = Self.shelfColor(key)
             return spaceBarHexRow(census, o[keyPath: path], n[keyPath: path])
+        case .handleColor:
+            return spaceBarRow(
+                census,
+                bordersAutoHex(o.handleColor),
+                bordersAutoHex(n.handleColor)
+            )
         }
     }
 

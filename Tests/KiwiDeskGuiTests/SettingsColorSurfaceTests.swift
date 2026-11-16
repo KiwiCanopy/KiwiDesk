@@ -164,8 +164,9 @@ struct SettingsColorSurfaceTests {
         // 17 rows since #1517: the shelf's eight colours replaced
         // the two bars' seventeen; 18 since #1679, the border; 19
         // since #1856, the front chip's indicator; 20 since #2671,
-        // the pocket mark; 16 since #2797 retired the drag tints.
-        #expect(placed.count == 16)
+        // the pocket mark; 16 since #2797 retired the drag tints;
+        // 17 since #3357, the resting handle.
+        #expect(placed.count == 17)
         #expect(placed.count == ColorPaletteKeys.all.count)
     }
 
@@ -230,8 +231,8 @@ struct SettingsColorSurfaceTests {
             ColorPaletteKeys.allowsAutomatic
         )
         #expect(flags == automaticPaths.count)
-        // The three marks (#2671), and the front indicator
-        // following its text (#1856).
-        #expect(flags == 4)
+        // The three marks (#2671), the front indicator following
+        // its text (#1856) and the resting handle (#3357).
+        #expect(flags == 5)
     }
 }

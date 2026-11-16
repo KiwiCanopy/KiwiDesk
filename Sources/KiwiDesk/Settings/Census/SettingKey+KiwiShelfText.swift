@@ -171,6 +171,11 @@ extension KiwiShelfKey {
             return .text("kiwishelf.color.group_badge")
         case .groupBadgeTextColor:
             return .text("kiwishelf.color.badge_text")
+        case .handleColor:
+            return .text(
+                "kiwishelf.color.handle",
+                help: "kiwishelf.color.handle.help"
+            )
         }
     }
 }

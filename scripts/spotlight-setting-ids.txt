@@ -181,6 +181,7 @@ settings.kiwishelf.glyphSize
 settings.kiwishelf.glyphSize (auto)
 settings.kiwishelf.groupBadgeColor
 settings.kiwishelf.groupBadgeTextColor
+settings.kiwishelf.handleColor
 settings.kiwishelf.highlightColor
 settings.kiwishelf.highlightWidth
 settings.kiwishelf.hoverFillColor

@@ -167,6 +167,7 @@ struct GapsBordersPanelTests {
                 == [
                     "sticky.color", "floating.color", "pocket.color",
                     "space_bar.focused_highlight_color",
+                    "kiwishelf.handle_color",
                 ],
             Comment(
                 rawValue:
@@ -180,6 +181,7 @@ struct GapsBordersPanelTests {
         for path in ColorPaletteKeys.all
         where path.hasSuffix("_color")
             && ColorPaletteKeys.followers[path] == nil
+            && !ColorPaletteKeys.adaptive.contains(path)
         {
             #expect(!ColorPaletteKeys.allowsAutomatic(path))
         }

@@ -51,10 +51,13 @@ enum KiwiShelfCommandSetting {
             return .success(keyword(max(0, value)))
         }
         if let path = colorFields[field] {
-            guard let hex = args.first?.stringValue,
-                HexColor.parse(hex) != nil
-            else { return .failure("expected #RRGGBB or #RRGGBBAA") }
-            return .success(.color(path, hex))
+            // The palette register says which colour takes ""
+            // (`ColorPaletteKeys.adaptive`, #3357).
+            let automatic = ColorPaletteKeys.allowsAutomatic(
+                "kiwishelf.\(field)"
+            )
+            return BarColorArg.parse(args, automatic: automatic)
+                .map { .color(path, $0) }
         }
         return .failure("unknown kiwishelf setting: \(field)")
     }
@@ -205,6 +208,7 @@ enum KiwiShelfCommandSetting {
             "border_color": \.borderColor,
             "group_badge_color": \.groupBadgeColor,
             "group_badge_text_color": \.groupBadgeTextColor,
+            "handle_color": \.handleColor,
         ]
     }
 

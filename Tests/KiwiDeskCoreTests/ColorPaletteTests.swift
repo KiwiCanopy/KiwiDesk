@@ -48,8 +48,9 @@ struct ColorPaletteTests {
         #expect(all.contains("floating.color"))
     }
 
-    /// Only the mark paths and the `followers` admit the empty
-    /// "Automatic" value — a mark's derived from the path shape —
+    /// Only the mark paths, the `adaptive` handle (#3357) and the
+    /// `followers` admit the empty "Automatic" value — a mark's
+    /// derived from the path shape —
     /// and a follower's leader is a palette path that never empties
     /// itself, so Automatic always resolves to a colour (#1856).
     @Test("Automatic is a mark's or a follower's palette value")
@@ -62,6 +63,7 @@ struct ColorPaletteTests {
                 == [
                     "sticky.color", "floating.color", "pocket.color",
                     "space_bar.focused_highlight_color",
+                    "kiwishelf.handle_color",
                 ]
         )
         for (follower, leader) in ColorPaletteKeys.followers {

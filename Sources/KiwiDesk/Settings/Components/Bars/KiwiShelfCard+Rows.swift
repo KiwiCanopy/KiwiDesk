@@ -134,7 +134,7 @@ extension KiwiShelfCard {
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,
-            .groupBadgeTextColor:
+            .groupBadgeTextColor, .handleColor:
             EmptyView()
         }
     }

@@ -125,6 +125,9 @@ public struct KiwiShelf: Sendable, Equatable {
     /// Group count badge colours (#955).
     public var groupBadgeColor = "#636366"
     public var groupBadgeTextColor = "#FFFFFF"
+    /// An Auto bar's resting handle (#3357); empty is Automatic,
+    /// the system label ink at `ShelfHandleSpec.restStrength`.
+    public var handleColor = ""
     /// How long a shelf the show/hide action revealed stays shown,
     /// in seconds (#761); 0 keeps it until the next press.
     public var revealTimeout: Double = 0
@@ -209,18 +212,6 @@ public struct KiwiShelf: Sendable, Equatable {
     /// strip and inner margin (#1516).
     public var reservation: CGFloat {
         outerMargin + thickness + innerMargin
-    }
-
-    /// The depth of the pocket's handle at rest (#2784): a whole
-    /// point, which lands on a pixel at 1x and 2x. A bar's handle
-    /// is its own hairline (`ShelfHandleSpec.depth`, #3349).
-    public static let hiddenDepth: CGFloat = 11
-
-    /// What the pocket's handle reserves (#2784): the shelf's own
-    /// rule with the handle's depth in place of `thickness`, so its
-    /// windows stand their outer gap clear of the kiwis.
-    public var hiddenReservation: CGFloat {
-        outerMargin + Self.hiddenDepth + innerMargin
     }
 
     /// True if Liquid Glass is on and the platform draws it.

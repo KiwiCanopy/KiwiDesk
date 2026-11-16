@@ -176,6 +176,7 @@ extension KiwiCore {
                 spec.yields = reveal.yields(barKey(bar))
                 spec.position = dots?.position
                 spec.glass = shelf.glassEnabled
+                spec.restHex = shelf.handleColor
                 targets[barKey(bar)] = Self.target(
                     spec,
                     side: side,
