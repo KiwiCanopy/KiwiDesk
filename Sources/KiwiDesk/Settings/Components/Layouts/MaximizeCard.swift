@@ -229,16 +229,19 @@ struct MaximizeCard: View {
         }
     }
 
-    /// The follow-focus row's `?` (#3280): what the switch does, its
+    /// The follow-focus row's `?` (#3280): what off does, what the
+    /// switch does, its
     /// two-window cost (a raise on Monocle, #3063), and that it
     /// reaches only the next Maximize.
     static var followFocusHelp: String {
         L(
             "layout_defaults.maximize.follow_focus.help",
-            "The window you focus takes over the Maximize, in the "
-                + "same shape, and the one you left shrinks back to its "
-                + "place. Each focus step resizes both windows, except "
-                + "a full Maximize on a Monocle Space, where it only "
+            "Off: focusing another window ends the Maximize. "
+                + "On: the window you focus takes over the Maximize, "
+                + "in the same shape, and the one you left shrinks "
+                + "back to its place. Each focus step resizes both "
+                + "windows, except a full Maximize on a Monocle "
+                + "Space, where it only "
                 + "brings the window forward. A change here applies "
                 + "from the next Maximize, not to one already on screen."
         )
