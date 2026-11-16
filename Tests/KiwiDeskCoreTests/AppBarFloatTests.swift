@@ -95,6 +95,7 @@ struct AppBarFloatTests {
                 spaceItems: nil,
                 app: app,
                 pocket: false,
+                hover: [],
                 drawn: { $0.drawnAtRest }
             ).first
         )

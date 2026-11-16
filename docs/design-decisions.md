@@ -19851,7 +19851,8 @@ Dock stays shown for as long as the pointer stays there. So:
   microsecond a read, with no cache and no notification to miss. An
   unreadable key reads as macOS's default, a free edge.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
-  #3359). The handle, the landing and the hold read one
+  #3359), amending "each opens at its lone place under the pair"
+  above: each now opens in its share of the pair. The handle, the landing and the hold read one
   arrangement: every bar resting on the edge — the bars drawn, the
   Auto bars, whose handles rest there, and the bars a maximized
   window brings in — with a stored Hidden bar counted only while it
@@ -19859,10 +19860,15 @@ Dock stays shown for as long as the pointer stays there. So:
   nowhere. A bar that came in somewhere other than where its handle
   showed broke the handle's one promise, and its hold, taken from
   the handle's run, left part of the drawn bar outside it to
-  retract under the pointer. The trade: a lone revealed Auto bar no
+  retract under the pointer. The trade: under `center`, a lone revealed Auto bar no
   longer centres while its sibling rests as a handle. It stands in
-  its share, off-centre by half its sibling's length, and a pair
-  too wide for the edge caps that share, so the bar may scroll.
+  its share, off-centre by half its sibling's length and the
+  gutter, and a pair too wide for the edge caps that share, so the
+  bar may scroll. The share is measured without the Space Bar's
+  front-app segment, which a resting App Bar handle therefore
+  stands down as a shown App Bar does: the segment would overflow
+  a share sized without it, and sizing the share with it would move
+  the Space Bar when the App Bar comes in.
   Moving the handles to where a lone bar lands was the other way,
   and it fails on any shared edge: two lone bars sit at the same
   place under every alignment, so their handles would overlap.

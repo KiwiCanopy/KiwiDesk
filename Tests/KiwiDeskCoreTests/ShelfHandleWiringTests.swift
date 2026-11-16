@@ -172,4 +172,54 @@ struct ShelfHandleWiringTests {
         #expect(abs(bar.strip.minX - handle.minX) < 0.5)
         #expect(bar.strip.width < screen.frame.width / 2)
     }
+
+    /// Over a maximizing Monocle both bars read Hidden and rest as
+    /// handles; a revealed App Bar lands in its share beside the
+    /// Space Bar's handle, never a lone bar's whole edge (#3359).
+    @Test(
+        "over a maximized window a revealed bar takes its share",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func maximizedRevealTakesItsShare() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let display = try #require(screen.kiwiDisplay)
+        let core = makeTestCore()
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.visibleBounds = { _ in screen.frame }
+        core.state.apply(.displaysChanged([display]))
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(900_104),
+                    pid: 900_104,
+                    appName: "Max",
+                    frame: CGRect(x: 100, y: 200, width: 600, height: 400)
+                )
+            )
+        )
+        core.resolveSpaceDisplays(mainID: display.id)
+        let space = try #require(
+            core.state.workspaces.space(of: WindowID(900_104))
+        )
+        core.state.workspaces.setMode(space, .monocle)
+        var settings = core.tiler.settings
+        settings.spaceBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(.top)
+        settings.spaceBarStyle.visibility = .always
+        settings.monocle.appBar.visibility = .always
+        settings.monocle.maximizeWindows = true
+        settings.kiwishelf.maximizedVisibility = .auto
+        core.tiler.settings = settings
+        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        #expect(core.maximizedHoverBars(on: display.id) == [.space, .app])
+        core.updateBars()
+        #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
+        core.updateBars()
+        let bar = try #require(
+            core.appBars.shownBarsForTesting.first {
+                $0.display == display.id
+            }
+        )
+        #expect(bar.strip.width < screen.frame.width / 2)
+    }
 }

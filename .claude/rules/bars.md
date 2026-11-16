@@ -273,14 +273,17 @@ twice, was a question the user answered twice. The argument is
   `hidden` bar has no approach, and a hidden bar whose edge sibling
   shows yields, its handle standing aside
   (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
-  `docs/design-decisions.md` ▸ A shelf can hide). **A revealed bar
-  lands under its handle**: the live plan places the drawn bars in
-  their slots of the one arrangement of the bars resting on the
-  edge (`ShelfEdge.resting`, cut by `ShelfArrangement.keeping`),
-  which the handle and the hold read as `ShelfPlan.revealed` —
-  never a second placement of a revealed bar beside it (#3359,
+  `docs/design-decisions.md` ▸ A shelf can hide). **Place a revealed
+  bar in its slot of the one arrangement of the bars resting on
+  the edge** (`ShelfEdge.resting`, cut by
+  `ShelfArrangement.keeping`), which the handles, the landing and
+  the hold read as `ShelfPlan.resting`; ask which bars rest as a
+  handle of the one `ShelfEdge.handled`, never a filter beside it,
+  and never place a revealed bar a second way (#3359,
   `ShelfLandingTests`, `ShelfHandleWiringTests` ▸
-  `holdIsWhereTheHandleRan`). **The handle
+  `holdIsWhereTheHandleRan`). A resting App Bar handle holds its
+  share of the Space Bar's edge, so a Space Bar revealed beside it
+  draws no front-app segment (`ShelfLandingFrontAppTests`). **The handle
   reserves nothing**: `ShelfReservation` takes no hiding edge, and a
   new input that would reserve for an Auto bar is a ruling
   (`BarAutoHideFoldTests`). Whether a bar yields is the revealer's

@@ -184,10 +184,11 @@ extension KiwiCore {
                     display: display.id,
                     plan: plan,
                     // Drawn, not merely built: a hidden App Bar
-                    // leaves the front-app segment its room (#761).
-                    appBarShows: plans.contains {
-                        $0.arrangement.app != nil
-                    },
+                    // leaves the front-app segment its room (#761),
+                    // save where its handle rests beside the Space
+                    // Bar and holds that room (#3359).
+                    appBarShows: plan.resting.arrangement.app != nil
+                        || plans.contains { $0.arrangement.app != nil },
                     style: look
                 )
             {

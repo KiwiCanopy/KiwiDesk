@@ -30,8 +30,10 @@ extension KiwiCore {
                 mode: app.space.mode,
                 spaceItems: nil,
                 app: app,
-                // Before any display, no pocket stands.
+                // Before any display, no pocket stands and no window
+                // maximizes.
                 pocket: false,
+                hover: [],
                 // Before any display, no reveal can stand: at rest.
                 drawn: { $0.drawnAtRest }
             ).first,

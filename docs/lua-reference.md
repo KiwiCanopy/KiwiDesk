@@ -2885,7 +2885,8 @@ double-click it to restore the default.
 (default `"center"`).
 
 **Does:** places the shelf's run along the edge — a lone bar, or
-both bars as one run. Values are edge-relative: a left edge's
+both bars as one run, an `"auto"` bar's handle counting as its bar
+there. Values are edge-relative: a left edge's
 `start` is its top, a top edge's `start` its left. Once the run
 overflows, all three values behave the same.
 
@@ -4098,8 +4099,9 @@ other's handle goes away. A thickened handle wears the bars'
 [Liquid Glass](#kiwishelfset_liquid_glass).
 
 A revealed bar lands under its handle, in its share of the edge
-beside its sibling's handle, so it sits off-centre and a long App
-Bar may scroll in its share. Beside a `"hidden"` sibling an
+beside its sibling's handle, where a long App Bar may scroll. A
+Space Bar revealed beside the App Bar's handle draws no front-app
+segment. Beside a `"hidden"` sibling an
 `"auto"` bar's handle runs alone; the hidden bar, shown by its
 shortcut, joins it side by side and the handle moves to its shared
 place.

@@ -242,6 +242,7 @@ struct ShelfHandleEdgeTests {
                 items: nil,
                 screens: screens,
                 reveal: ShelfRevealer(),
+                hover: [],
                 settings: TilingSettings()
             )
             return hiding.targets.values.first?.flush

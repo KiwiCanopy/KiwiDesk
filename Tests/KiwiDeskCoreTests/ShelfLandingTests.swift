@@ -49,7 +49,9 @@ struct ShelfLandingTests {
         app appVisibility: ShelfVisibility = .auto,
         alignment: KiwiShelf.Alignment = .center,
         width: CGFloat = 1600,
-        windows: Int = 3
+        windows: Int = 3,
+        hover: Set<ShelfBar> = [],
+        pocket: Bool = false
     ) throws -> KiwiCore.ShelfPlan {
         let core = makeTestCore()
         var settings = core.tiler.settings
@@ -58,6 +60,7 @@ struct ShelfLandingTests {
         settings.spaceBarStyle.visibility = space
         settings.monocle.appBar.visibility = appVisibility
         settings.kiwishelf.alignment = alignment
+        settings.kiwishelf.pocketEdge = .top
         let content = app(settings, windows: windows)
         let plans = core.shelfPlans(
             visible: CGRect(x: 0, y: 0, width: width, height: 1000),
@@ -65,7 +68,8 @@ struct ShelfLandingTests {
             mode: content.space.mode,
             spaceItems: items(),
             app: content,
-            pocket: false,
+            pocket: pocket,
+            hover: hover,
             drawn: { $0.drawnAtRest.union(drawn) }
         )
         #expect(plans.count == 1)
@@ -78,8 +82,8 @@ struct ShelfLandingTests {
         _ bar: ShelfBar,
         _ plan: KiwiCore.ShelfPlan
     ) -> ShelfArrangement.Slot? {
-        let placed = plan.revealed?.arrangement
-        return bar == .space ? placed?.space : placed?.app
+        let placed = plan.resting.arrangement
+        return bar == .space ? placed.space : placed.app
     }
 
     @Test(
@@ -94,6 +98,9 @@ struct ShelfLandingTests {
         let revealed = try plan([.app], alignment: alignment)
         #expect(revealed.arrangement.app == handle)
         #expect(revealed.arrangement.space == nil)
+        #expect(revealed.arrangement.divider == nil)
+        #expect(revealed.needs[.space] == nil)
+        #expect(revealed.needs[.app] != nil)
         #expect(handleSlot(.app, revealed) == handle)
         // The mirror: a lone Space reveal lands under its handle.
         let space = try plan([.space], alignment: alignment)
@@ -142,5 +149,40 @@ struct ShelfLandingTests {
         #expect(slot == handleSlot(.app, narrow))
         // Its Space sibling still holds its share as a handle.
         #expect(handleSlot(.space, narrow) != nil)
+        // The divider stands only while both bars draw.
+        #expect(narrow.arrangement.divider == nil)
+        let both = try plan([.app, .space], width: 400, windows: 12)
+        #expect(both.arrangement.divider != nil)
+    }
+
+    @Test("over a maximized window the hover bars rest beside it")
+    func hoverBarsRest() throws {
+        // A maximize reads both bars Hidden; the hover bars rest.
+        let rest = try plan(
+            [],
+            space: .hidden,
+            app: .hidden,
+            hover: [.space, .app]
+        )
+        let handle = try #require(handleSlot(.app, rest))
+        let revealed = try plan(
+            [.app],
+            space: .hidden,
+            app: .hidden,
+            hover: [.space, .app]
+        )
+        #expect(revealed.arrangement.app == handle)
+        #expect(handleSlot(.space, revealed) != nil)
+    }
+
+    @Test("the pocket keeps its slot across a reveal")
+    func pocketStays() throws {
+        let one = try plan([.app], pocket: true)
+        let both = try plan([.app, .space], pocket: true)
+        let slot = try #require(one.arrangement.pocket)
+        #expect(both.arrangement.pocket == slot)
+        #expect(one.arrangement.app == both.arrangement.app)
+        // An edge drawing no bar takes the pocket's handle (#2678).
+        #expect(try plan([], pocket: true).arrangement.pocket == nil)
     }
 }

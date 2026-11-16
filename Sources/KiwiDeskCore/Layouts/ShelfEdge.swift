@@ -74,9 +74,15 @@ public struct ShelfEdge: Sendable, Equatable {
         drawn: Set<ShelfBar>,
         hover: Set<ShelfBar>
     ) -> Set<ShelfBar> {
-        drawn.union(
-            bars.keys.filter { shown($0) == .auto || hover.contains($0) }
-        )
+        drawn.union(handled(hover: hover))
+    }
+
+    /// The bars resting as a handle on this edge: each `auto` bar
+    /// and each of the `hover` bars a maximized window brings in
+    /// (#3349, #3346) — the one set the arrangement and the
+    /// handles both read (#3359).
+    public func handled(hover: Set<ShelfBar>) -> Set<ShelfBar> {
+        Set(bars.keys.filter { shown($0) == .auto || hover.contains($0) })
     }
 
     /// Whether the edge draws nothing at rest, so a bar a reveal

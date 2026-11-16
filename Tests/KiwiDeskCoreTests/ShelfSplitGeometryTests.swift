@@ -134,6 +134,7 @@ struct ShelfSplitPlanTests {
             spaceItems: items(),
             app: app(settings),
             pocket: false,
+            hover: [],
             drawn: { $0.drawnAtRest }
         )
     }
@@ -157,6 +158,7 @@ struct ShelfSplitPlanTests {
             spaceItems: items(),
             app: app(settings),
             pocket: false,
+            hover: [],
             drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 2)
