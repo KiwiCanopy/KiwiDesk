@@ -21,7 +21,7 @@ struct LayoutStoryThumbnail: View {
     /// watched play (the tour's Spaces step on Back, #3288).
     var restsOnAppear = false
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @State private var atStart = false
     @State private var appeared = false
     @State private var run = 0

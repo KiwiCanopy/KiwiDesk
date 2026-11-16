@@ -12,7 +12,7 @@ struct DesktopsSwellEffect: ViewModifier {
     let pulsing: Bool
     let anchor: UnitPoint
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
         content

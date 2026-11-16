@@ -7,7 +7,7 @@ import SwiftUI
 /// are computed from the live settings, never stored (#757).
 struct OnboardingLooksStep: View {
     @Bindable var model: OnboardingModel
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     private var live: TilingSettings {

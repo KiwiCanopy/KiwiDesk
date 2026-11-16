@@ -17,6 +17,9 @@ final class CuePlateModel: ObservableObject {
     @Published var visible = false
     /// The plate's glass, read at each show (#2569).
     @Published var glass = PanelGlass.untinted
+    /// KiwiDesk's Reduce Motion, read at each show (#3252): the
+    /// leave fade and the controller's order-out read this one value.
+    @Published private(set) var reduceMotion = true
 
     static let hold: TimeInterval = 0.6
     static let fade: TimeInterval = 0.25
@@ -43,6 +46,7 @@ final class CuePlateModel: ObservableObject {
     /// up is the step, which moves; every first appearance is
     /// instant (#2142), and Reduce Motion jumps.
     func present(_ content: Content, reduceMotion: Bool) {
+        self.reduceMotion = reduceMotion
         if Self.steps(from: self.content, visible: visible, to: content) {
             withAnimation(reduceMotion ? nil : Self.step) {
                 self.content = content
@@ -128,7 +132,7 @@ final class CuePlateModel: ObservableObject {
 /// fading on the leave.
 struct CuePlateView: View {
     @ObservedObject var model: CuePlateModel
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var reduceMotion: Bool { model.reduceMotion }
 
     var body: some View {
         plate
@@ -144,6 +148,8 @@ struct CuePlateView: View {
                 value: model.visible
             )
             .accessibilityHidden(true)
+            // A cue view gates on this value, never macOS's.
+            .environment(\.kiwiDeskReduceMotion, reduceMotion)
     }
 
     @ViewBuilder private var plate: some View {

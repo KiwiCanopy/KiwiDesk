@@ -6,7 +6,7 @@ import SwiftUI
 /// fades, since a painted band would show on glass (#1849).
 /// Both cues are macOS 15 APIs; macOS 14 keeps the plain scroller.
 struct MoreBelowFade: ViewModifier {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @State private var moreBelow = false
 
     func body(content: Content) -> some View {

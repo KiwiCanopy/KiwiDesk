@@ -15,7 +15,7 @@ struct RecorderButtonChrome: ViewModifier {
     var flashing = false
     @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     /// The idle well's grey lift under the pointer: a fill over

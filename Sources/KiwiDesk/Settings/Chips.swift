@@ -102,7 +102,7 @@ private struct ChoiceChipSurface: ViewModifier {
     let edged: Bool
     @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     func body(content: Content) -> some View {

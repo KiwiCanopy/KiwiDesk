@@ -27,7 +27,7 @@ struct JumpLayoutTile: View {
     let onHover: () -> Void
     let onHoverEnd: () -> Void
     @Environment(\.kiwiHubPaint) private var paint
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     var body: some View {

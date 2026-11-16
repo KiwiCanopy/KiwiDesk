@@ -113,7 +113,7 @@ extension JumpPanelController {
         panel.setFrame(
             frame,
             display: true,
-            animate: animated && !reduceMotion()
+            animate: animated && !presence.reduceMotion
         )
     }
 

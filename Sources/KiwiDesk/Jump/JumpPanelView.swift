@@ -13,7 +13,7 @@ struct JumpPanelView: View {
     /// The panel's width on its screen, from the controller.
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     /// The key panels' scale (#2229 ▸ shared panel style).

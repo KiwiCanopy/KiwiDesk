@@ -29,7 +29,7 @@ struct SettingsSlider: View {
     }
 
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.accessibilityReduceTransparency)
     private var reduceTransparency

@@ -119,6 +119,7 @@ extension KiwiCore {
             // (`VisibleBoundsRoutingTests.allowed`, #537).
             let reveal = shelves.reveal
             let rides = maximizedPocketRides(on: display.id)
+            let hover = maximizedHoverBars(on: display.id)
             let planned = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: shown,
@@ -126,6 +127,7 @@ extension KiwiCore {
                 spaceItems: items,
                 app: app,
                 pocket: pocketRests(on: display.id) || rides,
+                hover: hover,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(
@@ -136,7 +138,7 @@ extension KiwiCore {
                 appIcons: app?.items.compactMap(\.icon) ?? [],
                 screens: ScreenList.all.map(\.frame),
                 reveal: reveal,
-                hover: maximizedHoverBars(on: display.id),
+                hover: hover,
                 settings: shown
             )
             let plans = planned.filter(\.drawsAny)
@@ -181,10 +183,11 @@ extension KiwiCore {
                     items,
                     display: display.id,
                     plan: plan,
-                    // Drawn, not merely built: a hidden App Bar
-                    // leaves the front-app segment its room (#761).
-                    appBarShows: plans.contains {
-                        $0.arrangement.app != nil
+                    // An App Bar on this screen drawn or resting as
+                    // a handle, on any edge, stands the front app
+                    // down; only a Hidden one leaves it room (#3359).
+                    appBarShows: planned.contains {
+                        $0.resting.arrangement.app != nil
                     },
                     style: look
                 )

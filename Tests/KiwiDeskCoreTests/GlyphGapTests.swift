@@ -311,8 +311,7 @@ struct GlyphGapPlanTests {
                 after: .none
             )
         }
-        // An App Bar beside it, so the Space Bar's slot is its
-        // own need rather than the whole edge.
+        // An App Bar beside it: the Space slot is its own need.
         let windows = (1...2).map {
             AppBarOverlay.Item(
                 id: WindowID(UInt32($0)),
@@ -334,6 +333,7 @@ struct GlyphGapPlanTests {
                 spaceItems: items,
                 app: app,
                 pocket: false,
+                hover: [],
                 drawn: { $0.drawnAtRest }
             ).first,
             let slot = plan.arrangement.space

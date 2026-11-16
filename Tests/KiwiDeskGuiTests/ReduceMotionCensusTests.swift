@@ -137,7 +137,7 @@ struct ReduceMotionCensusTests {
         "LayoutStoryThumbnail.swift: withTransaction":
             "a story's jump to its start frame starts no motion",
         // #2229: the key panel's height glide names its gate in
-        // the argument itself, `animated && !reduceMotion()`.
+        // the argument itself, `animated && !presence.reduceMotion`.
         "JumpPanelController+Sizing.swift: animate:":
             "gated in its own argument",
     ]

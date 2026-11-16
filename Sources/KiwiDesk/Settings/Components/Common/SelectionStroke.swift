@@ -4,7 +4,7 @@ import SwiftUI
 /// Motion the mark arrives rather than fades.
 private struct SelectionFade: ViewModifier {
     let selected: Bool
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
         content.animation(

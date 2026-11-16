@@ -12,7 +12,7 @@ struct FloatingSchematic: View {
     @Environment(\.schematicFocusStroke) private var focusStroke
     @Environment(\.schematicPalette) private var palette
 
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.schematicRestage) private var restage
 

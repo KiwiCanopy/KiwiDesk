@@ -41,7 +41,7 @@ struct JumpRowView: View {
     var onHover: () -> Void = {}
     var onHoverEnd: () -> Void = {}
 
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.kiwiHubPaint) private var paint
 

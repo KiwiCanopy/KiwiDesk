@@ -58,7 +58,7 @@ struct HoistedRevealAnchorsKey: PreferenceKey {
 private struct SearchRevealFlash: ViewModifier {
     let anchor: String
     @Environment(\.settingsFlash) private var flash
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     private var isMine: Bool { flash?.anchor == anchor }
 

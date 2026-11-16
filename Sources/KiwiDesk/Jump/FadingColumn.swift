@@ -15,7 +15,7 @@ struct FadingColumn<Selected: Hashable, Content: View>: View {
     var inset: CGFloat = 0
     @ViewBuilder let content: Content
 
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.panelSettled) private var settled
     /// Whether a key moved the selection since the list opened.

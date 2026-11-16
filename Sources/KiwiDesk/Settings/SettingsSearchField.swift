@@ -11,7 +11,7 @@ struct SettingsSearchField: View {
     /// the header. A `FocusState` binding is how the two share
     /// one focus.
     let focus: FocusState<Bool>.Binding
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     /// Moves the highlighted result while focus stays in the
     /// field. No default value, deliberately: a default on a

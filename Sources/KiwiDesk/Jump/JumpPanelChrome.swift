@@ -35,7 +35,7 @@ struct JumpFooter: View {
     /// which leaves its hint out (#3159).
     var lastAppChord: String?
 
-    @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) var reduceMotion
 
     var body: some View {
         if let refusal = desktops?.refusal {

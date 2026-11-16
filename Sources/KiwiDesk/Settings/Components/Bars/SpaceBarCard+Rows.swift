@@ -28,9 +28,9 @@ extension SpaceBarCard {
                 Text(
                     L(
                         "space_bar.show_front_app.caption",
-                        "Shows only on a Space without an App Bar — "
-                            + "the App Bar already marks the focused "
-                            + "window."
+                        "Hidden while an App Bar is shown or set to "
+                            + "%1$@.",
+                        L("bar.visibility.auto", "Auto")
                     )
                 )
                 .font(.caption)

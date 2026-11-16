@@ -21,7 +21,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
     let helpSubject: String?
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @State private var hovering = false
     @State private var phase: CGFloat = 0
 

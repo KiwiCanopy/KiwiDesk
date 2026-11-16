@@ -48,7 +48,7 @@ extension KiwiCore {
             appIcons: [NSImage] = [],
             screens: [CGRect],
             reveal: ShelfRevealer,
-            hover: Set<ShelfBar> = [],
+            hover: Set<ShelfBar>,
             settings: TilingSettings
         ) {
             for plan in plans {
@@ -94,9 +94,9 @@ extension KiwiCore {
             let strip = flip(plan.strip)
             let barKey = { ShelfRevealer.Key(shelf: key, bar: $0) }
             let shown = { reveal.reveal(of: barKey($0)).isShown }
-            // Where each bar draws once revealed, so a hidden bar's
-            // handle runs along it (#3349).
-            let placed = plan.revealed ?? (plan.arrangement, plan.needs)
+            // The one arrangement the edge's bars rest in: a
+            // handle runs, its bar lands and is held there (#3359).
+            let placed = plan.resting
             let slotOf = { (bar: ShelfBar) in
                 bar == .space
                     ? placed.arrangement.space : placed.arrangement.app
@@ -124,9 +124,7 @@ extension KiwiCore {
             // transparency makes its fill opaque (#1374).
             let shelf = LiquidGlassGate.rendered(settings.kiwishelf)
             let handled = ShelfArrangement.ordered(
-                bars.filter {
-                    plan.shelfEdge.shown($0) == .auto || hover.contains($0)
-                },
+                bars.intersection(plan.shelfEdge.handled(hover: hover)),
                 shelf
             )
             for bar in bars where !handled.contains(bar) {

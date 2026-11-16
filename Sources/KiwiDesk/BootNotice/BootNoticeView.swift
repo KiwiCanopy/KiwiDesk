@@ -11,6 +11,9 @@ final class BootNoticeModel: ObservableObject {
     /// Fixed when the notice appears, so the digits never jitter.
     @Published var width: CGFloat = 0
     var liquidGlass = true
+    /// KiwiDesk's Reduce Motion, read when the notice shows (#3252):
+    /// the fade and the controller's order-out read this one value.
+    @Published var reduceMotion = true
 
     static let fade: TimeInterval = 0.2
     static let height: CGFloat = 26
@@ -27,7 +30,7 @@ final class BootNoticeModel: ObservableObject {
 /// count. No controls; the panel ignores the mouse.
 struct BootNoticeView: View {
     @ObservedObject var model: BootNoticeModel
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var reduceMotion: Bool { model.reduceMotion }
 
     var body: some View {
         capsule

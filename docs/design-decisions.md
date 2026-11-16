@@ -7764,15 +7764,41 @@ under it would read as Off not working; so `expandSeconds(at:)` and
 `revealSeconds(at:)`, the one reading of a switch with its length
 (#3237), answer 0 under it, and no bar member's gate changes.
 
-*Off reaches Core alone.* The flag is ruled over the desk's motion
-— windows, bars, the marks on windows, the Space switch and
-KiwiVision — so it joins the one Core read and nothing in
-`Sources/KiwiDesk`. Stated residue: the GUI's own panels — KiwiHub,
-the cue plates, the slow-boot notice and the Settings window — keep
-following macOS's setting alone, so under Off a cue plate still
-fades. Settings reads the flag only to narrate it: the Animations
-card's box and greys, and the Switching Spaces captions, which
-say what the desk draws (*Reduce Motion shows the Space*, above).
+*Off reaches every surface KiwiDesk draws on the desk (#3252,
+owner ruling 2026-11-12).* A segment named Off under "Animation
+speed" reads as off everywhere KiwiDesk draws, so beside Core's
+gates KiwiHub, the cue plates (Space, layout, Desktop), the
+slow-boot notice and the first-launch tour read `ReduceMotion.isOn`
+too: Off's own fallback, Show the Space, puts up a plate on every
+switch, and a plate fading out there, or KiwiHub springing in over
+windows that snap, reads as Off not working, the argument that put
+the shelf's reveal and expand under Off. Their fades are motion and
+drop, the cue plate's leave fade and KiwiHub's entrance spring and
+content fade alike: macOS's Reduce Motion already drops them (#1875,
+#2142, #2144), as it cuts KiwiVision's fade, and keeping them under
+Off alone would give Off a second contract; a dissolve stand-in
+would be a change to Reduce Motion as a whole. Each panel's host reads the flag once at show and hands the
+one value to its order-out and to its views, through
+`PanelPresence`, the plate's or notice's model, or the
+`\.kiwiDeskReduceMotion` environment value, since SwiftUI's
+`accessibilityReduceMotion` is get-only and reads macOS's alone; a
+change lands at the next show, enough for panels up about a second.
+The tour follows Off too, so "everywhere but this window" stays true
+(owner addendum 2026-11-16); it reads Off when it opens, so Off
+turned on mid-tour, in its Looks step say, lands at its next open.
+The update windows (Update, Up to date, Checking, What's New) and the
+key-sequence hint follow it on the same reading (owner addendum
+2026-11-16), so Off turned on while What's New is open lands at its
+next open. A Settings view mounted on one of these surfaces as well,
+such as KiwiHub's scope picker, takes the host's value: the Settings
+window hands it macOS's, live.
+The Settings window keeps macOS's setting: its motion is where the
+user watches Off take effect (the box arrives, the rows grey), and
+it is ordinary window chrome. Settings reads the flag only to
+narrate it: the Animations card's box and greys, and the Switching
+Spaces captions, which say what the desk draws (*Reduce Motion
+shows the Space*, above). `ReduceMotionHomeTests` holds the GUI tree
+to the one read outside `Sources/KiwiDesk/Settings`.
 
 *Two offs, both kept.* Off covers every profile and applies at
 once; a profile's own **Animate windows** covers that profile and
@@ -19836,6 +19862,30 @@ Dock stays shown for as long as the pointer stays there. So:
   preferences as the pointer enters an approach, at about a
   microsecond a read, with no cache and no notification to miss. An
   unreadable key reads as macOS's default, a free edge.
+- *A revealed bar lands under its handle* (owner, 2026-11-16,
+  #3359), amending "each opens at its lone place under the pair"
+  above: each now opens in its share of the pair. The handle, the landing and the hold read one
+  arrangement: every bar resting on the edge — the bars drawn, the
+  Auto bars, whose handles rest there, and the bars a maximized
+  window brings in — with a stored Hidden bar counted only while it
+  is revealed. Revealing the second bar then moves the first
+  nowhere. A bar that came in somewhere other than where its handle
+  showed broke the handle's one promise, and its hold, taken from
+  the handle's run, left part of the drawn bar outside it to
+  retract under the pointer. The trade: under `center`, a lone revealed Auto bar no
+  longer centres while its sibling rests as a handle. It stands in
+  its share, off-centre by half its sibling's length and the
+  gutter, and a pair too wide for the edge caps that share, so the
+  bar may scroll. The share is measured without the Space Bar's
+  front-app segment, which an Auto App Bar therefore stands down
+  (▸ The front app still yields to the App Bar).
+  Moving the handles to where a lone bar lands was the other way,
+  and it fails on any shared edge: two lone bars sit at the same
+  place under every alignment, so their handles would overlap.
+  Beside a Hidden sibling the Auto bar's handle rests alone and
+  centred, and the Hidden bar shown by its shortcut joins it as it
+  joins an Always sibling. Two Hidden bars are unchanged: one
+  revealed lands alone. `reveal_style` stays one setting for both.
 :::
 
 A reveal onto an edge that shows nothing else slides the whole bar
@@ -20230,6 +20280,22 @@ Space Bar's front-app segment stays hidden: the App Bar already
 names every window and marks the focused one, and a second name
 for it elsewhere on screen is the duplicate the stand-down
 removed, whatever plate it sits on.
+
+:::unreleased
+*Amended* (owner, 2026-11-16, #3359): **an Auto App Bar stands the
+front app down too**, on any edge of the screen, so only a Hidden
+App Bar leaves the segment its room. One screen-wide answer keeps
+the segment from coming and going as the App Bar retracts and
+returns, which a pointer near its handle does all day. On the
+Space Bar's own edge it is also forced: the App Bar's handle holds
+its share there, the Space Bar's share is measured without the
+segment, and sizing the share with it would move the Space Bar
+each time the App Bar came in. Splitting the answer by edge was
+refused: the same setting would then show or hide the segment
+depending on where the App Bar sits, which no caption can say in
+one line. The row is not greyed, since a Hidden App Bar, or a
+layout without one, still shows the segment.
+:::
 
 *The App Bar's edge is global only.* No layout overrides it: an
 edge per layout would carry the bar across the screen on a
