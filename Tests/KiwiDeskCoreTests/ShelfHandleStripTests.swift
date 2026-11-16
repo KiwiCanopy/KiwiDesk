@@ -118,9 +118,9 @@ struct ShelfHandleStripTests {
         #expect(spec.frame.minX == 300 && spec.frame.width == 400)
         #expect(spec.frame.minY == ShelfHandleSpec.inset)
         #expect(spec.frame.height == ShelfHandleSpec.depth)
-        // Its hover band starts at the edge and runs the same run
-        // `hoverDepth` in (#3360).
-        #expect(spec.hoverBand.minY == spec.frame.minY)
+        // Its hover band starts at the edge itself, past the inset,
+        // and runs the same run `hoverDepth` in (#3360).
+        #expect(spec.hoverBand.minY == 0)
         #expect(spec.hoverBand.minX == 300 && spec.hoverBand.width == 400)
         #expect(spec.hoverBand.height == ShelfHandleSpec.hoverDepth)
     }
@@ -156,7 +156,7 @@ struct ShelfHandleStripTests {
             reveal: .slide
         )
         let reach = target(left, maximized: true).approach?.maxX
-        #expect(reach == ShelfHandleSpec.inset + ShelfHandleSpec.hoverDepth)
+        #expect(reach == ShelfHandleSpec.hoverDepth)
         // Cut where a sibling's approach meets it.
         let cut = target(spec, cut: (true, true)).approach
         #expect(cut?.minX == 300)

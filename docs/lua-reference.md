@@ -4066,7 +4066,7 @@ App Bar in monocle and scrolling.
 
 :::unreleased
 An `"auto"` bar's handle is a thin line along the
-bar's whole length, flush on the edge: a 2-point line in the label
+bar's whole length, flush on the edge: a 2-point capsule in the label
 ink with a fine line of the opposite tone along each side. It
 reserves nothing and floats over the windows; clicks pass through it
 to the window beneath. With the pointer within about 24 points of

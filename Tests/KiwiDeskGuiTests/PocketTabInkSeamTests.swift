@@ -19,17 +19,17 @@ struct PocketTabInkSeamTests {
                 "Sources/KiwiDeskCore/Bar/PocketHandleView.swift"
             )
         )
-        // The tab's part of the draw: from its rect to the inks.
+        // The tab's part of the draw: from its rect to the draw's end.
         let start = try #require(source.range(of: "let tab = CGRect("))
         let end = try #require(
             source.range(
-                of: "parts.hairlines.1.fill()",
+                of: "context.restoreGState()",
                 range: start.upperBound..<source.endIndex
             )
         )
         let tab = String(source[start.lowerBound..<end.upperBound])
         #expect(tab.contains("ShelfHandleSpec.restHex(of: shelf)"))
-        #expect(tab.contains("ShelfHandleSpec.restColor(hex: ink)"))
+        #expect(tab.contains("Self.tabCore(hex: ink,"))
         #expect(tab.contains("ShelfHandleSpec.hairlineColor(hex: ink)"))
         #expect(!tab.contains("hex: \"\""))
         #expect(!tab.contains("hex: hex"))

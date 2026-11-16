@@ -168,17 +168,13 @@ extension KiwiCore {
                 && (dragging || pocketPlate.dwelled.contains(display.id)
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
-            let peeking = place == .handle && hovered && !risen
+            let tabHovered = place == .handle && hovered && !risen
             let found: CGRect? =
                 switch place {
                 case .section(let frame), .inside(let frame): frame
                 case .whole: pocketMarkFrame(on: display.id)
                 case .handle:
-                    pocketHandleFrame(
-                        on: display.id,
-                        risen: risen,
-                        peeking: peeking
-                    )
+                    pocketHandleFrame(on: display.id, risen: risen)
                 }
             guard let frame = found else { return nil }
             // A lit pocket shows full, empty or not (#2776).
@@ -199,7 +195,7 @@ extension KiwiCore {
                 // handle on, with none drawn.
                 handle: place.isSection ? nil : edge,
                 risen: risen,
-                peeking: peeking,
+                hovered: tabHovered,
                 risenSide: rise,
                 // Inside the strip the mark stands at its frame's edge.
                 outer: Self.pocketOuter(place, shelf: shelf),

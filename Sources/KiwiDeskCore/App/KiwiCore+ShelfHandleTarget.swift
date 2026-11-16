@@ -68,9 +68,8 @@ extension KiwiCore.HidingShelves {
             handle: flip(spec.hoverBand),
             section: section,
             inward: maximized
-                ? ShelfHandleSpec.inset
-                    + (spec.horizontal
-                        ? spec.hoverBand.height : spec.hoverBand.width)
+                ? (spec.horizontal
+                    ? spec.hoverBand.height : spec.hoverBand.width)
                 : ShelfReveal.approachReach,
             cut: cut
         )

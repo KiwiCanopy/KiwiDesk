@@ -21,11 +21,10 @@ extension KiwiCore {
     static let pocketRiseMarkCap: CGFloat = 32
 
     /// The handle's frame on `display` (AX), risen or at rest, a
-    /// peek deeper while `peeking`.
+    /// the same depth while hovered, since the tab only brightens.
     func pocketHandleFrame(
         on display: DisplayID,
-        risen: Bool,
-        peeking: Bool = false
+        risen: Bool
     ) -> CGRect? {
         let shelf = tiler.settings.kiwishelf
         // Reaching the edge across the outer margin, as the bars'
@@ -36,8 +35,7 @@ extension KiwiCore {
                 + (risen
                     ? PocketHandleView.tabDepth + PocketPlateView.lift
                         + Self.pocketRiseSide(thickness: shelf.thickness)
-                    : PocketHandleView.restDepth
-                        + (peeking ? PocketHandleView.peekDepth : 0))
+                    : PocketHandleView.restDepth)
         )
     }
 

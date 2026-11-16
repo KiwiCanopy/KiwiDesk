@@ -22,23 +22,15 @@ final class PocketHandleView: NSView {
     /// The handle's whole depth at rest: the tab and the kiwis past
     /// it.
     static var restDepth: CGFloat { tabDepth + lookOut }
-    /// How much further they look out while the pointer is on the
-    /// handle and the pocket has not risen (#2807).
-    static let peekDepth: CGFloat = 3
-
-    /// How far the kiwis look out past their rest, animated by
-    /// `BarMotion.playPocketPeek` through the view's animator.
-    @objc dynamic var peek: CGFloat = 0 {
-        didSet { needsDisplay = true }
-    }
-    /// The peek `peek` is headed for.
-    var peekTarget: CGFloat = 0
 
     private var edge = AppBarEdge.bottom
     private var shelf = KiwiShelf()
     private var hex = ""
     /// The kiwis are out with the risen pocket: the tab alone stays.
     private var kiwisOut = false
+    /// The pointer rests on the handle: the tab draws at full
+    /// strength, in place (#3366 ruling 2).
+    private(set) var hovered = false
 
     override var isFlipped: Bool { true }
 
@@ -50,32 +42,28 @@ final class PocketHandleView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// Wears `shelf`; true where the kiwis move.
-    @discardableResult
+    /// Wears `shelf`, the tab at full strength while `hovered`.
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
         kiwisOut: Bool,
-        peeking: Bool = false
-    ) -> Bool {
+        hovered: Bool = false
+    ) {
         self.shelf = shelf
         self.hex = hex
         self.edge = edge
         self.kiwisOut = kiwisOut
+        self.hovered = hovered && !kiwisOut
         needsDisplay = true
-        return BarMotion.playPocketPeek(
-            self,
-            peeking: peeking && !kiwisOut
-        )
     }
 
-    override static func defaultAnimation(
-        forKey key: NSAnimatablePropertyKey
-    ) -> Any? {
-        key == "peek"
-            ? BarMotion.pocketPeekAnimation()
-            : super.defaultAnimation(forKey: key)
+    /// The tab's core: the handle's ink at rest, at the fill strength
+    /// while hovered, never lifting (#3366 ruling 2).
+    static func tabCore(hex: String, hovered: Bool) -> NSColor {
+        hovered
+            ? ShelfHandleSpec.fillColor(hex: hex)
+            : ShelfHandleSpec.restColor(hex: hex)
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
@@ -97,7 +85,7 @@ final class PocketHandleView: NSView {
         )
         let markRect = CGRect(
             x: (along - Self.markSide) / 2,
-            y: across - Self.restDepth - peek,
+            y: across - Self.restDepth,
             width: Self.markSide,
             height: Self.markSide
         )
@@ -129,14 +117,21 @@ final class PocketHandleView: NSView {
             width: Self.tabLength,
             height: Self.tabDepth
         )
-        let parts = ShelfHandleSpec.parts(of: tab, edge: .bottom)
+        let parts = ShelfHandleSpec.parts(of: tab)
         // A bar handle's ink, never the kiwis' own colour (#3361).
         let ink = ShelfHandleSpec.restHex(of: shelf)
-        ShelfHandleSpec.restColor(hex: ink).setFill()
-        parts.core.fill()
-        ShelfHandleSpec.hairlineColor(hex: ink).setFill()
-        parts.hairlines.0.fill()
-        parts.hairlines.1.fill()
+        for (capsule, colour) in [
+            (parts.outer, ShelfHandleSpec.hairlineColor(hex: ink)),
+            (parts.core, Self.tabCore(hex: ink, hovered: hovered)),
+        ] {
+            let radius = ShelfHandleSpec.radius(of: capsule)
+            colour.setFill()
+            NSBezierPath(
+                roundedRect: capsule,
+                xRadius: radius,
+                yRadius: radius
+            ).fill()
+        }
         context.restoreGState()
     }
 
