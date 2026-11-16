@@ -102,8 +102,7 @@ public final class ScrollGestures {
     /// its device (#1873): what the shortcuts panel reads a family's
     /// way by.
     public func isNatural(for input: GestureInput) -> Bool {
-        input.device == .mouse
-            ? settings.naturalMouse : settings.naturalTrackpad
+        settings.isNatural(input.device == .mouse ? .wheel : .trackpad)
     }
     /// Re-runs the resolve; wired once at bootstrap.
     var onHostChange: @MainActor () -> Void = {}
@@ -115,7 +114,9 @@ public final class ScrollGestures {
     private(set) var base = ScrollGestureBase.defaults
     private(set) var profileOverride: ScrollGestureOverride?
     /// The two resolved: what a consumer reads for its stepping.
-    public private(set) var resolved = ScrollGestureBase.defaults
+    private(set) var resolved = ScrollGestureBase.defaults
+    /// Whether long swipes are on as resolved: the tour's one read.
+    public var longSwipes: Bool { resolved.longSwipes }
     private var handler: Handler?
     /// Each chord's gesture in flight: the route it began with and
     /// its last event, so a change mid-gesture never hands a

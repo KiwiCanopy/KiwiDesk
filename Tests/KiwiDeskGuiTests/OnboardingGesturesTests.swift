@@ -36,6 +36,8 @@ struct OnboardingGesturesTests {
 
     @Test("the screen row needs a second screen")
     func screenRowNeedsTwo() {
+        // The footnote is read as English (tests.md ▸ pin the locale).
+        LocalizationManager.shared.select("en")
         let one = OnboardingGestures.families(
             bindings: ladder,
             screens: 1,

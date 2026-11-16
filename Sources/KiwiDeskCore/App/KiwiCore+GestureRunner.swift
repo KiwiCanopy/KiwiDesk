@@ -153,9 +153,7 @@ extension KiwiCore {
         guard case .split(let split) = bound, !split.axes.isEmpty else {
             return bound
         }
-        let horizontal = abs(travel.dx) > abs(travel.dy)
-        let along = horizontal ? travel.dx : travel.dy
-        guard abs(along) >= ScrollStepLatch.trackpadThreshold else {
+        guard let (horizontal, _) = ScrollStepLatch.named(travel) else {
             return nil
         }
         let axis: GestureAxis = horizontal ? .leftRight : .upDown

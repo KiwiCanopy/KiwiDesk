@@ -48,7 +48,7 @@ public final class TouchGestures {
     /// the latch (#1873 ▸ Ruling 2026-11-16), through this one door
     /// to the reader; nil while no reader runs or no pad reports
     /// its size, where the steps count points.
-    var travel: CGVector? { reader?.travel }
+    var travel: TouchTravel.Reading? { reader?.travel }
 
     /// Wires the one handler; once, at bootstrap.
     func setHandler(_ handler: @escaping Handler) {

@@ -68,6 +68,30 @@ struct ShortcutGestureBadgeTests {
         #expect(group.rows.allSatisfy { $0.gestures.count == 1 })
     }
 
+    /// A binding a row badges is held there alone, never also left
+    /// for the Gestures group.
+    @Test("a badged binding is not left over")
+    func badgedIsNotLeftOver() {
+        let built = build(
+            [GestureKey(.swipe2, step): .family(.space)],
+            rows: [
+                ShortcutRow(id: next, label: "Go to next Space", combo: ""),
+                ShortcutRow(
+                    id: "KiwiDesk.focus_space_previous()",
+                    label: "Go to previous Space",
+                    combo: ""
+                ),
+            ]
+        )
+        #expect(
+            built.controls.first?.rows.allSatisfy { !$0.gestures.isEmpty }
+                == true
+        )
+        #expect(
+            built.groups.allSatisfy { $0.rows.allSatisfy(\.gestures.isEmpty) }
+        )
+    }
+
     @Test("a search naming a hidden gesture brings it forward")
     func searchBringsForward() throws {
         let built = build(

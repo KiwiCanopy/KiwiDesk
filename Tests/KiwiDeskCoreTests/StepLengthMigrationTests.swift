@@ -77,7 +77,8 @@ struct StepLengthMigrationTests {
     @Test("a profile file drops the key")
     func profileDrops() throws {
         var root = retiring(try object(profile))
-        root["format"] = Profile.currentFormat - 1
+        // The last format before this step's bump, as written.
+        root["format"] = 39
         let out = try #require(ConfigMigration.migrated(data(root)))
         #expect(!carries(out))
         _ = try JSONDecoder().decode(Profile.self, from: out)
@@ -136,6 +137,29 @@ struct StepLengthMigrationTests {
             String(decoding: migrated, as: UTF8.self)
                 .contains("\"format\" :  ")
         )
+    }
+
+    /// The other spellings an edit meets: the key last in its group
+    /// (its comma before it goes), alone in it (the braces stay), and
+    /// in two groups at once. Each output parses, without the key.
+    @Test(
+        "the edit leaves valid JSON in every position",
+        arguments: [
+            #"{"scroll_gesture" : {"long_swipes" : true, "#
+                + #""step_distance" : 60}}"#,
+            #"{"scroll_gesture" : {"step_distance" : 60}}"#,
+            #"{"config" : {"scroll_gesture" : {"step_distance" : 60, "#
+                + #""long_swipes" : true}}, "profiles" : [{"#
+                + #""scroll_gesture" : {"long_swipes" : false, "#
+                + #""step_distance" : 90}}]}"#,
+        ]
+    )
+    func editPositions(_ text: String) throws {
+        let edited = try #require(ConfigMigration.stepDistanceTextOut(text))
+        #expect(!carries(edited))
+        let root = try JSONSerialization.jsonObject(with: edited)
+        let (_, changed) = ConfigMigration.withoutStepDistance(root)
+        #expect(!changed)
     }
 
     /// A key outside a `scroll_gesture` group is not the setting.

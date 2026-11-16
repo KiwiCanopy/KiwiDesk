@@ -6,7 +6,7 @@ import Testing
 private final class FakeReader: TouchReaderHandle {
     var deliver: TouchReader.Deliver?
     var stopped = false
-    var travel: CGVector?
+    var travel: TouchTravel.Reading?
     func stop() { stopped = true }
 }
 

@@ -73,7 +73,7 @@ extension AppDelegate {
             self?.onboardingGestureFamilies() ?? []
         }
         onboardingModel.longSwipes = { [weak self] in
-            self?.core.mouse.scroll.resolved.longSwipes ?? true
+            self?.core.mouse.scroll.longSwipes ?? true
         }
         wireOnboardingLooks()
         wireOnboardingBars()

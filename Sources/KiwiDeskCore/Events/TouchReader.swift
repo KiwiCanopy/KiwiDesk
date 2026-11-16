@@ -6,9 +6,9 @@ import os
 /// test replaces.
 protocol TouchReaderHandle: AnyObject {
     func stop()
-    /// The running two-finger travel in mm (`TouchTravel.sum`); nil
-    /// where no connected pad reports its size.
-    var travel: CGVector? { get }
+    /// The running two-finger travel in mm (`TouchTravel.reading`);
+    /// nil while the pad carrying two fingers reports no size.
+    var travel: TouchTravel.Reading? { get }
 }
 
 /// The MultitouchSupport reader (#1873). It reads, never
@@ -36,7 +36,10 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     )
     /// Each pad's size in mm, read once at start.
     private let sizes: [UInt: CGSize]
-    private let travelSum = OSAllocatedUnfairLock(initialState: TouchTravel())
+    private let travelSum: OSAllocatedUnfairLock<TouchTravel>
+    /// A fresh number per reader, so a rebuilt reader's sum is never
+    /// differenced against the last one's.
+    private static let generations = OSAllocatedUnfairLock(initialState: 0)
 
     private init(
         deliver: @escaping Deliver,
@@ -50,10 +53,17 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
                 MultitouchSupport.surfaceSize(of: device)
         }
         self.sizes = sizes
+        let generation = Self.generations.withLock { count in
+            count += 1
+            return count
+        }
+        travelSum = OSAllocatedUnfairLock(
+            initialState: TouchTravel(generation: generation)
+        )
     }
 
-    var travel: CGVector? {
-        sizes.isEmpty ? nil : travelSum.withLock { $0.sum }
+    var travel: TouchTravel.Reading? {
+        travelSum.withLock { $0.reading }
     }
 
     /// Starts reading every connected trackpad; nil where the

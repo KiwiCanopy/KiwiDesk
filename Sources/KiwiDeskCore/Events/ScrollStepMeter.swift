@@ -28,15 +28,15 @@ public struct ScrollStepMeter: Sendable {
     private let length: Double
     private var latch = ScrollStepLatch()
     private var fired = false
-    /// Point travel since the last step, both axes: the axis and
-    /// sign of every step, in either unit.
+    /// Point travel since the last step, both axes: the axis of
+    /// every step, in either unit.
     private var travel = CGVector.zero
-    /// The step budget since the last step, both axes: finger mm
-    /// signed by each event's point delta, or the point travel.
+    /// The step budget, both axes, the step's remainder kept: finger
+    /// mm signed by each event's point delta, or the point delta.
     private var budget = CGVector.zero
     /// The finger reading last fed, set at the latch where the
     /// touch counts in mm; nil where it counts points.
-    private var finger: CGVector?
+    private var finger: TouchTravel.Reading?
     /// The axis the last step took.
     private var horizontal: Bool?
     private var lastNotch: (time: Double, sign: Int)?
@@ -58,7 +58,7 @@ public struct ScrollStepMeter: Sendable {
     /// fixed at the latch, so a touch never counts in two.
     public mutating func feed(
         _ event: ScrollGestureEvent,
-        reading: CGVector? = nil
+        reading: TouchTravel.Reading? = nil
     ) -> Int {
         let along =
             abs(event.delta.dx) > abs(event.delta.dy)
@@ -90,14 +90,22 @@ public struct ScrollStepMeter: Sendable {
         let distance: Double
         if let last = finger {
             // A reading gone mid-touch adds nothing: no steps, never
-            // a switch to points.
+            // a switch to points; one from another source (a rebuilt
+            // reader, another pad) re-bases without a move.
             guard let now = reading else { return 0 }
             finger = now
-            budget.dx += Self.signed(now.dx - last.dx, by: event.delta.dx)
-            budget.dy += Self.signed(now.dy - last.dy, by: event.delta.dy)
+            if now.source == last.source {
+                let move = CGVector(
+                    dx: now.sum.dx - last.sum.dx,
+                    dy: now.sum.dy - last.sum.dy
+                )
+                budget.dx += Self.signed(move.dx, by: event.delta.dx)
+                budget.dy += Self.signed(move.dy, by: event.delta.dy)
+            }
             distance = length
         } else {
-            budget = travel
+            budget.dx += event.delta.dx
+            budget.dy += event.delta.dy
             distance = length * Self.pointsPerMM
         }
         let leads = abs(travel.dx) > abs(travel.dy)
@@ -109,7 +117,7 @@ public struct ScrollStepMeter: Sendable {
         horizontal = leads
         let rest = run - Double(steps) * distance
         budget = leads ? CGVector(dx: rest, dy: 0) : CGVector(dx: 0, dy: rest)
-        travel = finger == nil ? budget : .zero
+        travel = .zero
         return steps
     }
 
