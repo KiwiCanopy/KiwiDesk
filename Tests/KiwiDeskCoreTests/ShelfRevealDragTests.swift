@@ -79,6 +79,7 @@ struct ShelfRevealDragTests {
         }
         rig.revealer.removeMonitor = { _ in }
         rig.revealer.location = { rig.point }
+        rig.revealer.macEdges = { .none }
         rig.revealer.windowMoving = { rig.moving }
         rig.revealer.schedule = { delay, body in
             rig.timers.append((delay, body))
@@ -104,13 +105,15 @@ struct ShelfRevealDragTests {
         #expect(rig.timers.isEmpty)
     }
 
-    @Test("a drag resting in the band reveals after the delay")
+    @Test("a drag lingering near the edge reveals after the dwell")
     func dragDwellReveals() {
         let rig = make()
         defer { rig.revealer.stop() }
-        rig.send(CGPoint(x: 500, y: 795), dragging: true)
+        rig.send(CGPoint(x: 500, y: 785), dragging: true)
         #expect(rig.revealer.reveal(of: Self.space) == .hidden)
-        #expect(rig.delays == [ShelfReveal.revealDelay])
+        #expect(rig.delays == [ShelfReveal.approachDelay])
+        rig.fireAll()
+        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
         rig.fireAll()
         #expect(rig.revealer.reveal(of: Self.space) == .hover)
     }
@@ -136,7 +139,7 @@ struct ShelfRevealDragTests {
             edge: .top,
             strip: Self.top.strip,
             screen: Self.screen,
-            band: nil
+            approach: nil
         )
         let rig = make([Self.space: hidden, Self.app: Self.bottom])
         defer { rig.revealer.stop() }

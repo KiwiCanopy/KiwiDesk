@@ -208,9 +208,8 @@ twice, was a question the user answered twice. The argument is
   one `appBarVisibility(in:)` — and never link the two values.
   An edge two bars share reserves for its more present RESERVING
   bar (`ShelfEdge.reservation`: `always` over `auto` over
-  `hidden`, so a `hidden` bar's `reserve` reserves nothing), an
-  `auto` edge only its constant sliver (`hidingEdges`,
-  `KiwiShelf.hiddenReservation`) and a `hidden` one nothing, save
+  `hidden`, so a `hidden` bar's `reserve` reserves nothing), and an
+  `auto` or `hidden` edge nothing (#3349), save
   where the pocket rests (▸ The pocket is a shelf section); what a
   bar shows at rest beside its sibling is the one `ShelfEdge.shown`,
   never a comparison at a call site. The fold reads stored values,
@@ -220,7 +219,7 @@ twice, was a question the user answered twice. The argument is
   retiles (`BarAutoHideFoldTests`, `ShelfAutoHideCoreTests` ▸
   `actionRevealsWithoutARetile`). **A reveal names a bar**
   (`ShelfRevealer.Key`): a shortcut shows only its own, a `hidden`
-  bar's target has no hover band, and the bars an edge draws this
+  bar's target has no approach, and the bars an edge draws this
   pass are the one `ShelfRevealer.drawn`, which the live plan hands
   `shelfPlans` (`ShelfRevealPerBarTests`). A shortcut on a bar
   that reads `always` — stored so, or `auto` beside an `always`
@@ -230,7 +229,7 @@ twice, was a question the user answered twice. The argument is
   `flashRefusalPill(near:on:edge:text:symbol:)`; a `hidden` bar's
   timed pin ends hidden, since no hover can retract it. **A
   window drag's move opens only an `auto` Space Bar** — its push
-  or band dwell, never the drag's start — and holds or retracts
+  or approach dwell, never the drag's start — and holds or retracts
   any shown bar as a move does; the revealer's own monitors hear
   it through the one `ShelfRevealer.heard` mask, never a second
   monitor or tap, and a left drag counts only while the core's
@@ -264,42 +263,34 @@ twice, was a question the user answered twice. The argument is
   paths, since a kept hiding shelf's panel is judged against this
   pass's targets (`ShelfRevealWiringTests` ▸ `revealerSyncsFirst`,
   `ShelfAutoHideLifetimeTests` ▸ `keptBetweenReveals`). **Place
-  a hiding bar's mark and band through the one
-  `ShelfMarkPlacement`**, every band its fixed length centred on
-  its mark, the marks of an edge one row whose bands meet edge to
-  edge, and never a band along the edge or the bar's drawn
-  length — save a maximized window's bars, which draw no mark and
-  take `ShelfMarkPlacement.maximizedBands` along the whole edge,
-  reaching only outward past the shelf's screen side through
-  `HidingShelves.maximizedBands`, never in over the window
-  (#3346, `MaximizedBandTests`); a push counts only inside the
-  band, a shown bar is held over its own section and band, and a
-  hidden bar whose edge
-  sibling shows has no band, its mark standing aside
-  (`ShelfRevealBandTests`, `ShelfRevealPairTests`; the argument is
-  `docs/design-decisions.md` ▸ A shelf can hide). The Space dots
-  stay inside that band through the one `ShelfDotWindow`
-  (`ShelfDotWindowTests` ▸ `markFitsTheBand`). Whether a bar
-  yields is the revealer's one `ShelfRevealer.yields`, which the
-  pointer and the mark both read; a second placement or yield
-  beside them is review's.
-  **An App Bar handle counts what `AppBarContent.windowCount`
-  counts, never a second derivation**, carried in the handle's
-  spec so a count-only change redraws (#2567,
-  `ShelfHandleCountWiringTests`); an App Bar with no window
-  draws no handle, so the count is never 0 (▸
-  `emptyAppBarDrawsNoHandle`); grown on a top or bottom edge it
-  may reach past its band with the count, by ruling. **A hovered
-  pill — the Space name's or the count's — is never deeper than
-  `ShelfHandleSpec.pillDepth`**, the room inside the rim, and
-  never shorter than it is deep (`ShelfHandleDrawnTests`). **Every
-  reader of the grown plate takes the spec's one `growth`** — the
-  panel's room, the view and a reveal's origin — never a widening
-  of its own. **A handle's glass is one `GlassBox` whose host
-  the hover moves** inside the handle's own hover group, under one
-  capsule radius at both sizes (`ShelfHandleCountTests` ▸
-  `glassPlate`); the count reads the badge face, as every bar count
-  does.
+  an Auto bar's handle and its approach through the one
+  `KiwiCore.HidingShelves.target`** (#3349): the handle along the
+  bar's drawn run, against the screen side of the shelf's area
+  (`ShelfHandleSpec.frame`), never a fixed band or the whole edge;
+  the approach about it (`ShelfReveal.approach`), cut where two
+  bars' runs meet so a point opens one bar, and over a maximized
+  window reaching in only to the thickened handle (#3346); a
+  `hidden` bar has no approach, and a hidden bar whose edge sibling
+  shows yields, its handle standing aside
+  (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
+  `docs/design-decisions.md` ▸ A shelf can hide). **The handle
+  reserves nothing**: `ShelfReservation` takes no hiding edge, and a
+  new input that would reserve for an Auto bar is a ruling
+  (`BarAutoHideFoldTests`). Whether a bar yields is the revealer's
+  one `ShelfRevealer.yields`, which the pointer and the handle both
+  read; a second placement or yield beside them is review's.
+  **Ask whether macOS owns an edge only through the revealer's
+  `macEdges` seam over `MacEdges`**, read once per approach entry and
+  never cached past its leave, never a Dock or menu-bar read of its
+  own; both `makeTestCore` twins pin it `.none`
+  (`MouseButtonSeamGuardTests`), and a pointer on the outermost row
+  of an edge it owns cedes the approach, cancelling every timer of
+  the revealer's until the pointer leaves (`ShelfRevealApproachTests`,
+  `ShelfRevealApproachTests` ▸ `dockEdgeIsRead`). **What peeks through a thickened handle is the
+  spec's one `peek`** — the Space dots or the App Bar's glyphs — and
+  the handle carries no label or count (#3349, amending #2567).
+  **A handle's thickened glass is one `GlassBox` whose host the
+  approach moves**, under one capsule radius at both sizes.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one
@@ -456,8 +447,8 @@ twice, was a question the user answered twice. The argument is
   `maximizedHoverBars(in:)` over it**, per screen through
   `KiwiCore.maximizedHoverBars(on:)`, handed to the revealer's
   filing alone — never to `layoutBounds`, so a maximize never comes
-  out of the bar reading as `.auto`, whose sliver would retile the
-  window. A stored Hidden bar gets no band, and the tiling-off tick
+  out of the bar reading as `.auto`, which a layout would read. A
+  stored Hidden bar gets no handle, and the tiling-off tick
   wins over it (`MaximizedBarsTests`). **Let the Pocket ride a
   revealed bar there only through `KiwiCore.maximizedPocketRides(on:)`**,
   filed by the bar pass as `PocketPlateOverlay.riding`, which
@@ -929,10 +920,10 @@ Obligations:
   only through `shelfReservation(in:on:pocketAtRest:)`, an edge
   reserving the deepest strip it is asked for
   (`ShelfReservation.depth(of:)`).
-  Every edge handle — the dots, the line and the kiwis — rests the
-  one `KiwiShelf.hiddenDepth` deep, which the reservation reads
-  too, never a depth of its own (`PocketReservationTests` ▸
-  `autoEdgeTakesTheDeeper`, `PocketReservationCoreTests` ▸
+  The pocket's handle rests the one `KiwiShelf.hiddenDepth` deep,
+  which its reservation reads too, never a depth of its own; a
+  bar's handle is `ShelfHandleSpec.depth` and reserves nothing
+  (#3349, `PocketReservationTests`, `PocketReservationCoreTests` ▸
   `wholeFollowsTheRest`).
 - **A Show write that moves `shelfReservations` owes a pass, and
   one that moves none a repaint**: the pocket reaches the bounds
@@ -2013,9 +2004,7 @@ mark the current Space or focused window reads it.
   reach the screen) and never a point literal. The Space Bar's
   drop ring morphs into the outline, so it strokes alike.
   `HighlightWidthTests` builds both bars' item views and the
-  drop ring and holds their strokes to the width. A hidden
-  shelf's hover rim (#761) takes the same reading, capped at its
-  plate's growth, and the bars' sheen (`HighlightWidthMarkTests`).
+  drop ring and holds their strokes to the width.
 - **A preview of the bar draws the draft's width**, scaled from
   those two readings: the Settings Bars preview carries them on
   its `BarSpec` (`HighlightWidthPreviewTests` holds the spec).

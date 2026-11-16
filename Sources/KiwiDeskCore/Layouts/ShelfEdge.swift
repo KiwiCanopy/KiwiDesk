@@ -5,9 +5,8 @@ import CoreGraphics
 /// Shown and reserved are apart so a bar may draw over the
 /// windows; on an edge two bars share — one fused shelf, one strip
 /// — the edge reserves at the depth its most present RESERVING bar
-/// asks: the full strip for `always`, the sliver
-/// (`KiwiShelf.hiddenReservation`) for `auto`, nothing for
-/// `hidden` — the resting pocket's strip apart
+/// asks: the full strip for `always`, nothing for `auto` or
+/// `hidden` (#3349) — the resting pocket's strip apart
 /// (`ShelfReservation.pocket`, #2784). A reveal is an overlay.
 public struct ShelfEdge: Sendable, Equatable {
     public let edge: AppBarEdge
@@ -74,16 +73,14 @@ public struct ShelfEdge: Sendable, Equatable {
 }
 
 /// What the shelves take off a screen in one layout: the edges
-/// it reserves at the shelf's depth, the hiding edges it reserves
-/// at the sliver's (#761), the pocket's edge at its own (#2784),
-/// and each depth — the whole input
+/// it reserves at the shelf's depth, the pocket's edge at its own
+/// (#2784), and each depth — a hiding bar's handle floats and
+/// reserves nothing (#3349) — — the whole input
 /// `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)` reads,
 /// so two equal values leave every layout's bounds alone (#1524).
 public struct ShelfReservation: Sendable, Equatable {
     public let edges: [AppBarEdge]
     public let depth: CGFloat
-    public var hiding: [AppBarEdge] = []
-    public var hidingDepth: CGFloat = 0
     public var pocket: AppBarEdge? = nil
     public var pocketDepth: CGFloat = 0
 
@@ -91,7 +88,6 @@ public struct ShelfReservation: Sendable, Equatable {
     public func depth(of edge: AppBarEdge) -> CGFloat {
         max(
             edges.contains(edge) ? depth : 0,
-            hiding.contains(edge) ? hidingDepth : 0,
             pocket == edge ? pocketDepth : 0
         )
     }

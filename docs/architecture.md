@@ -189,16 +189,15 @@ A `space_bar.*` or `app_bar.*` write that leaves every layout's
 `layoutBounds` reads — unchanged on every screen runs no pass at
 all: it repaints the bars and re-clamps the floats (#1524).
 
-A shelf whose bars are all `auto` reserves only its sliver
-(`TilingSettings.hidingEdges`, `KiwiShelf.hiddenReservation`) and
-draws only
-when `ShelfManager.reveal` shows it (#761): `updateBars()` files
-each hiding bar as a target — its band centred on its mark, the
-marks of an edge placed as one row (`ShelfMarkPlacement`) — and
-draws its Space dots or line (`ShelfHandles`), one panel per
-bar, and a reveal or a retract from
-the pointer monitor or the show/hide action calls `updateBars()`
-alone — never a retile.
+A shelf whose bars are all `auto` reserves nothing and draws only
+when `ShelfManager.reveal` shows it (#761, #3349): `updateBars()`
+files each hiding bar as a target — its handle along the bar's
+run and the approach about it
+(`KiwiCore.HidingShelves.target`) — and draws the handle
+(`ShelfHandles`), one panel per bar; `ShelfRevealer` reads
+`MacEdges` as the pointer enters an approach, and a reveal or a
+retract from the pointer monitor or the show/hide action calls
+`updateBars()` alone — never a retile.
 
 The pocket's resting strip is part of that input:
 `TilingSettings.pocketReservation` adds its edge, and

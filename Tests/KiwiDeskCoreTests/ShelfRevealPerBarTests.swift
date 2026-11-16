@@ -40,7 +40,7 @@ struct ShelfRevealPerBarTests {
         #expect(quiet.drawnAtRest.isEmpty)
     }
 
-    @Test("a hidden bar reserves nothing, an auto one its sliver")
+    @Test("neither a hidden nor an auto bar reserves (#3349)")
     func hiddenReservesNothing() {
         var settings = TilingSettings()
         settings.spaceBarStyle.setEdge(.top)
@@ -51,7 +51,7 @@ struct ShelfRevealPerBarTests {
             pocketAtRest: false
         )
         #expect(hidden.edges.isEmpty)
-        #expect(hidden.hiding.isEmpty)
+        #expect(hidden.depth(of: .top) == 0)
         settings.spaceBarStyle.visibility = .auto
         let auto = settings.shelfReservation(
             in: .bsp,
@@ -59,7 +59,7 @@ struct ShelfRevealPerBarTests {
             pocketAtRest: false
         )
         #expect(auto.edges.isEmpty)
-        #expect(auto.hiding == [.top])
+        #expect(auto.depth(of: .top) == 0)
     }
 
     @Test("the App Bar's value is its layout's own")
@@ -84,6 +84,7 @@ struct ShelfRevealPerBarTests {
             bar: .app
         )
         let revealer = ShelfRevealer()
+        revealer.macEdges = { .none }
         revealer.makeMonitor = { _ in nil }
         revealer.schedule = { _, _ in ShelfRevealTimer() }
         revealer.location = { CGPoint(x: 500, y: 799) }
@@ -92,7 +93,7 @@ struct ShelfRevealPerBarTests {
                 edge: .top,
                 strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
                 screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-                band: nil
+                approach: nil
             )
         ])
         revealer.start()
@@ -114,6 +115,7 @@ struct ShelfRevealPerBarTests {
             bar: .space
         )
         let revealer = ShelfRevealer()
+        revealer.macEdges = { .none }
         final class Hold { var on = false }
         var due: [() -> Void] = []
         let hold = Hold()
@@ -130,7 +132,7 @@ struct ShelfRevealPerBarTests {
                 edge: .top,
                 strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
                 screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-                band: nil
+                approach: nil
             )
         ])
         revealer.start()
@@ -169,7 +171,7 @@ struct ShelfRevealPerBarTests {
             pocketAtRest: false
         )
         #expect(always.edges.isEmpty)
-        #expect(always.hiding.isEmpty)
+        #expect(always.depth(of: .top) == 0)
         settings.monocle.appBar.visibility = .auto
         let auto = settings.shelfReservation(
             in: .monocle,
@@ -177,7 +179,7 @@ struct ShelfRevealPerBarTests {
             pocketAtRest: false
         )
         #expect(auto.edges.isEmpty)
-        #expect(auto.hiding.isEmpty)
+        #expect(auto.depth(of: .top) == 0)
     }
 
     /// An `auto` bar beside an `always` one reads `always`, so a
@@ -199,7 +201,6 @@ struct ShelfRevealPerBarTests {
                 pocketAtRest: false
             )
             #expect(reserved.edges == [.top])
-            #expect(reserved.hiding.isEmpty)
         }
     }
 

@@ -162,6 +162,7 @@ func makeTestCore(
     // developer's real pointer; a suite moves it by hand.
     core.shelves.reveal.makeMonitor = { _ in nil }
     core.shelves.reveal.location = { CGPoint(x: -10_000, y: -10_000) }
+    core.shelves.reveal.macEdges = { .none }
     // Same class, fourth time (#878): the per-retile neighbor
     // scan defaults to the real screen list, so on a
     // multi-screen dev Mac an engine fixture would inherit the

@@ -133,11 +133,9 @@ extension KiwiCore {
                 display: display.id,
                 screen: screen,
                 items: items,
-                appWindows: app?.windowCount,
+                appIcons: app?.items.compactMap(\.icon) ?? [],
                 reveal: reveal,
                 hover: maximizedHoverBars(on: display.id),
-                gaps: state.workspaces.currentSpace(on: display.id)
-                    .map(shown.gaps(for:)) ?? shown.gapsGlobal,
                 settings: shown
             )
             let plans = planned.filter(\.drawsAny)

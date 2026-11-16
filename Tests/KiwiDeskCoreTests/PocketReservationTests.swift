@@ -61,20 +61,15 @@ struct PocketReservationTests {
         #expect(reserved(gone, at: .top) == 0)
     }
 
-    @Test("an Auto edge takes the deeper of the sliver and the handle")
-    func autoEdgeTakesTheDeeper() {
+    /// An Auto bar's handle reserves nothing (#3349); the pocket's
+    /// resting handle keeps its own strip there (#2784).
+    @Test("an Auto edge reserves only the pocket's handle")
+    func autoEdgeReservesThePocketHandle() {
         let auto = settings(space: .auto, pocket: .top)
         let shelf = auto.kiwishelf
-        // The kiwi handle rests as deep as the bars' handles (#2784).
         #expect(PocketMarkGeometry.handleDepth == KiwiShelf.hiddenDepth)
-        #expect(
-            reserved(auto, at: .top)
-                == max(shelf.hiddenReservation, shelf.hiddenReservation)
-        )
-        #expect(
-            reserved(auto, at: .top, resting: false)
-                == shelf.hiddenReservation
-        )
+        #expect(reserved(auto, at: .top) == shelf.hiddenReservation)
+        #expect(reserved(auto, at: .top, resting: false) == 0)
     }
 
     @Test("a shown bar's edge holds the pocket as a section")

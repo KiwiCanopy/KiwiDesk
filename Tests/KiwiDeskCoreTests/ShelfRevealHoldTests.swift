@@ -28,6 +28,7 @@ struct ShelfRevealHoldTests {
 
     private func make() -> (ShelfRevealer, Counter) {
         let revealer = ShelfRevealer()
+        revealer.macEdges = { .none }
         let counter = Counter()
         revealer.makeMonitor = { _ in nil }
         revealer.location = { CGPoint(x: 500, y: 300) }

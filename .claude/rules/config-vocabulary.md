@@ -130,18 +130,17 @@ synonym:
   *badge* nor a *mark*, and copy naming it says *half-moon*. Not a
   *dot*, which #2142's Desktop plate and #761's Space dots spend,
   nor a *pill* or an *indicator* (below).
-- **Space dots** — what a hidden shelf draws in place of the
-  Space Bar (#761): one dot per Space, the current one wide. A
-  lone App Bar's hidden shelf draws a short **line**. Neither is a
-  *pill*, an *indicator* or a *badge*, each spoken for here, and
-  neither is a *half-moon*.
-- **handle** — what an `auto` bar leaves at its edge, the Space
-  dots or the App Bar's line, as one thing: what the pointer
-  reaches for to bring the bar in (owner, #2567). Name it a
-  *handle* — the bar's handle where another handle could be read —
-  never a *mark*, the on-window glyph's word, nor an *indicator*,
-  the active item's. Rejected for it: *stub*, *trace*, *sliver*
-  (the reserved strip's), *cue*.
+- **Space dots** — one dot per Space, the current one wide, that
+  peek through an Auto Space Bar's thickened handle (#761, #3349).
+  Never a *pill*, an *indicator* or a *badge*, each spoken for
+  here, nor a *half-moon*.
+- **handle** — what an `auto` bar leaves at its edge: a thin strip
+  along the bar's run that the pointer reaches for to bring the bar
+  in (owner, #2567, #3349). Name it a *handle* — the bar's handle
+  where another handle could be read — never a *strip*, which is the
+  shelf's reserved strip (`ShelfStrip`, `KiwiShelf.thickness`), nor
+  a *mark*, the on-window glyph's word, nor an *indicator*, the
+  active item's. Rejected for it: *stub*, *trace*, *sliver*, *cue*.
 - **held Space** — a Space with windows kept live for the
   arrangement it left, when a switch does not name it (#1507,
   #1790). *Held* is the word in copy and

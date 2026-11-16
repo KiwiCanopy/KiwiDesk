@@ -488,10 +488,9 @@ drawn one or an Auto bar's while it hides (`pocketStrip`), opening
 no slot (#2793, `PocketInsideTests`); else the whole mark
 (`pocketMarkFrame(on:)`) under Hidden, which draws no handle, or
 where `TilingSettings.pocketRest` says `.mark` (#2784); else its
-handle risen — on an Auto edge where the shown pocket stands,
-joining the row of marks where it would meet it
-(`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
-`handleStandsOnTheSlot`), else at Position — never a frame of its
+handle risen — on an Auto edge where the shown pocket stands
+(`ShelfMarkPlacement.pocketBand`, `ShelfHandleStripTests` ▸
+`pocketStandsOnTheSlot`), else at Position — never a frame of its
 own beside them. The Hidden pocket slides out of its edge
 (`BarMotion.playPocketEntrance`) and its panel orders out only at
 the slide back's landing, through the overlay's `afterLeave`, a

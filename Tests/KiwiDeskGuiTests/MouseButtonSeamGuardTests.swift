@@ -268,6 +268,10 @@ struct MouseButtonSeamGuardTests {
                     && source.contains(
                         "shelves.reveal.location = {"
                     )
+                    // macOS's own auto-hidden edges (#3349).
+                    && source.contains(
+                        "shelves.reveal.macEdges = { .none }"
+                    )
                     // macOS's Natural scrolling (#3200).
                     && source.contains(
                         "mouse.scroll.host = .unset"

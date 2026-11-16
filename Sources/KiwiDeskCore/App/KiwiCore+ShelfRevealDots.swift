@@ -1,18 +1,15 @@
 import AppKit
 
 extension KiwiCore.HidingShelves {
-    /// A hidden Space Bar's mark: its Space dots, at most
+    /// A hidden Space Bar's peek: its Space dots, at most
     /// `ShelfDotWindow.cap` following the current Space with small
-    /// end dots where Spaces continue, the current Space's name for
-    /// its hovered pill, and its place for VoiceOver. Nil without
-    /// Spaces, where the bar hides to a line.
+    /// end dots where Spaces continue, and its place for VoiceOver.
+    /// Nil without Spaces, where the bar's glyphs peek instead.
     @MainActor mutating func spaceDots(
         _ items: [SpaceBarOverlay.Item]?,
-        key: ShelfRevealer.Key,
-        settings: TilingSettings
+        key: ShelfRevealer.Key
     ) -> (
-        mark: ShelfHandleSpec.Mark,
-        label: ShelfHandleSpec.Label?,
+        peek: ShelfHandleSpec.Peek,
         position: ShelfHandleSpec.Position?
     )? {
         let spaces = (items ?? []).filter { $0.space != nil }
@@ -43,44 +40,9 @@ extension KiwiCore.HidingShelves {
                 small: ends && !spaces[index].active
             )
         }
-        let label = current.map {
-            ShelfHandleSpec.label(
-                spaces[$0].spaceGlyph,
-                font: Self.markNameFont(settings)
-            )
-        }
         return (
             .dots(dots),
-            label,
             current.map { .init(index: $0 + 1, count: spaces.count) }
-        )
-    }
-
-    /// The hovered marks' text size: the Space Bar's own identifier
-    /// size, held inside the pill — the Space name's and the App Bar
-    /// count's alike, so the two marks read alike (#2567).
-    @MainActor static func markTextSize(_ settings: TilingSettings) -> CGFloat
-    {
-        let look = settings.spaceBarLook
-        return min(
-            look.identifierFontSize(forDepth: look.shelf.thickness),
-            ShelfHandleSpec.labelDepth - 4
-        )
-    }
-
-    /// The Space mark's name: the shelf's text face.
-    @MainActor static func markNameFont(_ settings: TilingSettings) -> NSFont {
-        settings.spaceBarLook.shelf.textFont(ofSize: markTextSize(settings))
-    }
-
-    /// The App Bar mark's count: the shelf's badge face, as every
-    /// bar count takes (bars.md ▸ Bar text takes its face).
-    @MainActor static func markCountFont(
-        _ settings: TilingSettings
-    ) -> NSFont {
-        settings.spaceBarLook.shelf.badgeFont(
-            ofSize: markTextSize(settings),
-            emphasis: .semibold
         )
     }
 }
