@@ -8,16 +8,20 @@ import Testing
 /// drivers on a Boxed Liquid Glass shelf: the App Bar's section is
 /// stood where its content was drawn, every piece inside it snaps,
 /// and the shelf's glide carries it to where it ends — one motion
-/// from where it was drawn to where it lands. What the animator
-/// then draws is the device's. Main-actor spend: one ordered panel
-/// per case.
+/// from where it was drawn to where it lands. A Hidden Space Bar
+/// joining an Auto App Bar moves it (#3359 ruling 4); two Auto bars
+/// rest in one arrangement, so a join moves nothing (ruling 1).
+/// What the animator then draws is the device's. Main-actor spend:
+/// one ordered panel per case.
 @Suite("Shelf join and leave glide (#2497)", .serialized)
 @MainActor
 struct ShelfJoinLeaveGlideTests {
-    /// A core with three windows in a monocle Space, both bars
-    /// `auto` on the top edge in `order`, the App Bar revealed.
+    /// A core with three windows in a monocle Space, the Space Bar
+    /// `space` and the App Bar `auto` on the top edge in `order`,
+    /// the App Bar revealed.
     private func makeCore(
-        _ order: KiwiShelf.Order
+        _ order: KiwiShelf.Order,
+        space: ShelfVisibility = .hidden
     ) -> (KiwiCore, DisplayID)? {
         guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
@@ -46,7 +50,7 @@ struct ShelfJoinLeaveGlideTests {
         var settings = core.tiler.settings
         settings.spaceBarStyle.setEdge(.top)
         settings.appBarStyle.setEdge(.top)
-        settings.spaceBarStyle.visibility = .auto
+        settings.spaceBarStyle.visibility = space
         settings.monocle.appBar.visibility = .auto
         settings.kiwishelf.alignment = .center
         settings.kiwishelf.order = order
@@ -104,6 +108,32 @@ struct ShelfJoinLeaveGlideTests {
             #expect(abs(recorder.placed[0] - before) < 0.5, "\(order) \(step)")
             #expect(abs(recorder.placed[1] - after) < 0.5, "\(order) \(step)")
             #expect(travelled.isEmpty, "\(order) \(step): \(travelled)")
+        }
+    }
+
+    @Test(
+        "Two Auto bars: a join or leave moves the App Bar nowhere",
+        .enabled(if: NSScreen.main != nil),
+        arguments: [KiwiShelf.Order.spacesFirst, .appsFirst]
+    )
+    func autoPairMovesNothing(order: KiwiShelf.Order) throws {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        let (core, display) = try #require(makeCore(order, space: .auto))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let app = try #require(core.appBars.shownOverlay(on: display))
+        let overlay = try #require(
+            core.shelves.overlayForTesting(display, edge: .top)
+        )
+        defer { overlay.hide() }
+        let recorder = Recorder(app: app, strip: overlay.stripView)
+        for step in ["join", "leave"] {
+            let before = try #require(recorder.drawnX())
+            #expect(
+                core.execute("space_bar.toggle_reveal", args: []).isSuccess
+            )
+            let after = try #require(recorder.drawnX())
+            #expect(abs(after - before) < 0.5, "\(order) \(step)")
         }
     }
 
