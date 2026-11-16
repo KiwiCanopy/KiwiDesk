@@ -3702,10 +3702,10 @@ item colour at 35% opacity). Every bundled palette carries one.
 :::unreleased
 `kiwishelf.set_handle_color` sets the colour of the handle an
 [`"auto"`](#space_barset_visibility) bar leaves at its edge while it
-hides; the thickened handle keeps the fill, and the Space dots and
-App Bar glyphs that peek through keep the bar's own inks. A picked
-colour rests at 38% of its own opacity. `""` (the default) is
-Automatic: the system label colour at 38% opacity, which follows
+hides, and of its progress fill and the pocket's tab. A picked
+colour rests at 38% of its own opacity and fills at 90%, beside a
+neutral fine line of the opposite tone. `""` (the default) is
+Automatic: the system label colour at those strengths, which follows
 light and dark mode. No bundled palette carries it, so
 a palette leaves it Automatic.
 :::
