@@ -1,24 +1,29 @@
 import AppKit
 
-/// The view a handle draws (#761), and VoiceOver's way to the
-/// show/hide action: its press runs the action and its value says
-/// whether the shelf is shown. The plate is a view of its own, so
-/// the hover grows its frame while the dots stay where they are.
+/// The view a handle draws (#761, #3349), and VoiceOver's way to
+/// the show/hide action: its press runs the action and its value
+/// says whether the shelf is shown. The plate is a view of its own,
+/// so an approach thickens its frame while what peeks through
+/// fades in over it.
 final class ShelfHandleView: NSView {
     private(set) var spec: ShelfHandleSpec?
     /// The bar the action names, for the label.
     var carriesSpaceBar = true
     var onPress: @MainActor () -> Void = {}
 
-    /// Holds the plate and the dots; it fades out under a shelf
+    /// Holds the plate and the peek; it fades out under a shelf
     /// revealing over it and back as it retracts, the view itself
     /// staying for VoiceOver.
     let body = AppBarOverlay.FlippedView()
     let plate = NSView()
-    let rim = ShelfHandleRim()
-    let dots = ShelfHandleDots()
-    /// The plate as tinted glass where its bar draws glass (#2567):
-    /// a glass box whose host travels with the hover, under the rim.
+    /// What peeks through the thickened plate, at the plate's grown
+    /// frame: the Space dots or the App Bar's glyphs.
+    let peek = ShelfHandlePeek()
+    /// The plate's content slot `BarMotion.placeHoverPlate` moves;
+    /// the handle keeps none.
+    private let still = NSView()
+    /// The thickened plate as tinted glass where its bar draws
+    /// glass (#2567): a glass box whose host travels with the plate.
     private(set) var glass: (glass: NSView, tint: GlassBackdrop)?
 
     override init(frame: NSRect) {
@@ -27,82 +32,76 @@ final class ShelfHandleView: NSView {
         plate.wantsLayer = true
         addSubview(body)
         body.addSubview(plate)
-        body.addSubview(rim)
-        body.addSubview(dots)
+        body.addSubview(peek)
     }
 
     required init?(coder: NSCoder) { nil }
 
     override var isFlipped: Bool { true }
 
-    /// Draws `spec` in the current bounds — the mark inset by the
-    /// hover's room — growing the plate where `animated`.
+    /// Draws `spec` in the current bounds — the handle inset by the
+    /// thickening's room — thickening the plate where `animated`.
     func render(_ spec: ShelfHandleSpec, animated: Bool) {
         let was = self.spec
         self.spec = spec
         body.frame = bounds
         let mark = ShelfHandle.mark(of: spec, in: bounds)
-        // The dots reach out past the screen side by the hover's
-        // shift, so they can follow the plate's middle inward.
-        let shift = BarMotion.hoverShift(
-            spec.edge,
-            across: spec.growth.across
-        )
-        let dotsRest = bounds.union(
-            bounds.offsetBy(dx: -shift.dx, dy: -shift.dy)
-        )
-        dots.mark = mark.offsetBy(dx: -dotsRest.minX, dy: -dotsRest.minY)
-        dots.spec = spec
-        plate.layer?.backgroundColor = NSColor(kiwiFill: spec.fill.hex).cgColor
-        rim.ink = .init(
-            hex: spec.highlight,
-            width: spec.rimWidth,
-            sheen: spec.sheen
-        )
+        peek.spec = spec
         let box = glassBox(for: spec)
-        plate.isHidden = box != nil
-        // One radius at both sizes: the box writes it before its
-        // host moves, so the grown plate's capsule rounds the
-        // resting mark too.
+        // At rest a hairline in the system's label ink, which
+        // follows the appearance as the windows under it do — the
+        // bar's own ink is made for its plate and vanishes on a
+        // light window (#3349); thickened, the Fill or its glass.
+        var rest: CGColor?
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            rest =
+                NSColor.labelColor
+                .withAlphaComponent(ShelfHandleSpec.restAlpha).cgColor
+        }
+        plate.layer?.backgroundColor =
+            spec.hovered
+            ? (box == nil
+                ? NSColor(kiwiFill: spec.fill.hex).cgColor : nil)
+            : rest
         let grown = BarMotion.hoverPlate(
             mark: mark,
-            growth: spec.growth,
             edge: spec.edge,
             hovered: true
         )
         let capsule = min(grown.width, grown.height) / 2
         BarMotion.placeHoverPlate(
-            box.flatMap { GlassBox.host(of: $0.glass) } ?? plate,
-            rim: rim,
-            content: dots,
-            contentRest: dotsRest,
+            plate,
+            rim: peek,
+            content: still,
+            contentRest: .zero,
             mark: mark,
-            growth: spec.growth,
             edge: spec.edge,
             hovered: spec.hovered,
             animated: animated && was?.hovered != spec.hovered,
-            placePlate: box.map { box in
-                { frame, glides in
-                    GlassBox.place(
-                        box.glass,
-                        tint: box.tint,
-                        at: frame,
-                        cornerRadius: capsule,
-                        fill: spec.fill,
-                        edge: spec.edge,
-                        visible: true,
-                        animated: glides,
-                        // Behind: the glass's edge over a Fill on
-                        // top reads as a border (#2569 ▸ owner).
-                        behind: true,
-                        // The mark's own hover group carries the
-                        // motion (`BarMotion.placeHoverPlate`).
-                        move: { host, frame, _ in host.frame = frame }
-                    )
-                }
+            placePlate: { [plate] frame, glides in
+                plate.frame = frame
+                plate.layer?.cornerRadius =
+                    min(frame.width, frame.height) / 2
+                guard let box else { return }
+                GlassBox.place(
+                    box.glass,
+                    tint: box.tint,
+                    at: frame,
+                    cornerRadius: capsule,
+                    fill: spec.fill,
+                    edge: spec.edge,
+                    visible: spec.hovered,
+                    animated: glides,
+                    // Behind: the glass's edge over a Fill on top
+                    // reads as a border (#2569 ▸ owner).
+                    behind: true,
+                    // The plate's own group carries the motion
+                    // (`BarMotion.placeHoverPlate`).
+                    move: { host, frame, _ in host.frame = frame }
+                )
             }
         )
-        // The mark gives way to the shelf it reveals and comes
+        // The handle gives way to the shelf it reveals and comes
         // back as the shelf's retract lands.
         if let was, was.standsAside != spec.standsAside, animated {
             BarMotion.fadeMark(
@@ -115,9 +114,15 @@ final class ShelfHandleView: NSView {
         }
     }
 
-    /// The glass box `spec` draws its plate in, made once beneath
-    /// the rim; nil, and any box dropped, where its bar draws no
-    /// glass or the OS has none.
+    /// The resting hairline's ink follows the appearance.
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        if let spec { render(spec, animated: false) }
+    }
+
+    /// The glass box `spec` draws its thickened plate in, made once
+    /// beneath the peek; nil, and any box dropped, where its bar
+    /// draws no glass or the OS has none.
     private func glassBox(
         for spec: ShelfHandleSpec
     ) -> (glass: NSView, tint: GlassBackdrop)? {
@@ -126,12 +131,14 @@ final class ShelfHandleView: NSView {
             glass = nil
             return nil
         }
-        if glass == nil { glass = GlassBox.make(in: body, below: rim) }
+        if glass == nil { glass = GlassBox.make(in: body, below: peek) }
         return glass
     }
 
     override func isAccessibilityElement() -> Bool { true }
-    override func accessibilityRole() -> NSAccessibility.Role? { .button }
+    override func accessibilityRole() -> NSAccessibility.Role? {
+        .button
+    }
 
     override func accessibilityLabel() -> String? {
         carriesSpaceBar
@@ -141,20 +148,6 @@ final class ShelfHandleView: NSView {
 
     override func accessibilityValue() -> Any? {
         let shown = spec?.shown == true
-        // The App Bar's count is spoken at rest too, number last.
-        if let windows = spec?.count?.windows {
-            return shown
-                ? L(
-                    "kiwishelf.indicator.shown_windows.ax",
-                    "Shown, windows: %1$d",
-                    windows
-                )
-                : L(
-                    "kiwishelf.indicator.hidden_windows.ax",
-                    "Hidden, windows: %1$d",
-                    windows
-                )
-        }
         // The dots may not all show, so the place is spoken whole.
         guard let place = spec?.position else {
             return shown
@@ -182,151 +175,98 @@ final class ShelfHandleView: NSView {
     }
 }
 
-/// The hovered plate's rim in the highlight colour and the bars'
-/// sheen, stroked inside its own bounds — drawn, never a layer
-/// border, which is the shelf border's one painter's (bars.md).
-final class ShelfHandleRim: NSView {
-    struct Ink: Equatable {
-        let hex: String
-        let width: CGFloat
-        let sheen: CGFloat
-    }
-
-    var ink: Ink? {
-        didSet { if ink != oldValue { needsDisplay = true } }
-    }
-
-    override func draw(_ dirtyRect: NSRect) {
-        guard let ink,
-            let context = NSGraphicsContext.current?.cgContext
-        else { return }
-        let inset = ink.width / 2
-        let rect = bounds.insetBy(dx: inset, dy: inset)
-        guard rect.width > 0, rect.height > 0 else { return }
-        let radius = min(rect.width, rect.height) / 2
-        let path = CGPath(
-            roundedRect: rect,
-            cornerWidth: radius,
-            cornerHeight: radius,
-            transform: nil
-        )
-        // Sheen 0 is the flat colour throughout.
-        BorderSheen.draw(
-            path,
-            lineWidth: ink.width,
-            extent: bounds,
-            hex: ink.hex,
-            strength: ink.sheen,
-            in: context
-        )
-    }
-}
-
-/// The Space dots on a handle's plate, drawn over the mark's
-/// resting frame: a hover widens the current one into the label's
-/// pill about the row's middle, the others moving out by half the
-/// widening each side.
-final class ShelfHandleDots: NSView {
+/// What peeks through a thickened handle (#3349), drawn centred in
+/// its own bounds — the grown plate — at `peekAlpha`: the Space
+/// dots, or the App Bar's glyphs, their tops past the plate's
+/// inner side clipped away.
+final class ShelfHandlePeek: NSView {
     var spec: ShelfHandleSpec? { didSet { needsDisplay = true } }
-    /// The mark's resting frame in this view.
-    var mark: CGRect = .zero { didSet { needsDisplay = true } }
 
     override var isFlipped: Bool { true }
 
     override func draw(_ dirtyRect: NSRect) {
         guard let spec else { return }
-        guard case .dots(let dots) = spec.mark else {
-            drawCount(spec)
-            return
+        switch spec.peek {
+        case .dots(let dots): draw(dots, spec)
+        case .glyphs(let images): draw(images, spec)
         }
-        let labelled = spec.hovered && spec.label != nil
-        let extra = labelled ? spec.labelExtra : 0
+    }
+
+    private func draw(
+        _ dots: [ShelfHandleSpec.Dot],
+        _ spec: ShelfHandleSpec
+    ) {
+        typealias Size = ShelfHandleSpec
+        let lengths = dots.map { dot in
+            dot.current
+                ? Size.currentDot : dot.small ? Size.smallDot : Size.dot
+        }
+        let gaps = CGFloat(max(0, dots.count - 1)) * Size.dotGap
+        let total = lengths.reduce(0, +) + gaps
         var lead =
-            (spec.horizontal ? mark.minX : mark.minY)
-            + ShelfHandleSpec.pad - extra / 2
-        let middle = spec.horizontal ? mark.midY : mark.midX
-        for dot in dots {
-            let pill = dot.current && labelled
+            (spec.horizontal ? bounds.midX : bounds.midY) - total / 2
+        let middle = spec.horizontal ? bounds.midY : bounds.midX
+        for (dot, long) in zip(dots, lengths) {
             let size =
-                pill
-                ? spec.pillDepth
-                : dot.small
-                    ? ShelfHandleSpec.smallDot : ShelfHandleSpec.dot
-            let long =
-                dot.current
-                ? ShelfHandleSpec.currentDot + extra : size
+                dot.small ? ShelfHandleSpec.smallDot : ShelfHandleSpec.dot
             let cross = middle - size / 2
             let rect =
                 spec.horizontal
                 ? CGRect(x: lead, y: cross, width: long, height: size)
                 : CGRect(x: cross, y: lead, width: size, height: long)
-            NSColor(kiwiHex: spec.ink(of: dot)).setFill()
+            NSColor(kiwiHex: spec.ink(of: dot))
+                .withAlphaComponent(ShelfHandleSpec.peekAlpha)
+                .setFill()
             NSBezierPath(
                 roundedRect: rect,
                 xRadius: size / 2,
                 yRadius: size / 2
             ).fill()
-            if pill, let label = spec.label {
-                // Ink against the pill itself, never the shelf's
-                // translucent fill, which read faint on a light pill.
-                draw(
-                    label,
-                    in: rect,
-                    ink: NSColor(kiwiHex: spec.ink(of: dot))
-                        .contrastingGlyph
-                )
-            }
             lead += long + ShelfHandleSpec.dotGap
         }
     }
 
-    /// The label centred in its pill: text by its ink
-    /// (`BarTextGlyph.Metrics`) on its band's baseline
-    /// (`BarTextGlyph.lineTop`), a symbol by its image.
-    private func draw(
-        _ label: ShelfHandleSpec.Label,
-        in pill: CGRect,
-        ink color: NSColor
-    ) {
-        switch label.glyph {
-        case .symbol(let name):
-            guard
-                let image = ShelfHandleSpec.symbol(name, font: label.font)
-            else { return }
-            let tinted = NSImage(size: image.size, flipped: false) { rect in
-                image.draw(in: rect)
-                color.set()
-                rect.fill(using: .sourceAtop)
-                return true
-            }
-            tinted.draw(
-                in: CGRect(
-                    x: pill.midX - image.size.width / 2,
-                    y: pill.midY - image.size.height / 2,
-                    width: image.size.width,
-                    height: image.size.height
+    private func draw(_ images: [NSImage], _ spec: ShelfHandleSpec) {
+        let size = ShelfHandleSpec.glyph
+        let step = size + ShelfHandleSpec.glyphGap
+        let along = spec.horizontal ? bounds.width : bounds.height
+        let gap = ShelfHandleSpec.glyphGap
+        let fits = max(0, Int((along + gap) / step))
+        let shown = images.prefix(fits)
+        let total = CGFloat(shown.count) * step - gap
+        var lead =
+            (spec.horizontal ? bounds.midX : bounds.midY) - total / 2
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(rect: bounds).setClip()
+        for image in shown {
+            // Anchored on the plate's inner side and running out
+            // past the screen side, so the edge of the glyph the
+            // bar brings in first shows, as the reveal will.
+            let low = spec.edge == .top || spec.edge == .left
+            let rect =
+                spec.horizontal
+                ? CGRect(
+                    x: lead,
+                    y: low ? bounds.maxY - size : bounds.minY,
+                    width: size,
+                    height: size
                 )
+                : CGRect(
+                    x: low ? bounds.maxX - size : bounds.minX,
+                    y: lead,
+                    width: size,
+                    height: size
+                )
+            image.draw(
+                in: rect,
+                from: .zero,
+                operation: .sourceOver,
+                fraction: ShelfHandleSpec.peekAlpha,
+                respectFlipped: true,
+                hints: nil
             )
-        case .text(let text, let tinted):
-            var attributes: [NSAttributedString.Key: Any] = [
-                .font: label.font
-            ]
-            if tinted { attributes[.foregroundColor] = color }
-            let metrics = BarTextGlyph.metrics(text, font: label.font)
-            (text as NSString).draw(
-                at: CGPoint(
-                    x: metrics.originX(
-                        centringInkOn: pill.midX,
-                        frameWidth: metrics.advance
-                    ),
-                    y: BarTextGlyph.lineTop(
-                        centredOn: pill.midY,
-                        band: .of(identifier: text),
-                        font: label.font
-                    )
-                ),
-                withAttributes: attributes
-            )
+            lead += step
         }
+        NSGraphicsContext.restoreGraphicsState()
     }
 }

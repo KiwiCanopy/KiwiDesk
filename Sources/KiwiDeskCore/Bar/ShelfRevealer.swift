@@ -4,8 +4,8 @@ import AppKit
 /// pointer, its shortcut and their timers — one target per bar, so
 /// a shortcut shows only the bar it names. A reveal or a retract
 /// only redraws the bars (`onChange`, wired to `updateBars()`): a
-/// hiding edge reserves only its constant sliver and a hidden bar
-/// nothing, so no reveal retiles (`BarAutoHideFoldTests`).
+/// hiding edge reserves nothing — its handle floats (#3349) — so
+/// no reveal retiles (`BarAutoHideFoldTests`).
 @MainActor
 final class ShelfRevealer {
     /// One hiding bar: the shelf it sits on and which bar.
@@ -44,6 +44,11 @@ final class ShelfRevealer {
     var schedule:
         @MainActor (TimeInterval, @escaping @MainActor () -> Void)
             -> ShelfRevealTimer = ShelfRevealTimer.after
+    /// The edges macOS auto-hides something on, read once as the
+    /// pointer enters an approach (#3349): live in production,
+    /// pinned to `.none` by both `makeTestCore` twins, since the
+    /// developer's Dock would decide every verdict.
+    var macEdges: @MainActor () -> MacEdges = MacEdges.live
 
     /// Every hiding bar reads shown while set — the tour's looks
     /// step (#2515) — over whatever its pointer or shortcut did,
@@ -54,14 +59,26 @@ final class ShelfRevealer {
 
     private(set) var targets: [Key: Target] = [:]
     private(set) var phases: [Key: ShelfReveal] = [:]
-    /// Hidden shelves whose mark shows its hover cue — the pointer
-    /// near the mark or in the band, where the reveal delay runs
-    /// (#761).
-    private(set) var arming: Set<Key> = []
+    /// Hidden bars whose handle is thickened — the pointer held in
+    /// the approach for `approachDelay` (#3349).
+    /// Written only by the revealer's own files (+Approach), as
+    /// is every approach member below; a writer elsewhere is
+    /// review's.
+    var arming: Set<Key> = []
+    /// Approaches handed to macOS: the pointer touched the outermost
+    /// row of an edge macOS owns, so nothing of KiwiDesk's runs
+    /// until the pointer leaves the approach (#3349 rule 5).
+    var ceded: Set<Key> = []
+    /// Whether macOS owned each entered approach's edge, read at
+    /// the entry and forgotten at the leave.
+    var owned: [Key: Bool] = [:]
+    /// The handle's own hover delay, apart from the approach's
+    /// timer, which the dwell follows.
+    var handleTimers: [Key: ShelfRevealTimer] = [:]
     /// Shelves the action hid under the pointer: the hover stands
     /// down until the pointer leaves the shelf.
     private var suppressed: Set<Key> = []
-    private var timers: [Key: ShelfRevealTimer] = [:]
+    var timers: [Key: ShelfRevealTimer] = [:]
     private var monitor: Any?
     private var running = false
 
@@ -77,16 +94,21 @@ final class ShelfRevealer {
         running = false
         heldOpen = false
         for timer in timers.values { timer.cancel() }
+        for timer in handleTimers.values { timer.cancel() }
         timers = [:]
+        handleTimers = [:]
         suppressed = []
         phases = [:]
         arming = []
+        ceded = []
+        owned = [:]
         syncMonitor()
     }
 
     /// Whether `key`'s bar stands aside: hidden while a sibling on
     /// its shelf shows, so the mouse opens one bar at a time (owner,
-    /// 2026-10-19) — its band opens nothing and its mark gives way.
+    /// 2026-10-19) — its approach opens nothing and its handle
+    /// gives way.
     /// Only a shortcut shows it, beside the sibling.
     func yields(_ key: Key) -> Bool {
         reveal(of: key) == .hidden
@@ -139,6 +161,8 @@ final class ShelfRevealer {
         }
         cancelTimer(key)
         arming.remove(key)
+        ceded.remove(key)
+        owned[key] = nil
         let next = reveal(of: key).toggled(now: now(), duration: duration)
         set(next, for: key)
         if next.isShown { suppressed.remove(key) }
@@ -165,61 +189,14 @@ final class ShelfRevealer {
             }
             switch reveal(of: key) {
             // Asked per target: a sibling this move revealed — a
-            // push at the seam of two bands — stands this one down.
+            // push where two approaches meet — stands this one down.
             case .hidden where yields(key),
                 .hidden where dragging && key.bar != .space:
-                cancelTimer(key)
-                setArming(key, false)
+                leave(key)
             case .hidden: hiddenMove(key, target, point)
             case .hover: hoverMove(key, target, point)
             case .pinned: break
             }
-        }
-    }
-
-    private func hiddenMove(_ key: Key, _ target: Target, _ point: CGPoint) {
-        guard let band = target.band else { return }
-        if ShelfReveal.pushes(
-            point,
-            band: band,
-            strip: target.strip,
-            edge: target.edge,
-            screen: target.screen
-        ) {
-            cancelTimer(key)
-            set(.hover, for: key)
-            return
-        }
-        guard band.contains(point) else {
-            cancelTimer(key)
-            // Near the mark lights its cue; only the band opens it.
-            setArming(key, target.near?.contains(point) == true)
-            return
-        }
-        // Movement inside the band never restarts the delay, or a
-        // jittering pointer would never reveal.
-        setArming(key, true)
-        guard timers[key] == nil else { return }
-        arm(key, after: ShelfReveal.revealDelay) { [weak self] in
-            guard let self else { return }
-            guard let target = self.targets[key],
-                self.reveal(of: key) == .hidden,
-                !self.yields(key),
-                // A drag begun during the delay opens no App Bar.
-                key.bar == .space || !self.windowMoving(),
-                target.band?.contains(self.location()) == true
-            else {
-                let near = self.targets[key]?.near
-                self.setArming(
-                    key,
-                    !self.yields(key)
-                        && near?.contains(self.location()) == true
-                )
-                return
-            }
-            // The reveal ends the hover in its own pass: a redraw
-            // ahead of it would cost a full bar render more.
-            self.set(.hover, for: key)
         }
     }
 
@@ -239,8 +216,8 @@ final class ShelfRevealer {
     private func retractIfLeft(_ key: Key) {
         guard let target = targets[key], reveal(of: key) == .hover
         else { return }
-        // A band-less bar is held by its zone only while the pointer
-        // can re-open it, which it cannot (#761).
+        // A bar with no approach is held by its zone only while the
+        // pointer can re-open it, which it cannot (#761).
         if target.hovers, target.zone.contains(location()) { return }
         guard !holds(key.shelf) else {
             arm(key, after: ShelfReveal.retractDelay) { [weak self] in
@@ -271,20 +248,24 @@ final class ShelfRevealer {
     }
 
     /// Marks `key` arming or not, reporting a change.
-    private func setArming(_ key: Key, _ armed: Bool) {
+    func setArming(_ key: Key, _ armed: Bool) {
         guard arming.contains(key) != armed else { return }
         if armed { arming.insert(key) } else { arming.remove(key) }
         onChange()
     }
 
-    private func set(_ next: ShelfReveal, for key: Key) {
-        if next.isShown { arming.remove(key) }
+    func set(_ next: ShelfReveal, for key: Key) {
+        if next.isShown {
+            arming.remove(key)
+            ceded.remove(key)
+            owned[key] = nil
+        }
         let was = reveal(of: key).isShown
         phases[key] = next == .hidden ? nil : next
         if was != next.isShown { onChange() }
     }
 
-    private func arm(
+    func arm(
         _ key: Key,
         after delay: TimeInterval,
         _ body: @escaping @MainActor () -> Void
@@ -295,13 +276,16 @@ final class ShelfRevealer {
         }
     }
 
-    private func cancelTimer(_ key: Key) {
+    func cancelTimer(_ key: Key) {
         timers.removeValue(forKey: key)?.cancel()
     }
 
     private func forget(_ key: Key) {
         cancelTimer(key)
+        handleTimers.removeValue(forKey: key)?.cancel()
         arming.remove(key)
+        ceded.remove(key)
+        owned[key] = nil
         phases[key] = nil
         suppressed.remove(key)
     }

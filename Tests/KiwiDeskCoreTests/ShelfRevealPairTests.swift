@@ -72,35 +72,29 @@ struct ShelfRevealPairTests {
     }
 
     @Test(
-        "two marks sit as one row, their bands meeting at the middle",
+        "two handles each run along their own bar, approaches apart",
         .enabled(if: NSScreen.main != nil)
     )
-    func pairMeetsAtTheMiddle() throws {
+    func pairRunsAlongTheirBars() throws {
         let (core, shelf) = try #require(makeCore())
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let space = try #require(spec(core, shelf, .space))
         let app = try #require(spec(core, shelf, .app))
-        guard case .dots = space.mark, case .line = app.mark else {
-            Issue.record("the Space Bar draws dots, the App Bar a line")
+        guard case .dots = space.peek, case .glyphs = app.peek else {
+            Issue.record("the Space Bar peeks dots, the App Bar glyphs")
             return
         }
-        let length = ShelfMarkPlacement.bandLength
-        #expect(abs(app.frame.midX - space.frame.midX - length) < 0.5)
-        let spaceBand = try #require(target(core, shelf, .space)?.band)
-        let appBand = try #require(target(core, shelf, .app)?.band)
-        #expect(spaceBand.width == length)
-        #expect(appBand.width == length)
-        #expect(spaceBand.maxX == appBand.minX)
-        #expect(!spaceBand.intersects(appBand))
-        let middle = (space.frame.midX + app.frame.midX) / 2
-        #expect(abs(spaceBand.maxX - middle) < 0.5)
-        // Each near cue stops where the bands meet: one mark lights.
-        let spaceNear = try #require(target(core, shelf, .space)?.near)
-        let appNear = try #require(target(core, shelf, .app)?.near)
-        #expect(spaceNear.maxX <= appBand.minX)
-        #expect(appNear.minX >= spaceBand.maxX)
-        // A top edge's Space mark names its Space on hover.
-        #expect(space.label != nil)
+        #expect(space.frame.height == ShelfHandleSpec.depth)
+        #expect(!space.frame.intersects(app.frame))
+        let spaceIn = try #require(target(core, shelf, .space)?.approach)
+        let appIn = try #require(target(core, shelf, .app)?.approach)
+        #expect(!spaceIn.intersects(appIn))
+        // Each approach reaches its run's far end by `alongReach`.
+        let reach = ShelfReveal.alongReach
+        let lead = space.frame.minX < app.frame.minX
+        let first = lead ? spaceIn : appIn
+        let firstRun = lead ? space.frame : app.frame
+        #expect(abs(first.minX - (firstRun.minX - reach)) < 0.5)
         #expect(space.position?.count == 1)
     }
 

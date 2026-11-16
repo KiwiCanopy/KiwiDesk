@@ -21,18 +21,16 @@ struct ShelfHandleFillBehindTests {
         LiquidGlassGate.override = { false }
         defer { LiquidGlassGate.override = before }
         var spec = ShelfHandleSpec(
-            mark: .line,
+            peek: .glyphs([]),
             frame: CGRect(x: 100, y: 0, width: 36, height: 8),
             edge: .top,
             fill: GlassFill(hex: "#1A1A2EA5"),
             currentInk: "#000000",
             ink: "#AAAAAA",
             emptyInk: "#555555",
-            highlight: "#FF0000",
             shown: false,
             hovered: hovered,
-            reveal: .slide,
-            rimWidth: 3
+            reveal: .slide
         )
         spec.glass = true
         let view = ShelfHandleView()

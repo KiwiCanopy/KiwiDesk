@@ -211,15 +211,14 @@ public struct KiwiShelf: Sendable, Equatable {
         outerMargin + thickness + innerMargin
     }
 
-    /// The depth of every edge handle at rest — a hidden shelf's
-    /// Space dots or line (#761) and the pocket's kiwis — one depth
-    /// so they read as one row (owner, #2784): a whole point, which
-    /// lands on a pixel at 1x and 2x.
+    /// The depth of the pocket's handle at rest (#2784): a whole
+    /// point, which lands on a pixel at 1x and 2x. A bar's handle
+    /// is its own hairline (`ShelfHandleSpec.depth`, #3349).
     public static let hiddenDepth: CGFloat = 11
 
-    /// What a hiding edge reserves (#761): the shelf's own rule
-    /// with the mark's depth in place of `thickness`, so its
-    /// windows stand their outer gap clear of the dots.
+    /// What the pocket's handle reserves (#2784): the shelf's own
+    /// rule with the handle's depth in place of `thickness`, so its
+    /// windows stand their outer gap clear of the kiwis.
     public var hiddenReservation: CGFloat {
         outerMargin + Self.hiddenDepth + innerMargin
     }

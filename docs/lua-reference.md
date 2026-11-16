@@ -3070,9 +3070,11 @@ the fill, opaque, where
 on.
 :::
 
-A hidden bar's Space dots and line wear the glass too, tinted by
-the same fill, and draw that fill flat when the glass is off or
+:::unreleased
+A hidden bar's thickened handle wears the glass too, tinted by
+the same fill, and draws that fill flat when the glass is off or
 stood down.
+:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -3440,15 +3442,21 @@ kiwishelf.set_reveal_timeout(5)
 **Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
 that shows nothing else. `"slide"` brings the whole bar in from
 the screen's edge — out from under the menu bar where it shows —
-and back out; `"grow"` grows the bar out of its mark — from the
+and back out; `"grow"` grows the bar out of its handle — from the
 screen edge where it has none — and back into it; `"unfold"`
-stretches the mark along the edge to the bar's length, then
+stretches the handle along the edge to the bar's length, then
 deepens it to the bar, and back; `"fade"` fades the bar in
-where it stands, and out. A `"hidden"` bar has no mark, so
+where it stands, and out. A `"hidden"` bar has no handle, so
 `"grow"` and `"unfold"` start from the middle of its screen edge.
 A bar shown beside an `"always"` bar joins it instead, whichever
 style. Each plays with Reduce Motion on too. On a `"boxed"` shelf
-`"unfold"` springs each box out of the mark to its place.
+`"unfold"` springs each box out of the handle to its place.
+
+:::unreleased
+An `"auto"` bar's handle already runs the bar's length, so
+`"unfold"` only deepens it, and `"grow"` grows the bar out of the
+thickened handle.
+:::
 
 On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
 
@@ -3501,8 +3509,7 @@ edge where a bar shows, it takes the shelf's nearer end instead — its
 start below `50`, its end from `50` — outside the bars' items, so it
 stays put while they scroll; on an edge where an `"auto"` bar rests
 hidden, its handle, or under `"always"` its whole mark, stands where
-the pocket shows once the bar comes in, joining the bars' handles in
-one row where it would meet them; on
+the pocket shows once the bar comes in; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
 
@@ -3596,14 +3603,14 @@ maximized: by [`toggle_maximized`](#toggle_maximized), a Height or
 Width maximize reaching a bar's strip,
 [`monocle.set_maximize_windows`](#monocleset_maximize_windows) or
 [`kiwivision.set_maximize`](#kiwivisionset_maximize). Under either
-value both bars and the pocket draw nothing at rest and reserve
-nothing, and a bar's shortcut shows it over the window.
+value both bars and the pocket reserve nothing, and a bar's
+shortcut shows it over the window.
 
-- `"auto"` also brings a bar in when you push the pointer against
-  its screen edge, or rest it in the bottom of the menu bar or the
-  top of the Dock where one stands between the bar and that edge.
-  A lone bar answers along the whole edge; two bars on one edge
-  split it. No handle is drawn.
+- `"auto"` rests each bar as its handle over the window and brings
+  it in as an `"auto"` bar comes in
+  ([`space_bar.set_visibility`](#space_barset_visibility)), save
+  that over the window only the handle itself counts as near the
+  edge.
 - `"hidden"` leaves only the shortcuts.
 
 A bar set to `"hidden"` stays hidden under `"auto"` as well, while a
@@ -3962,14 +3969,12 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
-are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
-short line, which grows when the pointer comes near and opens as
-the Space dots do.
+are retired: `false` is `"hidden"`.
 
-Grown, the line shows how many windows the App Bar lists for the
-Space on that screen, beside a window symbol. On a side edge the
-number stands above the symbol; past 99 a stacked-windows symbol
-shows there alone. VoiceOver reads the count at rest too.
+:::unreleased
+An `auto` App Bar hides to a handle and comes in as the Space Bar
+does ([`space_bar.set_visibility`](#space_barset_visibility)).
+:::
 
 ## Space Bar
 
@@ -4035,28 +4040,29 @@ App Bar in monocle and scrolling.
 **Does:**
 
 - `"always"` keeps the bar shown and reserves its strip.
-- `"auto"` hides it to a row of Space dots at its edge — one dot
-  per Space, the current one wide, a Space holding windows
-  brighter, at most six: past six Spaces the dots follow the
-  current Space, and an end with more Spaces beyond it draws a
-  small dot — and the edge keeps only a sliver: `outer_margin`,
-  the dots' depth and `inner_margin`, with the windows' outer gap
-  below it. The pointer within about 40 points of the dots grows
-  the plate behind them, rims it as the bars draw their active
-  item and, on a top or bottom edge, shows the current Space's
-  icon, number or first two letters in its dot. Resting a moment in the dots' band — 64
-  points along the edge, centred on the dots, from a few points
-  past the shelf to where the windows start — brings the bar in
-  as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
-  says, as the dots fade; at once when the pointer pushes against
-  the screen's edge inside that band. It goes back the same way
-  0.5 s after the
-  pointer leaves the bar and its band, and stays while a bar menu
-  or a peek it opened is up.
+- `"auto"` hides it to its handle at its edge (below).
 - `"hidden"` draws nothing and reserves nothing; only
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
+
+:::unreleased
+An `"auto"` bar's handle is a thin line along the bar's whole
+length, reserving nothing and floating over the windows; clicks pass
+through it to the window beneath. With the pointer within about 24
+points of the edge along the bar for 0.15 s, the handle thickens and
+the Space dots, or the App Bar's glyphs, peek through. The bar then
+comes in as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
+says when the pointer rests on the thickened handle for 0.15 s, or
+lingers near the edge for 0.4 s. Where nothing stands between the bar
+and the screen's edge, and no other screen continues past it, a push
+against that edge along the bar brings it in at once — except on the
+Dock's edge while the Dock hides itself and on the top edge while the
+menu bar does: there a push belongs to macOS, and the bar stays away
+until the pointer leaves the area near the edge. The bar goes back
+0.5 s after the pointer leaves it and the area near its edge, and
+stays while a bar menu or a peek it opened is up.
+:::
 
 On the pocket's edge, unless
 [`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
@@ -4074,19 +4080,23 @@ most once. A bar set not to reserve
 ([`space_bar.set_reserve`](#space_barset_reserve)) reserves
 nothing in any mode.
 
+:::unreleased
+An `"auto"` edge keeps no strip of its own: its windows reach
+the edge.
+:::
+
 Each bar keeps its own value. On an edge the two bars share, the
 edge reserves for its more present bar: beside an `"always"` bar
 an `"auto"` one stays shown, while a `"hidden"` one still shows
-only on its shortcut. Two `"auto"` bars on one edge draw two handles
-side by side — the Space dots and the App Bar's line, in the
-shelf's [order](#kiwishelfset_order), where a lone bar would sit
-— each with its own 64-point band, the two meeting between the
-handles. The pointer opens one bar at a time: while a bar is shown,
-the other's handle and band go away. A second bar's shortcut shows
-it beside the first. A look never carries the value.
+only on its shortcut. A second bar's shortcut shows it beside the
+first. A look never carries the value.
 
-The Space dots and the App Bar's line wear the bars'
+:::unreleased
+Two `"auto"` bars on one edge draw two handles, each along its own
+bar. The pointer opens one bar at a time: while a bar is shown, the
+other's handle goes away. A thickened handle wears the bars'
 [Liquid Glass](#kiwishelfset_liquid_glass).
+:::
 
 **Example:**
 

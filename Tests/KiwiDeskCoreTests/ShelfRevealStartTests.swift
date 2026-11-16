@@ -132,13 +132,14 @@ struct ShelfRevealStartTests {
         #expect(commits == 0)
     }
 
-    @Test("The reveal delay ends the hover in the reveal's own pass")
+    @Test("The dwell ends the thickening in the reveal's own pass")
     func revealEndsTheHoverInOnePass() {
         let key = ShelfRevealer.Key(
             shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
             bar: .space
         )
         let revealer = ShelfRevealer()
+        revealer.macEdges = { .none }
         var timers: [() -> Void] = []
         let point = CGPoint(x: 500, y: 770)
         var changes: [(Bool, Bool)] = []
@@ -157,15 +158,20 @@ struct ShelfRevealStartTests {
             )
         }
         revealer.sync([
-            key: ShelfRevealer.Target.hovering(
+            key: ShelfRevealer.Target.along(
+                CGRect(x: 0, y: 735, width: 1000, height: 40),
                 edge: .top,
-                strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
+                side: 775,
                 screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
             )
         ])
         revealer.moved(to: point)
+        #expect(changes.isEmpty)
+        // The approach's wait thickens the handle.
+        timers.removeFirst()()
         #expect(changes.map(\.0) == [true])
         changes = []
+        // The dwell opens the bar.
         timers.removeFirst()()
         // One redraw, already shown: no pass un-hovers the plate
         // first.
