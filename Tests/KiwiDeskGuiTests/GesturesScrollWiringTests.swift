@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -61,6 +62,47 @@ struct GesturesScrollWiringTests {
         #expect(row.contains("grey:greyed?Self.caption:nil"))
         #expect(row.contains("ifgreyed{Text(Self.caption)"))
         #expect(!row.contains("GreyOut("))
+    }
+
+    /// The gate answers both sides: the seeded ⌃⌥ focus swipe
+    /// reaches Long swipes, and with it unbound nothing does.
+    @Test("the Long swipes gate answers both sides")
+    func longSwipesGateAnswers() {
+        let key = SettingKey.shortcuts(.scrollLongSwipes)
+        var config = GuiConfig()
+        #expect(ShortcutsGates(config: config).inertReason(for: key) == nil)
+        config.gesture[GestureKey(.swipe2, GestureSeeds.panKeys)] = .unbound
+        #expect(
+            ShortcutsGates(config: config).inertReason(for: key)
+                == .noPanSwipe
+        )
+    }
+
+    /// The runner hands the pan exactly the families the gate reads,
+    /// so the grey cannot disagree with what a swipe does (#3369).
+    @Test("the runner dispatches the pan on runsThePan")
+    func runnerReadsThePredicate() throws {
+        let url = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/App/KiwiCore+GestureRunner.swift"
+        )
+        let runner = try #require(
+            SourceScan.declarationBody(
+                after: "private func runScroll(",
+                in: SourceScan.stripComments(
+                    try String(contentsOf: url, encoding: .utf8)
+                )
+            )
+        )
+        let squashed = Self.squash(runner)
+        #expect(
+            squashed.contains(
+                "case.family(letfamily)wherefamily.runsThePan:"
+                    + "handleScrollPan(event,session:session.pan,"
+                    + "directional:family==.focus)"
+            )
+        )
+        #expect(!squashed.contains("case.family(.focus)"))
+        #expect(!squashed.contains("case.family(.walk)"))
     }
 
     @Test("every value row carries its Applies to column")
