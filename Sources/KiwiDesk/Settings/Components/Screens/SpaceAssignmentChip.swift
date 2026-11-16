@@ -28,7 +28,7 @@ struct SpaceAssignmentChip: View {
     let displays: [Display]
     @FocusState private var focused: Bool
     @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     var body: some View {

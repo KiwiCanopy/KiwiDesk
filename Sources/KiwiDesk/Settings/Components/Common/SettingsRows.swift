@@ -196,7 +196,7 @@ struct ToggleRow: View {
 /// hover lift and, for a text button chip, a constant edge.
 private struct HoverChip: ViewModifier {
     @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
     var rest: Color

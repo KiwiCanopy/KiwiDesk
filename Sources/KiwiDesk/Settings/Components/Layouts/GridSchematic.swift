@@ -17,7 +17,7 @@ struct GridSchematic: View {
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
 
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.schematicRestage) private var restage
 

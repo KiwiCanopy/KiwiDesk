@@ -8,6 +8,15 @@ import SwiftUI
 @MainActor
 final class PanelPresence: ObservableObject {
     @Published private(set) var leaving = false
+    /// KiwiDesk's Reduce Motion for this opening, read by the host
+    /// once at show (#3252): the fade's order-out and the views'
+    /// gates read this one value, so they never disagree.
+    let reduceMotion: Bool
+
+    init(reduceMotion: Bool) {
+        self.reduceMotion = reduceMotion
+    }
+
     /// How long the fade out takes.
     static let leaveDuration: TimeInterval = 0.15
     /// A held panel's alpha: at 0 a window passes clicks through
@@ -15,13 +24,13 @@ final class PanelPresence: ObservableObject {
     nonisolated static let holdAlpha: CGFloat = 0.01
 
     /// Starts the fade, then orders `panel` out once it lands — at
-    /// once under Reduce Motion — unless a later opening of the
-    /// same panel took it over meanwhile. Where `holdUnseen` runs
-    /// past the fade the panel stays up, unseen, until it ends, so a
-    /// double click's second press lands on it (#3209).
+    /// once under this opening's Reduce Motion — unless a later
+    /// opening of the same panel took it over meanwhile. Where
+    /// `holdUnseen` runs past the fade the panel stays up, unseen,
+    /// until it ends, so a double click's second press lands on it
+    /// (#3209).
     func fadeOut(
         _ panel: NSWindow?,
-        reduceMotion: Bool,
         holdUnseen: TimeInterval,
         stillCurrent: @escaping @MainActor (PanelPresence) -> Bool
     ) {
@@ -86,9 +95,9 @@ final class PanelPresence: ObservableObject {
 /// the glass then adapts dark and keeps it (#1308's mechanism).
 private struct PanelEntrance: ViewModifier {
     @ObservedObject var presence: PanelPresence
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
     @State private var settled = false
+    private var reduceMotion: Bool { presence.reduceMotion }
 
     func body(content: Content) -> some View {
         content
@@ -116,8 +125,8 @@ private struct PanelEntrance: ViewModifier {
 /// the glass, which keeps its full opacity.
 private struct PanelContentFade: ViewModifier {
     @ObservedObject var presence: PanelPresence
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
+    private var reduceMotion: Bool { presence.reduceMotion }
 
     func body(content: Content) -> some View {
         content
@@ -136,6 +145,13 @@ private struct PanelContentFade: ViewModifier {
 }
 
 extension EnvironmentValues {
+    /// The Reduce Motion a view's host decided at show (#3252):
+    /// `ReduceMotion.isOn` for a desk surface. True where no host
+    /// wrote it, so a forgotten host draws still for everyone
+    /// rather than moving under Off; `ReduceMotionHomeTests` holds
+    /// the hosts.
+    @Entry var kiwiDeskReduceMotion = true
+
     /// False while a key panel's entrance is still scaling it in
     /// (#3203): the scale rounds a scroll inside a few points off
     /// its rest, so a list settles back once this turns true. True

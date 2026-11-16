@@ -15,7 +15,7 @@ struct MonocleSchematic: View {
     /// Tour story phase (`SchematicMotion.arrival`, #1750, #2099).
     var arrival: Double = 0
 
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.schematicRestage) private var restage
 

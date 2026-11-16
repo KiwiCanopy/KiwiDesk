@@ -107,6 +107,7 @@ final class KeySequenceHintController {
             ),
             scroll: sheetScroll
         )
+        .environment(\.kiwiDeskReduceMotion, ReduceMotion.isOn)
         let host = NSHostingView(
             rootView: LocaleScopedRoot { view }
                 .environmentObject(LocalizationManager.shared)

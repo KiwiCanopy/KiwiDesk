@@ -2107,6 +2107,21 @@ that used it were normalized. A model has no environment to
 read, so it takes `reduceMotion` as a parameter from its caller
 (`setAutoStart`) and names it at the call.
 
+**Outside the Settings window the gate reads KiwiDesk's Reduce
+Motion, never macOS's alone** (#3252): a view takes
+`\.kiwiDeskReduceMotion` or its model's value, which its host reads
+from `ReduceMotion.isOn` once at show and hands to the order-out as
+well, so a fade and its order-out never disagree. Only a view the
+Settings window alone mounts reads `\.accessibilityReduceMotion`;
+a Settings-tree view mounted elsewhere too (a picker in KiwiHub, a
+strip in the tour) reads `\.kiwiDeskReduceMotion`, which
+`SettingsView` writes from macOS's setting
+(`ReduceMotionHomeTests` ▸ `guiReadsTheHome`, `hostsAreWired`;
+`ReduceMotionReachTests` ▸ `readersStayInSettings`). A new hosting
+root states how it hands the value in `ReduceMotionReachTests` ▸
+`hostsAreRegistered`, and one that writes it joins `hostsAreWired`. `docs/design-decisions.md` ▸ *Off reaches
+every surface KiwiDesk draws on the desk* carries why.
+
 **And `withAnimation { … }` — no parens — is the shape that
 hides.** Swift defaults the animation, so that spelling is an
 ungated call a paren-only needle cannot see AT ALL; one shipped

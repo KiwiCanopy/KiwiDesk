@@ -5,7 +5,7 @@ import SwiftUI
 struct WaitingDot: View {
     var ink: Color = SettingsTheme.warningInk
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @State private var breathing = false
 
     private let size: CGFloat = 9

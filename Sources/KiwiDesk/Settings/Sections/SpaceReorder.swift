@@ -143,7 +143,7 @@ struct SpaceDragHandle: View {
     @ObservedObject var model: SettingsModel
     @ObservedObject var reorder: SpaceReorder
     let space: SpaceID
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     var body: some View {
         Image(systemName: "line.3.horizontal")

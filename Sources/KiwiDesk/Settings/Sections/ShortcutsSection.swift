@@ -11,7 +11,7 @@ import SwiftUI
 /// Single active recorder (#33), duplicate blocking (#34), live
 /// conflict detection (#35).
 struct ShortcutsSection: View {
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     var reduceMotion
     @ObservedObject var model: SettingsModel
     @State var advancedExpanded = false

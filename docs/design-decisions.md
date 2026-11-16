@@ -7764,15 +7764,41 @@ under it would read as Off not working; so `expandSeconds(at:)` and
 `revealSeconds(at:)`, the one reading of a switch with its length
 (#3237), answer 0 under it, and no bar member's gate changes.
 
-*Off reaches Core alone.* The flag is ruled over the desk's motion
-— windows, bars, the marks on windows, the Space switch and
-KiwiVision — so it joins the one Core read and nothing in
-`Sources/KiwiDesk`. Stated residue: the GUI's own panels — KiwiHub,
-the cue plates, the slow-boot notice and the Settings window — keep
-following macOS's setting alone, so under Off a cue plate still
-fades. Settings reads the flag only to narrate it: the Animations
-card's box and greys, and the Switching Spaces captions, which
-say what the desk draws (*Reduce Motion shows the Space*, above).
+*Off reaches every surface KiwiDesk draws on the desk (#3252,
+owner ruling 2026-11-12).* A segment named Off under "Animation
+speed" reads as off everywhere KiwiDesk draws, so beside Core's
+gates KiwiHub, the cue plates (Space, layout, Desktop), the
+slow-boot notice and the first-launch tour read `ReduceMotion.isOn`
+too: Off's own fallback, Show the Space, puts up a plate on every
+switch, and a plate fading out there, or KiwiHub springing in over
+windows that snap, reads as Off not working, the argument that put
+the shelf's reveal and expand under Off. Their fades are motion and
+drop, the cue plate's leave fade and KiwiHub's entrance spring and
+content fade alike: macOS's Reduce Motion already drops them (#1875,
+#2142, #2144), as it cuts KiwiVision's fade, and keeping them under
+Off alone would give Off a second contract; a dissolve stand-in
+would be a change to Reduce Motion as a whole. Each panel's host reads the flag once at show and hands the
+one value to its order-out and to its views, through
+`PanelPresence`, the plate's or notice's model, or the
+`\.kiwiDeskReduceMotion` environment value, since SwiftUI's
+`accessibilityReduceMotion` is get-only and reads macOS's alone; a
+change lands at the next show, enough for panels up about a second.
+The tour follows Off too, so "everywhere but this window" stays true
+(owner addendum 2026-11-16); it reads Off when it opens, so Off
+turned on mid-tour, in its Looks step say, lands at its next open.
+The update windows (Update, Up to date, Checking, What's New) and the
+key-sequence hint follow it on the same reading (owner addendum
+2026-11-16), so Off turned on while What's New is open lands at its
+next open. A Settings view mounted on one of these surfaces as well,
+such as KiwiHub's scope picker, takes the host's value: the Settings
+window hands it macOS's, live.
+The Settings window keeps macOS's setting: its motion is where the
+user watches Off take effect (the box arrives, the rows grey), and
+it is ordinary window chrome. Settings reads the flag only to
+narrate it: the Animations card's box and greys, and the Switching
+Spaces captions, which say what the desk draws (*Reduce Motion
+shows the Space*, above). `ReduceMotionHomeTests` holds the GUI tree
+to the one read outside `Sources/KiwiDesk/Settings`.
 
 *Two offs, both kept.* Off covers every profile and applies at
 once; a profile's own **Animate windows** covers that profile and

@@ -6,7 +6,7 @@ import SwiftUI
 struct OnboardingProgressRow: View {
     let steps: [OnboardingModel.Step]
     let index: Int
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     private let pipWidth: CGFloat = 18

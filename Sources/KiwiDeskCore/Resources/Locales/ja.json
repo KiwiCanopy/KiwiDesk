@@ -243,7 +243,7 @@
   "behavior.animations.speed": "アニメーションの速度",
   "behavior.animations.speed.custom": "カスタムの継続時間です。速度を選ぶと置き換わります。",
   "behavior.animations.speed.fast": "速い",
-  "behavior.animations.speed.help": "KiwiDeskのアニメーションの速さで、すべてのプロファイルに適用されます：ウインドウ、スクロール、バー、スペースの切り替え、KiwiVision。KiwiDeskは「%2$@」で始まります。「%1$@」にするとこれらのアニメーションが止まり、各プロファイルのスイッチはそのまま保たれます。",
+  "behavior.animations.speed.help": "KiwiDeskのアニメーションの速さで、すべてのプロファイルに適用されます：ウインドウ、スクロール、バー、スペースの切り替え、KiwiVision。KiwiDeskは「%2$@」で始まります。「%1$@」にするとこのウインドウ以外のすべての場所でKiwiDeskのアニメーションがオフになり、各プロファイルのスイッチはそのまま保たれます。",
   "behavior.animations.speed.medium": "中くらい",
   "behavior.animations.speed.off": "オフ",
   "behavior.animations.speed.off_warning": "すべてのプロファイルでアニメーションがオフです。",

@@ -94,7 +94,9 @@ extension AppDelegate {
         )
         let host = NSHostingView(
             rootView: LocaleScopedRoot {
+                // KiwiDesk's Reduce Motion, read at the show (#3252).
                 OnboardingView(model: onboardingModel)
+                    .environment(\.kiwiDeskReduceMotion, ReduceMotion.isOn)
             }
             .environmentObject(LocalizationManager.shared)
         )

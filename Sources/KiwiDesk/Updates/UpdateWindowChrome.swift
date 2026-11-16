@@ -82,6 +82,11 @@ enum UpdateWindowChrome {
         height: CGFloat,
         width: CGFloat = UpdateWindowMetrics.width
     ) -> NSWindow {
+        // KiwiDesk's Reduce Motion, read at the show (#3252).
+        let root = root.environment(
+            \.kiwiDeskReduceMotion,
+            ReduceMotion.isOn
+        )
         let hosting = NSHostingController(
             rootView: LocaleScopedRoot { root }
                 .environmentObject(LocalizationManager.shared)

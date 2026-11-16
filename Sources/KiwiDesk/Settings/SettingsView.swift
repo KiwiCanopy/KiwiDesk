@@ -148,6 +148,9 @@ struct SettingsView: View {
             )
         ) { _ in model.refreshScreenOffer() }
         .screenShiftAlert(model)
+        // The window keeps macOS's setting, live (#3252): last, so
+        // every sheet and alert above sits under it.
+        .environment(\.kiwiDeskReduceMotion, reduceMotion)
     }
 
     @ViewBuilder private func shell(

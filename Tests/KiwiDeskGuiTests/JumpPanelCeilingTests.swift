@@ -49,7 +49,7 @@ struct JumpPanelCeilingTests {
         if scope != .windows { model.setScope(scope) }
         let view = JumpPanelView(
             model: model,
-            presence: PanelPresence(),
+            presence: PanelPresence(reduceMotion: true),
             width: JumpPanelView.width
         )
         let host = NSHostingView(

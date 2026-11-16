@@ -91,7 +91,7 @@ struct SettingsDisclosureButton<Label: View>: View {
     /// card (`SettingsCollapsibleSection`) is not.
     var isHeading = true
     @ViewBuilder let label: () -> Label
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     var body: some View {

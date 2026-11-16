@@ -18,7 +18,7 @@ let jumpLog = Logger(
 /// `moveHere(_:)` or `swapHere(_:)`; Esc, ⌘W and a click away
 /// close it.
 @MainActor
-final class JumpPanelController: NSObject, NSWindowDelegate {
+final class JumpPanelController: NSObject {
     let core: KiwiCore
     /// The keyed show and the close's dismiss distrust (#952).
     let handBack: PanelHandBack
@@ -28,13 +28,12 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     var onEditShortcuts: () -> Void = {}
     /// This opening; a fade a later show overtook orders nothing
     /// out.
-    private var presence = PanelPresence()
+    private(set) var presence = PanelPresence(reduceMotion: true)
     /// The bus sink a stay-open drop reads the desk through (#3208).
     var landingSink: UUID?
-    /// Seam for the system Reduce Motion flag (#565).
-    var reduceMotion: () -> Bool = {
-        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-    }
+    /// Seam for KiwiDesk's Reduce Motion (#565, #3252), read once
+    /// per opening into its `PanelPresence`.
+    var reduceMotion: () -> Bool = { ReduceMotion.isOn }
 
     init(core: KiwiCore) {
         self.core = core
@@ -113,7 +112,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         self.currentModel = model
-        let presence = PanelPresence()
+        let presence = PanelPresence(reduceMotion: reduceMotion())
         self.presence = presence
         wire(model, panel)
         if scope != .windows { model.setScope(scope) }
@@ -123,6 +122,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             presence: presence,
             width: width
         )
+        .environment(\.kiwiDeskReduceMotion, presence.reduceMotion)
         let hosting = NSHostingView(
             rootView: LocaleScopedRoot { root }
                 .environmentObject(LocalizationManager.shared)
@@ -220,7 +220,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         currentModel?.leave()
         presence.fadeOut(
             panel,
-            reduceMotion: reduceMotion(),
             holdUnseen: holdUnseen
         ) { [weak self] in self?.presence === $0 }
     }
@@ -324,7 +323,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         model.onScopeChange = { [weak self] in
             guard let self else { return }
             let delay =
-                self.reduceMotion() ? 0 : JumpPanelView.scopeFade + 0.02
+                self.presence.reduceMotion
+                ? 0 : JumpPanelView.scopeFade + 0.02
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.refit(animated: true)
             }
@@ -334,17 +334,5 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         wireView(model)
         wireDesktops(model)
         wireShortcuts(model)
-    }
-
-    // MARK: - NSWindowDelegate
-
-    /// The field takes the keys whenever the panel does.
-    func windowDidBecomeKey(_ notification: Notification) {
-        currentModel?.requestFieldFocus()
-    }
-
-    func windowDidResignKey(_ notification: Notification) {
-        jumpLog.log("KiwiDesk: jump resign key; open \(self.isOpen)")
-        close()
     }
 }

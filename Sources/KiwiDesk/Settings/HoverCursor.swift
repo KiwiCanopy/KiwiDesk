@@ -6,7 +6,7 @@ import SwiftUI
 /// balancing `onHover(false)`; `onDisappear` restores the arrow.
 private struct LinkHover: ViewModifier {
     @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     func body(content: Content) -> some View {

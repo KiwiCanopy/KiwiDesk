@@ -10,7 +10,7 @@ struct InactiveDimmed: ViewModifier {
     static let fade = Animation.easeInOut(duration: 0.15)
 
     @Environment(\.controlActiveState) private var activeState
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     func body(content: Content) -> some View {

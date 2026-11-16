@@ -16,7 +16,7 @@ struct ScrollingSchematic: View {
     /// Tour story phase (`SchematicMotion.focus`, #1750).
     var focusStep = 0
 
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
     @Environment(\.schematicRestage) private var restage
     @Environment(\.schematicTellsStory) var tellsStory
