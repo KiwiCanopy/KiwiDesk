@@ -213,7 +213,7 @@ extension KiwiCore {
         else { return false }
         // One line per toggle: a reveal leaves no other trace.
         onLog(
-            "shelf reveal: \(key.bar) \(was) → "
+            "shelf reveal: \(key.bar.map { "\($0)" } ?? "pocket") \(was) → "
                 + "\(shelves.reveal.reveal(of: key))"
         )
         return true

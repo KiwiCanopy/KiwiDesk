@@ -60,6 +60,7 @@ extension PocketPlateOverlay {
             else { return }
             shown.view.endSink()
             Self.place(shown, at: spec.frame)
+            shown.panel?.ignoresMouseEvents = spec.rise != nil
         }
     }
 

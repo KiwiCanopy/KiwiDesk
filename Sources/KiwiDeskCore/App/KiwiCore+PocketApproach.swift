@@ -65,17 +65,28 @@ extension KiwiCore {
         }
     }
 
+    /// Whether the pointer is on `display`'s tab: its approach's hover
+    /// band.
+    func pocketPointerOnTab(on display: DisplayID) -> Bool {
+        let reveal = shelves.reveal
+        guard let tab = reveal.targets[pocketApproachKey(on: display)]?.handle
+        else { return false }
+        return tab.contains(reveal.location())
+    }
+
     /// Where the pocket on `display` stands in its approach: risen
-    /// once the approach opened it, else the countdown running, which
-    /// plays only where the bars' motion does (ruling 4).
+    /// once the approach opened it, else its countdown — the scrubbed
+    /// rise where the bars' motion plays, else the tab's progress
+    /// fill, which Reduce Motion keeps and Off drops (#3368 amended).
     func pocketApproach(
         on display: DisplayID
-    ) -> (open: Bool, rise: ShelfHandleSpec.Fill?) {
+    ) -> (
+        open: Bool, rise: ShelfHandleSpec.Fill?, tabFill: ShelfHandleSpec.Fill?
+    ) {
         let key = pocketApproachKey(on: display)
         let open = shelves.reveal.reveal(of: key).isShown
-        let rise =
-            open || !BarMotion.pocketScrubs
-            ? nil : shelves.reveal.fills[key]
-        return (open, rise)
+        let fill = open ? nil : shelves.reveal.fills[key]
+        let scrubs = BarMotion.pocketScrubs
+        return (open, scrubs ? fill : nil, scrubs ? nil : fill)
     }
 }

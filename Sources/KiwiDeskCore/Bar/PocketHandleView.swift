@@ -23,8 +23,8 @@ final class PocketHandleView: NSView {
     /// it.
     static var restDepth: CGFloat { tabDepth + lookOut }
 
-    private var edge = AppBarEdge.bottom
-    private var shelf = KiwiShelf()
+    private(set) var edge = AppBarEdge.bottom
+    private(set) var shelf = KiwiShelf()
     private var hex = ""
     /// The kiwis are out with the risen pocket: the tab alone stays.
     private var kiwisOut = false
@@ -42,31 +42,49 @@ final class PocketHandleView: NSView {
         didSet { if hidesKiwis != oldValue { needsDisplay = true } }
     }
 
+    /// The countdown run on the tab where the pocket's rise does not
+    /// play (#3368 amended), and whether a new one waits to start.
+    private(set) var fill: ShelfHandleSpec.Fill?
+    var fillPending = false
+    /// The tab's core capsule, which clips the fill running in it.
+    let fillClip = CALayer()
+    let fillLayer = CALayer()
+
     override var isFlipped: Bool { true }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         setAccessibilityElement(false)
+        wantsLayer = true
+        fillClip.masksToBounds = true
+        fillClip.addSublayer(fillLayer)
+        fillLayer.isHidden = true
+        layer?.addSublayer(fillClip)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
     /// Wears `shelf`, the tab at full strength while `hovered`,
-    /// which Core hands false while the pocket is risen.
+    /// which Core hands false while the pocket is risen, and running
+    /// `fill` as its countdown.
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
         kiwisOut: Bool,
-        hovered: Bool = false
+        hovered: Bool = false,
+        fill: ShelfHandleSpec.Fill? = nil
     ) {
         self.shelf = shelf
         self.hex = hex
         self.edge = edge
         self.kiwisOut = kiwisOut
         self.hovered = hovered
+        if fill != self.fill { fillPending = true }
+        self.fill = fill
         needsDisplay = true
+        needsLayout = true
     }
 
     /// The tab's core: the handle's ink at rest, at the fill strength

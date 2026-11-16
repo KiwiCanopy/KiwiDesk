@@ -234,7 +234,8 @@ final class ShelfRevealer {
         // A bar with no approach is held by its zone only while the
         // pointer can re-open it, which it cannot (#761).
         if target.hovers, target.zone.contains(location()) { return }
-        guard !holds(key.shelf) else {
+        // A surface its shelf opened holds the bars, never the pocket.
+        guard key.isPocket || !holds(key.shelf) else {
             arm(key, after: ShelfReveal.retractDelay) { [weak self] in
                 self?.retractIfLeft(key)
             }

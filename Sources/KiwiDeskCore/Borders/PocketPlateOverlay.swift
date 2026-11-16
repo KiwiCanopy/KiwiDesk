@@ -183,7 +183,8 @@ final class PocketPlateOverlay {
                 markHex: spec.markHex,
                 edge: spec.handle ?? .bottom,
                 kiwisOut: spec.risen,
-                hovered: spec.hovered
+                hovered: spec.hovered,
+                fill: spec.tabFill
             )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
@@ -192,12 +193,9 @@ final class PocketPlateOverlay {
             // A rise taken back sinks in the risen room it rose in,
             // which its landing gives back (#3368).
             let sinks =
-                old?.rise != nil && spec.rise == nil && !spec.risen
-                && spec.handle != nil
-            Self.place(
-                shown,
-                at: sinks ? (old?.frame ?? spec.frame) : spec.frame
-            )
+                spec.rise == nil && !spec.risen && spec.handle != nil
+                && (old?.rise != nil || shown.view.sinking)
+            if !sinks { Self.place(shown, at: spec.frame) }
         }
         orderIn(shown)
         // Sized and ordered in first: under Hidden the handle is
@@ -219,6 +217,10 @@ final class PocketPlateOverlay {
             {
                 Self.place(shown, at: spec.frame)
             }
+            // The room a rise or a sink holds is no pocket yet: clicks
+            // pass to the window under it (#3368).
+            shown.panel?.ignoresMouseEvents =
+                spec.rise != nil || shown.view.sinking
         }
         if enters, let edge = spec.handle {
             BarMotion.playPocketEntrance(

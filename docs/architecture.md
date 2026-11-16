@@ -197,7 +197,10 @@ run and the approach about it
 (`ShelfHandles`), one panel per bar; `ShelfRevealer` reads
 `MacEdges` as the pointer enters an approach, and a reveal or a
 retract from the pointer monitor or the show/hide action calls
-`updateBars()` alone — never a retile.
+`updateBars()` alone — never a retile. The pocket's resting handle
+is filed beside them (`filePocketApproaches`, #3368): its approach's
+fill is its rise's countdown, and its panel hands the revealer the
+moves it hears over itself.
 
 The pocket's resting strip is part of that input:
 `TilingSettings.pocketReservation` adds its edge, and

@@ -7203,7 +7203,8 @@ handle's ink and depth, flush on the edge, and the handle reserves
 nothing.** The tab is the bars' two-tone line, 3 points deep, so a
 row of handles still reads as one; the kiwis keep the pocket's
 colour and look out 5 points past it. Its hover runs no progress
-fill (its look is the #3366 amendment below): the fill
+fill (its look is the #3366 amendment below; under Reduce Motion
+its countdown does, #3368 below): the fill
 belongs to lingering near a bar's
 edge, while the pocket answers the pointer in its two steps. Its
 edge keeps no strip for it any more, as a bar's handle keeps none
@@ -7226,8 +7227,8 @@ stands, a delay not being motion.
 :::unreleased
 *Amended* (owner, 2026-11-16, #3366): **the hover lifts nothing.**
 The kiwis stay where they rest and the tab goes to full strength,
-the progress fill's 90%, in place; the pocket still rises after the
-0.15 s delay. A lift followed a moment later by the rise read as a
+the progress fill's 90%, in place; the rise is the pocket's own
+(the #3368 amendment below). A lift followed a moment later by the rise read as a
 stutter on the device, two motions where the pointer asked for one,
 and the brighter tab answers the hover without moving anything.
 :::
@@ -7247,12 +7248,22 @@ rise, and a fill on the tab as well would be two clocks for one
 wait. It is one approach, the revealer's, rather than a second: on
 the Dock's edge the outermost row then hands the pointer to macOS
 as a bar's approach does (#3349 rule 5), and a push on a free edge
-stands it at once, as a window drag still does. The pocket's panel
-takes the mouse, so it hands the revealer the moves the revealer's
-monitors cannot hear over KiwiDesk's own panels. The 0.15 s wait
+stands it at once, as a window drag still does. The 0.15 s wait
 keeps a pointer crossing the edge for a title bar from twitching
-it (#2807). Under Reduce Motion and Off there is no scrub: the
-pocket holds still and stands when the dwell ends.
+it (#2807). Under Reduce Motion there is no scrub, and the tab
+counts the wait down with the bars' progress fill instead, read
+off the same approach clock, the pocket standing at once as it
+completes: the rise scales the mark and turns it on a side edge,
+which is what Reduce Motion stands down, while a silent dwell
+beside handles that count down would leave the pocket the one wait
+on its edge with no sign of its end (owner, 2026-11-16, after a
+ui-designer consult). With the rise gone the fill is the one clock,
+so ruling 3's objection to a fill on the tab does not reach it. A
+cross-fade of the risen pocket was set aside: it puts two marks on
+screen at once, and a dissolve stand-in is what Reduce Motion here
+never takes. Under KiwiDesk's Off nothing shows during the wait,
+as Off drops the bars' fill, and the pocket stands when the dwell
+ends.
 :::
 
 **The pocket is the mark alone: faded while empty, in full colour
@@ -7272,6 +7283,12 @@ in the stitch's ink vanished on a window of that ink, and tones
 derived from the pocket colour collapse where it meets the
 background. Matching the edge to the window behind or the one
 dragged would need a screen capture, which needs Screen Recording.
+The lift is the cue that holds on every ground, a full pocket's
+included, where no fade can change; the Dock signals a hover and a
+drop target by size the same way. At rest the edge goes, since an
+edge standing on the screen read as a border. A hover ring in the
+highlight colour was weighed and set aside, since it reads like the
+focused-window ring; a coloured glow is the focused ring's alone.
 
 :::unreleased
 *Amended* (owner, 2026-11-16, #3368): **on a handle, the kiwis
@@ -7285,12 +7302,6 @@ something does not rest at the progress fill's 90%: a bright tab
 reads as a bar about to open. The whole mark under Always keeps
 its fade.
 :::
-The lift is the cue that holds on every ground, a full pocket's
-included, where no fade can change; the Dock signals a hover and a
-drop target by size the same way. At rest the edge goes, since an
-edge standing on the screen read as a border. A hover ring in the
-highlight colour was weighed and set aside, since it reads like the
-focused-window ring; a coloured glow is the focused ring's alone.
 
 **Remove from Pocket takes the float row's slot (#2612 ▸ 4).** A
 pocket window always floats, so the Tile Window the slot would hold
@@ -18510,11 +18521,17 @@ leave it out, so a bundled palette keeps the handle following
 light and dark, and the derived default palette carries it empty
 so a reset reaches it. A colour joins only where its Automatic is
 that kind of adaptive ink; one whose Automatic is another palette
-colour is a follower. Since the bundled palettes leave
-`kiwishelf.handle_color`, `sticky.color` and `floating.color` out,
-a colour the user picked on one of them survives a switch to a
-bundled palette, and the palette still reads as applied:
-`isApplied` compares only the keys a palette sets.
+colour is a follower.
+
+:::unreleased
+A colour the user picked on `kiwishelf.handle_color`,
+`sticky.color` or `floating.color` survives a switch to a bundled
+palette, and the palette still reads as applied, since `isApplied`
+compares only the keys a palette sets. That is the point of
+leaving them out: a palette recolours the shelf, and a colour the
+user chose for their own handle or marks is theirs to take back,
+never one a palette quietly overwrites.
+:::
 
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
@@ -21171,6 +21188,8 @@ three, and the handle's progress fill takes its place. It is a
 change of lightness in place rather than travel, and standing it
 down would leave the dwell with no sign of its end, which is the
 fill's whole job. KiwiDesk's Off still drops it with the reveal.
+The pocket's tab joins it under Reduce Motion (#3368): with its
+rise stood down, the tab counts the wait down with the same fill.
 :::
 
 **Space Bar drag-drop is a two-speed spring, not a blind

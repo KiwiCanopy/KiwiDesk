@@ -171,7 +171,13 @@ extension KiwiCore {
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
             let rising = place == .handle && !risen ? approach.rise : nil
-            let tabHovered = place == .handle && hovered && !risen
+            let tabFill =
+                place == .handle && !risen ? approach.tabFill : nil
+            // While the rise runs the panel holds its risen room, so
+            // only the pointer on the tab lights it (ruling 5).
+            let tabHovered =
+                place == .handle && hovered && !risen
+                && (rising == nil || pocketPointerOnTab(on: display.id))
             let found: CGRect? =
                 switch place {
                 case .section(let frame), .inside(let frame): frame
@@ -203,6 +209,7 @@ extension KiwiCore {
                 handle: place.isSection ? nil : edge,
                 risen: risen,
                 rise: rising,
+                tabFill: tabFill,
                 hovered: tabHovered,
                 risenSide: rise,
                 // Inside the strip the mark stands at its frame's edge.
@@ -247,8 +254,14 @@ extension KiwiCore {
         }
         // Over its own panel the revealer hears the pointer from the
         // panel (#3368).
+        // A left drag reaches it as a drag, read through the button
+        // seam (#2795).
         pocketPlate.onMove = { [weak self] point in
-            self?.shelves.reveal.moved(to: point)
+            guard let self else { return }
+            self.shelves.reveal.moved(
+                to: point,
+                dragging: self.mouse.leftButtonHeld
+            )
         }
         pocketPlate.onListChanged = { [weak self] in
             self?.updatePocketPlate()

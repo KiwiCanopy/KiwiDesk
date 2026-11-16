@@ -40,8 +40,9 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     /// The pointer came onto the pocket or left it.
     var onHover: @MainActor (Bool) -> Void = { _ in }
     /// The pointer moved over the panel, Cocoa screen space: the
-    /// revealer's monitors are blind over KiwiDesk's own panels, so
-    /// the handle's approach hears it here (#3368).
+    /// revealer's monitors miss KiwiDesk's own panels while another
+    /// app is active, so the handle's approach hears it here too
+    /// (#3368).
     var onMove: @MainActor (CGPoint) -> Void = { _ in }
     /// The edge a handle stands on; nil for a section on a bar.
     private(set) var handleEdge: AppBarEdge?

@@ -502,23 +502,28 @@ section.
 **A handle rises through the revealer's one approach, never a delay
 or push rule of its own** (#3368): `filePocketApproaches` files it
 as the pocket's `ShelfRevealer.Key` through `Target.along`, the
-approach across its band alone, and the panel, which takes the
-mouse where the revealer's monitors are blind, hands it every move
-through `onMove` (`PocketApproachTests` ▸ `viewIsWired`). The
-pocket key never yields, keeps no shelf panel and takes no tour
-hold (`ShelfRevealPocketKeyTests`). Whether it stands risen is the
+approach across its band alone, and the panel hands it the moves
+over itself through `onMove` (`PocketApproachTests` ▸
+`viewIsWired`); what the pocket key shares with the bars and what
+it does not is [bars.md](bars.md)'s. Whether it stands risen is the
 one derivation in `pocketPlateSpecs`, and its rise before then is
 the approach's fill read as a timeline through the one
 `PocketRiseTimeline` — waited, scrubbed, hurried on the tab from
 where it stands, and sunk back on a leave through
 `BarMotion.playPocketScrub` and `playPocketSink`, never a clock the
-view reads, and dropped under Reduce Motion and Off through the one
-`BarMotion.pocketScrubs` (`PocketApproachTests`,
+view reads. Where the one `BarMotion.pocketScrubs` stands the rise
+down, the same fill runs on the tab's core instead, through the one
+`BarMotion.playHandleFill`, which Reduce Motion keeps and Off drops,
+the pocket holding its resting room (#3368 amended;
+`PocketApproachTests` ▸ `reducedFillsTheTab`,
 `PocketRiseTimelineTests`). A sink keeps the risen room until its
-landing, through the overlay's `afterLeave` (`PocketApproachTests`
-▸ `leaveSinks`). Its hover lifts nothing: the tab goes to the fill
-strength in place, through the one `PocketHandleView.tabCore`, and
-the panel keeps its resting frame (#3366, `PocketApproachTests` ▸
+landing, through the overlay's `afterLeave`, whatever shows meanwhile
+(`PocketApproachTests` ▸ `leaveSinks`); that room passes clicks
+through until the pocket stands, and while the rise runs only the
+pointer on the tab lights it (`PocketApproachTests` ▸
+`riseLightsOnlyTheTab`). Its hover lifts nothing: the tab goes to
+the fill strength in place, through the one
+`PocketHandleView.tabCore` (#3366, `PocketApproachTests` ▸
 `hoverLightsInPlace`, `ShelfHandleDrawTests` ▸ `tabBrightens`). The
 tab is constant, empty or not, and an empty pocket fades its kiwis
 alone through `paintFade`, the whole mark its panel

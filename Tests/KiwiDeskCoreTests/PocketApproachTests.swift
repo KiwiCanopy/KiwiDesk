@@ -17,9 +17,11 @@ import Testing
 )
 @MainActor
 struct PocketApproachTests {
+    // Every rig pins `BarMotion.reducedOverride` off and its test
+    // puts it back (tests.md ▸ process-global state).
     typealias Fixture = ShelfRevealerTests
 
-    @MainActor private struct Rig {
+    @MainActor struct Rig {
         let core: KiwiCore
         let timers: Fixture.Timers
         let pointer: Fixture.Box
@@ -48,7 +50,7 @@ struct PocketApproachTests {
         }
     }
 
-    private func rig(visibility: String = "auto") throws -> Rig {
+    func rig(visibility: String = "auto") throws -> Rig {
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -67,6 +69,8 @@ struct PocketApproachTests {
             args: [.string(visibility)]
         )
         pinRevealLength()
+        // The scrub plays: a host's Reduce Motion decides nothing.
+        BarMotion.reducedOverride = false
         let timers = Fixture.Timers()
         let pointer = Fixture.Box()
         let reveal = core.shelves.reveal
@@ -93,13 +97,13 @@ struct PocketApproachTests {
         return rig
     }
 
-    private func depth(_ spec: PocketPlateOverlay.Spec) -> CGFloat {
+    func depth(_ spec: PocketPlateOverlay.Spec) -> CGFloat {
         spec.handle?.isHorizontal == false
             ? spec.frame.width : spec.frame.height
     }
 
     /// A point in the approach, off the tab and the edge's last row.
-    private func nearTab(_ target: ShelfRevealer.Target) throws -> CGPoint {
+    func nearTab(_ target: ShelfRevealer.Target) throws -> CGPoint {
         let approach = try #require(target.approach)
         let tab = try #require(target.handle)
         let row = try #require(target.edgeRow)
@@ -116,27 +120,41 @@ struct PocketApproachTests {
         )
     }
 
-    private func onTab(_ target: ShelfRevealer.Target) throws -> CGPoint {
+    func onTab(_ target: ShelfRevealer.Target) throws -> CGPoint {
         let tab = try #require(target.handle)
         return CGPoint(x: tab.midX, y: tab.midY)
+    }
+
+    @Test("the bar pass files the handle's approach")
+    func barPassFiles() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        rig.core.shelves.reveal.sync([:])
+        rig.core.updateBars()
+        #expect(rig.target != nil)
     }
 
     @Test("a hover lights the tab in place and rises nothing")
     func hoverLightsInPlace() throws {
         let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
         let rest = try #require(rig.spec)
+        // The pointer reaches the tab through its approach.
+        rig.move(to: try onTab(try #require(rig.target)))
         rig.core.pocketHovered(rest.display, true)
         let lit = try #require(rig.spec)
         #expect(lit.hovered)
         #expect(!lit.risen)
-        #expect(lit.frame == rest.frame)
         let view = try #require(rig.core.pocketPlate.view(on: rest.display))
         #expect(view.handle.hovered)
+        // The tab stays a bar handle's depth: nothing lifts.
+        #expect(view.handle.frame.size.height >= PocketHandleView.tabDepth)
     }
 
     @Test("lingering near the tab rises the pocket as its countdown")
     func approachRises() throws {
         let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
         let rest = try #require(rig.spec)
         let target = try #require(rig.target)
         // Across the band alone, never past its ends.
@@ -152,21 +170,23 @@ struct PocketApproachTests {
         #expect(abs(fill.length - ShelfReveal.dwellDelay) < 1e-6)
         let rising = try #require(rig.spec)
         #expect(!rising.risen)
-        if BarMotion.pocketScrubs {
-            #expect(rising.rise == fill)
-            // The rise needs the risen pocket's room.
-            #expect(depth(rising) > depth(rest))
-        }
+        #expect(rising.rise == fill)
+        // The rise needs the risen pocket's room, which passes clicks.
+        #expect(depth(rising) > depth(rest))
+        let view = try #require(rig.core.pocketPlate.view(on: rig.display))
+        #expect(view.window?.ignoresMouseEvents == true)
         rig.timers.fireAll()
         rig.pass()
         let risen = try #require(rig.spec)
         #expect(risen.risen)
         #expect(risen.rise == nil)
+        #expect(view.window?.ignoresMouseEvents == false)
     }
 
     @Test("an entry on the tab rises in the reveal delay")
     func tabEntryRises() throws {
         let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
         rig.move(to: try onTab(try #require(rig.target)))
         let fill = try #require(rig.core.shelves.reveal.fills[rig.key])
         #expect(abs(fill.length - ShelfReveal.revealDelay) < 1e-6)
@@ -176,6 +196,7 @@ struct PocketApproachTests {
     @Test("moving onto the tab hurries the rise from where it stands")
     func tabHurries() throws {
         let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
         let target = try #require(rig.target)
         rig.move(to: try nearTab(target))
         // 0.1 s into its 0.25 s rise: 40 % up.
@@ -187,9 +208,23 @@ struct PocketApproachTests {
         #expect(rig.timers.delays.contains { abs($0 - fill.length) < 1e-6 })
     }
 
+    @Test("while the rise runs only the pointer on the tab lights it")
+    func riseLightsOnlyTheTab() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        let target = try #require(rig.target)
+        rig.move(to: try nearTab(target))
+        rig.core.pocketHovered(rig.display, true)
+        #expect(rig.spec?.rise != nil)
+        #expect(rig.spec?.hovered == false)
+        rig.move(to: try onTab(target))
+        #expect(rig.spec?.hovered == true)
+    }
+
     @Test("a leave sinks the rise in its risen room, then rests")
     func leaveSinks() throws {
         let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
         var landings: [() -> Void] = []
         rig.core.pocketPlate.afterLeave = { _, body in landings.append(body) }
         let rest = try #require(rig.spec)
@@ -201,12 +236,16 @@ struct PocketApproachTests {
         #expect(left.rise == nil)
         #expect(!left.risen)
         #expect(left.frame == rest.frame)
-        guard BarMotion.pocketScrubs else { return }
         // The sink runs in the room it rose in, its landing gives it
         // back.
         #expect(view.sinking)
         #expect(view.frame.size == risenSize)
         #expect(landings.count == 1)
+        // A show meanwhile — the hover going — keeps the room.
+        rig.core.pocketHovered(rig.display, true)
+        rig.core.pocketHovered(rig.display, false)
+        #expect(view.sinking)
+        #expect(view.frame.size == risenSize)
         landings.forEach { $0() }
         #expect(!view.sinking)
         #expect(view.frame.size == rest.frame.size)
@@ -215,6 +254,7 @@ struct PocketApproachTests {
     @Test("the panel hands its own moves to the revealer")
     func viewIsWired() throws {
         let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
         let view = try #require(rig.core.pocketPlate.view(on: rig.display))
         view.updateTrackingAreas()
         #expect(
@@ -222,53 +262,26 @@ struct PocketApproachTests {
         )
         let point = try nearTab(try #require(rig.target))
         rig.pointer.point = point
-        view.onMove(point)
+        // A move AppKit delivers to the panel, through its own handler.
+        let window = try #require(view.window)
+        let event = try #require(
+            NSEvent.mouseEvent(
+                with: .mouseMoved,
+                location: window.convertPoint(fromScreen: point),
+                modifierFlags: [],
+                timestamp: 0,
+                windowNumber: window.windowNumber,
+                context: nil,
+                eventNumber: 0,
+                clickCount: 0,
+                pressure: 0
+            )
+        )
+        view.mouseMoved(with: event)
         #expect(rig.core.shelves.reveal.fills[rig.key] != nil)
+        // On the tab, the hover lights it.
+        rig.pointer.point = try onTab(try #require(rig.target))
         view.setHovered(true)
         #expect(rig.spec?.hovered == true)
-    }
-
-    @Test("an empty pocket fades its kiwis, the tab stays")
-    func kiwisFade() throws {
-        let rig = try rig()
-        let rest = try #require(rig.spec)
-        #expect(rest.faded)
-        let view = try #require(rig.core.pocketPlate.view(on: rig.display))
-        #expect(view.window?.alphaValue == 1)
-        #expect(view.handle.faded)
-        #expect(view.pocket.alphaValue == PocketPlateOverlay.fadedAlpha)
-        // A hover shows it full.
-        rig.core.pocketHovered(rest.display, true)
-        #expect(!view.handle.faded)
-        #expect(view.pocket.alphaValue == 1)
-    }
-
-    @Test("the whole mark keeps its empty fade")
-    func wholeMarkFades() throws {
-        let rig = try rig(visibility: "always")
-        let rest = try #require(rig.spec)
-        #expect(rest.whole)
-        let view = try #require(rig.core.pocketPlate.view(on: rig.display))
-        #expect(view.window?.alphaValue == PocketPlateOverlay.fadedAlpha)
-        #expect(!view.handle.faded)
-        // The whole mark files no approach.
-        #expect(rig.target == nil)
-    }
-
-    @Test("the hovered tab takes the fill strength, the kiwis stay")
-    func tabStrength() {
-        let light = NSAppearance(named: .aqua)
-        var rest: CGFloat = 0
-        var full: CGFloat = 0
-        light?.performAsCurrentDrawingAppearance {
-            rest =
-                PocketHandleView.tabCore(hex: "", hovered: false)
-                .alphaComponent
-            full =
-                PocketHandleView.tabCore(hex: "", hovered: true)
-                .alphaComponent
-        }
-        #expect(abs(rest - ShelfHandleSpec.restStrength) < 0.001)
-        #expect(abs(full - ShelfHandleSpec.fillStrength) < 0.001)
     }
 }

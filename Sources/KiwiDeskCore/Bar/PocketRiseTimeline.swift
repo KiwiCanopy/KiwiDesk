@@ -4,8 +4,9 @@ import Foundation
 /// the revealer stamps the pocket's key a `ShelfHandleSpec.Fill` as
 /// it stamps a bar's, and the pocket reads it as a timeline — it
 /// waits `revealDelay`, then rises over the rest of the dwell, so a
-/// rise that runs out is the pocket standing. Pure: the revealer
-/// and the view both read it, and neither reads a clock of its own.
+/// rise that runs out is the pocket standing. Pure over the fill's
+/// stamps: the revealer reads it against its own `now`, and the view
+/// plays a rise's delay and length from when it is handed one.
 enum PocketRiseTimeline {
     /// How long a full rise takes, lingering near the tab: the
     /// dwell past the no-twitch delay (#2807).
