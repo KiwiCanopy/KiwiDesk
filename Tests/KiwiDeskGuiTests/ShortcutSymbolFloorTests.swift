@@ -165,7 +165,9 @@ struct ShortcutSymbolFloorTests {
         let floor = try floorMajor()
         let since = try firstMacOS()
         #expect(since.count > 1000, "the availability table read empty")
-        let pairs = [GestureListWords.forceClick]
+        let pairs =
+            [GestureListWords.forceClick]
+            + ShortcutsReferenceBuilder.floorSymbols
         let drawn = Set(
             GestureInput.allCases.map(GestureListWords.symbol)
                 + GestureFamily.allCases.map(

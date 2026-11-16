@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Mouse & Trackpad ▸ Holding a modifier (#1656, #1519, #3184): the
-/// ⌃⌥ entry with its swipe length, then the ⌃⌥⌘ entry; their chords
-/// and Natural scrolling live in the Mouse and Trackpad cards
-/// (#3183). Each
+/// ⌃⌥ entry with its Long swipes box, then the ⌃⌥⌘ entry; their
+/// chords and Natural scrolling live in the Mouse and Trackpad
+/// cards (#3183). Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's
@@ -20,21 +20,17 @@ struct GesturesScrollEntries: View {
             settings: model.config.settings,
             gestures: gestures
         ) {
-            VStack(alignment: .leading, spacing: 8) {
-                reachRow(.longSwipes) {
-                    Toggle(
-                        ScrollGestureWords.longSwipes,
-                        isOn: $model.config.scrollGesture.longSwipes
-                    )
-                    .toggleStyle(.checkbox)
-                    .searchAnchored(
-                        SettingsCatalog.shortcuts.gestures.children
-                            .longSwipes
-                    )
-                }
-                reachRow(.stepDistance) {
-                    travelRow
-                }
+            // The step length is Lua-only (#1873 ▸ Ruling 2026-11-16).
+            reachRow(.longSwipes) {
+                Toggle(
+                    ScrollGestureWords.longSwipes,
+                    isOn: $model.config.scrollGesture.longSwipes
+                )
+                .toggleStyle(.checkbox)
+                .searchAnchored(
+                    SettingsCatalog.shortcuts.gestures.children
+                        .longSwipes
+                )
             }
         }
         .gestureAnchored(.scrollStep)
@@ -58,37 +54,6 @@ struct GesturesScrollEntries: View {
             EmptyView()
         }
         .gestureAnchored(.spaceStep)
-    }
-
-    /// Indented under the box it depends on, and greyed — never
-    /// hidden — while that box is off.
-    private var travelRow: some View {
-        StepperRow(
-            label: ScrollGestureWords.stepDistance,
-            value: stepDistance,
-            in: Self.stepDistanceRange,
-            step: 10,
-            suffix: L("shortcuts.gestures.scroll.points", "pt")
-        )
-        .fixedSize()
-        .disabled(!gestures.longSwipes)
-        .padding(.leading, 20)
-        .searchAnchored(
-            SettingsCatalog.shortcuts.gestures.children.stepDistance
-        )
-    }
-
-    /// Core's bounds, as the stepper's whole points.
-    static var stepDistanceRange: ClosedRange<Int> {
-        let range = ScrollGestureBase.stepDistanceRange
-        return Int(range.lowerBound)...Int(range.upperBound)
-    }
-
-    private var stepDistance: Binding<Int> {
-        Binding(
-            get: { Int(model.config.scrollGesture.stepDistance.rounded()) },
-            set: { model.config.scrollGesture.stepDistance = Double($0) }
-        )
     }
 
     /// A value's control with its "Applies to" column trailing.

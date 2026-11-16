@@ -55,6 +55,8 @@ struct OnboardingChordReachTests {
             callers == [
                 "AppDelegate+Onboarding.swift",
                 "AppDelegate+OnboardingBars.swift",
+                // The Gestures step's ⌃⌥K row (#1873).
+                "OnboardingGestures.swift",
                 "OnboardingKeys+Chords.swift",
                 "OnboardingKeys+KiwiHub.swift",
                 "OnboardingKeys+Toggles.swift",

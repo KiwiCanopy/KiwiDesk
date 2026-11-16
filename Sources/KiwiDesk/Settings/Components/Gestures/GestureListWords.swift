@@ -71,6 +71,8 @@ enum GestureListWords {
             L("shortcuts.gestures.family.space", "Switch Spaces")
         case .walk:
             L("shortcuts.gestures.family.walk", "Walk the window list")
+        case .layout:
+            L("shortcuts.gestures.family.layout", "Cycle the layout")
         }
     }
 
@@ -97,6 +99,13 @@ enum GestureListWords {
         case .back: L("shortcuts.gestures.direction.back", "Back")
         case .forward:
             L("shortcuts.gestures.direction.forward", "Forward")
+        case .clockwise:
+            L("shortcuts.gestures.direction.clockwise", "Clockwise")
+        case .counterClockwise:
+            L(
+                "shortcuts.gestures.direction.counter_clockwise",
+                "Counterclockwise"
+            )
         }
     }
 
@@ -106,6 +115,8 @@ enum GestureListWords {
         case .down: "arrow.down"
         case .left, .back: "arrow.left"
         case .right, .forward: "arrow.right"
+        case .clockwise: turnClockwise.drawn
+        case .counterClockwise: turnCounterClockwise.drawn
         }
     }
 
@@ -206,7 +217,8 @@ enum GestureListWords {
         case nil: SettingsValueReadout.onOff(false)
         case .family(let family): Self.family(family)
         case .grab(let grab): Self.grab(grab)
-        case .split: input.map(perDirection) ?? perDirection(.swipe2)
+        case .split(let split):
+            face(split, on: input ?? .swipe2)
         case .run(let run): runName(run)
         }
     }

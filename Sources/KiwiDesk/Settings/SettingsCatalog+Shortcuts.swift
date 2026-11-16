@@ -203,10 +203,6 @@ struct GesturesControls: Sendable {
         "shortcuts.gestures.scroll.long_swipes",
         "Long swipes move more windows"
     )
-    let stepDistance = SettingsControl(
-        "shortcuts.gestures.scroll.step_distance",
-        "Travel per window"
-    )
     let naturalTrackpad = SettingsControl(
         "shortcuts.gestures.scroll.trackpad",
         "Trackpad"

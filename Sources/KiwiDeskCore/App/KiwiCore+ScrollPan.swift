@@ -16,10 +16,7 @@ final class ScrollPanSession {
     }
 
     fileprivate var space: SpaceID?
-    fileprivate var meter = ScrollStepMeter(longSwipes: false, distance: 1)
-    /// A swipe's axis, locked by its first step and held to the
-    /// lift (#3200); nil before it and for a wheel.
-    fileprivate var horizontal: Bool?
+    fileprivate var meter = ScrollStepMeter(longSwipes: false, length: 1)
 
     init() {}
 }
@@ -51,14 +48,17 @@ extension KiwiCore {
         if event.kind == .began {
             beginScrollPan(at: event.location, session: session)
         }
-        let steps = session.meter.feed(locked(event, session))
+        // The finger travel the meter counts in from the latch, read
+        // through the one door; nil while no reader runs (#1873).
+        let reading =
+            event.input == .trackpad ? mouse.trackpad.travel : nil
+        let steps = session.meter.feed(event, reading: reading)
         if event.kind == .ended { session.space = nil }
         guard steps != 0, let id = session.space else { return }
-        if event.input == .trackpad, session.horizontal == nil {
-            session.horizontal = session.meter.firedHorizontal
-        }
+        // The axis this step took, re-decided per step (#1873).
         let swipe =
-            directional && event.input == .trackpad ? session.horizontal : nil
+            directional && event.input == .trackpad
+            ? session.meter.firedHorizontal : nil
         // The step a row slides by: content follows the fingers,
         // so it runs against the delta's sign. A swipe off a row
         // turns it back in `stepScrollPan`.
@@ -73,23 +73,6 @@ extension KiwiCore {
         }
     }
 
-    /// A swipe's event as the meter hears it: whole until the
-    /// axis locks, then along the locked axis alone, so a
-    /// diagonal never changes axis before the fingers lift.
-    private func locked(
-        _ event: ScrollGestureEvent,
-        _ session: ScrollPanSession
-    ) -> ScrollGestureEvent {
-        guard event.input == .trackpad, !event.momentum else {
-            return event
-        }
-        guard event.kind == .changed else {
-            session.horizontal = nil
-            return event
-        }
-        return event.locked(horizontal: session.horizontal)
-    }
-
     /// Fixes the gesture's Space and makes it the active one, so
     /// the focus the gesture moves lands on the screen it is on.
     private func beginScrollPan(
@@ -100,7 +83,7 @@ extension KiwiCore {
         let resolved = mouse.scroll.resolved
         session.meter = ScrollStepMeter(
             longSwipes: resolved.longSwipes,
-            distance: resolved.stepDistance
+            length: resolved.stepLength
         )
         guard let id = session.spaceAt(location, state),
             state.workspaces[id] != nil

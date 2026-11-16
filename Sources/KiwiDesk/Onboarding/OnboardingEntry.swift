@@ -17,9 +17,13 @@ enum OnboardingEntry {
     /// Returns the sequence of steps from `entry` to the end of
     /// the tour (#678, #828, #888, OnboardingProgressTests).
     static func plannedSteps(
-        from entry: OnboardingModel.Step
+        from entry: OnboardingModel.Step,
+        gestures: Bool
     ) -> [OnboardingModel.Step] {
-        let all = OnboardingModel.Step.allCases
+        // A Mac with no trackpad has no Gestures step (#1873).
+        let all = OnboardingModel.Step.allCases.filter {
+            gestures || $0 != .gestures
+        }
         guard let start = all.firstIndex(of: entry) else {
             return all
         }

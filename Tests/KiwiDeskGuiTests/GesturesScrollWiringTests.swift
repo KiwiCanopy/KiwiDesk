@@ -37,35 +37,11 @@ struct GesturesScrollWiringTests {
         )
     }
 
-    @Test("the travel field greys, never hides, while the box is off")
-    func travelGreys() throws {
-        let group = try Self.source("GesturesScrollEntries.swift")
-        let row = try #require(
-            SourceScan.declarationBody(
-                after: "private var travelRow",
-                in: group
-            )
-        )
-        #expect(row.contains("StepperRow("))
-        #expect(row.contains(".disabled(!gestures.longSwipes)"))
-        // Hidden by any spelling: no `if` reads the box.
-        let hides = try NSRegularExpression(
-            pattern: "\\bif\\b[^\\n{]*longSwipes"
-        )
-        #expect(
-            hides.numberOfMatches(
-                in: group,
-                range: NSRange(group.startIndex..., in: group)
-            ) == 0
-        )
-    }
-
     @Test("every value row carries its Applies to column")
     func everyRowReaches() throws {
         let group = try Self.source("GesturesScrollEntries.swift")
-        for field in [
-            "reachRow(.longSwipes)", "reachRow(.stepDistance)",
-        ] {
+        // The step length is Lua-only (#1873 ▸ Ruling 2026-11-16).
+        for field in ["reachRow(.longSwipes)"] {
             #expect(group.contains(field), "\(field) has no column")
         }
         #expect(group.contains("family: .scroll"))

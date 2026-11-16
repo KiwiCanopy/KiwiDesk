@@ -14,6 +14,7 @@ extension ShortcutsReferenceBuilder {
         case .display: "display.2"
         case .track: "arrow.forward.to.line"
         case .walk: CustomGlyph.walk.name
+        case .layout: layoutCycle.drawn
         }
     }
 }

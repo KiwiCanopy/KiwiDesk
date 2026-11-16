@@ -1,13 +1,13 @@
 import Foundation
 
 /// The wire shape both types share (#1656):
-/// `natural_scrolling: { trackpad, mouse }`, `long_swipes`,
-/// `step_distance`. The base takes a default for every key a file
-/// does not carry; the override writes only what it sets.
+/// `natural_scrolling: { trackpad, mouse }`, `long_swipes`, and the
+/// base's alone, `step_length`. The base takes a default for every
+/// key a file does not carry; the override writes only what it sets.
 enum ScrollGestureKeys: String, CodingKey {
     case naturalScrolling = "natural_scrolling"
     case longSwipes = "long_swipes"
-    case stepDistance = "step_distance"
+    case stepLength = "step_length"
 }
 
 enum NaturalScrollingKeys: String, CodingKey {
@@ -32,10 +32,6 @@ extension ScrollGestureOverride: Codable {
             )
         }
         longSwipes = try c.decodeIfPresent(Bool.self, forKey: .longSwipes)
-        stepDistance = try c.decodeIfPresent(
-            Double.self,
-            forKey: .stepDistance
-        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -49,7 +45,6 @@ extension ScrollGestureOverride: Codable {
             try n.encodeIfPresent(naturalMouse, forKey: .mouse)
         }
         try c.encodeIfPresent(longSwipes, forKey: .longSwipes)
-        try c.encodeIfPresent(stepDistance, forKey: .stepDistance)
     }
 }
 
@@ -59,6 +54,10 @@ extension ScrollGestureBase: Codable {
     public init(from decoder: Decoder) throws {
         self = try ScrollGestureOverride(from: decoder)
             .resolved(onto: .defaults)
+        let c = try decoder.container(keyedBy: ScrollGestureKeys.self)
+        stepLength =
+            try c.decodeIfPresent(Double.self, forKey: .stepLength)
+            ?? Self.defaults.stepLength
     }
 
     /// Every key, always: `gui.json` states the whole base.
@@ -66,8 +65,9 @@ extension ScrollGestureBase: Codable {
         try ScrollGestureOverride(
             naturalTrackpad: naturalTrackpad,
             naturalMouse: naturalMouse,
-            longSwipes: longSwipes,
-            stepDistance: stepDistance
+            longSwipes: longSwipes
         ).encode(to: encoder)
+        var c = encoder.container(keyedBy: ScrollGestureKeys.self)
+        try c.encode(stepLength, forKey: .stepLength)
     }
 }

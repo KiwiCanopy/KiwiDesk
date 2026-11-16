@@ -79,6 +79,11 @@ extension SettingsValueReadout {
         L("diff.value.points", "%1$@ pt", trimmed(value))
     }
 
+    /// Formats a length on the trackpad (e.g. "10 mm").
+    static func millimetres(_ value: Double) -> String {
+        L("diff.value.millimetres", "%1$@ mm", trimmed(value))
+    }
+
     /// Formats a minimum window size (e.g. "300 × 240 pt").
     static func minSize(_ size: MinSize) -> String {
         L(

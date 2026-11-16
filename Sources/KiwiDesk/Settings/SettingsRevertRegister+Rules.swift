@@ -57,8 +57,8 @@ extension SettingsRevertRegister {
         .shortcuts(.modeCycle): RevertWriter.leaf(\.modeCycle)
             .then { model, _ in settle(model, .cycle, nil) },
         .shortcuts(.scrollLongSwipes): scroll(\.scrollGesture.longSwipes),
-        .shortcuts(.scrollStepDistance): scroll(
-            \.scrollGesture.stepDistance
+        .shortcuts(.scrollStepLength): scroll(
+            \.scrollGesture.stepLength
         ),
         .shortcuts(.scrollNaturalTrackpad): scroll(
             \.scrollGesture.naturalTrackpad

@@ -32,7 +32,10 @@ struct ScrollStepMeterTests {
     /// Long swipes on, past the first window: what follows is
     /// the further travel the distance counts.
     private func byLength() -> ScrollStepMeter {
-        var meter = ScrollStepMeter(longSwipes: true, distance: stride)
+        var meter = ScrollStepMeter(
+            longSwipes: true,
+            length: stride / ScrollStepMeter.pointsPerMM
+        )
         _ = meter.feed(event(.began))
         _ = meter.feed(event(.changed, dx: firstStep))
         return meter
@@ -43,7 +46,10 @@ struct ScrollStepMeterTests {
 
     @Test("by default a swipe is one step, however long")
     func oneStepPerSwipe() {
-        var meter = ScrollStepMeter(longSwipes: false, distance: stride)
+        var meter = ScrollStepMeter(
+            longSwipes: false,
+            length: stride / ScrollStepMeter.pointsPerMM
+        )
         _ = meter.feed(event(.began))
         let steps = (0..<10).map { _ in
             meter.feed(event(.changed, dx: stride))
@@ -79,7 +85,10 @@ struct ScrollStepMeterTests {
 
     @Test("long swipes: the first window comes early, then one per distance")
     func firstEarlyThenDistance() {
-        var meter = ScrollStepMeter(longSwipes: true, distance: 200)
+        var meter = ScrollStepMeter(
+            longSwipes: true,
+            length: 200 / ScrollStepMeter.pointsPerMM
+        )
         _ = meter.feed(event(.began))
         #expect(meter.feed(event(.changed, dx: firstStep)) == 1)
         #expect(meter.feed(event(.changed, dx: 199)) == 0)
@@ -91,7 +100,7 @@ struct ScrollStepMeterTests {
         for longSwipes in [false, true] {
             var meter = ScrollStepMeter(
                 longSwipes: longSwipes,
-                distance: stride
+                length: stride / ScrollStepMeter.pointsPerMM
             )
             _ = meter.feed(event(.began))
             #expect(
@@ -106,7 +115,7 @@ struct ScrollStepMeterTests {
         for longSwipes in [false, true] {
             var meter = ScrollStepMeter(
                 longSwipes: longSwipes,
-                distance: stride
+                length: stride / ScrollStepMeter.pointsPerMM
             )
             _ = meter.feed(event(.began, input: .wheel))
             #expect(meter.feed(event(.changed, dy: 1, input: .wheel)) == 1)
@@ -153,7 +162,7 @@ struct ScrollStepMeterTests {
     func latchedHandPace() {
         var meter = ScrollStepMeter(
             longSwipes: false,
-            distance: 1
+            length: 1
         )
         let steps = (0..<4).map {
             wheel(&meter, at: Double($0) * Self.quiet)
@@ -165,7 +174,7 @@ struct ScrollStepMeterTests {
     func latchedSpin() {
         var meter = ScrollStepMeter(
             longSwipes: false,
-            distance: 1
+            length: 1
         )
         let spin = (0..<50).map {
             wheel(&meter, at: Double($0) * Self.quiet / 5)
@@ -178,7 +187,7 @@ struct ScrollStepMeterTests {
     func latchedTurn() {
         var meter = ScrollStepMeter(
             longSwipes: false,
-            distance: 1
+            length: 1
         )
         #expect(wheel(&meter, at: 0) == -1)
         #expect(wheel(&meter, at: 0.01) == 0)

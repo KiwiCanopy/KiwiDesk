@@ -16,31 +16,32 @@ public struct ScrollGestureBase: Equatable, Sendable {
     public var naturalTrackpad: NaturalScrolling
     public var naturalMouse: NaturalScrolling
     /// A trackpad swipe moves one window; with this on, one more
-    /// every `stepDistance` of further travel.
+    /// every `stepLength` of further finger travel.
     public var longSwipes: Bool
-    /// Further finger travel per extra window, in points.
-    public var stepDistance: Double
+    /// Finger travel on the pad per extra window, in mm (#1873 ▸
+    /// Ruling 2026-11-16). Global only: no profile overrides it.
+    public var stepLength: Double
 
-    /// The bounds a `step_distance` must fall within.
-    public static let stepDistanceRange = 10.0...1000.0
+    /// The bounds a `step_length` must fall within, in mm.
+    public static let stepLengthRange = 3.0...60.0
 
     public static let defaults = ScrollGestureBase(
         naturalTrackpad: .system,
         naturalMouse: .system,
-        longSwipes: false,
-        stepDistance: 60
+        longSwipes: true,
+        stepLength: 10
     )
 
     public init(
         naturalTrackpad: NaturalScrolling,
         naturalMouse: NaturalScrolling,
         longSwipes: Bool,
-        stepDistance: Double
+        stepLength: Double
     ) {
         self.naturalTrackpad = naturalTrackpad
         self.naturalMouse = naturalMouse
         self.longSwipes = longSwipes
-        self.stepDistance = stepDistance
+        self.stepLength = stepLength
     }
 
     /// What the tap is configured with: the routes the gesture
@@ -59,13 +60,13 @@ public struct ScrollGestureBase: Equatable, Sendable {
 }
 
 extension ScrollGestureBase {
-    /// The step distance clamped, the one refusal a hand-edited
+    /// The step length clamped, the one refusal a hand-edited
     /// file can still reach; the tap reads this verdict.
     public var sanitized: ScrollGestureBase {
         var result = self
-        result.stepDistance = min(
-            max(stepDistance, Self.stepDistanceRange.lowerBound),
-            Self.stepDistanceRange.upperBound
+        result.stepLength = min(
+            max(stepLength, Self.stepLengthRange.lowerBound),
+            Self.stepLengthRange.upperBound
         )
         return result
     }
@@ -74,23 +75,21 @@ extension ScrollGestureBase {
 /// A profile's sparse divergence from `ScrollGestureBase`
 /// (#1656): a field it leaves nil follows the base. Written by the
 /// Settings "Applies to" checklist, never by hand-merging; its
-/// fields mirror the base's (`ScrollGestureConfigParityTests`).
+/// fields mirror the base's save the global-only `stepLength`
+/// (`ScrollGestureConfigParityTests`).
 public struct ScrollGestureOverride: Equatable, Sendable {
     public var naturalTrackpad: NaturalScrolling?
     public var naturalMouse: NaturalScrolling?
     public var longSwipes: Bool?
-    public var stepDistance: Double?
 
     public init(
         naturalTrackpad: NaturalScrolling? = nil,
         naturalMouse: NaturalScrolling? = nil,
-        longSwipes: Bool? = nil,
-        stepDistance: Double? = nil
+        longSwipes: Bool? = nil
     ) {
         self.naturalTrackpad = naturalTrackpad
         self.naturalMouse = naturalMouse
         self.longSwipes = longSwipes
-        self.stepDistance = stepDistance
     }
 
     public var isEmpty: Bool { self == ScrollGestureOverride() }
@@ -102,7 +101,7 @@ public struct ScrollGestureOverride: Equatable, Sendable {
             naturalTrackpad: naturalTrackpad ?? base.naturalTrackpad,
             naturalMouse: naturalMouse ?? base.naturalMouse,
             longSwipes: longSwipes ?? base.longSwipes,
-            stepDistance: stepDistance ?? base.stepDistance
+            stepLength: base.stepLength
         )
     }
 
@@ -120,8 +119,7 @@ public struct ScrollGestureOverride: Equatable, Sendable {
                 base.naturalTrackpad
             ),
             naturalMouse: kept(edited.naturalMouse, base.naturalMouse),
-            longSwipes: kept(edited.longSwipes, base.longSwipes),
-            stepDistance: kept(edited.stepDistance, base.stepDistance)
+            longSwipes: kept(edited.longSwipes, base.longSwipes)
         )
         return over.isEmpty ? nil : over
     }

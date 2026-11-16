@@ -105,6 +105,10 @@ extension APIReference {
         ] {
             map[verb] = "gesture.bind"
         }
+        // A long swipe's steps count finger travel in mm, a new
+        // key the migration drops the old one for (#1873).
+        map["scroll_gesture.set_step_distance"] =
+            "scroll_gesture.set_step_length"
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()

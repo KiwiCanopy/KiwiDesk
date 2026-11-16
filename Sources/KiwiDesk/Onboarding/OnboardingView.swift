@@ -29,6 +29,8 @@ struct OnboardingView: View {
                 OnboardingBarsStep(model: model)
             case .keys:
                 keys
+            case .gestures:
+                gestures
             case .done:
                 done
             }

@@ -58,6 +58,8 @@ struct SymbolClassifierSeamTests {
             "render-time net on a name `homeSpaceMark` classified",
         "Tests/KiwiDeskCoreTests/FloatingMarkTests.swift":
             "builds the floating glyph from a fixed name",
+        "Sources/KiwiDesk/Shortcuts/CustomGlyph+Rotate.swift":
+            "builds the rotate glyph's hand from a fixed name (#1873)",
         "Tests/KiwiDeskCoreTests/FloatingMarkOverlayTests.swift":
             "builds the floating glyph from a fixed name",
         "Sources/KiwiDeskCore/Borders/SizeLimitPillPlate.swift":
@@ -74,10 +76,6 @@ struct SymbolClassifierSeamTests {
             "builds the overflow count's chevron from a fixed name",
         "Sources/KiwiDeskCore/Bar/FloatBreakMark.swift":
             "builds the App Bar's float mark from a fixed name",
-        "Sources/KiwiDeskCore/Bar/ShelfHandleSpec+Label.swift":
-            "draws a Space icon spaceIdentifier already classified",
-        "Sources/KiwiDeskCore/Bar/ShelfHandleSpec+Count.swift":
-            "builds the hidden App Bar mark's count glyphs from fixed names",
         "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":
             "asserts every count chevron RESOLVES; classifies nothing",
     ]

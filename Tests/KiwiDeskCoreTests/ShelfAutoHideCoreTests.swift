@@ -65,8 +65,8 @@ struct ShelfAutoHideCoreTests {
             )
         )
         let spec = try #require(handle.view.spec)
-        guard case .dots(let dots) = spec.mark else {
-            Issue.record("a Space Bar shelf draws Space dots")
+        guard case .dots(let dots) = spec.peek else {
+            Issue.record("a Space Bar handle peeks Space dots")
             return
         }
         #expect(dots.filter(\.current).count == 1)

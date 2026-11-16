@@ -6,6 +6,9 @@ import os
 /// test replaces.
 protocol TouchReaderHandle: AnyObject {
     func stop()
+    /// The running two-finger travel in mm (`TouchTravel.reading`);
+    /// nil while the pad carrying two fingers reports no size.
+    var travel: TouchTravel.Reading? { get }
 }
 
 /// The MultitouchSupport reader (#1873). It reads, never
@@ -31,6 +34,12 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     private let routers = OSAllocatedUnfairLock<[UInt: TrackpadGestureRouter]>(
         initialState: [:]
     )
+    /// Each pad's size in mm, read once at start.
+    private let sizes: [UInt: CGSize]
+    private let travelSum: OSAllocatedUnfairLock<TouchTravel>
+    /// A fresh number per reader, so a rebuilt reader's sum is never
+    /// differenced against the last one's.
+    private static let generations = OSAllocatedUnfairLock(initialState: 0)
 
     private init(
         deliver: @escaping Deliver,
@@ -38,6 +47,23 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     ) {
         self.deliver = deliver
         self.list = list
+        var sizes: [UInt: CGSize] = [:]
+        for device in list.devices {
+            sizes[UInt(bitPattern: device)] =
+                MultitouchSupport.surfaceSize(of: device)
+        }
+        self.sizes = sizes
+        let generation = Self.generations.withLock { count in
+            count += 1
+            return count
+        }
+        travelSum = OSAllocatedUnfairLock(
+            initialState: TouchTravel(generation: generation)
+        )
+    }
+
+    var travel: TouchTravel.Reading? {
+        travelSum.withLock { $0.reading }
     }
 
     /// Starts reading every connected trackpad; nil where the
@@ -131,6 +157,9 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             )
         )
         let key = UInt(bitPattern: device)
+        travelSum.withLock {
+            $0.feed(device: key, contacts: contacts, size: sizes[key])
+        }
         let events = routers.withLock { routers in
             var router = routers[key] ?? TrackpadGestureRouter()
             let events = router.route(frame)

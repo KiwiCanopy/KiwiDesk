@@ -141,7 +141,7 @@ struct CoreLocalizationBoundaryTests {
         "Bar/ShelfCountView.swift": 2,
         // A hidden shelf's handle: its bar and its state, and
         // the App Bar's window count, for VoiceOver (#761, #2567).
-        "Bar/ShelfHandleView.swift": 8,
+        "Bar/ShelfHandleView.swift": 6,
         // The bars' right-click menus (#1518), which Core draws:
         // their rows, VoiceOver's name for a nested row, and the
         // Layout menu's words under the keys Settings' own names

@@ -287,7 +287,7 @@ public enum APIReference {
         ],
         "scroll_gesture": [
             "set_natural_scrolling", "set_long_swipes",
-            "set_step_distance",
+            "set_step_length",
         ],
         "gesture": ["bind", "unbind"],
         "quit": [

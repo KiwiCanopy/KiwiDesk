@@ -3070,9 +3070,11 @@ the fill, opaque, where
 on.
 :::
 
-A hidden bar's Space dots and line wear the glass too, tinted by
-the same fill, and draw that fill flat when the glass is off or
+:::unreleased
+A hidden bar's thickened handle wears the glass too, tinted by
+the same fill, and draws that fill flat when the glass is off or
 stood down.
+:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -3440,15 +3442,21 @@ kiwishelf.set_reveal_timeout(5)
 **Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
 that shows nothing else. `"slide"` brings the whole bar in from
 the screen's edge — out from under the menu bar where it shows —
-and back out; `"grow"` grows the bar out of its mark — from the
+and back out; `"grow"` grows the bar out of its handle — from the
 screen edge where it has none — and back into it; `"unfold"`
-stretches the mark along the edge to the bar's length, then
+stretches the handle along the edge to the bar's length, then
 deepens it to the bar, and back; `"fade"` fades the bar in
-where it stands, and out. A `"hidden"` bar has no mark, so
+where it stands, and out. A `"hidden"` bar has no handle, so
 `"grow"` and `"unfold"` start from the middle of its screen edge.
 A bar shown beside an `"always"` bar joins it instead, whichever
 style. Each plays with Reduce Motion on too. On a `"boxed"` shelf
-`"unfold"` springs each box out of the mark to its place.
+`"unfold"` springs each box out of the handle to its place.
+
+:::unreleased
+An `"auto"` bar's handle already runs the bar's length, so
+`"unfold"` only deepens it, and `"grow"` grows the bar out of the
+thickened handle.
+:::
 
 On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
 
@@ -3501,8 +3509,7 @@ edge where a bar shows, it takes the shelf's nearer end instead — its
 start below `50`, its end from `50` — outside the bars' items, so it
 stays put while they scroll; on an edge where an `"auto"` bar rests
 hidden, its handle, or under `"always"` its whole mark, stands where
-the pocket shows once the bar comes in, joining the bars' handles in
-one row where it would meet them; on
+the pocket shows once the bar comes in; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
 
@@ -3596,14 +3603,14 @@ maximized: by [`toggle_maximized`](#toggle_maximized), a Height or
 Width maximize reaching a bar's strip,
 [`monocle.set_maximize_windows`](#monocleset_maximize_windows) or
 [`kiwivision.set_maximize`](#kiwivisionset_maximize). Under either
-value both bars and the pocket draw nothing at rest and reserve
-nothing, and a bar's shortcut shows it over the window.
+value both bars and the pocket reserve nothing, and a bar's
+shortcut shows it over the window.
 
-- `"auto"` also brings a bar in when you push the pointer against
-  its screen edge, or rest it in the bottom of the menu bar or the
-  top of the Dock where one stands between the bar and that edge.
-  A lone bar answers along the whole edge; two bars on one edge
-  split it. No handle is drawn.
+- `"auto"` rests each bar as its handle over the window and brings
+  it in as an `"auto"` bar comes in
+  ([`space_bar.set_visibility`](#space_barset_visibility)), save
+  that over the window only the handle itself counts as near the
+  edge.
 - `"hidden"` leaves only the shortcuts.
 
 A bar set to `"hidden"` stays hidden under `"auto"` as well, while a
@@ -3962,14 +3969,12 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
-are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
-short line, which grows when the pointer comes near and opens as
-the Space dots do.
+are retired: `false` is `"hidden"`.
 
-Grown, the line shows how many windows the App Bar lists for the
-Space on that screen, beside a window symbol. On a side edge the
-number stands above the symbol; past 99 a stacked-windows symbol
-shows there alone. VoiceOver reads the count at rest too.
+:::unreleased
+An `auto` App Bar hides to a handle and comes in as the Space Bar
+does ([`space_bar.set_visibility`](#space_barset_visibility)).
+:::
 
 ## Space Bar
 
@@ -4035,28 +4040,29 @@ App Bar in monocle and scrolling.
 **Does:**
 
 - `"always"` keeps the bar shown and reserves its strip.
-- `"auto"` hides it to a row of Space dots at its edge — one dot
-  per Space, the current one wide, a Space holding windows
-  brighter, at most six: past six Spaces the dots follow the
-  current Space, and an end with more Spaces beyond it draws a
-  small dot — and the edge keeps only a sliver: `outer_margin`,
-  the dots' depth and `inner_margin`, with the windows' outer gap
-  below it. The pointer within about 40 points of the dots grows
-  the plate behind them, rims it as the bars draw their active
-  item and, on a top or bottom edge, shows the current Space's
-  icon, number or first two letters in its dot. Resting a moment in the dots' band — 64
-  points along the edge, centred on the dots, from a few points
-  past the shelf to where the windows start — brings the bar in
-  as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
-  says, as the dots fade; at once when the pointer pushes against
-  the screen's edge inside that band. It goes back the same way
-  0.5 s after the
-  pointer leaves the bar and its band, and stays while a bar menu
-  or a peek it opened is up.
+- `"auto"` hides it to its handle at its edge (below).
 - `"hidden"` draws nothing and reserves nothing; only
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
+
+:::unreleased
+An `"auto"` bar's handle is a thin line along the bar's whole
+length, reserving nothing and floating over the windows; clicks pass
+through it to the window beneath. With the pointer within about 24
+points of the edge along the bar for 0.15 s, the handle thickens and
+the Space dots, or the App Bar's glyphs, peek through. The bar then
+comes in as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
+says when the pointer rests on the thickened handle for 0.15 s, or
+lingers near the edge for 0.4 s. Where nothing stands between the bar
+and the screen's edge, and no other screen continues past it, a push
+against that edge along the bar brings it in at once — except on the
+Dock's edge while the Dock hides itself and on the top edge while the
+menu bar does: there a push belongs to macOS, and the bar stays away
+until the pointer leaves the area near the edge. The bar goes back
+0.5 s after the pointer leaves it and the area near its edge, and
+stays while a bar menu or a peek it opened is up.
+:::
 
 On the pocket's edge, unless
 [`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
@@ -4074,19 +4080,23 @@ most once. A bar set not to reserve
 ([`space_bar.set_reserve`](#space_barset_reserve)) reserves
 nothing in any mode.
 
+:::unreleased
+An `"auto"` edge keeps no strip of its own: its windows reach
+the edge.
+:::
+
 Each bar keeps its own value. On an edge the two bars share, the
 edge reserves for its more present bar: beside an `"always"` bar
 an `"auto"` one stays shown, while a `"hidden"` one still shows
-only on its shortcut. Two `"auto"` bars on one edge draw two handles
-side by side — the Space dots and the App Bar's line, in the
-shelf's [order](#kiwishelfset_order), where a lone bar would sit
-— each with its own 64-point band, the two meeting between the
-handles. The pointer opens one bar at a time: while a bar is shown,
-the other's handle and band go away. A second bar's shortcut shows
-it beside the first. A look never carries the value.
+only on its shortcut. A second bar's shortcut shows it beside the
+first. A look never carries the value.
 
-The Space dots and the App Bar's line wear the bars'
+:::unreleased
+Two `"auto"` bars on one edge draw two handles, each along its own
+bar. The pointer opens one bar at a time: while a bar is shown, the
+other's handle goes away. A thickened handle wears the bars'
 [Liquid Glass](#kiwishelfset_liquid_glass).
+:::
 
 **Example:**
 
@@ -5323,10 +5333,11 @@ written to the base or a profile's own bindings
 | `side_buttons` | Presses Back or Forward (buttons 3 and 4) | `focus` or `space`, or a table of `back` and `forward` |
 | `wheel` | Scrolls with no finger phase, up or down: a notched mouse wheel | `walk` or `space`, or a table of `up` and `down` |
 | `wheel_x` | Scrolls sideways with no finger phase: a tilt or thumb wheel | `walk` or `space`, or a table of `left` and `right` |
-| `swipe2` | Scrolls with a finger phase: a two-finger swipe on a trackpad or a Magic Mouse | any family, or a table of `up`, `down`, `left` and `right` |
-| `swipe3`, `swipe4`, `swipe5` | Swipes three, four or five fingers on a trackpad | any family, or a table of the four directions |
+| `swipe2` | Scrolls with a finger phase: a two-finger swipe on a trackpad or a Magic Mouse | any family but `layout`, or a table of `up`, `down`, `left` and `right` and of the axes `left_right` and `up_down` |
+| `swipe3`, `swipe4`, `swipe5` | Swipes three, four or five fingers on a trackpad | any family but `layout`, or a table of the four directions and the two axes |
 | `tap2`, `tap3`, `tap4`, `tap5` | Taps two, three, four or five fingers | Lua |
-| `spread`, `pinch_together`, `rotate`, `force_click` | Moves fingers apart, closes them, rotates them, presses a Force Click | Lua |
+| `rotate` | Rotates two fingers | `layout`, or a table of `clockwise` and `counter_clockwise` |
+| `spread`, `pinch_together`, `force_click` | Moves fingers apart, closes them, presses a Force Click | Lua |
 | `spread4`, `pinch_together4` | Moves four fingers apart, or closes them | Lua |
 
 `tap2` and `force_click` keep their bindings but do nothing yet.
@@ -5354,6 +5365,13 @@ together are one gesture until it ends, so with only one of them
 bound the other, with the same keys, reaches neither the binding
 nor the app. The same gesture with other keys, or none, reaches
 the app as it is.
+
+`rotate` has two directions, `clockwise` and `counter_clockwise`,
+and takes the `layout` family: clockwise is the next layout and
+counter-clockwise the previous, as [`cycle_mode`](#cycle_mode) and
+`cycle_mode("prev")` do. A table of the two directions gives each
+its own action. A rotation fires once per gesture, the way its
+fingers first turn.
 
 `spread4` and `pinch_together4` take the four-finger pinch and
 spread the same way, so macOS shows neither Apps nor the desktop.
@@ -5395,7 +5413,14 @@ A binding does one of four things:
   [Natural scrolling](#scroll_gestureset_natural_scrolling) says:
   `up` is fingers up. On a scroll it runs once per motion, and
   again only after the scroll pauses or turns; on a multi-finger
-  swipe, once per swipe.
+  swipe, once per swipe. On a swipe the table may also name an
+  axis, `left_right` or `up_down`, with a family, which covers
+  that axis's two directions and runs as the whole family does,
+  Natural scrolling and long swipes included:
+  `{ left_right = "space", up = "kiwihub.show(\"desktops\")" }`.
+  A family name under a direction is Lua, and Lua under an axis is
+  refused. A direction's Lua stays Lua even where it spells a
+  family's step, so it never flips with Natural scrolling.
 
 The families:
 
@@ -5406,6 +5431,7 @@ The families:
 | `swap` | [`swap`](#swap) with the window that way |
 | `display` | [`focus_display`](#focus_display_last--focus_display) that way |
 | `track` | [`move_to_track`](#move_to_track): fingers moving left or up go to the previous track |
+| `layout` | [`cycle_mode`](#cycle_mode): clockwise the next layout, counter-clockwise the previous; `rotate`'s only family |
 | `space` | The next or previous Space: on a multi-finger swipe, fingers moving left or up show the next one, as a macOS Desktop swipe does; on a scroll, the [Space step](#scroll-focus-and-space-step) |
 
 On `swipe2`, `wheel` and `wheel_x`, `focus`, `walk` and `space`
@@ -5413,10 +5439,11 @@ act on the screen under the pointer; on a multi-finger swipe they
 act on the active Space, and `swap`, `display` and `track` act on
 the focused window everywhere. Each family takes one step per
 swipe or wheel notch, and its direction follows
-[Natural scrolling](#scroll_gestureset_natural_scrolling);
-[long swipes](#scroll_gestureset_long_swipes) add a step per
-[step distance](#scroll_gestureset_step_distance) to every
-`swipe2` family but `space`.
+[Natural scrolling](#scroll_gestureset_natural_scrolling), save
+`layout`'s, which follows the rotation alone. On `swipe2`,
+`focus` and `walk` also take a step per
+[step length](#scroll_gestureset_step_length) with
+[long swipes](#scroll_gestureset_long_swipes) on.
 
 `move` moves the window under the pointer, as a drag by its title
 bar does: a tiled window swaps with the one under the pointer at
@@ -5454,7 +5481,7 @@ Out of the box these are bound:
 
 | Input | Keys | Action |
 |---|---|---|
-| `tap4` | none | Open KiwiHub's shortcuts panel |
+| `tap4` | none | Turn KiwiVision on or off ([`kiwivision.toggle`](#kiwivisiontoggle)) |
 | `tap3` | none | Go to the last Space, toggling between two ([`focus_space_last`](#focus_space_last)) |
 | `drag` | ⌃⌘ | `move` |
 | `drag` | ⌃⌥ | `resize` |
@@ -5462,6 +5489,12 @@ Out of the box these are bound:
 | `wheel` | ⌃⌥ | `walk` |
 | `wheel_x` | ⌃⌥ | `space` |
 | `swipe2` | ⌃⌥⌘ | `space` |
+| `swipe3` | ⌃⌥ | `left_right` `space`, `up` the Desktop overview, `down` nothing |
+| `swipe4` | ⌃⌥ | `display` |
+| `rotate` | ⌃⌥ | `layout` |
+| `spread` | ⌃⌥ | Toggle maximized ([`toggle_maximized`](#toggle_maximized)) |
+| `pinch_together` | ⌃⌥ | The Desktop overview |
+| `pinch_together4` | ⌃⌥ | The window switcher |
 
 `hover_move`, the clicks and the side buttons are unbound.
 :::
@@ -5489,9 +5522,10 @@ way the fingers go, through the same step as [`focus`](#focus):
 fingers left focus the window on the left. A vertical wheel
 notch steps to the next or previous
 window in the Space's window order, floating windows included,
-wrapping at the ends. On every layout a swipe's first step fixes
-its axis until the fingers lift, so a diagonal swipe, and its
-long-swipe steps, move along one axis only. With
+wrapping at the ends. On every layout each step of a swipe goes
+along the axis its own travel leads, so with
+[long swipes](#scroll_gestureset_long_swipes) right, right, down
+is one movement. With
 [Natural scrolling](#scroll_gestureset_natural_scrolling) off for
 that input, every direction reverses, the Scrolling row's
 included.
@@ -5519,6 +5553,15 @@ its first window as it starts and one more every
 travel, which macOS's own Scrolling speed scales. The direction
 follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
 per input.
+
+:::unreleased
+On a trackpad, each window after the first costs a
+[step length](#scroll_gestureset_step_length) of finger travel on
+the pad, in mm, whatever the swipe's speed; macOS's Scrolling
+speed does not change it. Where KiwiDesk reads no finger travel —
+no three- to five-finger tap or swipe is bound, or the trackpad
+reports no size — every 6 pt of scroll counts as 1 mm.
+:::
 
 Hold **⌃⌥⌘** (the default;
 [`set_space_step`](#scroll_gestureset_space_step) changes it) and
@@ -5575,14 +5618,21 @@ inherits, and `null` turns it off, a default included. A binding
 stores Lua under `lua`, with the shortcut row's optional `kind`,
 `desc`, `group` and `symbol`; a family under `family`; a grab
 under `grab`; and a table of directions under `split`, each
-direction holding a Lua binding:
+direction holding a Lua binding and each axis (`left_right`,
+`up_down`) a family:
 
 ```json
 "gesture": {
   "tap3": null,
   "tap5": { "lua": "KiwiDesk.cycle_mode()", "kind": "custom" },
-  "swipe3:control+option": { "family": "focus" },
+  "swipe5:control+option": { "family": "focus" },
   "hover_move:control+command": { "grab": "move" },
+  "swipe3:control+option": {
+    "split": {
+      "left_right": { "family": "space" },
+      "up": { "lua": "kiwihub.show(\"desktops\")" }
+    }
+  },
   "wheel:control+option+command": {
     "split": { "up": { "lua": "KiwiDesk.focus_space_back()" } }
   }
@@ -5593,7 +5643,10 @@ Any of these makes the file unreadable: a key spelled any other way
 — an alias such as `ctrl`, the keys in another order, a `:` with no
 keys after it; an unknown input, modifier, family, grab or
 direction; a body naming no action, or two; a body carrying a field
-its action does not take; and an empty table of directions. A
+its action does not take; an empty table of directions; and a
+table spelled other than its one form — a direction under an axis
+that holds a family, or both axes on one family, which is that
+family whole. A
 binding [`gesture.bind`](#gesturebind) would refuse is kept and
 does nothing.
 
@@ -5617,12 +5670,14 @@ off.
 
 The other scroll settings are stored in `gui.json` as the
 `scroll_gesture` object — `natural_scrolling` (`trackpad`,
-`mouse`), `long_swipes`, `step_distance` — which a profile's
-sparse `scroll_gesture` object overrides field by field; a
-`step_distance` outside 10–1000 is clamped to the range. In the
-Settings app they are under **Shortcuts ▸ Mouse & Trackpad**,
-where each row's **Applies to** checklist writes the base or
-chosen profiles' overrides.
+`mouse`), `long_swipes`, `step_length` — which a profile's
+sparse `scroll_gesture` object overrides field by field, save
+`step_length`, which is `gui.json`'s alone; a `step_length`
+outside 3–60 is clamped to the range. In the
+Settings app the first two are under **Shortcuts ▸ Mouse &
+Trackpad**, where each row's **Applies to** checklist writes the
+base or chosen profiles' overrides; `step_length` has no row. A
+stored `step_distance` is removed when the file loads.
 
 The verbs below change the running base only: a profile's own
 value still wins, nothing reaches `gui.json`, and the value lasts
@@ -5639,15 +5694,17 @@ the base it set.
 **Expects:** an input; keys, spelled as in
 [Gesture inputs](#gesture-inputs), `""` for none; then an action:
 a family name, `"move"` or `"resize"`, a string of Lua, or a table
-mapping directions to Lua.
+mapping directions to Lua and, on a swipe, an axis (`left_right`,
+`up_down`) to a family name.
 
 **Does:** binds the input held with those keys, replacing what
 they held. It fails on an unknown input or modifier, a repeated
 modifier, no action, and every binding the input does not take:
 too few keys, `shift` on a wheel, a family the input does not
 offer, a grab off `drag` and `hover_move` or anything else on
-them, Lua on an input with directions, and a table on an input
-without them or naming a direction it lacks.
+them, Lua on an input with directions, a table on an input
+without them or naming a direction it lacks, and an axis on an
+input other than a swipe or holding anything but a family name.
 `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
 `modifier_drag.set_move`, `modifier_drag.set_resize` and
 `trackpad_gesture.bind` are retired and fail, naming it. Their
@@ -5788,6 +5845,14 @@ however long it is. A mouse wheel moves one window per notch
 either way, as the section above qualifies. The Space step
 always steps one Space per swipe.
 
+:::unreleased
+Long swipes are on by default, and each window after the first
+costs a [step length](#scroll_gestureset_step_length) of finger
+travel. Only `focus` and `walk` step more than once in a touch,
+whole or on one axis of a table; every other family, and every
+three- to five-finger swipe, takes one step per touch.
+:::
+
 **Example:**
 
 ```lua
@@ -5808,6 +5873,30 @@ does nothing, while long swipes are off.
 ```lua
 scroll_gesture.set_step_distance(120)
 ```
+
+:::unreleased
+`scroll_gesture.set_step_distance` is retired and fails, naming
+[`scroll_gesture.set_step_length`](#scroll_gestureset_step_length).
+:::
+
+### scroll_gesture.set_step_length
+
+:::unreleased
+**Expects:** mm, 3–60 (default `10`); a value outside the range
+fails.
+
+**Does:** sets the finger travel on the trackpad per extra window
+of a [long swipe](#scroll_gestureset_long_swipes), the same at
+every swipe speed. It applies in every profile, since no profile
+overrides it. It is kept, and does nothing, while long swipes are
+off.
+
+**Example:**
+
+```lua
+scroll_gesture.set_step_length(14)
+```
+:::
 
 ## When Windows No Longer Fit
 
@@ -7604,6 +7693,16 @@ live glance at the active layer's bindings.
 - **↑** **↓** and **Page Up** / **Page Down** scroll the list;
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
+
+:::unreleased
+The panel also lists every bound [gesture](#gesture-actions), once
+each. A gesture whose action has a row is a badge on that row: the
+most specific first — a trackpad gesture before a mouse one, then
+the fewest keys, then a swipe before other gestures, then the
+fewest fingers — and the rest behind **+N**, which names them on
+hover. Every other gesture is a row under **Gestures**. Typing a
+gesture's name finds its row and brings that badge to the front.
+:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every

@@ -6,8 +6,8 @@ import Testing
 
 /// The visibility fold (#761) in `barEdges(space:app:)`: each bar
 /// is handed its own value, an edge two bars share reads its more
-/// present bar's, an `auto` edge reserves only its sliver and a
-/// `hidden` one nothing, so a reveal draws over the windows.
+/// present bar's, and an `auto` or `hidden` edge reserves nothing
+/// (#3349), so a reveal draws over the windows.
 @Suite("Bar visibility fold (#761)")
 struct BarAutoHideFoldTests {
     private func settings(
@@ -54,11 +54,9 @@ struct BarAutoHideFoldTests {
         }
         // A layout with no App Bar reads the Space Bar alone.
         #expect(mixed.shelfEdges(in: .bsp, on: nil).isEmpty)
-        #expect(mixed.hidingEdges(in: .bsp, on: nil) == [.top])
         let both = settings(space: .auto, app: .auto)
         for mode in LayoutMode.allCases {
             #expect(both.shelfEdges(in: mode, on: nil).isEmpty)
-            #expect(both.hidingEdges(in: mode, on: nil) == [.top])
         }
     }
 
@@ -83,38 +81,34 @@ struct BarAutoHideFoldTests {
         )
     }
 
-    /// The amendment (#761, owner 2026-10-18): a hidden shelf keeps
-    /// a sliver laid out by the shelf's own rule, so its windows
-    /// stand their outer gap clear of the dots.
-    @Test("A hiding edge reserves the sliver, never the strip")
-    func hidingEdgeReservesTheSliver() {
+    /// The amendment (#3349, owner 2026-11-15): an Auto bar's
+    /// handle floats, so its edge reserves nothing and its windows
+    /// reach the edge; an Always bar still reserves its strip.
+    @Test("A hiding edge reserves nothing, an Always edge its strip")
+    func hidingEdgeReservesNothing() {
         var hidden = settings(space: .auto, app: .always, appEdge: .left)
         hidden.kiwishelf.outerMargin = 3
         hidden.kiwishelf.innerMargin = 5
         #expect(hidden.shelfEdges(in: .bsp, on: nil).isEmpty)
-        #expect(hidden.hidingEdges(in: .bsp, on: nil) == [.top])
         let visible = CGRect(x: 0, y: 0, width: 1000, height: 800)
-        let bounds = hidden.layoutBounds(
-            from: visible,
-            mode: .bsp,
-            on: nil,
-            pocketAtRest: false
-        )
-        #expect(
-            visible.height - bounds.height == 3 + KiwiShelf.hiddenDepth + 5
-        )
-        hidden.spaceBarStyle.reserve = false
         #expect(
             hidden.layoutBounds(
                 from: visible,
                 mode: .bsp,
                 on: nil,
                 pocketAtRest: false
-            )
-                == visible
+            ) == visible
         )
         let shown = settings(space: .always, app: .always)
         #expect(shown.shelfEdges(in: .bsp, on: nil) == [.top])
+        #expect(
+            shown.layoutBounds(
+                from: visible,
+                mode: .bsp,
+                on: nil,
+                pocketAtRest: false
+            ).height < visible.height
+        )
     }
 
     @Test("The mode and the reveal duration round-trip through JSON")

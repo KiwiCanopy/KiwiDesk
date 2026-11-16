@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// One scroll gesture in progress under a bound chord (#3199): the
@@ -12,8 +13,11 @@ final class ScrollBindingSession {
     /// The `.began` held until a move names the binding: a wheel's
     /// axis decides which of the chord's bindings it reaches.
     fileprivate var pending: ScrollGestureEvent?
-    fileprivate var meter = ScrollStepMeter(longSwipes: false, distance: 1)
+    fileprivate var meter = ScrollStepMeter(longSwipes: false, length: 1)
     fileprivate var latch = GestureMotionLatch()
+    /// A split's travel before its axis is named, both axes: the
+    /// motion the chosen runner is handed once it is (#1873).
+    fileprivate var unnamed = CGVector.zero
 
     init() {}
 }
@@ -59,14 +63,27 @@ extension KiwiCore {
         case .began:
             session.action = nil
             session.pending = event
+            session.unnamed = .zero
         case .changed:
             if session.action == nil {
-                guard let action = route.action(for: event) else { return }
+                guard let bound = route.action(for: event),
+                    let action = Self.gestureAction(
+                        bound,
+                        naming: event,
+                        &session.unnamed
+                    )
+                else { return }
                 session.action = action
                 if let began = session.pending {
                     runScroll(action, began, session)
                 }
                 session.pending = nil
+                // The travel that named the axis is the motion's
+                // start, handed whole to the runner it chose.
+                var start = event
+                start.delta = session.unnamed
+                runScroll(action, start, session)
+                return
             }
             if let action = session.action {
                 runScroll(action, event, session)
@@ -94,11 +111,11 @@ extension KiwiCore {
             handleScrollSpaceStep(event, session: session.step)
         case .family(let family):
             if event.kind == .began {
-                // A swipe steps once per `step_distance`, as the pan.
-                let resolved = mouse.scroll.resolved
+                // Only focus repeats within a touch (#1873 ▸ Ruling
+                // 2026-11-15): any other family steps once.
                 session.meter = ScrollStepMeter(
-                    longSwipes: resolved.longSwipes,
-                    distance: resolved.stepDistance
+                    longSwipes: false,
+                    length: 1
                 )
             }
             guard
@@ -109,9 +126,11 @@ extension KiwiCore {
             else { return }
             let code = family.lua(direction)
             for _ in 0..<steps { runGestureLua(code, "scroll") }
-        case .split(let arms):
-            guard let direction = session.latch.feed(event),
-                let arm = arms[direction]
+        case .split:
+            // An axis family was handed its own runner when the
+            // motion named its axis; a split here runs arms alone.
+            guard let hand = session.latch.feed(event),
+                case .lua(let arm) = action.step(toward: hand)
             else { return }
             runGestureLua(arm.lua, "scroll")
         case .run, .grab:
@@ -119,16 +138,35 @@ extension KiwiCore {
         }
     }
 
+    /// The binding a scroll motion runs (#1873): a split whose axes
+    /// hold a family waits until the travel names an axis, then runs
+    /// that axis's family through the whole family's own runner — the
+    /// pan, the Space step — and the arms through the split's; any
+    /// other binding at once. `travel` gathers the motion until then.
+    static func gestureAction(
+        _ bound: GestureAction,
+        naming event: ScrollGestureEvent,
+        _ travel: inout CGVector
+    ) -> GestureAction? {
+        travel.dx += event.delta.dx
+        travel.dy += event.delta.dy
+        guard case .split(let split) = bound, !split.axes.isEmpty else {
+            return bound
+        }
+        guard let (horizontal, _) = ScrollStepLatch.named(travel) else {
+            return nil
+        }
+        let axis: GestureAxis = horizontal ? .leftRight : .upDown
+        return split.axes[axis].map(GestureAction.family) ?? bound
+    }
+
     /// How many steps a family takes for `event` and which way:
-    /// the event projected onto the axis the latch fired on, so a
-    /// long swipe's later steps keep its axis and its sign. Pure.
+    /// along the axis the meter's step took. Pure.
     static func familyStep(
         _ meter: inout ScrollStepMeter,
         _ event: ScrollGestureEvent
     ) -> (Int, GestureDirection)? {
-        let steps = meter.feed(
-            event.locked(horizontal: meter.firedHorizontal)
-        )
+        let steps = meter.feed(event)
         guard steps != 0 else { return nil }
         let way = Self.direction(
             of: event.delta,
@@ -139,7 +177,7 @@ extension KiwiCore {
     }
 
     /// The direction a step of `sign` runs: along the axis the
-    /// meter's latch fired on, never a second reading of the travel
+    /// meter's last step took, never a second reading of the travel
     /// (input-and-animation.md), else the delta's larger one.
     static func direction(
         of delta: CGVector,
@@ -158,8 +196,12 @@ extension KiwiCore {
         _ event: TrackpadGestureEvent
     ) {
         var direction: GestureDirection?
-        if case .swipe(let swipe) = event.kind {
+        switch event.kind {
+        case .swipe(let swipe):
             direction = GestureDirection(rawValue: swipe.rawValue)
+        case .rotation(let clockwise):
+            direction = clockwise ? .clockwise : .counterClockwise
+        case .tap, .gesture: break
         }
         runGestureStep(key, action, toward: direction)
     }
@@ -171,16 +213,13 @@ extension KiwiCore {
         _ action: GestureAction,
         toward direction: GestureDirection?
     ) {
-        switch action {
-        case .run(let lua):
-            runGestureLua(lua.lua, key.spelling)
-        case .split(let arms):
-            guard let direction, let arm = arms[direction] else { return }
-            runGestureLua(arm.lua, key.spelling)
+        switch action.step(toward: direction) {
+        case .lua(let action):
+            runGestureLua(action.lua, key.spelling)
         case .family(let family):
             guard let direction else { return }
             stepFamily(family, toward: direction, key: key)
-        case .grab:
+        case nil:
             return
         }
     }
@@ -213,7 +252,7 @@ extension KiwiCore {
                 by: step,
                 swipe: family == .focus ? horizontal : nil
             )
-        case .space, .swap, .display, .track:
+        case .space, .swap, .display, .track, .layout:
             runGestureLua(family.lua(direction), key.spelling)
         }
     }
@@ -240,7 +279,7 @@ extension GestureFamily {
         // The list scrolls against the hand: fingers up or left
         // show the next window, as macOS's Desktop swipe does.
         case .walk, .space: direction.isBackward
-        case .track: !direction.isBackward
+        case .track, .layout: !direction.isBackward
         case .focus, .swap, .display: nil
         }
     }
@@ -267,6 +306,9 @@ extension GestureFamily {
         case .walk:
             let step = next ? "next" : "prev"
             return "KiwiDesk.focus_space_window(\"\(step)\")"
+        case .layout:
+            return next
+                ? "KiwiDesk.cycle_mode()" : "KiwiDesk.cycle_mode(\"prev\")"
         }
     }
 }

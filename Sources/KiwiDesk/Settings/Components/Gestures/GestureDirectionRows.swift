@@ -8,13 +8,46 @@ import SwiftUI
 /// echoed under its recorder. While the row binds
 /// a family each arm reads in secondary text and stays a live
 /// picker; picking one arm splits the row, which then reads "Per
-/// direction".
+/// direction". A swipe lists its two axes first, each followed by
+/// its directions while open, all at the SAME one indent (#1873 ▸
+/// Ruling 2026-11-15, owner): the order and the labels carry the
+/// hierarchy, never a deeper indent or a second rail.
 struct GestureDirectionRows: View {
     @ObservedObject var model: SettingsModel
     let key: GestureKey
     let catalog: SequenceActionCatalog
     /// The row's gesture pop-up width.
     let nameWidth: CGFloat
+    /// The axes whose directions show.
+    @State private var openAxes: Set<GestureAxis> = []
+
+    /// An axis split into fixed directions opens on appear, as a
+    /// split row does.
+    private func splitAxes() -> Set<GestureAxis> {
+        let action = GestureListEdits.action(
+            of: key,
+            in: model.config.gesture
+        )
+        guard case .split(let split) = action else { return [] }
+        return Set(
+            GestureAxis.allCases.filter { axis in
+                axis.directions.contains { split.arms[$0] != nil }
+            }
+        )
+    }
+
+    private func openBinding(_ axis: GestureAxis) -> Binding<Bool> {
+        Binding(
+            get: { openAxes.contains(axis) },
+            set: { open in
+                if open {
+                    openAxes.insert(axis)
+                } else {
+                    openAxes.remove(axis)
+                }
+            }
+        )
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: GestureListRow.columnGap) {
@@ -24,18 +57,41 @@ struct GestureDirectionRows: View {
                 .frame(width: GestureListRow.disclosureWidth)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 6) {
-                ForEach(key.input.directions, id: \.self) { direction in
-                    GestureDirectionRow(
-                        model: model,
-                        key: key,
-                        direction: direction,
-                        catalog: catalog,
-                        nameWidth: nameWidth
-                    )
+                if GestureListEdits.splitsByAxis(key.input) {
+                    ForEach(GestureAxis.allCases, id: \.self) { axis in
+                        GestureAxisRow(
+                            model: model,
+                            key: key,
+                            axis: axis,
+                            catalog: catalog,
+                            nameWidth: nameWidth,
+                            open: openBinding(axis)
+                        )
+                        if openAxes.contains(axis) {
+                            directionRows(axis.directions)
+                        }
+                    }
+                } else {
+                    directionRows(key.input.directions)
                 }
             }
         }
         .fixedSize(horizontal: false, vertical: true)
+        .onAppear { openAxes.formUnion(splitAxes()) }
+    }
+
+    private func directionRows(
+        _ directions: [GestureDirection]
+    ) -> some View {
+        ForEach(directions, id: \.self) { direction in
+            GestureDirectionRow(
+                model: model,
+                key: key,
+                direction: direction,
+                catalog: catalog,
+                nameWidth: nameWidth
+            )
+        }
     }
 }
 
@@ -60,7 +116,7 @@ struct GestureDirectionRow: View {
 
     var body: some View {
         HStack(spacing: GestureListRow.columnGap) {
-            Image(systemName: GestureListWords.direction(symbol: direction))
+            GlyphImage(GestureListWords.direction(symbol: direction))
                 .foregroundStyle(SettingsTheme.ink2)
                 .frame(width: GestureIcon.width)
                 .accessibilityHidden(true)
@@ -108,10 +164,14 @@ struct GestureDirectionRow: View {
         )
     }
 
-    /// Whether the arm is the family's, not one of its own.
+    /// Whether the arm is a family's — the row's or its axis's —
+    /// not one of its own.
     var inherited: Bool {
-        if case .family = action { return true }
-        return false
+        guard let axis = GestureAxis(of: direction) else {
+            if case .family = action { return true }
+            return false
+        }
+        return GestureListEdits.family(of: action, on: axis) != nil
     }
 
     /// The arm's step; a family's reads its catalogue name, else
@@ -129,7 +189,7 @@ struct GestureDirectionRow: View {
             )
         }
         var title: String?
-        if case .family(let family) = action,
+        if let family = familyOfArm,
             catalog.command(running: arm.lua) == nil
         {
             title = GestureListWords.arm(family, toward: direction)
@@ -141,6 +201,15 @@ struct GestureDirectionRow: View {
             desc: arm.meta.desc,
             title: title
         )
+    }
+
+    /// The family this direction steps by: the row's, or its
+    /// axis's on a swipe (#1873).
+    private var familyOfArm: GestureFamily? {
+        if case .family(let family) = action { return family }
+        return GestureAxis(of: direction).flatMap {
+            GestureListEdits.family(of: action, on: $0)
+        }
     }
 
     /// Edits this direction's arm alone (`GestureListEdits.arm`).

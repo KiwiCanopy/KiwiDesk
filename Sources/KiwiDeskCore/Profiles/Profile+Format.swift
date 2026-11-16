@@ -50,10 +50,11 @@ extension Profile {
     /// reveal or expand duration is its toggle off (#3236), 38 its
     /// own look carries no animation length (#3237), 39 the
     /// `gesture` map may hold the four-finger pinch and spread
-    /// slots, with no step (#1873).
+    /// slots, with no step (#1873), 40 its scroll-gesture override
+    /// loses the point `step_distance` (`migratingStepDistanceOut`).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 39
+    public static let currentFormat = 40
 }

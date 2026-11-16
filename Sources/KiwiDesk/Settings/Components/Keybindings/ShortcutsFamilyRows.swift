@@ -148,7 +148,7 @@ struct ShortcutsFamilyRows {
             .pocketApps,
             .advanced,
             .`import`, .restoreDefaults, .scrollLongSwipes,
-            .scrollStepDistance, .scrollNaturalTrackpad,
+            .scrollStepLength, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .gestureBindings, .spaceHistory,
             .focusWrap, .modeCycle, .modeCue, .desktopCue, .hyperKey,
             .shortcutBase, .kiwiHubNavigationKeys, .modifierSides:

@@ -52,7 +52,7 @@ extension GestureListRow {
         switch action {
         case nil: GestureListWords.chooseAction
         case .family(let family): GestureListWords.family(family)
-        case .split: GestureListWords.perDirection(key.input)
+        case .split(let split): GestureListWords.face(split, on: key.input)
         case .grab(let grab): GestureListWords.grab(grab)
         case .run(let run):
             catalog.command(running: run.lua)?.resolvedLabel

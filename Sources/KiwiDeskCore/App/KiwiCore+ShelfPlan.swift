@@ -17,6 +17,14 @@ extension KiwiCore {
         /// Each drawn bar's natural run length, which its slot
         /// draws in (`ShelfArrangement.Slot.drawing`).
         var needs: [ShelfBar: CGFloat] = [:]
+        /// The arrangement and needs as if every bar on the edge
+        /// drew — where a hiding bar's handle runs (#3349); the
+        /// pass's own where every bar draws.
+        var revealed:
+            (
+                arrangement: ShelfArrangement,
+                needs: [ShelfBar: CGFloat]
+            )?
         /// Whether the pocket stands on this edge this pass — the
         /// one answer its slot, its Auto mark band and the reveal
         /// target read (#2678).
@@ -74,17 +82,24 @@ extension KiwiCore {
         )
         return zip(folded, strips).map { shelfEdge, strip in
             let edge = shelfEdge.edge
+            let place = { (bars: Set<ShelfBar>) in
+                self.shelfPlan(
+                    edge: shelfEdge,
+                    strip: strip,
+                    settings: settings,
+                    spaceItems: settings.spaceBarStyle.edge == edge
+                        && bars.contains(.space) ? spaceItems : nil,
+                    app: settings.appBarStyle.edge == edge
+                        && bars.contains(.app) ? app : nil,
+                    pocket: pocket && edge == settings.kiwishelf.pocketEdge
+                )
+            }
             let bars = drawn(shelfEdge)
-            return shelfPlan(
-                edge: shelfEdge,
-                strip: strip,
-                settings: settings,
-                spaceItems: settings.spaceBarStyle.edge == edge
-                    && bars.contains(.space) ? spaceItems : nil,
-                app: settings.appBarStyle.edge == edge
-                    && bars.contains(.app) ? app : nil,
-                pocket: pocket && edge == settings.kiwishelf.pocketEdge
-            )
+            var plan = place(bars)
+            let every = Set(shelfEdge.bars.keys)
+            let full = bars == every ? plan : place(every)
+            plan.revealed = (full.arrangement, full.needs)
+            return plan
         }
     }
 

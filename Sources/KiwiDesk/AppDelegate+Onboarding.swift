@@ -68,6 +68,13 @@ extension AppDelegate {
         onboardingModel.keyFamilies = { [weak self] in
             self?.onboardingKeyFamilies() ?? []
         }
+        onboardingModel.hasTrackpad = { TrackpadPresence.connected() }
+        onboardingModel.gestureRows = { [weak self] in
+            self?.onboardingGestureFamilies() ?? []
+        }
+        onboardingModel.longSwipes = { [weak self] in
+            self?.core.mouse.scroll.longSwipes ?? true
+        }
         wireOnboardingLooks()
         wireOnboardingBars()
         wireOnboardingStart()
@@ -168,6 +175,15 @@ extension AppDelegate {
             spaces: SpaceID.deduplicated(
                 core.state.workspaces.allSpaces.map(\.id)
             )
+        )
+    }
+
+    /// The Gestures step's rows from the live bindings (#1873).
+    private func onboardingGestureFamilies() -> [OnboardingKeyFamily] {
+        OnboardingGestures.families(
+            bindings: core.mouse.gestures.resolved,
+            screens: NSScreen.screens.count,
+            layer: core.loadGuiConfig().layers.first(where: \.isDefault)
         )
     }
 }

@@ -44,6 +44,12 @@ public final class TouchGestures {
     /// Whether the machine reader is live.
     public var isReading: Bool { reader != nil }
 
+    /// The two-finger travel in mm a long swipe's steps count from
+    /// the latch (#1873 ▸ Ruling 2026-11-16), through this one door
+    /// to the reader; nil while no reader runs or no pad reports
+    /// its size, where the steps count points.
+    var travel: TouchTravel.Reading? { reader?.travel }
+
     /// Wires the one handler; once, at bootstrap.
     func setHandler(_ handler: @escaping Handler) {
         self.handler = handler
@@ -101,10 +107,13 @@ public final class TouchGestures {
                 let action = bindings[GestureKey(input, event.modifiers)],
                 !system.owns(event)
             else { continue }
-            // Natural scrolling off reverses a family's swipe, the one
-            // flip; a direction table's arm keeps the fingers' way.
-            if !natural, case .family = action,
-                case .swipe(let direction) = event.kind
+            // Natural scrolling off reverses a family's swipe, whole
+            // or an axis's, the one flip; an arm keeps the fingers'
+            // way (`resolvedStep`).
+            if case .swipe(let direction) = event.kind,
+                let hand = GestureDirection(rawValue: direction.rawValue),
+                action.resolvedStep(toward: hand, natural: natural)?.way
+                    == hand.opposite
             {
                 event.kind = .swipe(direction.opposite)
             }
@@ -119,7 +128,9 @@ public final class TouchGestures {
         case .tap: return .tap(fingers: event.fingers)
         case .swipe: return .swipe(fingers: event.fingers)
         case .gesture(let input):
-            return input.isGestureEvent ? input : nil
+            // A rotation arrives only by its way, as `.rotation`.
+            return input.isGestureEvent && input != .rotate ? input : nil
+        case .rotation: return .rotate
         }
     }
 

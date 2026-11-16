@@ -34,7 +34,6 @@ enum ScrollGestureWords {
     static func field(of key: ShortcutsKey) -> ScrollGestureField? {
         switch key {
         case .scrollLongSwipes: .longSwipes
-        case .scrollStepDistance: .stepDistance
         case .scrollNaturalTrackpad: .naturalTrackpad
         case .scrollNaturalMouse: .naturalMouse
         default: nil
@@ -52,8 +51,9 @@ enum ScrollGestureWords {
         )
     }
 
-    static var stepDistance: String {
-        L("shortcuts.gestures.scroll.step_distance", "Travel per window")
+    /// The Lua-only `step_length`'s name, for its diff row.
+    static var stepLength: String {
+        L("shortcuts.gestures.scroll.step_length", "Long swipe step")
     }
 
     static var trackpad: String {
@@ -92,7 +92,6 @@ enum ScrollGestureWords {
     static func label(_ field: ScrollGestureField) -> String {
         switch field {
         case .longSwipes: longSwipes
-        case .stepDistance: stepDistance
         case .naturalTrackpad:
             SettingsValueReadout.instanceLabel(natural, trackpad)
         case .naturalMouse:
@@ -100,13 +99,11 @@ enum ScrollGestureWords {
         }
     }
 
-    /// A value in words: On/Off, a Natural scrolling choice, points.
+    /// A value in words: On/Off or a Natural scrolling choice.
     static func value(_ value: ScrollGestureValue) -> String {
         switch value {
         case .flag(let on): SettingsValueReadout.onOff(on)
         case .natural(let natural): ScrollGestureWords.natural(natural)
-        case .points(let points):
-            SettingsValueReadout.points(CGFloat(points))
         }
     }
 }

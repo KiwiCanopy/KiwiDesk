@@ -103,14 +103,40 @@ editing here:
     "not mine, fall through", and read as a wall it strands a
     floating focus the arrow keys would carry to the float tier
     (`ScrollGestureDeadEndTests` ▸ `floatFocusFollowsTheKeys`).
-    A swipe's axis is locked from the axis the meter's latch
-    fired on (`ScrollStepMeter.firedHorizontal`), never a second
-    reading of the travel beside it, and the projection onto it
-    lives in the consumer that steps by direction, never in the
-    shared meter, whose Space-step consumer hears raw events
-    (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel` holds the
-    travel's axis over the last event's; where the reading and
-    the projection live is review's).
+    A swipe step's axis is the meter's alone
+    (`ScrollStepMeter.firedHorizontal`): the latch's for the
+    first step, then the axis each long-swipe step's own travel
+    leads (#1873). A consumer reads it and never projects an event
+    onto an axis of its own, nor takes a second reading of the
+    travel (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel`,
+    `longSwipeTurns`; a projection returning is review's).
+  - **Finger travel and point travel meet in `ScrollStepMeter`
+    and nowhere else** (#1873 ▸ Ruling 2026-11-16). A consumer
+    hands the meter the touch reading beside the event and does
+    no unit arithmetic of its own. Finger mm sets only a long
+    swipe's step budget: never take a step's axis or sign from
+    the reading, since the point delta carries Natural
+    scrolling's one flip and the pad's axes do not. Fix a
+    touch's unit at the latch: a reading lost mid-touch steps
+    nothing rather than switching to points, and a touch with no
+    reading at the latch counts points at
+    `ScrollStepMeter.pointsPerMM` (`ScrollStepMeterFingerTests`;
+    a second meeting place is review's). The argument is
+    `docs/design-decisions.md` ▸ *Amended (#1873, owner
+    2026-11-16)*.
+  - **On the two-finger path a split's axis family runs through
+    the whole family's runner** — the pan or the Space step — for
+    that gesture, chosen once the travel names its axis, never a
+    runner of its own; an arm keeps the once-per-motion latch, and
+    the scroll front's flip stays the only flip there (#1873;
+    `docs/design-decisions.md` ▸ *A swipe splits by axis*).
+  - **What a direction runs once Natural scrolling has had its say
+    is the one Core resolver's**, which the runner's flip, the
+    ⌃⌥K panel and the tour read; `GestureAction.step(toward:)`
+    stays the stored-shape resolver beneath it and
+    `GestureAction.split(normalizing:)` the one fold, so a reader
+    never re-derives which axis holds a family or which way a
+    family turns (#1873).
     The #292 preflight in `execute` is skipped on purpose — the
     gesture acts on the Space under the pointer — which the
     pan's docstring states.
@@ -1163,7 +1189,7 @@ editing here:
   `TouchReader`, reached only through `MouseTracker.trackpad`
   (#1873).** MultitouchSupport delivers every frame with no
   permission (probed 2026-10-31, macOS 27) and swallows nothing.
-  Five obligations:
+  Six obligations:
   - **Resolve the bindings in ONE home, `KiwiCore.applyScrollGestures`,
     the one caller of `TouchGestures.resolve`**, which hands it the
     trackpad's bindings from `applyGestures`; the config load's
@@ -1211,7 +1237,10 @@ editing here:
     the pure `PointerTapRouter+Gestures` decides on the tap's
     thread, swallowing a magnification or rotation from its begin
     to its end, and hands each step back through
-    `TouchGestures.receive` as `.gesture(input)`, so the
+    `TouchGestures.receive` — a pinch or spread as
+    `.gesture(input)`, a rotation as
+    `TrackpadGestureEvent.Kind.rotation(clockwise:)`, never
+    `.gesture(.rotate)` — so the
     exact-modifier match and the handler stay one
     (`PointerGestureWiringTests`, `TouchGesturesTests` ▸
     `gestureEventChordsReachTheDoor`). It reads the private event
@@ -1222,3 +1251,16 @@ editing here:
     built, and is rebuilt only at a resolve that needs it and at
     the session's return (`rearm`); a trackpad paired mid-session
     waits for one of those. Neither path is measured on a device.
+  - **Read the finger travel only through `MouseTracker.trackpad`
+    (`TouchGestures.travel`, nil while no reader runs), and let
+    the reader be its one writer**, feeding `TouchTravel` under
+    its lock on the framework's thread (#1873 ▸ Ruling
+    2026-11-16; `TouchTravelTests` for the sum). A long swipe
+    never starts the reader: where none runs, the meter counts
+    points (the meter bullet under the scroll tap, above). The
+    pad size that scales the sum comes from
+    `MTDeviceGetSensorSurfaceDimensions`, which is optional: keep
+    it out of `MultitouchSupport.isAvailable`, so a missing
+    symbol costs the reading alone and never the taps and
+    swipes. Nothing pins the door or the exclusion, so both are
+    review's.

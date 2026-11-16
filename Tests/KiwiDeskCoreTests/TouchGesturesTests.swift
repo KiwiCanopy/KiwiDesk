@@ -6,6 +6,7 @@ import Testing
 private final class FakeReader: TouchReaderHandle {
     var deliver: TouchReader.Deliver?
     var stopped = false
+    var travel: TouchTravel.Reading?
     func stop() { stopped = true }
 }
 
@@ -243,7 +244,7 @@ struct TouchGesturesTests {
             pushed.last?.chords
                 == [.rotate: [Self.hyper, [.option, .command]]]
         )
-        gestures.receive([event(.gesture(.rotate), 0, Self.hyper)])
+        gestures.receive([event(.rotation(clockwise: true), 0, Self.hyper)])
         gestures.receive([event(.gesture(.tap3), 0)])
         #expect(box.fired.map(\.0) == [.rotate])
         gestures.stop()

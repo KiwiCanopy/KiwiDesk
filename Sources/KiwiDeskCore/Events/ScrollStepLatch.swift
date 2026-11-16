@@ -34,14 +34,22 @@ public struct ScrollStepLatch: Sendable {
             guard !fired else { return nil }
             travel.dx += event.delta.dx
             travel.dy += event.delta.dy
-            let horizontal = abs(travel.dx) > abs(travel.dy)
-            let along = horizontal ? travel.dx : travel.dy
-            guard abs(along) >= Self.trackpadThreshold else {
+            guard let (horizontal, sign) = Self.named(travel) else {
                 return nil
             }
             fired = true
             firedHorizontal = horizontal
-            return along > 0 ? 1 : -1
+            return sign
         }
+    }
+
+    /// The axis and sign `travel` names once its larger axis passes
+    /// the threshold; nil before. The one reading of a latch, which
+    /// a split's naming takes too (#1873).
+    static func named(_ travel: CGVector) -> (horizontal: Bool, sign: Int)? {
+        let horizontal = abs(travel.dx) > abs(travel.dy)
+        let along = horizontal ? travel.dx : travel.dy
+        guard abs(along) >= trackpadThreshold else { return nil }
+        return (horizontal, along > 0 ? 1 : -1)
     }
 }

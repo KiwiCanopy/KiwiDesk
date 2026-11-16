@@ -32,8 +32,8 @@ struct GestureListEditsTests {
             Issue.record("a changed arm should split the row")
             return
         }
-        #expect(saved[.up] == other)
-        #expect(saved[.down]?.lua == GestureFamily.space.lua(.down))
+        #expect(saved.arms[.up] == other)
+        #expect(saved.arms[.down]?.lua == GestureFamily.space.lua(.down))
         arms[.up] = GestureListEdits.prefill(.space, on: .wheel)[.up]
         #expect(GestureListEdits.folded(arms, on: .wheel) == .family(.space))
     }

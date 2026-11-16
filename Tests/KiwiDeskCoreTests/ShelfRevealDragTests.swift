@@ -53,16 +53,18 @@ struct ShelfRevealDragTests {
         bar: .app
     )
     /// The Space Bar's shelf flush with the screen's top.
-    private static let top = ShelfRevealer.Target.hovering(
+    private static let top = ShelfRevealer.Target.along(
+        CGRect(x: 0, y: 760, width: 1000, height: 40),
         edge: .top,
-        strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
+        side: 800,
         screen: screen,
         section: CGRect(x: 350, y: 760, width: 300, height: 40)
     )
     /// The App Bar's shelf on the screen's bottom.
-    private static let bottom = ShelfRevealer.Target.hovering(
+    private static let bottom = ShelfRevealer.Target.along(
+        CGRect(x: 0, y: 0, width: 1000, height: 40),
         edge: .bottom,
-        strip: CGRect(x: 0, y: 0, width: 1000, height: 40),
+        side: 0,
         screen: screen,
         section: CGRect(x: 350, y: 0, width: 300, height: 40)
     )
@@ -79,6 +81,7 @@ struct ShelfRevealDragTests {
         }
         rig.revealer.removeMonitor = { _ in }
         rig.revealer.location = { rig.point }
+        rig.revealer.macEdges = { .none }
         rig.revealer.windowMoving = { rig.moving }
         rig.revealer.schedule = { delay, body in
             rig.timers.append((delay, body))
@@ -104,13 +107,15 @@ struct ShelfRevealDragTests {
         #expect(rig.timers.isEmpty)
     }
 
-    @Test("a drag resting in the band reveals after the delay")
+    @Test("a drag lingering near the edge reveals after the dwell")
     func dragDwellReveals() {
         let rig = make()
         defer { rig.revealer.stop() }
-        rig.send(CGPoint(x: 500, y: 795), dragging: true)
+        rig.send(CGPoint(x: 500, y: 785), dragging: true)
         #expect(rig.revealer.reveal(of: Self.space) == .hidden)
-        #expect(rig.delays == [ShelfReveal.revealDelay])
+        #expect(rig.delays == [ShelfReveal.approachDelay])
+        rig.fireAll()
+        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
         rig.fireAll()
         #expect(rig.revealer.reveal(of: Self.space) == .hover)
     }
@@ -132,11 +137,10 @@ struct ShelfRevealDragTests {
 
     @Test("a hidden Space Bar stays hidden under a drag")
     func dragLeavesAHiddenBar() {
-        let hidden = ShelfRevealer.Target(
+        let hidden = ShelfRevealer.Target.hidden(
             edge: .top,
             strip: Self.top.strip,
-            screen: Self.screen,
-            band: nil
+            screen: Self.screen
         )
         let rig = make([Self.space: hidden, Self.app: Self.bottom])
         defer { rig.revealer.stop() }

@@ -63,6 +63,10 @@ public enum GestureFamily: String, CaseIterable, Codable, Sendable {
     case space
     /// The window list in order (#3200: a wheel's walk).
     case walk
+    /// The layout cycle: clockwise the next layout, counter-clockwise
+    /// the previous, as ⌃⌥C and ⌃⌥⇧C (#1873 ▸ owner ruling
+    /// 2026-11-15). A rotation's family alone.
+    case layout
 }
 
 /// A built-in or Lua action as an end key stores it (#3199 ▸ the
@@ -108,30 +112,21 @@ extension KeyBinding {
 public enum GestureAction: Hashable, Sendable {
     case run(LuaAction)
     case family(GestureFamily)
-    /// One action per direction; a missing direction does nothing.
-    case split([GestureDirection: LuaAction])
+    /// Below the whole family: an axis's family or a direction's
+    /// action (#1873); a missing direction does nothing.
+    case split(GestureSplit)
     /// A pointer gesture's grab: the window moves, or resizes from
     /// the edge or corner nearest the pointer, while the keys are
     /// held; whether it starts on a press is the input's
     /// (`GestureInput.grabStart`).
     case grab(ModifierDragAction)
 
-    /// A split, folded: an empty one is nil, which binds nothing.
-    /// The one home of the fold every writer takes.
+    /// A split of direction arms alone, folded through the one
+    /// `split(normalizing:)`.
     public static func split(
         normalizing arms: [GestureDirection: LuaAction]
     ) -> GestureAction? {
-        arms.isEmpty ? nil : .split(arms)
-    }
-
-    /// The Lua one motion runs toward `direction`, nil where it
-    /// runs none.
-    public func lua(toward direction: GestureDirection?) -> String? {
-        switch self {
-        case .run(let action): action.lua
-        case .split(let arms): direction.flatMap { arms[$0]?.lua }
-        case .family, .grab: nil
-        }
+        split(normalizing: GestureSplit(arms: arms))
     }
 }
 
@@ -146,8 +141,11 @@ public enum GestureRefusal: Equatable, Sendable {
     /// macOS turns ⇧ + wheel into a sideways scroll.
     case shiftOnWheel
     case familyNotOffered
-    /// A swipe, a wheel or the side buttons bind a family, or one
-    /// action per direction; never one action for all of them.
+    /// An axis takes a family only on an input with both axes: a
+    /// swipe (#1873).
+    case axisNotOffered
+    /// An input with directions binds a family, or one action per
+    /// direction; never one action for all of them.
     case directionalNeedsFamily
     /// A drag binds a grab alone; nothing else binds one.
     case grabOnlyOnDrag
@@ -188,14 +186,21 @@ extension GestureAction {
             return action.isBlank ? .emptyAction : nil
         case .family(let family):
             return input.families.contains(family) ? nil : .familyNotOffered
-        case .split(let arms):
+        case .split(let split):
             if input.directions.isEmpty { return .noDirections }
-            if !arms.keys.allSatisfy(input.directions.contains) {
+            if !split.arms.keys.allSatisfy(input.directions.contains) {
                 return .noDirections
+            }
+            if !split.axes.isEmpty {
+                guard input.takesAxisFamily else { return .axisNotOffered }
+                guard split.axes.values.allSatisfy(input.families.contains)
+                else { return .familyNotOffered }
+                return nil
             }
             // Only a split of blank arms alone runs nothing; a blank
             // arm beside others is that direction left dead (#3321).
-            return arms.values.allSatisfy(\.isBlank) ? .emptyAction : nil
+            return split.arms.values.allSatisfy(\.isBlank)
+                ? .emptyAction : nil
         }
     }
 }
