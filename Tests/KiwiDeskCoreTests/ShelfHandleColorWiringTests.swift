@@ -108,7 +108,7 @@ struct ShelfHandleColorWiringTests {
                 .cgColor
         }
         let line = try #require(
-            view.body.subviews.first { $0 !== view.core }?.layer?
+            view.outline.layer?
                 .backgroundColor
         )
         #expect(line == expected)

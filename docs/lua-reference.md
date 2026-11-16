@@ -3584,6 +3584,11 @@ pocket comes up once the pointer rests there for 0.15 s, at once
 on a push against the edge or a window drag. Under Reduce Motion
 the kiwis do not peek.
 
+:::unreleased
+On a handle the hover moves nothing: the tab goes to full strength
+in place, and the pocket still comes up after the 0.15 s rest.
+:::
+
 While you drag a window, under any value, the pocket comes up on
 every screen as a drop target, and a drop on it pockets that window
 as [`pocket`](#pocket) naming it would; where the pocket would
@@ -4066,8 +4071,8 @@ App Bar in monocle and scrolling.
 
 :::unreleased
 An `"auto"` bar's handle is a thin line along the
-bar's whole length, flush on the edge: a 2-point line in the label
-ink with a fine line of the opposite tone along each side. It
+bar's whole length, flush on the edge: a 2-point capsule in the label
+ink, edged all round by a fine line of the opposite tone. It
 reserves nothing and floats over the windows; clicks pass through it
 to the window beneath. With the pointer within about 24 points of
 the edge along the bar, a progress fill runs along the handle

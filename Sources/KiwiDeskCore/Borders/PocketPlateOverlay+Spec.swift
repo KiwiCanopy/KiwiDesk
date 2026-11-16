@@ -20,8 +20,9 @@ extension PocketPlateOverlay {
         var handle: AppBarEdge? = nil
         /// Out of its handle (a dwell or push, a drag), at this side.
         var risen = false
-        /// The pointer on a resting handle: its kiwis peek (#2807).
-        var peeking = false
+        /// The pointer on a resting handle: its tab draws at full
+        /// strength, in place (#3366).
+        var hovered = false
         var risenSide: CGFloat = 0
         /// The shelf's outer margin, between the edge and the handle.
         var outer: CGFloat = 0

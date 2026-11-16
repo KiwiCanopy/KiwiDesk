@@ -126,8 +126,7 @@ extension FullscreenStandDownTests {
         // takes.
         #expect(
             over.height
-                == ShelfReveal.overshoot + ShelfHandleSpec.inset
-                + ShelfHandleSpec.hoverDepth
+                == ShelfReveal.overshoot + ShelfHandleSpec.hoverDepth
         )
         core.execute(
             "kiwishelf.set_maximized_visibility",

@@ -67,8 +67,8 @@ struct ShelfHandleSpec: Equatable {
     /// Whether the handle draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
 
-    /// The handle's depth (pt): its `core` and a `hairline` of the
-    /// opposite tone on each long side (#3361 ruling 1).
+    /// The handle's depth (pt): its `core` inside a `hairline` of
+    /// the opposite tone wrapping it (#3361 ruling 1, #3366).
     static let depth: CGFloat = core + 2 * hairline
     static let core: CGFloat = 2
     static let hairline: CGFloat = 0.5
@@ -81,7 +81,7 @@ struct ShelfHandleSpec: Equatable {
     /// (#3360): its hover band, a value of its own.
     static let hoverDepth: CGFloat = 9
     /// Its distance from the screen side of the shelf's area: flush
-    /// (#3361 ruling 2).
+    /// (#3361 ruling 2, kept by #3366).
     static let inset: CGFloat = 0
     /// The handle's strength at rest (#3360 ruling 3).
     static let restStrength: CGFloat = 0.38
@@ -122,49 +122,17 @@ struct ShelfHandleSpec: Equatable {
             .withAlphaComponent(hairlineStrength)
     }
 
-    /// The core and its two hairlines in `bounds`, a handle's frame
-    /// or the pocket's tab: the hairlines on its long sides.
-    static func parts(
-        of bounds: CGRect,
-        edge: AppBarEdge
-    ) -> (core: CGRect, hairlines: (CGRect, CGRect)) {
-        let line = ShelfHandleSpec.hairline
-        if edge.isHorizontal {
-            return (
-                bounds.insetBy(dx: 0, dy: line),
-                (
-                    CGRect(
-                        x: bounds.minX,
-                        y: bounds.minY,
-                        width: bounds.width,
-                        height: line
-                    ),
-                    CGRect(
-                        x: bounds.minX,
-                        y: bounds.maxY - line,
-                        width: bounds.width,
-                        height: line
-                    )
-                )
-            )
-        }
-        return (
-            bounds.insetBy(dx: line, dy: 0),
-            (
-                CGRect(
-                    x: bounds.minX,
-                    y: bounds.minY,
-                    width: line,
-                    height: bounds.height
-                ),
-                CGRect(
-                    x: bounds.maxX - line,
-                    y: bounds.minY,
-                    width: line,
-                    height: bounds.height
-                )
-            )
-        )
+    /// The two capsules in `bounds`, a handle's frame or the
+    /// pocket's tab (#3366): the outer one in the hairline ink, and
+    /// the core inset `hairline` on top of it, so the hairline wraps
+    /// the ends too. Each is rounded by half its thickness.
+    static func parts(of bounds: CGRect) -> (outer: CGRect, core: CGRect) {
+        (bounds, bounds.insetBy(dx: hairline, dy: hairline))
+    }
+
+    /// A capsule's corner radius: half its thickness.
+    static func radius(of capsule: CGRect) -> CGFloat {
+        min(capsule.width, capsule.height) / 2
     }
 
     /// The colour a handle and the pocket's tab ink with,
@@ -182,7 +150,7 @@ struct ShelfHandleSpec: Equatable {
         edge: AppBarEdge,
         side: CGFloat
     ) -> CGRect {
-        band(along: run, edge: edge, side: side, deep: depth)
+        band(along: run, edge: edge, side: side, past: inset, deep: depth)
     }
 
     /// A band along `run`, `deep` in from `side` past `inset`.
@@ -190,6 +158,7 @@ struct ShelfHandleSpec: Equatable {
         along run: CGRect,
         edge: AppBarEdge,
         side: CGFloat,
+        past inset: CGFloat,
         deep: CGFloat
     ) -> CGRect {
         switch edge {
@@ -225,7 +194,8 @@ struct ShelfHandleSpec: Equatable {
     }
 
     /// The hover band (AX): along the handle, `hoverDepth` in from
-    /// the screen side. Resting there runs the fill over
+    /// the screen side itself, the inset included, so the pointer at
+    /// the edge rests on it. Resting there runs the fill over
     /// `ShelfReveal.revealDelay` (#3360 ruling 2).
     var hoverBand: CGRect {
         let side: CGFloat
@@ -239,6 +209,7 @@ struct ShelfHandleSpec: Equatable {
             along: frame,
             edge: edge,
             side: side,
+            past: 0,
             deep: Self.hoverDepth
         )
     }
