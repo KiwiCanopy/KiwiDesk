@@ -11,7 +11,7 @@ extension KiwiCore {
         let strip: CGRect
         let horizontal: Bool
         /// The edge's bars and their visibility (#761).
-        var shelfEdge: ShelfEdge
+        let shelfEdge: ShelfEdge
         /// The arrangement and natural run lengths of every bar
         /// resting on the edge (`ShelfEdge.resting`): where a
         /// handle runs, its bar lands and a shown bar is held — one
@@ -197,8 +197,8 @@ extension KiwiCore {
                 appNeed: appNeed,
                 spaceFloor: spaceFloor,
                 shelf: shelf,
-                // A section only beside a bar drawn this pass; an
-                // edge drawing none takes the handle (#2678).
+                // A section beside a resting bar; `keeping` drops
+                // it where nothing draws (#2678).
                 pocket: pocket && (spaceNeed != nil || appNeed != nil)
                     ? .init(
                         need: ShelfArrangement.pocketNeed(depth: depth),

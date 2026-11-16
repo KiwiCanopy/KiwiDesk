@@ -3,9 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A Hidden bar its shortcut reveals beside an Always sibling is
-/// held over the run it lands in (#3359): its target's section is
-/// read from the same arrangement that places it.
+/// A Hidden bar its shortcut reveals beside a resting Auto sibling
+/// is held over the run it lands in (#3359): its target's section
+/// is read from the same arrangement that places it, never the
+/// drawn bars' alone.
 @Suite("A revealed Hidden bar's hold (#3359)", .serialized)
 @MainActor
 struct ShelfHiddenHoldTests {
@@ -38,8 +39,7 @@ struct ShelfHiddenHoldTests {
         var settings = core.tiler.settings
         settings.spaceBarStyle.setEdge(.top)
         settings.appBarStyle.setEdge(.top)
-        settings.spaceBarStyle.visibility = .always
-        settings.spaceBarStyle.reserve = false
+        settings.spaceBarStyle.visibility = .auto
         settings.monocle.appBar.visibility = .hidden
         settings.kiwishelf.order = .spacesFirst
         core.tiler.settings = settings
@@ -57,7 +57,7 @@ struct ShelfHiddenHoldTests {
                 $0.display == display.id
             }
         )
-        // The run starts its slot, which follows the Space section.
+        // The run starts its slot, which follows the Space handle.
         #expect(abs(held.minX - bar.strip.minX) < 0.5)
         #expect(held.maxX <= bar.strip.maxX + 0.5)
         #expect(bar.strip.minX > screen.frame.minX)
@@ -100,6 +100,11 @@ struct ShelfHiddenHoldTests {
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
         let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        // Filed as a hidden target, no handle's.
+        #expect(
+            core.shelves.reveal.targets[.init(shelf: shelf, bar: .app)]
+                != nil
+        )
         let handles = core.shelves.handles
         #expect(
             handles.handleForTesting(.init(shelf: shelf, bar: .space)) != nil
@@ -107,5 +112,12 @@ struct ShelfHiddenHoldTests {
         #expect(
             handles.handleForTesting(.init(shelf: shelf, bar: .app)) == nil
         )
+        // Revealed, it draws, and still rests as no handle.
+        #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
+        core.updateBars()
+        #expect(
+            handles.handleForTesting(.init(shelf: shelf, bar: .app)) == nil
+        )
     }
+
 }

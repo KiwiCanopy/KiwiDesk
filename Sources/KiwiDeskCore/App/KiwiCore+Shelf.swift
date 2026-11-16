@@ -187,9 +187,7 @@ extension KiwiCore {
                     // a handle, on any edge, stands the front app
                     // down; only a Hidden one leaves it room (#3359).
                     appBarShows: planned.contains {
-                        $0.arrangement.app != nil
-                            || $0.shelfEdge.handled(hover: hover)
-                                .contains(.app)
+                        $0.resting.arrangement.app != nil
                     },
                     style: look
                 )

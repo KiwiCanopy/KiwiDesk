@@ -283,8 +283,8 @@ twice, was a question the user answered twice. The argument is
   `ShelfLandingTests`, `ShelfHandleWiringTests` ▸
   `holdIsWhereTheHandleRan`). Stand the front-app segment down
   while an App Bar on its screen is drawn or rests as a handle, on
-  any edge, asked of the screen's plans and `ShelfEdge.handled`,
-  never per edge (`ShelfLandingFrontAppTests`). **The handle
+  any edge, asked of every plan's `ShelfPlan.resting`, never per
+  edge (`ShelfLandingFrontAppTests`). **The handle
   reserves nothing**: `ShelfReservation` takes no hiding edge, and a
   new input that would reserve for an Auto bar is a ruling
   (`BarAutoHideFoldTests`). Whether a bar yields is the revealer's
