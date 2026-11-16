@@ -56,16 +56,8 @@ enum KiwiShelfCommandSetting {
             let automatic = ColorPaletteKeys.allowsAutomatic(
                 "kiwishelf.\(field)"
             )
-            guard let hex = args.first?.stringValue,
-                (automatic && hex.isEmpty) || HexColor.parse(hex) != nil
-            else {
-                return .failure(
-                    automatic
-                        ? "expected #RRGGBB, #RRGGBBAA or \"\""
-                        : "expected #RRGGBB or #RRGGBBAA"
-                )
-            }
-            return .success(.color(path, hex))
+            return BarColorArg.parse(args, automatic: automatic)
+                .map { .color(path, $0) }
         }
         return .failure("unknown kiwishelf setting: \(field)")
     }

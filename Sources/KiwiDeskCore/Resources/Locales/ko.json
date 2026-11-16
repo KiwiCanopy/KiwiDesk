@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "그룹 배지",
   "kiwishelf.color.handle": "핸들",
   "kiwishelf.color.handle.a11y": "바 핸들 색상",
-  "kiwishelf.color.handle.help": "바가 가려져 있는 동안 가장자리에 남는 선입니다. 자동은 밝은 모드와 어두운 모드를 따릅니다.",
+  "kiwishelf.color.handle.help": "바가 가려져 있는 동안 가장자리에 남는 선입니다. 자동으로 두면 밝은 모드와 어두운 모드를 따릅니다.",
   "kiwishelf.color.highlight": "하이라이트",
   "kiwishelf.color.hover_fill": "호버 채우기",
   "kiwishelf.color.hover_item": "호버 항목",

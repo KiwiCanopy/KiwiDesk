@@ -304,7 +304,13 @@ twice, was a question the user answered twice. The argument is
   and the handle carries no label or count (#3349, amending #2567).
   **A handle's thickened glass is one `GlassBox` whose host the
   approach moves**, under one capsule radius at both sizes
-  (`ShelfHandleFillBehindTests`).
+  (`ShelfHandleFillBehindTests`). **A handle at rest is inked through the one
+  `ShelfHandleSpec.restColor(hex:)` from `kiwishelf.handle_color`**
+  (#3357), its Automatic the label ink at `restAlpha`, never the
+  bar's Fill or item ink; the colour reaches the resting handle
+  alone, the thickened plate keeping the Fill or glass and the
+  peek the bar's own inks (`ShelfHandleColorTests`,
+  `ShelfHandleColorWiringTests`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

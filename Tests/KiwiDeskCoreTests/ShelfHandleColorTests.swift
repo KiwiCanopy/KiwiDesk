@@ -76,13 +76,17 @@ struct ShelfHandleColorTests {
         #expect(settings.kiwishelf.handleColor.isEmpty)
     }
 
-    /// Ruling 3: a bundled palette shows Automatic. The derived
-    /// default palette carries every path, this one empty.
-    @Test("No bundled palette sets the handle colour")
+    /// Ruling 3: a bundled palette shows Automatic for every
+    /// `adaptive` colour. The derived default palette carries
+    /// every path, these empty.
+    @Test("No bundled palette sets an adaptive colour")
     func bundledPalettesLeaveItOut() {
-        for palette in PaletteCatalog.bundled()
-        where !(palette.colors["kiwishelf.handle_color"] ?? "").isEmpty {
-            Issue.record("\(palette.name) sets kiwishelf.handle_color")
+        #expect(ColorPaletteKeys.adaptive.contains("kiwishelf.handle_color"))
+        for palette in PaletteCatalog.bundled() {
+            for path in ColorPaletteKeys.adaptive
+            where !(palette.colors[path] ?? "").isEmpty {
+                Issue.record("\(palette.name) sets \(path)")
+            }
         }
     }
 

@@ -48,9 +48,10 @@ struct PaletteSceneRoleTests {
     }
 
     /// The withheld set is exactly the pointer states and the
-    /// resting handle (#3357), which the scene's shown bars never
-    /// leave — derived rather than counted: a fifth hover key
-    /// would join it, and any OTHER path appearing there is
+    /// `adaptive` colours — the resting handle (#3357), which the
+    /// scene's shown bars never leave — derived rather than
+    /// counted: a fifth hover key would join it, and any OTHER
+    /// path appearing there is
     /// someone quietly dropping a colour from the picture behind a
     /// reason that does not apply to it.
     @Test("only pointer states and the handle are withheld")
@@ -58,7 +59,7 @@ struct PaletteSceneRoleTests {
         for path in PaletteSceneRoles.withheld.keys {
             #expect(
                 path.contains(".hover_")
-                    || path == "kiwishelf.handle_color",
+                    || ColorPaletteKeys.adaptive.contains(path),
                 Comment(
                     rawValue:
                         "\(path) is not a pointer state — it "
@@ -70,7 +71,7 @@ struct PaletteSceneRoleTests {
             $0.contains(".hover_")
         }
         #expect(
-            Set(hover + ["kiwishelf.handle_color"])
+            Set(hover).union(ColorPaletteKeys.adaptive)
                 == Set(PaletteSceneRoles.withheld.keys),
             "every hover path and the handle are withheld, and only those"
         )

@@ -61,7 +61,7 @@ enum SpaceBarCommandSetting {
             let automatic = ColorPaletteKeys.allowsAutomatic(
                 "space_bar.\(field)"
             )
-            return (automatic ? automaticColor(args) : color(args))
+            return BarColorArg.parse(args, automatic: automatic)
                 .map(keyword)
         }
         return .failure("unknown space bar setting: \(field)")
@@ -192,30 +192,6 @@ enum SpaceBarCommandSetting {
             return .failure("expected a length (pt)")
         }
         return .success(max(0, value))
-    }
-
-    private static func color(
-        _ args: [JSONValue]
-    ) -> Result<String, AppBarSettingError> {
-        guard let hex = args.first?.stringValue,
-            HexColor.parse(hex) != nil
-        else {
-            return .failure("expected #RRGGBB or #RRGGBBAA")
-        }
-        return .success(hex)
-    }
-
-    /// A colour that also takes `""`, Automatic
-    /// (`ColorPaletteKeys.followers`, #1856).
-    private static func automaticColor(
-        _ args: [JSONValue]
-    ) -> Result<String, AppBarSettingError> {
-        guard let hex = args.first?.stringValue,
-            hex.isEmpty || HexColor.parse(hex) != nil
-        else {
-            return .failure("expected #RRGGBB, #RRGGBBAA or \"\"")
-        }
-        return .success(hex)
     }
 
     /// Applies setting value to SpaceBarStyle.

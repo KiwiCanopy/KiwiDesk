@@ -37,7 +37,8 @@ public enum ColorPaletteKeys {
     /// Whether path permits the empty "Automatic" value: a mark's
     /// adaptive tint (`StickyStyle.color`), derived from the path
     /// so a third mark struct cannot join the surface without
-    /// joining this too, or a `followers` colour. Without it the
+    /// joining this too, an `adaptive` colour, or a `followers`
+    /// colour. Without it the
     /// surface is one-directional: a palette could paint the
     /// colour but never hand it back to Automatic.
     public static func allowsAutomatic(_ path: String) -> Bool {
