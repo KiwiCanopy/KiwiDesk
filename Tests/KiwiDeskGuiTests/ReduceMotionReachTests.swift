@@ -128,39 +128,48 @@ struct ReduceMotionReachTests {
         #expect(leaks.isEmpty, "\(leaks)")
     }
 
-    /// Every SwiftUI hosting root, and how it hands its views the
-    /// value: a host that writes nothing leaves them on the key's
-    /// default, still, so a new root states its answer here, and a
-    /// root `hostsAreWired` pins says so (`ReduceMotionHomeTests`).
-    private static let hosts: [String: String] = [
-        "AppDelegate+Onboarding.swift": "ReduceMotion.isOn at open",
-        "BootNotice/BootNoticeController.swift": "its model, at show",
-        "ConfigIssuesWindow.swift": "mounts no reader",
-        "CuePlate/CuePlateController.swift": "its model, at show",
-        "Jump/JumpPanelController.swift": "PanelPresence, at show",
+    /// Every SwiftUI hosting root, by file and count, and how it
+    /// hands its views the value: a root that writes nothing leaves
+    /// them on the key's default, still, so a new root states its
+    /// answer here, and one that writes it joins
+    /// `ReduceMotionHomeTests`' `hostsAreWired`. Residue: a reason
+    /// ("mounts no reader") is prose nothing checks.
+    private static let hosts: [String: (Int, String)] = [
+        "AppDelegate+Onboarding.swift": (1, "ReduceMotion.isOn at open"),
+        "BootNotice/BootNoticeController.swift": (1, "its model, at show"),
+        "ConfigIssuesWindow.swift": (1, "mounts no reader"),
+        "CuePlate/CuePlateController.swift": (1, "its model, at show"),
+        "Jump/JumpPanelController.swift": (1, "PanelPresence, at show"),
         "Settings/SettingsWindowController.swift":
-            "SettingsView writes macOS's setting, live",
+            (1, "SettingsView writes macOS's setting, live"),
         "Shortcuts/KeySequenceHintController.swift":
-            "ReduceMotion.isOn at draw",
+            (1, "ReduceMotion.isOn at draw"),
         "Updates/UpdateCheckingWindowController.swift":
-            "a measuring probe; the window is UpdateWindowChrome's",
-        "Updates/UpdateWindowChrome.swift": "ReduceMotion.isOn at show",
+            (1, "a measuring probe; the window is UpdateWindowChrome's"),
+        "Updates/UpdateWindowChrome.swift":
+            (2, "ReduceMotion.isOn at show, and a measuring probe"),
     ]
 
     @Test("every hosting root states how it hands the value")
     func hostsAreRegistered() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
-        let spellings = ["NSHostingView", "NSHostingController"]
-        var found: Set<String> = []
+        // A generic spelling counts too, so a typed root is seen.
+        let spellings = [
+            "NSHostingView(", "NSHostingController(",
+            "NSHostingView<", "NSHostingController<",
+        ]
+        var found: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {
             let text = try SourceScan.strippedSource(at: file)
-            guard spellings.contains(where: text.contains) else {
-                continue
+                .filter { !$0.isWhitespace }
+            let count = spellings.reduce(0) {
+                $0 + text.occurrences(of: $1)
             }
-            found.insert(String(file.path.dropFirst(root.path.count + 1)))
+            guard count > 0 else { continue }
+            found[String(file.path.dropFirst(root.path.count + 1))] = count
         }
         #expect(!found.isEmpty)
-        #expect(found == Set(Self.hosts.keys), "\(found)")
+        #expect(found == Self.hosts.mapValues(\.0), "\(found)")
     }
 }
