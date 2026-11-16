@@ -13,9 +13,6 @@ public enum PocketMarkGeometry {
     static let haloBlur: CGFloat = 0.14
     /// The hovered mark's scale.
     static let lift: CGFloat = 1.06
-    /// The kiwi handle's depth at rest, the bars' handles' own
-    /// (`KiwiShelf.hiddenDepth`): its 6 pt tab and 5 pt of kiwi.
-    static var handleDepth: CGFloat { KiwiShelf.hiddenDepth }
 
     /// The mark's side in a slot `depth` deep.
     public static func markSide(depth: CGFloat) -> CGFloat {

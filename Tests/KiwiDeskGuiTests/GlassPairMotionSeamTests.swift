@@ -36,18 +36,16 @@ struct GlassPairMotionSeamTests {
             file: "GlassTint.swift", declaration: "static func apply(",
             input: "in glass: NSView"
         ),
-        (
-            file: "GlassTint.swift",
-            declaration: "static func applyBehind(",
-            input: "below glass: NSView"
-        ),
     ]
 
     /// The files whose every pair frame write goes through the
     /// no-motion writer.
     private static let pairFiles = [
-        "GlassBox.swift", "GlassPlate.swift", "GlassTint.swift",
+        "GlassBox.swift", "GlassPlate.swift",
     ]
+    /// Pair files that write no frame at all since the handles'
+    /// glass retired (#3361): they may hold no raw write either.
+    private static let stillFiles = ["GlassTint.swift"]
 
     /// Motion inputs a signature may not take.
     private static let motionInputs = ["Bool", "BarFrameMove", "animated"]
@@ -236,6 +234,13 @@ struct GlassPairMotionSeamTests {
                 Self.rawWriteCount(in: source) == 0,
                 "\(file) writes a frame past BarMotion.writeStill"
             )
+        }
+        for file in Self.stillFiles {
+            let source = try SourceScan.strippedSource(
+                at: Self.bar.appendingPathComponent(file)
+            )
+            #expect(!source.isEmpty, "\(file)")
+            #expect(Self.rawWriteCount(in: source) == 0, "\(file)")
         }
     }
 }

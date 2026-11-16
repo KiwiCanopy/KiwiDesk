@@ -47,11 +47,11 @@ extension TilingSettings {
     }
 
     /// The strip the pocket reserves at rest on `screen` in `mode`,
-    /// nil where it reserves none: the handle's on an edge whose bars
-    /// hide, the shelf's own where the whole mark stands (#2784). A
-    /// section takes the bars' strip, and a bar's `reserve` off on
-    /// that edge — on an edge no bar shows, both bars' — reserves
-    /// nothing (#1524).
+    /// nil where it reserves none: the shelf's own where the whole
+    /// mark stands (#2784). Its handle floats like a bar's and
+    /// reserves nothing (#3361 ruling 4), a section takes the bars'
+    /// strip, and a bar's `reserve` off on that edge — on an edge no
+    /// bar shows, both bars' — reserves nothing (#1524).
     public func pocketReservation(
         in mode: LayoutMode,
         on screen: String?
@@ -67,8 +67,7 @@ extension TilingSettings {
             return nil
         }
         switch pocketRest(in: mode, on: screen) {
-        case .section: return nil
-        case .handle: return (pocketEdge, kiwishelf.hiddenReservation)
+        case .section, .handle: return nil
         case .mark: return (pocketEdge, kiwishelf.reservation)
         }
     }

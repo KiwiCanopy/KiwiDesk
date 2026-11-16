@@ -214,30 +214,6 @@ public enum GlassTint {
         colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
     }
 
-    /// `apply`'s Fill BEHIND the glass, the backdrop its sibling
-    /// directly beneath: the hidden shelf's handles alone (#2569 ▸
-    /// owner). Their panel never wears the key-window look that
-    /// washes a Fill behind out, and glass over a Fill on top draws
-    /// its edge as a border around the pill.
-    @MainActor
-    static func applyBehind(
-        _ backdrop: GlassBackdrop,
-        below glass: NSView,
-        cornerRadius: CGFloat,
-        fill: GlassFill,
-        edge: AppBarEdge
-    ) {
-        glass.appearance = pinnedAppearance(fill.hex)
-        if let parent = glass.superview,
-            parent.subviews.firstIndex(of: backdrop).map({ $0 + 1 })
-                != parent.subviews.firstIndex(of: glass)
-        {
-            parent.addSubview(backdrop, positioned: .below, relativeTo: glass)
-        }
-        BarMotion.writeStill(backdrop, glass.frame)
-        colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
-    }
-
     /// A hovered bar item's fill on glass (#2645): `fill`, the
     /// hover colour minted by `KiwiShelf.glassFill(hover:)`, fading
     /// from `edge` like the Fill beneath it through the same capped

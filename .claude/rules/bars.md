@@ -269,7 +269,7 @@ twice, was a question the user answered twice. The argument is
   (`ShelfHandleSpec.frame`), never a fixed band or the whole edge;
   the approach about it (`ShelfReveal.approach`), cut where two
   bars' runs meet so a point opens one bar, and over a maximized
-  window reaching in only to the thickened handle (#3346); a
+  window reaching in only to the handle's hover band (#3346); a
   `hidden` bar has no approach, and a hidden bar whose edge sibling
   shows yields, its handle standing aside
   (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
@@ -308,21 +308,28 @@ twice, was a question the user answered twice. The argument is
   and the neighbour test is the one `HidingShelves.continues`,
   handed the run (`ShelfHandleEdgeTests` ▸ `innerEdgeIsNoPush`,
   `ShelfHandleEdgeTests` ▸ `filingAsksTheNeighbours`). **Write
-  the approach state — `arming`, `ceded`, `owned` and the timers —
+  the approach state — `fills`, `ceded`, `owned` and the timers —
   only in `Bar/ShelfRevealer*.swift`**; a reader elsewhere reads, and
-  a writer outside them is review's. **What peeks through a thickened handle is
-  the spec's one `peek`** — the Space dots or the App Bar's glyphs —
-  and the handle carries no label or count (#3349, amending #2567).
-  **A handle's thickened glass is one `GlassBox` whose host the
-  approach moves**, under one capsule radius at both sizes
-  (`ShelfHandleFillBehindTests`). **A handle is inked from
-  `kiwishelf.handle_color` through the one
-  `ShelfHandleSpec.ink(hex:strength:)`** (#3357, #3360): at rest
-  `restColor(hex:)`, its countdown `fillColor(hex:)`, Automatic the
-  label ink and a picked colour its own alpha times the strength,
-  never the bar's Fill or item ink. The colour reaches the handle
-  alone: the thickened plate keeps the Fill or glass and the peek
-  the bar's own inks (`ShelfHandleColorTests`,
+  a writer outside them is review's. **An approach shows itself
+  only as the spec's one `fill`** (#3360): stamped by the revealer's
+  `now` at the event that set it — the entry, or the rest on the
+  `ShelfHandleSpec.hoverBand` that hurries it — and run by the view
+  for its `length`, never against a clock read at draw time; it runs
+  through the one `BarMotion.playHandleFill`, which plays under Reduce
+  Motion and drops under Off. The handle peeks nothing and carries no
+  label or count (#3349, amending #2567), and draws no glass
+  (`ShelfRevealApproachTests`, `ShelfHandleFillTests`). **Ink a
+  handle and the pocket's tab through `ShelfHandleSpec`'s one
+  `restColor`, `fillColor` and `hairlineColor`** — over the one
+  `ShelfHandleSpec.ink(hex:strength:)` (#3357, #3360): Automatic the
+  label ink and a picked colour its own alpha times the strength — a
+  core between two
+  neutral hairlines, split by the one `ShelfHandleSpec.parts`, flush
+  on the edge (#3361) — never the bar's own ink or the Fill, both
+  handed `kiwishelf.handle_color` by the one
+  `ShelfHandleSpec.restHex(of:)`, never a colour of the tab's own
+  (`ShelfHandleFillTests` ▸ `hairlineIsNeutral`,
+  `PocketTabInkSeamTests`, `ShelfHandleColorTests`,
   `ShelfHandleColorWiringTests`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
@@ -809,8 +816,8 @@ render content into it (#1517). Obligations:
   fitted to the user's `animations.reveal_duration` through the one
   `BarMotion.revealScale` — a retract to its
   `AnimationSettings.retractShare` — and never a second length
-  beside it (`ShelfRevealDurationTests`). **The reveal, the mark's hover growth and the
-  shelf's expand play under Reduce Motion** (owner ruling,
+  beside it (`ShelfRevealDurationTests`). **The reveal, a handle's progress fill (#3360) and
+  the shelf's expand play under Reduce Motion** (owner ruling,
   2026-10-21;
   `docs/design-decisions.md` ▸ The bars honour Reduce Motion) —
   so their members are in `BarMotionSeamTests`' `ungated` map and
@@ -953,10 +960,11 @@ Obligations:
   only through `shelfReservation(in:on:pocketAtRest:)`, an edge
   reserving the deepest strip it is asked for
   (`ShelfReservation.depth(of:)`).
-  The pocket's handle rests the one `KiwiShelf.hiddenDepth` deep,
-  which its reservation reads too, never a depth of its own; a
-  bar's handle is `ShelfHandleSpec.depth` and reserves nothing
-  (#3349, `PocketReservationTests`, `PocketReservationCoreTests` ▸
+  The pocket's handle rests `PocketHandleView.restDepth` deep, its
+  `tabDepth` a bar handle's `ShelfHandleSpec.depth`, never a depth
+  of its own; neither handle reserves anything, only the whole mark
+  does (#3349, #3361, `PocketReservationTests` ▸
+  `autoEdgeReservesNothing`, `PocketReservationCoreTests` ▸
   `wholeFollowsTheRest`).
 - **A Show write that moves `shelfReservations` owes a pass, and
   one that moves none a repaint**: the pocket reaches the bounds
@@ -1596,8 +1604,8 @@ Obligations:
 - **A member whose motion Reduce Motion deliberately keeps is
   ruled in `BarMotionSeamTests`' `ungated` map**, naming its
   ruling, and reads neither `isReduced` nor `reduceMotion` — the
-  shelf's reveal, its hover growth and its expand (the plate
-  glide). The expand's frames and fades travel because
+  shelf's reveal, a handle's progress fill and its expand (the
+  plate glide). The expand's frames and fades travel because
   `setFrame` / `setAlpha` read the gate narrowed by the one
   `BarMotion.expanding` scope its groups open, never a second
   write path beside them (`ShelfExpandReducedMotionTests`). A
@@ -1665,12 +1673,9 @@ Obligations:
   look through it, and `GlassTint.apply` takes the glass, never a
   frame, so the gradient is the glass's bounds. A clear Fill
   clears the gradient and never hides the backdrop, which carries
-  the content (`GlassFillOnTopTests`). The hidden shelf's handles
-  alone paint it BEHIND their glass through
-  `GlassTint.applyBehind` (owner, #2569): their panel never wears
-  the key-window look, and the glass's edge over a Fill on top
-  reads as a border (`ShelfHandleFillBehindTests`). A new caller
-  of that door argues its own ruling.
+  the content (`GlassFillOnTopTests`); no glass paints its Fill
+  behind it since the handles stopped drawing glass (#3361), and a
+  surface that would is a ruling first.
 - **A steady-state bar render reparents nothing into a glass
   subtree.** A view moves only on a host CHANGE, and the arm that
   changes the host is the one that names it — the Space Bar's
@@ -1764,8 +1769,8 @@ Obligations:
   input and starts no motion of its own, only the follow it
   copies from the host (`GlassPairMotionSeamTests` ▸
   `hostLayoutOnlyCopiesTheFollow`). The pair's own frame writers,
-  `GlassPlate.update`, `GlassTint.apply` and
-  `GlassTint.applyBehind`, take no motion input and start no
+  `GlassPlate.update` and `GlassTint.apply`, take no motion input
+  and start no
   motion (`GlassPairMotionSeamTests`), so a call site cannot make
   either travel.
 - **Write every frame of a glass pair — in `GlassBox`,
@@ -1825,8 +1830,9 @@ Obligations:
   `settleStartsNoMotion`). Keep the settle as the follow's
   fallback (#2878) — for a glass off the measured shape, and for
   a host moved without a bounds animation (the design round of
-  2026-11-14 named the `ShelfHandleView` hover and the
-  `AppBarOverlay+GroupGlide` landing as possible ones, unmeasured)
+  2026-11-14 named a handle's hover, since retired with its glass
+  (#3361), and the `AppBarOverlay+GroupGlide` landing as possible
+  ones, unmeasured)
   — and retire it only after a device sitting through those paths
   shows it never changes a frame (owner, 2026-11-14); retiring it
   re-runs the follow's per-switch cost measure above.

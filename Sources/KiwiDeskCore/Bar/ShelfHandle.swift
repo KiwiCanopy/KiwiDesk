@@ -1,38 +1,21 @@
 import AppKit
 
 /// What an `auto` bar leaves at its edge (#761, #3349): its handle,
-/// a thin strip along the bar's whole run that reserves nothing and
-/// floats. The pointer's approach thickens it and its contents peek
-/// through — the Space dots, or the App Bar's glyphs — and only the
-/// open bar takes a click.
+/// a thin two-tone line along the bar's whole run, flush on the
+/// edge, that reserves nothing and floats (#3361). An approach runs
+/// a fill along it from the point nearest the pointer, and the bar
+/// opens as the fill completes (#3360); only the open bar takes a
+/// click.
 struct ShelfHandleSpec: Equatable {
-    /// What peeks through the thickened handle.
-    enum Peek: Equatable {
-        /// One per Space on the screen, in bar order.
-        case dots([Dot])
-        /// The App Bar's glyphs, in bar order.
-        case glyphs([NSImage])
-    }
-
-    struct Dot: Equatable {
-        /// The Space the screen shows: drawn wide.
-        let current: Bool
-        /// A Space holding windows: drawn brighter.
-        let occupied: Bool
-        /// An end dot with Spaces beyond it (`ShelfDotWindow`):
-        /// drawn small, as iOS page dots are.
-        var small = false
-    }
-
     /// Where the current Space sits, for VoiceOver: its place from
-    /// 1 and the Space count, which the dots may not all show.
+    /// 1 and the Space count.
     struct Position: Equatable {
         let index: Int
         let count: Int
     }
 
-    /// How a grow reveal's origin exceeds the handle's thickening;
-    /// the handle grows by none, a reveal mark's default.
+    /// How a grow reveal's origin exceeds the handle; the handle
+    /// grows by none, a reveal mark's default.
     struct Growth: Equatable, Sendable {
         var widen: CGFloat = 0
         var across: CGFloat = 0
@@ -40,37 +23,41 @@ struct ShelfHandleSpec: Equatable {
         static let none = Growth()
     }
 
-    let peek: Peek
+    /// An approach's fill (#3360 ruling 7): it starts at `origin`,
+    /// the share of the run from its leading end (AX: left or top)
+    /// nearest the pointer as it entered, and both its ends reach
+    /// the run's ends together at `until`, as the bar opens. Both
+    /// stamps come from the revealer's clock at the event that set
+    /// them — `started` the entry, or the rest on the handle that
+    /// hurried it — so the view runs it for their difference and
+    /// reads no clock.
+    struct Fill: Equatable {
+        var origin: CGFloat
+        var started: Date
+        var until: Date
+
+        /// How long it runs from `started`.
+        var length: TimeInterval { until.timeIntervalSince(started) }
+    }
+
     /// The handle at rest, AX coordinates: its bar's run, `depth`
-    /// deep, `inset` in from the screen side of the shelf's area.
+    /// deep, flush on the screen side of the shelf's area.
     let frame: CGRect
     /// The edge its shelf hides on.
     let edge: AppBarEdge
-    /// The shelf's Fill, the thickened plate's (#2569).
-    let fill: GlassFill
-    /// The bar's own state inks (`SpaceBarItemView.stateColor`):
-    /// the current Space's, an idle one's, an empty one's, which
-    /// the peeking dots take.
-    let currentInk: String
-    let ink: String
-    let emptyInk: String
     /// Whether its bar is shown over it: the handle then draws
     /// nothing but stays for VoiceOver, its value "shown".
     let shown: Bool
-    /// The pointer is in the approach: the handle thickens and its
-    /// contents peek through.
-    let hovered: Bool
     /// How its shelf reveals, which the handle's fade keeps time
     /// with.
     let reveal: BarMotion.RevealKind
+    /// The approach's fill running along the handle, nil at rest.
+    var fill: Fill?
     /// Its bar is hidden while a sibling on its edge shows: the
     /// mouse opens one bar at a time, so the handle gives way as
     /// under its own bar, VoiceOver still reading it hidden.
     var yields = false
     var position: Position?
-    /// The thickened plate draws as tinted glass, as its bar does
-    /// (`LiquidGlassGate.rendered`, #2567).
-    var glass = false
     /// The resting handle's colour (`kiwishelf.handle_color`,
     /// #3357): empty is Automatic.
     var restHex = ""
@@ -80,25 +67,25 @@ struct ShelfHandleSpec: Equatable {
     /// Whether the handle draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
 
-    /// A dot's ink, by the bar's own ladder: current, then held
-    /// windows, then empty.
-    func ink(of dot: Dot) -> String {
-        if dot.current { return currentInk }
-        return dot.occupied ? ink : emptyInk
-    }
-
-    /// The handle's depth at rest (pt): a hairline that reads
-    /// without nagging (ui-designer preview, #3349).
-    static let depth: CGFloat = 3
-    /// How far the thickened plate grows on each side — the room
-    /// the panel keeps around it: 3 pt to 9 pt across, held to the
-    /// screen side (`BarMotion.hoverPlate`).
+    /// The handle's depth (pt): its `core` and a `hairline` of the
+    /// opposite tone on each long side (#3361 ruling 1).
+    static let depth: CGFloat = core + 2 * hairline
+    static let core: CGFloat = 2
+    static let hairline: CGFloat = 0.5
+    /// The hairline's strength, constant through a fill.
+    static let hairlineStrength: CGFloat = 0.35
+    /// How far a grow reveal's origin grows past the handle on each
+    /// side (`BarMotion.hoverPlate`): 3 pt to 9 pt across.
     static let hoverGrowth: CGFloat = 3
-    /// Its distance from the screen side of the shelf's area.
-    static let inset: CGFloat = 2
+    /// How deep the pointer rests "on" the handle, from the edge
+    /// (#3360): its hover band, a value of its own.
+    static let hoverDepth: CGFloat = 9
+    /// Its distance from the screen side of the shelf's area: flush
+    /// (#3361 ruling 2).
+    static let inset: CGFloat = 0
     /// The handle's strength at rest (#3360 ruling 3).
     static let restStrength: CGFloat = 0.38
-    /// The strength its countdown fills at (#3360 ruling 3).
+    /// The strength its progress fill takes (#3360 ruling 3).
     static let fillStrength: CGFloat = 0.9
     /// The handle's ink at `strength` (#3357, #3360): Automatic the
     /// label ink at that alpha, a picked colour at its own alpha
@@ -115,27 +102,95 @@ struct ShelfHandleSpec: Equatable {
     static func restColor(hex: String) -> NSColor {
         ink(hex: hex, strength: restStrength)
     }
-    /// The ink the countdown fill takes.
+    /// The ink the progress fill takes.
     static func fillColor(hex: String) -> NSColor {
         ink(hex: hex, strength: fillStrength)
     }
-    /// What peeks through takes this alpha.
-    static let peekAlpha: CGFloat = 0.7
-    static let dot: CGFloat = 4
-    static let smallDot: CGFloat = 2
-    static let currentDot: CGFloat = 12
-    static let dotGap: CGFloat = 4
-    /// The App Bar's glyphs peeking through: their tops, clipped.
-    static let glyph: CGFloat = 12
-    static let glyphGap: CGFloat = 6
+    /// The hairline (#3361 ruling 1): neutral, the opposite tone of
+    /// the core's ink — white beside a dark ink, black beside a
+    /// light one — never the user's colour; resolved in the current
+    /// drawing appearance.
+    static func hairlineColor(hex: String) -> NSColor {
+        let ink = NSColor(cgColor: ink(hex: hex, strength: 1).cgColor)?
+            .usingColorSpace(.sRGB)
+        let luma =
+            ink.map {
+                0.2126 * $0.redComponent + 0.7152 * $0.greenComponent
+                    + 0.0722 * $0.blueComponent
+            } ?? 0
+        return (luma > 0.5 ? NSColor.black : NSColor.white)
+            .withAlphaComponent(hairlineStrength)
+    }
 
-    /// The handle at rest along `run` (AX, y down): `run`'s extent
-    /// along `edge`, `depth` deep, `inset` in from `side` — the
-    /// screen side of the shelf's area, on the edge's axis.
+    /// The core and its two hairlines in `bounds`, a handle's frame
+    /// or the pocket's tab: the hairlines on its long sides.
+    static func parts(
+        of bounds: CGRect,
+        edge: AppBarEdge
+    ) -> (core: CGRect, hairlines: (CGRect, CGRect)) {
+        let line = ShelfHandleSpec.hairline
+        if edge.isHorizontal {
+            return (
+                bounds.insetBy(dx: 0, dy: line),
+                (
+                    CGRect(
+                        x: bounds.minX,
+                        y: bounds.minY,
+                        width: bounds.width,
+                        height: line
+                    ),
+                    CGRect(
+                        x: bounds.minX,
+                        y: bounds.maxY - line,
+                        width: bounds.width,
+                        height: line
+                    )
+                )
+            )
+        }
+        return (
+            bounds.insetBy(dx: line, dy: 0),
+            (
+                CGRect(
+                    x: bounds.minX,
+                    y: bounds.minY,
+                    width: line,
+                    height: bounds.height
+                ),
+                CGRect(
+                    x: bounds.maxX - line,
+                    y: bounds.minY,
+                    width: line,
+                    height: bounds.height
+                )
+            )
+        )
+    }
+
+    /// The colour a handle and the pocket's tab ink with,
+    /// `kiwishelf.handle_color` (#3357): empty is Automatic — the one
+    /// read both make, so a pick reaches both.
+    static func restHex(of shelf: KiwiShelf) -> String {
+        shelf.handleColor
+    }
+
+    /// The handle along `run` (AX, y down): `run`'s extent along
+    /// `edge`, `depth` deep, `inset` in from `side` — the screen
+    /// side of the shelf's area, on the edge's axis.
     static func frame(
         along run: CGRect,
         edge: AppBarEdge,
         side: CGFloat
+    ) -> CGRect {
+        band(along: run, edge: edge, side: side, deep: depth)
+    }
+
+    /// A band along `run`, `deep` in from `side` past `inset`.
+    private static func band(
+        along run: CGRect,
+        edge: AppBarEdge,
+        side: CGFloat,
+        deep: CGFloat
     ) -> CGRect {
         switch edge {
         case .top:
@@ -143,42 +198,56 @@ struct ShelfHandleSpec: Equatable {
                 x: run.minX,
                 y: side + inset,
                 width: run.width,
-                height: depth
+                height: deep
             )
         case .bottom:
             return CGRect(
                 x: run.minX,
-                y: side - inset - depth,
+                y: side - inset - deep,
                 width: run.width,
-                height: depth
+                height: deep
             )
         case .left:
             return CGRect(
                 x: side + inset,
                 y: run.minY,
-                width: depth,
+                width: deep,
                 height: run.height
             )
         case .right:
             return CGRect(
-                x: side - inset - depth,
+                x: side - inset - deep,
                 y: run.minY,
-                width: depth,
+                width: deep,
                 height: run.height
             )
         }
     }
 
-    /// The thickened plate (AX): what the panel's room holds.
-    var grown: CGRect {
-        BarMotion.hoverPlate(mark: frame, edge: edge, hovered: true)
+    /// The hover band (AX): along the handle, `hoverDepth` in from
+    /// the screen side. Resting there runs the fill over
+    /// `ShelfReveal.revealDelay` (#3360 ruling 2).
+    var hoverBand: CGRect {
+        let side: CGFloat
+        switch edge {
+        case .top: side = frame.minY - Self.inset
+        case .bottom: side = frame.maxY + Self.inset
+        case .left: side = frame.minX - Self.inset
+        case .right: side = frame.maxX + Self.inset
+        }
+        return Self.band(
+            along: frame,
+            edge: edge,
+            side: side,
+            deep: Self.hoverDepth
+        )
     }
 }
 
 /// One hiding bar's handle panel (#761). It ignores the mouse —
 /// the approach is judged from the pointer, and a click on it pins
 /// nothing — so the windows below it keep their clicks, a bottom
-/// scrollbar or status bar under the strip included (#3349 rule 6).
+/// scrollbar or status bar under the handle included (#3349 rule 6).
 @MainActor
 final class ShelfHandle {
     let view = ShelfHandleView()
@@ -198,8 +267,8 @@ final class ShelfHandle {
         if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        // Room for the thickened plate, taken once: the plate grows
-        // inside it and an approach never resizes the panel.
+        // The handle's own frame: a fill runs inside it and an
+        // approach never resizes the panel.
         let frame = Self.room(of: spec)
         panel.setFrame(
             GeometryUtils.flip(
@@ -220,23 +289,10 @@ final class ShelfHandle {
         panel?.orderOut(nil)
     }
 
-    /// The panel's frame for `spec`, AX coordinates: its
-    /// thickened plate, which never crosses the screen side.
+    /// The panel's frame for `spec`, AX coordinates: the handle,
+    /// which never crosses the screen side.
     static func room(of spec: ShelfHandleSpec) -> CGRect {
-        spec.grown
-    }
-
-    /// The handle's resting frame inside a view `bounds` sized by
-    /// `room(of:)`.
-    static func mark(
-        of spec: ShelfHandleSpec,
-        in bounds: CGRect
-    ) -> CGRect {
-        let room = room(of: spec)
-        return spec.frame.offsetBy(
-            dx: bounds.minX - room.minX,
-            dy: bounds.minY - room.minY
-        )
+        spec.frame
     }
 
     var isVisible: Bool { panel?.isVisible == true }
@@ -255,10 +311,6 @@ final class ShelfHandles {
     typealias Key = ShelfRevealer.Key
 
     private var handles: [Key: ShelfHandle] = [:]
-    /// Each Space mark's first dot shown last pass
-    /// (`ShelfDotWindow`), handed to the next; kept only beside a
-    /// mark still drawn.
-    var dotStarts: [Key: Int] = [:]
     /// The handle's press: the show/hide action on its bar.
     var onPress: @MainActor (Key) -> Void = { _ in }
     #if DEBUG
@@ -271,7 +323,6 @@ final class ShelfHandles {
         for key in handles.keys where specs[key] == nil {
             handles.removeValue(forKey: key)?.hide()
         }
-        dotStarts = dotStarts.filter { specs[$0.key] != nil }
         for (key, spec) in specs {
             let handle = handles[key] ?? ShelfHandle()
             handles[key] = handle

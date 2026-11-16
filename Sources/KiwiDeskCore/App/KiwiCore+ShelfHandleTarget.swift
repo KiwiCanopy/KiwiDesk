@@ -43,7 +43,7 @@ extension KiwiCore.HidingShelves {
     /// the handle's frame took): an approach from
     /// `ShelfReveal.overshoot` past that side to
     /// `ShelfReveal.approachReach` in — over a maximized window
-    /// (`maximized`) only to the thickened handle, so a pause on its
+    /// (`maximized`) only to its hover band, so a pause on its
     /// toolbar drops no bar over it for long (#3346) — cut where a
     /// sibling's approach meets it (`cut`).
     @MainActor static func target(
@@ -65,12 +65,12 @@ extension KiwiCore.HidingShelves {
             strip: strip,
             screen: screen,
             beyond: beyond,
-            handle: flip(spec.grown),
+            handle: flip(spec.hoverBand),
             section: section,
             inward: maximized
                 ? ShelfHandleSpec.inset
                     + (spec.horizontal
-                        ? spec.grown.height : spec.grown.width)
+                        ? spec.hoverBand.height : spec.hoverBand.width)
                 : ShelfReveal.approachReach,
             cut: cut
         )

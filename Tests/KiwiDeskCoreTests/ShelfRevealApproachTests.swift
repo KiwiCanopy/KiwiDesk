@@ -4,67 +4,127 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// An Auto bar's approach (#3349), on `ShelfRevealerTests`' fixture
-/// and hand-fired timers: the handle thickens after the approach's
-/// wait, the bar opens on the dwell, on the thickened handle or on
-/// a push against a free edge, and an edge macOS owns takes the
-/// push for itself.
+/// An Auto bar's approach (#3349, #3360), on `ShelfRevealerTests`'
+/// fixture and hand-fired timers: entering the approach starts the
+/// fill at the handle's point nearest the pointer, and the bar
+/// opens as it completes — the dwell, hurried by a rest on the
+/// handle — or at once on a push against a free edge, and an edge
+/// macOS owns takes the push for itself.
 @Suite("Shelf approach (#3349)")
 @MainActor
 struct ShelfRevealApproachTests {
     typealias Suite = ShelfRevealerTests
 
-    /// The approach's wait, then the dwell's rest from the entry.
-    private var dwell: [TimeInterval] {
-        [ShelfReveal.dwellDelay - ShelfReveal.approachDelay]
-    }
-
-    @Test("Approach thickens the handle, then the dwell opens the bar")
+    @Test("The entry starts the fill, and the dwell opens the bar")
     func approachThenDwell() {
         let (revealer, timers, pointer) = Suite.make()
+        #expect(revealer.fills.isEmpty)
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 755))
-        #expect(timers.delays == [ShelfReveal.approachDelay])
-        #expect(revealer.arming.isEmpty)
-        timers.fireAll()
-        #expect(revealer.arming == [Suite.key])
+        #expect(timers.delays == [ShelfReveal.dwellDelay])
+        let fill = revealer.fills[Suite.key]
+        #expect(fill?.started == pointer.now)
+        #expect(abs((fill?.length ?? 0) - ShelfReveal.dwellDelay) < 1e-6)
         #expect(revealer.reveal(of: Suite.key) == .hidden)
-        #expect(timers.delays == dwell)
         timers.fireAll()
         #expect(revealer.reveal(of: Suite.key) == .hover)
-        #expect(revealer.arming.isEmpty)
+        #expect(revealer.fills.isEmpty)
     }
 
-    @Test("Resting on the thickened handle opens after the delay")
+    @Test("The fill starts nearest the pointer and keeps that start")
+    func fillKeepsItsStart() {
+        let (revealer, _, pointer) = Suite.make()
+        // The handle runs x 347–653: a quarter of the way along.
+        Suite.move(revealer, pointer, to: CGPoint(x: 423.5, y: 755))
+        let start = revealer.fills[Suite.key]?.origin ?? -1
+        #expect(abs(start - 0.25) < 0.001)
+        Suite.move(revealer, pointer, to: CGPoint(x: 600, y: 756))
+        #expect(revealer.fills[Suite.key]?.origin == start)
+        // Past the run's end the start holds at that end.
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 400))
+        Suite.move(revealer, pointer, to: CGPoint(x: 340, y: 760))
+        #expect(revealer.fills[Suite.key]?.origin == 0)
+    }
+
+    @Test("Resting on the handle hurries the fill to the delay")
     func handleOpens() {
         let (revealer, timers, pointer) = Suite.make()
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 755))
+        let origin = revealer.fills[Suite.key]?.origin
+        pointer.now += 0.1
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 768))
-        timers.fireAll()
-        // The approach fired: the dwell and the handle's delay run.
         #expect(
             timers.delays.sorted()
-                == (dwell + [ShelfReveal.revealDelay]).sorted()
+                == [ShelfReveal.revealDelay, ShelfReveal.dwellDelay]
+        )
+        #expect(
+            revealer.fills[Suite.key]
+                == .init(
+                    origin: origin ?? -1,
+                    started: pointer.now,
+                    until: pointer.now + ShelfReveal.revealDelay
+                )
         )
         timers.queue.removeAll { $0.delay != ShelfReveal.revealDelay }
         timers.fireAll()
         #expect(revealer.reveal(of: Suite.key) == .hover)
     }
 
-    @Test("Moving inside the approach does not restart the wait")
+    @Test("An entry onto the handle itself hurries the fill at once")
+    func entryOnTheHandleHurries() {
+        let (revealer, timers, pointer) = Suite.make()
+        revealer.onChange = { pointer.changes += 1 }
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 768))
+        // Set once, so its first draw runs from its start.
+        #expect(pointer.changes == 1)
+        #expect(
+            timers.delays.sorted()
+                == [ShelfReveal.revealDelay, ShelfReveal.dwellDelay]
+        )
+        let length = revealer.fills[Suite.key]?.length ?? 0
+        #expect(abs(length - ShelfReveal.revealDelay) < 1e-6)
+    }
+
+    @Test("A late rest on the handle never lengthens the fill")
+    func lateRestKeepsTheFill() {
+        let (revealer, timers, pointer) = Suite.make()
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 755))
+        let fill = revealer.fills[Suite.key]
+        pointer.now += 0.3
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 768))
+        #expect(revealer.fills[Suite.key] == fill)
+        #expect(timers.delays == [ShelfReveal.dwellDelay])
+    }
+
+    @Test("On a side edge the fill starts from the top, AX-wise")
+    func sideEdgeOrigin() {
+        let target = ShelfRevealer.Target.along(
+            CGRect(x: 0, y: 100, width: 3, height: 400),
+            edge: .left,
+            side: 0,
+            screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+            handle: CGRect(x: 0, y: 100, width: 9, height: 400)
+        )
+        // Cocoa y 400 is a quarter down from the handle's top, 500.
+        #expect(target.fillOrigin(at: CGPoint(x: 5, y: 400)) == 0.25)
+        #expect(target.fillOrigin(at: CGPoint(x: 5, y: 550)) == 0)
+        #expect(target.fillOrigin(at: CGPoint(x: 5, y: 50)) == 1)
+    }
+
+    @Test("Moving inside the approach does not restart the fill")
     func jitterKeepsTheDelay() {
         let (revealer, timers, pointer) = Suite.make()
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 755))
         Suite.move(revealer, pointer, to: CGPoint(x: 503, y: 756))
         Suite.move(revealer, pointer, to: CGPoint(x: 498, y: 754))
-        #expect(timers.delays.count == 1)
+        #expect(timers.delays == [ShelfReveal.dwellDelay])
     }
 
-    @Test("Leaving the approach cancels every wait")
+    @Test("Leaving the approach cancels the fill and the opening")
     func leavingCancels() {
         let (revealer, timers, pointer) = Suite.make()
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 755))
-        timers.fireAll()
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 400))
-        #expect(revealer.arming.isEmpty)
+        #expect(revealer.fills.isEmpty)
         timers.fireAll()
         #expect(revealer.reveal(of: Suite.key) == .hidden)
     }
@@ -101,13 +161,12 @@ struct ShelfRevealApproachTests {
         let (revealer, timers, pointer) = Suite.make(Suite.flush)
         pointer.edges = MacEdges(dock: nil, menuBar: true)
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 785))
-        timers.fireAll()
-        #expect(revealer.arming == [Suite.key])
+        #expect(revealer.fills[Suite.key] != nil)
         // The push: every wait ends, the handle rests.
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 800))
         #expect(revealer.reveal(of: Suite.key) == .hidden)
         #expect(revealer.ceded == [Suite.key])
-        #expect(revealer.arming.isEmpty)
+        #expect(revealer.fills.isEmpty)
         timers.fireAll()
         #expect(revealer.reveal(of: Suite.key) == .hidden)
         // However long the pointer then stays inside.
@@ -117,7 +176,7 @@ struct ShelfRevealApproachTests {
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 400))
         #expect(revealer.ceded.isEmpty)
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 785))
-        #expect(timers.delays == [ShelfReveal.approachDelay])
+        #expect(timers.delays == [ShelfReveal.dwellDelay])
     }
 
     @Test("Lingering just inside an edge macOS owns opens only the bar")
@@ -125,7 +184,6 @@ struct ShelfRevealApproachTests {
         let (revealer, timers, pointer) = Suite.make(Suite.flush)
         pointer.edges = MacEdges(dock: nil, menuBar: true)
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 794))
-        timers.fireAll()
         timers.fireAll()
         #expect(revealer.reveal(of: Suite.key) == .hover)
     }
@@ -170,16 +228,15 @@ struct ShelfRevealApproachTests {
     }
 
     /// A leave the monitor never heard — a drag that moves no
-    /// window — ends the thickening when the dwell runs out.
-    @Test("an unheard leave ends the thickening at the dwell")
-    func unheardLeaveEndsTheThickening() {
+    /// window — ends the fill when the dwell runs out.
+    @Test("an unheard leave ends the fill at the dwell")
+    func unheardLeaveEndsTheFill() {
         let (revealer, timers, pointer) = Suite.make(Suite.flush)
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 785))
-        timers.fireAll()
-        #expect(revealer.arming == [Suite.key])
+        #expect(revealer.fills[Suite.key] != nil)
         pointer.point = CGPoint(x: 500, y: 300)
         timers.fireAll()
-        #expect(revealer.arming.isEmpty)
+        #expect(revealer.fills.isEmpty)
         #expect(revealer.reveal(of: Suite.key) == .hidden)
     }
 }

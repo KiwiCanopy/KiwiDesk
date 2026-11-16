@@ -59,12 +59,13 @@ final class ShelfRevealer {
 
     private(set) var targets: [Key: Target] = [:]
     private(set) var phases: [Key: ShelfReveal] = [:]
-    /// Hidden bars whose handle is thickened — the pointer held in
-    /// the approach for `approachDelay` (#3349).
+    /// Hidden bars whose handle runs an approach's fill (#3360),
+    /// from the pointer's entry into the approach until the bar
+    /// opens or the pointer leaves.
     /// Written only by the revealer's own files (+Approach), as
     /// is every approach member below; a writer elsewhere is
     /// review's.
-    var arming: Set<Key> = []
+    var fills: [Key: ShelfHandleSpec.Fill] = [:]
     /// Approaches handed to macOS: the pointer touched the outermost
     /// row of an edge macOS owns, so nothing of KiwiDesk's runs
     /// until the pointer leaves the approach (#3349 rule 5).
@@ -73,7 +74,8 @@ final class ShelfRevealer {
     /// the entry and forgotten at the leave.
     var owned: [Key: Bool] = [:]
     /// The handle's own hover delay, apart from the approach's
-    /// timer, which the dwell follows.
+    /// timer, which the dwell follows: resting on the hover band
+    /// hurries the fill on to `revealDelay`.
     var handleTimers: [Key: ShelfRevealTimer] = [:]
     /// Shelves the action hid under the pointer: the hover stands
     /// down until the pointer leaves the shelf.
@@ -99,7 +101,7 @@ final class ShelfRevealer {
         handleTimers = [:]
         suppressed = []
         phases = [:]
-        arming = []
+        fills = [:]
         ceded = []
         owned = [:]
         syncMonitor()
@@ -160,7 +162,8 @@ final class ShelfRevealer {
             return false
         }
         cancelTimer(key)
-        arming.remove(key)
+        handleTimers.removeValue(forKey: key)?.cancel()
+        fills[key] = nil
         ceded.remove(key)
         owned[key] = nil
         let next = reveal(of: key).toggled(now: now(), duration: duration)
@@ -247,16 +250,16 @@ final class ShelfRevealer {
         }
     }
 
-    /// Marks `key` arming or not, reporting a change.
-    func setArming(_ key: Key, _ armed: Bool) {
-        guard arming.contains(key) != armed else { return }
-        if armed { arming.insert(key) } else { arming.remove(key) }
+    /// Sets `key`'s fill, reporting a change.
+    func setFill(_ key: Key, _ fill: ShelfHandleSpec.Fill?) {
+        guard fills[key] != fill else { return }
+        fills[key] = fill
         onChange()
     }
 
     func set(_ next: ShelfReveal, for key: Key) {
         if next.isShown {
-            arming.remove(key)
+            fills[key] = nil
             ceded.remove(key)
             owned[key] = nil
         }
@@ -283,7 +286,7 @@ final class ShelfRevealer {
     private func forget(_ key: Key) {
         cancelTimer(key)
         handleTimers.removeValue(forKey: key)?.cancel()
-        arming.remove(key)
+        fills[key] = nil
         ceded.remove(key)
         owned[key] = nil
         phases[key] = nil

@@ -80,10 +80,6 @@ struct ShelfRevealPairTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let space = try #require(spec(core, shelf, .space))
         let app = try #require(spec(core, shelf, .app))
-        guard case .dots = space.peek, case .glyphs = app.peek else {
-            Issue.record("the Space Bar peeks dots, the App Bar glyphs")
-            return
-        }
         #expect(space.frame.height == ShelfHandleSpec.depth)
         #expect(!space.frame.intersects(app.frame))
         let spaceIn = try #require(target(core, shelf, .space)?.approach)

@@ -31,11 +31,11 @@ struct ShelfRevealerTests {
     /// A top shelf 40 pt deep under a 25 pt menu bar on a
     /// 1000 x 800 screen, Cocoa coordinates, its bar drawing 300 pt
     /// in the middle while shown: the approach runs from y 751 up
-    /// to 779 past the shelf's side at 775, the thickened handle
+    /// to 779 past the shelf's side at 775, its hover band
     /// y 764–773.
     static let underMenuBar = target(stripY: 735)
     /// The same shelf flush with the screen's top: side 800,
-    /// approach y 776–804, handle y 789–798.
+    /// approach y 776–804, hover band y 789–798.
     static let flush = target(stripY: 760)
 
     static func target(stripY: CGFloat) -> ShelfRevealer.Target {
@@ -94,7 +94,7 @@ struct ShelfRevealerTests {
         revealer.moved(to: point)
     }
 
-    /// Opens the bar from the approach: its wait, then the dwell.
+    /// Opens the bar from the approach: the fill's dwell.
     static func open(_ revealer: ShelfRevealer, _ timers: Timers) {
         timers.fireAll()
         timers.fireAll()
@@ -183,7 +183,7 @@ struct ShelfRevealerTests {
         #expect(timers.delays.isEmpty)
         Self.move(revealer, pointer, to: CGPoint(x: 500, y: 300))
         Self.move(revealer, pointer, to: CGPoint(x: 500, y: 755))
-        #expect(timers.delays == [ShelfReveal.approachDelay])
+        #expect(timers.delays == [ShelfReveal.dwellDelay])
     }
 
     @Test("A show reports a change; a shelf that stops hiding forgets")

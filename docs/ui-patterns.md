@@ -1218,6 +1218,11 @@ ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
 mark growing under the pointer, and the shelf's expand
 (`docs/design-decisions.md` ▸ The bars honour Reduce Motion).
 
+:::unreleased
+A hidden bar's handle no longer grows under the pointer; its
+progress fill plays under Reduce Motion in its place (#3360).
+:::
+
 Nothing else is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
 put, so the sentence it belongs to is still marked, and the

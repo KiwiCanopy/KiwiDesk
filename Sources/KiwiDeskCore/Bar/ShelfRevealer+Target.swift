@@ -12,8 +12,8 @@ extension ShelfRevealer {
         /// (`ShelfReveal.approach`, #3349); nil for a `hidden` bar,
         /// which only its shortcut shows.
         var approach: CGRect?
-        /// The thickened handle, where resting `revealDelay` opens
-        /// the bar.
+        /// The handle's hover band (`ShelfHandleSpec.hoverBand`),
+        /// where resting hurries the fill on to `revealDelay`.
         var handle: CGRect?
         /// The handle rests against the screen's physical edge, so
         /// a push on a free edge opens the bar at once.
@@ -123,6 +123,18 @@ extension ShelfRevealer {
 
         /// Whether the pointer can open it.
         var hovers: Bool { approach != nil }
+
+        /// Where a fill entered at `point` starts (#3360 ▸ 7): the
+        /// share of the handle's run, from its AX leading end — the
+        /// left, or the top — nearest the point.
+        func fillOrigin(at point: CGPoint) -> CGFloat {
+            guard let handle, !handle.isEmpty else { return 0.5 }
+            let share =
+                edge.isHorizontal
+                ? (point.x - handle.minX) / handle.width
+                : (handle.maxY - point.y) / handle.height
+            return min(max(share, 0), 1)
+        }
 
         /// The outermost screen row along the approach, where a
         /// push lands (`ShelfReveal.edgeRow`).
