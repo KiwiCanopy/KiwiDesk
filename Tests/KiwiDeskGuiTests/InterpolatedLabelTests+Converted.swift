@@ -293,9 +293,6 @@ extension InterpolatedLabelTests {
         // The Track drawer's `?` (#1440): names the Layout
         // Defaults pane where the layout is tuned.
         "shortcuts.tracks.help": 1,
-        // Long swipes' greyed caption (#3369) names the card's
-        // own two families.
-        "shortcuts.gestures.scroll.long_swipes_off": 2,
         // The Mac Checklist (#1365): authored interpolating from
         // the start. Two captions name Open or Focus; the Dock
         // habit names the Space Bar too; the big-windows habit
