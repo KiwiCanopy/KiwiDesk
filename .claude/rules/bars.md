@@ -273,7 +273,14 @@ twice, was a question the user answered twice. The argument is
   `hidden` bar has no approach, and a hidden bar whose edge sibling
   shows yields, its handle standing aside
   (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
-  `docs/design-decisions.md` ▸ A shelf can hide). **The handle
+  `docs/design-decisions.md` ▸ A shelf can hide). **A revealed bar
+  lands under its handle**: the live plan places the drawn bars in
+  their slots of the one arrangement of the bars resting on the
+  edge (`ShelfEdge.resting`, cut by `ShelfArrangement.keeping`),
+  which the handle and the hold read as `ShelfPlan.revealed` —
+  never a second placement of a revealed bar beside it (#3359,
+  `ShelfLandingTests`, `ShelfHandleWiringTests` ▸
+  `holdIsWhereTheHandleRan`). **The handle
   reserves nothing**: `ShelfReservation` takes no hiding edge, and a
   new input that would reserve for an Auto bar is a ruling
   (`BarAutoHideFoldTests`). Whether a bar yields is the revealer's

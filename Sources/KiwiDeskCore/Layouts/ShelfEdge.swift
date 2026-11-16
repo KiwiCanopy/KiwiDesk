@@ -65,6 +65,20 @@ public struct ShelfEdge: Sendable, Equatable {
         Set(bars.keys.filter { shown($0) == .always })
     }
 
+    /// The bars the edge's arrangement places (#3359): those
+    /// `drawn` this pass, every `auto` bar, which rests as a handle,
+    /// and the `hover` bars a maximized window rests as handles —
+    /// so a revealed bar lands under its handle and moves no
+    /// sibling. A `hidden` bar counts only while drawn.
+    public func resting(
+        drawn: Set<ShelfBar>,
+        hover: Set<ShelfBar>
+    ) -> Set<ShelfBar> {
+        drawn.union(
+            bars.keys.filter { shown($0) == .auto || hover.contains($0) }
+        )
+    }
+
     /// Whether the edge draws nothing at rest, so a bar a reveal
     /// shows comes onto an empty edge and takes the reveal's own
     /// motion — Hidden as well as Auto — where one shown beside an

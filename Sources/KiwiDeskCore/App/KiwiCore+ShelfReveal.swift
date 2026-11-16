@@ -94,8 +94,8 @@ extension KiwiCore {
             let strip = flip(plan.strip)
             let barKey = { ShelfRevealer.Key(shelf: key, bar: $0) }
             let shown = { reveal.reveal(of: barKey($0)).isShown }
-            // Where each bar draws once revealed, so a hidden bar's
-            // handle runs along it (#3349).
+            // The one arrangement the edge's bars rest in: a
+            // handle runs, its bar lands and is held there (#3359).
             let placed = plan.revealed ?? (plan.arrangement, plan.needs)
             let slotOf = { (bar: ShelfBar) in
                 bar == .space

@@ -10,16 +10,19 @@ extension KiwiCore {
         let edge: AppBarEdge
         let strip: CGRect
         let horizontal: Bool
-        let arrangement: ShelfArrangement
+        /// The drawn bars' slots, cut from `revealed`'s arrangement
+        /// so a bar lands where its handle runs (#3359).
+        var arrangement: ShelfArrangement
         /// The edge's bars and their visibility (#761); the
         /// arrangement places only the ones drawn this pass.
         var shelfEdge: ShelfEdge
         /// Each drawn bar's natural run length, which its slot
         /// draws in (`ShelfArrangement.Slot.drawing`).
         var needs: [ShelfBar: CGFloat] = [:]
-        /// The arrangement and needs as if every bar on the edge
-        /// drew — where a hiding bar's handle runs (#3349); the
-        /// pass's own where every bar draws.
+        /// The arrangement and needs of every bar resting on the
+        /// edge (`ShelfEdge.resting`): where a handle runs, a bar
+        /// lands and a shown bar is held — one arrangement for all
+        /// three (#3349, #3359).
         var revealed:
             (
                 arrangement: ShelfArrangement,
@@ -58,8 +61,11 @@ extension KiwiCore {
     /// (`ShelfGeometry.strips`) — placing only the bars `drawn`
     /// answers for that edge (#761): the ones shown at rest and the
     /// ones a reveal shows, read in `mode`, the layout the screen
-    /// shows. A plan that draws nothing still carries
-    /// its strip, where a hidden bar's shortcut would show it.
+    /// shows. Each drawn bar stands in its slot of the bars
+    /// resting on the edge, `hover` the bars a maximized window's
+    /// screen brings in (#3359). A plan that draws nothing still
+    /// carries its strip, where a hidden bar's shortcut would show
+    /// it.
     func shelfPlans(
         visible: CGRect,
         settings: TilingSettings,
@@ -67,6 +73,7 @@ extension KiwiCore {
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
         pocket: Bool,
+        hover: Set<ShelfBar> = [],
         drawn: (ShelfEdge) -> Set<ShelfBar>
     ) -> [ShelfPlan] {
         // The bars as the screen's shown layout reads them (#2976).
@@ -95,9 +102,10 @@ extension KiwiCore {
                 )
             }
             let bars = drawn(shelfEdge)
-            var plan = place(bars)
-            let every = Set(shelfEdge.bars.keys)
-            let full = bars == every ? plan : place(every)
+            let full = place(shelfEdge.resting(drawn: bars, hover: hover))
+            var plan = full
+            plan.arrangement = full.arrangement.keeping(bars)
+            plan.needs = full.needs.filter { bars.contains($0.key) }
             plan.revealed = (full.arrangement, full.needs)
             return plan
         }

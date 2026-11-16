@@ -19850,6 +19850,26 @@ Dock stays shown for as long as the pointer stays there. So:
   preferences as the pointer enters an approach, at about a
   microsecond a read, with no cache and no notification to miss. An
   unreadable key reads as macOS's default, a free edge.
+- *A revealed bar lands under its handle* (owner, 2026-11-16,
+  #3359). The handle, the landing and the hold read one
+  arrangement: every bar resting on the edge — the bars drawn, the
+  Auto bars, whose handles rest there, and the bars a maximized
+  window brings in — with a stored Hidden bar counted only while it
+  is revealed. Revealing the second bar then moves the first
+  nowhere. A bar that came in somewhere other than where its handle
+  showed broke the handle's one promise, and its hold, taken from
+  the handle's run, left part of the drawn bar outside it to
+  retract under the pointer. The trade: a lone revealed Auto bar no
+  longer centres while its sibling rests as a handle. It stands in
+  its share, off-centre by half its sibling's length, and a pair
+  too wide for the edge caps that share, so the bar may scroll.
+  Moving the handles to where a lone bar lands was the other way,
+  and it fails on any shared edge: two lone bars sit at the same
+  place under every alignment, so their handles would overlap.
+  Beside a Hidden sibling the Auto bar's handle rests alone and
+  centred, and the Hidden bar shown by its shortcut joins it as it
+  joins an Always sibling. Two Hidden bars are unchanged: one
+  revealed lands alone. `reveal_style` stays one setting for both.
 :::
 
 A reveal onto an edge that shows nothing else slides the whole bar

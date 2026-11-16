@@ -4096,6 +4096,13 @@ Two `"auto"` bars on one edge draw two handles, each along its own
 bar. The pointer opens one bar at a time: while a bar is shown, the
 other's handle goes away. A thickened handle wears the bars'
 [Liquid Glass](#kiwishelfset_liquid_glass).
+
+A revealed bar lands under its handle, in its share of the edge
+beside its sibling's handle, so it sits off-centre and a long App
+Bar may scroll in its share. Beside a `"hidden"` sibling an
+`"auto"` bar's handle runs alone; the hidden bar, shown by its
+shortcut, joins it side by side and the handle moves to its shared
+place.
 :::
 
 **Example:**
