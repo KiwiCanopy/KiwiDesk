@@ -6,14 +6,13 @@ import SwiftUI
 /// its entry alone.
 enum GestureItem: String, CaseIterable, Identifiable {
     case hoverFocus, followFocus
-    case swap, edge
-    case scrollStep, spaceStep
+    case swap
     case dropOnSpace, spring, glyphClick, glyphPeek, shelfScroll
     case contextMenu, appBarReorder, appBarHover
 
     /// Where the hand is: the part's groups.
     enum Group: CaseIterable {
-        case windows, modifier, shelf
+        case windows, shelf
     }
 
     var id: String { rawValue }
@@ -23,36 +22,30 @@ enum GestureItem: String, CaseIterable, Identifiable {
 
     var group: Group {
         switch self {
-        case .scrollStep, .spaceStep: return .modifier
-        case .hoverFocus, .followFocus, .swap, .edge: return .windows
+        case .hoverFocus, .followFocus, .swap: return .windows
         default: return .shelf
         }
     }
 
     var pace: GesturePace {
         switch self {
-        case .edge, .shelfScroll: return .quick
-        case .spaceStep, .swap, .dropOnSpace, .spring: return .story
+        case .shelfScroll: return .quick
+        case .swap, .dropOnSpace, .spring: return .story
         default: return .steps
         }
     }
 
-    /// Whether the gesture does nothing on this draft. The scroll
-    /// chords are gesture bindings (#3199), which #3183's card draws
-    /// and judges; until then no entry greys.
+    /// Whether the gesture does nothing on this draft. The bound
+    /// gestures are the Mouse and Trackpad cards' to judge (#3369),
+    /// so no entry greys.
     func isOff(_ gestures: ScrollGestureBase) -> Bool { false }
 
     @MainActor @ViewBuilder
     func picture(t: CGFloat, gestures: ScrollGestureBase) -> some View {
         switch self {
-        case .scrollStep:
-            GesturePicture.ScrollStep(t: t, chord: GestureSeeds.panKeys)
-        case .spaceStep:
-            GesturePicture.SpaceStep(t: t, chord: GestureSeeds.stepKeys)
         case .hoverFocus: GesturePicture.HoverFocus(t: t)
         case .followFocus: GesturePicture.FollowFocus(t: t)
         case .swap: GesturePicture.Swap(t: t)
-        case .edge: GesturePicture.Edge(t: t)
         case .dropOnSpace: GesturePicture.DropOnSpace(t: t)
         case .spring: GesturePicture.Spring(t: t)
         case .glyphClick: GesturePicture.GlyphClick(t: t)

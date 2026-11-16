@@ -110,9 +110,11 @@ struct GesturesLayoutTests {
         }
         func controlled() -> some View {
             GestureEntry("With a control") {
-                GesturePicture.Edge(t: $0)
+                GesturePicture.Swap(t: $0)
             } control: {
-                MouseResizePicker(selection: .constant(.layout))
+                // A segmented strip's width, too wide to sit beside
+                // the picture at the narrow width.
+                Color.clear.frame(width: 320, height: 22)
             }
         }
         let bareWide = try height(bare(), width: wide)

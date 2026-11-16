@@ -218,7 +218,7 @@ struct DefaultShortcutsRow: View {
         case .matchesDefaults?, .otherLayerPicked?, .onlyDefaultLayer?,
             .trackUnused?,
             .appWideLuaOwned?, .storedProfilePage?, .noBarShows?,
-            .focusBorderOff?:
+            .focusBorderOff?, .noPanSwipe?:
             return L(
                 "shortcuts.restore_defaults.at_defaults",
                 "Every default shortcut is in place."

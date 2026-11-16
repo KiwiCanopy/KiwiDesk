@@ -42,8 +42,7 @@ struct GesturesPartTests {
     func entriesAreTheItems() throws {
         var all = ""
         for file in [
-            "GesturesPart.swift", "GesturesScrollEntries.swift",
-            "GesturesShelfEntries.swift",
+            "GesturesPart.swift", "GesturesShelfEntries.swift",
         ] {
             all += Self.squash(try Self.source(Self.gestures + file))
         }
@@ -79,15 +78,14 @@ struct GesturesPartTests {
         let drawer = Self.squash(
             try Self.source(Self.gestures + "GesturesPart.swift")
         )
-        let order = [
+        let needles = [
             "SettingsCatalog.shortcuts.gesturesOnWindows",
             "focusEntries", "windowEntries",
-            "SettingsCatalog.shortcuts.gesturesModifier",
-            "GesturesScrollEntries(",
             "SettingsCatalog.shortcuts.gesturesOnShelf",
             "GesturesShelfEntries(",
-        ].compactMap { drawer.range(of: $0)?.lowerBound }
-        #expect(order.count == 7 && order == order.sorted())
+        ]
+        let order = needles.compactMap { drawer.range(of: $0)?.lowerBound }
+        #expect(order.count == needles.count && order == order.sorted())
         // Group order follows the items' declared groups.
         let ranks = GestureItem.allCases.compactMap {
             GestureItem.Group.allCases.firstIndex(of: $0.group)

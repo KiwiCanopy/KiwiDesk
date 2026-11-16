@@ -1,0 +1,541 @@
+#!/usr/bin/env python3
+"""Diff two SketchyBar App Font drops for the re-vendor PR.
+
+Run by .github/workflows/app-font.yml after
+scripts/update-app-font.sh: OLD is the font on the base branch,
+NEW the one the script just vendored. It answers the one question
+the PR's reviewer has: does any app the App Bar draws a glyph for
+draw a different one now? A drop where none does can land on
+green.
+
+The bar reaches a ligature only through an app name, resolved by
+`AppFontGlyphMap.ligature(for:)`: an exact name first, then the
+longest `*` prefix. `Table.resolve` mirrors that, and
+`AppFontDiffScriptTests` holds the two equal. The `APPM` table is
+read in the schema `AppFontGlyphMap.load(fontData:)` decodes
+(version 1, rows of [ligature, codepoint, names | null]); a schema
+change moves that decoder, update-app-font.sh's sanity check and
+this file together.
+
+A ligature's glyph is the one its text shapes to through the
+font's `liga` lookup, since the bar draws the text. A ligature
+that no longer shapes draws nothing; the codepoint is used only to
+render it.
+
+Writes into --out:
+  summary.md   the PR body's glyph section
+  notes.md     upstream release notes after --from up to --to,
+               collapsed (empty without --releases)
+  glyphs.html  before/after renders of what changed, plus the
+               additions
+Prints `look=true` or `look=false` for $GITHUB_OUTPUT.
+
+Usage:
+  scripts/app-font-diff OLD.ttf NEW.ttf --out DIR \\
+      [--releases releases.json --from v3.0.22 --to v3.0.26]
+  scripts/app-font-diff --model MODEL.json
+      classify a font-free model ({"old"|"new": {"icons": rows,
+      "sigs": {ligature: signature}}, "probes": [names]}) and
+      print the result as JSON; how the suite reaches the logic
+      without fontTools
+
+The font mode needs fontTools (the workflow pins the version).
+"""
+
+import argparse
+import html
+import json
+import logging
+import re
+import sys
+from pathlib import Path
+
+UPSTREAM = "https://github.com/kvndrsslr/sketchybar-app-font"
+# GitHub refuses a PR body past 65,536 characters; the workflow's
+# own lines take the reserve, the notes whatever the glyph section
+# leaves.
+BODY_BUDGET = 65536 - 4000
+# Rows a list in the glyph section shows before it refers to the
+# renders.
+ROW_CAP = 100
+
+
+class Table:
+    """An APPM name table: AppFontGlyphMap's resolution, in Python.
+
+    `rows` are [ligature, codepoint, names | null]; a ligature
+    listed on two rows keeps both rows' names, as the Swift
+    decoder's flatMap does.
+    """
+
+    def __init__(self, rows):
+        self.names = {}  # ligature -> [names], merged
+        self.exact = {}
+        prefixes = []
+        for row in rows:
+            ligature, names = row[0], row[2] or []
+            if not isinstance(ligature, str) or not ligature:
+                continue
+            self.names.setdefault(ligature, []).extend(names)
+            for name in names:
+                if name.endswith("*"):
+                    if name[:-1]:
+                        prefixes.append((name[:-1], ligature))
+                elif name:
+                    self.exact[name] = ligature
+        # Longest first, so the first hit is the most specific.
+        self.prefixes = sorted(prefixes, key=lambda p: -len(p[0]))
+
+    def resolve(self, name):
+        if name in self.exact:
+            return self.exact[name]
+        for prefix, ligature in self.prefixes:
+            if name.startswith(prefix):
+                return ligature
+        return None
+
+    def probes(self):
+        """Every name this table can tell apart: each exact name,
+        each prefix's stem, and the stem plus a character no exact
+        name carries, which reaches the prefix where the stem is
+        also an exact name."""
+        stems = {p for p, _ in self.prefixes}
+        return set(self.exact) | stems | {p + TAIL for p in stems}
+
+
+class Font:
+    """One drop: its table and the glyph each ligature draws."""
+
+    def __init__(self, path):
+        from fontTools.ttLib import TTFont
+
+        self.font = TTFont(path)
+        payload = json.loads(self.font["meta"].data["APPM"])
+        if payload.get("version") != 1:
+            raise SystemExit(f"{path}: unknown APPM schema")
+        self.release = payload.get("release")
+        self.table = Table(payload["icons"])
+        self.glyphs = self.font.getGlyphSet()
+        self.advances = self.font["hmtx"].metrics
+        cmap = self.font.getBestCmap()
+        ligatures = self._ligature_table()
+        self.drawn = {}  # ligature -> glyph its text shapes to
+        self.rendered = {}  # ligature -> glyph to picture
+        for row in payload["icons"]:
+            ligature, codepoint = row[0], row[1]
+            if not isinstance(ligature, str) or not ligature:
+                continue
+            shaped = self._shape(ligature, cmap, ligatures)
+            self.drawn[ligature] = shaped
+            self.rendered[ligature] = shaped or cmap.get(codepoint)
+
+    def _ligature_table(self):
+        table = {}
+        if "GSUB" not in self.font:
+            return table
+        gsub = self.font["GSUB"].table
+        for record in gsub.FeatureList.FeatureRecord:
+            if record.FeatureTag != "liga":
+                continue
+            for index in record.Feature.LookupListIndex:
+                lookup = gsub.LookupList.Lookup[index]
+                for sub in lookup.SubTable:
+                    if lookup.LookupType == 7:
+                        sub = sub.ExtSubTable
+                    for first, ligs in getattr(
+                        sub, "ligatures", {}
+                    ).items():
+                        for lig in ligs:
+                            key = (first, *lig.Component)
+                            table.setdefault(key, lig.LigGlyph)
+        return table
+
+    @staticmethod
+    def _shape(text, cmap, ligatures):
+        names = [cmap.get(ord(ch)) for ch in text]
+        if None in names:
+            return None
+        return ligatures.get(tuple(names))
+
+    def _outline(self, glyph):
+        from fontTools.pens.recordingPen import (
+            DecomposingRecordingPen,
+        )
+
+        pen = DecomposingRecordingPen(self.glyphs)
+        self.glyphs[glyph].draw(pen)
+        return repr((self.advances[glyph][0], pen.value))
+
+    def signatures(self):
+        """ligature -> its drawn outline, None where it draws
+        nothing."""
+        return {
+            lig: self._outline(glyph)
+            if glyph in self.glyphs
+            else None
+            for lig, glyph in self.drawn.items()
+        }
+
+    def svg(self, ligature, size=48):
+        from fontTools.pens.svgPathPen import SVGPathPen
+
+        glyph = self.rendered.get(ligature)
+        if glyph is None or glyph not in self.glyphs:
+            return NONE
+        pen = SVGPathPen(self.glyphs)
+        self.glyphs[glyph].draw(pen)
+        upm = self.font["head"].unitsPerEm
+        hhea = self.font["hhea"]
+        top, bottom = hhea.ascent, hhea.descent
+        width = max(self.advances[glyph][0], upm)
+        height = top - bottom
+        shaped = "" if self.drawn.get(ligature) else (
+            '<br><span class="none">(no longer shapes)</span>')
+        return (
+            f'<svg xmlns="http://www.w3.org/2000/svg" '
+            f'width="{size * width / height:.0f}" height="{size}" '
+            f'viewBox="0 {-top} {width} {height}">'
+            f'<path transform="scale(1,-1)" '
+            f'd="{pen.getCommands()}"/></svg>{shaped}'
+        )
+
+
+NONE = '<span class="none">app icon</span>'
+# Appended to a prefix's stem to probe the prefix itself; shown as
+# the prefix's own spelling.
+TAIL = "\u0000"
+
+
+def shown(name):
+    return name.replace(TAIL, "*")
+
+
+def classify(old, new, old_sigs, new_sigs, extra_probes=()):
+    """The verdict over two tables and their signatures."""
+    result = {"added": [], "removed": [], "changed": [], "unchanged": []}
+    for lig in sorted(set(old.names) | set(new.names)):
+        if lig not in old.names:
+            result["added"].append(lig)
+        elif lig not in new.names:
+            result["removed"].append(lig)
+        elif old_sigs.get(lig) != new_sigs.get(lig):
+            result["changed"].append(lig)
+        else:
+            result["unchanged"].append(lig)
+
+    # A removed ligature whose outline an added one carries is a
+    # rename, not a loss.
+    result["renamed"] = []
+    added = {}
+    for lig in result["added"]:
+        if new_sigs.get(lig) is not None:
+            added.setdefault(new_sigs[lig], lig)
+    for lig in list(result["removed"]):
+        twin = added.pop(old_sigs.get(lig), None)
+        if twin is not None:
+            result["removed"].remove(lig)
+            result["added"].remove(twin)
+            result["renamed"].append([lig, twin])
+
+    # The verdict: every name either table can tell apart, resolved
+    # through each, by the glyph it draws. A name that drew nothing
+    # before and draws a glyph now only adds.
+    probes = old.probes() | new.probes() | set(extra_probes)
+    result["redrawn"] = []
+    result["named"] = []
+    resolved = {"old": {}, "new": {}}
+    for name in sorted(probes):
+        was, now = old.resolve(name), new.resolve(name)
+        resolved["old"][name], resolved["new"][name] = was, now
+        before = old_sigs.get(was) if was else None
+        after = new_sigs.get(now) if now else None
+        if before is None:
+            if after is not None and (was, now) != (None, None):
+                result["named"].append([name, now])
+        elif before != after:
+            result["redrawn"].append(
+                [name, was, now, why(was, now, after)]
+            )
+    result["look"] = bool(result["redrawn"])
+    result["resolved"] = resolved
+    return result
+
+
+MENTION = re.compile(r"(?<![\w/.])@(?=[A-Za-z0-9-])")
+BARE_REF = re.compile(r"(?<![\w/&#])#(\d+)\b")
+GH_REF = re.compile(r"(?<![\w/-])GH-(\d+)\b", re.IGNORECASE)
+
+
+def quiet(text):
+    """Upstream text, made inert in this repo: a mention would
+    notify upstream's people from our PR, and a bare #N or GH-N
+    would link to this repo's issue N."""
+    text = MENTION.sub("@​", text)
+    text = BARE_REF.sub(rf"[#\1]({UPSTREAM}/issues/\1)", text)
+    return GH_REF.sub(rf"[GH-\1]({UPSTREAM}/issues/\1)", text)
+
+
+def cell(text):
+    return quiet(shown(text)).replace("|", "\\|").replace("<", "&lt;")
+
+
+def apps(table, ligature):
+    names = table.names.get(ligature) or []
+    return ", ".join(names) if names else "(no app)"
+
+
+def why(was, now, after):
+    if now is None:
+        return "no longer mapped"
+    if after is None:
+        return "no longer shapes"
+    if was == now:
+        return "outline changed"
+    return "moved to another glyph"
+
+
+def capped(rows, noun):
+    if len(rows) <= ROW_CAP:
+        return rows
+    rest = len(rows) - ROW_CAP
+    return rows[:ROW_CAP] + [
+        f"{rest} more {noun}: see the renders."
+    ]
+
+
+def glyph_section(old, new, result):
+    out = ["### Glyph diff", ""]
+    counts = (
+        f"Ligatures: {len(result['added'])} added, "
+        f"{len(result['removed'])} removed, "
+        f"{len(result['renamed'])} renamed, "
+        f"{len(result['changed'])} changed, "
+        f"{len(result['unchanged'])} unchanged. App names: "
+        f"{len(result['named'])} newly drawn, "
+        f"{len(result['redrawn'])} drawing a different glyph."
+    )
+    if not result["look"]:
+        out += [
+            "**No look needed.** Every app the App Bar drew a "
+            "glyph for draws the identical glyph; this drop only "
+            "adds. It carries the `app-font: additions only` "
+            "label and may land on green.",
+            "",
+            counts,
+        ]
+    else:
+        out += [
+            "**Needs the owner's look.** These apps draw a "
+            "different glyph than before; check exactly these "
+            "in the App Bar (renders linked below):",
+            "",
+            counts,
+            "",
+            "| App | Before | After | Why |",
+            "|---|---|---|---|",
+        ]
+        rows = []
+        for name, was, now, reason in result["redrawn"]:
+            after = f"`{now}`" if now else "app icon"
+            rows.append(
+                f"| {cell(name)} | `{was}` | {after} | {reason} |"
+            )
+        out += capped(rows, "apps")
+    # Ligature changes no app draws: listed, never gating.
+    redrawn = {row[1] for row in result["redrawn"]}
+    quiet_rows = [f"- `{lig}` removed" for lig in result["removed"]]
+    quiet_rows += [
+        f"- `{lig}` renamed to `{twin}`"
+        for lig, twin in result["renamed"]
+    ]
+    quiet_rows += [
+        f"- `{lig}` outline changed"
+        for lig in result["changed"]
+        if lig not in redrawn
+    ]
+    if quiet_rows:
+        out += [
+            "",
+            "Ligature changes that move no app's glyph (the bar "
+            "reaches a ligature only through an app name):",
+            "",
+            *capped(quiet_rows, "ligatures"),
+        ]
+    fresh = set(result["added"])
+    additions = [
+        f"- `{lig}`: {cell(apps(new.table, lig))}"
+        for lig in result["added"]
+    ]
+    additions += [
+        f"- {cell(name)} now draws `{lig}`"
+        for name, lig in result["named"]
+        if lig not in fresh
+    ]
+    if additions:
+        out += ["", "<details>", "<summary>Additions</summary>", ""]
+        out += capped(additions, "additions")
+        out += ["", "</details>"]
+    return "\n".join(out)
+
+
+def notes_section(releases, start, end, budget):
+    """Every release after `start` up to and including `end`,
+    newest first as GitHub lists them; nothing when the span is
+    not a forward one."""
+    tags = [r.get("tag_name") for r in releases]
+    if not start or end not in tags:
+        return ""
+    if start in tags and tags.index(start) <= tags.index(end):
+        return ""  # a downgrade, or no move at all
+    picked, reached = [], False
+    for release in releases[tags.index(end):]:
+        if release.get("tag_name") == start:
+            reached = True
+            break
+        if not release.get("draft"):
+            picked.append(release)
+    if not picked:
+        return ""
+    span = picked[-1]["tag_name"]
+    if span != end:
+        span = f"{span} … {end}"
+    out = [
+        "<details>",
+        f"<summary>Upstream release notes ({span})</summary>",
+        "",
+    ]
+    used = 0
+    for index, release in enumerate(picked):
+        tag = release["tag_name"]
+        body = quiet(html.escape(
+            (release.get("body") or "").strip(), quote=False
+        ))
+        block = [f"#### [{tag}]({release['html_url']})", ""]
+        block += [
+            f"> {line}" if line else ">"
+            for line in body.splitlines()
+        ] or ["> (no notes)"]
+        block.append("")
+        size = sum(len(line) + 1 for line in block)
+        if used + size > budget:
+            rest = len(picked) - index
+            out.append(
+                f"{rest} older release(s) cut for length: see "
+                f"[the releases]({UPSTREAM}/releases)."
+            )
+            break
+        out += block
+        used += size
+    if not reached:
+        out.append(
+            f"The list stops before `{start}`; older notes are "
+            f"on [the releases page]({UPSTREAM}/releases)."
+        )
+    out += ["", "</details>"]
+    return "\n".join(out)
+
+
+def sheet(old, new, result):
+    rows = []
+
+    def row(kind, label, before, after):
+        rows.append(
+            f"<tr><td>{html.escape(kind)}</td>"
+            f"<td><code>{html.escape(label)}</code></td>"
+            f"<td>{before}</td><td>{after}</td></tr>"
+        )
+
+    pictured = set()
+    for name, was, now, reason in result["redrawn"]:
+        name = shown(name)
+        label = f"{name}: {was}" if was == now else (
+            f"{name}: {was} → {now or '—'}")
+        row(reason, label,
+            old.svg(was), new.svg(now) if now else NONE)
+        pictured.add(was)
+    for lig in result["removed"]:
+        row("removed", lig, old.svg(lig), NONE)
+    for lig, twin in result["renamed"]:
+        row("renamed", f"{lig} → {twin}", old.svg(lig), new.svg(twin))
+    for lig in result["changed"]:
+        if lig not in pictured:
+            row("changed", f"{lig} ({apps(new.table, lig)})",
+                old.svg(lig), new.svg(lig))
+    for lig in result["added"]:
+        row("added", f"{lig} ({apps(new.table, lig)})",
+            NONE, new.svg(lig))
+    title = f"App Font {old.release} → {new.release}"
+    return f"""<!doctype html>
+<meta charset="utf-8">
+<title>{html.escape(title)}</title>
+<style>
+body {{ font: 14px -apple-system, system-ui, sans-serif;
+       margin: 24px; color: #111; background: #fff; }}
+table {{ border-collapse: collapse; }}
+td, th {{ border: 1px solid #ccc; padding: 6px 10px;
+          vertical-align: middle; }}
+svg path {{ fill: currentColor; }}
+.none {{ color: #999; }}
+</style>
+<h1>{html.escape(title)}</h1>
+<table>
+<tr><th>Change</th><th>Ligature / app</th>
+<th>Before</th><th>After</th></tr>
+{chr(10).join(rows) or '<tr><td colspan="4">No changes</td></tr>'}
+</table>
+"""
+
+
+def run_model(path):
+    model = json.loads(Path(path).read_text())
+    old, new = model["old"], model["new"]
+    result = classify(
+        Table(old["icons"]),
+        Table(new["icons"]),
+        old["sigs"],
+        new["sigs"],
+        model.get("probes", ()),
+    )
+    print(json.dumps(result, sort_keys=True))
+    return 0
+
+
+def main():
+    logging.disable(logging.WARNING)  # fontTools' post-table chatter
+    parser = argparse.ArgumentParser()
+    parser.add_argument("old", nargs="?")
+    parser.add_argument("new", nargs="?")
+    parser.add_argument("--model")
+    parser.add_argument("--out")
+    parser.add_argument("--releases")
+    parser.add_argument("--from", dest="start")
+    parser.add_argument("--to", dest="end")
+    args = parser.parse_args()
+    if args.model:
+        return run_model(args.model)
+    if not (args.old and args.new and args.out):
+        parser.error("OLD, NEW and --out are required")
+
+    old, new = Font(args.old), Font(args.new)
+    result = classify(
+        old.table, new.table, old.signatures(), new.signatures()
+    )
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    summary = glyph_section(old, new, result) + "\n"
+    (out / "summary.md").write_text(summary)
+    notes = ""
+    if args.releases:
+        releases = json.loads(Path(args.releases).read_text())
+        notes = notes_section(
+            releases, args.start, args.end,
+            BODY_BUDGET - len(summary),
+        )
+    (out / "notes.md").write_text(notes + "\n" if notes else "")
+    (out / "glyphs.html").write_text(sheet(old, new, result))
+    print(f"look={'true' if result['look'] else 'false'}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

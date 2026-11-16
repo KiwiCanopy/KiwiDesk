@@ -52,43 +52,6 @@ enum GesturePicture {
         }
     }
 
-    /// Drag an edge: one window grows as its neighbour gives way.
-    struct Edge: View, Animatable {
-        var t: CGFloat
-        nonisolated var animatableData: CGFloat {
-            get { t }
-            set { t = newValue }
-        }
-        @Environment(\.schematicPalette) private var palette
-
-        var body: some View {
-            let ink = GestureInk(palette: palette)
-            let edge = gestureLerp(60, 74, t)
-            ZStack(alignment: .topLeading) {
-                ink.window(
-                    CGRect(x: 8, y: 10, width: edge - 10, height: 52)
-                )
-                ink.window(
-                    CGRect(
-                        x: edge + 2,
-                        y: 10,
-                        width: 110 - edge,
-                        height: 52
-                    )
-                )
-                Rectangle()
-                    .fill(ink.ink.opacity(0.35))
-                    .frame(width: 1, height: 56)
-                    .offset(x: 60, y: 8)
-                Capsule()
-                    .fill(ink.accent)
-                    .frame(width: 3, height: 24)
-                    .offset(x: edge - 0.5, y: 24)
-                ink.pointer(at: CGPoint(x: edge + 1, y: 34))
-            }
-        }
-    }
-
     /// Focus moves first; then the pointer jumps to the window
     /// that took it, in one frame, the way the warp does.
     struct FollowFocus: View, Animatable {

@@ -85,7 +85,7 @@ extension SettingRuntimeGate {
             .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
-            .noBindingStore, .defaultsToRestore:
+            .noBindingStore, .defaultsToRestore, .noPanSwipe:
             return true
         case .orphanPinsExist, .screensDisconnected,
             .paletteGlowPairing, .lookReplacedUnsavedColors,
@@ -119,6 +119,10 @@ extension SettingRuntimeGate {
         case .defaultsToRestore:
             // Nothing on the surface says the default layer
             // matches the shipped set (#3074).
+            return false
+        case .noPanSwipe:
+            // The rows above show the bindings, not that long swipes
+            // need a focus or walk swipe (#3369).
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true

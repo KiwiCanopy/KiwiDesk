@@ -4,7 +4,7 @@ import SwiftUI
 /// Shortcuts ▸ Mouse & Trackpad (#1726, #3184): the Mouse and
 /// Trackpad binding cards first (#3298), then what the mouse and
 /// trackpad do, in open groups ordered by where the hand is — on
-/// your windows, holding a modifier, on the KiwiShelf. An entry
+/// your windows, on the KiwiShelf. An entry
 /// lands with its feature, never before, and one whose surface is
 /// off greys with a pointer to where it turns on. It mounts
 /// inside the section's `keybindingLayerName` scope, so a gesture
@@ -24,9 +24,6 @@ struct GesturesPart: View {
                 focusEntries
                 GestureRule()
                 windowEntries
-            }
-            SettingsSection(SettingsCatalog.shortcuts.gesturesModifier) {
-                GesturesScrollEntries(model: model)
             }
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnShelf) {
                 GesturesShelfEntries(model: model)
@@ -87,23 +84,6 @@ struct GesturesPart: View {
             gestures: model.config.scrollGesture
         )
         .gestureAnchored(.swap)
-        GestureRule()
-        GestureEntry(
-            .edge,
-            settings: settings,
-            gestures: model.config.scrollGesture,
-            help: MouseResizePicker.help,
-            helpSubject: MouseResizePicker.spokenLabel
-        ) {
-            MouseResizePicker(
-                selection: $model.config.settings.mouseResize
-            )
-            .searchAnchored(
-                SettingsCatalog.shortcuts.gestures.children
-                    .mouseResize
-            )
-        }
-        .gestureAnchored(.edge)
     }
 }
 
@@ -171,54 +151,5 @@ extension GesturesPart {
                 + "moves under the pointer — click it, or its item in "
                 + "the App Bar or Space Bar, to bring it in."
         )
-    }
-}
-
-/// The Mouse resize action picker, moved from Behavior ▸ Mouse
-/// with #1726; its keys keep their `behavior.mouse.*` names.
-struct MouseResizePicker: View {
-    @Binding var selection: MouseResizeMode
-
-    /// No visible label: the entry's sentence names the control,
-    /// and its `?` sits after that sentence (`help`). The label
-    /// key names it for VoiceOver and for the census.
-    var body: some View {
-        SegmentedPicker(
-            spokenLabel: Self.spokenLabel,
-            hugsLabels: true,
-            selection: $selection,
-            options: [
-                (layoutLabel, MouseResizeMode.layout),
-                (snapBackLabel, .snapBack),
-            ]
-        )
-    }
-
-    static var spokenLabel: String {
-        L("behavior.mouse.resize_action", "Mouse resize action")
-    }
-
-    /// The options, explained: the `?` the edge entry's sentence
-    /// carries.
-    static var help: String {
-        L(
-            "behavior.mouse.resize_action.help",
-            "**%1$@** — Dragging a "
-                + "window's edge resizes it and reflows "
-                + "its neighbours in the layout.\n**%2$@**"
-                + " — The window resizes "
-                + "freely while you drag, then snaps back "
-                + "to its tiled size when you release.",
-            L("behavior.mouse.resize_layout", "Resize adjacent windows"),
-            L("behavior.mouse.resize_snap_back", "Snap back to slot")
-        )
-    }
-
-    private var layoutLabel: String {
-        L("behavior.mouse.resize_layout", "Resize adjacent windows")
-    }
-
-    private var snapBackLabel: String {
-        L("behavior.mouse.resize_snap_back", "Snap back to slot")
     }
 }

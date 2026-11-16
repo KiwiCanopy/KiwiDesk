@@ -47,7 +47,7 @@ enum ScrollGestureWords {
     static var longSwipes: String {
         L(
             "shortcuts.gestures.scroll.long_swipes",
-            "Long swipes move more windows"
+            "Long two-finger swipes move focus further"
         )
     }
 
