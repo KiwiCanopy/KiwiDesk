@@ -7,9 +7,13 @@ name: Update App Font
 # runs scripts/update-app-font.sh, and nothing reminds anyone to.
 #
 # This workflow runs that same script — it is not a second copy of
-# the vendoring logic — and opens a PR. It never writes to main:
-# the drop is reviewed like any other change, because a new
-# upstream release can retire a ligature the App Bar draws.
+# the vendoring logic — and opens a PR. It never writes to main
+# and never arms auto-merge: the orchestrator lands the PR. The PR
+# says whether it needs the owner's look: scripts/app-font-diff
+# compares the base branch's font with the new one per app name,
+# and a drop that changes no glyph an app drew is labelled
+# `app-font: additions only` and may land on green. The upstream
+# release notes since the vendored tag ride along, collapsed.
 #
 # The PR is opened with RELEASE_SYNC_TOKEN, the owner's PAT
 # changelog.yml threads for the same reason (#1154): a real actor's
@@ -35,6 +39,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # The additions-only label is created on first use.
+  issues: write
 
 # One vendoring run at a time; never cancel one mid-push.
 concurrency:
@@ -51,6 +57,7 @@ jobs:
     outputs:
       tag: ${{ steps.upstream.outputs.tag }}
       run: ${{ steps.upstream.outputs.run }}
+      vendored: ${{ steps.upstream.outputs.vendored }}
     steps:
       - uses: actions/checkout@v7
 
@@ -73,6 +80,7 @@ jobs:
           vendored="$(sed -n 's/^- Release: //p' \
             Sources/KiwiDeskCore/Resources/AppFont/UPSTREAM.md)"
           echo "vendored: $vendored"
+          echo "vendored=$vendored" >> "$GITHUB_OUTPUT"
           if [ "$tag" = "$vendored" ]; then
             echo "already vendored — nothing to do"
             echo "run=false" >> "$GITHUB_OUTPUT"
@@ -139,6 +147,37 @@ jobs:
             exit 1
           fi
 
+      # Whether the PR needs the owner's look, computed rather than
+      # asked every week. Runs tree code, so github.token only.
+      - name: Diff the glyphs
+        id: diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VENDORED: ${{ needs.check.outputs.vendored }}
+          FONTTOOLS: fonttools==4.60.2
+        run: |
+          set -euo pipefail
+          font=Sources/KiwiDeskCore/Resources/AppFont
+          font="$font/sketchybar-app-font.ttf"
+          git show "HEAD:$font" > "$RUNNER_TEMP/old.ttf"
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet "$FONTTOOLS"
+          gh api \
+            "repos/kvndrsslr/sketchybar-app-font/releases?per_page=100" \
+            > "$RUNNER_TEMP/releases.json"
+          "$RUNNER_TEMP/venv/bin/python" scripts/app-font-diff \
+            "$RUNNER_TEMP/old.ttf" "$font" \
+            --out "$RUNNER_TEMP/app-font-diff" \
+            --releases "$RUNNER_TEMP/releases.json" \
+            --from "$VENDORED" --to "$TAG" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Keep the before/after renders
+        id: renders
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-font-glyphs-${{ env.TAG }}
+          path: ${{ runner.temp }}/app-font-diff/glyphs.html
+
       # The gate ci.yml would have run, minus the release build: no
       # Swift source moves in this drop. AppFontResourceTests is the
       # one that matters — it fails on an undecodable map, an
@@ -162,6 +201,9 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN || github.token }}
           BASE: ${{ github.event.repository.default_branch }}
           REPO: ${{ github.repository }}
+          LOOK: ${{ steps.diff.outputs.look }}
+          RENDERS_URL: ${{ steps.renders.outputs.artifact-url }}
+          LABEL: 'app-font: additions only'
           RUN_URL: >-
             ${{ github.server_url }}/${{ github.repository
             }}/actions/runs/${{ github.run_id }}
@@ -195,11 +237,24 @@ jobs:
 
           $GATE
 
-          Before merging, check the App Bar with the new glyphs: an
-          upstream release can retire or restyle a ligature.
-
           [upstream]: https://github.com/kvndrsslr/sketchybar-app-font
           EOF
-          gh pr create --base "$BASE" --head "$branch" \
+          diff="$RUNNER_TEMP/app-font-diff"
+          { echo; cat "$diff/summary.md"; echo
+            echo "Before/after renders: [glyphs.html]($RENDERS_URL)" \
+              "(zipped, from [this run]($RUN_URL))."
+            if [ -s "$diff/notes.md" ]; then
+              echo; cat "$diff/notes.md"
+            fi
+          } >> "$body"
+          url="$(gh pr create --base "$BASE" --head "$branch" \
             --title "chore(bar): update sketchybar-app-font to $TAG" \
-            --body-file "$body"
+            --body-file "$body")"
+          echo "$url"
+          # Only an explicit verdict labels: a missing one asks.
+          if [ "$LOOK" = "false" ]; then
+            gh label create "$LABEL" --repo "$REPO" --force \
+              --color 0e8a16 \
+              --description "App Font drop that changes no drawn glyph"
+            gh pr edit "$url" --add-label "$LABEL"
+          fi

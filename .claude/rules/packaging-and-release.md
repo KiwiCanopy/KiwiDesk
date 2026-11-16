@@ -991,11 +991,23 @@ check to wait out**.
 **The dispatch and the arming are owed to a PR nobody is
 watching land, and that is the scope.** The release path is unwatched by
 construction — publish, and the feed waits on the sync PR — so
-it owes both. `app-font.yml`'s PR is the other shape: a human
-reads it before it lands, because an upstream drop can restyle
-a glyph, so auto-merge would be wrong there; with the PAT its CI
-starts on the PR's own event, and only its fallback leaves the
-start to its reviewer. That is a scope line, not an argument that
+it owes both. `app-font.yml`'s PR is the other shape: the
+orchestrator lands it, and the workflow never merges or arms
+auto-merge. **Its body states whether the drop needs the owner's
+look, computed by `scripts/app-font-diff` per app name** — the
+bar reaches a ligature only through an app name, so a drop in
+which every app draws the identical glyph is labelled `app-font:
+additions only` and may land on green, and any other lists
+exactly the apps whose glyph moved. Only an explicit `false`
+verdict labels, the label is the one the script's text names, the
+diff step holds `github.token` alone and pins fontTools, and the
+upstream notes span the tag the check job read
+(`AppFontDiffWorkflowTests`). The script reads `APPM` in the
+schema `AppFontGlyphMap.load(fontData:)` decodes, so a schema
+change moves both, and a change to its classification is re-run
+by hand against real upstream drops, since the test runner has no
+fontTools. With the PAT its CI starts on the PR's own event, and
+only its fallback leaves the start to its reviewer. That is a scope line, not an argument that
 it is fine: the two halves are separable,
 and a workflow-opened PR that acquires an unwatched landing owes
 the dispatch on the day it does.
