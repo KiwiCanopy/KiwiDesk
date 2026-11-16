@@ -3071,12 +3071,6 @@ the fill, opaque, where
 on.
 :::
 
-:::unreleased
-A hidden bar's thickened handle wears the glass too, tinted by
-the same fill, and draws that fill flat when the glass is off or
-stood down.
-:::
-
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
@@ -3113,7 +3107,13 @@ at the far end. It sets the bars' fill, a hovered bar item's
 [`hover_fill_color`](#kiwishelf-colours), a hidden shelf's handle,
 the overflow marks and their list, the hover peek, and the panels
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
-tints. A hovered overflow count's chip fades the same way. On
+tints. A hovered overflow count's chip fades the same way.
+
+:::unreleased
+A hidden shelf's handle wears no fill now, so the fade no longer
+reaches it.
+:::
+ On
 glass a hovered bar item's fill is held under the
 same ceiling as `fill_color`, and the stored value is unchanged.
 The drag visuals and the sticky mark keep their own fade.
@@ -3455,8 +3455,7 @@ style. Each plays with Reduce Motion on too. On a `"boxed"` shelf
 
 :::unreleased
 An `"auto"` bar's handle already runs the bar's length, so
-`"unfold"` only deepens it, and `"grow"` grows the bar out of the
-thickened handle.
+`"unfold"` only deepens it.
 :::
 
 On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
@@ -3556,7 +3555,15 @@ says.
 
 Windows keep clear of the
 resting handle or pocket unless `reserve` is off for every bar on
-that edge, or on an edge no bar sits on, for both bars. A click on
+that edge, or on an edge no bar sits on, for both bars.
+
+:::unreleased
+The resting handle no longer keeps windows clear: it floats over
+them as a bar's handle does, and its tab takes a bar handle's ink
+and depth. Only the whole pocket under `"always"` keeps its strip.
+:::
+
+A click on
 the pocket lists the windows inside by app; a row takes its window
 out. Below them, under **Pocket Keys**, the list shows each app's own
 pocket window ([`pocket_app`](#pocket_app)); its row takes it out
@@ -4058,27 +4065,39 @@ App Bar in monocle and scrolling.
   screen is on.
 
 :::unreleased
-An `"auto"` bar's handle is a thin line along the bar's whole
-length, reserving nothing and floating over the windows; clicks pass
-through it to the window beneath. With the pointer within about 24
-points of the edge along the bar for 0.15 s, the handle thickens and
-the Space dots, or the App Bar's glyphs, peek through. The bar then
-comes in as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
-says when the pointer rests on the thickened handle for 0.15 s, or
-lingers near the edge for 0.4 s. Where nothing stands between the bar
-and the screen's edge, and no other screen continues past it, a push
-against that edge along the bar brings it in at once — except on the
-Dock's edge while the Dock hides itself and on the top edge while the
-menu bar does: there a push belongs to macOS, and the bar stays away
-until the pointer leaves the area near the edge. The bar goes back
-0.5 s after the pointer leaves it and the area near its edge, and
-stays while a bar menu or a peek it opened is up.
+An `"auto"` bar's handle is a thin line along the
+bar's whole length, flush on the edge: a 2-point line in the label
+ink with a fine line of the opposite tone along each side. It
+reserves nothing and floats over the windows; clicks pass through it
+to the window beneath. With the pointer within about 24 points of
+the edge along the bar, a progress fill runs along the handle
+outward from the point nearest the pointer, and the bar comes in as
+[`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) says as
+the fill completes: 0.4 s after the pointer came near, or 0.15 s
+after it reaches the handle itself, within about 9 points of the
+edge. The fill keeps its start while the pointer moves, restarts for
+the other bar when the pointer crosses into that bar's part of the
+edge, plays with Reduce Motion on, and is dropped, with the bar
+staying away, when the pointer leaves before it completes. Where
+nothing stands between the bar and the screen's edge, and no other
+screen continues past it, a push against that edge along the bar
+brings it in at once — except on the Dock's edge while the Dock
+hides itself and on the top edge while the menu bar does: there a
+push belongs to macOS, and the bar stays away until the pointer
+leaves the area near the edge. The bar goes back 0.5 s after the
+pointer leaves it and the area near its edge, and stays while a bar
+menu or a peek it opened is up.
 :::
 
 On the pocket's edge, unless
 [`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
 is `"hidden"`, an `"auto"` or `"hidden"` bar's edge also keeps clear
 of the pocket's resting handle or mark.
+
+:::unreleased
+Only the whole mark keeps that edge clear now
+([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)).
+:::
 
 A window drag opens an `"auto"` Space Bar as the pointer does
 above, so the window can be dropped on a Space
@@ -4105,8 +4124,7 @@ first. A look never carries the value.
 :::unreleased
 Two `"auto"` bars on one edge draw two handles, each along its own
 bar. The pointer opens one bar at a time: while a bar is shown, the
-other's handle goes away. A thickened handle wears the bars'
-[Liquid Glass](#kiwishelfset_liquid_glass).
+other's handle goes away.
 
 A revealed bar lands under its handle, in its share of the edge
 beside its sibling's handle, where a long App Bar may scroll. A
@@ -4134,6 +4152,11 @@ stays until the next call, or for
 seconds where that is above 0. Fails, with a pill beside the bar,
 where the Space Bar is `"always"`. VoiceOver's press on the Space
 dots runs it too.
+
+:::unreleased
+The dots are retired: VoiceOver's press on the Space Bar's handle
+runs it.
+:::
 
 It fails with a pill first while a window fills the screen, whether
 maximized, full screen or a presentation, since the bars stay

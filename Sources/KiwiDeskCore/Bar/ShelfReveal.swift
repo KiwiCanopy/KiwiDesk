@@ -16,19 +16,15 @@ enum ShelfReveal: Equatable {
 
     var isShown: Bool { self != .hidden }
 
-    /// How long the pointer rests on the thickened handle before
-    /// the bar opens (owner, 2026-10-20; #3349 rule 3).
+    /// How long a fill runs once the pointer rests on the handle's
+    /// hover band (owner, 2026-10-20; #3360 ruling 2).
     static let revealDelay: TimeInterval = 0.15
     /// How long after the pointer leaves the shelf it retracts —
     /// forgiving an overshoot.
     static let retractDelay: TimeInterval = 0.5
-    /// How long the pointer stays in the approach before the
-    /// handle thickens and its contents peek through (#3349).
-    static let approachDelay: TimeInterval = 0.15
-    /// How long the pointer lingers in the approach, counted from
-    /// its entry, before the bar opens off the handle — the same
-    /// on every edge (#3349 rule 3; set with the owner on the
-    /// device).
+    /// How long an approach's fill runs, from the pointer's entry,
+    /// before the bar opens — the same on every edge (#3360 ruling
+    /// 2).
     static let dwellDelay: TimeInterval = 0.4
     /// How far in from the edge the approach reaches (pt).
     static let approachReach: CGFloat = 24

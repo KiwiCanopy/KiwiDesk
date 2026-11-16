@@ -73,8 +73,9 @@ extension BarMotionSeamTests {
         "fadeMark": ["markFade("],
         "hoverPlate": [],
         "hoverShift": [],
+        "handleFillStart": [],
+        "playHandleFill": ["handleFillStart(", "revealLength"],
         "horizontal": [],
-        "placeHoverPlate": ["hoverGrow"],
         "clipPlace": [],
         "expanding": [],
         "settling": [],
@@ -115,8 +116,8 @@ extension BarMotionSeamTests {
 
     /// Members whose motion Reduce Motion deliberately KEEPS, each
     /// naming its ruling — the one copy of who is ungated. The owner
-    /// ruled the shelf's reveal (every style), the hidden mark's
-    /// hover growth and the shelf's expand motions that play
+    /// ruled the shelf's reveal (every style), a handle's progress
+    /// fill (#3360) and the shelf's expand motions that play
     /// regardless, as the
     /// Dock's auto-hide slides under Reduce Motion (2026-10-21,
     /// `docs/design-decisions.md` ▸ The bars honour Reduce Motion).
@@ -132,7 +133,7 @@ extension BarMotionSeamTests {
         "playSpread": "the Boxed unfold plays under Reduce Motion",
         "spreadFade": "the Boxed unfold's fade, the same ruling",
         "fadeMark": "the mark keeps the reveal's time (owner)",
-        "placeHoverPlate": "the hover growth plays under Reduce Motion",
+        "playHandleFill": "the approach's fill plays under Reduce Motion",
         "runPlateGlide": "the shelf's expand plays under Reduce Motion",
         "runDissolveOut": "the expand's dissolve, the same ruling",
         "settling": "builds a spring to read its length, plays none",

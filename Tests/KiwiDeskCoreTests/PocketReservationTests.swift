@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The pocket's strip (#2784, #2978): a resting pocket's edge reserves
-/// the handle's depth by the shelf's own rule, or the whole mark's
-/// where the pocket reads Always on an edge that draws no bar at rest,
-/// and nothing while no pocket rests there.
+/// The pocket's strip (#2784, #2978, #3361): a pocket resting as its
+/// handle floats like a bar's handle and reserves nothing; the whole
+/// mark reserves the shelf's own strip where the pocket reads Always
+/// on an edge that draws no bar at rest.
 @Suite("Pocket reservation (#2784)")
 struct PocketReservationTests {
     private let visible = CGRect(x: 0, y: 0, width: 1000, height: 800)
@@ -39,19 +39,12 @@ struct PocketReservationTests {
         ).depth(of: edge)
     }
 
-    @Test("a hidden bar's edge reserves the resting handle")
-    func hiddenEdgeReservesTheHandle() {
-        var hidden = settings(space: .hidden, pocket: .top)
+    @Test("a hidden bar's edge reserves nothing for the handle")
+    func hiddenEdgeReservesNoHandle() {
+        let hidden = settings(space: .hidden, pocket: .top)
         #expect(hidden.pocketRest(in: .bsp, on: nil) == .handle)
-        #expect(
-            reserved(hidden, at: .top)
-                == hidden.kiwishelf.hiddenReservation
-        )
-        // No pocket at rest: a Hidden edge reserves nothing.
-        #expect(reserved(hidden, at: .top, resting: false) == 0)
-        // The bar's reserve off turns the strip off.
-        hidden.spaceBarStyle.reserve = false
         #expect(reserved(hidden, at: .top) == 0)
+        #expect(reserved(hidden, at: .top, resting: false) == 0)
         // Always on that edge stands the whole mark (#2978).
         let whole = settings(space: .hidden, pocket: .top, show: .always)
         #expect(whole.pocketRest(in: .bsp, on: nil) == .mark)
@@ -61,15 +54,13 @@ struct PocketReservationTests {
         #expect(reserved(gone, at: .top) == 0)
     }
 
-    /// An Auto bar's handle reserves nothing (#3349); the pocket's
-    /// resting handle keeps its own strip there (#2784).
-    @Test("an Auto edge reserves only the pocket's handle")
-    func autoEdgeReservesThePocketHandle() {
+    /// Nothing reserves on an Auto edge, the pocket's handle
+    /// included (#3349, #3361 ruling 4).
+    @Test("an Auto edge reserves nothing, the pocket included")
+    func autoEdgeReservesNothing() {
         let auto = settings(space: .auto, pocket: .top)
-        let shelf = auto.kiwishelf
-        #expect(PocketMarkGeometry.handleDepth == KiwiShelf.hiddenDepth)
-        #expect(reserved(auto, at: .top) == shelf.hiddenReservation)
-        #expect(reserved(auto, at: .top, resting: false) == 0)
+        #expect(auto.pocketRest(in: .bsp, on: nil) == .handle)
+        #expect(reserved(auto, at: .top) == 0)
     }
 
     @Test("a shown bar's edge holds the pocket as a section")
@@ -92,10 +83,7 @@ struct PocketReservationTests {
         )
         let auto = settings(space: .always, pocket: .bottom)
         #expect(auto.pocketRest(in: .bsp, on: nil) == .handle)
-        #expect(
-            reserved(auto, at: .bottom)
-                == auto.kiwishelf.hiddenReservation
-        )
+        #expect(reserved(auto, at: .bottom) == 0)
         // The Space Bar's reserve off frees it, an App Bar this
         // layout does not host holding nothing.
         let both = settings(

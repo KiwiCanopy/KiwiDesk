@@ -19,7 +19,7 @@ struct GlassBoxFollowTests {
         let host: GlassBoxHost
     }
 
-    private func rig(behind: Bool = false) throws -> Rig? {
+    private func rig() throws -> Rig? {
         guard #available(macOS 26, *) else { return nil }
         let window = NSWindow(
             contentRect: CGRect(x: 200, y: 400, width: 400, height: 60),
@@ -43,8 +43,7 @@ struct GlassBoxFollowTests {
             box.glass,
             box.tint,
             width: 63,
-            animated: false,
-            behind: behind
+            animated: false
         )
         box.glass.layoutSubtreeIfNeeded()
         window.displayIfNeeded()
@@ -60,8 +59,7 @@ struct GlassBoxFollowTests {
         _ glass: NSView,
         _ tint: GlassBackdrop,
         width: CGFloat,
-        animated: Bool,
-        behind: Bool = false
+        animated: Bool
     ) {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
@@ -74,8 +72,7 @@ struct GlassBoxFollowTests {
                 fill: GlassFill(hex: "#202020B3"),
                 edge: .top,
                 visible: true,
-                animated: animated,
-                behind: behind
+                animated: animated
             )
         }
     }
@@ -97,15 +94,14 @@ struct GlassBoxFollowTests {
     }
 
     /// Every layer of the pair at the host's size follows — the
-    /// glass's private ones, its tint inside it or behind it, and
+    /// glass's private ones, its tint inside it, and
     /// its content — on the host's own clock, at a fractional
     /// width Auto Layout rounds the glass off (#2388).
     @Test(
-        "A growing box writes its glass at once and follows the host",
-        arguments: [false, true]
+        "A growing box writes its glass at once and follows the host"
     )
-    func glideFollowsTheHost(behind: Bool) throws {
-        guard let rig = try rig(behind: behind) else { return }
+    func glideFollowsTheHost() throws {
+        guard let rig = try rig() else { return }
         defer { rig.window.close() }
         let content = try #require(GlassPlate.contentChain(rig.glass).last)
         // A plain box-sized view ahead of the glass: the follow
@@ -117,11 +113,10 @@ struct GlassBoxFollowTests {
             rig.glass,
             rig.tint,
             width: 140.3,
-            animated: true,
-            behind: behind
+            animated: true
         )
         #expect(GlassPlate.fills(rig.glass.frame, rig.host.bounds))
-        #expect((rig.tint.superview === rig.host) == behind)
+        #expect(rig.tint.superview !== rig.host)
         let hostLayer = try #require(rig.host.layer)
         let host = try #require(
             hostLayer.animation(forKey: "bounds") as? CABasicAnimation

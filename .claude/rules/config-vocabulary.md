@@ -128,12 +128,20 @@ synonym:
   and a covered window draws it empty. It says where a window sits
   in the layout, never a window's state, so it is neither a
   *badge* nor a *mark*, and copy naming it says *half-moon*. Not a
-  *dot*, which #2142's Desktop plate and #761's Space dots spend,
+  *dot*, which #2142's Desktop plate spends and #761's retired
+  Space dots spent,
   nor a *pill* or an *indicator* (below).
-- **Space dots** — one dot per Space, the current one wide, that
-  peek through an Auto Space Bar's thickened handle (#761, #3349).
-  Never a *pill*, an *indicator* or a *badge*, each spoken for
+- **Space dots** — one dot per Space, the current one wide, that an
+  Auto Space Bar's handle carried (#761) until the progress fill
+  replaced them (#3360). Retired: give no new dot the name, and
+  never a *pill*, an *indicator* or a *badge*, each spoken for
   here, nor a *half-moon*.
+- **progress fill** — the ink that runs along an Auto bar's handle
+  as the pointer comes near, the bar opening as it completes
+  (#3360; `ShelfHandleSpec.Fill`, `ShelfRevealer.fills` in code).
+  Copy and docs write *progress fill* at first mention, never a
+  bare *Fill*, which is the shelf's Fill colour (`fill_color`), nor
+  a *countdown*, *timer* or *pulse*.
 - **handle** — what an `auto` bar leaves at its edge: a thin line
   along the bar's run that the pointer reaches for to bring the bar
   in (owner, #2567, #3349). Name it a *handle* — the bar's handle

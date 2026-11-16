@@ -6839,6 +6839,11 @@ tab bar's top edge included, still brings the bar in. The residue
 the band carried is gone: on an edge macOS owns, the push belongs to
 macOS. A stored Hidden bar still rests as nothing.
 
+*Amended* (owner, 2026-11-16, #3360): with no thickening, the
+approach over a maximized window reaches in only to the handle's
+9-point hover band, and the residue is a 0.15 s rest there, which
+runs the progress fill and brings the bar in.
+
 *The user's own bar setting wins downward.* A bar stored as Hidden
 gets no handle under a maximize: it never showed unprompted, and a
 maximize should not make it. A bar stored as Always or Auto gets the
@@ -7191,6 +7196,21 @@ size it has as a section on that edge's bar, mark for mark
 object at one size. The floor is the handle's 20 pt kiwis, which a
 rise must never shrink; the ceiling, 1.6x, is as far as a growth
 still reads as the pocket coming out rather than a jump.
+
+:::unreleased
+*Amended* (owner, 2026-11-16, #3361): **the tab takes a bar
+handle's ink and depth, flush on the edge, and the handle reserves
+nothing.** The tab is the bars' two-tone line, 3 points deep, so a
+row of handles still reads as one; the kiwis keep the pocket's
+colour and look out 5 points past it. Its hover stays as the
+two-step paragraph below has it, with no progress fill: the fill
+belongs to lingering near a bar's
+edge, while the pocket answers the pointer in its two steps. Its
+edge keeps no strip for it any more, as a bar's handle keeps none
+(#3349): windows reach the edge and the tab floats over them,
+clicks passing through. The whole mark under Always keeps the
+shelf's strip.
+:::
 
 **The handle answers the pointer in two steps, as the bars'
 handles do** (#2807). On the approach the kiwis look 3 pt further
@@ -19729,6 +19749,13 @@ only for a drag or a put-in or take-out reserves nothing, so
 pocketing never retiles the Space, and the bars' `reserve` switch
 on that edge still turns the strip off.
 
+:::unreleased
+*Amended* (owner, 2026-11-16, #3361): the pocket's resting handle
+reserves nothing either, so a `hidden` or `auto` edge reserves
+nothing at all; only the whole mark keeps a strip. ▸ *A fixed
+handle* under the pocket gives the argument.
+:::
+
 A fresh install's starter takes `auto` (#2515), and only beside
 the welcome tour's bars step, which shows what Auto does and
 offers Always and Hidden in one click: a starter that hides the
@@ -19862,6 +19889,43 @@ Dock stays shown for as long as the pointer stays there. So:
   preferences as the pointer enters an approach, at about a
   microsecond a read, with no cache and no notification to miss. An
   unreadable key reads as macOS's default, a free edge.
+- *A progress fill replaces the thickening and the peek* (owner,
+  2026-11-16, #3360), amending the approach bullet above. On
+  approach the 3-point handle stays 3 points, and a progress fill
+  runs along it outward
+  from the point nearest the pointer; the bar opens as it completes,
+  0.4 s from the entry, or 0.15 s once the pointer rests within the
+  9-point hover band at the edge. A thickening said "something is
+  near" but not when the bar would come, so the dwell read as a
+  delay with no end; a fill states its end as it runs, and it
+  needs no peek to say which bar, since it runs along that bar's
+  run. The fill starts at the pointer's entry and keeps that start,
+  so it never chases a moving pointer, and both ends reach the
+  handle's ends together, the longer side running faster. It is
+  one colour at two strengths, 38% at rest and about 90% filled:
+  Automatic is the label ink at those alphas, and a colour picked
+  in #3357 takes them times its own alpha, with no floor for a weak
+  pick (#1857). Nothing blinks or pulses: three pulses in 0.4 s
+  is about 7 Hz (WCAG 2.3.1), and on macOS a pulse means attention
+  or an error. The fill is a change of lightness in place, so it
+  plays under Reduce Motion as the reveal does (owner,
+  2026-10-21), and KiwiDesk's Off drops it with the reveal. A
+  pointer that leaves before it completes drops it, and the bar
+  stays away. The push on a free edge still opens at once, and a
+  grow or unfold reveal now starts from the 3-point handle itself.
+- *Two tones, flush on the edge* (owner, 2026-11-16, #3361),
+  amending the resting ink, a single tone of label ink at 38%
+  (#3349 ruling, as the lane shipped it). The handle is a
+  2-point core with a hairline of the opposite tone along each
+  long side at 35%, so one handle reads over a light and a dark
+  window at once, where a single tone vanished over one of them.
+  The core carries the ink and runs the fill; the hairline stays
+  constant, and beside a colour picked in #3357 it is neutral, its
+  tone
+  chosen once as the opposite of the colour's lightness, so the
+  user's colour is never thinned into a second one. The handle
+  sits flush on the edge: with nothing thickening, there is no
+  room to keep, and a gap above the line reads as a misplacement.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one
@@ -21037,6 +21101,15 @@ once. In code, the members that play them are ruled in
 `BarMotionSeamTests`' `ungated` map, which may neither read the
 flag nor be added to without a ruling.
 
+:::unreleased
+*Amended* (owner, 2026-11-16, #3360): a hidden bar's handle no
+longer grows under the pointer, so the hover growth leaves the
+three, and the handle's progress fill takes its place. It is a
+change of lightness in place rather than travel, and standing it
+down would leave the dwell with no sign of its end, which is the
+fill's whole job. KiwiDesk's Off still drops it with the reveal.
+:::
+
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either
 relocates it (fast drop, `move_to_space`) or, after a dwell,
@@ -22016,9 +22089,14 @@ owner's desk: screen 45, line 20, band 51–53, Fill 40, red
 channel). A handle's panel never wears the key-window look, so
 the reason the Fill moved does not apply there, and behind the
 glass the band takes the Fill's tint. Hovering still grows the
-pill and shows its highlight rim. `GlassTint.applyBehind` is
-that door and the handles its only caller
-(`ShelfHandleFillBehindTests`).
+pill and shows its highlight rim. `GlassTint.applyBehind` was
+that door and the handles its only caller.
+
+:::unreleased
+*Retired* (owner, 2026-11-16, #3360, #3361): the handles no longer
+thicken or draw glass, so no glass paints its Fill behind it and the
+door is gone.
+:::
 
 **The bars, the overflow marks and their list, the hover peek
 and the plates wear the key-window rim.** macOS draws

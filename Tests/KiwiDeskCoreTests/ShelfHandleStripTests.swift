@@ -6,8 +6,8 @@ import Testing
 
 /// An Auto bar's handle runs along its whole bar (#3349): the
 /// handle on the bar's run against the screen side, its approach
-/// about it — 24 pt in, over a maximized window only to the
-/// thickened handle (#3346) — cut where two bars meet so a point
+/// about it — 24 pt in, over a maximized window only to its hover
+/// band (#3346) — cut where two bars meet so a point
 /// opens one bar, and a shown bar held over its section alone.
 @Suite("Shelf handle along the bar (#3349)")
 @MainActor
@@ -68,19 +68,13 @@ struct ShelfHandleStripTests {
     /// y 0.
     private func spec() -> ShelfHandleSpec {
         ShelfHandleSpec(
-            peek: .dots([]),
             frame: ShelfHandleSpec.frame(
                 along: CGRect(x: 300, y: 0, width: 400, height: 30),
                 edge: .top,
                 side: 0
             ),
             edge: .top,
-            fill: GlassFill(hex: "#000000"),
-            currentInk: "#FFFFFF",
-            ink: "#AAAAAA",
-            emptyInk: "#555555",
             shown: false,
-            hovered: false,
             reveal: .slide
         )
     }
@@ -124,12 +118,11 @@ struct ShelfHandleStripTests {
         #expect(spec.frame.minX == 300 && spec.frame.width == 400)
         #expect(spec.frame.minY == ShelfHandleSpec.inset)
         #expect(spec.frame.height == ShelfHandleSpec.depth)
-        // Thickened, it keeps the screen side and grows inward.
-        #expect(spec.grown.minY == spec.frame.minY)
-        #expect(
-            spec.grown.height
-                == ShelfHandleSpec.depth + 2 * ShelfHandleSpec.hoverGrowth
-        )
+        // Its hover band starts at the edge and runs the same run
+        // `hoverDepth` in (#3360).
+        #expect(spec.hoverBand.minY == spec.frame.minY)
+        #expect(spec.hoverBand.minX == 300 && spec.hoverBand.width == 400)
+        #expect(spec.hoverBand.height == ShelfHandleSpec.hoverDepth)
     }
 
     @Test("the approach reaches 24 pt in and past the run's ends")
@@ -145,10 +138,25 @@ struct ShelfHandleStripTests {
         #expect(approach.maxY == side + ShelfReveal.overshoot)
         #expect(approach.minX == 300 - ShelfReveal.alongReach)
         #expect(approach.maxX == 700 + ShelfReveal.alongReach)
-        #expect(target(spec).handle?.width == spec.grown.width)
-        // Over a maximized window: only to the thickened handle.
+        #expect(target(spec).handle?.width == spec.hoverBand.width)
+        #expect(target(spec).handle?.maxY == side)
+        #expect(target(spec).handle?.height == ShelfHandleSpec.hoverDepth)
+        // Over a maximized window: only to the hover band.
         let inward = (target(spec, maximized: true).approach ?? .null).minY
-        #expect(side - inward == ShelfHandleSpec.inset + spec.grown.height)
+        #expect(side - inward == ShelfHandleSpec.hoverDepth)
+        // On a side edge across x: only the band's depth, never the run.
+        let left = ShelfHandleSpec(
+            frame: ShelfHandleSpec.frame(
+                along: CGRect(x: 0, y: 300, width: 30, height: 400),
+                edge: .left,
+                side: 0
+            ),
+            edge: .left,
+            shown: false,
+            reveal: .slide
+        )
+        let reach = target(left, maximized: true).approach?.maxX
+        #expect(reach == ShelfHandleSpec.inset + ShelfHandleSpec.hoverDepth)
         // Cut where a sibling's approach meets it.
         let cut = target(spec, cut: (true, true)).approach
         #expect(cut?.minX == 300)
@@ -201,16 +209,44 @@ struct ShelfHandleStripTests {
         return (revealer, box, app)
     }
 
+    @Test("crossing into a sibling's part restarts the fill for it")
+    func crossingRestartsTheFill() {
+        let app = ShelfRevealer.Key(shelf: Self.key.shelf, bar: .app)
+        // Two runs meeting at x 500, their approaches cut there.
+        let target = { (minX: CGFloat, cut: (lead: Bool, trail: Bool)) in
+            ShelfRevealer.Target.along(
+                CGRect(x: minX, y: 797, width: 200, height: 3),
+                edge: .top,
+                side: 800,
+                strip: Self.strip,
+                screen: Self.screen,
+                handle: CGRect(x: minX, y: 791, width: 200, height: 9),
+                cut: cut
+            )
+        }
+        let (revealer, box) = make([
+            Self.key: target(300, (false, true)),
+            app: target(500, (true, false)),
+        ])
+        // Inside the sibling's un-cut reach, so the cut decides.
+        move(revealer, box, 495, 785)
+        #expect(revealer.fills[Self.key]?.origin == 0.975)
+        #expect(revealer.fills[app] == nil)
+        move(revealer, box, 505, 785)
+        #expect(revealer.fills[Self.key] == nil)
+        // At its own point nearest the pointer, not the first bar's.
+        #expect(revealer.fills[app]?.origin == 0.025)
+    }
+
     @Test("a sibling shown stands a hidden bar's approach down")
     func siblingShownYields() {
         let (revealer, box, app) = pair()
         move(revealer, box, 400, 795)
-        box.timers.removeFirst()()
-        #expect(revealer.arming.contains(Self.key))
+        #expect(revealer.fills[Self.key] != nil)
         #expect(revealer.toggle(app, duration: 0))
         #expect(revealer.yields(Self.key))
         move(revealer, box, 401, 795)
-        #expect(!revealer.arming.contains(Self.key))
+        #expect(revealer.fills[Self.key] == nil)
         // The dwell it had armed reveals nothing.
         box.timers.forEach { $0() }
         #expect(revealer.reveal(of: Self.key) == .hidden)

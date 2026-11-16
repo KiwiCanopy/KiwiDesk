@@ -27,11 +27,6 @@ extension KiwiCore {
         /// its shown bar's, else its first — so the reveal starts
         /// from the handle on screen (#2567). AX coordinates.
         var marks: [ShelfManager.Key: BarMotion.RevealMark] = [:]
-        /// Each Space handle's first dot shown, carried from the
-        /// last pass so the dots slide only when they must
-        /// (`ShelfDotWindow`); a handle that stops drawing forgets
-        /// it.
-        var dotStarts: [ShelfRevealer.Key: Int] = [:]
         /// The pocket handle's band on each display's Auto edge, AX
         /// along the edge (#2678): where the shown pocket stands.
         var pocketBands: [DisplayID: ClosedRange<CGFloat>] = [:]
@@ -45,7 +40,6 @@ extension KiwiCore {
             display: DisplayID,
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
-            appIcons: [NSImage] = [],
             screens: [CGRect],
             reveal: ShelfRevealer,
             hover: Set<ShelfBar>,
@@ -62,7 +56,6 @@ extension KiwiCore {
                     key: ShelfManager.Key(display: display, edge: plan.edge),
                     screen: screen,
                     items: items,
-                    appIcons: appIcons,
                     screens: screens,
                     reveal: reveal,
                     hover: hover,
@@ -83,7 +76,6 @@ extension KiwiCore {
             key: ShelfManager.Key,
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
-            appIcons: [NSImage],
             screens: [CGRect],
             reveal: ShelfRevealer,
             hover: Set<ShelfBar>,
@@ -153,30 +145,21 @@ extension KiwiCore {
 
             for (index, bar) in handled.enumerated() {
                 guard let run = run(bar) else { continue }
-                let dots =
-                    bar == .space
-                    ? spaceDots(items, key: barKey(bar)) : nil
-                let peek = dots?.peek ?? .glyphs(appIcons)
                 var spec = ShelfHandleSpec(
-                    peek: peek,
                     frame: ShelfHandleSpec.frame(
                         along: run,
                         edge: plan.edge,
                         side: side
                     ),
                     edge: plan.edge,
-                    fill: shelf.glassFill,
-                    currentInk: shelf.activeItemColor,
-                    ink: shelf.idleItemColor,
-                    emptyInk: shelf.emptyItemColor,
                     shown: shown(bar),
-                    hovered: reveal.arming.contains(barKey(bar)),
-                    reveal: BarMotion.RevealKind(shelf)
+                    reveal: BarMotion.RevealKind(shelf),
+                    fill: reveal.fills[barKey(bar)]
                 )
                 spec.yields = reveal.yields(barKey(bar))
-                spec.position = dots?.position
-                spec.glass = shelf.glassEnabled
-                spec.restHex = shelf.handleColor
+                spec.restHex = ShelfHandleSpec.restHex(of: shelf)
+                spec.position =
+                    bar == .space ? Self.spacePosition(items) : nil
                 targets[barKey(bar)] = Self.target(
                     spec,
                     side: side,
@@ -203,7 +186,7 @@ extension KiwiCore {
                     || (shown(bar)
                         && !handled.prefix(index).contains(where: shown))
                 {
-                    marks[key] = .init(frame: spec.grown)
+                    marks[key] = .init(frame: spec.frame)
                 }
                 handles[barKey(bar)] = spec
             }
@@ -214,7 +197,6 @@ extension KiwiCore {
     /// to the panels.
     func syncHidingShelves(_ hiding: HidingShelves) {
         shelves.reveal.sync(hiding.targets)
-        shelves.handles.dotStarts = hiding.dotStarts
         shelves.handles.sync(hiding.handles)
     }
 

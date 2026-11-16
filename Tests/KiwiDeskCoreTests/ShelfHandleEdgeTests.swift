@@ -29,19 +29,13 @@ struct ShelfHandleEdgeTests {
     /// y 0.
     private func spec() -> ShelfHandleSpec {
         ShelfHandleSpec(
-            peek: .dots([]),
             frame: ShelfHandleSpec.frame(
                 along: CGRect(x: 300, y: 0, width: 400, height: 30),
                 edge: .top,
                 side: 0
             ),
             edge: .top,
-            fill: GlassFill(hex: "#000000"),
-            currentInk: "#FFFFFF",
-            ink: "#AAAAAA",
-            emptyInk: "#555555",
             shown: false,
-            hovered: false,
             reveal: .slide
         )
     }
@@ -163,19 +157,13 @@ struct ShelfHandleEdgeTests {
     @Test("a left handle's approach starts at its x, not flipped")
     func leftEdgeSide() {
         let spec = ShelfHandleSpec(
-            peek: .dots([]),
             frame: ShelfHandleSpec.frame(
                 along: CGRect(x: 0, y: 300, width: 30, height: 200),
                 edge: .left,
                 side: 40
             ),
             edge: .left,
-            fill: GlassFill(hex: "#000000"),
-            currentInk: "#FFFFFF",
-            ink: "#AAAAAA",
-            emptyInk: "#555555",
             shown: false,
-            hovered: false,
             reveal: .slide
         )
         let approach =

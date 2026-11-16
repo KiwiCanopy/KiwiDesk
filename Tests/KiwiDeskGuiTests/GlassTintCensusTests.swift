@@ -36,8 +36,6 @@ struct GlassTintCensusTests {
         "pinFrost": ["darkAqua", "aqua"],
         // The one painter (#1946's uniform tint retired, #2569).
         "apply": ["pinnedAppearance(", "setBackdrop(", "colour("],
-        // The handles' Fill beneath their glass (#2569 ▸ owner).
-        "applyBehind": ["pinnedAppearance(", ".below", "colour("],
         // Both doors' one gradient, through the mint.
         "colour": ["rendered(", "fade("],
         // A bar item's hover, fading with the Fill (#2645).

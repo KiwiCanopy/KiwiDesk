@@ -6,8 +6,8 @@ import Testing
 
 /// How a hiding shelf's reveal and its mark's hover MOVE (#761,
 /// #2497): the whole shelf slides in from past its screen side and
-/// the mark fades as it starts, and the hovered plate grows its
-/// frame rather than cross-fading a redraw. Whether it reads well is the
+/// the mark fades as it starts, and a grow reveal grows out of the
+/// handle's hover plate. Whether it reads well is the
 /// device's; this holds the decisions and the start order, never
 /// the tuned values. Main-actor spend: a handful of unwindowed
 /// views.
@@ -67,7 +67,7 @@ struct ShelfRevealMotionTests {
                 edge.isHorizontal
                 ? CGRect(x: 100, y: 100, width: 60, height: 8)
                 : CGRect(x: 100, y: 100, width: 8, height: 60)
-            let spec = spec(hovered: true, edge: edge, at: frame)
+            let spec = spec(edge: edge, at: frame)
             let room = ShelfHandle.room(of: spec)
             #expect(screenSide(room, edge) == screenSide(frame, edge))
             #expect(room.contains(frame), "\(edge)")
@@ -157,66 +157,15 @@ struct ShelfRevealMotionTests {
     }
 
     private func spec(
-        hovered: Bool,
         shown: Bool = false,
         edge: AppBarEdge = .top,
         at frame: CGRect = ShelfRevealMotionTests.mark
     ) -> ShelfHandleSpec {
         ShelfHandleSpec(
-            peek: .dots([.init(current: true, occupied: true)]),
             frame: frame,
             edge: edge,
-            fill: GlassFill(hex: "#000000"),
-            currentInk: "#FFFFFF",
-            ink: "#AAAAAA",
-            emptyInk: "#555555",
             shown: shown,
-            hovered: hovered,
             reveal: .slide
         )
-    }
-
-    /// The handle view sized as `ShelfHandle.show` sizes it.
-    private func view() -> ShelfHandleView {
-        let view = ShelfHandleView()
-        view.frame = CGRect(
-            origin: .zero,
-            size: ShelfHandle.room(of: spec(hovered: false)).size
-        )
-        return view
-    }
-
-    @Test("An approach thickens the plate and the peek fades in")
-    func hoverGrowsThePlate() {
-        BarMotion.reducedOverride = false
-        defer { BarMotion.reducedOverride = nil }
-        pinRevealLength()
-        let view = view()
-        view.render(spec(hovered: false), animated: false)
-        let resting = ShelfHandle.mark(
-            of: spec(hovered: false),
-            in: view.bounds
-        )
-        #expect(view.plate.frame == resting)
-        #expect(view.peek.alphaValue == 0)
-        view.render(spec(hovered: true), animated: false)
-        #expect(view.plate.frame == view.bounds)
-        #expect(view.peek.frame == view.bounds)
-        #expect(view.peek.alphaValue == 1)
-    }
-
-    /// The thickening is content, and the growth is motion the
-    /// owner keeps under Reduce Motion (2026-10-21).
-    @Test("Under Reduce Motion an approach still thickens the plate")
-    func reducedHoverGrowsThePlate() {
-        BarMotion.reducedOverride = true
-        defer { BarMotion.reducedOverride = nil }
-        pinRevealLength()
-        let view = view()
-        view.render(spec(hovered: false), animated: false)
-        view.render(spec(hovered: true), animated: true)
-        #expect(view.plate.frame == view.bounds)
-        #expect(view.peek.alphaValue == 1)
-        #expect(view.plate.layer?.animationKeys()?.isEmpty == false)
     }
 }

@@ -50,7 +50,7 @@ struct ShelfAutoHideCoreTests {
     }
 
     @Test(
-        "A hidden shelf draws its Space dots and no bar",
+        "A hidden shelf draws its handle and no bar",
         .enabled(if: NSScreen.main != nil)
     )
     func hiddenDrawsTheHandle() throws {
@@ -65,12 +65,9 @@ struct ShelfAutoHideCoreTests {
             )
         )
         let spec = try #require(handle.view.spec)
-        guard case .dots(let dots) = spec.peek else {
-            Issue.record("a Space Bar handle peeks Space dots")
-            return
-        }
-        #expect(dots.filter(\.current).count == 1)
-        #expect(dots.contains { $0.current && $0.occupied })
+        #expect(spec.frame.height == ShelfHandleSpec.depth)
+        // VoiceOver still hears the Space's place through it.
+        #expect(spec.position?.index == 1)
         #expect(!spec.shown)
     }
 

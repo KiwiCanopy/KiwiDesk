@@ -132,7 +132,7 @@ struct ShelfRevealStartTests {
         #expect(commits == 0)
     }
 
-    @Test("The dwell ends the thickening in the reveal's own pass")
+    @Test("The dwell ends the fill in the reveal's own pass")
     func revealEndsTheHoverInOnePass() {
         let key = ShelfRevealer.Key(
             shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
@@ -152,7 +152,7 @@ struct ShelfRevealStartTests {
         revealer.onChange = {
             changes.append(
                 (
-                    revealer.arming.contains(key),
+                    revealer.fills[key] != nil,
                     revealer.reveal(of: key).isShown
                 )
             )
@@ -165,16 +165,13 @@ struct ShelfRevealStartTests {
                 screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
             )
         ])
+        // The entry starts the fill.
         revealer.moved(to: point)
-        #expect(changes.isEmpty)
-        // The approach's wait thickens the handle.
-        timers.removeFirst()()
         #expect(changes.map(\.0) == [true])
         changes = []
         // The dwell opens the bar.
         timers.removeFirst()()
-        // One redraw, already shown: no pass un-hovers the plate
-        // first.
+        // One redraw, already shown: no pass drops the fill first.
         #expect(changes.count == 1)
         #expect(changes.first?.0 == false)
         #expect(changes.first?.1 == true)

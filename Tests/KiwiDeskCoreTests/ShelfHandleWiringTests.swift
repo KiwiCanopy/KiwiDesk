@@ -4,9 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// An App Bar's handle reaching the shelf through the real
-/// `updateBars()` (#2567, #3349): no window, no handle; the glyphs
-/// peek through it, and a grow reveal starts from its thickened
-/// plate.
+/// `updateBars()` (#2567, #3349, #3360): no window, no handle; the
+/// revealer's fill reaches it, and a grow reveal starts from it.
 @Suite("App Bar handle wiring (#3349)", .serialized)
 @MainActor
 struct ShelfHandleWiringTests {
@@ -42,22 +41,14 @@ struct ShelfHandleWiringTests {
     }
 
     @Test(
-        "updateBars hands the handle its glyphs and the shelf its plate",
+        "updateBars hands the handle its fill and the shelf its mark",
         .enabled(if: NSScreen.main != nil)
     )
     func shelfReadsTheHandle() throws {
         let screen = try #require(NSScreen.screens.first)
         let display = try #require(screen.kiwiDisplay)
         let core = makeTestCore()
-        // The fixture's pid has no app; its icon is the glyph.
-        let glyph = NSImage(size: CGSize(width: 16, height: 16))
-        let before = BarIconCache.read
-        BarIconCache.read = { $0 == 900_101 ? glyph : nil }
-        defer {
-            BarIconCache.read = before
-            BarIconCache.forget(pid: 900_101)
-            NativeSpaces.currentSpaceIsUserOverride = nil
-        }
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         core.tiler.visibleBounds = { _ in screen.frame }
         core.state.apply(.displaysChanged([display]))
         core.state.apply(
@@ -83,26 +74,32 @@ struct ShelfHandleWiringTests {
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
-        let key = ShelfManager.Key(display: display.id, edge: .top)
-        let spec = try #require(
-            core.shelves.handles.handleForTesting(
-                .init(shelf: key, bar: .app)
-            )?.view.spec
+        let key = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(display: display.id, edge: .top),
+            bar: .app
         )
-        guard case .glyphs(let glyphs) = spec.peek else {
-            Issue.record("the App Bar's glyphs peek through")
-            return
-        }
-        #expect(glyphs == [glyph])
-        #expect(spec.frame.height == ShelfHandleSpec.depth)
+        let spec = { core.shelves.handles.handleForTesting(key)?.view.spec }
+        #expect(spec()?.fill == nil)
+        #expect(spec()?.frame.height == ShelfHandleSpec.depth)
+        // The revealer's fill reaches the handle it runs along.
+        let start = Date(timeIntervalSince1970: 1_000)
+        let fill = ShelfHandleSpec.Fill(
+            origin: 0.3,
+            started: start,
+            until: start.addingTimeInterval(1)
+        )
+        core.shelves.reveal.setFill(key, fill)
+        core.updateBars()
+        #expect(spec()?.fill == fill)
+        let frame = try #require(spec()?.frame)
         // A hidden shelf's panel exists once its bar is revealed.
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         core.updateBars()
         let overlay = try #require(
             core.shelves.overlayForTesting(display.id, edge: .top)
         )
-        // In the shelf's own coordinates: the thickened plate.
-        #expect(overlay.revealMark?.frame.size == spec.grown.size)
+        // In the shelf's own coordinates: the handle itself.
+        #expect(overlay.revealMark?.frame.size == frame.size)
     }
 
     /// On an edge two Auto bars share, a revealed bar is held over

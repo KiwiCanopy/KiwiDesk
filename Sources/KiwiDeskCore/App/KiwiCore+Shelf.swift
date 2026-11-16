@@ -77,9 +77,7 @@ extension KiwiCore {
         // The overflow marks sit on windows a maximize covers, so
         // they stand down there too (#2448, #3346).
         var marksStandingDown: Set<DisplayID> = []
-        var hiding = HidingShelves(
-            dotStarts: shelves.handles.dotStarts
-        )
+        var hiding = HidingShelves()
         // The pocket's slot on each screen's bar edge (#2678).
         var pocketSlots: [DisplayID: CGRect] = [:]
         // Under Hidden it stands inside its edge's strip (#2793).
@@ -135,7 +133,6 @@ extension KiwiCore {
                 display: display.id,
                 screen: screen,
                 items: items,
-                appIcons: app?.items.compactMap(\.icon) ?? [],
                 screens: ScreenList.all.map(\.frame),
                 reveal: reveal,
                 hover: hover,

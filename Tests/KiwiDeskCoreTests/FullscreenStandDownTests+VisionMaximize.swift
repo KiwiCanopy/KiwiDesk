@@ -121,13 +121,13 @@ extension FullscreenStandDownTests {
         #expect(core.execute("toggle_maximized").isSuccess)
         core.updateBars()
         let over = try #require(band() ?? nil)
-        // Over the window it reaches in only to the thickened handle
-        // (#3349), never the 24 pt an Auto bar's approach takes.
+        // Over the window it reaches in only to the handle's hover
+        // band (#3349, #3360), never the 24 pt an Auto bar's approach
+        // takes.
         #expect(
             over.height
                 == ShelfReveal.overshoot + ShelfHandleSpec.inset
-                + ShelfHandleSpec.depth
-                + 2 * ShelfHandleSpec.hoverGrowth
+                + ShelfHandleSpec.hoverDepth
         )
         core.execute(
             "kiwishelf.set_maximized_visibility",

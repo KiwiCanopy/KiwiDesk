@@ -1,17 +1,18 @@
 import AppKit
 
-/// A hidden bar's approach (#3349), split from `ShelfRevealer` at
-/// the §2.1 ceiling: the pointer near an Auto bar's edge thickens
-/// its handle, and a dwell, a rest on the handle or a push on a
-/// free edge opens it; the outermost row of an edge macOS owns
-/// hands the approach to macOS.
+/// A hidden bar's approach (#3349, #3360), split from
+/// `ShelfRevealer` at the §2.1 ceiling: the pointer near an Auto
+/// bar's edge runs a fill along its handle, and the bar opens as
+/// the fill completes — the dwell, hurried by a rest on the handle
+/// — or at once on a push against a free edge; the outermost row of
+/// an edge macOS owns hands the approach to macOS.
 extension ShelfRevealer {
-    /// A move over a hidden bar (#3349): the outermost row of an
-    /// edge macOS owns hands the approach to macOS, and on a free
-    /// edge opens the bar at once; inside the approach the handle
-    /// thickens after `approachDelay`, the bar opens after
-    /// `dwellDelay` from the entry, or `revealDelay` on the
-    /// thickened handle.
+    /// A move over a hidden bar (#3349, #3360): the outermost row
+    /// of an edge macOS owns hands the approach to macOS, and on a
+    /// free edge opens the bar at once; entering the approach starts
+    /// the fill at the handle's point nearest the pointer, and the
+    /// bar opens `dwellDelay` after the entry, or `revealDelay`
+    /// after the pointer reaches the handle's hover band.
     func hiddenMove(
         _ key: Key,
         _ target: Target,
@@ -40,62 +41,72 @@ extension ShelfRevealer {
             leave(key)
             return
         }
-        if arming.contains(key) {
-            handleMove(key, target, point)
+        if let fill = fills[key] {
+            handleMove(key, target, point, fill)
             return
         }
-        // Movement inside the approach never restarts the wait, or
-        // a jittering pointer would never thicken it.
-        guard timers[key] == nil else { return }
-        arm(key, after: ShelfReveal.approachDelay) { [weak self] in
-            self?.approached(key)
-        }
-    }
-
-    /// The approach's wait ran out: the handle thickens, and the
-    /// dwell runs on from the entry.
-    fileprivate func approached(_ key: Key) {
-        guard let target = targets[key], stillApproaching(key, target)
-        else {
-            leave(key)
-            return
-        }
-        setArming(key, true)
-        handleMove(key, target, location())
-        let rest = ShelfReveal.dwellDelay - ShelfReveal.approachDelay
-        arm(key, after: rest) { [weak self] in
+        // The entry: moving on keeps the fill's start (#3360 ▸ 7).
+        // One that lands on the hover band is hurried at once, the
+        // fill set once so its first draw runs from its start.
+        let entered = now()
+        let onBand = target.handle?.contains(point) == true
+        setFill(
+            key,
+            .init(
+                origin: target.fillOrigin(at: point),
+                started: entered,
+                until: entered.addingTimeInterval(
+                    onBand
+                        ? min(ShelfReveal.revealDelay, ShelfReveal.dwellDelay)
+                        : ShelfReveal.dwellDelay
+                )
+            )
+        )
+        arm(key, after: ShelfReveal.dwellDelay) { [weak self] in
             guard let self else { return }
             guard let target = self.targets[key],
                 self.stillApproaching(key, target)
             else {
                 // Unheard leaves — a drag moving no window, a bar
-                // turned Hidden — end the thickening here.
+                // turned Hidden — end the fill here.
                 self.leave(key)
                 return
             }
             self.open(key)
         }
+        if onBand { armHandle(key) }
     }
 
-    /// A move while the handle is thickened: resting on it opens
-    /// the bar after `revealDelay`.
+    /// A move while the fill runs: reaching the hover band hurries
+    /// it on, the bar opening `revealDelay` later unless the dwell
+    /// ends first.
     fileprivate func handleMove(
         _ key: Key,
         _ target: Target,
-        _ point: CGPoint
+        _ point: CGPoint,
+        _ fill: ShelfHandleSpec.Fill
     ) {
-        guard target.handle?.contains(point) == true else {
-            handleTimers.removeValue(forKey: key)?.cancel()
-            return
-        }
-        guard handleTimers[key] == nil else { return }
+        guard handleTimers[key] == nil,
+            target.handle?.contains(point) == true
+        else { return }
+        let rested = now()
+        let hurried = rested.addingTimeInterval(ShelfReveal.revealDelay)
+        guard hurried < fill.until else { return }
+        setFill(
+            key,
+            .init(origin: fill.origin, started: rested, until: hurried)
+        )
+        armHandle(key)
+    }
+
+    /// Opens the bar `revealDelay` from now, while it still hides.
+    fileprivate func armHandle(_ key: Key) {
         handleTimers[key] = schedule(ShelfReveal.revealDelay) {
             [weak self] in
             guard let self else { return }
             self.handleTimers[key] = nil
             guard let target = self.targets[key],
-                self.stillApproaching(key, target),
-                target.handle?.contains(self.location()) == true
+                self.stillApproaching(key, target)
             else { return }
             self.open(key)
         }
@@ -117,8 +128,8 @@ extension ShelfRevealer {
     }
 
     /// Opens a hidden bar from the pointer. The reveal ends the
-    /// thickening in its own pass: a redraw ahead of it would cost
-    /// a full bar render more.
+    /// fill in its own pass: a redraw ahead of it would cost a full
+    /// bar render more.
     fileprivate func open(_ key: Key) {
         cancelTimer(key)
         handleTimers.removeValue(forKey: key)?.cancel()
@@ -131,7 +142,7 @@ extension ShelfRevealer {
         cancelTimer(key)
         handleTimers.removeValue(forKey: key)?.cancel()
         ceded.insert(key)
-        setArming(key, false)
+        setFill(key, nil)
     }
 
     /// The pointer left the approach: every wait ends and the
@@ -141,6 +152,6 @@ extension ShelfRevealer {
         handleTimers.removeValue(forKey: key)?.cancel()
         ceded.remove(key)
         owned[key] = nil
-        setArming(key, false)
+        setFill(key, nil)
     }
 }

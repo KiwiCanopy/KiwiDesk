@@ -43,7 +43,7 @@ struct PocketReservationCoreTests {
     }
 
     @Test(
-        "Auto reserves the handle's strip and owes a pass",
+        "Always reserves the whole mark's strip and owes a pass",
         .enabled(if: NSScreen.main != nil)
     )
     func capacityMovesTheBounds() throws {
@@ -53,14 +53,21 @@ struct PocketReservationCoreTests {
         let before = core.tiler.layoutBounds(on: screen, for: space)
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
+        // Auto rests as the handle, which reserves nothing (#3361).
         core.execute(
             "kiwishelf.set_pocket_visibility",
             args: [.string("auto")]
         )
+        #expect(core.tiler.layoutBounds(on: screen, for: space) == before)
+        #expect(passes(meter) == 0)
+        core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
         let after = core.tiler.layoutBounds(on: screen, for: space)
         #expect(
             before.height - after.height
-                == core.tiler.settings.kiwishelf.hiddenReservation
+                == core.tiler.settings.kiwishelf.reservation
         )
         #expect(passes(meter) == 1)
     }

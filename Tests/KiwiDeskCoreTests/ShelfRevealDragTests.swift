@@ -113,9 +113,7 @@ struct ShelfRevealDragTests {
         defer { rig.revealer.stop() }
         rig.send(CGPoint(x: 500, y: 785), dragging: true)
         #expect(rig.revealer.reveal(of: Self.space) == .hidden)
-        #expect(rig.delays == [ShelfReveal.approachDelay])
-        rig.fireAll()
-        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
+        #expect(rig.delays == [ShelfReveal.dwellDelay])
         rig.fireAll()
         #expect(rig.revealer.reveal(of: Self.space) == .hover)
     }
@@ -130,7 +128,7 @@ struct ShelfRevealDragTests {
         rig.send(CGPoint(x: 500, y: 0), dragging: true)
         #expect(rig.revealer.reveal(of: Self.app) == .hidden)
         #expect(rig.timers.isEmpty)
-        #expect(!rig.revealer.arming.contains(Self.app))
+        #expect(rig.revealer.fills[Self.app] == nil)
         rig.send(CGPoint(x: 500, y: 0), dragging: false)
         #expect(rig.revealer.reveal(of: Self.app) == .hover)
     }
@@ -187,7 +185,7 @@ struct ShelfRevealDragTests {
         rig.send(CGPoint(x: 500, y: 795), dragging: true)
         #expect(rig.revealer.reveal(of: Self.space) == .hidden)
         #expect(rig.timers.isEmpty)
-        #expect(!rig.revealer.arming.contains(Self.space))
+        #expect(rig.revealer.fills[Self.space] == nil)
     }
 
     /// The press lands inside the delay a plain move armed; the
@@ -198,7 +196,7 @@ struct ShelfRevealDragTests {
         defer { rig.revealer.stop() }
         rig.moving = false
         rig.send(CGPoint(x: 500, y: 4), dragging: false)
-        #expect(rig.delays == [ShelfReveal.revealDelay])
+        #expect(rig.delays == [ShelfReveal.dwellDelay])
         rig.moving = true
         rig.fireAll()
         #expect(rig.revealer.reveal(of: Self.app) == .hidden)

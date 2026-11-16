@@ -203,6 +203,11 @@ The pocket's resting strip is part of that input:
 `TilingSettings.pocketReservation` adds its edge, and
 `ShelfReservation` reserves each edge's deepest strip (#2784).
 
+:::unreleased
+Only the whole mark under Always reserves; the pocket's resting
+handle floats like a bar's (#3361).
+:::
+
 The pocket rests unless its Show is Hidden
 (`kiwishelf.pocket_visibility`, #2978) or `KiwiCore.shelfSettings(on:)`
 reads it Hidden: a maximizing Monocle (#2976), a maximized window

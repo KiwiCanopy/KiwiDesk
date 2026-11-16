@@ -2,23 +2,26 @@ import AppKit
 
 /// The pocket's handle on an edge no bar shows (#2678, 2026-10-29
 /// ruling): the two kiwis alone looking out from behind a short tab
-/// lying on the screen edge, the pocket itself out of sight (owner,
-/// device 2026-10-29), turned so they face the screen. A fixed
-/// edge mark like the Space dots and the App Bar line — it never
+/// lying flush on the screen edge, the pocket itself out of sight
+/// (owner, device 2026-10-29), turned so they face the screen. The
+/// tab wears a bar handle's two-tone ink at its depth, and runs no
+/// progress fill (#3361 ruling 3). A fixed edge mark: it never
 /// scales with the shelf and carries no count. An empty pocket's
 /// fade is its panel's alone (#2678 review 18).
 @MainActor
 final class PocketHandleView: NSView {
-    /// The tab's depth across the edge and length along it.
-    static let tabDepth: CGFloat = 6
+    /// The tab's depth across the edge, a bar handle's (#3361), and
+    /// its length along it.
+    static var tabDepth: CGFloat { ShelfHandleSpec.depth }
     static let tabLength: CGFloat = 30
     /// The kiwis are drawn at the mark's grid at this side, their
     /// lower part behind the tab.
     static let markSide: CGFloat = 20
-    /// The handle's whole depth at rest, `PocketMarkGeometry`'s.
-    static var restDepth: CGFloat { PocketMarkGeometry.handleDepth }
     /// How far the kiwis' image reaches past the tab at rest.
-    static var lookOut: CGFloat { restDepth - tabDepth }
+    static let lookOut: CGFloat = 5
+    /// The handle's whole depth at rest: the tab and the kiwis past
+    /// it.
+    static var restDepth: CGFloat { tabDepth + lookOut }
     /// How much further they look out while the pointer is on the
     /// handle and the pocket has not risen (#2807).
     static let peekDepth: CGFloat = 3
@@ -99,8 +102,8 @@ final class PocketHandleView: NSView {
             height: Self.markSide
         )
         if !kiwisOut {
-            // Cut at the tab rather than covered by it: the tab wears
-            // the Fill as the bars' handles do, its alpha kept (#2776).
+            // Cut at the tab rather than covered by it: the tab's ink
+            // is translucent, as a bar handle's is (#3361).
             context.saveGState()
             context.clip(
                 to: CGRect(
@@ -126,13 +129,14 @@ final class PocketHandleView: NSView {
             width: Self.tabLength,
             height: Self.tabDepth
         )
-        let path = NSBezierPath(
-            roundedRect: tab,
-            xRadius: Self.tabDepth / 2,
-            yRadius: Self.tabDepth / 2
-        )
-        NSColor(kiwiFill: shelf.fillColor).setFill()
-        path.fill()
+        let parts = ShelfHandleSpec.parts(of: tab, edge: .bottom)
+        // A bar handle's ink, never the kiwis' own colour (#3361).
+        let ink = ShelfHandleSpec.restHex(of: shelf)
+        ShelfHandleSpec.restColor(hex: ink).setFill()
+        parts.core.fill()
+        ShelfHandleSpec.hairlineColor(hex: ink).setFill()
+        parts.hairlines.0.fill()
+        parts.hairlines.1.fill()
         context.restoreGState()
     }
 
