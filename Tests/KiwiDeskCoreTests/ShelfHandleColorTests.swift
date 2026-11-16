@@ -4,11 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The resting handle's colour (#3357): `kiwishelf.handle_color`,
-/// empty for Automatic — the label ink at `restStrength` — taken by
-/// the verb, the decoder and a palette, and left out of every
-/// bundled palette.
-@Suite("Shelf handle colour (#3357)")
+/// The handle's colour (#3357, #3360): `kiwishelf.handle_color`,
+/// empty for Automatic — the label ink at the rest and fill
+/// strengths — taken by the verb, the decoder and a palette, and
+/// left out of every bundled palette.
+@Suite("Shelf handle colour (#3357, #3360)")
 struct ShelfHandleColorTests {
     @Test("Automatic is the default, and absent decodes to it")
     func defaultIsAutomatic() throws {

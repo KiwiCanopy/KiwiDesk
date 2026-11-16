@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "グループバッジ",
   "kiwishelf.color.handle": "ハンドル",
   "kiwishelf.color.handle.a11y": "バーのハンドルのカラー",
-  "kiwishelf.color.handle.help": "ハンドルはこのカラーで表示され、バーが開くときにこのカラーで満たされます。",
+  "kiwishelf.color.handle.help": "ハンドルは普段このカラーで表示され、バーが開くときにこのカラーで満たされます。",
   "kiwishelf.color.highlight": "ハイライト",
   "kiwishelf.color.hover_fill": "ホバー時の塗りつぶし",
   "kiwishelf.color.hover_item": "ホバー時の項目",

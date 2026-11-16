@@ -96,9 +96,9 @@ struct ShelfHandleSpec: Equatable {
     static let hoverGrowth: CGFloat = 3
     /// Its distance from the screen side of the shelf's area.
     static let inset: CGFloat = 2
-    /// The handle's two strengths (#3360 ruling 3): it rests at
-    /// `restStrength` and its countdown fills at `fillStrength`.
+    /// The handle's strength at rest (#3360 ruling 3).
     static let restStrength: CGFloat = 0.38
+    /// The strength its countdown fills at (#3360 ruling 3).
     static let fillStrength: CGFloat = 0.9
     /// The handle's ink at `strength` (#3357, #3360): Automatic the
     /// label ink at that alpha, a picked colour at its own alpha

@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "Gruppen-Badge",
   "kiwishelf.color.handle": "Griff",
   "kiwishelf.color.handle.a11y": "Farbe des Leistengriffs",
-  "kiwishelf.color.handle.help": "Der Griff ruht in dieser Farbe und füllt sich damit, wenn die Leiste erscheint.",
+  "kiwishelf.color.handle.help": "Der Griff ruht in dieser Farbe und füllt sich damit, wenn sich die Leiste öffnet.",
   "kiwishelf.color.highlight": "Hervorhebung",
   "kiwishelf.color.hover_fill": "Hover-Füllung",
   "kiwishelf.color.hover_item": "Hover-Element",
