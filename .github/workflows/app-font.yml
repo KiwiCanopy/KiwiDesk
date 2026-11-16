@@ -8,7 +8,8 @@ name: Update App Font
 #
 # This workflow runs that same script — it is not a second copy of
 # the vendoring logic — and opens a PR. It never writes to main
-# and never arms auto-merge: the orchestrator lands the PR. The PR
+# and never merges its PR or arms a merge: the orchestrator lands
+# it. The PR
 # says whether it needs the owner's look: scripts/app-font-diff
 # compares the base branch's font with the new one per app name,
 # and a drop that changes no glyph an app drew is labelled
@@ -39,8 +40,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  # The additions-only label is created on first use.
-  issues: write
 
 # One vendoring run at a time; never cancel one mid-push.
 concurrency:
@@ -148,9 +147,12 @@ jobs:
           fi
 
       # Whether the PR needs the owner's look, computed rather than
-      # asked every week. Runs tree code, so github.token only.
+      # asked every week. Runs tree code, so github.token only. A
+      # failure here must not cost the drop: the PR then says the
+      # diff is missing and carries no label.
       - name: Diff the glyphs
         id: diff
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           VENDORED: ${{ needs.check.outputs.vendored }}
@@ -173,6 +175,8 @@ jobs:
 
       - name: Keep the before/after renders
         id: renders
+        if: steps.diff.outcome == 'success'
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: app-font-glyphs-${{ env.TAG }}
@@ -240,21 +244,27 @@ jobs:
           [upstream]: https://github.com/kvndrsslr/sketchybar-app-font
           EOF
           diff="$RUNNER_TEMP/app-font-diff"
-          { echo; cat "$diff/summary.md"; echo
-            echo "Before/after renders: [glyphs.html]($RENDERS_URL)" \
-              "(zipped, from [this run]($RUN_URL))."
-            if [ -s "$diff/notes.md" ]; then
-              echo; cat "$diff/notes.md"
-            fi
-          } >> "$body"
+          if [ "$LOOK" = "true" ] || [ "$LOOK" = "false" ]; then
+            { echo; cat "$diff/summary.md"; echo
+              if [ -n "$RENDERS_URL" ]; then
+                echo "Before/after renders:" \
+                  "[glyphs.html]($RENDERS_URL) (zipped)."
+              fi
+              if [ -s "$diff/notes.md" ]; then
+                echo; cat "$diff/notes.md"
+              fi
+            } >> "$body"
+          else
+            { echo
+              echo "**The glyph diff failed in [this run]($RUN_URL)," \
+                "so this drop needs the owner's look.**"
+            } >> "$body"
+          fi
           url="$(gh pr create --base "$BASE" --head "$branch" \
             --title "chore(bar): update sketchybar-app-font to $TAG" \
             --body-file "$body")"
           echo "$url"
           # Only an explicit verdict labels: a missing one asks.
           if [ "$LOOK" = "false" ]; then
-            gh label create "$LABEL" --repo "$REPO" --force \
-              --color 0e8a16 \
-              --description "App Font drop that changes no drawn glyph"
             gh pr edit "$url" --add-label "$LABEL"
           fi

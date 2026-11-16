@@ -939,6 +939,24 @@ only proof the drop was ever built. The PAT reaches the PR step
 alone — the checkout persists no credential, so the vendoring
 script and the build never hold it.
 
+**A fourth: the app-font PR states whether it needs the owner's
+look, and that verdict is computed per app name.** The bar reaches
+a ligature only through `AppFontGlyphMap.ligature(for:)`, so
+`scripts/app-font-diff` resolves every name both drops can tell
+apart the same way — exact first, then the longest `*` prefix — and
+compares the glyph each draws through the font's `liga` lookup. A
+drop in which every app draws the identical glyph is labelled
+`app-font: additions only` and may land on green; any other lists
+exactly the apps whose glyph moved. Only an explicit `false`
+labels, and a failed diff opens the PR saying so, unlabelled. The
+diff step holds `github.token` alone and pins fontTools
+(`AppFontDiffWorkflowTests`). A change to the name resolution moves
+`AppFontGlyphMap` and the script together, and
+`AppFontDiffScriptTests` holds the two equal and the verdict on
+the shapes that would pass as additions; the `APPM` schema moves
+the decoder, `update-app-font.sh`'s sanity check and the script
+together.
+
 **A workflow-opened PR gets its CI started for it, and one it
 expects to merge itself gets armed too.** Running the gate before
 the PR exists proves the change; it does not get the PR merged.
@@ -992,24 +1010,11 @@ check to wait out**.
 watching land, and that is the scope.** The release path is unwatched by
 construction — publish, and the feed waits on the sync PR — so
 it owes both. `app-font.yml`'s PR is the other shape: the
-orchestrator lands it, and the workflow never merges or arms
-auto-merge. **Its body states whether the drop needs the owner's
-look, computed by `scripts/app-font-diff` per app name** — the
-bar reaches a ligature only through an app name, so a drop in
-which every app draws the identical glyph is labelled `app-font:
-additions only` and may land on green, and any other lists
-exactly the apps whose glyph moved. Only an explicit `false`
-verdict labels, the label is the one the script's text names, the
-diff step holds `github.token` alone and pins fontTools, and the
-upstream notes span the tag the check job read
-(`AppFontDiffWorkflowTests`). The script reads `APPM` in the
-schema `AppFontGlyphMap.load(fontData:)` decodes, so a schema
-change moves both, and a change to its classification is re-run
-by hand against real upstream drops, since the test runner has no
-fontTools. With the PAT its CI starts on the PR's own event, and
-only its fallback leaves the start to its reviewer. That is a scope line, not an argument that
-it is fine: the two halves are separable,
-and a workflow-opened PR that acquires an unwatched landing owes
+orchestrator lands it, and the workflow never merges it or arms a
+merge; with the PAT its CI starts on the PR's own event, and
+only its fallback leaves the start to its reviewer. That is a
+scope line, not an argument that it is fine: the two halves are
+separable, and a workflow-opened PR that acquires an unwatched landing owes
 the dispatch on the day it does.
 
 **The dispatch is filtered, and that buys the PR leg only.** It

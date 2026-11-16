@@ -12,7 +12,8 @@ import Testing
 /// 1. The workflow runs the script, with fontTools pinned, and
 ///    reads its `look=` line from the step it names.
 /// 2. Only an explicit `false` labels: an empty verdict (a renamed
-///    step, a dropped print) must ask, never pass.
+///    step, a dropped print, a failed diff) must ask, never pass,
+///    and a failed diff still opens the PR.
 /// 3. The label the workflow applies is the one the script's PR
 ///    text promises.
 /// 4. The release notes start at the tag the check job read off
@@ -20,10 +21,11 @@ import Testing
 /// 5. The workflow never merges or arms auto-merge: the
 ///    orchestrator lands the PR.
 ///
-/// **What this cannot see**: whether the classification is right.
-/// The script needs fontTools, which the test runner lacks; its
-/// behaviour was checked against real upstream drops when it
-/// landed, and changes to it owe the same run by hand.
+/// **What this cannot see**: the verdict itself, which
+/// `AppFontDiffScriptTests` drives through the script's font-free
+/// model; nor the font reading (the `liga` shaping, the outline
+/// signatures), which needs fontTools the test runner lacks — a
+/// change there owes a run by hand against real upstream drops.
 @Suite("App font diff in the update workflow")
 struct AppFontDiffWorkflowTests {
     static let label = "app-font: additions only"
@@ -112,6 +114,20 @@ struct AppFontDiffWorkflowTests {
         #expect(!step.contains("\"$LOOK\" != "))
     }
 
+    /// A broken diff (a PyPI outage, a font fontTools refuses)
+    /// must still open the PR, saying so, rather than lose the drop.
+    @Test("A failed diff still opens an unlabelled PR")
+    func failedDiffStillOpensThePullRequest() throws {
+        #expect(
+            try diffStep.contains("continue-on-error: true\n"),
+            "a failed diff now fails the job before the PR exists"
+        )
+        #expect(
+            try prStep.contains("**The glyph diff failed in"),
+            "the PR no longer says its diff is missing"
+        )
+    }
+
     @Test("The applied label is the one the PR text names")
     func labelMatchesTheScript() throws {
         let step = try prStep
@@ -158,7 +174,11 @@ struct AppFontDiffWorkflowTests {
     @Test("The workflow never merges its own PR")
     func neverMerges() throws {
         let source = try yaml
-        for needle in ["gh pr merge", "--auto", "auto-merge"] {
+        let needles = [
+            "gh pr merge", "--auto", "auto-merge", "/merge",
+            "enablePullRequestAutoMerge",
+        ]
+        for needle in needles {
             #expect(
                 !source.contains(needle),
                 "app-font.yml reaches for `\(needle)`"
