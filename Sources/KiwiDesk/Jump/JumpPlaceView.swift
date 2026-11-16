@@ -77,7 +77,7 @@ struct JumpRefusalView: View {
     let text: String
     let pulsing: Bool
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     static let swell: CGFloat = 1.08
 

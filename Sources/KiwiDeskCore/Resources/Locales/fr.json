@@ -243,7 +243,7 @@
   "behavior.animations.speed": "Vitesse des animations",
   "behavior.animations.speed.custom": "Durées personnalisées. Choisissez une vitesse pour les remplacer.",
   "behavior.animations.speed.fast": "Rapide",
-  "behavior.animations.speed.help": "La vitesse des animations de KiwiDesk, dans tous les profils : fenêtres, défilement, les barres, changements d'espace et KiwiVision. KiwiDesk démarre sur « %2$@ ». « %1$@ » arrête ces animations et conserve les interrupteurs de chaque profil.",
+  "behavior.animations.speed.help": "La vitesse des animations de KiwiDesk, dans tous les profils : fenêtres, défilement, les barres, changements d'espace et KiwiVision. KiwiDesk démarre sur « %2$@ ». « %1$@ » désactive les animations de KiwiDesk partout sauf dans cette fenêtre et conserve les interrupteurs de chaque profil.",
   "behavior.animations.speed.medium": "Moyenne",
   "behavior.animations.speed.off": "Désactivé",
   "behavior.animations.speed.off_warning": "Les animations sont désactivées dans tous les profils.",

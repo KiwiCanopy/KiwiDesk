@@ -16,7 +16,7 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
     @State private var offset: CGFloat = 0
     @State private var contentWidth: CGFloat = 0
     @State private var width: CGFloat = 0
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     static var fade: CGFloat { 24 }

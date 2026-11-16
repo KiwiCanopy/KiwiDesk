@@ -100,8 +100,9 @@ struct AnimationSpeedRow: View {
             "behavior.animations.speed.help",
             "How fast KiwiDesk animates, in every profile: windows, "
                 + "scrolling, the bars, Space switches and KiwiVision. "
-                + "KiwiDesk starts at %2$@. %1$@ stops those animations "
-                + "and keeps each profile's switches.",
+                + "KiwiDesk starts at %2$@. %1$@ turns off KiwiDesk's "
+                + "animations everywhere but this window, and keeps "
+                + "each profile's switches.",
             title(of: .off),
             title(of: .medium)
         )

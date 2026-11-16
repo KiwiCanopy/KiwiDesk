@@ -29,7 +29,7 @@ struct DesktopsSideCeilingTests {
         model.setScope(.desktops)
         let view = JumpPanelView(
             model: model,
-            presence: PanelPresence(),
+            presence: PanelPresence(reduceMotion: true),
             width: JumpPanelView.width
         )
         let host = NSHostingView(

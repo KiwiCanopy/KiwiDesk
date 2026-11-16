@@ -9872,10 +9872,12 @@ is on, the windows, the bars and the marks on windows move as they
 do with Reduce Motion on in macOS — windows move at once, a
 `"slide"` Space switch shows the Space, the KiwiVision fade is
 instant. It also stops a hidden bar's reveal and the KiwiShelf
-expand, which macOS's Reduce Motion lets play. No length changes,
-so turning it off brings back the same pace. KiwiHub, the plates
-that name a Space, a layout or a Desktop, the slow-boot notice and
-the Settings window follow macOS's setting alone.
+expand, which macOS's Reduce Motion lets play. KiwiHub, the plates
+that name a Space, a layout or a Desktop, and the slow-boot notice
+appear and leave at once, without their fades; one already on
+screen keeps its motion until it next shows. No length changes,
+so turning it off brings back the same pace. The Settings window
+follows macOS's setting alone.
 
 It is the **Off** of **Looks &amp; Animations ▸ Animations ▸
 Animation speed**, which Simple shows too. The setting is app-wide,

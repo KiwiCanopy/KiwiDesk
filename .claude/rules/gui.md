@@ -2107,6 +2107,16 @@ that used it were normalized. A model has no environment to
 read, so it takes `reduceMotion` as a parameter from its caller
 (`setAutoStart`) and names it at the call.
 
+**Outside `Sources/KiwiDesk/Settings` the gate reads KiwiDesk's
+Reduce Motion, never macOS's alone** (#3252): a view takes
+`\.kiwiDeskReduceMotion` or its model's value, which its panel's
+host reads from `ReduceMotion.isOn` once at show and hands to the
+order-out as well, so a fade and its order-out never disagree.
+Only the Settings window may read `\.accessibilityReduceMotion`
+(`ReduceMotionHomeTests` ▸ `guiReadsTheHome`, `hostsAreWired`); a
+new panel host joins the second. `docs/design-decisions.md` ▸ *Off
+is Reduce Motion for KiwiDesk* carries why.
+
 **And `withAnimation { … }` — no parens — is the shape that
 hides.** Swift defaults the animation, so that spelling is an
 ungated call a paren-only needle cannot see AT ALL; one shipped

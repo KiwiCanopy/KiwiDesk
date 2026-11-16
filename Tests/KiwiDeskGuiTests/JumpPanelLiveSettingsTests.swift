@@ -46,7 +46,7 @@ struct JumpPanelLiveSettingsTests {
         let model = try #require(controller.currentModel)
         let view = JumpPanelView(
             model: model,
-            presence: PanelPresence(),
+            presence: PanelPresence(reduceMotion: true),
             width: JumpPanelView.width
         )
         let opened = view.panelGlass.enabled

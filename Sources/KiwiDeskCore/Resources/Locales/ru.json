@@ -243,7 +243,7 @@
   "behavior.animations.speed": "Скорость анимаций",
   "behavior.animations.speed.custom": "Свои длительности. Выбери скорость, чтобы заменить их.",
   "behavior.animations.speed.fast": "Быстрая",
-  "behavior.animations.speed.help": "Насколько быстро KiwiDesk анимирует, во всех профилях: окна, прокрутку, панели, переключение пространств и KiwiVision. KiwiDesk начинает в положении «%2$@». В положении «%1$@» эти анимации останавливаются, а переключатели каждого профиля сохраняются.",
+  "behavior.animations.speed.help": "Насколько быстро KiwiDesk анимирует, во всех профилях: окна, прокрутку, панели, переключение пространств и KiwiVision. KiwiDesk начинает в положении «%2$@». В положении «%1$@» анимации KiwiDesk отключаются везде, кроме этого окна, а переключатели каждого профиля сохраняются.",
   "behavior.animations.speed.medium": "Средняя",
   "behavior.animations.speed.off": "Выкл.",
   "behavior.animations.speed.off_warning": "Анимации выключены во всех профилях.",

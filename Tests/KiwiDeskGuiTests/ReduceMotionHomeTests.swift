@@ -4,11 +4,11 @@ import Testing
 /// KiwiDesk's own Off joins macOS Reduce Motion in one read in Core
 /// (#3238): `ReduceMotion.isOn`. A second AppKit read of the OS flag
 /// there plays motion while the preset says Off, so that spelling
-/// lives in `ReduceMotion.swift` alone. The scan stops at Core, as
-/// the ruling does: the GUI tree's panels (KiwiHub, the cue plates,
-/// the boot notice) and Settings read macOS's setting alone, through
-/// AppKit or SwiftUI's `\.accessibilityReduceMotion`, and are not
-/// scanned.
+/// lives in `ReduceMotion.swift` alone. The GUI tree reads the same
+/// home outside Settings (#3252): KiwiHub, the cue plates, the boot
+/// notice and the tour take `\.kiwiDeskReduceMotion` or a value
+/// their host read at show, and only the Settings window keeps
+/// macOS's setting.
 @Suite("Reduce Motion home (#3238)")
 struct ReduceMotionHomeTests {
     private static let needle = "accessibilityDisplayShouldReduceMotion"
@@ -30,6 +30,93 @@ struct ReduceMotionHomeTests {
             }
         }
         #expect(found == [Self.home: 1])
+    }
+
+    /// The trees ruled to stay on macOS's setting alone (#3252 ▸
+    /// Ruling): the Settings window's motion is where Off is seen
+    /// to take effect, and it is ordinary window chrome.
+    private static let macOSOnly = ["Sources/KiwiDesk/Settings/"]
+
+    /// Either OS read in the GUI tree — SwiftUI's environment value
+    /// or AppKit's flag — plays motion under Off, so outside the
+    /// ruled trees neither is spelled.
+    @Test("the GUI reads KiwiDesk's Reduce Motion outside Settings")
+    func guiReadsTheHome() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let tree = root.appendingPathComponent("Sources/KiwiDesk")
+        let files = try SourceScan.swiftSources(under: tree)
+        #expect(!files.isEmpty)
+        let needles = [
+            "accessibilityReduceMotion",
+            Self.needle,
+        ]
+        var found: [String] = []
+        var ruledHits = 0
+        for file in files {
+            let path = String(
+                file.path.dropFirst(root.path.count + 1)
+            )
+            let source = try SourceScan.strippedSource(at: file)
+            let hits = needles.reduce(0) {
+                $0 + source.occurrences(of: $1)
+            }
+            guard hits > 0 else { continue }
+            if Self.macOSOnly.contains(where: path.hasPrefix) {
+                ruledHits += hits
+            } else {
+                found.append(path)
+            }
+        }
+        #expect(found.isEmpty, "\(found)")
+        // A ruled tree that stopped reading the OS is a stale entry.
+        #expect(ruledHits > 0)
+    }
+
+    /// Each panel host reads the home once at show and hands that
+    /// one value to its order-out and to its views (#3252).
+    @Test("the GUI hosts read the home at show")
+    func hostsAreWired() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let needles: [String: [String]] = [
+            "Jump/JumpPanelController.swift": [
+                "varreduceMotion:()->Bool={ReduceMotion.isOn}",
+                "PanelPresence(reduceMotion:reduceMotion())",
+                "width:width).environment(\\.kiwiDeskReduceMotion,"
+                    + "presence.reduceMotion)",
+            ],
+            "PanelEntrance.swift": [
+                "letdelay=reduceMotion?0:Self.leaveDuration",
+                "privatevarreduceMotion:Bool{presence.reduceMotion}",
+            ],
+            "CuePlate/CuePlateController.swift": [
+                "model.present(content,reduceMotion:ReduceMotion.isOn)",
+                "letfade=model.reduceMotion?0:CuePlateModel.fade",
+            ],
+            "CuePlate/CuePlateModel.swift": [
+                "self.reduceMotion=reduceMotion",
+                "privatevarreduceMotion:Bool{model.reduceMotion}",
+                ".environment(\\.kiwiDeskReduceMotion,reduceMotion)",
+            ],
+            "BootNotice/BootNoticeController.swift": [
+                "model.reduceMotion=ReduceMotion.isOn",
+                "letfade=model.reduceMotion?0:BootNoticeModel.fade",
+            ],
+            "BootNotice/BootNoticeView.swift": [
+                "privatevarreduceMotion:Bool{model.reduceMotion}"
+            ],
+            "AppDelegate+Onboarding.swift": [
+                ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"
+            ],
+        ]
+        for (path, wanted) in needles {
+            let source = try SourceScan.strippedSource(
+                at: root.appendingPathComponent(path)
+            ).filter { !$0.isWhitespace }
+            for needle in wanted {
+                #expect(source.contains(needle), "\(path): \(needle)")
+            }
+        }
     }
 
     /// A gate reading the home's OS half drops KiwiDesk's Off as

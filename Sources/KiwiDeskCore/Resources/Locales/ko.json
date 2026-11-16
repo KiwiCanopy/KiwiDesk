@@ -243,7 +243,7 @@
   "behavior.animations.speed": "애니메이션 속도",
   "behavior.animations.speed.custom": "사용자 지정 지속 시간입니다. 속도를 선택하면 대체됩니다.",
   "behavior.animations.speed.fast": "빠르게",
-  "behavior.animations.speed.help": "모든 프로필에 적용되는 KiwiDesk 애니메이션의 속도입니다: 윈도우, 스크롤, 바, 공간 전환 및 KiwiVision. KiwiDesk는 ‘%2$@’에서 시작합니다. ‘%1$@’은 이 애니메이션을 멈추고, 각 프로필의 스위치는 그대로 유지합니다.",
+  "behavior.animations.speed.help": "모든 프로필에 적용되는 KiwiDesk 애니메이션의 속도입니다: 윈도우, 스크롤, 바, 공간 전환 및 KiwiVision. KiwiDesk는 ‘%2$@’에서 시작합니다. ‘%1$@’은 이 윈도우를 제외한 모든 곳에서 KiwiDesk의 애니메이션을 끄고, 각 프로필의 스위치는 그대로 유지합니다.",
   "behavior.animations.speed.medium": "중간",
   "behavior.animations.speed.off": "끔",
   "behavior.animations.speed.off_warning": "모든 프로필에서 애니메이션이 꺼져 있습니다.",

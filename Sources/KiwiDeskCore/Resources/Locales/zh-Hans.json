@@ -243,7 +243,7 @@
   "behavior.animations.speed": "动画速度",
   "behavior.animations.speed.custom": "自定义时长。选择一种速度即可替换。",
   "behavior.animations.speed.fast": "快",
-  "behavior.animations.speed.help": "KiwiDesk 动画的快慢，适用于所有描述文件：窗口、滚动、栏、空间切换和 KiwiVision。KiwiDesk 初始为“%2$@”。“%1$@”会停止这些动画，并保留每个描述文件的开关。",
+  "behavior.animations.speed.help": "KiwiDesk 动画的快慢，适用于所有描述文件：窗口、滚动、栏、空间切换和 KiwiVision。KiwiDesk 初始为“%2$@”。“%1$@”会在除此窗口外的所有地方关闭 KiwiDesk 的动画，并保留每个描述文件的开关。",
   "behavior.animations.speed.medium": "中等",
   "behavior.animations.speed.off": "关闭",
   "behavior.animations.speed.off_warning": "所有描述文件中的动画均已关闭。",
