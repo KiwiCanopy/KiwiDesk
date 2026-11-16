@@ -132,6 +132,20 @@ struct ShelfRevealApproachTests {
 
     @Test("The Dock's edge belongs to macOS only while it hides")
     func dockEdgeIsRead() {
+        let read = { (prefs: [String: Any]) in
+            MacEdges.dock { domain, key in
+                domain == "com.apple.dock" ? prefs[key] : nil
+            }
+        }
+        let on = NSNumber(value: true)
+        #expect(read([:]) == nil)
+        #expect(read(["autohide": NSNumber(value: false)]) == nil)
+        // A value of another shape reads as macOS's default.
+        #expect(read(["autohide": "yes"]) == nil)
+        #expect(read(["autohide": on]) == .bottom)
+        #expect(read(["autohide": on, "orientation": "left"]) == .left)
+        #expect(read(["autohide": on, "orientation": "right"]) == .right)
+        #expect(read(["autohide": on, "orientation": "bottom"]) == .bottom)
         let hidden = MacEdges(dock: .bottom)
         #expect(hidden.owns(.bottom))
         #expect(!hidden.owns(.top) && !hidden.owns(.left))

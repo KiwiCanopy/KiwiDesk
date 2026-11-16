@@ -64,9 +64,15 @@ extension ShelfRevealer {
         handleMove(key, target, location())
         let rest = ShelfReveal.dwellDelay - ShelfReveal.approachDelay
         arm(key, after: rest) { [weak self] in
-            guard let self, let target = self.targets[key],
+            guard let self else { return }
+            guard let target = self.targets[key],
                 self.stillApproaching(key, target)
-            else { return }
+            else {
+                // Unheard leaves — a drag moving no window, a bar
+                // turned Hidden — end the thickening here.
+                self.leave(key)
+                return
+            }
             self.open(key)
         }
     }

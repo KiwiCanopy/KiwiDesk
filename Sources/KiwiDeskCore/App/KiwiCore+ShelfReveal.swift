@@ -150,6 +150,13 @@ extension KiwiCore {
                     (origin + band.lowerBound)...(origin + band.upperBound)
             }
             let side = Self.side(of: plan.strip, edge: plan.edge, shelf: shelf)
+            // An edge another screen continues past is a crossing:
+            // a push there opens nothing (#3349).
+            let beyond = Self.continues(
+                plan.edge,
+                of: screen.frame,
+                among: ScreenList.all.map(\.frame)
+            )
             for (index, bar) in handled.enumerated() {
                 guard let run = run(bar) else { continue }
                 let dots =
@@ -177,11 +184,12 @@ extension KiwiCore {
                 spec.glass = shelf.glassEnabled
                 targets[barKey(bar)] = Self.target(
                     spec,
+                    side: side,
                     strip: strip,
                     screen: screen.frame,
+                    beyond: beyond,
                     section: section(bar),
-                    outward: shelf.outerMargin + ShelfReveal.overshoot,
-                    maximized: plan.shelfEdge.shown(bar) != .auto,
+                    maximized: hover.contains(bar),
                     cut: (
                         lead: index > 0,
                         trail: index < handled.count - 1

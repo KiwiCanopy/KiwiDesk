@@ -134,7 +134,7 @@ synonym:
   peek through an Auto Space Bar's thickened handle (#761, #3349).
   Never a *pill*, an *indicator* or a *badge*, each spoken for
   here, nor a *half-moon*.
-- **handle** — what an `auto` bar leaves at its edge: a thin strip
+- **handle** — what an `auto` bar leaves at its edge: a thin line
   along the bar's run that the pointer reaches for to bring the bar
   in (owner, #2567, #3349). Name it a *handle* — the bar's handle
   where another handle could be read — never a *strip*, which is the
@@ -282,8 +282,8 @@ synonym:
   `LayoutMode.symbol` the Layout menu and the Space Bar's
   `item_label` draw (#1535), is that same SF Symbol kind; a
   further use of the word owes this row an entry. A shortcut's
-  `symbol` (#2544) is that same SF Symbol kind, and so is the
-  window symbol an App Bar handle's count stands beside (#2567). In a catalog, the two words are the
+  `symbol` (#2544) is that same SF Symbol kind. In a catalog,
+  the two words are the
   translator's own under `docs/localization-naming.md` ▸
   Family C, and must differ from each other and from the
   catalog's word for an app icon. `AppSymbolNounTests` holds

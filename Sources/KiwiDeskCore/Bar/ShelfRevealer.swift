@@ -61,7 +61,9 @@ final class ShelfRevealer {
     private(set) var phases: [Key: ShelfReveal] = [:]
     /// Hidden bars whose handle is thickened — the pointer held in
     /// the approach for `approachDelay` (#3349).
-    /// Written only by the revealer's own files.
+    /// Written only by the revealer's own files (+Approach), as
+    /// is every approach member below; a writer elsewhere is
+    /// review's.
     var arming: Set<Key> = []
     /// Approaches handed to macOS: the pointer touched the outermost
     /// row of an edge macOS owns, so nothing of KiwiDesk's runs

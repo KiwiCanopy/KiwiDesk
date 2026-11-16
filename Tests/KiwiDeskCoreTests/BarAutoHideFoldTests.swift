@@ -6,8 +6,8 @@ import Testing
 
 /// The visibility fold (#761) in `barEdges(space:app:)`: each bar
 /// is handed its own value, an edge two bars share reads its more
-/// present bar's, an `auto` edge reserves only its sliver and a
-/// `hidden` one nothing, so a reveal draws over the windows.
+/// present bar's, and an `auto` or `hidden` edge reserves nothing
+/// (#3349), so a reveal draws over the windows.
 @Suite("Bar visibility fold (#761)")
 struct BarAutoHideFoldTests {
     private func settings(

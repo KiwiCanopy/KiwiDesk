@@ -38,73 +38,64 @@ extension KiwiCore.HidingShelves {
         return bar
     }
 
-    /// The revealer's target for `spec`'s handle, Cocoa: its
-    /// approach along the handle, reaching `outward` past the
-    /// screen side and `ShelfReveal.approachReach` in — over a
-    /// maximized window (`maximized`) only to the thickened handle,
-    /// so a pause on its tab bar or toolbar drops no bar over them
-    /// (#3346) — cut at the handle's end where a sibling's approach
-    /// meets it (`cut`), so a point opens one bar.
+    /// The revealer's target for `spec`'s handle, its area's
+    /// screen side at AX `side` (`side(of:edge:shelf:)`, the one
+    /// the handle's frame took): an approach from
+    /// `ShelfReveal.overshoot` past that side to
+    /// `ShelfReveal.approachReach` in — over a maximized window
+    /// (`maximized`) only to the thickened handle, so a pause on its
+    /// toolbar drops no bar over it for long (#3346) — cut where a
+    /// sibling's approach meets it (`cut`).
     @MainActor static func target(
         _ spec: ShelfHandleSpec,
+        side: CGFloat,
         strip: CGRect,
         screen: CGRect,
+        beyond: Bool,
         section: CGRect?,
-        outward: CGFloat,
         maximized: Bool = false,
         cut: (lead: Bool, trail: Bool)
     ) -> ShelfRevealer.Target {
         let primary = GeometryUtils.primaryHeight
-        let handle = GeometryUtils.flip(spec.frame, primaryHeight: primary)
-        let grown = GeometryUtils.flip(spec.grown, primaryHeight: primary)
-        let inset = ShelfHandleSpec.inset
-        let side: CGFloat =
-            switch spec.edge {
-            case .top: handle.maxY + inset
-            case .bottom: handle.minY - inset
-            case .left: handle.minX - inset
-            case .right: handle.maxX + inset
-            }
-        var approach = ShelfReveal.approach(
-            along: handle,
+        let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
+        return .along(
+            flip(spec.frame),
             edge: spec.edge,
-            side: side,
-            outward: outward,
-            inward: maximized
-                ? inset + ShelfHandleSpec.depth
-                    + 2 * ShelfHandleSpec.hoverGrowth
-                : ShelfReveal.approachReach
-        )
-        // AX runs top to bottom along a side edge, Cocoa bottom to
-        // top: the leading end is the top there.
-        let reach = ShelfReveal.alongReach
-        let low = spec.horizontal ? cut.lead : cut.trail
-        let high = spec.horizontal ? cut.trail : cut.lead
-        let cuts = CGFloat((low ? 1 : 0) + (high ? 1 : 0)) * reach
-        let shift = low ? reach : 0
-        if spec.horizontal {
-            approach.origin.x += shift
-            approach.size.width -= cuts
-        } else {
-            approach.origin.y += shift
-            approach.size.height -= cuts
-        }
-        let touch = ShelfReveal.pushReach
-        let flush: Bool =
-            switch spec.edge {
-            case .top: screen.maxY - side <= touch
-            case .bottom: side - screen.minY <= touch
-            case .left: side - screen.minX <= touch
-            case .right: screen.maxX - side <= touch
-            }
-        return ShelfRevealer.Target(
-            edge: spec.edge,
+            side: spec.horizontal ? primary - side : side,
             strip: strip,
             screen: screen,
-            approach: approach,
-            handle: grown,
-            flush: flush,
-            section: section
+            beyond: beyond,
+            handle: flip(spec.grown),
+            section: section,
+            inward: maximized
+                ? ShelfHandleSpec.inset
+                    + (spec.horizontal
+                        ? spec.grown.height : spec.grown.width)
+                : ShelfReveal.approachReach,
+            cut: cut
         )
+    }
+
+    /// Whether a screen in `screens` continues past `edge` of
+    /// `frame`, Cocoa: the edge is then a crossing, never a stop.
+    static func continues(
+        _ edge: AppBarEdge,
+        of frame: CGRect,
+        among screens: [CGRect]
+    ) -> Bool {
+        screens.contains { other in
+            guard other != frame else { return false }
+            let along =
+                edge.isHorizontal
+                ? other.minX < frame.maxX && other.maxX > frame.minX
+                : other.minY < frame.maxY && other.maxY > frame.minY
+            guard along else { return false }
+            switch edge {
+            case .top: return abs(other.minY - frame.maxY) < 1
+            case .bottom: return abs(other.maxY - frame.minY) < 1
+            case .left: return abs(other.maxX - frame.minX) < 1
+            case .right: return abs(other.minX - frame.maxX) < 1
+            }
+        }
     }
 }

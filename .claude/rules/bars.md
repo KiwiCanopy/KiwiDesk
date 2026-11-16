@@ -281,16 +281,24 @@ twice, was a question the user answered twice. The argument is
   read; a second placement or yield beside them is review's.
   **Ask whether macOS owns an edge only through the revealer's
   `macEdges` seam over `MacEdges`**, read once per approach entry and
-  never cached past its leave, never a Dock or menu-bar read of its
-  own; both `makeTestCore` twins pin it `.none`
-  (`MouseButtonSeamGuardTests`), and a pointer on the outermost row
-  of an edge it owns cedes the approach, cancelling every timer of
-  the revealer's until the pointer leaves (`ShelfRevealApproachTests`,
-  `ShelfRevealApproachTests` ▸ `dockEdgeIsRead`). **What peeks through a thickened handle is the
-  spec's one `peek`** — the Space dots or the App Bar's glyphs — and
-  the handle carries no label or count (#3349, amending #2567).
+  never cached past its leave: the Dock through `MacEdges.dock`, the
+  menu bar through the one `GeometryUtils.menuBarAutoHides`, never a
+  Dock or `_HIHideMenuBar` read of its own; both `makeTestCore` twins
+  pin the seam `.none` (`MouseButtonSeamGuardTests`), and a pointer on
+  the outermost row of an edge macOS owns cedes the approach,
+  cancelling every timer of the revealer's until the pointer leaves
+  it (`ShelfRevealApproachTests` ▸ `macOSEdgeCedes`,
+  `ShelfRevealApproachTests` ▸ `dockEdgeIsRead`). **A push counts
+  only on a free edge: one the handle's area touches and no other
+  screen continues past**, answered by the one
+  `ShelfRevealer.Target.along`, which production and the suites build
+  every approach through (`ShelfHandleStripTests` ▸
+  `innerEdgeIsNoPush`). **What peeks through a thickened handle is
+  the spec's one `peek`** — the Space dots or the App Bar's glyphs —
+  and the handle carries no label or count (#3349, amending #2567).
   **A handle's thickened glass is one `GlassBox` whose host the
-  approach moves**, under one capsule radius at both sizes.
+  approach moves**, under one capsule radius at both sizes
+  (`ShelfHandleFillBehindTests`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

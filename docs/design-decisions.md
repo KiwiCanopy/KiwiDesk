@@ -6804,9 +6804,10 @@ leaf's one reader, `maximizedHoverBars(in:)` lists the bars it opens
 over it, and the revealer reads that, never `layoutBounds`. Every
 reader asks whether a screen is maximized through the one
 `screenMaximizes(on:)`. Auto must never come
-out of the bar reading as `.auto`, because an `.auto` edge reserves
-its sliver and draws its handle, and a reveal would then retile the
-maximized window. The fill and `maximizedBounds` stay as they are,
+out of the bar reading as `.auto`, because an `.auto` bar beside an
+Always sibling reads Always: it would show at rest over the window
+and refuse its shortcut (amended by #3349, which took the `.auto`
+edge's sliver away). The fill and `maximizedBounds` stay as they are,
 so a reveal floats over the window and moves nothing.
 
 *The band runs along the whole edge and never over the window.*
@@ -6828,18 +6829,20 @@ set to hide on the bar's edge, one push brings in both.
 strip at rest. Over a maximized window each bar rests as the handle
 an Auto bar leaves, along its run, which floats and reserves nothing
 as the band did, so a reveal still moves no window. The whole-edge
-band is retired with #761's 64-point one: the strip shows the user
+band is retired with #761's 64-point one: the handle shows the user
 where to aim. The argument against an inward band still holds, so
 over a maximized window the approach reaches in only to the
-thickened strip, never 24 points over the window's tab bar or
-toolbar. The accepted residue is gone too: on an edge macOS owns,
-the push belongs to macOS. A stored Hidden bar still rests as
-nothing.
+thickened handle, never 24 points over the window's tab bar or
+toolbar. The residue that stays is accepted: a pause of 0.4 s on
+the thickened handle's 11 points at a maximized window's edge, its
+tab bar's top edge included, still brings the bar in. The residue
+the band carried is gone: on an edge macOS owns, the push belongs to
+macOS. A stored Hidden bar still rests as nothing.
 
 *The user's own bar setting wins downward.* A bar stored as Hidden
-gets no band under a maximize: it never showed unprompted, and a
+gets no handle under a maximize: it never showed unprompted, and a
 maximize should not make it. A bar stored as Always or Auto gets the
-band. A tiling-off Space whose tick hides the bars gets none either,
+handle. A tiling-off Space whose tick hides the bars gets none either,
 since the tick asks for Hidden.
 
 *The Pocket follows the same value* (owner, 2026-11-15). It rests on
@@ -19566,6 +19569,7 @@ An App Bar with no window draws no handle at all, so the count is
 never 0; its show/hide there refuses with a pill, as every refusal
 of a bar's show/hide does, rather than doing nothing silently.
 
+:::unreleased
 *Amended* (owner, 2026-11-15, #3349): **an Auto bar rests as a
 strip along its whole run and leaves macOS its own edges.** The
 handle stays the handle, in code and copy, and only its shape and
@@ -19576,12 +19580,12 @@ showed, the bar came in only "in the middle". And on an edge where
 macOS auto-hides something, a push brought both in at once, since a
 Dock stays shown for as long as the pointer stays there. So:
 
-- *The handle is a 3-point strip along the bar's drawn run.* It
+- *The handle is a 3-point line along the bar's drawn run.* It
   replaces the Space dots and the line on every edge, never mixed
   with them, because the user aims at an edge, as they do for the
   Dock. That amends the band paragraphs above: the bar's run is now
   the target. The worry that a long run opens a bar far from the
-  pointer is answered by the strip itself, which shows the run
+  pointer is answered by the handle itself, which shows the run
   before anything opens. Two bars on one edge each take their own
   run, and their approaches stop where the runs meet.
 - *It reserves nothing* (amends #2784's sliver for the bars, not the
@@ -19590,7 +19594,11 @@ Dock stays shown for as long as the pointer stays there. So:
   windows for a target that no longer needs one. The handle lets
   every click through, so a bottom scrollbar or status bar under it
   keeps working, and only the open bar takes clicks.
-- *An approach thickens it before anything opens.* Within about 24
+- *An approach thickens it before anything opens.* The thickening
+  is the handle's hover growth, which plays under Reduce Motion as
+  that growth always has (owner, 2026-10-21), and no
+  `reveal_style` touches it. The grow and unfold reveals now start
+  from the thickened handle, which already runs the bar's length. Within about 24
   points of the edge along the run, held 0.15 s, the strip thickens to
   9 points and its contents peek through at 70%: the Space dots, or the
   App Bar's glyphs, which take the place of #2567's count. A name or a
@@ -19598,11 +19606,13 @@ Dock stays shown for as long as the pointer stays there. So:
   as "this bar" at a glance. VoiceOver still speaks the Space's place
   through the handle's value. Approach alone never opens the bar, so
   working near a window's bottom edge only thickens a line.
-- *Three ways in.* Resting on the thickened strip opens after 0.15 s,
+- *Three ways in.* Resting on the thickened handle opens after 0.15 s,
   as the band did. Lingering in the approach opens after a dwell of
   0.4 s from the entry, the same on every edge (set with the owner on
   the device). A push against the outermost row opens at once, but
-  only on a free edge.
+  only on a free edge: one with nothing between the bar and the
+  screen's edge and no other screen past it, since a push is a stop
+  against the edge and a pointer crossing to a neighbour is not.
 - *macOS keeps its own edges.* On the Dock's edge while the Dock hides
   itself (bottom, left or right, on every screen, since with "Displays
   have separate Spaces" the Dock follows the pushed screen), and on the
@@ -19616,9 +19626,7 @@ Dock stays shown for as long as the pointer stays there. So:
   preferences as the pointer enters an approach, at about a
   microsecond a read, with no cache and no notification to miss. An
   unreadable key reads as macOS's default, a free edge.
-
-A side edge's strip and its approach take the same rule as a top or
-bottom one, so nothing here is per edge but the axis.
+:::
 
 A reveal onto an edge that shows nothing else slides the whole bar
 in from the shelf's screen side, already laid out — out from under

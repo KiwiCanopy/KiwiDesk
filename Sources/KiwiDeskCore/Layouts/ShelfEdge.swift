@@ -75,7 +75,7 @@ public struct ShelfEdge: Sendable, Equatable {
 /// What the shelves take off a screen in one layout: the edges
 /// it reserves at the shelf's depth, the pocket's edge at its own
 /// (#2784), and each depth — a hiding bar's handle floats and
-/// reserves nothing (#3349) — — the whole input
+/// reserves nothing (#3349): the whole input
 /// `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)` reads,
 /// so two equal values leave every layout's bounds alone (#1524).
 public struct ShelfReservation: Sendable, Equatable {

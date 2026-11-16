@@ -88,14 +88,16 @@ struct ShelfHandleStripTests {
     private func target(
         _ spec: ShelfHandleSpec,
         maximized: Bool = false,
+        beyond: Bool = false,
         cut: (lead: Bool, trail: Bool) = (false, false)
     ) -> ShelfRevealer.Target {
         KiwiCore.HidingShelves.target(
             spec,
+            side: 0,
             strip: Self.strip,
             screen: Self.screen,
+            beyond: beyond,
             section: nil,
-            outward: ShelfReveal.overshoot,
             maximized: maximized,
             cut: cut
         )
@@ -153,12 +155,97 @@ struct ShelfHandleStripTests {
         #expect(cut?.maxX == 700)
     }
 
+    /// The target's own push verdict: flush only where the handle's
+    /// side is the screen's edge and nothing continues past it.
+    @Test("the filed target pushes only at a free screen edge")
+    func targetFlush() {
+        let primary = GeometryUtils.primaryHeight
+        let top = CGRect(x: 0, y: 0, width: 1000, height: primary)
+        let below = CGRect(x: 0, y: 0, width: 1000, height: primary + 30)
+        let file = { (screen: CGRect, beyond: Bool) in
+            KiwiCore.HidingShelves.target(
+                self.spec(),
+                side: 0,
+                strip: Self.strip,
+                screen: screen,
+                beyond: beyond,
+                section: nil,
+                cut: (false, false)
+            ).flush
+        }
+        #expect(file(top, false))
+        #expect(!file(top, true))
+        // A side 30 pt below the screen's top: a menu bar between.
+        #expect(!file(below, false))
+    }
+
+    /// Along a side edge AX leads from the top, Cocoa from the
+    /// bottom: a cut at the lead end trims the approach's top.
+    @Test("a side edge's cut trims the end its sibling meets")
+    func sideEdgeCut() {
+        let run = CGRect(x: 0, y: 300, width: 3, height: 200)
+        let whole =
+            ShelfRevealer.Target.along(
+                run,
+                edge: .left,
+                side: 0,
+                screen: Self.screen
+            ).approach ?? .null
+        let lead =
+            ShelfRevealer.Target.along(
+                run,
+                edge: .left,
+                side: 0,
+                screen: Self.screen,
+                cut: (true, false)
+            ).approach ?? .null
+        #expect(whole.maxY == 500 + ShelfReveal.alongReach)
+        #expect(lead.maxY == 500)
+        #expect(lead.minY == whole.minY)
+    }
+
+    /// A push is a stop against the physical edge: an edge another
+    /// screen continues past is a crossing (#3349 rule 4).
+    @Test("a push counts only where no screen continues past the edge")
+    func innerEdgeIsNoPush() {
+        let top = ShelfRevealer.Target.along(
+            CGRect(x: 300, y: 790, width: 400, height: 3),
+            edge: .top,
+            side: 800,
+            screen: Self.screen
+        )
+        #expect(top.flush)
+        let shared = ShelfRevealer.Target.along(
+            CGRect(x: 300, y: 790, width: 400, height: 3),
+            edge: .top,
+            side: 800,
+            screen: Self.screen,
+            beyond: true
+        )
+        #expect(!shared.flush)
+        let above = CGRect(x: 0, y: 800, width: 1000, height: 600)
+        #expect(
+            KiwiCore.HidingShelves.continues(
+                .top,
+                of: Self.screen,
+                among: [Self.screen, above]
+            )
+        )
+        #expect(
+            !KiwiCore.HidingShelves.continues(
+                .bottom,
+                of: Self.screen,
+                among: [Self.screen, above]
+            )
+        )
+    }
+
     @Test("a shown bar is held over its section, never the edge")
     func holdIsTheSection() {
         let section = CGRect(x: 300, y: 760, width: 400, height: 40)
-        let target = ShelfRevealer.Target.hovering(
+        let target = ShelfRevealer.Target.along(
+            section,
             edge: .top,
-            strip: section,
             screen: Self.screen,
             section: section
         )
@@ -176,17 +263,19 @@ struct ShelfHandleStripTests {
     /// middle, the App Bar's right of it, their approaches meeting.
     private func pair() -> (ShelfRevealer, Box, ShelfRevealer.Key) {
         let app = ShelfRevealer.Key(shelf: Self.key.shelf, bar: .app)
+        // The two approaches overlap by 40 pt, so only the
+        // revealer's `yields` keeps a push there to one bar.
         let target = { (minX: CGFloat) in
             ShelfRevealer.Target(
                 edge: .top,
                 strip: Self.strip,
                 screen: Self.screen,
-                approach: CGRect(x: minX, y: 776, width: 200, height: 28),
+                approach: CGRect(x: minX, y: 776, width: 220, height: 28),
                 flush: true
             )
         }
         let (revealer, box) = make([
-            Self.key: target(300), app: target(500),
+            Self.key: target(300), app: target(480),
         ])
         return (revealer, box, app)
     }
@@ -194,12 +283,12 @@ struct ShelfHandleStripTests {
     @Test("a sibling shown stands a hidden bar's approach down")
     func siblingShownYields() {
         let (revealer, box, app) = pair()
-        move(revealer, box, 480, 795)
+        move(revealer, box, 400, 795)
         box.timers.removeFirst()()
         #expect(revealer.arming.contains(Self.key))
         #expect(revealer.toggle(app, duration: 0))
         #expect(revealer.yields(Self.key))
-        move(revealer, box, 481, 795)
+        move(revealer, box, 401, 795)
         #expect(!revealer.arming.contains(Self.key))
         // The dwell it had armed reveals nothing.
         box.timers.forEach { $0() }

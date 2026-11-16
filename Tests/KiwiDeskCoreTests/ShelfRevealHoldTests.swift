@@ -19,9 +19,9 @@ struct ShelfRevealHoldTests {
         shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
         bar: .app
     )
-    private static let target = ShelfRevealer.Target.hovering(
+    private static let target = ShelfRevealer.Target.along(
+        CGRect(x: 0, y: 735, width: 1000, height: 40),
         edge: .top,
-        strip: CGRect(x: 0, y: 735, width: 1000, height: 40),
         screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
         section: CGRect(x: 350, y: 735, width: 300, height: 40)
     )

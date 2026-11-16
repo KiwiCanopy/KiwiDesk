@@ -53,16 +53,16 @@ struct ShelfRevealDragTests {
         bar: .app
     )
     /// The Space Bar's shelf flush with the screen's top.
-    private static let top = ShelfRevealer.Target.hovering(
+    private static let top = ShelfRevealer.Target.along(
+        CGRect(x: 0, y: 760, width: 1000, height: 40),
         edge: .top,
-        strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
         screen: screen,
         section: CGRect(x: 350, y: 760, width: 300, height: 40)
     )
     /// The App Bar's shelf on the screen's bottom.
-    private static let bottom = ShelfRevealer.Target.hovering(
+    private static let bottom = ShelfRevealer.Target.along(
+        CGRect(x: 0, y: 0, width: 1000, height: 40),
         edge: .bottom,
-        strip: CGRect(x: 0, y: 0, width: 1000, height: 40),
         screen: screen,
         section: CGRect(x: 350, y: 0, width: 300, height: 40)
     )

@@ -3070,9 +3070,11 @@ the fill, opaque, where
 on.
 :::
 
+:::unreleased
 A hidden bar's thickened handle wears the glass too, tinted by
 the same fill, and draws that fill flat when the glass is off or
 stood down.
+:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -3440,15 +3442,21 @@ kiwishelf.set_reveal_timeout(5)
 **Does:** how an `"auto"` or `"hidden"` bar comes onto an edge
 that shows nothing else. `"slide"` brings the whole bar in from
 the screen's edge — out from under the menu bar where it shows —
-and back out; `"grow"` grows the bar out of its mark — from the
+and back out; `"grow"` grows the bar out of its handle — from the
 screen edge where it has none — and back into it; `"unfold"`
-stretches the mark along the edge to the bar's length, then
+stretches the handle along the edge to the bar's length, then
 deepens it to the bar, and back; `"fade"` fades the bar in
-where it stands, and out. A `"hidden"` bar has no mark, so
+where it stands, and out. A `"hidden"` bar has no handle, so
 `"grow"` and `"unfold"` start from the middle of its screen edge.
 A bar shown beside an `"always"` bar joins it instead, whichever
 style. Each plays with Reduce Motion on too. On a `"boxed"` shelf
-`"unfold"` springs each box out of the mark to its place.
+`"unfold"` springs each box out of the handle to its place.
+
+:::unreleased
+An `"auto"` bar's handle already runs the bar's length, so
+`"unfold"` only deepens it, and `"grow"` grows the bar out of the
+thickened handle.
+:::
 
 On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
 
@@ -3600,7 +3608,9 @@ shortcut shows it over the window.
 
 - `"auto"` rests each bar as its handle over the window and brings
   it in as an `"auto"` bar comes in
-  ([`space_bar.set_visibility`](#space_barset_visibility)).
+  ([`space_bar.set_visibility`](#space_barset_visibility)), save
+  that over the window only the handle itself counts as near the
+  edge.
 - `"hidden"` leaves only the shortcuts.
 
 A bar set to `"hidden"` stays hidden under `"auto"` as well, while a
@@ -3959,9 +3969,12 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
-are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
-handle and comes in as the Space Bar does
-([`space_bar.set_visibility`](#space_barset_visibility)).
+are retired: `false` is `"hidden"`.
+
+:::unreleased
+An `auto` App Bar hides to a handle and comes in as the Space Bar
+does ([`space_bar.set_visibility`](#space_barset_visibility)).
+:::
 
 ## Space Bar
 
@@ -4034,20 +4047,21 @@ App Bar in monocle and scrolling.
   screen is on.
 
 :::unreleased
-An `"auto"` bar's handle is a thin strip along the bar's whole
+An `"auto"` bar's handle is a thin line along the bar's whole
 length, reserving nothing and floating over the windows; clicks pass
 through it to the window beneath. With the pointer within about 24
-points of the edge along the bar for 0.15 s, the strip thickens and
+points of the edge along the bar for 0.15 s, the handle thickens and
 the Space dots, or the App Bar's glyphs, peek through. The bar then
 comes in as [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style)
-says when the pointer rests on the thickened strip for 0.15 s, or
-lingers near the edge for 0.4 s. A push against the screen's edge
-along the bar brings it in at once, except on the Dock's edge while
-the Dock hides itself and on the top edge while the menu bar does:
-there a push belongs to macOS, and the bar stays away until the
-pointer leaves the edge and comes back. The bar goes back 0.5 s after
-the pointer leaves it and the area near its edge, and stays while a
-bar menu or a peek it opened is up.
+says when the pointer rests on the thickened handle for 0.15 s, or
+lingers near the edge for 0.4 s. Where nothing stands between the bar
+and the screen's edge, and no other screen continues past it, a push
+against that edge along the bar brings it in at once — except on the
+Dock's edge while the Dock hides itself and on the top edge while the
+menu bar does: there a push belongs to macOS, and the bar stays away
+until the pointer leaves the area near the edge. The bar goes back
+0.5 s after the pointer leaves it and the area near its edge, and
+stays while a bar menu or a peek it opened is up.
 :::
 
 On the pocket's edge, unless
@@ -4074,13 +4088,15 @@ the edge.
 Each bar keeps its own value. On an edge the two bars share, the
 edge reserves for its more present bar: beside an `"always"` bar
 an `"auto"` one stays shown, while a `"hidden"` one still shows
-only on its shortcut. Two `"auto"` bars on one edge draw two handles,
-each along its own bar. The pointer opens one bar at a time: while a
-bar is shown, the other's handle goes away. A second bar's shortcut
-shows it beside the first. A look never carries the value.
+only on its shortcut. A second bar's shortcut shows it beside the
+first. A look never carries the value.
 
-A thickened handle wears the bars'
+:::unreleased
+Two `"auto"` bars on one edge draw two handles, each along its own
+bar. The pointer opens one bar at a time: while a bar is shown, the
+other's handle goes away. A thickened handle wears the bars'
 [Liquid Glass](#kiwishelfset_liquid_glass).
+:::
 
 **Example:**
 

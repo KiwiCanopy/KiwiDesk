@@ -19,43 +19,40 @@ struct MacEdges: Equatable, Sendable {
         edge == .top ? menuBar : edge == dock
     }
 
-    /// The verdict over `value`, a preference read by domain (nil
-    /// is the global domain) and key. An absent or unreadable key
-    /// reads as macOS's shipped default — Dock shown at the bottom,
-    /// menu bar shown — so a failed read leaves the edge free.
-    /// `_HIHideMenuBar` covers "Always" and "On Desktop Only"; the
-    /// bars stand down in full screen (#670), so "In Full Screen
-    /// Only" owns no edge a bar rests on (measured on the issue).
-    static func read(
-        _ value: (_ domain: String?, _ key: String) -> Any?
-    ) -> MacEdges {
-        let hides = flag(value("com.apple.dock", "autohide"))
-        let place = value("com.apple.dock", "orientation") as? String
-        let edge: AppBarEdge =
-            switch place {
-            case "left": .left
-            case "right": .right
-            default: .bottom
-            }
-        return MacEdges(
-            dock: hides ? edge : nil,
-            menuBar: flag(value(nil, "_HIHideMenuBar"))
-        )
-    }
-
-    private static func flag(_ value: Any?) -> Bool {
-        (value as? NSNumber)?.boolValue ?? false
-    }
-
-    /// The live read: cfprefsd pushes another process's write to
-    /// this one, so no change notification is needed and nothing
-    /// is cached (about 1 µs a read, measured 2026-11-15, #3349).
-    static func live() -> MacEdges {
-        read { domain, key in
-            CFPreferencesCopyAppValue(
-                key as CFString,
-                (domain as CFString?) ?? kCFPreferencesAnyApplication
-            )
+    /// The Dock's half over `value`, a preference read by domain
+    /// and key: its edge while it auto-hides. An absent or
+    /// unreadable key reads as macOS's shipped default — shown, at
+    /// the bottom — so a failed read leaves the edge free.
+    static func dock(
+        _ value: (_ domain: String, _ key: String) -> Any?
+    ) -> AppBarEdge? {
+        let hides =
+            (value("com.apple.dock", "autohide") as? NSNumber)?
+            .boolValue ?? false
+        guard hides else { return nil }
+        switch value("com.apple.dock", "orientation") as? String {
+        case "left": return .left
+        case "right": return .right
+        default: return .bottom
         }
+    }
+
+    /// The live read: the Dock's preferences, which cfprefsd pushes
+    /// to this process so a read is fresh and needs no change
+    /// notification (about 1 µs, measured 2026-11-15, #3349), and
+    /// the menu bar through `GeometryUtils.menuBarAutoHides`, the one
+    /// `_HIHideMenuBar` read — "Always" and "On Desktop Only"; the
+    /// bars stand down in full screen (#670), so "In Full Screen
+    /// Only" owns no edge a bar rests on.
+    @MainActor static func live() -> MacEdges {
+        MacEdges(
+            dock: dock { domain, key in
+                CFPreferencesCopyAppValue(
+                    key as CFString,
+                    domain as CFString
+                )
+            },
+            menuBar: GeometryUtils.menuBarAutoHides
+        )
     }
 }

@@ -40,23 +40,58 @@ extension ShelfRevealer {
             self.section = section
         }
 
-        /// A target the pointer can open along the whole `strip`:
-        /// the approach from its screen side, and a push where that
-        /// side is the screen's.
-        static func hovering(
+        /// The one target the pointer can open (#3349), Cocoa: the
+        /// approach along `run` from `outward` past `side` — the
+        /// screen side of the shelf's area, on the edge's axis — to
+        /// `inward` in, cut at a run's end where a sibling's approach
+        /// meets it; a push where `side` is the screen's edge and no
+        /// screen continues past it (`beyond`), so a pointer crossing
+        /// to a neighbour opens nothing. `strip` defaults to `run`.
+        static func along(
+            _ run: CGRect,
             edge: AppBarEdge,
-            strip: CGRect,
+            side: CGFloat? = nil,
+            strip: CGRect? = nil,
             screen: CGRect,
-            section: CGRect? = nil
+            beyond: Bool = false,
+            handle: CGRect? = nil,
+            section: CGRect? = nil,
+            outward: CGFloat = ShelfReveal.overshoot,
+            inward: CGFloat = ShelfReveal.approachReach,
+            cut: (lead: Bool, trail: Bool) = (false, false)
         ) -> Target {
-            let side: CGFloat =
-                switch edge {
-                case .top: strip.maxY
-                case .bottom: strip.minY
-                case .left: strip.minX
-                case .right: strip.maxX
-                }
-            let edgeOf: CGFloat =
+            let side =
+                side
+                ?? {
+                    switch edge {
+                    case .top: run.maxY
+                    case .bottom: run.minY
+                    case .left: run.minX
+                    case .right: run.maxX
+                    }
+                }()
+            var approach = ShelfReveal.approach(
+                along: run,
+                edge: edge,
+                side: side,
+                outward: outward,
+                inward: inward
+            )
+            // Cocoa runs bottom to top along a side edge, AX top to
+            // bottom: there the leading end is the top.
+            let reach = ShelfReveal.alongReach
+            let low = edge.isHorizontal ? cut.lead : cut.trail
+            let high = edge.isHorizontal ? cut.trail : cut.lead
+            let cuts = CGFloat((low ? 1 : 0) + (high ? 1 : 0)) * reach
+            let shift = low ? reach : 0
+            if edge.isHorizontal {
+                approach.origin.x += shift
+                approach.size.width -= cuts
+            } else {
+                approach.origin.y += shift
+                approach.size.height -= cuts
+            }
+            let screenSide: CGFloat =
                 switch edge {
                 case .top: screen.maxY
                 case .bottom: screen.minY
@@ -65,15 +100,12 @@ extension ShelfRevealer {
                 }
             return Target(
                 edge: edge,
-                strip: strip,
+                strip: strip ?? run,
                 screen: screen,
-                approach: ShelfReveal.approach(
-                    along: strip,
-                    edge: edge,
-                    side: side,
-                    outward: ShelfReveal.overshoot
-                ),
-                flush: abs(edgeOf - side) <= ShelfReveal.pushReach,
+                approach: approach,
+                handle: handle,
+                flush: !beyond
+                    && abs(screenSide - side) <= ShelfReveal.pushReach,
                 section: section
             )
         }
