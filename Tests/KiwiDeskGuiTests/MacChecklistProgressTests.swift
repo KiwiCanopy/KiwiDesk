@@ -46,8 +46,8 @@ struct MacChecklistProgressTests {
         var states: [MacSetting: MacSettingState] = [:]
         for setting in optionals { states[setting] = .set }
         #expect(
-            MacChecklistProgress.done(states: states, ticks: [])
-                == 0
+            MacChecklistProgress.verdicts(states: states, ticks: [])
+                .filter(\.done).count == 0
         )
     }
 
@@ -140,10 +140,6 @@ struct MacChecklistProgressTests {
             ticks: ticks
         )
         #expect(verdicts.map(\.setting) == MacChecklistProgress.essentials)
-        #expect(
-            verdicts.filter(\.done).count
-                == MacChecklistProgress.done(states: states, ticks: ticks)
-        )
         #expect(verdicts.filter(\.done).count == 2)
         // The one reading of an unread row is "not set".
         #expect(

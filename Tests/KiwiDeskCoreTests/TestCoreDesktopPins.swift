@@ -27,6 +27,10 @@ func pinDesktopReads(_ core: KiwiCore) {
             )
             : NativeSpaces.desktopSnapshot()
     }
+    // The Displays arrangement (#2756): no screens to read, and a
+    // write that never reaches the host's screens.
+    core.tiler.readArrangement = { _ in [] }
+    core.tiler.writeArrangement = { _ in false }
     core.windowIsOnScreen = { _ in nil }
     core.windowIsOnShownDesktop = { _ in nil }
     core.vision.listWindows = { [] }

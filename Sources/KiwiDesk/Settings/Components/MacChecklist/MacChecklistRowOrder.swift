@@ -11,6 +11,7 @@ enum MacChecklistRowOrder {
         .macChecklist(.switchOnActivate),
         .macChecklist(.stageManager),
         .macChecklist(.edgeTiling),
+        .macChecklist(.parkCorners),
     ]
 
     static let optionalSettings: [SettingKey] = [
@@ -24,6 +25,13 @@ enum MacChecklistRowOrder {
         .macChecklist(.habitKeyboard),
         .macChecklist(.habitFloat),
         .macChecklist(.habitDock),
+    ]
+
+    /// Rows shown only while their condition holds: the boxed-in
+    /// offer's while one is open (#2756). A reader that skips or
+    /// adds one goes by this set, never by naming the row.
+    static let conditionalRows: Set<SettingKey> = [
+        .macChecklist(.parkCorners)
     ]
 
     static let byContainer: [SettingsContainer: [SettingKey]] = [
@@ -47,8 +55,8 @@ extension MacChecklistKey {
         case .edgeTiling: return .edgeTiling
         case .clickWallpaper: return .clickWallpaper
         case .doubleClickTitle: return .doubleClickTitle
-        case .habitHide, .habitBigWindows, .habitKeyboard,
-            .habitFloat, .habitDock, .selfTicks:
+        case .parkCorners, .habitHide, .habitBigWindows,
+            .habitKeyboard, .habitFloat, .habitDock, .selfTicks:
             return nil
         }
     }
@@ -65,7 +73,8 @@ extension MacChecklistKey {
         case .habitDock: return .systemSettings
         case .habitHide, .rearrangeSpaces,
             .switchOnActivate, .stageManager, .edgeTiling,
-            .clickWallpaper, .doubleClickTitle, .selfTicks:
+            .parkCorners, .clickWallpaper, .doubleClickTitle,
+            .selfTicks:
             return nil
         }
     }
@@ -133,10 +142,4 @@ enum MacChecklistProgress {
         }
     }
 
-    static func done(
-        states: [MacSetting: MacSettingState],
-        ticks: Set<MacSetting>
-    ) -> Int {
-        verdicts(states: states, ticks: ticks).filter(\.done).count
-    }
 }

@@ -13,10 +13,7 @@ struct SimpleMacChecklist: View {
     static let anchor = "simple.mac_checklist"
 
     var body: some View {
-        let open = Self.openEssentials(
-            states: model.macChecklistStates,
-            ticks: model.macChecklistTicks
-        )
+        let open = Self.openRows(model)
         Group {
             if open.isEmpty {
                 allDone
@@ -31,6 +28,30 @@ struct SimpleMacChecklist: View {
             }
         }
         .id(Self.anchor)
+    }
+
+    /// Every essential the block draws: those macOS does not yet
+    /// report set, then the conditional ones still open.
+    @MainActor static func openRows(
+        _ model: SettingsModel
+    ) -> [MacChecklistKey] {
+        openEssentials(
+            states: model.macChecklistStates,
+            ticks: model.macChecklistTicks
+        ) + openConditional(model)
+    }
+
+    /// The conditional essentials shown and still open (#2756).
+    @MainActor static func openConditional(
+        _ model: SettingsModel
+    ) -> [MacChecklistKey] {
+        guard model.screenShiftChecklistDone == false else { return [] }
+        return MacChecklistRowOrder.essentialSettings.compactMap {
+            guard MacChecklistRowOrder.conditionalRows.contains($0),
+                case .macChecklist(let key) = $0
+            else { return nil }
+            return key
+        }
     }
 
     /// The essentials macOS does not yet report set, in the
@@ -56,7 +77,7 @@ struct SimpleMacChecklist: View {
     private var progress: String {
         MacChecklistText.cardProgress(
             done: model.macChecklistDone,
-            total: MacChecklistProgress.total
+            total: model.macChecklistTotal
         )
     }
 
@@ -130,7 +151,12 @@ struct SimpleMacChecklist: View {
                 index,
                 key in
                 if index > 0 { Divider() }
-                if let setting = key.setting,
+                if key == .parkCorners {
+                    ScreenShiftChecklistRow(
+                        model: model,
+                        chipWidth: chipWidth
+                    )
+                } else if let setting = key.setting,
                     let control = MacChecklistSection.control(for: key)
                 {
                     MacSettingRow(

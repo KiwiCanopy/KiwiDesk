@@ -145,7 +145,7 @@ enum HomeCardContent {
         case .macChecklist:
             return MacChecklistText.cardProgress(
                 done: model.macChecklistDone,
-                total: MacChecklistProgress.total
+                total: model.macChecklistTotal
             )
         }
     }

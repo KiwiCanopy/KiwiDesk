@@ -52,6 +52,16 @@ enum MacChecklistText {
                 "Two tilers would answer one drag. %1$@",
                 slot
             )
+        case .parkCorners:
+            // No slot: the row's fix is KiwiDesk's own button, and
+            // the row draws the live sentences (`ScreenShiftText`).
+            return L(
+                "mac_checklist.park_corners.caption",
+                "A screen with both bottom corners covered shows its "
+                    + "parked windows on another screen. Shifting a "
+                    + "screen in your macOS screen arrangement frees a "
+                    + "corner."
+            )
         case .clickWallpaper:
             return L(
                 "mac_checklist.click_wallpaper.caption",
@@ -144,8 +154,8 @@ enum MacChecklistText {
                 slot
             )
         case .rearrangeSpaces, .switchOnActivate, .stageManager,
-            .edgeTiling, .clickWallpaper, .doubleClickTitle,
-            .selfTicks:
+            .edgeTiling, .parkCorners, .clickWallpaper,
+            .doubleClickTitle, .selfTicks:
             return ""
         }
     }

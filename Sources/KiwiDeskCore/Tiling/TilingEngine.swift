@@ -229,6 +229,21 @@ public final class TilingEngine {
         }
     }
 
+    /// macOS's Displays arrangement for these displays (#2756),
+    /// nil when one has no UUID; `allScreenBounds`' sibling, pinned
+    /// to none by the `makeTestCore` factories.
+    var readArrangement: @MainActor ([DisplayID]) -> [DisplayReading]? = {
+        DisplayArrangement.read($0)
+    }
+
+    /// Writes origins into macOS's Displays arrangement for good
+    /// (#2756), true once they landed. Pinned to a refusal by the
+    /// `makeTestCore` factories, so no suite moves the host's
+    /// screens.
+    var writeArrangement: @MainActor ([DisplayID: CGPoint]) -> Bool = {
+        DisplayArrangement.configure($0)
+    }
+
     /// Every screen's WHOLE AX frame, menu bar and Dock included
     /// (#1787); `allScreenBounds`' sibling, pinned the same way.
     var allScreenFrames: @MainActor () -> [CGRect] = {
