@@ -16,6 +16,10 @@ struct ShortcutSettingRowSeamTests {
         "GestureDirectionRows.swift":
             "a split gesture row's sub-row echoes the row's keys in "
             + "the recorder column, read-only (#3281)",
+        "GestureAxisRow.swift":
+            "a swipe row's axis line holds the recorder column "
+            + "empty, so its picker lines up with the direction "
+            + "rows' (#1873)",
     ]
 
     /// File basename → the setting rows it builds through the one

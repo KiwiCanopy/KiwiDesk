@@ -94,7 +94,6 @@ config.modeCycle
 config.scrollGesture.longSwipes
 config.scrollGesture.naturalMouse
 config.scrollGesture.naturalTrackpad
-config.scrollGesture.stepDistance
 config.shortcutBase
 config.spaceHistory
 config.tileRules
