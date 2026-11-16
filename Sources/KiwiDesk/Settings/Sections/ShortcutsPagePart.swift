@@ -174,7 +174,6 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
         let more: [(SettingsControl, Self)] = [
             (catalog.gestures.control, .gestures),
             (catalog.gesturesOnWindows, .gestures),
-            (catalog.gesturesModifier, .gestures),
             (catalog.gesturesOnShelf, .gestures),
             (catalog.openApplications, .openApplications),
             (catalog.luaBindings.control, .luaBindings),

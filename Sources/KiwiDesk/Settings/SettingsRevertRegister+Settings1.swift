@@ -45,6 +45,7 @@ extension SettingsRevertRegister {
             .leaf(\.settings.maximize.followFocus),
         .behaviour(.resizeStep): .leaf(\.settings.resizeStep),
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),
+        .behaviour(.mouseResize): .leaf(\.settings.mouseResize),
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),
         .behaviour(.floatScaleOnDisplayChange):
             .leaf(\.settings.floatScaleOnDisplayChange),
@@ -68,7 +69,6 @@ extension SettingsRevertRegister {
             .entry(\.settings.placementOverride, key: { SpaceID($0) }),
         .behaviour(.tilingStartOverride):
             .entry(\.settings.tiling.startOverride, key: { SpaceID($0) }),
-        .behaviour(.mouseResize): .leaf(\.settings.mouseResize),
         .behaviour(.mouseFollowsFocus): .leaf(\.settings.mouse.followsFocus),
         .behaviour(.mouseHoverFocus): .leaf(\.settings.mouse.hoverFocus),
         .behaviour(.mouseHoverFocusDelay):

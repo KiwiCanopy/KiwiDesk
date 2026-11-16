@@ -156,10 +156,6 @@ struct ShortcutsControls: Sendable {
         "shortcuts.gestures.group.windows",
         "On your windows"
     )
-    let gesturesModifier = SettingsControl(
-        "shortcuts.gestures.group.modifier",
-        "Holding a modifier"
-    )
     let gesturesOnShelf = SettingsControl(
         "shortcuts.gestures.group.shelf",
         "On the KiwiShelf"
@@ -201,7 +197,7 @@ struct ModifierKeysControls: Sendable {
 struct GesturesControls: Sendable {
     let longSwipes = SettingsControl(
         "shortcuts.gestures.scroll.long_swipes",
-        "Long swipes move more windows"
+        "Long two-finger swipes move focus further"
     )
     let naturalTrackpad = SettingsControl(
         "shortcuts.gestures.scroll.trackpad",
@@ -214,10 +210,6 @@ struct GesturesControls: Sendable {
     let gestureBindings = SettingsControl(
         "shortcuts.gestures.rows",
         "Gestures"
-    )
-    let mouseResize = SettingsControl(
-        "behavior.mouse.resize_action",
-        "Mouse resize action"
     )
     let hoverFocus = SettingsControl(
         "behavior.mouse.hover_focus",

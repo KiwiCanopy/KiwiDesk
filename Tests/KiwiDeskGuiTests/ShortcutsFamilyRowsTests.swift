@@ -61,7 +61,6 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.advanced),
             .shortcuts(.import),
             .shortcuts(.restoreDefaults),
-            .behaviour(.mouseResize),
             .behaviour(.mouseFollowsFocus),
             .behaviour(.mouseHoverFocus),
             .behaviour(.mouseHoverFocusDelay),

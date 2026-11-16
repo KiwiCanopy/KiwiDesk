@@ -35,6 +35,10 @@ struct GestureListCard: View {
                 naturalRow
                 Divider()
                 revealed(boundRows)
+                if device == .trackpad {
+                    GestureRule()
+                    GestureLongSwipesRow(model: model)
+                }
             }
         }
         .onAppear(perform: snapshot)
@@ -236,16 +240,15 @@ struct GestureListCard: View {
             // The ladder is stated here once, for swipes (#1873 ▸
             // Ruling 2026-11-15).
             L(
-                "shortcuts.gestures.list.trackpad_help_ladder",
+                "shortcuts.gestures.list.trackpad_help_steps",
                 "Bind a tap, a swipe, a pinch or a rotation to an "
                     + "action; a tap may take no keys. Two fingers move "
                     + "between windows, three between Spaces and the "
                     + "Desktop overview, four between screens. A "
-                    + "two-finger swipe steps as far as you swipe; three "
-                    + "to five "
-                    + "fingers take one step per swipe. Give one "
-                    + "direction its own action and it acts once per "
-                    + "swipe."
+                    + "two-finger swipe that moves between windows can "
+                    + "step as far as you swipe; every other swipe takes "
+                    + "one step. Give one direction its own action and "
+                    + "it acts once per swipe."
             )
         }
     }

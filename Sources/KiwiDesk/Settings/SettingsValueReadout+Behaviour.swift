@@ -102,15 +102,6 @@ extension SettingsValueReadout {
                 old: before.placementOverride,
                 new: after.placementOverride
             )
-        case .mouseResize:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: behaviourMouseResize(before.mouseResize),
-                    new: behaviourMouseResize(after.mouseResize)
-                )
-            ]
         case .tilingStart, .tilingOffHidesBorders, .tilingOffHidesBars:
             return tilingRows(key, census, old: old, new: new)
         // Lua-only (#3008): no draft writes the per-Space values,
@@ -118,6 +109,17 @@ extension SettingsValueReadout {
         case .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return []
+        // Lua-only (#3369): a live `set_mouse_resize` still owes the
+        // save pill its row.
+        case .mouseResize:
+            return [
+                .change(
+                    census,
+                    label: L("diff.label.mouse_resize", "Mouse resize"),
+                    old: mouseResizeWords(before.mouseResize),
+                    new: mouseResizeWords(after.mouseResize)
+                )
+            ]
         case .mouseFollowsFocus:
             return [
                 behaviourToggleRow(
@@ -254,20 +256,19 @@ extension SettingsValueReadout {
         }
     }
 
-    /// `BehaviorSection`'s segmented-picker labels, reused
-    /// verbatim.
-    private static func behaviourMouseResize(
+    /// `set_mouse_resize`'s two values, for the Lua-only diff row.
+    private static func mouseResizeWords(
         _ mode: MouseResizeMode
     ) -> String {
         switch mode {
         case .layout:
             return L(
-                "behavior.mouse.resize_layout",
+                "diff.value.mouse_resize.layout",
                 "Resize adjacent windows"
             )
         case .snapBack:
             return L(
-                "behavior.mouse.resize_snap_back",
+                "diff.value.mouse_resize.snap_back",
                 "Snap back to slot"
             )
         }

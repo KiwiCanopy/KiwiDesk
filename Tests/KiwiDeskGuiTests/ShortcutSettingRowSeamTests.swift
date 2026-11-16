@@ -33,6 +33,9 @@ struct ShortcutSettingRowSeamTests {
         "GestureListCard.swift":
             "Natural scrolling, a value over the gesture rows' "
             + "recorders (#3281)",
+        "GestureLongSwipesRow.swift":
+            "Long swipes, one per-profile checkbox at the Trackpad "
+            + "card's foot (#3369)",
     ]
 
     @Test("every setting row is registered with its reason")

@@ -5,25 +5,6 @@ extension GestureItem {
     /// from the draft, in the diff readout's own seconds form.
     @MainActor func sentence(_ settings: TilingSettings) -> String {
         switch self {
-        case .scrollStep:
-            return L(
-                "shortcuts.gestures.scroll.sentence",
-                "Hold these keys and scroll to move focus window by "
-                    + "window along a %1$@ row. On any other Space, a "
-                    + "swipe moves focus the way you scroll, and a "
-                    + "mouse wheel moves it through the windows in "
-                    + "order.",
-                L("layout.scrolling.name", "Scrolling")
-            )
-        case .spaceStep:
-            return L(
-                "shortcuts.gestures.scroll.space_step_sentence",
-                "Hold these keys and swipe to switch to the next or "
-                    + "previous Space on the screen under the "
-                    + "pointer, one per swipe. With a mouse, hold %1$@ "
-                    + "and scroll sideways.",
-                ScrollChordGlyphs.text(GestureSeeds.panKeys)
-            )
         case .hoverFocus:
             return L(
                 "shortcuts.gestures.hover_focus",
@@ -41,11 +22,6 @@ extension GestureItem {
                 "shortcuts.gestures.swap",
                 "Drag a window onto another to swap them, or onto "
                     + "another screen to move it there."
-            )
-        case .edge:
-            return L(
-                "shortcuts.gestures.edge",
-                "Drag a window's edge to resize it."
             )
         case .dropOnSpace:
             return L(

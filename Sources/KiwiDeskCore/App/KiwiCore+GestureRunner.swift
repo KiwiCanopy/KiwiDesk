@@ -103,10 +103,12 @@ extension KiwiCore {
         _ session: ScrollBindingSession
     ) {
         switch action {
-        case .family(.focus):
-            handleScrollPan(event, session: session.pan, directional: true)
-        case .family(.walk):
-            handleScrollPan(event, session: session.pan, directional: false)
+        case .family(let family) where family.runsThePan:
+            handleScrollPan(
+                event,
+                session: session.pan,
+                directional: family == .focus
+            )
         case .family(.space):
             handleScrollSpaceStep(event, session: session.step)
         case .family(let family):

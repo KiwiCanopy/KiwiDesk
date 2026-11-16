@@ -6,7 +6,8 @@ import KiwiDeskCore
 /// save the layout plate's switch, which greys with General's
 /// Lua-owned sentence (#2144), and Restore Defaults, which greys
 /// with its row's caption (#3074) and leaves with the `default`
-/// layer (#3260). `LayersCard` asks this
+/// layer (#3260), and Long swipes, which greys with its caption
+/// (#3369). `LayersCard` asks this
 /// rather than re-deriving — a renderer whose predicate silently
 /// disagreed once hid a user's own configured layers
 /// (`ShortcutsGateTests`).
@@ -52,6 +53,9 @@ struct ShortcutsGates {
         /// The focus border is off, so hiding it while tiling is
         /// off hides nothing (#3089).
         case focusBorderOff
+        /// No two-finger swipe moves focus or walks the windows, so
+        /// Long swipes reach nothing (#3369).
+        case noPanSwipe
     }
 
     /// Evaluates inert reason for setting key.
@@ -83,6 +87,13 @@ struct ShortcutsGates {
                 return .otherLayerPicked
             }
             return defaultsToRestore ? nil : .matchesDefaults
+        case .shortcuts(.scrollLongSwipes):
+            // The page's map is the edited profile's resolved one
+            // (#3225), so no profile layer goes over it.
+            return GestureSeeds.longSwipesApply(
+                base: config.gesture,
+                profile: nil
+            ) ? nil : .noPanSwipe
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -168,6 +179,7 @@ struct ShortcutsGates {
         .shortcuts(.modifierSides),
         .shortcuts(.shortcutBase),
         .shortcuts(.restoreDefaults),
+        .shortcuts(.scrollLongSwipes),
         .behaviour(.tilingOffHidesBars),
         .behaviour(.tilingOffHidesBorders),
     ]
