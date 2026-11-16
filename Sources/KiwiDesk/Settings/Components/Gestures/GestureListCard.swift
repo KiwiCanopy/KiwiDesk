@@ -35,6 +35,10 @@ struct GestureListCard: View {
                 naturalRow
                 Divider()
                 revealed(boundRows)
+                if device == .trackpad {
+                    GestureRule()
+                    GestureLongSwipesRow(model: model)
+                }
             }
         }
         .onAppear(perform: snapshot)
@@ -76,10 +80,6 @@ struct GestureListCard: View {
                 )
             }
             footer
-            if device == .trackpad {
-                Divider()
-                GestureLongSwipesRow(model: model)
-            }
         }
     }
 

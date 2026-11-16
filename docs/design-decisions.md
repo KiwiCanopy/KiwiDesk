@@ -17163,8 +17163,8 @@ Home, the other two add a navigator.
   the one long page and is spent.
 - **Mouse & Trackpad** opens with the Mouse and Trackpad binding
   cards, the part's own settings (#3298), then holds open groups
-  ordered by where the hand is — on your windows, holding a
-  modifier, on the KiwiShelf — each with its own pictures, and no
+  ordered by where the hand is — on your windows, on the
+  KiwiShelf — each with its own pictures, and no
   Layers card, since a layer does not act on a gesture. The part
   replaces #1726's collapsed card, the picture strip the shut card
   drew, and Mouse & trackpad's first chip and the rule after it:
@@ -17194,12 +17194,10 @@ rule between the two, so its two bands read apart without the
 jump bar.
 
 **Its entries are grouped by where the hand is** — on your
-windows, on the KiwiShelf — never by gesture type, which is
-grouping by widget. A scroll with keys held is a binding, so it
-lives in the Mouse and Trackpad cards rather than in a group of
-its own (#3369): a sentence restating a seed goes stale the moment
-the user rebinds it, and a plain scroll over the shelf stays apart
-from it all the same.
+windows, anywhere holding a modifier, on the KiwiShelf — never by
+gesture type, which is grouping by widget. That grouping is also
+what keeps a plain scroll over the shelf apart from a modifier
+scroll anywhere.
 
 :::unreleased
 **The bindings themselves are a list per device** (#3199 ▸ Ruling, owner
@@ -17284,8 +17282,8 @@ says "you cannot change this".
 whatever page that is, and profile scope does not stop it.** The
 pointer-follow and Long swipes are profile values, and this page
 shows the header's profile chip like every page a profile owns,
-so they edit the profile the chip names. The pointer-follow is its own entry rather than a row in
-the Focus card: it fires on every focus change KiwiDesk sees — a
+so they edit the profile the chip names. The pointer-follow is
+its own entry rather than a row in the Focus card: it fires on every focus change KiwiDesk sees — a
 Space switch, a closed window, ⌘-Tab — not only on focus
 shortcuts, and that card sits under the layer header.
 
@@ -17503,8 +17501,7 @@ swipe is a step a user can aim. **Long two-finger swipes move
 focus further** keeps the first window at the swipe's start, so
 exactly one is still easy, and adds one per step length after
 it, on every layout: the meter counts the hand, and the layout
-only decides where each window's step lands. The step length is
-Lua-only, argued under `step_length` below. The glide after a lift
+only decides where each window's step lands. The glide after a lift
 never counts, on either setting — it is macOS extrapolating a
 flick, not the hand, and a fast flick's glide runs far past any
 swipe, so counting it would race down the row. A wheel notch is one
@@ -17593,19 +17590,24 @@ default.
 :::
 
 :::unreleased
-**Amended (#3369, owner 2026-11-16): Long swipes is one setting at
-the Trackpad card's foot, never per binding.** It reaches only a
-two-finger swipe bound to focus or the walk, whole or on one axis,
-since every other family and every wheel notch steps once, so a
-per-binding switch would sit on rows it cannot change. Below the
-list and its Restore Defaults, which restores bindings alone, it
-reads as the card's own setting rather than a restored row. It
-greys, never hides, with a caption naming the two families while
-no two-finger swipe takes either: the rows above show what is
-bound, not that this checkbox needs one (`noPanSwipe`).
-`GestureSeeds.longSwipesApply` reads the pan predicate the runner
-dispatches on, `GestureFamily.runsThePan`, so the grey cannot
-disagree with what a swipe does.
+**Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
+no "Holding a modifier" group, and Long swipes is one setting at
+the Trackpad card's foot, never per binding.** A scroll with keys
+held is a binding, so the Mouse and Trackpad cards hold it: a
+sentence restating a seed goes stale the moment the user rebinds
+it. The part's entries are grouped on your windows and on the
+KiwiShelf. Long swipes reaches only a two-finger swipe bound to
+focus or the walk, whole or on one axis, since every other family
+and every wheel notch steps once, so a per-binding switch would
+sit on rows it cannot change. Its step length is Lua-only
+(`step_length`, above). Below the list and its Restore Defaults,
+which restores bindings alone, it reads as the card's own setting
+rather than a restored row. It greys, never hides, with a caption
+naming the two families while no two-finger swipe takes either:
+the rows above show what is bound, not that this checkbox needs
+one (`noPanSwipe`). `GestureSeeds.longSwipesApply` reads the pan
+predicate the runner dispatches on, `GestureFamily.runsThePan`, so
+the grey cannot disagree with what a swipe does.
 :::
 
 :::unreleased

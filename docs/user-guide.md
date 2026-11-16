@@ -1288,8 +1288,9 @@ apps keep the gesture.
 
 - **Two-finger swipes** step after a short travel. A swipe that
   moves focus keeps stepping while your fingers move, with
-  **Long two-finger swipes move focus further** on; each step goes the way
-  your fingers lead, so right, right, down is one movement.
+  **Long two-finger swipes move focus further** on; each step
+  goes the way your fingers lead, so right, right, down is one
+  movement.
 - **Three- to five-finger swipes** step after a longer travel, or
   on a quick flick, and take one step per touch.
 

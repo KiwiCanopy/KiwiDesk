@@ -6,7 +6,8 @@ import KiwiDeskCore
 /// save the layout plate's switch, which greys with General's
 /// Lua-owned sentence (#2144), and Restore Defaults, which greys
 /// with its row's caption (#3074) and leaves with the `default`
-/// layer (#3260). `LayersCard` asks this
+/// layer (#3260), and Long swipes, which greys with its caption
+/// (#3369). `LayersCard` asks this
 /// rather than re-deriving — a renderer whose predicate silently
 /// disagreed once hid a user's own configured layers
 /// (`ShortcutsGateTests`).

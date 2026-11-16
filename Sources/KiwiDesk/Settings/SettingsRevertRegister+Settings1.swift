@@ -45,6 +45,7 @@ extension SettingsRevertRegister {
             .leaf(\.settings.maximize.followFocus),
         .behaviour(.resizeStep): .leaf(\.settings.resizeStep),
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),
+        .behaviour(.mouseResize): .leaf(\.settings.mouseResize),
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),
         .behaviour(.floatScaleOnDisplayChange):
             .leaf(\.settings.floatScaleOnDisplayChange),

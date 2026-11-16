@@ -10,8 +10,9 @@ extension GestureFamily {
 extension GestureSeeds {
     /// Whether long swipes reach any binding once `base` lies over
     /// the seeds and `profile` over that (#3369): a two-finger swipe
-    /// whose whole family, or one axis's, runs the pan. A wheel
-    /// notch steps once, so no wheel binding counts.
+    /// whose whole family, or one axis's, runs the pan. The input
+    /// half mirrors `ScrollStepMeter.feed`, whose wheel notch steps
+    /// once; a change there owes this predicate the same change.
     public static func longSwipesApply(
         base: GestureMap,
         profile: GestureMap?

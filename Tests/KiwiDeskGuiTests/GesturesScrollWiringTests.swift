@@ -30,15 +30,13 @@ struct GesturesScrollWiringTests {
     @Test("Long swipes sits at the Trackpad card's foot")
     func longSwipesAtTheTrackpadFoot() throws {
         let card = try Self.source("GestureListCard.swift")
-        let rows = try #require(
-            SourceScan.declarationBody(
-                after: "private var boundRows:",
-                in: card
-            )
+        let body = try #require(
+            SourceScan.declarationBody(after: "var body:", in: card)
         )
+        // After the rows and their footer, outside their reveal.
         #expect(
-            Self.squash(rows).contains(
-                "footerifdevice==.trackpad{Divider()"
+            Self.squash(body).contains(
+                "revealed(boundRows)ifdevice==.trackpad{GestureRule()"
                     + "GestureLongSwipesRow(model:model)}"
             )
         )

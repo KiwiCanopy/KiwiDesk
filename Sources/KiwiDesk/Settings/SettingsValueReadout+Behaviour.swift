@@ -109,9 +109,17 @@ extension SettingsValueReadout {
         case .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
             return []
-        // Lua-only (#3369): no row draws it.
+        // Lua-only (#3369): a live `set_mouse_resize` still owes the
+        // save pill its row.
         case .mouseResize:
-            return []
+            return [
+                .change(
+                    census,
+                    label: L("diff.label.mouse_resize", "Mouse resize"),
+                    old: mouseResizeWords(before.mouseResize),
+                    new: mouseResizeWords(after.mouseResize)
+                )
+            ]
         case .mouseFollowsFocus:
             return [
                 behaviourToggleRow(
@@ -245,6 +253,24 @@ extension SettingsValueReadout {
             return L("diff.value.float_placement.center", "Centered")
         case .keep:
             return L("diff.value.float_placement.keep", "Kept in place")
+        }
+    }
+
+    /// `set_mouse_resize`'s two values, for the Lua-only diff row.
+    private static func mouseResizeWords(
+        _ mode: MouseResizeMode
+    ) -> String {
+        switch mode {
+        case .layout:
+            return L(
+                "diff.value.mouse_resize.layout",
+                "Resize adjacent windows"
+            )
+        case .snapBack:
+            return L(
+                "diff.value.mouse_resize.snap_back",
+                "Snap back to slot"
+            )
         }
     }
 

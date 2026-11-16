@@ -169,8 +169,7 @@ argues both.
 
 Every shipped segmented strip fits a full-width row at the
 720 pt minimum (`SettingsWidthClass.minimum`), measured against
-all ten locales (#95): the widest is App Bar active indicator
-at ~408 pt (`fr`). Re-measure a strip before adding a fourth
+all ten locales (#95). Re-measure a strip before adding a
 segment to it.
 
 **The per-Space override rows keep menus, not segmented
