@@ -126,6 +126,12 @@ struct AppFontDiffWorkflowTests {
             try prStep.contains("**The glyph diff failed in"),
             "the PR no longer says its diff is missing"
         )
+        // A step-level `if:` on the diff's outcome would skip the
+        // PR, and the drop with it.
+        #expect(
+            try !prStep.contains("\n        if:"),
+            "the PR step is gated, so a failed diff can skip it"
+        )
     }
 
     @Test("The applied label is the one the PR text names")
@@ -176,7 +182,8 @@ struct AppFontDiffWorkflowTests {
         let source = try yaml
         let needles = [
             "gh pr merge", "--auto", "auto-merge", "/merge",
-            "enablePullRequestAutoMerge",
+            "enablePullRequestAutoMerge", "mergePullRequest",
+            "gh api graphql",
         ]
         for needle in needles {
             #expect(

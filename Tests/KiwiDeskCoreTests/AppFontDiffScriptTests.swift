@@ -13,7 +13,9 @@ import Testing
 /// re-implements that in Python. `resolutionMatchesTheMap` holds
 /// the copy to the Swift one on every name the script probed, so
 /// the two cannot drift apart; the other tests hold the verdict on
-/// the shapes that would otherwise pass as additions.
+/// the shapes that would otherwise pass as additions. Blind to two
+/// prefixes of equal length on different ligatures: Swift's sort
+/// leaves their order unspecified, so no fixture states one.
 @Suite("App font diff script")
 struct AppFontDiffScriptTests {
     struct Side {
@@ -150,15 +152,15 @@ struct AppFontDiffScriptTests {
     func drawnGlyphChanges() throws {
         var outline = Self.base
         outline.sigs[":finder:"] = "F2"
-        #expect(try run(Self.base, outline).redraws("Finder"))
-
         var unshaped = Self.base
         unshaped.sigs[":finder:"] = .some(nil)
-        #expect(try run(Self.base, unshaped).redraws("Finder"))
-
         var unmapped = Self.base
         unmapped.rows[2] = (":finder:", [])
-        #expect(try run(Self.base, unmapped).redraws("Finder"))
+        for new in [outline, unshaped, unmapped] {
+            let verdict = try run(Self.base, new)
+            #expect(verdict.look)
+            #expect(verdict.redraws("Finder"))
+        }
     }
 
     @Test("A rename that keeps the outline needs no look")
