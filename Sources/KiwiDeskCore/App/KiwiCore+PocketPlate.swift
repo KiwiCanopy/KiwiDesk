@@ -161,7 +161,7 @@ extension KiwiCore {
             let place = pocketPlace(on: display.id)
             // A handle's pocket rises out of it after a dwell or a push,
             // during a drag or a play, and while its list is open
-            // (#2678); the pointer on it alone peeks its kiwis (#2807).
+            // (#2678); the pointer on it alone lights the tab (#3366).
             let hovered = pocketPlate.hovered.contains(display.id)
             let risen =
                 place == .handle

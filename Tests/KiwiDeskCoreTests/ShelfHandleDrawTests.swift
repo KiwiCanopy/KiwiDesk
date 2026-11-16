@@ -81,6 +81,20 @@ struct ShelfHandleDrawTests {
         let corner = alpha(0, 0)
         #expect(endMiddle > 0.3, "\(edge): end \(endMiddle)")
         #expect(corner < 0.8 * endMiddle, "\(edge): corner \(corner)")
+        // The hairline rings the core: the outermost row at mid-length
+        // shows less ink than the middle.
+        let rim =
+            edge.isHorizontal
+            ? alpha(rep.pixelsWide / 2, 0) : alpha(0, rep.pixelsHigh / 2)
+        let middle = peak(rep, horizontal: edge.isHorizontal)
+        #expect(rim < middle - 0.08, "\(edge): rim \(rim)")
+        // The core is a capsule too, and clips the progress fill.
+        let core = try #require(view.core.layer)
+        #expect(
+            core.cornerRadius
+                == ShelfHandleSpec.radius(of: view.core.frame)
+        )
+        #expect(core.masksToBounds)
     }
 
     @Test("the pocket's tab brightens in place on hover")
@@ -104,17 +118,42 @@ struct ShelfHandleDrawTests {
             )
             view.cacheDisplay(in: view.bounds, to: rep)
             let scale = CGFloat(rep.pixelsHigh) / size.height
-            let row = rep.pixelsHigh - Int(1.5 * scale)
+            // The core's middle row, whole at 1x and 2x alike.
+            let row = Int((size.height - 1.5) * scale)
             return rep.colorAt(x: rep.pixelsWide / 2, y: row)?
                 .alphaComponent ?? 0
         }
+        // The tab is a capsule: its end's corner is emptier than its
+        // end's middle, which a square end draws alike.
+        let view = PocketHandleView(frame: CGRect(origin: .zero, size: size))
+        view.appearance = NSAppearance(named: .darkAqua)
+        view.wear(
+            KiwiShelf(),
+            markHex: "#FF0000",
+            edge: .bottom,
+            kiwisOut: false
+        )
+        let rep = try #require(
+            view.bitmapImageRepForCachingDisplay(in: view.bounds)
+        )
+        view.cacheDisplay(in: view.bounds, to: rep)
+        let scale = CGFloat(rep.pixelsHigh) / size.height
+        let end = Int((size.width - PocketHandleView.tabLength) / 2 * scale)
+        let alpha = { (y: Int) in
+            rep.colorAt(x: end, y: y)?.alphaComponent ?? 0
+        }
+        let endMiddle = alpha(Int((size.height - 1.5) * scale))
+        let corner = alpha(rep.pixelsHigh - 1)
+        #expect(endMiddle > 0.3, "tab end \(endMiddle)")
+        #expect(corner < 0.8 * endMiddle, "tab corner \(corner)")
         let rest = over(ShelfHandleSpec.restStrength)
         #expect(abs(try core(false, false) - rest) < 0.05)
         #expect(
             abs(try core(true, false) - over(ShelfHandleSpec.fillStrength))
                 < 0.05
         )
-        // Risen, the kiwis are out and hover lights nothing.
-        #expect(abs(try core(true, true) - rest) < 0.05)
+        // Risen, the tab stays at rest: Core hands no hover then
+        // (`PocketHandleDwellTests` ▸ `hoverLightsThenRises`).
+        #expect(abs(try core(false, true) - rest) < 0.05)
     }
 }

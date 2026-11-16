@@ -20,8 +20,8 @@ extension KiwiCore {
     /// The risen mark's largest side.
     static let pocketRiseMarkCap: CGFloat = 32
 
-    /// The handle's frame on `display` (AX), risen or at rest, a
-    /// the same depth while hovered, since the tab only brightens.
+    /// The handle's frame on `display` (AX), risen or at rest; a
+    /// hover keeps the resting depth, since the tab only brightens.
     func pocketHandleFrame(
         on display: DisplayID,
         risen: Bool

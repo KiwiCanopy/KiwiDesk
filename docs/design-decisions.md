@@ -7202,8 +7202,8 @@ still reads as the pocket coming out rather than a jump.
 handle's ink and depth, flush on the edge, and the handle reserves
 nothing.** The tab is the bars' two-tone line, 3 points deep, so a
 row of handles still reads as one; the kiwis keep the pocket's
-colour and look out 5 points past it. Its hover stays as the
-two-step paragraph below has it, with no progress fill: the fill
+colour and look out 5 points past it. Its hover runs no progress
+fill (its look is the #3366 amendment below): the fill
 belongs to lingering near a bar's
 edge, while the pocket answers the pointer in its two steps. Its
 edge keeps no strip for it any more, as a bar's handle keeps none
@@ -19936,7 +19936,8 @@ Dock stays shown for as long as the pointer stays there. So:
   sits flush on the edge: with nothing thickening, there is no
   room to keep, and a gap above the line reads as a misplacement.
 - *Capsules, wrapped by the hairline* (owner, 2026-11-16, #3366,
-  after a ui-designer consult and a native prototype). The handle
+  after a ui-designer consult and a native prototype), amending
+  the two-tone bullet above. The handle
   and the pocket's tab are each an outer 3-point capsule in the
   hairline ink with the 2-point core capsule 0.5 points inside it,
   so the hairline wraps the ends as well as the long sides; the
@@ -19944,8 +19945,10 @@ Dock stays shown for as long as the pointer stays there. So:
   ends bare, the one place it met the window under it with no edge
   of the opposite tone, and a rounded end reads as a deliberate
   object rather than a cut. No taper, fade or one-sided rounding.
-  The handle stays flush: it drew nothing on the device for a
-  missing view attachment, not for the inset.
+  The core is drawn over the hairline capsule rather than inside a
+  ring, so its strengths show composited over the hairline's 35%:
+  about 60% at rest, which one draw path for both drawers buys.
+  The handle stays flush, as the two-tone bullet argues.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one

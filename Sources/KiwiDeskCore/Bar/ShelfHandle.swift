@@ -67,8 +67,8 @@ struct ShelfHandleSpec: Equatable {
     /// Whether the handle draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
 
-    /// The handle's depth (pt): its `core` and a `hairline` of the
-    /// opposite tone on each long side (#3361 ruling 1).
+    /// The handle's depth (pt): its `core` inside a `hairline` of
+    /// the opposite tone wrapping it (#3361 ruling 1, #3366).
     static let depth: CGFloat = core + 2 * hairline
     static let core: CGFloat = 2
     static let hairline: CGFloat = 0.5

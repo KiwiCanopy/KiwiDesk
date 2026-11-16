@@ -323,11 +323,13 @@ twice, was a question the user answered twice. The argument is
   `restColor`, `fillColor` and `hairlineColor`** — over the one
   `ShelfHandleSpec.ink(hex:strength:)` (#3357, #3360): Automatic the
   label ink and a picked colour its own alpha times the strength — a
-  core between two
-  neutral hairline capsule wrapping it, split by the one
-  `ShelfHandleSpec.parts`, flush on the edge (#3361, #3366), its
-  body attached under the view that draws, which only a pixel read
-  proves (`ShelfHandleDrawTests`) — never the bar's own ink or the Fill, both
+  2 pt core capsule on a 3 pt neutral hairline capsule, split by the
+  one `ShelfHandleSpec.parts` and rounded by the one
+  `ShelfHandleSpec.radius(of:)`, flush on the edge (#3361, #3366;
+  `ShelfHandleFillTests` ▸ `twoTone`), its body attached under the
+  view that draws, which only a pixel read proves
+  (`ShelfHandleDrawTests` ▸ `handleDraws`) — never the bar's own ink
+  or the Fill, both
   handed `kiwishelf.handle_color` by the one
   `ShelfHandleSpec.restHex(of:)`, never a colour of the tab's own
   (`ShelfHandleFillTests` ▸ `hairlineIsNeutral`,

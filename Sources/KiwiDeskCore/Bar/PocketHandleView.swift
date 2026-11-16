@@ -42,7 +42,8 @@ final class PocketHandleView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// Wears `shelf`, the tab at full strength while `hovered`.
+    /// Wears `shelf`, the tab at full strength while `hovered`,
+    /// which Core hands false while the pocket is risen.
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
@@ -54,7 +55,7 @@ final class PocketHandleView: NSView {
         self.hex = hex
         self.edge = edge
         self.kiwisOut = kiwisOut
-        self.hovered = hovered && !kiwisOut
+        self.hovered = hovered
         needsDisplay = true
     }
 
