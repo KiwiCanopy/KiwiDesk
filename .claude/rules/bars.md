@@ -2011,6 +2011,18 @@ sites clipped alike.
   anchored the ink correctly would stay green there, so the
   routing is review's.
 
+## An App Font glyph is drawn through an app name
+
+- **Draw an App Font ligature only through the name lookup,
+  `AppFontGlyphMap.ligature(for:)`, and test a hard-coded ligature
+  against that map.** The weekly re-vendor PR is cleared to land
+  unlooked when every app NAME draws the glyph it drew before
+  ([packaging-and-release.md](packaging-and-release.md) ▸ CI,
+  `AppFontDiffScriptTests`), so a surface drawing a ligature by its
+  own spelling would see a restyle land unchecked.
+  `LookPlateDeskTests` holds the Settings plate's spelled glyphs to
+  the map; a new spelling owes the same, which is review's.
+
 ## A bar image from a symbol name goes through `SymbolImage`
 
 A bar or bar-menu image built from a symbol name the site did not
