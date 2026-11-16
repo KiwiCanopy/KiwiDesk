@@ -3,10 +3,12 @@ import QuartzCore
 
 /// The pocket rising out of its handle (#2678, 2026-10-29 ruling):
 /// lift, grow from the handle's kiwis and, on another edge, the turn
-/// upright, all one transform on one damped spring pivoting on the
-/// pocket's base behind the tab. Under Reduce Motion it stands out
-/// at once. The One-window pocket, which has no handle, slides out of
-/// its edge instead (#2793).
+/// upright, all one transform pivoting on the pocket's base behind
+/// the tab. Its approach scrubs it up as a countdown and a leave
+/// sinks it back from where it stands, one animation each (#3368);
+/// a stand ahead of the countdown finishes on a damped spring. Under
+/// Reduce Motion it stands out at once. The One-window pocket, which
+/// has no handle, slides out of its edge instead (#2793).
 extension BarMotion {
     /// How far below its risen place the pocket starts, past the
     /// tab, so the kiwis are what first shows.
@@ -15,35 +17,57 @@ extension BarMotion {
             + PocketHandleView.markSide - PocketHandleView.lookOut
     }
 
-    /// Plays the rise on `pocket`, `side` points risen on `edge`.
+    /// The key the rise, its countdown and its sink run under, so
+    /// each takes over from the last.
+    static let pocketRiseKey = "pocketRise"
+
+    /// Where `pocket`'s rise stands on screen, nil where none runs;
+    /// a layer not yet drawn stands where its animation starts.
+    @MainActor
+    static func pocketRiseShown(_ pocket: BriefPocketView) -> CATransform3D? {
+        guard let layer = pocket.layer,
+            let running = layer.animation(forKey: pocketRiseKey)
+        else { return nil }
+        if let shown = layer.presentation() { return shown.transform }
+        return (running.value(forKey: "fromValue") as? NSValue)?
+            .caTransform3DValue
+    }
+
+    /// Plays the rise on `pocket`, `side` points risen on `edge`,
+    /// from where a countdown or a sink left it.
     @MainActor
     static func playPocketRise(
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
         side: CGFloat
     ) {
+        guard let layer = pocket.layer else { return }
+        let from = pocketRiseShown(pocket)
+        layer.removeAnimation(forKey: pocketRiseKey)
         guard
             let rise = pocketRise(
                 edge: edge,
                 side: side,
+                from: from,
                 reduceMotion: isReduced
-            ),
-            let layer = pocket.layer
+            )
         else { return }
-        layer.add(rise, forKey: "pocketRise")
+        layer.add(rise, forKey: pocketRiseKey)
     }
 
-    /// The rise's spring, nil under `reduceMotion` or with no side.
+    /// The rise's spring from `from`, else from the handle's kiwis;
+    /// nil under `reduceMotion` or with no side.
     @MainActor
     static func pocketRise(
         edge: AppBarEdge,
         side: CGFloat,
+        from: CATransform3D? = nil,
         reduceMotion: Bool
     ) -> CASpringAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
         let animation = CASpringAnimation(keyPath: "transform")
         animation.fromValue = NSValue(
-            caTransform3D: pocketRiseStart(edge: edge, side: side)
+            caTransform3D: from ?? pocketRiseStart(edge: edge, side: side)
         )
         animation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
         // Critically damped: no overshoot to read as a throb.
@@ -52,6 +76,123 @@ extension BarMotion {
         animation.damping = 2 * (220 as CGFloat).squareRoot()
         animation.duration = animation.settlingDuration
         return animation
+    }
+
+    /// Whether the pocket's approach scrubs its rise: not under
+    /// Reduce Motion, where it stands when the dwell ends, nor under
+    /// KiwiDesk's Off (#3368 ruling 4). Starts no motion.
+    @MainActor static var pocketScrubs: Bool {
+        !isReduced && revealLength > 0
+    }
+
+    /// Scrubs `pocket` up on `rise`, from where a running rise
+    /// stands, or from the handle's kiwis after `rise`'s delay.
+    @MainActor
+    static func playPocketScrub(
+        _ pocket: BriefPocketView,
+        edge: AppBarEdge,
+        side: CGFloat,
+        rise: ShelfHandleSpec.Fill
+    ) {
+        guard let layer = pocket.layer else { return }
+        let from = pocketRiseShown(pocket)
+        layer.removeAnimation(forKey: pocketRiseKey)
+        guard
+            let scrub = pocketScrub(
+                edge: edge,
+                side: side,
+                rise: rise,
+                from: from,
+                reduceMotion: isReduced
+            )
+        else { return }
+        if scrub.beginTime > 0 {
+            scrub.beginTime += layer.convertTime(
+                CACurrentMediaTime(),
+                from: nil
+            )
+        }
+        layer.add(scrub, forKey: pocketRiseKey)
+    }
+
+    /// The countdown's scrub: still at the kiwis over `rise`'s delay,
+    /// then linear to the risen pocket as the dwell ends; one taken
+    /// over from `from` runs at once. Nil under `reduceMotion` or with
+    /// no side. `beginTime` is the delay, relative.
+    @MainActor
+    static func pocketScrub(
+        edge: AppBarEdge,
+        side: CGFloat,
+        rise: ShelfHandleSpec.Fill,
+        from: CATransform3D?,
+        reduceMotion: Bool
+    ) -> CABasicAnimation? {
+        guard !reduceMotion, side > 0 else { return nil }
+        let delay = from == nil ? PocketRiseTimeline.delay(of: rise) : 0
+        let length = rise.length - delay
+        guard length > 0 else { return nil }
+        let scrub = CABasicAnimation(keyPath: "transform")
+        scrub.fromValue = NSValue(
+            caTransform3D: from ?? pocketRiseStart(edge: edge, side: side)
+        )
+        scrub.toValue = NSValue(caTransform3D: CATransform3DIdentity)
+        scrub.beginTime = delay
+        scrub.duration = length
+        scrub.timingFunction = CAMediaTimingFunction(name: .linear)
+        scrub.fillMode = .both
+        scrub.isRemovedOnCompletion = false
+        return scrub
+    }
+
+    /// How long a sink from a whole rise takes.
+    static let pocketSinkSpan: TimeInterval = 0.2
+
+    /// Sinks `pocket` back into its handle from where its rise
+    /// stands; returns how long that takes, 0 where nothing runs.
+    @MainActor
+    @discardableResult
+    static func playPocketSink(
+        _ pocket: BriefPocketView,
+        edge: AppBarEdge,
+        side: CGFloat
+    ) -> TimeInterval {
+        guard let layer = pocket.layer,
+            let from = pocketRiseShown(pocket)
+        else { return 0 }
+        layer.removeAnimation(forKey: pocketRiseKey)
+        guard
+            let sink = pocketSink(
+                edge: edge,
+                side: side,
+                from: from,
+                reduceMotion: isReduced
+            )
+        else { return 0 }
+        layer.add(sink, forKey: pocketRiseKey)
+        return sink.duration
+    }
+
+    /// The sink from `from` back to the handle's kiwis, held there
+    /// until its landing removes it; nil under `reduceMotion` or with
+    /// no side.
+    @MainActor
+    static func pocketSink(
+        edge: AppBarEdge,
+        side: CGFloat,
+        from: CATransform3D,
+        reduceMotion: Bool
+    ) -> CABasicAnimation? {
+        guard !reduceMotion, side > 0 else { return nil }
+        let sink = CABasicAnimation(keyPath: "transform")
+        sink.fromValue = NSValue(caTransform3D: from)
+        sink.toValue = NSValue(
+            caTransform3D: pocketRiseStart(edge: edge, side: side)
+        )
+        sink.duration = pocketSinkSpan
+        sink.timingFunction = CAMediaTimingFunction(name: .easeIn)
+        sink.fillMode = .forwards
+        sink.isRemovedOnCompletion = false
+        return sink
     }
 
     /// Where the rise starts, in the pocket layer's own flipped

@@ -6,8 +6,8 @@ import AppKit
 /// (owner, device 2026-10-29), turned so they face the screen. The
 /// tab wears a bar handle's two-tone ink at its depth, and runs no
 /// progress fill (#3361 ruling 3). A fixed edge mark: it never
-/// scales with the shelf and carries no count. An empty pocket's
-/// fade is its panel's alone (#2678 review 18).
+/// scales with the shelf and carries no count. The tab is constant;
+/// an empty pocket fades its kiwis alone (#3368 ruling 1).
 @MainActor
 final class PocketHandleView: NSView {
     /// The tab's depth across the edge, a bar handle's (#3361), and
@@ -31,6 +31,16 @@ final class PocketHandleView: NSView {
     /// The pointer rests on the handle: the tab draws at full
     /// strength, in place (#3366 ruling 2).
     private(set) var hovered = false
+    /// The pocket is empty: the kiwis draw faded, the tab as ever
+    /// (#3368 ruling 1).
+    var faded = false {
+        didSet { if faded != oldValue { needsDisplay = true } }
+    }
+    /// The pocket rising out of the tab or sinking back carries the
+    /// kiwis meanwhile (#3368).
+    var hidesKiwis = false {
+        didSet { if hidesKiwis != oldValue { needsDisplay = true } }
+    }
 
     override var isFlipped: Bool { true }
 
@@ -90,7 +100,7 @@ final class PocketHandleView: NSView {
             width: Self.markSide,
             height: Self.markSide
         )
-        if !kiwisOut {
+        if !kiwisOut, !hidesKiwis {
             // Cut at the tab rather than covered by it: the tab's ink
             // is translucent, as a bar handle's is (#3361).
             context.saveGState()
@@ -106,7 +116,7 @@ final class PocketHandleView: NSView {
                 in: markRect,
                 from: .zero,
                 operation: .sourceOver,
-                fraction: 1,
+                fraction: faded ? PocketPlateOverlay.fadedAlpha : 1,
                 respectFlipped: true,
                 hints: nil
             )

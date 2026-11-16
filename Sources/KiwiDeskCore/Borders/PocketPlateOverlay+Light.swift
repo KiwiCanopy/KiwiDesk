@@ -47,12 +47,17 @@ extension PocketPlateOverlay {
     }
 
     /// Fades the empty pocket at rest; a flash shows it full. An
-    /// ancestor fades (bars.md ▸ glass alpha): the handle's panel,
-    /// or the section's holder.
+    /// ancestor fades (bars.md ▸ glass alpha): the whole mark's
+    /// panel, or the section's holder. A handle keeps its tab
+    /// constant and fades its kiwis alone, in the tab and risen out
+    /// of it (#3368 ruling 1).
     func paintFade(_ shown: Shown, _ spec: Spec) {
         let faded = spec.faded && !shown.view.flashing
         let alpha = faded ? Self.fadedAlpha : 1
-        shown.panel?.alphaValue = alpha
+        let tab = spec.handle != nil && !spec.whole
+        shown.panel?.alphaValue = tab ? 1 : alpha
         shown.holder?.alphaValue = alpha
+        shown.view.handle.faded = tab && faded
+        shown.view.pocket.alphaValue = tab ? alpha : 1
     }
 }

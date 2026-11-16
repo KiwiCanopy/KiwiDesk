@@ -22,13 +22,7 @@ final class PocketPlateOverlay {
     private(set) var specs: [DisplayID: Spec] = [:]
     /// The displays whose pocket the pointer is on, handle or
     /// section.
-    var hovered: Set<DisplayID> = [] {
-        // Every hover dropped drops its dwell with it (#2807).
-        didSet { dwelled.formIntersection(hovered) }
-    }
-    /// The hovered displays whose handle the pointer has dwelt on or
-    /// pushed against: the pocket rises out of it (#2807).
-    var dwelled: Set<DisplayID> = []
+    var hovered: Set<DisplayID> = []
     /// The displays a put-in or take-out plays on, each with the
     /// play that holds it out; the pocket stands out of its handle
     /// for the play (#2678).
@@ -40,8 +34,8 @@ final class PocketPlateOverlay {
     var onListChanged: @MainActor () -> Void = {}
     /// The pointer came onto a display's pocket or left it.
     var onHover: @MainActor (DisplayID, Bool) -> Void = { _, _ in }
-    /// The pointer pushed against the edge on a display's handle.
-    var onPush: @MainActor (DisplayID) -> Void = { _ in }
+    /// The pointer moved over a pocket's panel, Cocoa screen space.
+    var onMove: @MainActor (CGPoint) -> Void = { _ in }
     /// A click on one display's pocket.
     var onClick: @MainActor (PocketPlateView) -> Void = { _ in }
     /// VoiceOver's press on one display's pocket (#2936).
@@ -81,6 +75,9 @@ final class PocketPlateOverlay {
     /// Each display's sliding pocket on its way out, its leave's
     /// token, so a return in the meantime keeps its panel (#2793).
     var leaving: [DisplayID: UUID] = [:]
+    /// Each display's sinking pocket, its sink's token, so an older
+    /// landing ends no newer sink (#3368).
+    var sinks: [DisplayID: UUID] = [:]
     /// Whether a panel is on screen; a test pins it, since no test
     /// panel orders in.
     var isOnScreen: @MainActor (NSWindow) -> Bool = { $0.isVisible }
@@ -192,20 +189,36 @@ final class PocketPlateOverlay {
             shown.view.paintLit()
             paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
-            Self.place(shown, at: spec.frame)
+            // A rise taken back sinks in the risen room it rose in,
+            // which its landing gives back (#3368).
+            let sinks =
+                old?.rise != nil && spec.rise == nil && !spec.risen
+                && spec.handle != nil
+            Self.place(
+                shown,
+                at: sinks ? (old?.frame ?? spec.frame) : spec.frame
+            )
         }
         orderIn(shown)
         // Sized and ordered in first: under Hidden the handle is
         // made in the pass it rises, and a rise played before showed
         // none on device (#2776).
         if changed {
-            shown.view.stand(
+            let sink = shown.view.stand(
                 handle: spec.handle,
                 risen: spec.risen,
                 side: spec.risenSide,
                 outer: spec.outer,
-                whole: spec.whole
+                whole: spec.whole,
+                rise: spec.rise
             )
+            if sink > 0 {
+                landSink(on: spec.display, after: sink)
+            } else if shown.view.sinking == false,
+                old?.rise != nil, spec.rise == nil, !spec.risen
+            {
+                Self.place(shown, at: spec.frame)
+            }
         }
         if enters, let edge = spec.handle {
             BarMotion.playPocketEntrance(
@@ -301,7 +314,7 @@ final class PocketPlateOverlay {
         view.onHover = { [weak self] on in
             self?.onHover(display, on)
         }
-        view.onPush = { [weak self] in self?.onPush(display) }
+        view.onMove = { [weak self] point in self?.onMove(point) }
         view.onListChanged = { [weak self] in self?.onListChanged() }
     }
 

@@ -1,0 +1,81 @@
+import AppKit
+
+/// The pocket's resting handle joins the revealer's approach
+/// (#3368 ruling 3): lingering near the tab rises the pocket as its
+/// countdown, a rest on the tab hurries it, a push on a free edge
+/// stands it at once, and on an edge macOS owns the outermost row
+/// hands the approach to macOS, as a bar's does (#3349 rule 5).
+extension KiwiCore {
+    /// The revealer's key for the pocket handle on `display`.
+    func pocketApproachKey(on display: DisplayID) -> ShelfRevealer.Key {
+        .pocket(
+            on: ShelfManager.Key(
+                display: display,
+                edge: tiler.settings.kiwishelf.pocketEdge
+            )
+        )
+    }
+
+    /// Files each display's resting pocket handle with the revealer:
+    /// an approach `ShelfReveal.approachReach` deep across the
+    /// handle's band, its tab the hover band, the risen pocket the
+    /// section that holds it shown. Run after the bar pass filed
+    /// `markBands`, which places the handle.
+    func filePocketApproaches(into hiding: inout HidingShelves) {
+        guard pocketStands else { return }
+        let edge = tiler.settings.kiwishelf.pocketEdge
+        let primary = GeometryUtils.primaryHeight
+        let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
+        let screens = ScreenList.all.map(\.frame)
+        for display in state.workspaces.allDisplays {
+            guard pocketStands(on: display.id),
+                pocketPlace(on: display.id) == .handle,
+                let rest = pocketHandleFrame(on: display.id, risen: false),
+                let risen = pocketHandleFrame(on: display.id, risen: true),
+                let screen = TilingEngine.screen(for: display.id)
+            else { continue }
+            let tab = flip(rest)
+            hiding.targets[pocketApproachKey(on: display.id)] = .along(
+                tab,
+                edge: edge,
+                side: Self.screenSide(of: tab, edge: edge),
+                screen: screen.frame,
+                beyond: HidingShelves.continues(
+                    edge,
+                    of: screen.frame,
+                    along: tab,
+                    among: screens
+                ),
+                handle: tab,
+                section: flip(risen),
+                // Across the band alone, never past its ends.
+                cut: (lead: true, trail: true)
+            )
+        }
+    }
+
+    /// The side of `rect` on `edge`, Cocoa: where the handle meets
+    /// the usable area's edge.
+    static func screenSide(of rect: CGRect, edge: AppBarEdge) -> CGFloat {
+        switch edge {
+        case .top: rect.maxY
+        case .bottom: rect.minY
+        case .left: rect.minX
+        case .right: rect.maxX
+        }
+    }
+
+    /// Where the pocket on `display` stands in its approach: risen
+    /// once the approach opened it, else the countdown running, which
+    /// plays only where the bars' motion does (ruling 4).
+    func pocketApproach(
+        on display: DisplayID
+    ) -> (open: Bool, rise: ShelfHandleSpec.Fill?) {
+        let key = pocketApproachKey(on: display)
+        let open = shelves.reveal.reveal(of: key).isShown
+        let rise =
+            open || !BarMotion.pocketScrubs
+            ? nil : shelves.reveal.fills[key]
+        return (open, rise)
+    }
+}

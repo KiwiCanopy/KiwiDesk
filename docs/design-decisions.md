@@ -7232,6 +7232,29 @@ stutter on the device, two motions where the pointer asked for one,
 and the brighter tab answers the hover without moving anything.
 :::
 
+:::unreleased
+*Amended* (owner, 2026-11-16, #3368, after a ui-designer consult
+and a native prototype): **the rise is the pocket's countdown, and
+it joins the bars' approach.** Lingering within about 24 points of
+the edge across the handle's band, the pocket waits the same
+0.15 s, then rises scrubbed over the rest of the bars' 0.4 s dwell,
+so the rise itself shows how long is left; on the tab it goes on
+at the fast pace, a whole rise in 0.15 s, from wherever it stands,
+and a leave before it is up sinks it back from where it stands as
+one animation. A bar's handle counts down with its progress fill;
+the pocket has its own object to move, so its countdown is its
+rise, and a fill on the tab as well would be two clocks for one
+wait. It is one approach, the revealer's, rather than a second: on
+the Dock's edge the outermost row then hands the pointer to macOS
+as a bar's approach does (#3349 rule 5), and a push on a free edge
+stands it at once, as a window drag still does. The pocket's panel
+takes the mouse, so it hands the revealer the moves the revealer's
+monitors cannot hear over KiwiDesk's own panels. The 0.15 s wait
+keeps a pointer crossing the edge for a title bar from twitching
+it (#2807). Under Reduce Motion and Off there is no scrub: the
+pocket holds still and stands when the dwell ends.
+:::
+
 **The pocket is the mark alone: faded while empty, in full colour
 while anything is inside, and edged in black and white while lit
 or as a window goes in or out** (owner, prototype 2026-10-30,
@@ -7249,6 +7272,19 @@ in the stitch's ink vanished on a window of that ink, and tones
 derived from the pocket colour collapse where it meets the
 background. Matching the edge to the window behind or the one
 dragged would need a screen capture, which needs Screen Recording.
+
+:::unreleased
+*Amended* (owner, 2026-11-16, #3368): **on a handle, the kiwis
+alone fade.** The tab is constant, a bar handle's two-tone line at
+its ink and depth, empty or not, and the empty fade moves off the
+handle's panel onto the kiwis, in the tab and risen out of it. A
+faded panel thinned the tab to about 15% beside the bar handles'
+38%, so it read as a thinner, lighter line than its neighbours,
+and the kiwis already say what the pocket holds. A tab that holds
+something does not rest at the progress fill's 90%: a bright tab
+reads as a bar about to open. The whole mark under Always keeps
+its fade.
+:::
 The lift is the cue that holds on every ground, a full pocket's
 included, where no fade can change; the Dock signals a hover and a
 drop target by size the same way. At rest the edge goes, since an
@@ -18474,7 +18510,11 @@ leave it out, so a bundled palette keeps the handle following
 light and dark, and the derived default palette carries it empty
 so a reset reaches it. A colour joins only where its Automatic is
 that kind of adaptive ink; one whose Automatic is another palette
-colour is a follower.
+colour is a follower. Since the bundled palettes leave
+`kiwishelf.handle_color`, `sticky.color` and `floating.color` out,
+a colour the user picked on one of them survives a switch to a
+bundled palette, and the palette still reads as applied:
+`isApplied` compares only the keys a palette sets.
 
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag

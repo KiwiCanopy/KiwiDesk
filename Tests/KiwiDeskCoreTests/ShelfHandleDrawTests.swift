@@ -153,7 +153,7 @@ struct ShelfHandleDrawTests {
                 < 0.05
         )
         // Risen, the tab stays at rest: Core hands no hover then
-        // (`PocketHandleDwellTests` ▸ `hoverLightsThenRises`).
+        // (`PocketApproachTests` ▸ `hoverLightsInPlace`).
         #expect(abs(try core(false, true) - rest) < 0.05)
     }
 }

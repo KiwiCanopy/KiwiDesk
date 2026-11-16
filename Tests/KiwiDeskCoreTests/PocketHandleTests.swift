@@ -97,16 +97,19 @@ struct PocketHandleTests {
         #expect(depth == PocketHandleView.restDepth + 8)
     }
 
-    @Test("a push raises the pocket out of its handle, and leaving sinks it")
-    func pushRises() throws {
+    @Test("its approach opening raises the pocket, and closing sinks it")
+    func approachRises() throws {
         let core = try makeCore()
         let shown = try #require(spec(core))
-        core.pocketHovered(shown.display, true)
-        core.pocketPushed(shown.display)
+        // The approach opening, whatever opened it (#3368).
+        let key = core.pocketApproachKey(on: shown.display)
+        core.shelves.reveal.set(.hover, for: key)
+        core.updatePocketPlate(slots: [:])
         let risen = try #require(core.pocketPlate.specs[shown.display])
         #expect(risen.risen)
         #expect(risen.frame.height > shown.frame.height)
-        core.pocketHovered(shown.display, false)
+        core.shelves.reveal.set(.hidden, for: key)
+        core.updatePocketPlate(slots: [:])
         #expect(core.pocketPlate.specs[shown.display]?.risen == false)
     }
 

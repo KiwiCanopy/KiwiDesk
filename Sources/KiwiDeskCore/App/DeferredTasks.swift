@@ -118,9 +118,6 @@ final class DeferredTasks {
         /// Lights the standing pocket as a play's window lands in
         /// it or leaves it (#2776).
         case pocketLight
-        /// Raises the pocket out of its handle once the pointer has
-        /// rested on it (#2807).
-        case pocketDwell
         /// The ordinary pass an explicit apply owes, once its
         /// asks are answered (#2785). Ambient: it coalesces every
         /// apply, whoever made it.
@@ -146,7 +143,7 @@ final class DeferredTasks {
                 .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
-                .visionHold, .pocketHold, .pocketLight, .pocketDwell,
+                .visionHold, .pocketHold, .pocketLight,
                 .applyHealPass:
                 return false
             }

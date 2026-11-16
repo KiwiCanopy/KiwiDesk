@@ -318,7 +318,15 @@ twice, was a question the user answered twice. The argument is
   through the one `BarMotion.playHandleFill`, which plays under Reduce
   Motion and drops under Off. The handle peeks nothing and carries no
   label or count (#3349, amending #2567), and draws no glass
-  (`ShelfRevealApproachTests`, `ShelfHandleFillTests`). **Ink a
+  (`ShelfRevealApproachTests`, `ShelfHandleFillTests`). **The
+  pocket's handle is the revealer's one other member**
+  (`ShelfRevealer.Key.pocket`, #3368): its fill is its rise's
+  countdown, read through `PocketRiseTimeline`, hurried on its tab
+  from the rise's progress rather than restarted, and its key stands
+  out of everything that belongs to the bars alone — `yields`,
+  `hasTarget` and `heldOpen` — where a new bars-only reader of the
+  revealer's keys asks `isPocket` too (`ShelfRevealPocketKeyTests`;
+  [borders.md](borders.md) ▸ the pocket's handle). **Ink a
   handle and the pocket's tab through `ShelfHandleSpec`'s one
   `restColor`, `fillColor` and `hairlineColor`** — over the one
   `ShelfHandleSpec.ink(hex:strength:)` (#3357, #3360): Automatic the
