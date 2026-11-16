@@ -216,6 +216,23 @@ struct PocketApproachTests {
         #expect(rig.spec?.hovered == true)
     }
 
+    @Test("a rising tab relights as the pointer crosses onto it")
+    func crossingRelights() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        let target = try #require(rig.target)
+        rig.move(to: try nearTab(target))
+        rig.core.pocketHovered(rig.display, true)
+        #expect(rig.spec?.hovered == false)
+        // A move the panel hears, onto the tab, with no pass of its
+        // own: the crossing alone redraws the light.
+        let view = try #require(rig.core.pocketPlate.view(on: rig.display))
+        let tab = try onTab(target)
+        rig.pointer.point = tab
+        view.onMove(tab)
+        #expect(rig.spec?.hovered == true)
+    }
+
     @Test("a leave sinks the rise in its risen room, then rests")
     func leaveSinks() throws {
         let rig = try rig()
