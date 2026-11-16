@@ -9,7 +9,7 @@ import SwiftUI
 private struct HoverRise<S: Shape>: ViewModifier {
     let risen: Bool
     let shape: S
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
         content

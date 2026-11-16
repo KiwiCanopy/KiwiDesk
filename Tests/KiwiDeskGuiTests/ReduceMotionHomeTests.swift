@@ -72,50 +72,132 @@ struct ReduceMotionHomeTests {
         #expect(ruledHits > 0)
     }
 
+    /// Where a host needle must sit: a function's body, the body a
+    /// declaration opens, or (for a stored seam) the whole file.
+    private enum Scope {
+        case function(String)
+        case declaration(String)
+        case file
+    }
+
     /// Each panel host reads the home once at show and hands that
-    /// one value to its order-out and to its views (#3252).
+    /// one value to its order-out and to its views (#3252). Each
+    /// needle is scoped to the body it describes, so a decoy
+    /// elsewhere in the file cannot stand in for it.
     @Test("the GUI hosts read the home at show")
     func hostsAreWired() throws {
+        let wired: [(String, String, Scope, String)] = [
+            (
+                "Jump", "JumpPanelController.swift", .file,
+                "varreduceMotion:()->Bool={ReduceMotion.isOn}"
+            ),
+            (
+                "Jump", "JumpPanelController.swift", .function("show"),
+                "PanelPresence(reduceMotion:reduceMotion())"
+            ),
+            (
+                "Jump", "JumpPanelController.swift", .function("show"),
+                "width:width).environment(\\.kiwiDeskReduceMotion,"
+                    + "presence.reduceMotion)"
+            ),
+            (
+                "", "PanelEntrance.swift", .function("fadeOut"),
+                "letdelay=reduceMotion?0:Self.leaveDuration"
+            ),
+            (
+                "", "PanelEntrance.swift",
+                .declaration("structPanelEntrance:"),
+                "privatevarreduceMotion:Bool{presence.reduceMotion}"
+            ),
+            (
+                "", "PanelEntrance.swift",
+                .declaration("structPanelContentFade:"),
+                "privatevarreduceMotion:Bool{presence.reduceMotion}"
+            ),
+            (
+                "CuePlate", "CuePlateController.swift", .function("show"),
+                "model.present(content,reduceMotion:ReduceMotion.isOn)"
+            ),
+            (
+                "CuePlate", "CuePlateController.swift", .function("hide"),
+                "letfade=model.reduceMotion?0:CuePlateModel.fade"
+            ),
+            (
+                "CuePlate", "CuePlateModel.swift", .function("present"),
+                "self.reduceMotion=reduceMotion"
+            ),
+            (
+                "CuePlate", "CuePlateModel.swift",
+                .declaration("structCuePlateView:"),
+                "privatevarreduceMotion:Bool{model.reduceMotion}"
+            ),
+            (
+                "CuePlate", "CuePlateModel.swift",
+                .declaration("structCuePlateView:"),
+                ".environment(\\.kiwiDeskReduceMotion,reduceMotion)"
+            ),
+            (
+                "BootNotice", "BootNoticeController.swift",
+                .function("showIfDue"),
+                "model.reduceMotion=ReduceMotion.isOn"
+            ),
+            (
+                "BootNotice", "BootNoticeController.swift",
+                .function("hide"),
+                "letfade=model.reduceMotion?0:BootNoticeModel.fade"
+            ),
+            (
+                "BootNotice", "BootNoticeView.swift",
+                .declaration("structBootNoticeView:"),
+                "privatevarreduceMotion:Bool{model.reduceMotion}"
+            ),
+            (
+                "", "AppDelegate+Onboarding.swift",
+                .function("showOnboarding"),
+                ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"
+            ),
+            (
+                "Updates", "UpdateWindowChrome.swift",
+                .declaration("staticfuncwindow<Root:View>("),
+                "letroot=root.environment(\\.kiwiDeskReduceMotion,"
+                    + "ReduceMotion.isOn)"
+            ),
+            (
+                "Shortcuts", "KeySequenceHintController.swift",
+                .function("draw"),
+                ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"
+            ),
+            // The Settings window keeps macOS's setting, live.
+            (
+                "Settings", "SettingsView.swift",
+                .declaration("varbody:someView{"),
+                ".environment(\\.kiwiDeskReduceMotion,reduceMotion)"
+            ),
+        ]
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
-        let needles: [String: [String]] = [
-            "Jump/JumpPanelController.swift": [
-                "varreduceMotion:()->Bool={ReduceMotion.isOn}",
-                "PanelPresence(reduceMotion:reduceMotion())",
-                "width:width).environment(\\.kiwiDeskReduceMotion,"
-                    + "presence.reduceMotion)",
-            ],
-            "PanelEntrance.swift": [
-                "letdelay=reduceMotion?0:Self.leaveDuration",
-                "privatevarreduceMotion:Bool{presence.reduceMotion}",
-            ],
-            "CuePlate/CuePlateController.swift": [
-                "model.present(content,reduceMotion:ReduceMotion.isOn)",
-                "letfade=model.reduceMotion?0:CuePlateModel.fade",
-            ],
-            "CuePlate/CuePlateModel.swift": [
-                "self.reduceMotion=reduceMotion",
-                "privatevarreduceMotion:Bool{model.reduceMotion}",
-                ".environment(\\.kiwiDeskReduceMotion,reduceMotion)",
-            ],
-            "BootNotice/BootNoticeController.swift": [
-                "model.reduceMotion=ReduceMotion.isOn",
-                "letfade=model.reduceMotion?0:BootNoticeModel.fade",
-            ],
-            "BootNotice/BootNoticeView.swift": [
-                "privatevarreduceMotion:Bool{model.reduceMotion}"
-            ],
-            "AppDelegate+Onboarding.swift": [
-                ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"
-            ],
-        ]
-        for (path, wanted) in needles {
-            let source = try SourceScan.strippedSource(
-                at: root.appendingPathComponent(path)
-            ).filter { !$0.isWhitespace }
-            for needle in wanted {
-                #expect(source.contains(needle), "\(path): \(needle)")
+        for (dir, file, scope, needle) in wired {
+            let url = root.appendingPathComponent(dir)
+                .appendingPathComponent(file)
+            let whole = try SourceScan.strippedSource(at: url)
+                .filter { !$0.isWhitespace }
+            let body: String
+            switch scope {
+            case .file: body = whole
+            case .function(let name):
+                body = try SourceScan.functionBody(
+                    of: name,
+                    in: file,
+                    under: dir,
+                    root: "Sources/KiwiDesk"
+                ).filter { !$0.isWhitespace }
+            case .declaration(let head):
+                body =
+                    SourceScan.declarationBody(after: head, in: whole)
+                    ?? ""
             }
+            #expect(!body.isEmpty, "\(file): \(scope)")
+            #expect(body.contains(needle), "\(file): \(needle)")
         }
     }
 

@@ -16,7 +16,7 @@ struct LayoutCycleList: View {
     @State private var dragged: LayoutMode?
     @State private var rowFrames: [LayoutMode: CGRect] = [:]
     @FocusState private var focused: LayoutMode?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     private static let listSpace = "layoutCycleList"
     static let rowHeight: CGFloat = 28

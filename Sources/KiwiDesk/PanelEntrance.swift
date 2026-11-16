@@ -145,12 +145,11 @@ private struct PanelContentFade: ViewModifier {
 }
 
 extension EnvironmentValues {
-    /// KiwiDesk's Reduce Motion — macOS's setting or the speed
-    /// preset's Off — for a view outside Settings (#3252), set by
-    /// its host from `ReduceMotion.isOn` once at show. SwiftUI's
-    /// `accessibilityReduceMotion` is get-only and reads macOS's
-    /// alone. True where no host set it, so a host that forgets
-    /// shows its panel still rather than moving it under Off.
+    /// The Reduce Motion a view's host decided at show (#3252):
+    /// `ReduceMotion.isOn` for a desk surface. True where no host
+    /// wrote it, so a forgotten host draws still for everyone
+    /// rather than moving under Off; `ReduceMotionHomeTests` holds
+    /// the hosts.
     @Entry var kiwiDeskReduceMotion = true
 
     /// False while a key panel's entrance is still scaling it in

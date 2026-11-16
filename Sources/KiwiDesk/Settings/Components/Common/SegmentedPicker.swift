@@ -43,7 +43,7 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// The segment under the pointer, selected or not.
     @State var pointerIndex: Int?
     @FocusState private var focused: Bool
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     var reduceMotion
     @Environment(\.isEnabled) var isEnabled
     /// KiwiHub's selection inside it (#2569); elsewhere its defaults

@@ -10,7 +10,7 @@ struct SidewaysStrip<ID: Hashable, Content: View>: View {
     private let followed: StripFollow<ID>?
     private let content: Content
     @State private var scroll = StripScroll()
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     init(
         run: StripRun,

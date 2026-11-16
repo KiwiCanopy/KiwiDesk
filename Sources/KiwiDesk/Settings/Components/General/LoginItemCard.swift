@@ -11,7 +11,7 @@ import SwiftUI
 struct LoginItemCard: View {
     @ObservedObject var model: SettingsModel
     @EnvironmentObject private var localization: LocalizationManager
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     var body: some View {

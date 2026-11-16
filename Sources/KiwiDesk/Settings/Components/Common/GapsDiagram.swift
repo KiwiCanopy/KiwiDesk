@@ -18,7 +18,7 @@ enum GapPreviewScale {
 struct GapsDiagram: View {
     let outer: Gaps.Outer
     let inner: Gaps.Inner
-    @Environment(\.accessibilityReduceMotion)
+    @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     /// Shared damping animation gated by reduce motion (#1069).

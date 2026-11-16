@@ -1167,9 +1167,10 @@ Slow · Medium · Fast, drawn by the same row in Simple's Animations
 card (#3238, #3254); no segment is marked as the default, and the
 row's help names Medium as where KiwiDesk starts.
 Its Off is KiwiDesk's own Reduce Motion, which the windows, the
-bars, the marks on windows, KiwiHub, the cue plates and the slow-boot
-notice read with macOS's, their fades included; the Settings window
-reads macOS's alone. While it is on, the card
+bars, the marks on windows, KiwiHub, the cue plates, the slow-boot
+notice, the setup tour and KiwiDesk's other windows read with
+macOS's, and their fades drop too; the Settings window reads macOS's
+alone. While it is on, the card
 shows a warning box with **Turn On**, and every row below the preset
 greys; while macOS's Reduce Motion is on, that box wins and Off
 shows picked and takes no input. Where `init.lua` owns the config,

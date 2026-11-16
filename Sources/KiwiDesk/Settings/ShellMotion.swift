@@ -36,7 +36,7 @@ struct HomeConverge: ViewModifier {
     let arrived: Bool
     let index: Int
     let viewport: CGSize
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
         let away = !(arrived || reduceMotion)

@@ -860,8 +860,7 @@ editing here:
   `appWide.animationReduceMotion`, written only by
   `appWideLiveChanged`, so a second writer would let the two
   disagree (`ReduceMotionHomeTests` ▸ `gatesAreWired`). The GUI
-  tree's panels and Settings read macOS's setting alone, by the
-  ruling's scope.
+  tree's side is [gui.md](gui.md) ▸ The Reduce Motion gate.
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the
