@@ -314,11 +314,27 @@ twice, was a question the user answered twice. The argument is
   only as the spec's one `fill`** (#3360): stamped by the revealer's
   `now` at the event that set it — the entry, or the rest on the
   `ShelfHandleSpec.hoverBand` that hurries it — and run by the view
-  for its `length`, never against a clock read at draw time; it runs
-  through the one `BarMotion.playHandleFill`, which plays under Reduce
-  Motion and drops under Off. The handle peeks nothing and carries no
+  for its `length`, never against a clock read at draw time; a bar's
+  runs through the one `BarMotion.playHandleFill`, which plays under
+  Reduce Motion and drops under Off. The handle peeks nothing and carries no
   label or count (#3349, amending #2567), and draws no glass
-  (`ShelfRevealApproachTests`, `ShelfHandleFillTests`). **Ink a
+  (`ShelfRevealApproachTests`, `ShelfHandleFillTests`). **The
+  pocket's handle is the revealer's one other member**
+  (`ShelfRevealer.Key.pocket`, #3368), and a reader of the revealer's
+  keys states whether it means the pocket: `yields`, `hasTarget` and
+  `heldOpen` and the `holds` of a retract leave it out
+  (`ShelfRevealPocketKeyTests`), while `moved`'s drag leave and
+  `stillApproaching` take it in as they take an App Bar, and a new
+  reader joins one side of them; a pin, and so `pinEnded`'s hold,
+  is a bar's alone, since the show/hide action finds its key by its
+  bar. The revealer hears a move from two doors: its
+  `heard` monitors and the pocket panel's `onMove`, which Core
+  hands on with `MouseTracker.leftButtonHeld` as the drag, since the
+  monitors miss
+  KiwiDesk's own panels while another app is active; a moved point
+  delivered twice is harmless, the entry setting its fill once. How
+  the pocket reads its fill is [borders.md](borders.md)'s ▸ the
+  pocket's handle. **Ink a
   handle and the pocket's tab through `ShelfHandleSpec`'s one
   `restColor`, `fillColor` and `hairlineColor`** — over the one
   `ShelfHandleSpec.ink(hex:strength:)` (#3357, #3360): Automatic the

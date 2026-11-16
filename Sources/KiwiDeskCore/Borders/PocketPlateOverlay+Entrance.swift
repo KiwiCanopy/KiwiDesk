@@ -46,6 +46,23 @@ extension PocketPlateOverlay {
         if shown.view.dropHover() { hovered.remove(display) }
     }
 
+    /// Lands a rise taken back (#3368): once its sink has run, the
+    /// pocket hides in its handle and the panel takes the spec's
+    /// resting frame, unless a rise came back meanwhile.
+    func landSink(on display: DisplayID, after span: TimeInterval) {
+        let token = UUID()
+        sinks[display] = token
+        afterLeave(span) { [weak self] in
+            guard let self, self.sinks[display] == token else { return }
+            self.sinks[display] = nil
+            guard let spec = self.specs[display],
+                let shown = self.shown(spec), shown.view.sinking
+            else { return }
+            shown.view.endSink()
+            Self.place(shown, at: spec.frame)
+        }
+    }
+
     /// Sizes a handle's panel, and its view, to `frame`.
     static func place(_ shown: Shown, at frame: CGRect) {
         guard let panel = shown.panel else { return }

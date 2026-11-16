@@ -499,17 +499,35 @@ through the one `orderOut(_:on:)` (`PocketPlaceTests` ▸
 `leaveLandsOrReturns`). On a bar edge while it rests it is a shelf
 section, its rules [bars.md](bars.md)'s ▸ The pocket is a shelf
 section.
-**A handle rises after `ShelfReveal.revealDelay` or at once on
-`ShelfReveal.pushes`, never on a delay or push rule of its own**
-(#2807): its panel takes the mouse, so it is no `ShelfRevealer`
-target, whose monitors are blind over KiwiDesk's panels. Whether it
-stands risen is the one derivation in `pocketPlateSpecs`, every
-hover dropped drops its dwell (`PocketPlateOverlay.hovered`'s
-`didSet`, `PocketHandleDwellTests` ▸ `dwellEndsWithTheHover`), and
-its hover lifts nothing: the tab goes to the fill strength in
-place, through the one `PocketHandleView.tabCore`, and the panel
-keeps its resting frame (#3366, `PocketHandleDwellTests` ▸
-`hoverLightsThenRises`, `ShelfHandleDrawTests` ▸ `tabBrightens`).
+**A handle rises through the revealer's one approach, never a delay
+or push rule of its own** (#3368): `filePocketApproaches` files it
+as the pocket's `ShelfRevealer.Key` through `Target.along`, the
+approach across its band alone, and the panel hands it the moves
+over itself through `onMove` (`PocketApproachTests` ▸
+`viewIsWired`); what the pocket key shares with the bars and what
+it does not is [bars.md](bars.md)'s. Whether it stands risen is the
+one derivation in `pocketPlateSpecs`, and its rise before then is
+the approach's fill read as a timeline through the one
+`PocketRiseTimeline` — waited, scrubbed, hurried on the tab from
+where it stands, and sunk back on a leave through
+`BarMotion.playPocketScrub` and `playPocketSink`, never a clock the
+view reads. Where the one `BarMotion.pocketScrubs` stands the rise
+down, the same fill runs on the tab's core instead, through the one
+`BarMotion.playHandleFill`, which Reduce Motion keeps and Off drops,
+the pocket holding its resting room (#3368 amended;
+`PocketApproachTests` ▸ `reducedFillsTheTab`,
+`PocketRiseTimelineTests`). A sink keeps the risen room until its
+landing, through the overlay's `afterLeave`, whatever shows meanwhile
+(`PocketApproachTests` ▸ `leaveSinks`); that room takes the
+pocket's clicks as the risen pocket does (owner, 2026-11-16), and
+while the rise runs only the pointer on the tab lights it (`PocketApproachTests` ▸
+`riseLightsOnlyTheTab`). Its hover lifts nothing: the tab goes to
+the fill strength in place, through the one
+`PocketHandleView.tabCore` (#3366, `PocketApproachTests` ▸
+`hoverLightsInPlace`, `ShelfHandleDrawTests` ▸ `tabBrightens`). The
+tab is constant, empty or not, and an empty pocket fades its kiwis
+alone through `paintFade`, the whole mark its panel
+(`PocketApproachTests` ▸ `kiwisFade`, `wholeMarkFades`).
 **What it counts and shows for is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it: the
 general list, then while it rests the apps' own pocket

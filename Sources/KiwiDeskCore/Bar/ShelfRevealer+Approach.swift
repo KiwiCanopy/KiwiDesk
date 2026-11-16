@@ -79,7 +79,8 @@ extension ShelfRevealer {
 
     /// A move while the fill runs: reaching the hover band hurries
     /// it on, the bar opening `revealDelay` later unless the dwell
-    /// ends first.
+    /// ends first; the pocket's rise goes on at the fast pace from
+    /// where it stands (#3368 ruling 3).
     fileprivate func handleMove(
         _ key: Key,
         _ target: Target,
@@ -90,18 +91,28 @@ extension ShelfRevealer {
             target.handle?.contains(point) == true
         else { return }
         let rested = now()
-        let hurried = rested.addingTimeInterval(ShelfReveal.revealDelay)
-        guard hurried < fill.until else { return }
-        setFill(
+        let next =
+            key.isPocket
+            ? PocketRiseTimeline.hurried(fill, at: rested)
+            : .init(
+                origin: fill.origin,
+                started: rested,
+                until: rested.addingTimeInterval(ShelfReveal.revealDelay)
+            )
+        guard next.until < fill.until else { return }
+        setFill(key, next)
+        armHandle(
             key,
-            .init(origin: fill.origin, started: rested, until: hurried)
+            after: key.isPocket ? next.length : ShelfReveal.revealDelay
         )
-        armHandle(key)
     }
 
-    /// Opens the bar `revealDelay` from now, while it still hides.
-    fileprivate func armHandle(_ key: Key) {
-        handleTimers[key] = schedule(ShelfReveal.revealDelay) {
+    /// Opens the bar `delay` from now, while it still hides.
+    fileprivate func armHandle(
+        _ key: Key,
+        after delay: TimeInterval = ShelfReveal.revealDelay
+    ) {
+        handleTimers[key] = schedule(delay) {
             [weak self] in
             guard let self else { return }
             self.handleTimers[key] = nil

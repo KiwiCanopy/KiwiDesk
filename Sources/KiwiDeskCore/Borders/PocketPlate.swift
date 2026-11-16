@@ -39,9 +39,11 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     let handle = PocketHandleView(frame: .zero)
     /// The pointer came onto the pocket or left it.
     var onHover: @MainActor (Bool) -> Void = { _ in }
-    /// The pointer pushed against the screen edge on a resting
-    /// handle, which raises the pocket at once (#2807).
-    var onPush: @MainActor () -> Void = {}
+    /// The pointer moved over the panel, Cocoa screen space: the
+    /// revealer's monitors miss KiwiDesk's own panels while another
+    /// app is active, so the handle's approach hears it here too
+    /// (#3368).
+    var onMove: @MainActor (CGPoint) -> Void = { _ in }
     /// The edge a handle stands on; nil for a section on a bar.
     private(set) var handleEdge: AppBarEdge?
     /// Whether the pocket is out of its handle, and at what side.
@@ -49,6 +51,10 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     /// The whole mark stands at rest, with no handle (#2784).
     private(set) var whole = false
     private var risenSide: CGFloat = 0
+    /// The approach's countdown the pocket rises on (#3368).
+    private(set) var rise: ShelfHandleSpec.Fill?
+    /// A rise taken back is sinking into the handle.
+    private(set) var sinking = false
     /// The shelf's outer margin, kept clear between the edge and the
     /// handle as the bars' handles keep it (#2678).
     private var outer: CGFloat = 0
@@ -85,25 +91,55 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     func listOpenChanged() { onListChanged() }
 
     /// Stands as a section, or as a handle on `edge` `outer` in from
-    /// it, risen to `side` where `risen`.
+    /// it, risen to `side` where `risen`, else rising on `rise`, its
+    /// approach's countdown (#3368). Returns how long a sink back
+    /// into the handle runs, 0 where none does: the panel keeps the
+    /// risen room until `endSink`.
+    @discardableResult
     func stand(
         handle edge: AppBarEdge?,
         risen: Bool,
         side: CGFloat,
         outer: CGFloat = 0,
-        whole: Bool = false
-    ) {
+        whole: Bool = false,
+        rise: ShelfHandleSpec.Fill? = nil
+    ) -> TimeInterval {
         let rising = risen && !self.risen && edge != nil
+        let was = self.rise
         handleEdge = edge
         self.whole = whole
         self.risen = risen
+        self.rise = edge == nil || risen ? nil : rise
         risenSide = side
         self.outer = outer
+        if self.rise != nil || risen { sinking = false }
         needsLayout = true
-        if rising, let edge {
-            layoutSubtreeIfNeeded()
+        guard let edge else { return 0 }
+        layoutSubtreeIfNeeded()
+        if rising {
             BarMotion.playPocketRise(pocket, edge: edge, side: side)
+        } else if let next = self.rise, next != was {
+            BarMotion.playPocketScrub(
+                pocket,
+                edge: edge,
+                side: side,
+                rise: next
+            )
+        } else if was != nil, self.rise == nil, !risen {
+            let sink = BarMotion.playPocketSink(pocket, edge: edge, side: side)
+            sinking = sink > 0
+            needsLayout = true
+            return sink
         }
+        return 0
+    }
+
+    /// A sink landed: the pocket hides in its handle again.
+    func endSink() {
+        guard sinking else { return }
+        sinking = false
+        pocket.layer?.removeAnimation(forKey: BarMotion.pocketRiseKey)
+        needsLayout = true
     }
 
     override func layout() {
@@ -124,7 +160,8 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         }
         handle.isHidden = false
         handle.frame = room
-        pocket.isHidden = !risen
+        pocket.isHidden = !(risen || rise != nil || sinking)
+        handle.hidesKiwis = rise != nil || sinking
         pocket.frame = Self.risenFrame(in: room, edge: edge, side: risenSide)
     }
 
@@ -196,27 +233,14 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     override func mouseEntered(with event: NSEvent) {
         setHovered(true)
-        reportPush(event)
+        reportMove(event)
     }
 
-    override func mouseMoved(with event: NSEvent) {
-        reportPush(event)
-    }
+    override func mouseMoved(with event: NSEvent) { reportMove(event) }
 
-    /// Tells `onPush` where a resting handle's pointer stands against
-    /// the screen edge, as a bar's band hears a push.
-    private func reportPush(_ event: NSEvent) {
-        guard let edge = handleEdge, !risen, !whole,
-            let window, let screen = window.screen,
-            ShelfReveal.pushes(
-                window.convertPoint(toScreen: event.locationInWindow),
-                band: window.frame,
-                strip: window.frame,
-                edge: edge,
-                screen: screen.frame
-            )
-        else { return }
-        onPush()
+    private func reportMove(_ event: NSEvent) {
+        guard let window else { return }
+        onMove(window.convertPoint(toScreen: event.locationInWindow))
     }
 
     override func mouseExited(with event: NSEvent) { setHovered(false) }

@@ -153,7 +153,51 @@ struct ShelfHandleDrawTests {
                 < 0.05
         )
         // Risen, the tab stays at rest: Core hands no hover then
-        // (`PocketHandleDwellTests` ▸ `hoverLightsThenRises`).
+        // (`PocketApproachTests` ▸ `hoverLightsInPlace`).
         #expect(abs(try core(false, true) - rest) < 0.05)
+    }
+
+    @Test(
+        "the tab's countdown fill lands on its drawn core",
+        arguments: [AppBarEdge.top, .left]
+    )
+    func tabFillLandsOnTheCore(edge: AppBarEdge) throws {
+        pinRevealLength()
+        let along: CGFloat = 40
+        let across = PocketHandleView.restDepth
+        let size =
+            edge.isHorizontal
+            ? CGSize(width: along, height: across)
+            : CGSize(width: across, height: along)
+        let view = PocketHandleView(frame: CGRect(origin: .zero, size: size))
+        view.appearance = NSAppearance(named: .darkAqua)
+        let start = Date(timeIntervalSince1970: 1_000)
+        view.wear(
+            KiwiShelf(),
+            markHex: "#FF0000",
+            edge: edge,
+            kiwisOut: true,
+            fill: .init(
+                origin: 0.5,
+                started: start,
+                until: start.addingTimeInterval(ShelfReveal.dwellDelay)
+            )
+        )
+        view.layoutSubtreeIfNeeded()
+        let rep = try pixels(of: view)
+        let scale = CGFloat(rep.pixelsWide) / size.width
+        let core = view.tabCoreFrame()
+        let alpha =
+            rep.colorAt(
+                x: Int(core.midX * scale),
+                y: Int(core.midY * scale)
+            )?.alphaComponent ?? 0
+        // The fill over the resting core and the hairline, never the
+        // core alone, which a fill on the wrong side would leave.
+        let filled =
+            1 - (1 - ShelfHandleSpec.hairlineStrength)
+            * (1 - ShelfHandleSpec.restStrength)
+            * (1 - ShelfHandleSpec.fillStrength)
+        #expect(abs(alpha - filled) < 0.05, "\(edge): \(alpha)")
     }
 }

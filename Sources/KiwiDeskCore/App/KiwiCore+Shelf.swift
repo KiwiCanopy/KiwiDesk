@@ -202,6 +202,7 @@ extension KiwiCore {
         pocketPlate.standingDown = standingDown
         pocketPlate.riding = riding
         pocketPlate.markBands = hiding.pocketBands
+        filePocketApproaches(into: &hiding)
         pocketPlate.barStrips = pocketStrips
         updatePocketPlate(slots: pocketSlots)
         // The revealer first, so the shelves judge this pass's

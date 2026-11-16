@@ -3586,7 +3586,20 @@ the kiwis do not peek.
 
 :::unreleased
 On a handle the hover moves nothing: the tab goes to full strength
-in place, and the pocket still comes up after the 0.15 s rest.
+in place. Within about 24 points of the edge over the handle, the
+pocket waits 0.15 s, then rises over the next 0.25 s. On the tab it
+rises faster, a whole rise taking 0.15 s, and one already under way
+goes on at that pace from where it is; leaving before it is up
+sinks it back. A push against the edge brings it up at once only
+where nothing lies between the handle and the screen's edge and no
+other screen continues past it. On the edge the Dock auto-hides on,
+and on the top edge while the menu bar hides, the outermost row is
+macOS's. Under Reduce Motion the pocket does not rise part way: the
+tab fills over the wait as a bar's handle does, and the pocket
+comes up when it is full. With KiwiDesk's animations off nothing
+shows during the wait.
+The tab stays the same whether the pocket is empty or not; an
+empty pocket fades its kiwis.
 :::
 
 While you drag a window, under any value, the pocket comes up on

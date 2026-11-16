@@ -159,22 +159,35 @@ extension KiwiCore {
             display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
             let place = pocketPlace(on: display.id)
-            // A handle's pocket rises out of it after a dwell or a push,
-            // during a drag or a play, and while its list is open
-            // (#2678); the pointer on it alone lights the tab (#3366).
+            // A handle's pocket rises out of it as its approach
+            // opens (#3368), during a drag or a play, and while its
+            // list is open (#2678); the pointer on it alone lights the
+            // tab (#3366).
             let hovered = pocketPlate.hovered.contains(display.id)
+            let approach = pocketApproach(on: display.id)
             let risen =
                 place == .handle
-                && (dragging || pocketPlate.dwelled.contains(display.id)
+                && (dragging || approach.open
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
-            let tabHovered = place == .handle && hovered && !risen
+            let rising = place == .handle && !risen ? approach.rise : nil
+            let tabFill =
+                place == .handle && !risen ? approach.tabFill : nil
+            // While the rise runs the panel holds its risen room, so
+            // only the pointer on the tab lights it (ruling 5).
+            let tabHovered =
+                place == .handle && hovered && !risen
+                && (rising == nil || pocketPointerOnTab(on: display.id))
             let found: CGRect? =
                 switch place {
                 case .section(let frame), .inside(let frame): frame
                 case .whole: pocketMarkFrame(on: display.id)
                 case .handle:
-                    pocketHandleFrame(on: display.id, risen: risen)
+                    // A rise running needs the risen pocket's room.
+                    pocketHandleFrame(
+                        on: display.id,
+                        risen: risen || rising != nil
+                    )
                 }
             guard let frame = found else { return nil }
             // A lit pocket shows full, empty or not (#2776).
@@ -195,6 +208,8 @@ extension KiwiCore {
                 // handle on, with none drawn.
                 handle: place.isSection ? nil : edge,
                 risen: risen,
+                rise: rising,
+                tabFill: tabFill,
                 hovered: tabHovered,
                 risenSide: rise,
                 // Inside the strip the mark stands at its frame's edge.
@@ -237,8 +252,17 @@ extension KiwiCore {
         pocketPlate.onHover = { [weak self] display, on in
             self?.pocketHovered(display, on)
         }
-        pocketPlate.onPush = { [weak self] display in
-            self?.pocketPushed(display)
+        // Over its own panel the revealer hears the pointer from the
+        // panel (#3368).
+        // A left drag reaches it as a drag, read through the button
+        // seam (#2795).
+        pocketPlate.onMove = { [weak self] point in
+            guard let self else { return }
+            self.shelves.reveal.moved(
+                to: point,
+                dragging: self.mouse.leftButtonHeld
+            )
+            self.relightPocketTabs()
         }
         pocketPlate.onListChanged = { [weak self] in
             self?.updatePocketPlate()

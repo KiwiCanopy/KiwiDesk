@@ -8,10 +8,18 @@ import AppKit
 /// no reveal retiles (`BarAutoHideFoldTests`).
 @MainActor
 final class ShelfRevealer {
-    /// One hiding bar: the shelf it sits on and which bar.
+    /// One hiding bar: the shelf it sits on and which bar; nil for
+    /// the pocket's handle, whose rise is its approach's (#3368).
     struct Key: Hashable {
         let shelf: ShelfManager.Key
-        let bar: ShelfBar
+        let bar: ShelfBar?
+
+        /// The pocket's handle on `shelf`'s edge.
+        static func pocket(on shelf: ShelfManager.Key) -> Key {
+            Key(shelf: shelf, bar: nil)
+        }
+
+        var isPocket: Bool { bar == nil }
     }
 
     /// Fires when a shelf is shown or hidden.
@@ -113,20 +121,24 @@ final class ShelfRevealer {
     /// gives way.
     /// Only a shortcut shows it, beside the sibling.
     func yields(_ key: Key) -> Bool {
-        reveal(of: key) == .hidden
-            && phases.keys.contains { $0.shelf == key.shelf && $0 != key }
+        !key.isPocket && reveal(of: key) == .hidden
+            && phases.keys.contains {
+                $0.shelf == key.shelf && $0 != key && !$0.isPocket
+            }
     }
 
     /// The state of `key`, hidden where nothing revealed it.
     func reveal(of key: Key) -> ShelfReveal {
-        if heldOpen, targets[key] != nil { return .pinned(until: nil) }
+        if heldOpen, !key.isPocket, targets[key] != nil {
+            return .pinned(until: nil)
+        }
         return phases[key] ?? .hidden
     }
 
     /// Whether any hiding bar sits on `shelf`, which a retracted
     /// shelf's panel is kept for.
     func hasTarget(on shelf: ShelfManager.Key) -> Bool {
-        targets.keys.contains { $0.shelf == shelf }
+        targets.keys.contains { $0.shelf == shelf && !$0.isPocket }
     }
 
     /// The bars `edge` draws on `display` this pass: those shown at
@@ -222,7 +234,8 @@ final class ShelfRevealer {
         // A bar with no approach is held by its zone only while the
         // pointer can re-open it, which it cannot (#761).
         if target.hovers, target.zone.contains(location()) { return }
-        guard !holds(key.shelf) else {
+        // A surface its shelf opened holds the bars, never the pocket.
+        guard key.isPocket || !holds(key.shelf) else {
             arm(key, after: ShelfReveal.retractDelay) { [weak self] in
                 self?.retractIfLeft(key)
             }

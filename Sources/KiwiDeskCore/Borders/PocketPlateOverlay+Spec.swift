@@ -18,8 +18,15 @@ extension PocketPlateOverlay {
         let name: String
         /// The edge its handle stands on, nil for a bar's section.
         var handle: AppBarEdge? = nil
-        /// Out of its handle (a dwell or push, a drag), at this side.
+        /// Out of its handle (its approach opened, a drag), at this
+        /// side.
         var risen = false
+        /// The approach's countdown the pocket rises on while not yet
+        /// risen (#3368 ruling 3), read by `PocketRiseTimeline`.
+        var rise: ShelfHandleSpec.Fill? = nil
+        /// The countdown as the tab's progress fill instead, where the
+        /// rise does not play (#3368 amended).
+        var tabFill: ShelfHandleSpec.Fill? = nil
         /// The pointer on a resting handle: its tab draws at full
         /// strength, in place (#3366).
         var hovered = false

@@ -6,8 +6,8 @@ import AppKit
 /// (owner, device 2026-10-29), turned so they face the screen. The
 /// tab wears a bar handle's two-tone ink at its depth, and runs no
 /// progress fill (#3361 ruling 3). A fixed edge mark: it never
-/// scales with the shelf and carries no count. An empty pocket's
-/// fade is its panel's alone (#2678 review 18).
+/// scales with the shelf and carries no count. The tab is constant;
+/// an empty pocket fades its kiwis alone (#3368 ruling 1).
 @MainActor
 final class PocketHandleView: NSView {
     /// The tab's depth across the edge, a bar handle's (#3361), and
@@ -23,40 +23,68 @@ final class PocketHandleView: NSView {
     /// it.
     static var restDepth: CGFloat { tabDepth + lookOut }
 
-    private var edge = AppBarEdge.bottom
-    private var shelf = KiwiShelf()
+    private(set) var edge = AppBarEdge.bottom
+    private(set) var shelf = KiwiShelf()
     private var hex = ""
     /// The kiwis are out with the risen pocket: the tab alone stays.
     private var kiwisOut = false
     /// The pointer rests on the handle: the tab draws at full
     /// strength, in place (#3366 ruling 2).
     private(set) var hovered = false
+    /// The pocket is empty: the kiwis draw faded, the tab as ever
+    /// (#3368 ruling 1).
+    var faded = false {
+        didSet { if faded != oldValue { needsDisplay = true } }
+    }
+    /// The pocket rising out of the tab or sinking back carries the
+    /// kiwis meanwhile (#3368).
+    var hidesKiwis = false {
+        didSet { if hidesKiwis != oldValue { needsDisplay = true } }
+    }
+
+    /// The countdown run on the tab where the pocket's rise does not
+    /// play (#3368 amended), and whether a new one waits to start.
+    private(set) var fill: ShelfHandleSpec.Fill?
+    var fillPending = false
+    /// The tab's core capsule, which clips the fill running in it.
+    let fillClip = CALayer()
+    let fillLayer = CALayer()
 
     override var isFlipped: Bool { true }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         setAccessibilityElement(false)
+        wantsLayer = true
+        fillClip.masksToBounds = true
+        fillClip.addSublayer(fillLayer)
+        fillLayer.isHidden = true
+        layer?.addSublayer(fillClip)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
     /// Wears `shelf`, the tab at full strength while `hovered`,
-    /// which Core hands false while the pocket is risen.
+    /// which Core hands false while the pocket is risen, and running
+    /// `fill` as its countdown.
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
         kiwisOut: Bool,
-        hovered: Bool = false
+        hovered: Bool = false,
+        fill: ShelfHandleSpec.Fill? = nil
     ) {
         self.shelf = shelf
         self.hex = hex
         self.edge = edge
         self.kiwisOut = kiwisOut
         self.hovered = hovered
+        if fill != self.fill { fillPending = true }
+        self.fill = fill
         needsDisplay = true
+        needsLayout = true
     }
 
     /// The tab's core: the handle's ink at rest, at the fill strength
@@ -77,9 +105,7 @@ final class PocketHandleView: NSView {
         let along = edge.isHorizontal ? bounds.width : bounds.height
         let across = edge.isHorizontal ? bounds.height : bounds.width
         context.saveGState()
-        context.translateBy(x: bounds.midX, y: bounds.midY)
-        context.rotate(by: Self.turn(for: edge))
-        context.translateBy(x: -along / 2, y: -across / 2)
+        context.concatenate(drawingTurn())
         let mark = PocketMark.kiwis.image(
             size: Self.markSide,
             hex: hex
@@ -90,7 +116,7 @@ final class PocketHandleView: NSView {
             width: Self.markSide,
             height: Self.markSide
         )
-        if !kiwisOut {
+        if !kiwisOut, !hidesKiwis {
             // Cut at the tab rather than covered by it: the tab's ink
             // is translucent, as a bar handle's is (#3361).
             context.saveGState()
@@ -106,19 +132,13 @@ final class PocketHandleView: NSView {
                 in: markRect,
                 from: .zero,
                 operation: .sourceOver,
-                fraction: 1,
+                fraction: faded ? PocketPlateOverlay.fadedAlpha : 1,
                 respectFlipped: true,
                 hints: nil
             )
             context.restoreGState()
         }
-        let tab = CGRect(
-            x: (along - Self.tabLength) / 2,
-            y: across - Self.tabDepth,
-            width: Self.tabLength,
-            height: Self.tabDepth
-        )
-        let parts = ShelfHandleSpec.parts(of: tab)
+        let parts = ShelfHandleSpec.parts(of: tabRect())
         // A bar handle's ink, never the kiwis' own colour (#3361).
         let ink = ShelfHandleSpec.restHex(of: shelf)
         for (capsule, colour) in [

@@ -215,8 +215,9 @@ extension KiwiCore {
         }
     }
 
-    /// The pointer came onto `display`'s handle or left it. On it,
-    /// the pocket rises after the bars' reveal delay (#2807).
+    /// The pointer came onto `display`'s pocket or left it: it
+    /// lights, a handle's tab included. A handle's rise is its
+    /// approach's (`filePocketApproaches`, #3368).
     func pocketHovered(_ display: DisplayID, _ on: Bool) {
         let was = pocketPlate.hovered.contains(display)
         guard was != on else { return }
@@ -225,27 +226,6 @@ extension KiwiCore {
         } else {
             pocketPlate.hovered.remove(display)
         }
-        // Only a handle rises; a section's hover lights it alone.
-        if on, pocketPlace(on: display) == .handle {
-            deferred.schedule(
-                .pocketDwell,
-                after: .seconds(ShelfReveal.revealDelay)
-            ) { [weak self] in
-                guard let self, self.pocketPlate.hovered.contains(display)
-                else { return }
-                self.pocketPlate.dwelled.insert(display)
-                self.updatePocketPlate()
-            }
-        }
-        updatePocketPlate()
-    }
-
-    /// The pointer pushed against the edge on `display`'s handle: the
-    /// pocket rises at once, as a push opens a bar.
-    func pocketPushed(_ display: DisplayID) {
-        guard pocketPlate.hovered.contains(display),
-            pocketPlate.dwelled.insert(display).inserted
-        else { return }
         updatePocketPlate()
     }
 }
