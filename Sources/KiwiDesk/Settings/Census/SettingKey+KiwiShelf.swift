@@ -58,6 +58,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case hoverItemColor = "settings.kiwishelf.hoverItemColor"
     case groupBadgeColor = "settings.kiwishelf.groupBadgeColor"
     case groupBadgeTextColor = "settings.kiwishelf.groupBadgeTextColor"
+    /// An Auto bar's resting handle (#3357); empty is Automatic.
+    case handleColor = "settings.kiwishelf.handleColor"
 }
 
 extension KiwiShelfKey {
@@ -169,7 +171,7 @@ extension KiwiShelfKey {
             // greys, outside the Colors drawer (#2593).
             return .row(.coloursAndMotion, .kiwishelf, .atRest)
         case .itemColor, .hoverItemColor, .groupBadgeColor,
-            .groupBadgeTextColor:
+            .groupBadgeTextColor, .handleColor:
             return .row(.coloursAndMotion, .kiwishelf, .showMore)
         case .borderColor:
             // Inert while the border is off (#1679).

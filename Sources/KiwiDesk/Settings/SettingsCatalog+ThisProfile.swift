@@ -281,6 +281,7 @@ struct ColorsDrawerControls: Sendable {
         "kiwishelf.color.badge_text",
         "Badge text"
     )
+    let tintHandle = SettingsControl("kiwishelf.color.handle", "Handle")
     let windowMarksGroup = SettingsControl(
         "colors.window_marks.title",
         "Window marks"

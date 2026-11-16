@@ -81,6 +81,7 @@ enum ColorsRowOrder {
         .kiwishelf(.borderColor),
         .kiwishelf(.groupBadgeColor),
         .kiwishelf(.groupBadgeTextColor),
+        .kiwishelf(.handleColor),
     ]
 
     /// The marks on windows that are not the focus (#1857).

@@ -31,6 +31,7 @@ enum ColorsAndGlassAnchors {
         case .borderColor: return rows.tintShelfBorder
         case .groupBadgeColor: return rows.tintGroupBadge
         case .groupBadgeTextColor: return rows.tintBadgeText
+        case .handleColor: return rows.tintHandle
         default: return nil
         }
     }

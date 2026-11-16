@@ -58,6 +58,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.kiwishelf.groupBadgeColor),
         .kiwishelf(.groupBadgeTextColor):
             .leaf(\.settings.kiwishelf.groupBadgeTextColor),
+        .kiwishelf(.handleColor):
+            .leaf(\.settings.kiwishelf.handleColor),
         .layout(.bspStrategy): .leaf(\.settings.bsp.strategy),
         .layout(.bspSplitRatioH): .leaf(\.settings.bsp.splitRatioH),
         .layout(.bspSplitRatioV): .leaf(\.settings.bsp.splitRatioV),

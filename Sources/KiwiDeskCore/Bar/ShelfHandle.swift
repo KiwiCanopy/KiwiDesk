@@ -71,6 +71,9 @@ struct ShelfHandleSpec: Equatable {
     /// The thickened plate draws as tinted glass, as its bar does
     /// (`LiquidGlassGate.rendered`, #2567).
     var glass = false
+    /// The resting handle's colour (`kiwishelf.handle_color`,
+    /// #3357): empty is Automatic.
+    var restHex = ""
 
     var horizontal: Bool { edge.isHorizontal }
 
@@ -96,6 +99,15 @@ struct ShelfHandleSpec: Equatable {
     /// The handle at rest takes the system's label ink at this
     /// alpha (ui-designer preview, 35–40%).
     static let restAlpha: CGFloat = 0.38
+    /// The handle's ink at rest (#3357): `hex` as set, or on
+    /// Automatic the label ink at `restAlpha`, resolved in the
+    /// current drawing appearance.
+    static func restColor(hex: String) -> NSColor {
+        .mark(
+            hex: hex,
+            fallback: .labelColor.withAlphaComponent(restAlpha)
+        )
+    }
     /// What peeks through takes this alpha.
     static let peekAlpha: CGFloat = 0.7
     static let dot: CGFloat = 4

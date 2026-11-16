@@ -146,6 +146,11 @@ extension APIReference {
             "Sets the text color of count and overflow badges.",
             .color("hex")
         ),
+        "set_handle_color": APIRecord(
+            "Sets the color of an Auto bar's resting handle; \"\" "
+                + "is Automatic, the system label color.",
+            .color("hex")
+        ),
         "set_reveal_style": APIRecord(
             "Sets whether a revealed bar slides in, grows or "
                 + "unfolds out of its mark, or fades in.",

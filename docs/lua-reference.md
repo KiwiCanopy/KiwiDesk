@@ -3691,6 +3691,15 @@ one draws them in the item colour, and the focused one in
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
 item colour at 35% opacity). Every bundled palette carries one.
+:::unreleased
+`kiwishelf.set_handle_color` sets the colour of the handle an
+[`"auto"`](#space_barset_visibility) bar leaves at its edge while it
+hides; the thickened handle keeps the fill, and the Space dots and
+App Bar glyphs that peek through keep the bar's own inks. `""`
+(the default) is Automatic: the system label colour at 38% opacity,
+which follows light and dark mode. No bundled palette carries it, so
+a palette leaves it Automatic.
+:::
 
 **Example:**
 

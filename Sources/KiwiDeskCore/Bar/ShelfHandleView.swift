@@ -48,15 +48,14 @@ final class ShelfHandleView: NSView {
         let mark = ShelfHandle.mark(of: spec, in: bounds)
         peek.spec = spec
         let box = glassBox(for: spec)
-        // At rest a hairline in the system's label ink, which
-        // follows the appearance as the windows under it do — the
-        // bar's own ink is made for its plate and vanishes on a
-        // light window (#3349); thickened, the Fill or its glass.
+        // At rest the handle colour, Automatic the system's label
+        // ink, which follows the appearance as the windows under it
+        // do — the bar's own ink is made for its plate and vanishes
+        // on a light window (#3349, #3357); thickened, the Fill or
+        // its glass.
         var rest: CGColor?
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            rest =
-                NSColor.labelColor
-                .withAlphaComponent(ShelfHandleSpec.restAlpha).cgColor
+            rest = ShelfHandleSpec.restColor(hex: spec.restHex).cgColor
         }
         plate.layer?.backgroundColor =
             spec.hovered

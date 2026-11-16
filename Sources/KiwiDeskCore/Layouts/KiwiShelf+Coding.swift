@@ -42,6 +42,7 @@ extension KiwiShelf {
         case borderColor = "border_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
+        case handleColor = "handle_color"
         case revealTimeout = "reveal_timeout"
         case revealStyle = "reveal_style"
         case pocketEdge = "pocket_edge"
@@ -198,5 +199,6 @@ extension KiwiShelf {
             .groupBadgeTextColor,
             d.groupBadgeTextColor
         )
+        handleColor = try color(.handleColor, d.handleColor)
     }
 }

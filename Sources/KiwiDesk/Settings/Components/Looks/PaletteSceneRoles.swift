@@ -50,6 +50,8 @@ enum PaletteSceneRoles {
             + "still frame can only draw as the resting one",
         "kiwishelf.hover_item_color": "a pointer state, which a "
             + "still frame can only draw as the resting one",
+        "kiwishelf.handle_color": "an Auto bar's resting handle, "
+            + "which the scene's shown bars never leave",
     ]
 
     static func drawn(at scale: PaletteSceneScale) -> Set<String> {

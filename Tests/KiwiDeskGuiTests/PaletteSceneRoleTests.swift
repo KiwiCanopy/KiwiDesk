@@ -47,16 +47,18 @@ struct PaletteSceneRoleTests {
         #expect(drawn.intersection(withheld).isEmpty)
     }
 
-    /// The withheld set is exactly the pointer states, derived
-    /// rather than counted: a fifth hover key would join it, and
-    /// a NON-hover path appearing there is someone quietly
-    /// dropping a colour from the picture behind a reason that
-    /// does not apply to it.
-    @Test("only pointer states are withheld")
+    /// The withheld set is exactly the pointer states and the
+    /// resting handle (#3357), which the scene's shown bars never
+    /// leave — derived rather than counted: a fifth hover key
+    /// would join it, and any OTHER path appearing there is
+    /// someone quietly dropping a colour from the picture behind a
+    /// reason that does not apply to it.
+    @Test("only pointer states and the handle are withheld")
     func onlyHoverIsWithheld() {
         for path in PaletteSceneRoles.withheld.keys {
             #expect(
-                path.contains(".hover_"),
+                path.contains(".hover_")
+                    || path == "kiwishelf.handle_color",
                 Comment(
                     rawValue:
                         "\(path) is not a pointer state — it "
@@ -68,8 +70,9 @@ struct PaletteSceneRoleTests {
             $0.contains(".hover_")
         }
         #expect(
-            Set(hover) == Set(PaletteSceneRoles.withheld.keys),
-            "every hover path is withheld, and only those"
+            Set(hover + ["kiwishelf.handle_color"])
+                == Set(PaletteSceneRoles.withheld.keys),
+            "every hover path and the handle are withheld, and only those"
         )
         // Each entry states its own reason; an empty one is the
         // finding, not a formality.
