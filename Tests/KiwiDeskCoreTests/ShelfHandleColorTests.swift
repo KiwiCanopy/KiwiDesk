@@ -93,12 +93,13 @@ struct ShelfHandleColorTests {
     @Test("Automatic is the label ink at each strength in either mode")
     @MainActor
     func automaticFollowsTheAppearance() throws {
+        let aqua = try #require(NSAppearance(named: .aqua))
+        let darkAqua = try #require(NSAppearance(named: .darkAqua))
         func resolved(
             _ hex: String,
-            _ name: NSAppearance.Name,
+            _ appearance: NSAppearance,
             _ ink: (String) -> NSColor
-        ) throws -> NSColor {
-            let appearance = try #require(NSAppearance(named: name))
+        ) -> NSColor {
             var color = NSColor.clear
             appearance.performAsCurrentDrawingAppearance {
                 let cg = ink(hex).cgColor
@@ -112,15 +113,15 @@ struct ShelfHandleColorTests {
             (Spec.fillStrength, Spec.fillColor(hex:)),
         ]
         for (strength, ink) in inks {
-            let light = try resolved("", .aqua, ink)
-            let dark = try resolved("", .darkAqua, ink)
+            let light = resolved("", aqua, ink)
+            let dark = resolved("", darkAqua, ink)
             #expect(abs(light.alphaComponent - strength) < 0.02)
             #expect(abs(dark.alphaComponent - strength) < 0.02)
             // Dark ink on light, light ink on dark.
             #expect(light.redComponent < 0.5)
             #expect(dark.redComponent > 0.5)
             // A picked colour: its own alpha times the strength.
-            let set = try resolved("#FF000080", .darkAqua, ink)
+            let set = resolved("#FF000080", darkAqua, ink)
             #expect(abs(set.redComponent - 1) < 0.01)
             #expect(set.greenComponent < 0.01)
             #expect(
