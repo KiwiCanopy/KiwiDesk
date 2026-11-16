@@ -41,18 +41,13 @@ struct ShelfRevealerTests {
     static func target(stripY: CGFloat) -> ShelfRevealer.Target {
         let side = stripY + 40
         let run = CGRect(x: 350, y: side - 5, width: 300, height: 3)
-        return ShelfRevealer.Target(
+        return .along(
+            run,
             edge: .top,
+            side: side,
             strip: CGRect(x: 0, y: stripY, width: 1000, height: 40),
             screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-            approach: ShelfReveal.approach(
-                along: run,
-                edge: .top,
-                side: side,
-                outward: ShelfReveal.overshoot
-            ),
             handle: CGRect(x: 347, y: side - 11, width: 306, height: 9),
-            flush: side >= 800,
             section: CGRect(x: 350, y: stripY, width: 300, height: 40)
         )
     }

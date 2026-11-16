@@ -19612,7 +19612,10 @@ Dock stays shown for as long as the pointer stays there. So:
   the device). A push against the outermost row opens at once, but
   only on a free edge: one with nothing between the bar and the
   screen's edge and no other screen past it, since a push is a stop
-  against the edge and a pointer crossing to a neighbour is not.
+  against the edge and a pointer crossing to a neighbour is not. A
+  neighbour past any part of the bar's run takes the push off the
+  whole run: the residue is one bar on a partly shared edge opening
+  only by the dwell or the handle.
 - *macOS keeps its own edges.* On the Dock's edge while the Dock hides
   itself (bottom, left or right, on every screen, since with "Displays
   have separate Spaces" the Dock follows the pushed screen), and on the

@@ -56,6 +56,7 @@ struct ShelfRevealDragTests {
     private static let top = ShelfRevealer.Target.along(
         CGRect(x: 0, y: 760, width: 1000, height: 40),
         edge: .top,
+        side: 800,
         screen: screen,
         section: CGRect(x: 350, y: 760, width: 300, height: 40)
     )
@@ -63,6 +64,7 @@ struct ShelfRevealDragTests {
     private static let bottom = ShelfRevealer.Target.along(
         CGRect(x: 0, y: 0, width: 1000, height: 40),
         edge: .bottom,
+        side: 0,
         screen: screen,
         section: CGRect(x: 350, y: 0, width: 300, height: 40)
     )
@@ -135,11 +137,10 @@ struct ShelfRevealDragTests {
 
     @Test("a hidden Space Bar stays hidden under a drag")
     func dragLeavesAHiddenBar() {
-        let hidden = ShelfRevealer.Target(
+        let hidden = ShelfRevealer.Target.hidden(
             edge: .top,
             strip: Self.top.strip,
-            screen: Self.screen,
-            approach: nil
+            screen: Self.screen
         )
         let rig = make([Self.space: hidden, Self.app: Self.bottom])
         defer { rig.revealer.stop() }

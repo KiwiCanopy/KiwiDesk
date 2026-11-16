@@ -137,6 +137,25 @@ struct ShelfHandleEdgeTests {
                 among: [Self.screen, above]
             )
         )
+        // A side edge judged along the run: a neighbour beside the
+        // corner rows alone leaves a mid-edge run free.
+        let corner = CGRect(x: -500, y: 0, width: 500, height: 40)
+        #expect(
+            !KiwiCore.HidingShelves.continues(
+                .left,
+                of: Self.screen,
+                along: CGRect(x: 0, y: 300, width: 3, height: 200),
+                among: [Self.screen, corner]
+            )
+        )
+        #expect(
+            KiwiCore.HidingShelves.continues(
+                .left,
+                of: Self.screen,
+                along: CGRect(x: 0, y: 20, width: 3, height: 200),
+                among: [Self.screen, corner]
+            )
+        )
     }
 
     /// A side edge's handle keeps its x through the flip: only a top
@@ -148,7 +167,7 @@ struct ShelfHandleEdgeTests {
             frame: ShelfHandleSpec.frame(
                 along: CGRect(x: 0, y: 300, width: 30, height: 200),
                 edge: .left,
-                side: 0
+                side: 40
             ),
             edge: .left,
             fill: GlassFill(hex: "#000000"),
@@ -162,15 +181,15 @@ struct ShelfHandleEdgeTests {
         let approach =
             KiwiCore.HidingShelves.target(
                 spec,
-                side: 0,
+                side: 40,
                 strip: Self.strip,
                 screen: Self.screen,
                 beyond: false,
                 section: nil,
                 cut: (false, false)
             ).approach ?? .null
-        #expect(approach.minX == -ShelfReveal.overshoot)
-        #expect(approach.maxX == ShelfReveal.approachReach)
+        #expect(approach.minX == 40 - ShelfReveal.overshoot)
+        #expect(approach.maxX == 40 + ShelfReveal.approachReach)
     }
 
     /// The filing hands each bar's run to the neighbour test: a

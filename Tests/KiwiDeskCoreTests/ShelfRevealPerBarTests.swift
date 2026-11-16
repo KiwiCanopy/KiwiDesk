@@ -89,11 +89,10 @@ struct ShelfRevealPerBarTests {
         revealer.schedule = { _, _ in ShelfRevealTimer() }
         revealer.location = { CGPoint(x: 500, y: 799) }
         revealer.sync([
-            key: ShelfRevealer.Target(
+            key: ShelfRevealer.Target.hidden(
                 edge: .top,
                 strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
-                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-                approach: nil
+                screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
             )
         ])
         revealer.start()
@@ -128,11 +127,10 @@ struct ShelfRevealPerBarTests {
         // Resting on the strip, inside the zone.
         revealer.location = { CGPoint(x: 500, y: 780) }
         revealer.sync([
-            key: ShelfRevealer.Target(
+            key: ShelfRevealer.Target.hidden(
                 edge: .top,
                 strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
-                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
-                approach: nil
+                screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
             )
         ])
         revealer.start()

@@ -291,10 +291,15 @@ twice, was a question the user answered twice. The argument is
   `ShelfRevealApproachTests` ▸ `dockEdgeIsRead`). **A push counts
   only on a free edge: one the handle's area touches and no other
   screen continues past along the bar's run** — a production
-  approach is built through the one `ShelfRevealer.Target.along`,
+  approach is built through the one `ShelfRevealer.Target.along`
+  — the memberwise init is private, and a `hidden` bar's target
+  takes `Target.hidden` —
   and the neighbour test is the one `HidingShelves.continues`,
   handed the run (`ShelfHandleEdgeTests` ▸ `innerEdgeIsNoPush`,
-  `ShelfHandleEdgeTests` ▸ `filingAsksTheNeighbours`). **What peeks through a thickened handle is
+  `ShelfHandleEdgeTests` ▸ `filingAsksTheNeighbours`). **Write
+  the approach state — `arming`, `ceded`, `owned` and the timers —
+  only in `Bar/ShelfRevealer*.swift`**; a reader elsewhere reads, and
+  a writer outside them is review's. **What peeks through a thickened handle is
   the spec's one `peek`** — the Space dots or the App Bar's glyphs —
   and the handle carries no label or count (#3349, amending #2567).
   **A handle's thickened glass is one `GlassBox` whose host the

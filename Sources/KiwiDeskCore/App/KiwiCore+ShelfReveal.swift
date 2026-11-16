@@ -130,11 +130,10 @@ extension KiwiCore {
                 shelf
             )
             for bar in bars where !handled.contains(bar) {
-                targets[barKey(bar)] = ShelfRevealer.Target(
+                targets[barKey(bar)] = .hidden(
                     edge: plan.edge,
                     strip: strip,
                     screen: screen.frame,
-                    approach: nil,
                     section: section(bar)
                 )
             }

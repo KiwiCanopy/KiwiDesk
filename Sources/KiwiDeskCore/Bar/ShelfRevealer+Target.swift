@@ -22,7 +22,9 @@ extension ShelfRevealer {
         /// with the approach, what holds a hover reveal open.
         var section: CGRect?
 
-        init(
+        /// Through `along` or `hidden` alone, so every approach
+        /// takes the one free-edge rule.
+        private init(
             edge: AppBarEdge,
             strip: CGRect,
             screen: CGRect,
@@ -40,17 +42,36 @@ extension ShelfRevealer {
             self.section = section
         }
 
+        /// A `hidden` bar's target, which only its shortcut shows: no
+        /// approach, held by its section while shown.
+        static func hidden(
+            edge: AppBarEdge,
+            strip: CGRect,
+            screen: CGRect,
+            section: CGRect? = nil
+        ) -> Target {
+            Target(
+                edge: edge,
+                strip: strip,
+                screen: screen,
+                approach: nil,
+                section: section
+            )
+        }
+
         /// The one target the pointer can open (#3349), Cocoa: the
         /// approach along `run` from `outward` past `side` — the
         /// screen side of the shelf's area, on the edge's axis — to
         /// `inward` in, cut at a run's end where a sibling's approach
         /// meets it; a push where `side` is the screen's edge and no
         /// screen continues past it (`beyond`), so a pointer crossing
-        /// to a neighbour opens nothing. `strip` defaults to `run`.
+        /// to a neighbour opens nothing. `strip` defaults to `run`;
+        /// production takes `side` from
+        /// `HidingShelves.side(of:edge:shelf:)`.
         static func along(
             _ run: CGRect,
             edge: AppBarEdge,
-            side: CGFloat? = nil,
+            side: CGFloat,
             strip: CGRect? = nil,
             screen: CGRect,
             beyond: Bool = false,
@@ -60,16 +81,6 @@ extension ShelfRevealer {
             inward: CGFloat = ShelfReveal.approachReach,
             cut: (lead: Bool, trail: Bool) = (false, false)
         ) -> Target {
-            let side =
-                side
-                ?? {
-                    switch edge {
-                    case .top: run.maxY
-                    case .bottom: run.minY
-                    case .left: run.minX
-                    case .right: run.maxX
-                    }
-                }()
             var approach = ShelfReveal.approach(
                 along: run,
                 edge: edge,

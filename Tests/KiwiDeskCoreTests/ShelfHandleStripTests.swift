@@ -161,6 +161,7 @@ struct ShelfHandleStripTests {
         let target = ShelfRevealer.Target.along(
             section,
             edge: .top,
+            side: 800,
             screen: Self.screen,
             section: section
         )
@@ -181,12 +182,17 @@ struct ShelfHandleStripTests {
         // The two approaches overlap by 40 pt, so only the
         // revealer's `yields` keeps a push there to one bar.
         let target = { (minX: CGFloat) in
-            ShelfRevealer.Target(
+            ShelfRevealer.Target.along(
+                CGRect(
+                    x: minX + ShelfReveal.alongReach,
+                    y: 790,
+                    width: 220 - 2 * ShelfReveal.alongReach,
+                    height: 3
+                ),
                 edge: .top,
+                side: 800,
                 strip: Self.strip,
-                screen: Self.screen,
-                approach: CGRect(x: minX, y: 776, width: 220, height: 28),
-                flush: true
+                screen: Self.screen
             )
         }
         let (revealer, box) = make([

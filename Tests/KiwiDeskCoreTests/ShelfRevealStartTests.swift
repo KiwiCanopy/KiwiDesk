@@ -161,6 +161,7 @@ struct ShelfRevealStartTests {
             key: ShelfRevealer.Target.along(
                 CGRect(x: 0, y: 735, width: 1000, height: 40),
                 edge: .top,
+                side: 775,
                 screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
             )
         ])
