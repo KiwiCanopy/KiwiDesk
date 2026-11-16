@@ -62,16 +62,12 @@ struct ShelfRevealMotionTests {
 
     @Test("The mark's panel and a grow's mark keep the screen side")
     func roomKeepsTheScreenSide() throws {
-        let label = ShelfHandleSpec.label(
-            .text("MA", tinted: true),
-            font: NSFont.systemFont(ofSize: 8)
-        )
         for edge in AppBarEdge.allCases {
             let frame =
                 edge.isHorizontal
                 ? CGRect(x: 100, y: 100, width: 60, height: 8)
                 : CGRect(x: 100, y: 100, width: 8, height: 60)
-            let spec = spec(hovered: true, label: label, edge: edge, at: frame)
+            let spec = spec(hovered: true, edge: edge, at: frame)
             let room = ShelfHandle.room(of: spec)
             #expect(screenSide(room, edge) == screenSide(frame, edge))
             #expect(room.contains(frame), "\(edge)")
@@ -163,23 +159,20 @@ struct ShelfRevealMotionTests {
     private func spec(
         hovered: Bool,
         shown: Bool = false,
-        label: ShelfHandleSpec.Label? = nil,
         edge: AppBarEdge = .top,
         at frame: CGRect = ShelfRevealMotionTests.mark
     ) -> ShelfHandleSpec {
         ShelfHandleSpec(
-            mark: .dots([.init(current: true, occupied: true)]),
+            peek: .dots([.init(current: true, occupied: true)]),
             frame: frame,
             edge: edge,
             fill: GlassFill(hex: "#000000"),
             currentInk: "#FFFFFF",
             ink: "#AAAAAA",
             emptyInk: "#555555",
-            highlight: "#FF0000",
             shown: shown,
             hovered: hovered,
-            reveal: .slide,
-            label: label
+            reveal: .slide
         )
     }
 
@@ -193,15 +186,7 @@ struct ShelfRevealMotionTests {
         return view
     }
 
-    /// The dots' mark in the handle view's own coordinates.
-    private func drawnMark(_ view: ShelfHandleView) -> CGRect {
-        view.dots.mark.offsetBy(
-            dx: view.dots.frame.minX,
-            dy: view.dots.frame.minY
-        )
-    }
-
-    @Test("A hover grows the plate's frame and the dots follow its middle")
+    @Test("An approach thickens the plate and the peek fades in")
     func hoverGrowsThePlate() {
         BarMotion.reducedOverride = false
         defer { BarMotion.reducedOverride = nil }
@@ -213,19 +198,16 @@ struct ShelfRevealMotionTests {
             in: view.bounds
         )
         #expect(view.plate.frame == resting)
-        #expect(drawnMark(view) == resting)
-        #expect(view.rim.alphaValue == 0)
+        #expect(view.peek.alphaValue == 0)
         view.render(spec(hovered: true), animated: false)
         #expect(view.plate.frame == view.bounds)
-        #expect(view.rim.frame == view.bounds)
-        #expect(drawnMark(view).midY == view.plate.frame.midY)
-        #expect(view.rim.alphaValue == 1)
+        #expect(view.peek.frame == view.bounds)
+        #expect(view.peek.alphaValue == 1)
     }
 
-    /// The size is content, and the growth is motion the owner
-    /// keeps under Reduce Motion (2026-10-21): an unlabelled mark (a
-    /// lone App Bar's line) grows like a labelled one.
-    @Test("Under Reduce Motion a hover still grows the plate")
+    /// The thickening is content, and the growth is motion the
+    /// owner keeps under Reduce Motion (2026-10-21).
+    @Test("Under Reduce Motion an approach still thickens the plate")
     func reducedHoverGrowsThePlate() {
         BarMotion.reducedOverride = true
         defer { BarMotion.reducedOverride = nil }
@@ -234,27 +216,7 @@ struct ShelfRevealMotionTests {
         view.render(spec(hovered: false), animated: false)
         view.render(spec(hovered: true), animated: true)
         #expect(view.plate.frame == view.bounds)
-        #expect(view.rim.frame == view.plate.frame)
-        #expect(view.rim.alphaValue == 1)
+        #expect(view.peek.alphaValue == 1)
         #expect(view.plate.layer?.animationKeys()?.isEmpty == false)
-    }
-
-    /// A label narrower than the current dot widens nothing, yet
-    /// still needs the grown plate's depth: under Reduce Motion the
-    /// plate takes its hovered frame rather than staying thin under
-    /// the pill (owner, device, 2026-10-21).
-    @Test("Under Reduce Motion a labelled mark's plate grows")
-    func reducedLabelGrowsThePlate() {
-        BarMotion.reducedOverride = true
-        defer { BarMotion.reducedOverride = nil }
-        pinRevealLength()
-        let label = ShelfHandleSpec.label(
-            .text("1", tinted: true),
-            font: NSFont.systemFont(ofSize: 8)
-        )
-        let view = view()
-        view.render(spec(hovered: true, label: label), animated: true)
-        #expect(spec(hovered: true, label: label).labelExtra == 0)
-        #expect(view.plate.frame == view.bounds)
     }
 }

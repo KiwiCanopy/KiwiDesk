@@ -99,10 +99,10 @@ extension FullscreenStandDownTests {
         #expect(core.showsMaximized(on: display))
     }
 
-    /// Over a maximized window the Space Bar is filed with a band
-    /// under Auto and without one under Hidden, and no stand-down
-    /// retires its target (#3346).
-    @Test("a Maximize files a band under Auto, none under Hidden")
+    /// Over a maximized window the Space Bar is filed with an
+    /// approach under Auto and without one under Hidden, and no
+    /// stand-down retires its target (#3346, #3349).
+    @Test("a Maximize files an approach under Auto, none under Hidden")
     func maximizeFilesTheBand() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, display) = try #require(
@@ -111,14 +111,24 @@ extension FullscreenStandDownTests {
         let band = { () -> CGRect?? in
             core.shelves.reveal.targets.first {
                 $0.key.shelf.display == display && $0.key.bar == .space
-            }.map(\.value.band)
+            }.map(\.value.approach)
         }
+        // A margin, which the approach must not count twice.
+        core.tiler.settings.kiwishelf.outerMargin = 6
         // Control: an Always bar is no hiding bar, so no target.
         core.updateBars()
         #expect(band() == nil)
         #expect(core.execute("toggle_maximized").isSuccess)
         core.updateBars()
-        #expect((band() ?? nil) != nil)
+        let over = try #require(band() ?? nil)
+        // Over the window it reaches in only to the thickened handle
+        // (#3349), never the 24 pt an Auto bar's approach takes.
+        #expect(
+            over.height
+                == ShelfReveal.overshoot + ShelfHandleSpec.inset
+                + ShelfHandleSpec.depth
+                + 2 * ShelfHandleSpec.hoverGrowth
+        )
         core.execute(
             "kiwishelf.set_maximized_visibility",
             args: [.string("hidden")]

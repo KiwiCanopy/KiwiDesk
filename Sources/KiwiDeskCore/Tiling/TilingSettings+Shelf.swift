@@ -117,18 +117,6 @@ extension TilingSettings {
         }.map(\.edge)
     }
 
-    /// The hiding edges a space laid out in `mode` on `screen`
-    /// reserves its sliver on (#761) — `shelfEdges`' twin over the
-    /// same fold, apart because a float stays out of a full strip
-    /// and never a sliver.
-    public func hidingEdges(
-        in mode: LayoutMode,
-        on screen: String?
-    ) -> [AppBarEdge] {
-        onScreen(screen).barEdges(in: mode).filter { $0.reservation == .auto }
-            .map(\.edge)
-    }
-
     /// Whether `bar`, stored `auto`, reads `always` in `mode` on
     /// `screen` — beside an `always` bar on its edge (#761), which
     /// keeps it shown: the note Settings draws under its row, and
@@ -253,8 +241,6 @@ extension TilingSettings {
         return ShelfReservation(
             edges: shelfEdges(in: mode, on: screen),
             depth: kiwishelf.reservation,
-            hiding: hidingEdges(in: mode, on: screen),
-            hidingDepth: kiwishelf.hiddenReservation,
             pocket: pocket?.edge,
             pocketDepth: pocket?.depth ?? 0
         )

@@ -4,11 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A hidden Space Bar's mark always fits its band (#761, owner
-/// 2026-10-19): at most six dots, following the current Space and
-/// sliding only when it would land on an end dot, small end dots
-/// where Spaces continue, the current Space's identifier for its
-/// hovered pill and its whole place for VoiceOver.
+/// The Space dots a hidden Space Bar's handle peeks (#761, #3349):
+/// at most six, following the current Space and sliding only when
+/// it would land on an end dot, small end dots where Spaces
+/// continue, and its whole place for VoiceOver.
 @Suite("Shelf Space dots (#761)")
 @MainActor
 struct ShelfDotWindowTests {
@@ -26,28 +25,6 @@ struct ShelfDotWindowTests {
                 active: $0 == active,
                 after: .none
             )
-        }
-    }
-
-    @Test("a mark never outgrows its band, at any Space count")
-    func markFitsTheBand() {
-        var hiding = KiwiCore.HidingShelves()
-        for count in 1...20 {
-            for active in [1, count / 2 + 1, count] {
-                let dots = hiding.spaceDots(
-                    items(count, active: active),
-                    key: Self.key,
-                    settings: TilingSettings()
-                )
-                guard let mark = dots?.mark else {
-                    Issue.record("Spaces draw dots")
-                    return
-                }
-                #expect(
-                    ShelfHandleSpec.length(of: mark)
-                        <= ShelfMarkPlacement.bandLength
-                )
-            }
         }
     }
 
@@ -70,11 +47,10 @@ struct ShelfDotWindowTests {
         var hiding = KiwiCore.HidingShelves()
         let built = hiding.spaceDots(
             items(10, active: 7),
-            key: Self.key,
-            settings: TilingSettings()
+            key: Self.key
         )
         let dots = try #require(built)
-        guard case .dots(let shown) = dots.mark else {
+        guard case .dots(let shown) = dots.peek else {
             Issue.record("Spaces draw dots")
             return
         }
@@ -84,39 +60,14 @@ struct ShelfDotWindowTests {
         #expect(shown.dropFirst().dropLast().allSatisfy { !$0.small })
         #expect(shown.filter(\.current).count == 1)
         #expect(dots.position == .init(index: 7, count: 10))
-        #expect(dots.label?.glyph == .text("7", tinted: true))
         let built3 = hiding.spaceDots(
             items(3, active: 1),
-            key: Self.key,
-            settings: TilingSettings()
+            key: Self.key
         )
         let few = try #require(built3)
-        guard case .dots(let all) = few.mark else { return }
+        guard case .dots(let all) = few.peek else { return }
         #expect(all.count == 3)
         #expect(all.allSatisfy { !$0.small })
-    }
-
-    @Test("the hovered pill takes the label's room; the plate widens")
-    func pillTakesTheLabel() {
-        let label = ShelfHandleSpec.label(
-            .text("MA", tinted: true),
-            font: NSFont.systemFont(ofSize: 8)
-        )
-        #expect(label.width > 0)
-        let mark = CGRect(x: 10, y: 0, width: 40, height: 8)
-        let extra =
-            label.width + 2 * ShelfHandleSpec.labelPad
-            - ShelfHandleSpec.currentDot
-        let plate = BarMotion.hoverPlate(
-            mark: mark,
-            growth: .init(widen: extra),
-            edge: .top,
-            hovered: true
-        )
-        #expect(
-            plate.width == mark.width + extra + 2
-                * ShelfHandleSpec.hoverGrowth
-        )
     }
 }
 
@@ -131,14 +82,13 @@ struct ShelfDotSpokenTests {
         let view = ShelfHandleView()
         view.render(
             ShelfHandleSpec(
-                mark: .dots([.init(current: true, occupied: true)]),
+                peek: .dots([.init(current: true, occupied: true)]),
                 frame: CGRect(x: 0, y: 0, width: 20, height: 8),
                 edge: .top,
                 fill: GlassFill(hex: "#000000"),
                 currentInk: "#FFFFFF",
                 ink: "#AAAAAA",
                 emptyInk: "#555555",
-                highlight: "#FF9900",
                 shown: false,
                 hovered: false,
                 reveal: .slide,

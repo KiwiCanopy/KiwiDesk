@@ -29,9 +29,6 @@ struct SymbolNameDoorTests {
         "KiwiDeskCore/Borders/SizeLimitPillPlate.swift": 1,
         "KiwiDeskCore/Bar/BarPeekBody+More.swift": 1,
         "KiwiDeskCore/Bar/FloatBreakMark.swift": 1,
-        // The shelf handle's window and label symbols.
-        "KiwiDeskCore/Bar/ShelfHandleSpec+Label.swift": 1,
-        "KiwiDeskCore/Bar/ShelfHandleSpec+Count.swift": 1,
         "KiwiDeskCore/Bar/ShelfCountView.swift": 1,
         // A Space's icon, its marker or its layout's symbol: a user
         // icon reaches them only past `KiwiCore.iconIsSymbol`, which

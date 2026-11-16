@@ -151,11 +151,15 @@ struct MaximizedBarsTests {
         settings.kiwishelf.maximizedVisibility = .hidden
         #expect(settings.maximizedHoverBars(in: .bsp).isEmpty)
         // Monocle's reading never comes out as `.auto`, so no edge
-        // reserves its sliver under a maximize.
+        // reads as an Auto edge under a maximize.
         settings.kiwishelf.maximizedVisibility = .auto
         settings.monocle.maximizeWindows = true
         #expect(settings.barVisibilities(in: .monocle).space == .hidden)
-        #expect(settings.hidingEdges(in: .monocle, on: nil).isEmpty)
+        #expect(
+            !settings.barEdges(in: .monocle).contains {
+                $0.reservation == .auto
+            }
+        )
         // A stored Hidden App Bar gets no band; Auto, the control,
         // gets one.
         let path = try #require(TilingSettings.appBarPath(for: .monocle))

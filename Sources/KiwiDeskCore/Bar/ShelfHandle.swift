@@ -1,15 +1,17 @@
 import AppKit
 
-/// What a hiding bar draws while hidden (#761): Space dots for the
-/// Space Bar, a short line for the App Bar — one mark per bar, two
-/// on an edge both bars hide on.
+/// What an `auto` bar leaves at its edge (#761, #3349): its handle,
+/// a thin strip along the bar's whole run that reserves nothing and
+/// floats. The pointer's approach thickens it and its contents peek
+/// through — the Space dots, or the App Bar's glyphs — and only the
+/// open bar takes a click.
 struct ShelfHandleSpec: Equatable {
-    enum Mark: Equatable {
+    /// What peeks through the thickened handle.
+    enum Peek: Equatable {
         /// One per Space on the screen, in bar order.
         case dots([Dot])
-        /// The App Bar's: no window dots, so the App Bar has one
-        /// hidden look.
-        case line
+        /// The App Bar's glyphs, in bar order.
+        case glyphs([NSImage])
     }
 
     struct Dot: Equatable {
@@ -22,54 +24,57 @@ struct ShelfHandleSpec: Equatable {
         var small = false
     }
 
-    let mark: Mark
-    /// The handle's frame, AX coordinates.
+    /// Where the current Space sits, for VoiceOver: its place from
+    /// 1 and the Space count, which the dots may not all show.
+    struct Position: Equatable {
+        let index: Int
+        let count: Int
+    }
+
+    /// How a grow reveal's origin exceeds the handle's thickening;
+    /// the handle grows by none, a reveal mark's default.
+    struct Growth: Equatable, Sendable {
+        var widen: CGFloat = 0
+        var across: CGFloat = 0
+
+        static let none = Growth()
+    }
+
+    let peek: Peek
+    /// The handle at rest, AX coordinates: its bar's run, `depth`
+    /// deep, `inset` in from the screen side of the shelf's area.
     let frame: CGRect
     /// The edge its shelf hides on.
     let edge: AppBarEdge
-    /// The shelf's Fill, its fade with it (#2569).
+    /// The shelf's Fill, the thickened plate's (#2569).
     let fill: GlassFill
     /// The bar's own state inks (`SpaceBarItemView.stateColor`):
-    /// the current Space's, an idle one's, an empty one's.
+    /// the current Space's, an idle one's, an empty one's, which
+    /// the peeking dots take.
     let currentInk: String
     let ink: String
     let emptyInk: String
-    /// The bars' indicator colour, the hover's border.
-    let highlight: String
-    /// Whether its bar is shown over it: the handle then
-    /// draws nothing but stays for VoiceOver, its value "shown".
+    /// Whether its bar is shown over it: the handle then draws
+    /// nothing but stays for VoiceOver, its value "shown".
     let shown: Bool
-    /// The pointer rests in the band, the reveal delay running:
-    /// the plate grows and takes the highlight's border.
+    /// The pointer is in the approach: the handle thickens and its
+    /// contents peek through.
     let hovered: Bool
-    /// How its shelf reveals, which the mark's fade keeps time with.
+    /// How its shelf reveals, which the handle's fade keeps time
+    /// with.
     let reveal: BarMotion.RevealKind
-    /// The hover rim's width: the bars' indicator weight, capped
-    /// at the plate's growth so the dots keep their room.
-    var rimWidth: CGFloat = hoverGrowth
-    /// The bars' indicator sheen (`BorderSheen`); 0 draws flat.
-    var sheen: CGFloat = 0
     /// Its bar is hidden while a sibling on its edge shows: the
-    /// mouse opens one bar at a time, so the mark gives way as
+    /// mouse opens one bar at a time, so the handle gives way as
     /// under its own bar, VoiceOver still reading it hidden.
     var yields = false
-
-    /// The current Space's name, drawn in its dot while the mark
-    /// is hovered (`label`, `ShelfHandleSpec+Label`).
-    var label: Label?
-    /// Where the current Space sits, for VoiceOver: its place
-    /// from 1 and the Space count, which the dots may not all show.
     var position: Position?
-    /// The App Bar mark's window count, drawn while hovered and
-    /// spoken always (`ShelfHandleSpec+Count`, #2567).
-    var count: Count?
-    /// The plate draws as tinted glass, as its bar does
+    /// The thickened plate draws as tinted glass, as its bar does
     /// (`LiquidGlassGate.rendered`, #2567).
     var glass = false
 
     var horizontal: Bool { edge.isHorizontal }
 
-    /// Whether the mark draws nothing: its bar or a sibling shows.
+    /// Whether the handle draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
 
     /// A dot's ink, by the bar's own ladder: current, then held
@@ -79,95 +84,78 @@ struct ShelfHandleSpec: Equatable {
         return dot.occupied ? ink : emptyInk
     }
 
-    /// The handle's depth across its edge (pt).
-    static let depth = KiwiShelf.hiddenDepth
+    /// The handle's depth at rest (pt): a hairline that reads
+    /// without nagging (ui-designer preview, #3349).
+    static let depth: CGFloat = 3
+    /// How far the thickened plate grows on each side — the room
+    /// the panel keeps around it: 3 pt to 9 pt across, held to the
+    /// screen side (`BarMotion.hoverPlate`).
+    static let hoverGrowth: CGFloat = 3
+    /// Its distance from the screen side of the shelf's area.
+    static let inset: CGFloat = 2
+    /// The handle at rest takes the system's label ink at this
+    /// alpha (ui-designer preview, 35–40%).
+    static let restAlpha: CGFloat = 0.38
+    /// What peeks through takes this alpha.
+    static let peekAlpha: CGFloat = 0.7
     static let dot: CGFloat = 4
     static let smallDot: CGFloat = 2
     static let currentDot: CGFloat = 12
     static let dotGap: CGFloat = 4
-    static let pad: CGFloat = 4
-    /// How far a hovered plate grows on each side — the room the
-    /// panel keeps around it. Five points take the 11 pt plate to
-    /// 21, deep enough for the Space's name to read in the 0.35 s
-    /// before the bar opens (device feedback, #761, #2784).
-    static let hoverGrowth: CGFloat = 5
+    /// The App Bar's glyphs peeking through: their tops, clipped.
+    static let glyph: CGFloat = 12
+    static let glyphGap: CGFloat = 6
 
-    /// The hover rim's width for `shelf`: its indicator weight
-    /// (bars.md ▸ an indicator's weight), at most the growth.
-    static func rimWidth(for shelf: KiwiShelf) -> CGFloat {
-        min(shelf.resolvedHighlightWidth, hoverGrowth)
-    }
-    static let lineLength: CGFloat = 36
-    /// Its distance from the shelf's screen side, inside the band.
-    static let inset: CGFloat = 0
-
-    /// The handle's length along its edge.
-    static func length(of mark: Mark) -> CGFloat {
-        switch mark {
-        case .line:
-            return lineLength
-        case .dots(let dots):
-            let marks = dots.reduce(0) {
-                $0 + ($1.current ? currentDot : $1.small ? smallDot : dot)
-            }
-            let gaps = CGFloat(max(0, dots.count - 1)) * dotGap
-            return marks + gaps + 2 * pad
-        }
-    }
-
-    /// Where the handle sits on `strip` (AX, y down): centred
-    /// on `centre` — an offset along `edge` from the strip's start,
-    /// its band's middle — else on the strip, against its screen
-    /// side.
+    /// The handle at rest along `run` (AX, y down): `run`'s extent
+    /// along `edge`, `depth` deep, `inset` in from `side` — the
+    /// screen side of the shelf's area, on the edge's axis.
     static func frame(
-        of mark: Mark,
-        in strip: CGRect,
+        along run: CGRect,
         edge: AppBarEdge,
-        centre: CGFloat? = nil
+        side: CGFloat
     ) -> CGRect {
-        let horizontal = edge.isHorizontal
-        let along = min(
-            length(of: mark),
-            horizontal ? strip.width : strip.height
-        )
-        let midX = centre.map { strip.minX + $0 } ?? strip.midX
-        let midY = centre.map { strip.minY + $0 } ?? strip.midY
         switch edge {
         case .top:
             return CGRect(
-                x: midX - along / 2,
-                y: strip.minY + inset,
-                width: along,
+                x: run.minX,
+                y: side + inset,
+                width: run.width,
                 height: depth
             )
         case .bottom:
             return CGRect(
-                x: midX - along / 2,
-                y: strip.maxY - inset - depth,
-                width: along,
+                x: run.minX,
+                y: side - inset - depth,
+                width: run.width,
                 height: depth
             )
         case .left:
             return CGRect(
-                x: strip.minX + inset,
-                y: midY - along / 2,
+                x: side + inset,
+                y: run.minY,
                 width: depth,
-                height: along
+                height: run.height
             )
         case .right:
             return CGRect(
-                x: strip.maxX - inset - depth,
-                y: midY - along / 2,
+                x: side - inset - depth,
+                y: run.minY,
                 width: depth,
-                height: along
+                height: run.height
             )
         }
     }
+
+    /// The thickened plate (AX): what the panel's room holds.
+    var grown: CGRect {
+        BarMotion.hoverPlate(mark: frame, edge: edge, hovered: true)
+    }
 }
 
-/// One hiding shelf's handle panel (#761). It ignores the mouse
-/// — the hover band is judged from the pointer, and a click on it
-/// pins nothing — so the windows below it keep their clicks.
+/// One hiding bar's handle panel (#761). It ignores the mouse —
+/// the approach is judged from the pointer, and a click on it pins
+/// nothing — so the windows below it keep their clicks, a bottom
+/// scrollbar or status bar under the strip included (#3349 rule 6).
 @MainActor
 final class ShelfHandle {
     let view = ShelfHandleView()
@@ -187,9 +175,8 @@ final class ShelfHandle {
         if panel?.isVisible == true, view.spec == spec { return }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        // Room around the mark for its hover growth and its
-        // label, taken once: the plate grows inside it and a hover
-        // never resizes the panel.
+        // Room for the thickened plate, taken once: the plate grows
+        // inside it and an approach never resizes the panel.
         let frame = Self.room(of: spec)
         panel.setFrame(
             GeometryUtils.flip(
@@ -210,19 +197,13 @@ final class ShelfHandle {
         panel?.orderOut(nil)
     }
 
-    /// The panel's frame for `spec`, AX coordinates: its hovered
-    /// plate with the label's room, which never crosses the
-    /// screen side.
+    /// The panel's frame for `spec`, AX coordinates: its
+    /// thickened plate, which never crosses the screen side.
     static func room(of spec: ShelfHandleSpec) -> CGRect {
-        BarMotion.hoverPlate(
-            mark: spec.frame,
-            growth: spec.growth,
-            edge: spec.edge,
-            hovered: true
-        )
+        spec.grown
     }
 
-    /// The mark's resting frame inside a view `bounds` sized by
+    /// The handle's resting frame inside a view `bounds` sized by
     /// `room(of:)`.
     static func mark(
         of spec: ShelfHandleSpec,
