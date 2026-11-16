@@ -73,10 +73,12 @@ struct ReduceMotionHomeTests {
     }
 
     /// Where a host needle must sit: a function's body, the body a
-    /// declaration opens, or (for a stored seam) the whole file.
+    /// declaration opens, the END of that body (a write every
+    /// presentation above it inherits), or the whole file.
     private enum Scope {
         case function(String)
         case declaration(String)
+        case declarationTail(String)
         case file
     }
 
@@ -167,10 +169,11 @@ struct ReduceMotionHomeTests {
                 .function("draw"),
                 ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"
             ),
-            // The Settings window keeps macOS's setting, live.
+            // The Settings window keeps macOS's setting, live, as the
+            // outermost write so its sheets and alerts inherit it.
             (
                 "Settings", "SettingsView.swift",
-                .declaration("varbody:someView{"),
+                .declarationTail("varbody:someView{"),
                 ".environment(\\.kiwiDeskReduceMotion,reduceMotion)"
             ),
         ]
@@ -191,13 +194,17 @@ struct ReduceMotionHomeTests {
                     under: dir,
                     root: "Sources/KiwiDesk"
                 ).filter { !$0.isWhitespace }
-            case .declaration(let head):
+            case .declaration(let head), .declarationTail(let head):
                 body =
                     SourceScan.declarationBody(after: head, in: whole)
                     ?? ""
             }
             #expect(!body.isEmpty, "\(file): \(scope)")
-            #expect(body.contains(needle), "\(file): \(needle)")
+            if case .declarationTail = scope {
+                #expect(body.hasSuffix(needle), "\(file): \(needle)")
+            } else {
+                #expect(body.contains(needle), "\(file): \(needle)")
+            }
         }
     }
 

@@ -7786,8 +7786,10 @@ change lands at the next show, enough for panels up about a second.
 The tour follows Off too, so "everywhere but this window" stays true
 (owner addendum 2026-11-16); it reads Off when it opens, so Off
 turned on mid-tour, in its Looks step say, lands at its next open.
-The update window and the key-sequence hint follow it on the same
-reading. A Settings view mounted on one of these surfaces as well,
+The update windows (Update, Up to date, Checking, What's New) and the
+key-sequence hint follow it on the same reading (owner addendum
+2026-11-16), so Off turned on while What's New is open lands at its
+next open. A Settings view mounted on one of these surfaces as well,
 such as KiwiHub's scope picker, takes the host's value: the Settings
 window hands it macOS's, live.
 The Settings window keeps macOS's setting: its motion is where the

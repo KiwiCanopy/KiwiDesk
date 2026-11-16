@@ -127,4 +127,40 @@ struct ReduceMotionReachTests {
         }
         #expect(leaks.isEmpty, "\(leaks)")
     }
+
+    /// Every SwiftUI hosting root, and how it hands its views the
+    /// value: a host that writes nothing leaves them on the key's
+    /// default, still, so a new root states its answer here, and a
+    /// root `hostsAreWired` pins says so (`ReduceMotionHomeTests`).
+    private static let hosts: [String: String] = [
+        "AppDelegate+Onboarding.swift": "ReduceMotion.isOn at open",
+        "BootNotice/BootNoticeController.swift": "its model, at show",
+        "ConfigIssuesWindow.swift": "mounts no reader",
+        "CuePlate/CuePlateController.swift": "its model, at show",
+        "Jump/JumpPanelController.swift": "PanelPresence, at show",
+        "Settings/SettingsWindowController.swift":
+            "SettingsView writes macOS's setting, live",
+        "Shortcuts/KeySequenceHintController.swift":
+            "ReduceMotion.isOn at draw",
+        "Updates/UpdateCheckingWindowController.swift":
+            "a measuring probe; the window is UpdateWindowChrome's",
+        "Updates/UpdateWindowChrome.swift": "ReduceMotion.isOn at show",
+    ]
+
+    @Test("every hosting root states how it hands the value")
+    func hostsAreRegistered() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let spellings = ["NSHostingView", "NSHostingController"]
+        var found: Set<String> = []
+        for file in try SourceScan.swiftSources(under: root) {
+            let text = try SourceScan.strippedSource(at: file)
+            guard spellings.contains(where: text.contains) else {
+                continue
+            }
+            found.insert(String(file.path.dropFirst(root.path.count + 1)))
+        }
+        #expect(!found.isEmpty)
+        #expect(found == Set(Self.hosts.keys), "\(found)")
+    }
 }

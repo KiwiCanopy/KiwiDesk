@@ -48,8 +48,6 @@ struct SettingsView: View {
             )
             shell(width)
                 .environment(\.settingsWidth, width)
-                // The window keeps macOS's setting, live (#3252).
-                .environment(\.kiwiDeskReduceMotion, reduceMotion)
                 // Re-docking retires the per-mount answer — a
                 // "not now" must not outlive the band it was given
                 // in (architecture review, 2026-08-11).
@@ -150,6 +148,9 @@ struct SettingsView: View {
             )
         ) { _ in model.refreshScreenOffer() }
         .screenShiftAlert(model)
+        // The window keeps macOS's setting, live (#3252): last, so
+        // every sheet and alert above sits under it.
+        .environment(\.kiwiDeskReduceMotion, reduceMotion)
     }
 
     @ViewBuilder private func shell(

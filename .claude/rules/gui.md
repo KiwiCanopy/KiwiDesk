@@ -2117,8 +2117,9 @@ a Settings-tree view mounted elsewhere too (a picker in KiwiHub, a
 strip in the tour) reads `\.kiwiDeskReduceMotion`, which
 `SettingsView` writes from macOS's setting
 (`ReduceMotionHomeTests` ▸ `guiReadsTheHome`, `hostsAreWired`;
-`ReduceMotionReachTests` ▸ `readersStayInSettings`). A new host
-joins `hostsAreWired`. `docs/design-decisions.md` ▸ *Off reaches
+`ReduceMotionReachTests` ▸ `readersStayInSettings`). A new hosting
+root states how it hands the value in `ReduceMotionReachTests` ▸
+`hostsAreRegistered`, and one that writes it joins `hostsAreWired`. `docs/design-decisions.md` ▸ *Off reaches
 every surface KiwiDesk draws on the desk* carries why.
 
 **And `withAnimation { … }` — no parens — is the shape that

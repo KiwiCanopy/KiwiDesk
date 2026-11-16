@@ -16,8 +16,6 @@ struct GeneralSection: View {
     /// The log export's range (#1209) — per-mount, never stored.
     @State var logRange: SettingsModel.LogExportRange = .last15Minutes
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.accessibilityReduceMotion)
-    var reduceMotion
 
     var body: some View {
         ScrollView {

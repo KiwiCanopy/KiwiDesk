@@ -148,7 +148,7 @@ struct CuePlateView: View {
                 value: model.visible
             )
             .accessibilityHidden(true)
-            // For a cue view that gates motion; none does yet.
+            // A cue view gates on this value, never macOS's.
             .environment(\.kiwiDeskReduceMotion, reduceMotion)
     }
 
