@@ -325,7 +325,9 @@ twice, was a question the user answered twice. The argument is
   `heldOpen` and the `holds` of a retract leave it out
   (`ShelfRevealPocketKeyTests`), while `moved`'s drag leave and
   `stillApproaching` take it in as they take an App Bar, and a new
-  reader joins one side of them. The revealer hears a move from two doors: its
+  reader joins one side of them; a pin, and so `pinEnded`'s hold,
+  is a bar's alone, since the show/hide action finds its key by its
+  bar. The revealer hears a move from two doors: its
   `heard` monitors and the pocket panel's `onMove`, which Core
   hands on with `MouseTracker.leftButtonHeld` as the drag, since the
   monitors miss

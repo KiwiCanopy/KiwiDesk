@@ -75,6 +75,18 @@ extension KiwiCore {
         return tab.contains(reveal.location())
     }
 
+    /// Redraws the rising pockets whose tab the pointer crossed onto
+    /// or off since the last move, which no fill change marks.
+    func relightPocketTabs() {
+        let on = Set(
+            pocketPlate.specs.values.filter { $0.rise != nil }.map(\.display)
+                .filter { pocketPointerOnTab(on: $0) }
+        )
+        guard on != pocketPlate.pointerOnTab else { return }
+        pocketPlate.pointerOnTab = on
+        updatePocketPlate()
+    }
+
     /// Where the pocket on `display` stands in its approach: risen
     /// once the approach opened it, else its countdown — the scrubbed
     /// rise where the bars' motion plays, else the tab's progress

@@ -23,6 +23,9 @@ final class PocketPlateOverlay {
     /// The displays whose pocket the pointer is on, handle or
     /// section.
     var hovered: Set<DisplayID> = []
+    /// The rising displays whose tab the pointer was on at the last
+    /// move, so a crossing relights it (#3368).
+    var pointerOnTab: Set<DisplayID> = []
     /// The displays a put-in or take-out plays on, each with the
     /// play that holds it out; the pocket stands out of its handle
     /// for the play (#2678).

@@ -19,8 +19,10 @@ struct PocketTabInkSeamTests {
                 "Sources/KiwiDeskCore/Bar/PocketHandleView.swift"
             )
         )
-        // The tab's part of the draw: from its rect to the draw's end.
-        let start = try #require(source.range(of: "let tab = CGRect("))
+        // The tab's part of the draw: from its capsules to the draw's end.
+        let start = try #require(
+            source.range(of: "ShelfHandleSpec.parts(of: tabRect())")
+        )
         let end = try #require(
             source.range(
                 of: "context.restoreGState()",

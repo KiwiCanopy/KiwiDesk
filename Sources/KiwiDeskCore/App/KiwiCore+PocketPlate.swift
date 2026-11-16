@@ -262,6 +262,7 @@ extension KiwiCore {
                 to: point,
                 dragging: self.mouse.leftButtonHeld
             )
+            self.relightPocketTabs()
         }
         pocketPlate.onListChanged = { [weak self] in
             self?.updatePocketPlate()

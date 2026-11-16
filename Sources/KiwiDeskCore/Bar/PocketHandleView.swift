@@ -105,9 +105,7 @@ final class PocketHandleView: NSView {
         let along = edge.isHorizontal ? bounds.width : bounds.height
         let across = edge.isHorizontal ? bounds.height : bounds.width
         context.saveGState()
-        context.translateBy(x: bounds.midX, y: bounds.midY)
-        context.rotate(by: Self.turn(for: edge))
-        context.translateBy(x: -along / 2, y: -across / 2)
+        context.concatenate(drawingTurn())
         let mark = PocketMark.kiwis.image(
             size: Self.markSide,
             hex: hex
@@ -140,13 +138,7 @@ final class PocketHandleView: NSView {
             )
             context.restoreGState()
         }
-        let tab = CGRect(
-            x: (along - Self.tabLength) / 2,
-            y: across - Self.tabDepth,
-            width: Self.tabLength,
-            height: Self.tabDepth
-        )
-        let parts = ShelfHandleSpec.parts(of: tab)
+        let parts = ShelfHandleSpec.parts(of: tabRect())
         // A bar handle's ink, never the kiwis' own colour (#3361).
         let ink = ShelfHandleSpec.restHex(of: shelf)
         for (capsule, colour) in [
