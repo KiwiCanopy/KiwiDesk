@@ -830,6 +830,17 @@ every lens with why it cannot turn on.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
+`scroll_gesture.set_long_swipes` defaults to `true`.
+:::
+
+:::unreleased
+`scroll_gesture.set_step_distance` is retired and fails, naming
+its replacement: `scroll_gesture.set_step_length` takes mm (3–60,
+default 10), the finger travel per extra window of a long swipe
+([`scroll_gesture.set_step_length`](lua-reference.md#scroll_gestureset_step_length)).
+:::
+
+:::unreleased
 The defaults of `set_space_slide_duration`,
 `animations.set_expand_duration` and `animations.set_reveal_duration`
 are the Medium speed's
@@ -911,7 +922,7 @@ it, and the `stack_position` that `get_state` reports, are in the
 input held with keys — `drag`, `hover_move`, `wheel`, `swipe2`,
 `tap4` and the rest of the
 [Gesture inputs](lua-reference.md#gesture-inputs) — to a family
-(`focus|walk|swap|display|track|space`), `move|resize` or Lua, and
+(`focus|walk|swap|display|track|space|layout`), `move|resize` or Lua, and
 `gesture.unbind <input> <keys>` turns one off, a default included;
 `""` holds no keys
 ([`gesture.bind`](lua-reference.md#gesturebind)). The CLI passes

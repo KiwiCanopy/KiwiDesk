@@ -7,7 +7,7 @@
 
   ],
   "focus_wrap" : "all_screens",
-  "format" : 26,
+  "format" : 27,
   "ignore_rules" : [
 
   ],
@@ -354,12 +354,12 @@
     "floating"
   ],
   "scroll_gesture" : {
-    "long_swipes" : false,
+    "long_swipes" : true,
     "natural_scrolling" : {
       "mouse" : "system",
       "trackpad" : "system"
     },
-    "step_distance" : 60
+    "step_length" : 10
   },
   "shortcut_base" : "control+option",
   "space_history" : "per_screen",

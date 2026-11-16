@@ -87,6 +87,16 @@ struct ShortcutsSheet {
     static func matched(_ row: ShortcutRow, by needle: String) -> ShortcutRow?
     {
         if matchRange(of: needle, in: row.label) != nil { return row }
+        // A search naming a gesture brings it forward as the row's
+        // badge, so a hit never matches a gesture the row hides
+        // (#1873).
+        if let hit = row.gestures.firstIndex(where: {
+            matchRange(of: needle, in: $0.words) != nil
+        }) {
+            var row = row
+            row.gestures.insert(row.gestures.remove(at: hit), at: 0)
+            return row
+        }
         guard
             let name = row.pathNames.first(where: {
                 matchRange(of: needle, in: $0) != nil

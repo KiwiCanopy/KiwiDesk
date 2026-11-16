@@ -28,11 +28,30 @@ struct OnboardingBackTests {
         let model = OnboardingModel()
         model.beginPresentation(at: .grant)
         var shown: [OnboardingModel.Step] = []
-        for step in OnboardingModel.Step.allCases {
+        for step in model.plannedSteps {
             walk(model, to: step)
             if model.back != nil { shown.append(step) }
         }
         #expect(shown == [.looks, .bars, .keys, .done])
+        // A trackpad Mac adds the Gestures step after Keys (#1873).
+        let trackpad = OnboardingModel()
+        trackpad.hasTrackpad = { true }
+        trackpad.gestureRows = {
+            [
+                OnboardingKeyFamily(
+                    id: "focus",
+                    label: "Move focus",
+                    chord: .mixed(["2 fingers"])
+                )
+            ]
+        }
+        trackpad.beginPresentation(at: .grant)
+        var backs: [OnboardingModel.Step] = []
+        for step in trackpad.plannedSteps {
+            walk(trackpad, to: step)
+            if trackpad.back != nil { backs.append(step) }
+        }
+        #expect(backs == [.looks, .bars, .keys, .gestures, .done])
         let replay = OnboardingModel()
         replay.beginPresentation(at: .spaces)
         #expect(replay.back == nil)

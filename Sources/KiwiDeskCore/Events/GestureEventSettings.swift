@@ -90,19 +90,12 @@ struct GestureEventSettings: Equatable, Sendable {
         }
     }
 
-    /// The axes a swipe binding names: a family both, a table its
-    /// arms'.
+    /// The axes a swipe binding names: each axis a direction of
+    /// it runs something on, read through the one `step(toward:)`.
     static func axes(of action: GestureAction) -> Set<Int> {
-        let directions: [GestureDirection]
-        switch action {
-        case .family:
-            return [
-                GestureEventSample.horizontal,
-                GestureEventSample.vertical,
-            ]
-        case .split(let arms): directions = Array(arms.keys)
-        case .run, .grab: return []
-        }
+        if case .run = action { return [] }
+        let directions = GestureAxis.allCases.flatMap(\.directions)
+            .filter { action.step(toward: $0) != nil }
         return Set(
             directions.map {
                 $0.isHorizontal

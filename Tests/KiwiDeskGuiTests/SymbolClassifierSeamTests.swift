@@ -58,6 +58,8 @@ struct SymbolClassifierSeamTests {
             "render-time net on a name `homeSpaceMark` classified",
         "Tests/KiwiDeskCoreTests/FloatingMarkTests.swift":
             "builds the floating glyph from a fixed name",
+        "Sources/KiwiDesk/Shortcuts/CustomGlyph+Rotate.swift":
+            "builds the rotate glyph's hand from a fixed name (#1873)",
         "Tests/KiwiDeskCoreTests/FloatingMarkOverlayTests.swift":
             "builds the floating glyph from a fixed name",
         "Sources/KiwiDeskCore/Borders/SizeLimitPillPlate.swift":

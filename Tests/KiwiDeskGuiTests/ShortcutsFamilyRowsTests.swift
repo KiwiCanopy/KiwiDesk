@@ -66,7 +66,6 @@ struct ShortcutsFamilyRowsTests {
             .behaviour(.mouseHoverFocus),
             .behaviour(.mouseHoverFocusDelay),
             .shortcuts(.scrollLongSwipes),
-            .shortcuts(.scrollStepDistance),
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
             // The gesture cards' rows, drawn by `GestureListCard`.

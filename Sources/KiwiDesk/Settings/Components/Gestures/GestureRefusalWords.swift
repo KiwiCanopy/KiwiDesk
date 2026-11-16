@@ -40,6 +40,11 @@ enum GestureRefusalWords {
                 "shortcuts.gestures.refusal.grab",
                 "Only a drag or a move can hold a window."
             )
+        case .axisNotOffered:
+            L(
+                "shortcuts.gestures.refusal.axis",
+                "Only a swipe takes an action per axis."
+            )
         case .noDirections:
             L(
                 "shortcuts.gestures.refusal.no_directions",

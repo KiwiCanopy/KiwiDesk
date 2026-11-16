@@ -35,7 +35,7 @@ public struct TrackpadSystemGestures: Equatable, Sendable {
         case .tap: return event.fingers == 3 && lookUpTap
         // A gesture event reaches KiwiDesk only through a tap that
         // swallows it, so macOS never answers it as well.
-        case .gesture: return false
+        case .gesture, .rotation: return false
         case .swipe(let direction):
             let axis: Axis =
                 direction == .left || direction == .right

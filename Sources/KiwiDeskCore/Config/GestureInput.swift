@@ -59,8 +59,16 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
         case .wheel: [.up, .down]
         case .wheelX: [.left, .right]
         case .sideButtons: [.back, .forward]
+        case .rotate: [.clockwise, .counterClockwise]
         default: []
         }
+    }
+
+    /// Whether the input has both axes, so an axis may take a family
+    /// of its own (#1873): the swipes.
+    public var takesAxisFamily: Bool {
+        GestureAxis.allCases.flatMap(\.directions)
+            .allSatisfy(directions.contains)
     }
 
     /// A pointer motion holds the window while the keys are down,
@@ -105,11 +113,11 @@ public enum GestureInput: String, CaseIterable, Codable, Sendable {
     /// the Space step, the side buttons the directional ones.
     public var families: [GestureFamily] {
         switch self {
-        case .swipe2: GestureFamily.allCases
-        case .swipe3, .swipe4, .swipe5:
+        case .swipe2, .swipe3, .swipe4, .swipe5:
             [.focus, .swap, .display, .track, .space, .walk]
         case .wheel, .wheelX: [.walk, .space]
         case .sideButtons: [.focus, .space]
+        case .rotate: [.layout]
         default: []
         }
     }
@@ -172,22 +180,43 @@ public enum GestureDirection: String, CaseIterable, Codable, Sendable {
     case back
     /// Side button 4.
     case forward
+    /// A rotation's two ways (#1873 ▸ owner ruling 2026-11-15).
+    case clockwise
+    case counterClockwise = "counter_clockwise"
 
     /// The layout direction a directional family steps toward.
     var layout: Direction {
         switch self {
         case .up: .up
         case .down: .down
-        case .left, .back: .left
-        case .right, .forward: .right
+        case .left, .back, .counterClockwise: .left
+        case .right, .forward, .clockwise: .right
         }
     }
 
     /// Left and right: a motion along the horizontal axis.
     var isHorizontal: Bool { self == .left || self == .right }
 
-    /// Up, left and back step toward the start of a list.
-    var isBackward: Bool { self == .up || self == .left || self == .back }
+    /// The other way along the same axis, or the other side button.
+    var opposite: GestureDirection {
+        switch self {
+        case .up: .down
+        case .down: .up
+        case .left: .right
+        case .right: .left
+        case .back: .forward
+        case .forward: .back
+        case .clockwise: .counterClockwise
+        case .counterClockwise: .clockwise
+        }
+    }
+
+    /// Up, left, back and counter-clockwise step toward the start of
+    /// a list.
+    var isBackward: Bool {
+        self == .up || self == .left || self == .back
+            || self == .counterClockwise
+    }
 
     /// A side button: a press, not a motion, so a list family steps
     /// the way the button is named (Back = previous) and no Natural

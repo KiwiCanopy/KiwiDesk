@@ -1,4 +1,5 @@
 import CoreFoundation
+import CoreGraphics
 import Foundation
 
 /// The private MultitouchSupport framework, resolved by `dlsym`
@@ -21,6 +22,11 @@ enum MultitouchSupport {
         @convention(c) (Device, FrameCallback) -> Void
     typealias StartFn = @convention(c) (Device, Int32) -> Int32
     typealias StopFn = @convention(c) (Device) -> Int32
+    /// `int (*)(MTDeviceRef, int *width, int *height)`, in 1/100 mm.
+    typealias DimensionsFn =
+        @convention(c) (
+            Device, UnsafeMutablePointer<Int32>, UnsafeMutablePointer<Int32>
+        ) -> Int32
 
     private nonisolated(unsafe) static let handle: UnsafeMutableRawPointer? =
         dlopen(
@@ -56,6 +62,27 @@ enum MultitouchSupport {
     )
     static let startSymbol = symbol("MTDeviceStart", as: StartFn.self)
     static let stopSymbol = symbol("MTDeviceStop", as: StopFn.self)
+    /// Optional, outside `isAvailable`: without it the reader keeps
+    /// its taps and swipes and reads no finger travel, so a long
+    /// swipe counts points (#1873 ▸ Ruling 2026-11-16).
+    static let dimensionsSymbol = symbol(
+        "MTDeviceGetSensorSurfaceDimensions",
+        as: DimensionsFn.self
+    )
+
+    /// A device's pad in mm; nil where the symbol is absent or the
+    /// device answers no size.
+    static func surfaceSize(of device: Device) -> CGSize? {
+        guard let read = dimensionsSymbol.function else { return nil }
+        var width: Int32 = 0
+        var height: Int32 = 0
+        _ = read(device, &width, &height)
+        guard width > 0, height > 0 else { return nil }
+        return CGSize(
+            width: Double(width) / 100,
+            height: Double(height) / 100
+        )
+    }
 
     /// Whether every symbol the reader calls resolved — the
     /// capability a gesture surface gates on.
@@ -104,6 +131,10 @@ enum MultitouchSupport {
             .write(unregisterSymbol.resolution, home: home),
             .write(startSymbol.resolution, home: home),
             .write(stopSymbol.resolution, home: home),
+            .read(dimensionsSymbol.resolution, home: home) {
+                let sizes = devices().devices.compactMap(surfaceSize(of:))
+                return .answered("\(sizes.count) sizes")
+            },
         ]
     }
 }

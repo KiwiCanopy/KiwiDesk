@@ -34,19 +34,6 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     /// `ScrollGestures.receive` alone.
     public var reversed = false
 
-    /// A swipe's event as a consumer stepping by direction hears it
-    /// (input-and-animation.md): whole until `horizontal` names the
-    /// axis the latch fired on, then along that axis alone, so a
-    /// diagonal never changes the axis or the sign mid-swipe.
-    public func locked(horizontal: Bool?) -> ScrollGestureEvent {
-        guard input == .trackpad, !momentum, kind == .changed,
-            let horizontal
-        else { return self }
-        var along = self
-        if horizontal { along.delta.dy = 0 } else { along.delta.dx = 0 }
-        return along
-    }
-
     /// The hand's own motion, whatever Natural scrolling says: a
     /// direction table's arm means the fingers' way (#3199 ▸ it
     /// never flips a per-direction arm).

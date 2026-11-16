@@ -55,7 +55,9 @@ extension KiwiCore {
     }
 
     /// An action argument: a family or grab name, Lua, or a table
-    /// of direction → Lua (a split).
+    /// (a split) whose direction keys take Lua and whose axis keys,
+    /// `left_right` and `up_down`, take a family (#1873).
+    /// Folded through the one `split(normalizing:)`.
     static func gestureAction(_ arg: JSONValue?) -> GestureAction? {
         if let text = arg?.stringValue {
             if let family = GestureFamily(rawValue: text) {
@@ -67,14 +69,23 @@ extension KiwiCore {
             return text.isEmpty ? nil : .run(LuaAction(lua: text))
         }
         guard case .object(let table)? = arg else { return nil }
-        var arms: [GestureDirection: LuaAction] = [:]
+        var split = GestureSplit(axes: [:], arms: [:])
         for (name, value) in table {
-            guard let direction = GestureDirection(rawValue: name),
-                let lua = value.stringValue, !lua.isEmpty
-            else { return nil }
-            arms[direction] = LuaAction(lua: lua)
+            guard let text = value.stringValue, !text.isEmpty else {
+                return nil
+            }
+            if let axis = GestureAxis(rawValue: name) {
+                guard let family = GestureFamily(rawValue: text) else {
+                    return nil
+                }
+                split.axes[axis] = family
+            } else if let direction = GestureDirection(rawValue: name) {
+                split.arms[direction] = LuaAction(lua: text)
+            } else {
+                return nil
+            }
         }
-        return .split(normalizing: arms)
+        return .split(normalizing: split)
     }
 
     /// A refusal in CLI English.
@@ -100,6 +111,8 @@ extension KiwiCore {
             return "\(input) takes a family or a table of directions"
         case .noDirections:
             return "\(input) has no such direction"
+        case .axisNotOffered:
+            return "only a swipe takes a family per axis"
         case .keysHeldByDrag:
             return "a click or hover_move cannot share a drag's keys"
         }

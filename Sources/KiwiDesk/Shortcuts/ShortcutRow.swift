@@ -49,6 +49,9 @@ struct ShortcutRow: Identifiable {
     /// The name along the path a search matched, which the row draws
     /// as "in …"; nil where the row's own name matched.
     var matchedPathName: String? = nil
+    /// The gestures running this row's action, most specific first:
+    /// the row draws the first and counts the rest as "+N" (#1873).
+    var gestures: [ShortcutGestureBadge] = []
 
     /// The chord as VoiceOver reads it, each run of a side in words.
     @MainActor var spokenChord: String {

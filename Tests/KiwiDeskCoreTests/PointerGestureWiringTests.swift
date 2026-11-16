@@ -99,9 +99,9 @@ struct PointerGestureWiringTests {
         core.mouse.pointer.start()
         core.mouse.trackpad.resolve(
             [
-                GestureKey(.rotate, Self.keys): .run(
-                    LuaAction(lua: "kiwi_rotated = true")
-                )
+                GestureKey(.rotate, Self.keys): .split([
+                    .clockwise: LuaAction(lua: "kiwi_rotated = true")
+                ])
             ],
             natural: true
         )
@@ -120,7 +120,7 @@ struct PointerGestureWiringTests {
                 grab: [],
                 gestures: [
                     TrackpadGestureEvent(
-                        kind: .gesture(.rotate),
+                        kind: .rotation(clockwise: true),
                         fingers: 2,
                         modifiers: Self.keys,
                         time: 0

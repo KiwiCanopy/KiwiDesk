@@ -137,6 +137,16 @@ struct BindingNameDoorTests {
             1,
             "a NavCommand's label stored on the binding it creates"
         ),
+        "ShortcutsReference+Gestures.swift": (
+            1,
+            "a gesture row's own label beside its badge, named by "
+                + "GestureListWords, never a binding's (#1873)"
+        ),
+        "OnboardingGestures.swift": (
+            1,
+            "SidedChordWords.label speaks a gesture's chord; no "
+                + "binding label is read (#1873)"
+        ),
         "JumpPanelController+Shortcuts.swift": (
             1,
             "a built ShortcutRow's display label"

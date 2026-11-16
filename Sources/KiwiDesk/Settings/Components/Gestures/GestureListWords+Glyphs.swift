@@ -22,7 +22,7 @@ extension GestureListWords {
             CustomGlyph.swipes(input.fingers ?? 2).name
         case .spread: CustomGlyph.spread(2).name
         case .pinchTogether: CustomGlyph.pinch(2).name
-        case .rotate: "rotate.right"
+        case .rotate: rotate.drawn
         case .spread4: CustomGlyph.spread(4).name
         case .pinchTogether4: CustomGlyph.pinch(4).name
         case .forceClick: forceClick.drawn
@@ -34,6 +34,24 @@ extension GestureListWords {
     static let forceClick = ShortcutsReferenceBuilder.FloorSymbol(
         name: "hand.rays",
         floor: "hand.tap.fill"
+    )
+
+    /// The rotate glyph draws `hand.pinch`, which needs macOS 15
+    /// (#1873 ▸ 2026-11-13): the floor draws SF's rotation arrow.
+    static let rotate = ShortcutsReferenceBuilder.FloorSymbol(
+        name: CustomGlyph.rotate.name,
+        floor: "rotate.right"
+    )
+
+    /// A rotation's one-way glyphs, a direction row's and a badge's,
+    /// with SF's arrows on the floor (#1873 ▸ owner 2026-11-15).
+    static let turnClockwise = ShortcutsReferenceBuilder.FloorSymbol(
+        name: CustomGlyph.turn(clockwise: true).name,
+        floor: "arrow.clockwise"
+    )
+    static let turnCounterClockwise = ShortcutsReferenceBuilder.FloorSymbol(
+        name: CustomGlyph.turn(clockwise: false).name,
+        floor: "arrow.counterclockwise"
     )
 
     /// The gesture pop-up's groups, in the order a card lists them

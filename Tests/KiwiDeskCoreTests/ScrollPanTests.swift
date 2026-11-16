@@ -74,7 +74,9 @@ struct ScrollPanTests {
         core.applyScrollGestures(base: base, profile: nil)
     }
 
-    private var stride: Double { ScrollGestureBase.defaults.stepDistance }
+    private var stride: Double {
+        ScrollGestureBase.defaults.stepLength * ScrollStepMeter.pointsPerMM
+    }
 
     @Test("a swipe moves one window, against the fingers")
     func oneWindowPerSwipe() {
@@ -225,9 +227,13 @@ struct ScrollPanTests {
         #expect(focused(core) == WindowID(2))
     }
 
+    /// Long swipes off: the default is on since #1873.
     @Test("a Monocle Space steps once per gesture")
     func monocleOncePerGesture() {
         let (core, _, session) = makeCore("monocle")
+        var base = ScrollGestureBase.defaults
+        base.longSwipes = false
+        core.applyScrollGestures(base: base, profile: nil)
         core.handleScrollPan(
             event(.began),
             session: session,

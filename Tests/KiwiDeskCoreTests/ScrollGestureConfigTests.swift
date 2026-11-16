@@ -42,10 +42,10 @@ struct ScrollGestureConfigTests {
     func baseShape() throws {
         let text = try json(ScrollGestureBase.defaults)
         #expect(
-            text == "{\"long_swipes\":false,"
+            text == "{\"long_swipes\":true,"
                 + "\"natural_scrolling\":"
                 + "{\"mouse\":\"system\",\"trackpad\":\"system\"},"
-                + "\"step_distance\":60}"
+                + "\"step_length\":10}"
         )
         #expect(
             try decode(ScrollGestureBase.self, text) == .defaults

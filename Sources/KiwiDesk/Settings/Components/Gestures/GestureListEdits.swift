@@ -131,17 +131,42 @@ enum GestureListEdits {
     }
 
     /// A directional row's arms (#3183 ▸ Ruling: directions of a
-    /// family row): a family's are its one-shot steps, pre-filled;
-    /// a split's are its own; nil for any other action.
+    /// family row): a family's are its one-shot steps, pre-filled,
+    /// whole or per axis (#1873); a direction's own are its own; nil
+    /// for any other action.
     static func arms(
         of action: GestureAction?,
         on input: GestureInput
     ) -> [GestureDirection: LuaAction]? {
         switch action {
-        case .family(let family): prefill(family, on: input)
-        case .split(let arms): arms
+        case .family(let family): return prefill(family, on: input)
+        case .split(let split):
+            var arms = split.arms
+            for (axis, family) in split.axes {
+                for direction in axis.directions {
+                    arms[direction] = step(family, toward: direction)
+                }
+            }
+            return arms
+        default: return nil
+        }
+    }
+
+    /// The family `axis` runs: the whole row's, or its own (#1873).
+    static func family(
+        of action: GestureAction?,
+        on axis: GestureAxis
+    ) -> GestureFamily? {
+        switch action {
+        case .family(let family): family
+        case .split(let split): split.axes[axis]
         default: nil
         }
+    }
+
+    /// Whether `input` takes a family per axis: a swipe, with both.
+    static func splitsByAxis(_ input: GestureInput) -> Bool {
+        input.takesAxisFamily
     }
 
     /// The directions `action` fires toward, in `input`'s order.
@@ -160,13 +185,24 @@ enum GestureListEdits {
     ) -> [GestureDirection: LuaAction] {
         Dictionary(
             uniqueKeysWithValues: input.directions.map {
-                ($0, LuaAction(lua: family.lua($0), kind: .navigation))
+                ($0, step(family, toward: $0))
             }
         )
     }
 
+    private static func step(
+        _ family: GestureFamily,
+        toward direction: GestureDirection
+    ) -> LuaAction {
+        LuaAction(lua: family.lua(direction), kind: .navigation)
+    }
+
     /// What `arms` save as: the family whose every step they still
-    /// match, which keeps the pan, else the arms one by one.
+    /// match, which keeps the pan, else — on a swipe — each axis
+    /// whose two steps match a family as that family, and the rest
+    /// one by one (#1873), so a family stays a family while its arms
+    /// match. Settings' own lift, by ruling: Lua and the CLI store
+    /// arms as written, and Core's fold never lifts them.
     static func folded(
         _ arms: [GestureDirection: LuaAction],
         on input: GestureInput
@@ -177,7 +213,19 @@ enum GestureListEdits {
         }) {
             return .family(family)
         }
-        return .split(normalizing: arms)
+        guard splitsByAxis(input) else {
+            return .split(normalizing: arms)
+        }
+        var split = GestureSplit(axes: [:], arms: arms)
+        for axis in GestureAxis.allCases {
+            let family = input.families.first { family in
+                axis.directions.allSatisfy {
+                    arms[$0]?.lua == family.lua($0)
+                }
+            }
+            if let family { split.axes[axis] = family }
+        }
+        return .split(normalizing: split)
     }
 
     /// `action` with its arm toward `direction` set to `arm` (#3321):
@@ -195,6 +243,23 @@ enum GestureListEdits {
         arms[direction] = arm.isBlank ? nil : arm
         if let saved = folded(arms, on: input) { return saved }
         return .split([direction: arm])
+    }
+
+    /// `action` with `axis` set to `family` (#1873 ▸ Ruling
+    /// 2026-11-15): picking a family on an axis folds its two
+    /// directions back into it, without asking; both axes on one
+    /// family are the whole row's.
+    static func axis(
+        _ axis: GestureAxis,
+        family: GestureFamily,
+        of action: GestureAction?,
+        on input: GestureInput
+    ) -> GestureAction? {
+        var arms = arms(of: action, on: input) ?? [:]
+        for direction in axis.directions {
+            arms[direction] = step(family, toward: direction)
+        }
+        return folded(arms, on: input)
     }
 
     /// Whether `device`'s seeded rows differ from the seeds.

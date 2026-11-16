@@ -77,23 +77,24 @@ struct ScrollGestureReachTests {
         var snapshot = try #require(core.ruleReachSnapshot())
         snapshot.scrollGestures.apply(
             ScrollGestureField.longSwipes.rawValue,
-            value: .flag(true),
+            value: .flag(false),
             reach: .shared(joining: []),
             editing: "Home"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.scrollGesture.longSwipes == true)
-        #expect(core.mouse.scroll.resolved.longSwipes)
+        // Off: the default is on (#1873), so on would prove nothing.
+        #expect(core.guiConfigStore.load()?.scrollGesture.longSwipes == false)
+        #expect(!core.mouse.scroll.resolved.longSwipes)
     }
 
     @Test("a stored page resolves the override and diffs it back")
     func storedPageRoundTrips() throws {
         let core = try makeCore()
         var work = try core.profiles.read(name: "Work")
-        work.scrollGesture = ScrollGestureOverride(stepDistance: 90)
+        work.scrollGesture = ScrollGestureOverride(naturalMouse: .on)
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        #expect(page.scrollGesture.stepDistance == 90)
+        #expect(page.scrollGesture.naturalMouse == .on)
         page.scrollGesture.naturalTrackpad = .off
         try core.overwriteProfile(
             named: "Work",
@@ -104,7 +105,7 @@ struct ScrollGestureReachTests {
             try core.profiles.read(name: "Work").scrollGesture
                 == ScrollGestureOverride(
                     naturalTrackpad: .off,
-                    stepDistance: 90
+                    naturalMouse: .on
                 )
         )
     }
@@ -113,10 +114,10 @@ struct ScrollGestureReachTests {
     func checklistSaveKeepsTheOverride() throws {
         let core = try makeCore()
         var work = try core.profiles.read(name: "Work")
-        work.scrollGesture = ScrollGestureOverride(stepDistance: 90)
+        work.scrollGesture = ScrollGestureOverride(naturalMouse: .on)
         try core.profiles.write(work)
         var page = try core.loadGuiConfig(editing: "Work")
-        page.scrollGesture.stepDistance = 200
+        page.scrollGesture.naturalMouse = .off
         try core.overwriteProfile(
             named: "Work",
             with: page,
@@ -124,7 +125,7 @@ struct ScrollGestureReachTests {
         )
         #expect(
             try core.profiles.read(name: "Work").scrollGesture
-                == ScrollGestureOverride(stepDistance: 90)
+                == ScrollGestureOverride(naturalMouse: .on)
         )
     }
 

@@ -109,7 +109,7 @@ struct ScrollGestureDeadEndTests {
         let (core, session, bumps) = makeCore("scrolling", focus: WindowID(2))
         var base = ScrollGestureBase.defaults
         base.longSwipes = true
-        base.stepDistance = 10
+        base.stepLength = ScrollGestureBase.stepLengthRange.lowerBound
         core.applyScrollGestures(base: base, profile: nil)
         for (kind, dx) in [
             (ScrollGestureEvent.Kind.began, 0.0), (.changed, -30),

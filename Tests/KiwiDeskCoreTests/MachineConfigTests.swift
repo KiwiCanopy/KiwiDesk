@@ -201,7 +201,7 @@ struct MachineConfigTests {
     @Test("The strip removes the entry and nothing else")
     func stripIsSurgical() throws {
         var config = remembering
-        config.scrollGesture.stepDistance = 0.4
+        config.scrollGesture.stepLength = 0.4
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let current = String(
