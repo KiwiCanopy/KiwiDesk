@@ -10,25 +10,61 @@ extension KiwiCore {
         let edge: AppBarEdge
         let strip: CGRect
         let horizontal: Bool
-        let arrangement: ShelfArrangement
-        /// The edge's bars and their visibility (#761); the
-        /// arrangement places only the ones drawn this pass.
-        var shelfEdge: ShelfEdge
-        /// Each drawn bar's natural run length, which its slot
-        /// draws in (`ShelfArrangement.Slot.drawing`).
-        var needs: [ShelfBar: CGFloat] = [:]
-        /// The arrangement and needs as if every bar on the edge
-        /// drew — where a hiding bar's handle runs (#3349); the
-        /// pass's own where every bar draws.
-        var revealed:
+        /// The edge's bars and their visibility (#761).
+        let shelfEdge: ShelfEdge
+        /// The arrangement and natural run lengths of every bar
+        /// resting on the edge (`ShelfEdge.resting`): where a
+        /// handle runs, its bar lands and a shown bar is held — one
+        /// arrangement for all three (#3349, #3359).
+        let resting:
             (
                 arrangement: ShelfArrangement,
                 needs: [ShelfBar: CGFloat]
-            )?
+            )
+        /// The bars drawn this pass, each in its resting slot.
+        let drawn: Set<ShelfBar>
         /// Whether the pocket stands on this edge this pass — the
         /// one answer its slot, its Auto mark band and the reveal
         /// target read (#2678).
         var carriesPocket = false
+
+        /// A plan over `arrangement`, the resting bars', drawing
+        /// `drawn` — every bar it places unless named.
+        init(
+            edge: AppBarEdge,
+            strip: CGRect,
+            horizontal: Bool,
+            arrangement: ShelfArrangement,
+            shelfEdge: ShelfEdge,
+            needs: [ShelfBar: CGFloat] = [:],
+            drawn: Set<ShelfBar>? = nil,
+            carriesPocket: Bool = false
+        ) {
+            self.edge = edge
+            self.strip = strip
+            self.horizontal = horizontal
+            self.shelfEdge = shelfEdge
+            self.resting = (arrangement, needs)
+            self.drawn =
+                drawn
+                ?? Set(
+                    [
+                        arrangement.space.map { _ in ShelfBar.space },
+                        arrangement.app.map { _ in ShelfBar.app },
+                    ].compactMap { $0 }
+                )
+            self.carriesPocket = carriesPocket
+        }
+
+        /// The drawn bars' slots of the resting arrangement.
+        var arrangement: ShelfArrangement {
+            resting.arrangement.keeping(drawn)
+        }
+        /// Each drawn bar's natural run length, which its slot
+        /// draws in (`ShelfArrangement.Slot.drawing`).
+        var needs: [ShelfBar: CGFloat] {
+            resting.needs.filter { drawn.contains($0.key) }
+        }
 
         /// Whether the edge hides to a mark (#761).
         var hides: Bool { shelfEdge.hides }
@@ -58,8 +94,11 @@ extension KiwiCore {
     /// (`ShelfGeometry.strips`) — placing only the bars `drawn`
     /// answers for that edge (#761): the ones shown at rest and the
     /// ones a reveal shows, read in `mode`, the layout the screen
-    /// shows. A plan that draws nothing still carries
-    /// its strip, where a hidden bar's shortcut would show it.
+    /// shows. Each drawn bar stands in its slot of the bars
+    /// resting on the edge, `hover` the bars a maximized window's
+    /// screen brings in (#3359). A plan that draws nothing still
+    /// carries its strip, where a hidden bar's shortcut would show
+    /// it.
     func shelfPlans(
         visible: CGRect,
         settings: TilingSettings,
@@ -67,6 +106,7 @@ extension KiwiCore {
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
         pocket: Bool,
+        hover: Set<ShelfBar>,
         drawn: (ShelfEdge) -> Set<ShelfBar>
     ) -> [ShelfPlan] {
         // The bars as the screen's shown layout reads them (#2976).
@@ -82,7 +122,7 @@ extension KiwiCore {
         )
         return zip(folded, strips).map { shelfEdge, strip in
             let edge = shelfEdge.edge
-            let place = { (bars: Set<ShelfBar>) in
+            let place = { (bars: Set<ShelfBar>, shown: Set<ShelfBar>) in
                 self.shelfPlan(
                     edge: shelfEdge,
                     strip: strip,
@@ -91,15 +131,15 @@ extension KiwiCore {
                         && bars.contains(.space) ? spaceItems : nil,
                     app: settings.appBarStyle.edge == edge
                         && bars.contains(.app) ? app : nil,
-                    pocket: pocket && edge == settings.kiwishelf.pocketEdge
+                    pocket: pocket && edge == settings.kiwishelf.pocketEdge,
+                    drawn: shown
                 )
             }
             let bars = drawn(shelfEdge)
-            var plan = place(bars)
-            let every = Set(shelfEdge.bars.keys)
-            let full = bars == every ? plan : place(every)
-            plan.revealed = (full.arrangement, full.needs)
-            return plan
+            return place(
+                shelfEdge.resting(drawn: bars, hover: hover),
+                bars
+            )
         }
     }
 
@@ -110,7 +150,8 @@ extension KiwiCore {
         settings: TilingSettings,
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
-        pocket: Bool
+        pocket: Bool,
+        drawn: Set<ShelfBar>
     ) -> ShelfPlan {
         let shelf = settings.kiwishelf
         let edge = shelfEdge.edge
@@ -156,8 +197,8 @@ extension KiwiCore {
                 appNeed: appNeed,
                 spaceFloor: spaceFloor,
                 shelf: shelf,
-                // A section only beside a bar drawn this pass; an
-                // edge drawing none takes the handle (#2678).
+                // A section beside a resting bar; `keeping` drops
+                // it where nothing draws (#2678).
                 pocket: pocket && (spaceNeed != nil || appNeed != nil)
                     ? .init(
                         need: ShelfArrangement.pocketNeed(depth: depth),
@@ -169,6 +210,7 @@ extension KiwiCore {
             needs: [.space: spaceNeed, .app: appNeed].compactMapValues {
                 $0
             },
+            drawn: drawn,
             carriesPocket: pocket
         )
     }

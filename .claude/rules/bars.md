@@ -273,7 +273,18 @@ twice, was a question the user answered twice. The argument is
   `hidden` bar has no approach, and a hidden bar whose edge sibling
   shows yields, its handle standing aside
   (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
-  `docs/design-decisions.md` ▸ A shelf can hide). **The handle
+  `docs/design-decisions.md` ▸ A shelf can hide). **Place a revealed
+  bar in its slot of the one arrangement of the bars resting on
+  the edge** (`ShelfEdge.resting`, cut by
+  `ShelfArrangement.keeping`), which the handles, the landing and
+  the hold read as `ShelfPlan.resting`; ask which bars rest as a
+  handle of the one `ShelfEdge.handled`, never a filter beside it,
+  and never place a revealed bar a second way (#3359,
+  `ShelfLandingTests`, `ShelfHandleWiringTests` ▸
+  `holdIsWhereTheHandleRan`). Stand the front-app segment down
+  while an App Bar on its screen is drawn or rests as a handle, on
+  any edge, asked of every plan's `ShelfPlan.resting`, never per
+  edge (`ShelfLandingFrontAppTests`). **The handle
   reserves nothing**: `ShelfReservation` takes no hiding edge, and a
   new input that would reserve for an Auto bar is a ruling
   (`BarAutoHideFoldTests`). Whether a bar yields is the revealer's

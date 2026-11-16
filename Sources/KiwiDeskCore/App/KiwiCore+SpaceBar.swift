@@ -18,9 +18,9 @@ extension KiwiCore {
     }
 
     /// One display's bar in the segment the shelf gives it
-    /// (#1517). The front app hides while an App Bar shows on the
-    /// display, on its edge or another (#1731): that bar already
-    /// names every window.
+    /// (#1517). The front app hides while an App Bar shows or rests
+    /// as a handle on the display, on its edge or another (#1731,
+    /// #3359): that bar already names every window.
     func placedSpaceBar(
         _ items: [SpaceBarOverlay.Item],
         display: DisplayID,

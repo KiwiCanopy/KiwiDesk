@@ -105,14 +105,14 @@ struct ShelfHandleWiringTests {
         #expect(overlay.revealMark?.frame.size == spec.grown.size)
     }
 
-    /// On an edge an Always bar shares, a hidden Auto bar's handle
-    /// runs where that bar draws once revealed, never where the
-    /// pass that leaves it out would put it (#3349).
+    /// On an edge two Auto bars share, a revealed bar is held over
+    /// the run its handle drew along, never a lone bar's centred
+    /// run (#3359).
     @Test(
-        "a hidden bar's handle runs where it draws once revealed",
+        "a revealed bar is held where its handle ran",
         .enabled(if: NSScreen.main != nil)
     )
-    func handleRunsWhereTheBarDraws() throws {
+    func holdIsWhereTheHandleRan() throws {
         let screen = try #require(NSScreen.screens.first)
         let display = try #require(screen.kiwiDisplay)
         let core = makeTestCore()
@@ -137,24 +137,98 @@ struct ShelfHandleWiringTests {
         var settings = core.tiler.settings
         settings.spaceBarStyle.setEdge(.top)
         settings.appBarStyle.setEdge(.top)
-        settings.spaceBarStyle.visibility = .always
-        settings.spaceBarStyle.reserve = false
-        settings.monocle.appBar.visibility = .hidden
+        settings.spaceBarStyle.visibility = .auto
+        settings.monocle.appBar.visibility = .auto
+        settings.kiwishelf.alignment = .center
+        settings.kiwishelf.order = .spacesFirst
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
-        let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display.id, edge: .top),
-            bar: .app
+        let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        let key = ShelfRevealer.Key(shelf: shelf, bar: .app)
+        let spec = try #require(
+            core.shelves.handles.handleForTesting(key)?.view.spec
         )
-        // A Hidden App Bar draws no handle; its target knows the run.
-        let hidden = try #require(
-            core.shelves.reveal.targets[key]?.section
+        let handle = spec.frame
+        // Both handles rest, so the App Bar's is not the lone run.
+        #expect(
+            core.shelves.handles.handleForTesting(
+                .init(shelf: shelf, bar: .space)
+            ) != nil
         )
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         core.updateBars()
-        let shown = try #require(core.shelves.reveal.targets[key]?.section)
-        #expect(abs(hidden.minX - shown.minX) < 0.5)
-        #expect(abs(hidden.width - shown.width) < 0.5)
+        let held = try #require(core.shelves.reveal.targets[key]?.section)
+        #expect(abs(held.minX - handle.minX) < 0.5)
+        #expect(abs(held.width - handle.width) < 0.5)
+        // It lands in its slot beside the Space Bar's handle, whose
+        // run starts where the handle's does — a lone bar's slot
+        // would span the edge.
+        let bar = try #require(
+            core.appBars.shownBarsForTesting.first {
+                $0.display == display.id
+            }
+        )
+        #expect(abs(bar.strip.minX - handle.minX) < 0.5)
+        #expect(bar.strip.width < screen.frame.width / 2)
+    }
+
+    /// Over a maximizing Monocle both bars read Hidden and rest as
+    /// handles; a revealed App Bar lands in its share beside the
+    /// Space Bar's handle, never a lone bar's whole edge (#3359).
+    @Test(
+        "over a maximized window a revealed bar takes its share",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func maximizedRevealTakesItsShare() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let display = try #require(screen.kiwiDisplay)
+        let core = makeTestCore()
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.visibleBounds = { _ in screen.frame }
+        core.state.apply(.displaysChanged([display]))
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(900_104),
+                    pid: 900_104,
+                    appName: "Max",
+                    frame: CGRect(x: 100, y: 200, width: 600, height: 400)
+                )
+            )
+        )
+        core.resolveSpaceDisplays(mainID: display.id)
+        let space = try #require(
+            core.state.workspaces.space(of: WindowID(900_104))
+        )
+        core.state.workspaces.setMode(space, .monocle)
+        var settings = core.tiler.settings
+        settings.spaceBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(.top)
+        settings.spaceBarStyle.visibility = .always
+        settings.monocle.appBar.visibility = .always
+        settings.monocle.maximizeWindows = true
+        settings.kiwishelf.maximizedVisibility = .auto
+        core.tiler.settings = settings
+        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        #expect(core.maximizedHoverBars(on: display.id) == [.space, .app])
+        core.updateBars()
+        // Both hover bars rest as handles over the window.
+        let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        for bar in [ShelfBar.space, .app] {
+            #expect(
+                core.shelves.handles.handleForTesting(
+                    .init(shelf: shelf, bar: bar)
+                ) != nil
+            )
+        }
+        #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
+        core.updateBars()
+        let bar = try #require(
+            core.appBars.shownBarsForTesting.first {
+                $0.display == display.id
+            }
+        )
+        #expect(bar.strip.width < screen.frame.width / 2)
     }
 }
