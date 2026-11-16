@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "Значок группы",
   "kiwishelf.color.handle": "Ручка",
   "kiwishelf.color.handle.a11y": "Цвет ручки панели",
-  "kiwishelf.color.handle.help": "Линия, которую панель оставляет у своего края, пока скрыта. «Автоматически» следует светлой и тёмной теме.",
+  "kiwishelf.color.handle.help": "Ручка остаётся этого цвета и заполняется им, когда панель открывается.",
   "kiwishelf.color.highlight": "Подсветка",
   "kiwishelf.color.hover_fill": "Заливка под курсором",
   "kiwishelf.color.hover_item": "Элемент под курсором",

@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "群組徽章",
   "kiwishelf.color.handle": "把手",
   "kiwishelf.color.handle.a11y": "列把手顏色",
-  "kiwishelf.color.handle.help": "列隱藏時在其邊緣留下的線條。自動會依循淺色與深色模式。",
+  "kiwishelf.color.handle.help": "把手平時顯示為此顏色，列開啟時以此顏色填滿。",
   "kiwishelf.color.highlight": "高亮",
   "kiwishelf.color.hover_fill": "指標懸停填色",
   "kiwishelf.color.hover_item": "指標懸停項目",

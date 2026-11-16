@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "Badge de groupe",
   "kiwishelf.color.handle": "Poignée",
   "kiwishelf.color.handle.a11y": "Couleur de la poignée de la barre",
-  "kiwishelf.color.handle.help": "La ligne qu'une barre laisse sur son bord tant qu'elle est masquée. Automatique suit les modes clair et sombre.",
+  "kiwishelf.color.handle.help": "La poignée repose dans cette couleur et s'en remplit à l'ouverture de la barre.",
   "kiwishelf.color.highlight": "Surlignage",
   "kiwishelf.color.hover_fill": "Remplissage au survol",
   "kiwishelf.color.hover_item": "Élément survolé",

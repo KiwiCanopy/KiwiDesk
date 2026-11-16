@@ -96,17 +96,28 @@ struct ShelfHandleSpec: Equatable {
     static let hoverGrowth: CGFloat = 3
     /// Its distance from the screen side of the shelf's area.
     static let inset: CGFloat = 2
-    /// The handle at rest takes the system's label ink at this
-    /// alpha (ui-designer preview, 35–40%).
-    static let restAlpha: CGFloat = 0.38
-    /// The handle's ink at rest (#3357): `hex` as set, or on
-    /// Automatic the label ink at `restAlpha`, resolved in the
-    /// current drawing appearance.
+    /// The handle's two strengths (#3360 ruling 3): it rests at
+    /// `restStrength` and its countdown fills at `fillStrength`.
+    static let restStrength: CGFloat = 0.38
+    static let fillStrength: CGFloat = 0.9
+    /// The handle's ink at `strength` (#3357, #3360): Automatic the
+    /// label ink at that alpha, a picked colour at its own alpha
+    /// times it, with no floor; resolved in the current drawing
+    /// appearance.
+    static func ink(hex: String, strength: CGFloat) -> NSColor {
+        guard !hex.isEmpty else {
+            return .labelColor.withAlphaComponent(strength)
+        }
+        let picked = NSColor(kiwiHex: hex)
+        return picked.withAlphaComponent(picked.alphaComponent * strength)
+    }
+    /// The ink at rest.
     static func restColor(hex: String) -> NSColor {
-        .mark(
-            hex: hex,
-            fallback: .labelColor.withAlphaComponent(restAlpha)
-        )
+        ink(hex: hex, strength: restStrength)
+    }
+    /// The ink the countdown fill takes.
+    static func fillColor(hex: String) -> NSColor {
+        ink(hex: hex, strength: fillStrength)
     }
     /// What peeks through takes this alpha.
     static let peekAlpha: CGFloat = 0.7

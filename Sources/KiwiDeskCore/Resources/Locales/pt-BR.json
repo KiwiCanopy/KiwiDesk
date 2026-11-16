@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "Selo de grupo",
   "kiwishelf.color.handle": "Alça",
   "kiwishelf.color.handle.a11y": "Cor da alça da barra",
-  "kiwishelf.color.handle.help": "A linha que uma barra deixa na borda enquanto está oculta. Automático acompanha os modos claro e escuro.",
+  "kiwishelf.color.handle.help": "A alça fica nesta cor e se preenche com ela quando a barra abre.",
   "kiwishelf.color.highlight": "Destaque",
   "kiwishelf.color.hover_fill": "Preenchimento ao passar o mouse",
   "kiwishelf.color.hover_item": "Item sob o ponteiro",

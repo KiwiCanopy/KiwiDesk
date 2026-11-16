@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The resting handle's colour (#3357): `kiwishelf.handle_color`,
-/// empty for Automatic — the label ink at `restAlpha` — taken by
+/// empty for Automatic — the label ink at `restStrength` — taken by
 /// the verb, the decoder and a palette, and left out of every
 /// bundled palette.
 @Suite("Shelf handle colour (#3357)")
@@ -90,30 +90,43 @@ struct ShelfHandleColorTests {
         }
     }
 
-    @Test("Automatic is the label ink at restAlpha in either mode")
+    @Test("Automatic is the label ink at each strength in either mode")
     @MainActor
     func automaticFollowsTheAppearance() throws {
-        func resolved(_ hex: String, _ name: NSAppearance.Name)
-            throws -> NSColor
-        {
+        func resolved(
+            _ hex: String,
+            _ name: NSAppearance.Name,
+            _ ink: (String) -> NSColor
+        ) throws -> NSColor {
             let appearance = try #require(NSAppearance(named: name))
             var color = NSColor.clear
             appearance.performAsCurrentDrawingAppearance {
-                let cg = ShelfHandleSpec.restColor(hex: hex).cgColor
+                let cg = ink(hex).cgColor
                 color = NSColor(cgColor: cg) ?? .clear
             }
             return color.usingColorSpace(.sRGB) ?? color
         }
-        let light = try resolved("", .aqua)
-        let dark = try resolved("", .darkAqua)
-        #expect(abs(light.alphaComponent - ShelfHandleSpec.restAlpha) < 0.02)
-        #expect(abs(dark.alphaComponent - ShelfHandleSpec.restAlpha) < 0.02)
-        // Dark ink on light, light ink on dark.
-        #expect(light.redComponent < 0.5)
-        #expect(dark.redComponent > 0.5)
-        let set = try resolved("#FF000080", .darkAqua)
-        #expect(abs(set.redComponent - 1) < 0.01)
-        #expect(set.greenComponent < 0.01)
-        #expect(abs(set.alphaComponent - 128.0 / 255) < 0.01)
+        typealias Spec = ShelfHandleSpec
+        let inks: [(CGFloat, (String) -> NSColor)] = [
+            (Spec.restStrength, Spec.restColor(hex:)),
+            (Spec.fillStrength, Spec.fillColor(hex:)),
+        ]
+        for (strength, ink) in inks {
+            let light = try resolved("", .aqua, ink)
+            let dark = try resolved("", .darkAqua, ink)
+            #expect(abs(light.alphaComponent - strength) < 0.02)
+            #expect(abs(dark.alphaComponent - strength) < 0.02)
+            // Dark ink on light, light ink on dark.
+            #expect(light.redComponent < 0.5)
+            #expect(dark.redComponent > 0.5)
+            // A picked colour: its own alpha times the strength.
+            let set = try resolved("#FF000080", .darkAqua, ink)
+            #expect(abs(set.redComponent - 1) < 0.01)
+            #expect(set.greenComponent < 0.01)
+            #expect(
+                abs(set.alphaComponent - 128.0 / 255 * strength) < 0.01
+            )
+        }
+        #expect(Spec.restStrength < Spec.fillStrength)
     }
 }

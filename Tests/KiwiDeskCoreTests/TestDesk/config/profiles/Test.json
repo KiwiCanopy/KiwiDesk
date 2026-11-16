@@ -97,6 +97,7 @@
       "glyph_size" : 0,
       "group_badge_color" : "#636366",
       "group_badge_text_color" : "#FFFFFF",
+      "handle_color" : "",
       "highlight_color" : "#8DB354",
       "highlight_width" : 2,
       "hover_fill_color" : "#AACB5D80",

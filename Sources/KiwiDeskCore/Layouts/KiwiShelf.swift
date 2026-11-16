@@ -126,7 +126,7 @@ public struct KiwiShelf: Sendable, Equatable {
     public var groupBadgeColor = "#636366"
     public var groupBadgeTextColor = "#FFFFFF"
     /// An Auto bar's resting handle (#3357); empty is Automatic,
-    /// the system label ink at `ShelfHandleSpec.restAlpha`.
+    /// the system label ink at `ShelfHandleSpec.restStrength`.
     public var handleColor = ""
     /// How long a shelf the show/hide action revealed stays shown,
     /// in seconds (#761); 0 keeps it until the next press.

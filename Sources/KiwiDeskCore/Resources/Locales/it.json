@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "Badge di gruppo",
   "kiwishelf.color.handle": "Maniglia",
   "kiwishelf.color.handle.a11y": "Colore della maniglia della barra",
-  "kiwishelf.color.handle.help": "La linea che una barra lascia sul suo bordo mentre è nascosta. Automatico segue la modalità chiara e scura.",
+  "kiwishelf.color.handle.help": "La maniglia resta in questo colore e se ne riempie quando la barra si apre.",
   "kiwishelf.color.highlight": "Evidenziazione",
   "kiwishelf.color.hover_fill": "Riempimento al passaggio mouse",
   "kiwishelf.color.hover_item": "Elemento al passaggio mouse",

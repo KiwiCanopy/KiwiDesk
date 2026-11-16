@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "分组徽标",
   "kiwishelf.color.handle": "把手",
   "kiwishelf.color.handle.a11y": "栏把手颜色",
-  "kiwishelf.color.handle.help": "栏隐藏时在其边缘留下的线条。自动会跟随浅色和深色外观。",
+  "kiwishelf.color.handle.help": "把手平时显示为此颜色，栏打开时以此颜色填满。",
   "kiwishelf.color.highlight": "高亮",
   "kiwishelf.color.hover_fill": "悬停填充",
   "kiwishelf.color.hover_item": "悬停项目",

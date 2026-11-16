@@ -47,11 +47,13 @@ struct ShelfHandleColorWiringTests {
         )
         #expect(abs(rgb.redComponent - 1) < 0.01)
         #expect(rgb.greenComponent < 0.01)
-        #expect(abs(rgb.alphaComponent - 128.0 / 255) < 0.01)
+        // Its own alpha times the rest strength (#3360 ruling 3).
+        let rest = 128.0 / 255 * ShelfHandleSpec.restStrength
+        #expect(abs(rgb.alphaComponent - rest) < 0.01)
     }
 
     @Test(
-        "Automatic paints the label ink at restAlpha",
+        "Automatic paints the label ink at the rest strength",
         .enabled(if: NSScreen.main != nil)
     )
     func automaticPaintsTheLabelInk() throws {
@@ -62,7 +64,7 @@ struct ShelfHandleColorWiringTests {
         view.effectiveAppearance.performAsCurrentDrawingAppearance {
             label =
                 NSColor.labelColor
-                .withAlphaComponent(ShelfHandleSpec.restAlpha).cgColor
+                .withAlphaComponent(ShelfHandleSpec.restStrength).cgColor
         }
         #expect(fill == label)
     }

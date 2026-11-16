@@ -1136,7 +1136,7 @@
   "kiwishelf.color.group_badge": "Group badge",
   "kiwishelf.color.handle": "Handle",
   "kiwishelf.color.handle.a11y": "Bar handle color",
-  "kiwishelf.color.handle.help": "The line a bar leaves at its edge while it hides. Automatic follows light and dark mode.",
+  "kiwishelf.color.handle.help": "The handle rests in this color and fills with it as the bar opens.",
   "kiwishelf.color.highlight": "Highlight",
   "kiwishelf.color.hover_fill": "Hover fill",
   "kiwishelf.color.hover_item": "Hover item",

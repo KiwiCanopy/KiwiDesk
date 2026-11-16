@@ -82,8 +82,8 @@ extension ColorsAndGlassRow {
             .help(
                 L(
                     "kiwishelf.color.handle.help",
-                    "The line a bar leaves at its edge while it hides. "
-                        + "Automatic follows light and dark mode."
+                    "The handle rests in this color and fills with it "
+                        + "as the bar opens."
                 )
             )
         case .borderColor:
