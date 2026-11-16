@@ -3,16 +3,19 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A revealed Space Bar beside a resting App Bar handle draws no
-/// front-app segment (#3359): its slot is its share of the pair,
-/// measured without one, while beside a Hidden App Bar the segment
-/// keeps the room #761 leaves it.
+/// An Auto App Bar on the screen stands the Space Bar's front-app
+/// segment down on any edge (#3359): beside its handle the Space
+/// Bar's share is measured without one. Only a Hidden App Bar
+/// leaves the segment the room #761 gives it.
 @Suite("Front app beside a resting App handle (#3359)", .serialized)
 @MainActor
 struct ShelfLandingFrontAppTests {
     private static let window = WindowID(900_103)
 
-    private func core(app visibility: ShelfVisibility) throws -> KiwiCore {
+    private func core(
+        app visibility: ShelfVisibility,
+        edge: AppBarEdge = .top
+    ) throws -> KiwiCore {
         let screen = try #require(NSScreen.screens.first)
         let display = try #require(screen.kiwiDisplay)
         let core = makeTestCore()
@@ -38,7 +41,7 @@ struct ShelfLandingFrontAppTests {
         }
         var settings = core.tiler.settings
         settings.spaceBarStyle.setEdge(.top)
-        settings.appBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(edge)
         settings.spaceBarStyle.visibility = .auto
         settings.spaceBarStyle.showFrontApp = true
         settings.monocle.appBar.visibility = visibility
@@ -60,5 +63,11 @@ struct ShelfLandingFrontAppTests {
         #expect(!resting.spaceBars.showsTitle(of: Self.window))
         let hidden = try core(app: .hidden)
         #expect(hidden.spaceBars.showsTitle(of: Self.window))
+        // One screen-wide answer: an Auto App Bar on another edge.
+        let apart = try core(app: .auto, edge: .bottom)
+        #expect(!apart.spaceBars.showsTitle(of: Self.window))
+        // And a drawn App Bar on another edge, as before.
+        let drawn = try core(app: .always, edge: .bottom)
+        #expect(!drawn.spaceBars.showsTitle(of: Self.window))
     }
 }

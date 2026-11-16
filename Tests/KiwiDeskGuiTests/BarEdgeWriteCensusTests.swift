@@ -24,6 +24,9 @@ struct BarEdgeWriteCensusTests {
         "ShelfRevealer+Target.swift": (
             1, "`ShelfRevealer.Target`'s own field, no bar's (#761)"
         ),
+        "KiwiCore+ShelfPlan.swift": (
+            1, "`ShelfPlan`'s own field, no bar's (#3359)"
+        ),
         "KiwiCore+ShelfFrames.swift": (
             1, "`ShelfFrame`'s own field, a drawn strip's, no bar's"
         ),

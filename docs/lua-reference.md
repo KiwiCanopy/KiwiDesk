@@ -4320,6 +4320,11 @@ horizontal rule.
 
 The segment shows only while no App Bar is shown on that screen.
 
+:::unreleased
+It is also hidden while an App Bar on that screen is set to
+`"auto"`, on any edge; only a `"hidden"` App Bar leaves it room.
+:::
+
 **Example:**
 
 ```lua

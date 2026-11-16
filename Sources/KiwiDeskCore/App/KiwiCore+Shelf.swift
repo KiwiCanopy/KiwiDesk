@@ -183,12 +183,14 @@ extension KiwiCore {
                     items,
                     display: display.id,
                     plan: plan,
-                    // Drawn, not merely built: a hidden App Bar
-                    // leaves the front-app segment its room (#761),
-                    // save where its handle rests beside the Space
-                    // Bar and holds that room (#3359).
-                    appBarShows: plan.resting.arrangement.app != nil
-                        || plans.contains { $0.arrangement.app != nil },
+                    // An App Bar on this screen drawn or resting as
+                    // a handle, on any edge, stands the front app
+                    // down; only a Hidden one leaves it room (#3359).
+                    appBarShows: planned.contains {
+                        $0.arrangement.app != nil
+                            || $0.shelfEdge.handled(hover: hover)
+                                .contains(.app)
+                    },
                     style: look
                 )
             {

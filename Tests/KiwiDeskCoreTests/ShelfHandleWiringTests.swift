@@ -213,6 +213,15 @@ struct ShelfHandleWiringTests {
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         #expect(core.maximizedHoverBars(on: display.id) == [.space, .app])
         core.updateBars()
+        // Both hover bars rest as handles over the window.
+        let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        for bar in [ShelfBar.space, .app] {
+            #expect(
+                core.shelves.handles.handleForTesting(
+                    .init(shelf: shelf, bar: bar)
+                ) != nil
+            )
+        }
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         core.updateBars()
         let bar = try #require(

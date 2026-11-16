@@ -281,9 +281,10 @@ twice, was a question the user answered twice. The argument is
   handle of the one `ShelfEdge.handled`, never a filter beside it,
   and never place a revealed bar a second way (#3359,
   `ShelfLandingTests`, `ShelfHandleWiringTests` ▸
-  `holdIsWhereTheHandleRan`). A resting App Bar handle holds its
-  share of the Space Bar's edge, so a Space Bar revealed beside it
-  draws no front-app segment (`ShelfLandingFrontAppTests`). **The handle
+  `holdIsWhereTheHandleRan`). Stand the front-app segment down
+  while an App Bar on its screen is drawn or rests as a handle, on
+  any edge, asked of the screen's plans and `ShelfEdge.handled`,
+  never per edge (`ShelfLandingFrontAppTests`). **The handle
   reserves nothing**: `ShelfReservation` takes no hiding edge, and a
   new input that would reserve for an Auto bar is a ruling
   (`BarAutoHideFoldTests`). Whether a bar yields is the revealer's

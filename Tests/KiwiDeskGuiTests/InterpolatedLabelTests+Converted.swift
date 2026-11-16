@@ -243,16 +243,16 @@ extension InterpolatedLabelTests {
         "border.fit_gaps.updated_new": 1,
         "sticky.caption": 2,
         "general.login_item.managed_by_service": 1,
-        // 4. #1094. The help quoted "Toggle sticky" as literal
-        //    text while the label itself was being reworded, so
-        //    the sentence would have named a control that no
-        //    longer exists under that name in any locale.
+        // 4. #1094. The help quoted "Toggle sticky" as literal text
+        //    while the label was being reworded, so it would have
+        //    named a control no locale has under that name.
         "keybinding.toggle_display_sticky.help": 1,
         // #761, #3089: a bar grey names the segments and layouts.
         "keybinding.toggle_space_bar.inert_link": 2,
         "shortcuts.tiling_off.bars_link": 2, "space_override.inherits_page": 1,
         "kiwishelf.show.space_bar.beside_always": 1,
         "kiwishelf.show.app_bar.beside_always": 1,
+        "space_bar.show_front_app.caption": 1,  // #3359
         "kiwishelf.show.pocket.beside_always": 2,  // #2978
         "kiwishelf.show.monocle.maximizes_link": 1,  // #2976
         "layout_defaults.maximize.show_bars.help": 2,

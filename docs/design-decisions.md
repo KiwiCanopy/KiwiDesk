@@ -19865,10 +19865,8 @@ Dock stays shown for as long as the pointer stays there. So:
   its share, off-centre by half its sibling's length and the
   gutter, and a pair too wide for the edge caps that share, so the
   bar may scroll. The share is measured without the Space Bar's
-  front-app segment, which a resting App Bar handle therefore
-  stands down as a shown App Bar does: the segment would overflow
-  a share sized without it, and sizing the share with it would move
-  the Space Bar when the App Bar comes in.
+  front-app segment, which an Auto App Bar therefore stands down
+  (▸ The front app still yields to the App Bar).
   Moving the handles to where a lone bar lands was the other way,
   and it fails on any shared edge: two lone bars sit at the same
   place under every alignment, so their handles would overlap.
@@ -20270,6 +20268,22 @@ Space Bar's front-app segment stays hidden: the App Bar already
 names every window and marks the focused one, and a second name
 for it elsewhere on screen is the duplicate the stand-down
 removed, whatever plate it sits on.
+
+:::unreleased
+*Amended* (owner, 2026-11-16, #3359): **an Auto App Bar stands the
+front app down too**, on any edge of the screen, so only a Hidden
+App Bar leaves the segment its room. One screen-wide answer keeps
+the segment from coming and going as the App Bar retracts and
+returns, which a pointer near its handle does all day. On the
+Space Bar's own edge it is also forced: the App Bar's handle holds
+its share there, the Space Bar's share is measured without the
+segment, and sizing the share with it would move the Space Bar
+each time the App Bar came in. Splitting the answer by edge was
+refused: the same setting would then show or hide the segment
+depending on where the App Bar sits, which no caption can say in
+one line. The row is not greyed, since a Hidden App Bar, or a
+layout without one, still shows the segment.
+:::
 
 *The App Bar's edge is global only.* No layout overrides it: an
 edge per layout would carry the bar across the screen on a
