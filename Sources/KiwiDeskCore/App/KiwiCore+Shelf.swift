@@ -134,6 +134,7 @@ extension KiwiCore {
                 screen: screen,
                 items: items,
                 appIcons: app?.items.compactMap(\.icon) ?? [],
+                screens: ScreenList.all.map(\.frame),
                 reveal: reveal,
                 hover: maximizedHoverBars(on: display.id),
                 settings: shown

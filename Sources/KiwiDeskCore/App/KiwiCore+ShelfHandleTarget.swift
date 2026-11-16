@@ -77,18 +77,21 @@ extension KiwiCore.HidingShelves {
     }
 
     /// Whether a screen in `screens` continues past `edge` of
-    /// `frame`, Cocoa: the edge is then a crossing, never a stop.
+    /// `frame` along `span` — a bar's run — Cocoa: the edge is a
+    /// crossing there, never a stop. A neighbour beside only part
+    /// of the edge leaves a run past it free.
     static func continues(
         _ edge: AppBarEdge,
         of frame: CGRect,
+        along span: CGRect,
         among screens: [CGRect]
     ) -> Bool {
         screens.contains { other in
             guard other != frame else { return false }
             let along =
                 edge.isHorizontal
-                ? other.minX < frame.maxX && other.maxX > frame.minX
-                : other.minY < frame.maxY && other.maxY > frame.minY
+                ? other.minX < span.maxX && other.maxX > span.minX
+                : other.minY < span.maxY && other.maxY > span.minY
             guard along else { return false }
             switch edge {
             case .top: return abs(other.minY - frame.maxY) < 1

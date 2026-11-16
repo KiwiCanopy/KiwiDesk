@@ -46,6 +46,7 @@ extension KiwiCore {
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
             appIcons: [NSImage] = [],
+            screens: [CGRect],
             reveal: ShelfRevealer,
             hover: Set<ShelfBar> = [],
             settings: TilingSettings
@@ -62,6 +63,7 @@ extension KiwiCore {
                     screen: screen,
                     items: items,
                     appIcons: appIcons,
+                    screens: screens,
                     reveal: reveal,
                     hover: hover,
                     settings: settings
@@ -82,6 +84,7 @@ extension KiwiCore {
             screen: NSScreen,
             items: [SpaceBarOverlay.Item]?,
             appIcons: [NSImage],
+            screens: [CGRect],
             reveal: ShelfRevealer,
             hover: Set<ShelfBar>,
             settings: TilingSettings
@@ -150,13 +153,7 @@ extension KiwiCore {
                     (origin + band.lowerBound)...(origin + band.upperBound)
             }
             let side = Self.side(of: plan.strip, edge: plan.edge, shelf: shelf)
-            // An edge another screen continues past is a crossing:
-            // a push there opens nothing (#3349).
-            let beyond = Self.continues(
-                plan.edge,
-                of: screen.frame,
-                among: ScreenList.all.map(\.frame)
-            )
+
             for (index, bar) in handled.enumerated() {
                 guard let run = run(bar) else { continue }
                 let dots =
@@ -187,7 +184,14 @@ extension KiwiCore {
                     side: side,
                     strip: strip,
                     screen: screen.frame,
-                    beyond: beyond,
+                    // An edge another screen continues past is a
+                    // crossing: a push there opens nothing (#3349).
+                    beyond: Self.continues(
+                        plan.edge,
+                        of: screen.frame,
+                        along: flip(run),
+                        among: screens
+                    ),
                     section: section(bar),
                     maximized: hover.contains(bar),
                     cut: (

@@ -290,10 +290,11 @@ twice, was a question the user answered twice. The argument is
   it (`ShelfRevealApproachTests` ▸ `macOSEdgeCedes`,
   `ShelfRevealApproachTests` ▸ `dockEdgeIsRead`). **A push counts
   only on a free edge: one the handle's area touches and no other
-  screen continues past**, answered by the one
-  `ShelfRevealer.Target.along`, which production and the suites build
-  every approach through (`ShelfHandleStripTests` ▸
-  `innerEdgeIsNoPush`). **What peeks through a thickened handle is
+  screen continues past along the bar's run** — a production
+  approach is built through the one `ShelfRevealer.Target.along`,
+  and the neighbour test is the one `HidingShelves.continues`,
+  handed the run (`ShelfHandleEdgeTests` ▸ `innerEdgeIsNoPush`,
+  `ShelfHandleEdgeTests` ▸ `filingAsksTheNeighbours`). **What peeks through a thickened handle is
   the spec's one `peek`** — the Space dots or the App Bar's glyphs —
   and the handle carries no label or count (#3349, amending #2567).
   **A handle's thickened glass is one `GlassBox` whose host the

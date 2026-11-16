@@ -168,4 +168,18 @@ struct ShelfRevealApproachTests {
         Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 785))
         #expect(reads == 2)
     }
+
+    /// A leave the monitor never heard — a drag that moves no
+    /// window — ends the thickening when the dwell runs out.
+    @Test("an unheard leave ends the thickening at the dwell")
+    func unheardLeaveEndsTheThickening() {
+        let (revealer, timers, pointer) = Suite.make(Suite.flush)
+        Suite.move(revealer, pointer, to: CGPoint(x: 500, y: 785))
+        timers.fireAll()
+        #expect(revealer.arming == [Suite.key])
+        pointer.point = CGPoint(x: 500, y: 300)
+        timers.fireAll()
+        #expect(revealer.arming.isEmpty)
+        #expect(revealer.reveal(of: Suite.key) == .hidden)
+    }
 }

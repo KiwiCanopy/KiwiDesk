@@ -113,6 +113,8 @@ extension FullscreenStandDownTests {
                 $0.key.shelf.display == display && $0.key.bar == .space
             }.map(\.value.approach)
         }
+        // A margin, which the approach must not count twice.
+        core.tiler.settings.kiwishelf.outerMargin = 6
         // Control: an Always bar is no hiding bar, so no target.
         core.updateBars()
         #expect(band() == nil)
