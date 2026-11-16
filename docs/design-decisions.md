@@ -7202,8 +7202,8 @@ still reads as the pocket coming out rather than a jump.
 handle's ink and depth, flush on the edge, and the handle reserves
 nothing.** The tab is the bars' two-tone line, 3 points deep, so a
 row of handles still reads as one; the kiwis keep the pocket's
-colour and look out 5 points past it. Its hover stays as the
-two-step paragraph below has it, with no progress fill: the fill
+colour and look out 5 points past it. Its hover runs no progress
+fill (its look is the #3366 amendment below): the fill
 belongs to lingering near a bar's
 edge, while the pocket answers the pointer in its two steps. Its
 edge keeps no strip for it any more, as a bar's handle keeps none
@@ -7222,6 +7222,15 @@ pocket under a pointer crossing the edge for a window's title bar
 peek never moves the reserved strip, which reads the resting
 depth, and under Reduce Motion it is dropped while the delay
 stands, a delay not being motion.
+
+:::unreleased
+*Amended* (owner, 2026-11-16, #3366): **the hover lifts nothing.**
+The kiwis stay where they rest and the tab goes to full strength,
+the progress fill's 90%, in place; the pocket still rises after the
+0.15 s delay. A lift followed a moment later by the rise read as a
+stutter on the device, two motions where the pointer asked for one,
+and the brighter tab answers the hover without moving anything.
+:::
 
 **The pocket is the mark alone: faded while empty, in full colour
 while anything is inside, and edged in black and white while lit
@@ -19926,6 +19935,20 @@ Dock stays shown for as long as the pointer stays there. So:
   user's colour is never thinned into a second one. The handle
   sits flush on the edge: with nothing thickening, there is no
   room to keep, and a gap above the line reads as a misplacement.
+- *Capsules, wrapped by the hairline* (owner, 2026-11-16, #3366,
+  after a ui-designer consult and a native prototype), amending
+  the two-tone bullet above. The handle
+  and the pocket's tab are each an outer 3-point capsule in the
+  hairline ink with the 2-point core capsule 0.5 points inside it,
+  so the hairline wraps the ends as well as the long sides; the
+  progress fill is clipped to the core. Square ends left the line's
+  ends bare, the one place it met the window under it with no edge
+  of the opposite tone, and a rounded end reads as a deliberate
+  object rather than a cut. No taper, fade or one-sided rounding.
+  The core is drawn over the hairline capsule rather than inside a
+  ring, so its strengths show composited over the hairline's 35%:
+  about 60% at rest, which one draw path for both drawers buys.
+  The handle stays flush, as the two-tone bullet argues.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one

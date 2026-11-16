@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A handle's look and its approach fill (#3360, #3361): a 2 pt
-/// core between two neutral hairlines, flush on the edge, and a
+/// core capsule on a neutral 3 pt capsule, flush on the edge, and a
 /// fill that runs out from its start along the core alone, plays
 /// under Reduce Motion and drops under KiwiDesk's Off. What the
 /// animator then draws is the device's. Main-actor spend: a few
@@ -49,21 +49,22 @@ struct ShelfHandleFillTests {
         )
     }
 
-    @Test("The handle is a 2 pt core between two hairlines, flush")
+    @Test("The handle is a 2 pt core capsule in a 3 pt one, flush")
     func twoTone() {
         #expect(ShelfHandleSpec.inset == 0)
         #expect(ShelfHandleSpec.depth == 3)
         let bounds = CGRect(x: 0, y: 0, width: 400, height: 3)
-        let parts = ShelfHandleSpec.parts(of: bounds, edge: .top)
+        let parts = ShelfHandleSpec.parts(of: bounds)
+        #expect(parts.outer == bounds)
+        // Inset the hairline on every side, the ends included.
+        #expect(parts.core == bounds.insetBy(dx: 0.5, dy: 0.5))
         #expect(parts.core.height == ShelfHandleSpec.core)
-        #expect(parts.hairlines.0.maxY == parts.core.minY)
-        #expect(parts.hairlines.1.minY == parts.core.maxY)
+        #expect(ShelfHandleSpec.radius(of: parts.outer) == 1.5)
+        #expect(ShelfHandleSpec.radius(of: parts.core) == 1)
         let side = ShelfHandleSpec.parts(
-            of: CGRect(x: 0, y: 0, width: 3, height: 400),
-            edge: .left
+            of: CGRect(x: 0, y: 0, width: 3, height: 400)
         )
         #expect(side.core.width == ShelfHandleSpec.core)
-        #expect(side.hairlines.0.maxX == side.core.minX)
     }
 
     @Test("The hairline is the opposite tone, never the user's colour")

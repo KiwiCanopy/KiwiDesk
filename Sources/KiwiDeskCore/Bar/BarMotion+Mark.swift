@@ -119,11 +119,6 @@ extension BarMotion {
         body.layer?.add(fade, forKey: revealKey)
     }
 
-    /// The hidden mark's hover growth (#761): short, so the plate
-    /// reads as answering the pointer. It travels under Reduce
-    /// Motion too (owner ruling, 2026-10-21).
-    static let hoverGrow: TimeInterval = 0.15
-
     /// Where the mark's plate stands in its view, y down: `mark`,
     /// grown while hovered by `ShelfHandleSpec.hoverGrowth` each
     /// way along `edge` plus half of `growth.widen`, a pill's room,

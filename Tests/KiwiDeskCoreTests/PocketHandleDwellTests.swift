@@ -5,8 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The pocket's handle answers an approaching pointer as the bars'
-/// handles do (#2807): the kiwis peek on the hover, and the pocket
-/// rises only after the bars' reveal delay, or at once on a push.
+/// handles do (#2807): the hover takes the tab to full strength in
+/// place, lifting nothing (#3366), and the pocket rises only after
+/// the bars' reveal delay, or at once on a push.
 @Suite(
     "Pocket handle dwell",
     .serialized,
@@ -45,26 +46,28 @@ struct PocketHandleDwellTests {
             ? spec.frame.width : spec.frame.height
     }
 
-    @Test("a hover peeks the kiwis, and the pocket rises after the dwell")
-    func hoverPeeksThenRises() async throws {
+    @Test("a hover lights the tab in place, then the pocket rises")
+    func hoverLightsThenRises() async throws {
         let core = try makeCore()
         let rest = try #require(spec(core))
         core.pocketHovered(rest.display, true)
-        let peeked = try #require(core.pocketPlate.specs[rest.display])
-        #expect(peeked.peeking)
-        #expect(!peeked.risen)
-        // The handle's panel makes room for the peek.
-        #expect(depth(peeked) == depth(rest) + PocketHandleView.peekDepth)
+        let lit = try #require(core.pocketPlate.specs[rest.display])
+        #expect(lit.hovered)
+        #expect(!lit.risen)
+        // In place: the handle's panel takes no more room.
+        #expect(lit.frame == rest.frame)
+        let view = try #require(core.pocketPlate.view(on: rest.display))
+        #expect(view.handle.hovered)
         let dwell = core.deferred.task(for: .pocketDwell)
         #expect(dwell != nil)
         await dwell?.value
         let risen = try #require(core.pocketPlate.specs[rest.display])
         #expect(risen.risen)
-        #expect(!risen.peeking)
+        #expect(!risen.hovered)
         core.pocketHovered(rest.display, false)
         let sunk = try #require(core.pocketPlate.specs[rest.display])
         #expect(!sunk.risen)
-        #expect(!sunk.peeking)
+        #expect(!sunk.hovered)
         #expect(depth(sunk) == depth(rest))
     }
 
@@ -128,66 +131,25 @@ struct PocketHandleDwellTests {
             view.trackingAreas.contains { $0.options.contains(.mouseMoved) }
         )
         view.setHovered(true)
-        #expect(core.pocketPlate.specs[rest.display]?.peeking == true)
+        #expect(core.pocketPlate.specs[rest.display]?.hovered == true)
         view.onPush()
         #expect(core.pocketPlate.specs[rest.display]?.risen == true)
     }
 
-    @Test("a peek taken back keeps its room until the kiwis are in")
-    func unpeekHoldsTheRoom() throws {
-        // Under Reduce Motion nothing peeks, so nothing is held.
-        guard !BarMotion.isReduced else { return }
-        let core = try makeCore()
-        var landings: [@MainActor () -> Void] = []
-        core.pocketPlate.afterLeave = { _, body in landings.append(body) }
-        let rest = try #require(spec(core))
-        core.pocketHovered(rest.display, true)
-        let panel = try #require(
-            core.pocketPlate.panelForTesting(on: rest.display)
-        )
-        let peeked = panel.frame
-        core.pocketHovered(rest.display, false)
-        let resting = try #require(core.pocketPlate.specs[rest.display])
-        #expect(panel.frame == peeked)
-        #expect(panel.frame.size != resting.frame.size)
-        #expect(landings.count == 1)
-        // Once the kiwis are in, the panel takes the resting frame.
-        landings.forEach { $0() }
-        // AppKit rounds the panel's origin; the depth is what moves.
-        #expect(panel.frame.size == resting.frame.size)
-    }
-
-    @Test("a later show drops a held peek's landing")
-    func reHoverDropsTheLanding() throws {
-        guard !BarMotion.isReduced else { return }
-        let core = try makeCore()
-        var landings: [@MainActor () -> Void] = []
-        core.pocketPlate.afterLeave = { _, body in landings.append(body) }
-        let rest = try #require(spec(core))
-        core.pocketHovered(rest.display, true)
-        core.pocketHovered(rest.display, false)
-        core.pocketHovered(rest.display, true)
-        let panel = try #require(
-            core.pocketPlate.panelForTesting(on: rest.display)
-        )
-        let peeked = panel.frame
-        // The first leave's landing finds a newer show and stands down.
-        landings.forEach { $0() }
-        #expect(panel.frame == peeked)
-    }
-
-    @Test("the peek is the stated depth, and none under Reduce Motion")
-    func peekDecision() {
-        #expect(
-            BarMotion.pocketPeek(peeking: true, reduceMotion: false)
-                == PocketHandleView.peekDepth
-        )
-        #expect(BarMotion.pocketPeek(peeking: true, reduceMotion: true) == 0)
-        #expect(BarMotion.pocketPeek(peeking: false, reduceMotion: false) == 0)
-        // A rise out of peeking kiwis starts where they stood.
-        #expect(
-            BarMotion.pocketRiseTravel(peek: PocketHandleView.peekDepth)
-                == BarMotion.pocketRiseTravel() - PocketHandleView.peekDepth
-        )
+    @Test("the hovered tab takes the fill strength, the kiwis stay")
+    func tabStrength() {
+        let light = NSAppearance(named: .aqua)
+        var rest: CGFloat = 0
+        var full: CGFloat = 0
+        light?.performAsCurrentDrawingAppearance {
+            rest =
+                PocketHandleView.tabCore(hex: "", hovered: false)
+                .alphaComponent
+            full =
+                PocketHandleView.tabCore(hex: "", hovered: true)
+                .alphaComponent
+        }
+        #expect(abs(rest - ShelfHandleSpec.restStrength) < 0.001)
+        #expect(abs(full - ShelfHandleSpec.fillStrength) < 0.001)
     }
 }

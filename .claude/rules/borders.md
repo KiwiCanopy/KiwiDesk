@@ -506,8 +506,10 @@ target, whose monitors are blind over KiwiDesk's panels. Whether it
 stands risen is the one derivation in `pocketPlateSpecs`, every
 hover dropped drops its dwell (`PocketPlateOverlay.hovered`'s
 `didSet`, `PocketHandleDwellTests` ▸ `dwellEndsWithTheHover`), and
-its peek grows the handle's panel
-(`PocketHandleDwellTests` ▸ `hoverPeeksThenRises`).
+its hover lifts nothing: the tab goes to the fill strength in
+place, through the one `PocketHandleView.tabCore`, and the panel
+keeps its resting frame (#3366, `PocketHandleDwellTests` ▸
+`hoverLightsThenRises`, `ShelfHandleDrawTests` ▸ `tabBrightens`).
 **What it counts and shows for is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it: the
 general list, then while it rests the apps' own pocket
