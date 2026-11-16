@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Mouse & trackpad ▸ Scroll gestures (#1656, #1519): the group
-/// leads the drawer, the travel field greys while the box is off,
-/// and every value row carries its "Applies to" column. The chord
-/// recorders left with #3199; #3183's list card replaces them.
+/// Mouse & trackpad ▸ the scroll settings (#1656, #1519, #3369):
+/// each value row carries its "Applies to" column, and Long swipes
+/// sits at the Trackpad card's foot, greyed with its reason drawn
+/// outside the grey while no two-finger swipe runs the pan.
 @Suite("Scroll gestures group wiring (#1656, #1519)")
 struct GesturesScrollWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -25,26 +25,54 @@ struct GesturesScrollWiringTests {
         )
     }
 
-    /// The scroll gestures open the Holding a modifier card (#3184).
-    @Test("the scroll entries lead the Holding a modifier card")
-    func scrollGroupLeads() throws {
-        let part = Self.squash(try Self.source("GesturesPart.swift"))
-        #expect(
-            part.contains(
-                "SettingsSection(SettingsCatalog.shortcuts.gesturesModifier)"
-                    + "{GesturesScrollEntries(model:model)"
+    /// One checkbox under the Trackpad card's list and its footer,
+    /// never on the Mouse card and never per row (#3369 ▸ Ruling).
+    @Test("Long swipes sits at the Trackpad card's foot")
+    func longSwipesAtTheTrackpadFoot() throws {
+        let card = try Self.source("GestureListCard.swift")
+        let rows = try #require(
+            SourceScan.declarationBody(
+                after: "private var boundRows:",
+                in: card
             )
         )
+        #expect(
+            Self.squash(rows).contains(
+                "footerifdevice==.trackpad{Divider()"
+                    + "GestureLongSwipesRow(model:model)}"
+            )
+        )
+        let users = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent("Sources")
+        ).filter {
+            ((try? String(contentsOf: $0, encoding: .utf8)) ?? "")
+                .contains("GestureLongSwipesRow(")
+        }
+        #expect(users.map(\.lastPathComponent) == ["GestureListCard.swift"])
+    }
+
+    /// The row asks the census gate, greys the checkbox alone, and
+    /// draws its caption beside the row rather than inside the grey
+    /// (gui.md ▸ a dim is not a sentence).
+    @Test("Long swipes greys with its reason outside the grey")
+    func longSwipesGreysWithItsReason() throws {
+        let row = Self.squash(try Self.source("GestureLongSwipesRow.swift"))
+        #expect(
+            row.contains(".inertReason(for:.shortcuts(.scrollLongSwipes))")
+        )
+        #expect(row.contains("grey:greyed?Self.caption:nil"))
+        #expect(row.contains("ifgreyed{Text(Self.caption)"))
+        #expect(!row.contains("GreyOut("))
     }
 
     @Test("every value row carries its Applies to column")
     func everyRowReaches() throws {
-        let group = try Self.source("GesturesScrollEntries.swift")
+        let row = try Self.source("GestureLongSwipesRow.swift")
         // The step length is Lua-only (#1873 ▸ Ruling 2026-11-16).
-        for field in ["reachRow(.longSwipes)"] {
-            #expect(group.contains(field), "\(field) has no column")
-        }
-        #expect(group.contains("family: .scroll"))
+        #expect(row.contains("ScrollGestureField.longSwipes"))
+        #expect(row.contains("model.scrollReach(field.rawValue)"))
+        #expect(row.contains("family: .scroll"))
+        #expect(Self.squash(row).contains("reach:{reach}"))
         // Both Natural rows lead their device's card (#3183), each
         // naming its own input's field, through the one row that
         // carries the column.

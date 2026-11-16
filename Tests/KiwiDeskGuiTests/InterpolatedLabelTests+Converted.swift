@@ -222,7 +222,6 @@ extension InterpolatedLabelTests {
         //    this register — converting some would leave a picker
         //    naming its entries as text beside one that does not.
         "layout_params.split_strategy.help": 2,
-        "behavior.mouse.resize_action.help": 2,
         // 3. Found by re-running #830's own detector against
         //    this tree rather than trusting its table. Two are
         //    greyed-section reasons — the class that issue leads
@@ -294,9 +293,9 @@ extension InterpolatedLabelTests {
         // The Track drawer's `?` (#1440): names the Layout
         // Defaults pane where the layout is tuned.
         "shortcuts.tracks.help": 1,
-        // The ⌃⌥ scroll entry (#1519) names the Scrolling layout
-        // (localization-naming.md ▸ Family B).
-        "shortcuts.gestures.scroll.sentence": 1,
+        // Long swipes' greyed caption (#3369) names the card's
+        // own two families.
+        "shortcuts.gestures.scroll.long_swipes_off": 2,
         // The Mac Checklist (#1365): authored interpolating from
         // the start. Two captions name Open or Focus; the Dock
         // habit names the Space Bar too; the big-windows habit

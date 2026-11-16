@@ -76,6 +76,10 @@ struct GestureListCard: View {
                 )
             }
             footer
+            if device == .trackpad {
+                Divider()
+                GestureLongSwipesRow(model: model)
+            }
         }
     }
 

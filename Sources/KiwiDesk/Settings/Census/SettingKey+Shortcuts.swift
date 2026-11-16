@@ -214,8 +214,16 @@ extension ShortcutsKey {
             // Lua-only: a long swipe's step in mm (#1873 ▸ Ruling
             // 2026-11-16).
             return .luaOnly
-        case .scrollLongSwipes,
-            .scrollNaturalTrackpad, .scrollNaturalMouse,
+        case .scrollLongSwipes:
+            // The Trackpad card's foot (#3369): greyed while no
+            // two-finger swipe runs the pan.
+            return .row(
+                .shortcuts,
+                .gestures,
+                .showMore,
+                gate: .runtime(.noPanSwipe)
+            )
+        case .scrollNaturalTrackpad, .scrollNaturalMouse,
             .gestureBindings:
             // The Mouse & trackpad drawer's first group (#1656).
             return .row(.shortcuts, .gestures, .showMore)

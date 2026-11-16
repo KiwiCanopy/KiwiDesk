@@ -54,6 +54,9 @@ enum SettingRuntimeGate: Hashable {
     /// shipped set (#3074); off `default` its container is not drawn
     /// (#3260).
     case defaultsToRestore
+    /// No two-finger swipe runs the pan, so Long swipes reach no
+    /// binding (#3369).
+    case noPanSwipe
     /// Non-default layer exists in configuration.
     case layersExist
     /// A Track space exists or a Track verb is bound (#1440) —

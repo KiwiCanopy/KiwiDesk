@@ -71,8 +71,7 @@ struct GestureAutoplayWiringTests {
         }
         for file in [
             "GestureEntry.swift", "GestureEntry+Item.swift",
-            "GesturesPart.swift", "GesturesScrollEntries.swift",
-            "GesturesShelfEntries.swift",
+            "GesturesPart.swift", "GesturesShelfEntries.swift",
         ] {
             let source = try Self.squashed(
                 "Settings/Components/Gestures/" + file

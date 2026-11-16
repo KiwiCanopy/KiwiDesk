@@ -65,7 +65,7 @@ struct ShortcutsSegmentTests {
         model.showShortcutsSegment(holding: catalog.layersCard.control.id)
         #expect(model.nav.shortcutsSegment == .personal)
         model.showShortcutsSegment(
-            holding: catalog.gestures.children.mouseResize.id
+            holding: catalog.gestures.children.longSwipes.id
         )
         #expect(model.nav.shortcutsSegment == .mouse)
         model.showShortcutsSegment(holding: catalog.focusKeys.id)

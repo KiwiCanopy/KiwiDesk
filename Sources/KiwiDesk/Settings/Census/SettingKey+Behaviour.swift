@@ -94,7 +94,8 @@ extension BehaviourKey {
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
             .tilingStartOverride, .tilingStartGlobal,
-            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
+            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal,
+            .mouseResize:
             return .luaOnly
         case .tilingStart:
             // Never greyed: the menu row and Lua pause tiling too.
@@ -113,7 +114,7 @@ extension BehaviourKey {
                 .atRest,
                 gate: .runtime(.noBarShows)
             )
-        case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
+        case .mouseFollowsFocus, .mouseHoverFocus,
             .mouseHoverFocusDelay:
             // Moved from Behavior with #1726: the Mouse &
             // trackpad drawer explains the gestures they tune.
@@ -171,7 +172,8 @@ extension BehaviourKey {
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride,
             .tilingStartOverride, .tilingStartGlobal,
-            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
+            .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal,
+            .mouseResize:
             return .none
         case .maximizeFollowFocus:
             return .text(
@@ -189,11 +191,6 @@ extension BehaviourKey {
             return .text("shortcuts.tiling_off.hide_bars")
         case .mouseHoverFocusDelay:
             return .text("behavior.mouse.hover_focus_delay")
-        case .mouseResize:
-            return .text(
-                "behavior.mouse.resize_action",
-                help: "behavior.mouse.resize_action.help"
-            )
         case .mouseFollowsFocus:
             return .text("behavior.mouse.follows_focus")
         case .mouseHoverFocus:

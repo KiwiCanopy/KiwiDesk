@@ -211,7 +211,8 @@ extension TilingOffWords {
                 .gapsAndBorders
             )
         case .onlyDefaultLayer, .trackUnused, .appWideLuaOwned,
-            .storedProfilePage, .otherLayerPicked, .matchesDefaults:
+            .storedProfilePage, .otherLayerPicked, .matchesDefaults,
+            .noPanSwipe:
             nil
         }
     }

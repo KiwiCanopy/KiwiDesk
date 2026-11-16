@@ -52,6 +52,9 @@ struct ShortcutsGates {
         /// The focus border is off, so hiding it while tiling is
         /// off hides nothing (#3089).
         case focusBorderOff
+        /// No two-finger swipe moves focus or walks the windows, so
+        /// Long swipes reach nothing (#3369).
+        case noPanSwipe
     }
 
     /// Evaluates inert reason for setting key.
@@ -83,6 +86,13 @@ struct ShortcutsGates {
                 return .otherLayerPicked
             }
             return defaultsToRestore ? nil : .matchesDefaults
+        case .shortcuts(.scrollLongSwipes):
+            // The page's map is the edited profile's resolved one
+            // (#3225), so no profile layer goes over it.
+            return GestureSeeds.longSwipesApply(
+                base: config.gesture,
+                profile: nil
+            ) ? nil : .noPanSwipe
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -168,6 +178,7 @@ struct ShortcutsGates {
         .shortcuts(.modifierSides),
         .shortcuts(.shortcutBase),
         .shortcuts(.restoreDefaults),
+        .shortcuts(.scrollLongSwipes),
         .behaviour(.tilingOffHidesBars),
         .behaviour(.tilingOffHidesBorders),
     ]

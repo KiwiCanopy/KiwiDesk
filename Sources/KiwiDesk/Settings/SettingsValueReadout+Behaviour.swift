@@ -102,21 +102,15 @@ extension SettingsValueReadout {
                 old: before.placementOverride,
                 new: after.placementOverride
             )
-        case .mouseResize:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: behaviourMouseResize(before.mouseResize),
-                    new: behaviourMouseResize(after.mouseResize)
-                )
-            ]
         case .tilingStart, .tilingOffHidesBorders, .tilingOffHidesBars:
             return tilingRows(key, census, old: old, new: new)
         // Lua-only (#3008): no draft writes the per-Space values,
         // and the app-wide ones are undrafted.
         case .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal:
+            return []
+        // Lua-only (#3369): no row draws it.
+        case .mouseResize:
             return []
         case .mouseFollowsFocus:
             return [
@@ -251,25 +245,6 @@ extension SettingsValueReadout {
             return L("diff.value.float_placement.center", "Centered")
         case .keep:
             return L("diff.value.float_placement.keep", "Kept in place")
-        }
-    }
-
-    /// `BehaviorSection`'s segmented-picker labels, reused
-    /// verbatim.
-    private static func behaviourMouseResize(
-        _ mode: MouseResizeMode
-    ) -> String {
-        switch mode {
-        case .layout:
-            return L(
-                "behavior.mouse.resize_layout",
-                "Resize adjacent windows"
-            )
-        case .snapBack:
-            return L(
-                "behavior.mouse.resize_snap_back",
-                "Snap back to slot"
-            )
         }
     }
 

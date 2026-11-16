@@ -169,10 +169,9 @@ argues both.
 
 Every shipped segmented strip fits a full-width row at the
 720 pt minimum (`SettingsWidthClass.minimum`), measured against
-all ten locales (#95): the widest is Mouse resize action at
-~503 pt (`es`, "Redimensionar las ventanas contiguas"), then App
-Bar active indicator at ~408 pt (`fr`). Re-measure a strip
-before adding a fourth segment to either of those two.
+all ten locales (#95): the widest is App Bar active indicator
+at ~408 pt (`fr`). Re-measure a strip before adding a fourth
+segment to it.
 
 **The per-Space override rows keep menus, not segmented
 controls (#291).** The override editor is a full pushed pane
