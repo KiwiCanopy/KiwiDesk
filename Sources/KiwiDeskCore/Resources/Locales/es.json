@@ -2332,7 +2332,6 @@
   "shortcuts.gestures.list.restore": "Restaurar predeterminados",
   "shortcuts.gestures.list.restore_ask": "Otros perfiles también cambiaron estos gestos.",
   "shortcuts.gestures.list.restore_keeps": "Los gestos que añadiste se mantienen.",
-  "shortcuts.gestures.list.trackpad_help_ladder": "Asigna una acción a un toque, un deslizamiento, un gesto de juntar o separar los dedos o un giro; un toque puede no usar teclas. Dos dedos se mueven entre ventanas, tres entre espacios y el resumen de Escritorios, cuatro entre pantallas. Un deslizamiento con dos dedos avanza tanto como deslizas; con tres a cinco dedos avanza un paso por deslizamiento. Si das a una dirección su propia acción, actúa una vez por deslizamiento.",
   "shortcuts.gestures.mixed_caption": "Cada dirección actúa una vez por deslizamiento y ya no sigue tus dedos.",
   "shortcuts.gestures.mixed_caption_wheel": "Cada dirección actúa una vez por desplazamiento, sin importar cuánto te desplaces.",
   "shortcuts.gestures.natural.fixed": "Cada dirección se queda como la configuraste, diga lo que diga «%1$@».",

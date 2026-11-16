@@ -2332,7 +2332,6 @@
   "shortcuts.gestures.list.restore": "Restaurar Padrões",
   "shortcuts.gestures.list.restore_ask": "Outros perfis também alteraram estes gestos.",
   "shortcuts.gestures.list.restore_keeps": "Os gestos que você adicionou continuam.",
-  "shortcuts.gestures.list.trackpad_help_ladder": "Atribua uma ação a um toque, um deslize, um gesto de juntar ou separar os dedos ou um giro; um toque pode dispensar teclas. Dois dedos passam entre janelas, três entre espaços e a visão geral das Mesas, quatro entre telas. Um deslize com dois dedos avança o quanto você deslizar; com três a cinco dedos, avança um passo por deslize. Dê a uma direção sua própria ação e ela age uma vez por deslize.",
   "shortcuts.gestures.mixed_caption": "Cada direção age uma vez por deslize e não acompanha mais seus dedos.",
   "shortcuts.gestures.mixed_caption_wheel": "Cada direção age uma vez por rolagem, não importa o quanto você role.",
   "shortcuts.gestures.natural.fixed": "Cada direção fica como você definiu, independentemente de “%1$@”.",

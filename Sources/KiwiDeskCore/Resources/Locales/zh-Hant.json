@@ -2332,7 +2332,6 @@
   "shortcuts.gestures.list.restore": "回復預設值",
   "shortcuts.gestures.list.restore_ask": "其他描述檔也變更了這些手勢。",
   "shortcuts.gestures.list.restore_keeps": "你加入的手勢會保留。",
-  "shortcuts.gestures.list.trackpad_help_ladder": "為點一下、滑動、靠攏、分開或旋轉指定操作；點一下可以不使用按鍵。兩指在視窗間移動，三指在空間和桌面總覽間移動，四指在螢幕間移動。兩指滑動滑多遠就走多遠；三到五指每滑動一次走一步。為某個方向單獨指定操作後，該方向每次滑動執行一次。",
   "shortcuts.gestures.mixed_caption": "每個方向每次滑動執行一次，不再隨手指移動。",
   "shortcuts.gestures.mixed_caption_wheel": "無論捲動多遠，每個方向每次捲動只執行一次。",
   "shortcuts.gestures.natural.fixed": "無論「%1$@」如何設定，每個方向都維持你設定的方式。",

@@ -2332,7 +2332,6 @@
   "shortcuts.gestures.list.restore": "恢复默认",
   "shortcuts.gestures.list.restore_ask": "其他描述文件也更改了这些手势。",
   "shortcuts.gestures.list.restore_keeps": "你添加的手势会保留。",
-  "shortcuts.gestures.list.trackpad_help_ladder": "为轻点、轻扫、捏合或旋转指定操作；轻点可以不使用按键。双指在窗口间移动，三指在空间和桌面概览间移动，四指在显示器间移动。双指轻扫扫多远就走多远；三到五指每轻扫一次走一步。为某个方向单独指定操作后，该方向每次轻扫执行一次。",
   "shortcuts.gestures.mixed_caption": "每个方向每次轻扫执行一次，不再随手指滑动。",
   "shortcuts.gestures.mixed_caption_wheel": "无论滚动多远，每个方向每次滚动只执行一次。",
   "shortcuts.gestures.natural.fixed": "无论“%1$@”如何设置，每个方向都保持你设定的方式。",

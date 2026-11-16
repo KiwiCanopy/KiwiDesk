@@ -2332,7 +2332,6 @@
   "shortcuts.gestures.list.restore": "デフォルトに戻す",
   "shortcuts.gestures.list.restore_ask": "他のプロファイルでもこれらのジェスチャが変更されています。",
   "shortcuts.gestures.list.restore_keeps": "追加したジェスチャはそのまま残ります。",
-  "shortcuts.gestures.list.trackpad_help_ladder": "タップ、スワイプ、ピンチ、回転に操作を割り当てます。タップはキーなしでも使えます。2本指はウインドウ間、3本指はスペースとデスクトップ一覧の間、4本指は画面間を移動します。2本指のスワイプはスワイプした分だけ進み、3〜5本指はスワイプ1回につき1ステップ進みます。1つの方向に独自の操作を割り当てると、その方向はスワイプ1回につき1回動作します。",
   "shortcuts.gestures.mixed_caption": "各方向はスワイプ1回につき1回ずつ動作し、指の動きに合わせてスライドしなくなります。",
   "shortcuts.gestures.mixed_caption_wheel": "各方向は、どれだけスクロールしてもスクロール1回につき1回ずつ動作します。",
   "shortcuts.gestures.natural.fixed": "各方向は、「%1$@」にかかわらず、設定したとおりに動作します。",

@@ -2332,7 +2332,6 @@
   "shortcuts.gestures.list.restore": "Standards wiederherstellen",
   "shortcuts.gestures.list.restore_ask": "Andere Profile haben diese Gesten auch geändert.",
   "shortcuts.gestures.list.restore_keeps": "Gesten, die du hinzugefügt hast, bleiben.",
-  "shortcuts.gestures.list.trackpad_help_ladder": "Weise einem Tippen, einer Wischbewegung, einem Auf- oder Zuziehen oder einem Drehen eine Aktion zu; ein Tippen kommt auch ohne Tasten aus. Zwei Finger wechseln zwischen Fenstern, drei zwischen Spaces und der Schreibtischübersicht, vier zwischen Bildschirmen. Eine Wischbewegung mit zwei Fingern geht so weit, wie du wischst; mit drei bis fünf Fingern geht sie einen Schritt pro Wischbewegung. Gibst du einer Richtung eine eigene Aktion, wirkt sie einmal pro Wischbewegung.",
   "shortcuts.gestures.mixed_caption": "Jede Richtung wirkt einmal pro Wischbewegung und gleitet nicht mehr mit deinen Fingern mit.",
   "shortcuts.gestures.mixed_caption_wheel": "Jede Richtung wirkt einmal pro Scrollen, egal wie weit du scrollst.",
   "shortcuts.gestures.natural.fixed": "Jede Richtung bleibt so, wie du sie festgelegt hast, egal was „%1$@“ vorgibt.",
