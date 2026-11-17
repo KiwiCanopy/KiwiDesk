@@ -1115,7 +1115,12 @@ editing here:
     filed at the put-back and never re-places it, the centring
     being the fallback for a screen with no filed frame
     (`PocketWindowTests` ▸ `takeOutKeepsTheSize`,
-    `fallbackPlacesBeforeThePark`). Emptying the slot is
+    `fallbackPlacesBeforeThePark`). A put-back of a maximized
+    window files the frame its Maximize returns to, read through
+    the payment's own `returnFrame(_:of:)`, never the fill, and
+    ends that Maximize through the verdict, adding no ender of its
+    own (#3385, `PocketMaximizeTests` ▸ `putBackFilesTheReturn`,
+    `PocketMaximizeTests` ▸ `filedReturnIsConfined`). Emptying the slot is
     `releasePocketWindow`, for a quit and an unmark alike; the unmark's filing goes through
     `fileMembership`, and it then tiles through the Tile's own
     `setFloating` unless the reason `tileRefusal` names
@@ -2660,7 +2665,9 @@ editing here:
   return record, `maximizedFloatReturn`, and its frame comes back
   only through the one `payMaximizedFloatReturns`** — the tail of
   `retile()`, or a float verb ending it first through
-  `endMaximizeBeforeFloatVerb` — so an ender clears the flag and
+  `endMaximizeBeforeFloatVerb` — save a pocket put-back, which
+  files the frame for its take-out instead; both read it through
+  the one `returnFrame(_:of:)` (#3385) — so an ender clears the flag and
   writes no frame of its own; a new verb moving a float's frame
   takes that door ahead of its base read and steps from the frame
   it returns, and an entry asking whether a return is owed asks

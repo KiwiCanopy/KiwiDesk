@@ -221,15 +221,24 @@ extension KiwiCore {
     }
 
     /// Files the window's frame under the screen it sits on, while
-    /// it is out.
+    /// it is out. A maximized window files the frame its Maximize
+    /// returns to, never the fill, so a take-out lands it plain
+    /// there (#3385); the put-back ends the Maximize.
     private func rememberPocketFrame(of id: WindowID) {
         guard state.pocketPhase(of: id) == .out,
             let window = state.windows[id]
         else { return }
+        // Confined as the payment would place it, so it files under
+        // the screen it goes back on.
+        let returns = state.maximizedFloatReturn[id].flatMap {
+            returnFrame($0, of: window)
+        }
         let dropped = pocketPlate.dropStart.flatMap {
             $0.window == id ? $0.frame : nil
         }
-        let frame = dropped ?? tiler.commandedFrame(of: id) ?? window.frame
+        let frame =
+            returns ?? dropped ?? tiler.commandedFrame(of: id)
+            ?? window.frame
         guard
             let display = TilingEngine.screen(containing: frame)?
                 .kiwiDisplayID,

@@ -6862,9 +6862,17 @@ it, and the maximized window stays beneath that one. On a Floating
 layout Space nothing is tiled, so only a second call or the window
 leaving ends it. `move_floating`, `center_floating`, a resize and a
 mouse drag put it back first; a mouse resize of its edge keeps the
-new size instead. Fails with a pill on a dialog, a full-screen
-window and the Pocket window. A floating window takes an axis too,
+new size instead. Fails with a pill on a dialog, a panel or a
+full-screen window. A floating window takes an axis too,
 and `"in_place"` centres it on the frame it had.
+:::
+
+:::unreleased
+A pocket window out of the Pocket maximizes as any floating window
+does, and marking a maximized floating window with
+[`toggle_pocket_window`](#toggle_pocket_window) keeps it maximized.
+Put back in the Pocket while maximized, it comes out at the frame it
+had before the maximize, not maximized.
 :::
 
 A sticky window fills the screen of the Space it is drawn on. Its

@@ -6646,7 +6646,16 @@ tiled window, so there only a second press or a departure ends it.
 Focus on another float keeps it, a dialog or a plain float alike,
 and the float raise keeps the maximized float lowest of the floats
 while it does not hold focus, so it cannot bury the one in front.
-Dialogs, full-screen windows and the Pocket window stay refused.
+Dialogs, full-screen windows and a window in the Pocket stay refused.
+
+*Amended* (orchestrator after architect-reviewer, 2026-11-17,
+#3385): a pocket window that is out maximizes as any float does,
+since only a pocketed one is drawn nowhere and never the focus.
+Putting it back ends the Maximize, as a departure does, and the
+pocket files the frame the Maximize returns to, never the fill, so
+a take-out lands it plain at that frame. A Maximize belongs to a
+Space and a take-out lands on whichever Space is active, so keeping
+it across a pocketing would need a second copy of it.
 
 The frame it returns to is its own record,
 `maximizedFloatReturn`, written at the press, never `floatFrames`,
