@@ -131,6 +131,10 @@ struct KeySequencePassTests {
         var stock = self.router()
         _ = press(&stock, "ctrl+alt+space")
         #expect(press(&stock, "ctrl+cmd+shift+4") == .passed(closing: false))
+        // The ⌘⇧3 twin on its own default chord (guard-prover).
+        _ = press(&stock, "ctrl+alt+space")
+        _ = press(&stock, "ctrl+alt+space")
+        #expect(press(&stock, "ctrl+cmd+shift+3") == .passed(closing: false))
     }
 
     @Test("A shortcut switched off in macOS stays swallowed")
