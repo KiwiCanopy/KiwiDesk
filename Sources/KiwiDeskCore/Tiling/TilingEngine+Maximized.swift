@@ -26,11 +26,7 @@ extension TilingEngine {
             let slot = frames[id] ?? state.maximizedFloatReturn[id]?.frame
         else { return frames }
         var context = input.context
-        context.bounds = Self.maximizedBounds(
-            shape,
-            screen: visibleBounds(screen),
-            slot: slot
-        )
+        context.bounds = maximizedBounds(shape, on: screen, slot: slot)
         context.gaps = .none
         context.focused = id
         var filled = frames
@@ -41,6 +37,17 @@ extension TilingEngine {
                 context: context
             )[id] ?? context.bounds
         return filled
+    }
+
+    /// The rect a Maximize of `shape` fills on `screen` from the
+    /// window's `slot`: the one owner of the fill's bounds, which a
+    /// pocket take-out's plate lands on too (#3408).
+    func maximizedBounds(
+        _ shape: MaximizeShape,
+        on screen: NSScreen,
+        slot: CGRect
+    ) -> CGRect {
+        Self.maximizedBounds(shape, screen: visibleBounds(screen), slot: slot)
     }
 
     /// The rect a Maximize of `shape` fills on a `screen` of AX

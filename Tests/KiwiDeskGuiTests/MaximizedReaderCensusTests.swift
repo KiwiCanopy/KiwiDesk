@@ -40,8 +40,11 @@ struct MaximizedReaderCensusTests {
         // The mode write ends it; a re-key reaches a traveler's flag
         // on a Space it is no member of (#3035).
         "State/WorkspaceManager.swift": 3,
-        // The toggle, its shape change, and the drag's end.
-        "App/KiwiCore+Maximize.swift": 7,
+        // The toggle, its shape change, and the drag's end; a pocket
+        // take-out writes its own and lands plain beside any STORED
+        // Maximize, never the verdict, which misses one awaiting its
+        // window's return (#3408).
+        "App/KiwiCore+Maximize.swift": 9,
         // Rearranging writes end it.
         "Commands/KiwiCore+Resize.swift": 2,
         "Commands/KiwiCore+ResetLayoutSizing.swift": 1,

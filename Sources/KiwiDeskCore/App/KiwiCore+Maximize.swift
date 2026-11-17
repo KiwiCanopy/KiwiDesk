@@ -93,11 +93,39 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// Maximizes `id`, just out of the pocket at `frame`, as `shape`
+    /// on the active Space `spaceID`, through a press's admission
+    /// (#3408), and returns the frame it fills. Its return record is
+    /// `frame`, never the park it left. Nil, recording nothing, where
+    /// that Space stores any Maximize or the press would refuse.
+    func maximizeOnTakeOut(
+        _ id: WindowID,
+        _ shape: MaximizeShape,
+        returningTo frame: CGRect,
+        on spaceID: SpaceID
+    ) -> CGRect? {
+        guard spaceID == state.workspaces.activeSpace,
+            let space = state.workspaces[spaceID],
+            space.maximized == nil,
+            let screen = TilingEngine.screen(for: spaceID, in: state),
+            let follows = maximizeAdmits(id, on: space, returningTo: frame)
+        else { return nil }
+        state.workspaces.withSpace(spaceID) {
+            $0.maximized = Maximize(window: id, shape: shape, follows: follows)
+        }
+        return tiler.maximizedBounds(shape, on: screen, slot: frame)
+    }
+
     /// Whether a press may maximize `id` on `space`, and the follow
     /// it stamps: a tile takes the setting's (#3063); an effective
     /// float follows nothing and records the frame it returns to
-    /// (#3036). Nil refuses, recording nothing.
-    private func maximizeAdmits(_ id: WindowID, on space: Space) -> Bool? {
+    /// (#3036), `seed` where a take-out names it (#3408). Nil
+    /// refuses, recording nothing.
+    private func maximizeAdmits(
+        _ id: WindowID,
+        on space: Space,
+        returningTo seed: CGRect? = nil
+    ) -> Bool? {
         if state.placementMode(of: space) != .floating,
             state.effectiveTiledMembers(of: space).contains(id)
         {
@@ -110,8 +138,10 @@ extension KiwiCore {
         else { return nil }
         // A return a held pass still owes is where the window goes
         // back to; its frame now is the fill.
+        // A take-out's seed is where it came out (#3408).
         state.maximizedFloatReturn[id] =
-            state.maximizedFloatReturn[id]
+            seed.map { .init(pid: window.pid, frame: $0) }
+            ?? state.maximizedFloatReturn[id]
             ?? .init(
                 pid: window.pid,
                 frame: tiler.commandedFrame(of: id) ?? window.frame

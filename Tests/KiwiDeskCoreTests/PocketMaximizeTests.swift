@@ -6,10 +6,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// An out pocket window maximizes as any float (#3385): a second
-/// press returns it, putting it back in the pocket ends the Maximize
-/// and files the frame it returns to, and a take-out lands it plain
-/// there. Reads the host's first screen, which the pocket files a
-/// frame under.
+/// press returns it, and putting it back in the pocket ends the
+/// Maximize and files the frame it returns to. Reads the host's first
+/// screen, which the pocket files a frame under.
 @Suite("Pocket window maximize (#3385)", .serialized)
 @MainActor
 struct PocketMaximizeTests {
@@ -103,16 +102,12 @@ struct PocketMaximizeTests {
         #expect(core.state.maximizedFloatReturn[one] == nil)
         let filed = try #require(core.state.pocket.first?.frames.values.first)
         #expect(filed == own)
-        // The take-out lands it plain, at that frame.
+        // The take-out maximizes it again (#3408), returning to that
+        // frame on a second press.
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(maximized(core) == nil)
-        let back = try #require(
-            core.tiler.stashOriginal(one) ?? core.state.windows[one]?.frame
-        )
-        // The size: a delivered frame may be nudged into the grow
-        // bounds, as `PocketWindowTests` ▸ `takeOutKeepsTheSize` says.
-        #expect(back.size == own.size)
+        #expect(maximized(core) == one)
+        #expect(core.state.maximizedFloatReturn[one]?.frame == own)
     }
 
     @Test("a pocketed window is never maximized, nor paid its return")

@@ -30,6 +30,10 @@ public struct PocketSlot: Sendable, Equatable, Codable {
     /// nil for the general list `pocket` works — the one answer to
     /// "has a key of its own". Stored as `owner`.
     public var keyedApp: String?
+    /// The Maximize it went into the pocket with, which its next
+    /// take-out puts back on the active Space (#3408); nil for a
+    /// window pocketed plain. Absent in an older snapshot.
+    public var returnMaximized: MaximizeShape?
 
     public init(
         window: WindowID,
@@ -37,7 +41,8 @@ public struct PocketSlot: Sendable, Equatable, Codable {
         phase: Phase,
         frames: [String: CGRect] = [:],
         cameFrom: WindowID? = nil,
-        owner: String? = nil
+        owner: String? = nil,
+        returnMaximized: MaximizeShape? = nil
     ) {
         self.window = window
         self.pid = pid
@@ -45,6 +50,7 @@ public struct PocketSlot: Sendable, Equatable, Codable {
         self.frames = frames
         self.cameFrom = cameFrom
         self.keyedApp = owner
+        self.returnMaximized = returnMaximized
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -54,6 +60,7 @@ public struct PocketSlot: Sendable, Equatable, Codable {
         case frames
         case cameFrom = "came_from"
         case keyedApp = "owner"
+        case returnMaximized = "return_maximized"
     }
 }
 

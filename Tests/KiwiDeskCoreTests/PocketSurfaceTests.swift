@@ -90,6 +90,9 @@ struct PocketSurfaceTests {
     func inPlaceCarries() throws {
         let core = makeCore()
         core.execute("pocket")
+        // The Maximize it went in with rides the slot (#3408).
+        let shape = MaximizeShape(axis: .height, share: 0.5)
+        core.state.setPocketReturnMaximized(shape, of: one)
         let snapshot = core.state.inPlaceSnapshot(
             monocleShown: [:],
             ratios: { _ in .init(entries: [:], drawn: SessionRatios()) }
@@ -97,11 +100,34 @@ struct PocketSurfaceTests {
         let data = try JSONEncoder().encode(snapshot)
         let read = try JSONDecoder().decode(StateSnapshot.self, from: data)
         #expect(read.pocket.first?.window == one)
+        #expect(read.pocket.first?.returnMaximized == shape)
         let next = makeCore()
         #expect(next.state.workspaces.space(of: one) != nil)
         next.state.adopt(read)
         #expect(next.state.pocketPhase(of: one) == .pocketed)
         #expect(next.state.workspaces.space(of: one) == nil)
+        #expect(next.state.pocketSlot(of: one)?.returnMaximized == shape)
+        // A snapshot from before #3408 carries no such key: the slot
+        // still reads, plain, so an upgrade restart drops no window.
+        let older = try Self.strippingReturnMaximized(data)
+        let old = try JSONDecoder().decode(StateSnapshot.self, from: older)
+        #expect(old.pocket.first?.window == one)
+        #expect(old.pocket.first?.returnMaximized == nil)
+    }
+
+    /// `data` with every pocket slot's `return_maximized` removed.
+    private static func strippingReturnMaximized(
+        _ data: Data
+    ) throws -> Data {
+        var root = try #require(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        let slots = try #require(root["pockets"] as? [[String: Any]])
+        #expect(slots.contains { $0["return_maximized"] != nil })
+        root["pockets"] = slots.map {
+            $0.filter { $0.key != "return_maximized" }
+        }
+        return try JSONSerialization.data(withJSONObject: root)
     }
 
     @Test("a plain snapshot carries no pocket")
