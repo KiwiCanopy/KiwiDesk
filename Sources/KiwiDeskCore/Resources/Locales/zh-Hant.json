@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "使用此手勢時請至少按住一個按鍵。",
   "shortcuts.gestures.refusal.no_directions": "此手勢沒有方向。",
   "shortcuts.gestures.refusal.shift": "macOS 會將 ⇧ 加滾輪變成橫向捲動。",
-  "shortcuts.gestures.refusal.single_key": "請按住兩個或更多按鍵：macOS 和 App 會用一個按鍵捲動。",
   "shortcuts.gestures.refusal.taken": "另一列已使用這些按鍵。",
   "shortcuts.gestures.remove": "移除手勢",
   "shortcuts.gestures.row_name": "%2$@ + %1$@",

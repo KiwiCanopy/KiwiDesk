@@ -5471,12 +5471,14 @@ flick, at the release when they travelled 5% and were still moving
 at 40% of the pad per second.
 
 The keys are modifiers joined by `+` — `control` (`ctrl`),
-`option` (`opt`, `alt`), `shift`, `command` (`cmd`) — and `""`
-holds none. A tap, `wheel_click` and `side_buttons` may hold
-none; every other input needs at least one, so a plain click
-stays the app's. `wheel`, `wheel_x`
-and `swipe2` need two or more, and `wheel` and `wheel_x` refuse
-`shift`, which macOS turns into a sideways scroll.
+`option` (`opt`, `alt`), `shift`, `command` (`cmd`) and `hyper`,
+the Hyper key `set_hyper_key` sets — and `""` holds none. A tap,
+`wheel_click` and `side_buttons` may hold none; every other input
+needs at least one, so a plain click stays the app's. `wheel`,
+`wheel_x` and `swipe2` need two or more, or `hyper` alone or with
+others, since no app answers Hyper; `wheel` and `wheel_x` refuse
+`shift`, which macOS turns into a sideways scroll. A `hyper` key
+binds while no Hyper key is set, and does nothing until one is.
 :::
 
 ### Gesture actions

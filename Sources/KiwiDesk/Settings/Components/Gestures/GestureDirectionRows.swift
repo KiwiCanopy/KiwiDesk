@@ -160,7 +160,7 @@ struct GestureDirectionRow: View {
             "%1$@, %2$@, with %3$@",
             input,
             way,
-            ScrollChordGlyphs.text(key.chord)
+            ScrollChordGlyphs.spoken(key.chord)
         )
     }
 

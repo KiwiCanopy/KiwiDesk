@@ -11,11 +11,15 @@ public struct ScrollChord: OptionSet, Hashable, Sendable {
     public static let option = ScrollChord(rawValue: 1 << 1)
     public static let command = ScrollChord(rawValue: 1 << 2)
     public static let shift = ScrollChord(rawValue: 1 << 3)
+    /// The Hyper key (#1870, #3407): no event flag, so a reader
+    /// takes it from the `HyperHold` beside the flags.
+    public static let hyper = ScrollChord(rawValue: 1 << 4)
 
     /// Reads the four modifiers off an event's flags, dropping
-    /// every other bit.
-    public init(flags: CGEventFlags) {
-        var chord: ScrollChord = []
+    /// every other bit, and Hyper from its hold. `hyper` has no
+    /// default, so a reader cannot forget the hold (#3407).
+    public init(flags: CGEventFlags, hyper: Bool) {
+        var chord: ScrollChord = hyper ? .hyper : []
         if flags.contains(.maskControl) { chord.insert(.control) }
         if flags.contains(.maskAlternate) { chord.insert(.option) }
         if flags.contains(.maskCommand) { chord.insert(.command) }

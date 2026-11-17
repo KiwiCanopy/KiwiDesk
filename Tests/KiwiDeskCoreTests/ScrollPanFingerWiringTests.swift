@@ -58,7 +58,7 @@ struct ScrollPanFingerWiringTests {
         base.stepLength = 10
         core.applyScrollGestures(base: base, profile: nil)
         let reader = MovingReader()
-        core.mouse.trackpad.makeReader = { _ in reader }
+        core.mouse.trackpad.makeReader = { _, _ in reader }
         core.mouse.trackpad.start()
         defer { core.mouse.trackpad.stop() }
         #expect(core.mouse.trackpad.isReading)

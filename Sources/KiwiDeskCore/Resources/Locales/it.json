@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "Tieni premuto almeno un tasto con questo gesto.",
   "shortcuts.gestures.refusal.no_directions": "Questo gesto non ha direzioni.",
   "shortcuts.gestures.refusal.shift": "macOS trasforma ⇧ e la rotella in uno scorrimento laterale.",
-  "shortcuts.gestures.refusal.single_key": "Tieni premuti due o più tasti: macOS e le app scorrono con uno solo.",
   "shortcuts.gestures.refusal.taken": "Un'altra riga usa già questi tasti.",
   "shortcuts.gestures.remove": "Rimuovi gesto",
   "shortcuts.gestures.row_name": "%1$@ con %2$@",

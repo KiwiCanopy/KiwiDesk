@@ -164,7 +164,7 @@ enum OnboardingGestures {
                 "onboarding.gestures.spoken_chord",
                 "%1$@: %2$@, %3$@",
                 label,
-                SidedChordWords.label(ScrollChordGlyphs.text(key.chord)),
+                ScrollChordGlyphs.spoken(key.chord),
                 motion
             )
         return OnboardingKeyFamily(

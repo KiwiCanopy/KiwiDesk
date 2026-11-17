@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "Maintenez au moins une touche avec ce geste.",
   "shortcuts.gestures.refusal.no_directions": "Ce geste n'a pas de direction.",
   "shortcuts.gestures.refusal.shift": "macOS transforme ⇧ et la molette en défilement latéral.",
-  "shortcuts.gestures.refusal.single_key": "Maintenez deux touches ou plus : macOS et les apps défilent avec une seule.",
   "shortcuts.gestures.refusal.taken": "Une autre ligne utilise déjà ces touches.",
   "shortcuts.gestures.remove": "Supprimer le geste",
   "shortcuts.gestures.row_name": "%1$@ avec %2$@",

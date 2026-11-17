@@ -28,6 +28,18 @@ extension KiwiCore {
             buttons: PointerButtonSettings(resolved: gestures.resolved)
         )
         applyScrollGestures(base: scrollBase, profile: scrollProfile)
+        keys.setHyperGestureBound(
+            gestures.resolved.keys.contains { $0.chord.contains(.hyper) }
+        )
+    }
+
+    /// Hands the three gesture readers the Hyper layer's one hold
+    /// (#3407): Hyper is no event flag, so each reads it there.
+    func wireHyperHold() {
+        let hold = keys.hyperHold
+        mouse.scroll.hyperHold = hold
+        mouse.pointer.hyperHold = hold
+        mouse.trackpad.hyperHold = hold
     }
 
     /// A config load's reset: the load applies at its tail.

@@ -22,6 +22,7 @@ struct GestureChordRecorder: View {
     var armsOnAppear = false
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
+    @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
@@ -54,6 +55,11 @@ struct GestureChordRecorder: View {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)
+            } else if hyperDormant {
+                Text(Self.dormantCaption)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .onChange(of: coordinator.generation) { _, _ in
@@ -72,9 +78,13 @@ struct GestureChordRecorder: View {
             .modifier(
                 RecorderButtonChrome(recording: recording, flashing: flashing)
             )
+            // Dim, never disable: re-recording is how a row leaves
+            // Hyper, as a key row's well (#1870, #3407).
+            .opacity(hyperDormant ? 0.55 : 1)
             .help(Self.recordHelp)
             .accessibilityLabel(name)
-            .accessibilityValue(label)
+            .accessibilityValue(SidedChordWords.label(label))
+            .accessibilityHint(hyperDormant ? Self.dormantCaption : "")
     }
 
     private var clearButton: some View {
@@ -93,6 +103,18 @@ struct GestureChordRecorder: View {
                     .iconButtonAffordance(Self.clearHelp)
                 }
             }
+    }
+
+    /// A Hyper chord while no Hyper key is set: it cannot fire.
+    private var hyperDormant: Bool {
+        hyperKeyIsOff && !recording && chord.contains(.hyper)
+    }
+
+    static var dormantCaption: String {
+        L(
+            "shortcuts.gestures.hyper_dormant",
+            "Hyper is off, so this gesture doesn't work."
+        )
     }
 
     private var buttonTint: Color {
@@ -162,6 +184,7 @@ struct GestureChordRecorder: View {
         }
         recorder.start(
             mode: .modifiers,
+            hyper: !hyperKeyIsOff,
             preview: { preview = $0 },
             finish: { finish($0) }
         )

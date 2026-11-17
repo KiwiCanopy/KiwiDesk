@@ -30,6 +30,8 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     )
 
     private let deliver: Deliver
+    /// Read at each frame's modifiers (#3407).
+    private let hyper: HyperHold
     private let list: MultitouchSupport.DeviceList
     private let routers = OSAllocatedUnfairLock<[UInt: TrackpadGestureRouter]>(
         initialState: [:]
@@ -42,9 +44,11 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     private static let generations = OSAllocatedUnfairLock(initialState: 0)
 
     private init(
+        hyper: HyperHold,
         deliver: @escaping Deliver,
         list: MultitouchSupport.DeviceList
     ) {
+        self.hyper = hyper
         self.deliver = deliver
         self.list = list
         var sizes: [UInt: CGSize] = [:]
@@ -69,14 +73,21 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
     /// Starts reading every connected trackpad; nil where the
     /// framework is absent, no device is connected, or a reader
     /// already runs.
-    static func live(deliver: @escaping Deliver) -> TouchReaderHandle? {
+    static func live(
+        hyper: HyperHold,
+        deliver: @escaping Deliver
+    ) -> TouchReaderHandle? {
         guard MultitouchSupport.isAvailable,
             let register = MultitouchSupport.registerSymbol.function,
             let start = MultitouchSupport.startSymbol.function
         else { return nil }
         let list = MultitouchSupport.devices()
         guard !list.devices.isEmpty else { return nil }
-        let reader = TouchReader(deliver: deliver, list: list)
+        let reader = TouchReader(
+            hyper: hyper,
+            deliver: deliver,
+            list: list
+        )
         let claimed = current.withLock { slot -> Bool in
             guard slot == nil else { return false }
             slot = reader
@@ -153,7 +164,8 @@ final class TouchReader: TouchReaderHandle, @unchecked Sendable {
             time: time,
             contacts: contacts,
             modifiers: ScrollChord(
-                flags: CGEventSource.flagsState(.combinedSessionState)
+                flags: CGEventSource.flagsState(.combinedSessionState),
+                hyper: hyper.isHeld
             )
         )
         let key = UInt(bitPattern: device)

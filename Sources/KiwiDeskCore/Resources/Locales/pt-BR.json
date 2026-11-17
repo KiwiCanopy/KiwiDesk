@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "Segure pelo menos uma tecla com este gesto.",
   "shortcuts.gestures.refusal.no_directions": "Este gesto não tem direções.",
   "shortcuts.gestures.refusal.shift": "O macOS transforma ⇧ e a roda em uma rolagem lateral.",
-  "shortcuts.gestures.refusal.single_key": "Segure duas ou mais teclas: o macOS e os apps rolam com uma.",
   "shortcuts.gestures.refusal.taken": "Outra linha já usa estas teclas.",
   "shortcuts.gestures.remove": "Remover gesto",
   "shortcuts.gestures.row_name": "%2$@ + %1$@",

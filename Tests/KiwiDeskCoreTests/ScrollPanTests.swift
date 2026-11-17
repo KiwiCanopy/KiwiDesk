@@ -307,7 +307,7 @@ struct ScrollPanTests {
     func bootstrapWiresTheHandler() {
         let core = makeTestCore()
         var made = 0
-        core.mouse.scroll.makeTap = { _ in
+        core.mouse.scroll.makeTap = { _, _ in
             made += 1
             return nil
         }

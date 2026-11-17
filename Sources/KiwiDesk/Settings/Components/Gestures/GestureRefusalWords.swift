@@ -17,7 +17,8 @@ enum GestureRefusalWords {
         case .singleModifierScroll:
             L(
                 "shortcuts.gestures.refusal.single_key",
-                "Hold two or more keys: macOS and apps scroll with one."
+                "Hold two or more keys, or Hyper: macOS and apps scroll "
+                    + "with one."
             )
         case .shiftOnWheel:
             L(

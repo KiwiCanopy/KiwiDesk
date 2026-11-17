@@ -78,7 +78,7 @@ struct ModifierGrabWiringTests {
         let core = make(Log())
         // A wired consumer with its default chords asks for the tap.
         var asked: [CGEventMask] = []
-        core.mouse.pointer.makeTap = { mask, _ in
+        core.mouse.pointer.makeTap = { mask, _, _ in
             asked.append(mask)
             return nil
         }

@@ -112,7 +112,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
                 "shortcuts.gestures.input_chord",
                 "%1$@, with %2$@",
                 GestureListWords.input(key.input),
-                chord
+                ScrollChordGlyphs.spoken(key.chord)
             )
         }
         return L(
@@ -120,7 +120,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
             "%1$@, %2$@, with %3$@",
             GestureListWords.input(key.input),
             way,
-            chord
+            ScrollChordGlyphs.spoken(key.chord)
         )
     }
 

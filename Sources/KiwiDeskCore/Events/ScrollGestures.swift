@@ -77,13 +77,18 @@ public final class ScrollGestures {
     public typealias Handler =
         @MainActor (ScrollGestureEvent, ScrollRoute) -> Void
     typealias MakeTap =
-        @MainActor (@escaping ScrollGestureTap.Deliver)
+        @MainActor (HyperHold, @escaping ScrollGestureTap.Deliver)
         -> ScrollTapHandle?
 
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// Builds the machine tap. Live in production; `makeTestCore`
     /// pins one that touches nothing.
-    var makeTap: MakeTap = { ScrollGestureTap.live(deliver: $0) }
+    var makeTap: MakeTap = {
+        ScrollGestureTap.live(hyper: $0, deliver: $1)
+    }
+    /// The Hyper hold the tap reads (#3407); `KiwiCore` hands it
+    /// the keybinding manager's at bootstrap.
+    var hyperHold = HyperHold()
     /// macOS's own Natural scrolling (#3200). Live in production;
     /// `makeTestCore` pins it unset.
     var host = HostNaturalScrolling.live
@@ -249,7 +254,7 @@ public final class ScrollGestures {
             return
         }
         if tap == nil {
-            tap = makeTap { [weak self] events in
+            tap = makeTap(hyperHold) { [weak self] events in
                 DispatchQueue.main.async {
                     MainActor.assumeIsolated { self?.receive(events) }
                 }

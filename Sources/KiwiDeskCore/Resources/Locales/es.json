@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "Mantén pulsada al menos una tecla con este gesto.",
   "shortcuts.gestures.refusal.no_directions": "Este gesto no tiene direcciones.",
   "shortcuts.gestures.refusal.shift": "macOS convierte ⇧ y la rueda en un desplazamiento lateral.",
-  "shortcuts.gestures.refusal.single_key": "Mantén pulsadas dos o más teclas: macOS y las apps se desplazan con una.",
   "shortcuts.gestures.refusal.taken": "Otra fila ya usa estas teclas.",
   "shortcuts.gestures.remove": "Eliminar gesto",
   "shortcuts.gestures.row_name": "%2$@ + %1$@",

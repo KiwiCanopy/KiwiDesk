@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "このジェスチャでは少なくとも1つのキーを押したままにしてください。",
   "shortcuts.gestures.refusal.no_directions": "このジェスチャには方向がありません。",
   "shortcuts.gestures.refusal.shift": "macOSは⇧とホイールを横スクロールに変換します。",
-  "shortcuts.gestures.refusal.single_key": "2つ以上のキーを押したままにしてください。macOSとアプリは1つのキーでスクロールします。",
   "shortcuts.gestures.refusal.taken": "このキーはすでに別の行で使われています。",
   "shortcuts.gestures.remove": "ジェスチャを削除",
   "shortcuts.gestures.row_name": "%2$@ + %1$@",

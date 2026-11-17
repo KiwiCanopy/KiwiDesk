@@ -48,7 +48,7 @@ struct TouchReaderSeamTests {
             )
             let source = try SourceScan.strippedSource(at: twin)
             #expect(
-                source.contains("mouse.trackpad.makeReader = { _ in nil }"),
+                source.contains("mouse.trackpad.makeReader = { _, _ in nil }"),
                 "\(target)"
             )
             #expect(

@@ -31,7 +31,7 @@ struct TouchGesturesTests {
         let box = Box()
         gestures.onLog = { _ in }
         gestures.readSystemGestures = { system }
-        gestures.makeReader = { deliver in
+        gestures.makeReader = { _, deliver in
             let reader = FakeReader()
             reader.deliver = deliver
             box.readers.append(reader)
@@ -267,7 +267,7 @@ struct TouchGesturesTests {
         #expect(pushed.last?.swipeAxes == [3: [Self.hyper: [h, v]]])
         // No reader, nothing fires the swipe: macOS keeps it.
         gestures.stop()
-        gestures.makeReader = { _ in nil }
+        gestures.makeReader = { _, _ in nil }
         gestures.start()
         #expect(pushed.last?.swipeAxes == [:])
     }

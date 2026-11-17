@@ -2358,7 +2358,6 @@
   "shortcuts.gestures.refusal.needs_key": "Halte bei dieser Geste mindestens eine Taste gedrückt.",
   "shortcuts.gestures.refusal.no_directions": "Diese Geste hat keine Richtungen.",
   "shortcuts.gestures.refusal.shift": "macOS macht aus ⇧ und dem Mausrad ein seitliches Scrollen.",
-  "shortcuts.gestures.refusal.single_key": "Halte zwei oder mehr Tasten: macOS und Apps scrollen mit einer.",
   "shortcuts.gestures.refusal.taken": "Diese Tasten belegt schon eine andere Zeile.",
   "shortcuts.gestures.remove": "Geste entfernen",
   "shortcuts.gestures.row_name": "%2$@ + %1$@",

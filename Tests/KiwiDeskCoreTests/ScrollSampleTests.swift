@@ -16,6 +16,7 @@ struct ScrollSampleTests {
     ) -> ScrollSample {
         ScrollSample(
             flags: flags,
+            hyper: false,
             pointDeltaX: 3,
             pointDeltaY: -7,
             invertedBySystem: inverted,
@@ -96,7 +97,7 @@ struct ScrollTapEventReadingTests {
             .scrollWheelEventMomentumPhase,
             value: 2
         )
-        let sample = ScrollGestureTap.sample(of: event)
+        let sample = ScrollGestureTap.sample(of: event, hyper: false)
         #expect(sample.chord == [.control, .option])
         #expect(sample.phase == .ended)
         #expect(sample.momentum == .changed)

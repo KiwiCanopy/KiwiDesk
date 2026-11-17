@@ -17,7 +17,10 @@ extension KiwiCore {
         }
         let spelling = args.dropFirst().first?.stringValue ?? ""
         guard let keys = ScrollChord(spelling: spelling) else {
-            return .fail("expected keys like \"control+option\", or \"\"")
+            return .fail(
+                "expected keys like \"control+option\" or \"hyper\", "
+                    + "or \"\""
+            )
         }
         let key = GestureKey(input, keys)
         var base = mouse.gestures.base
@@ -98,7 +101,7 @@ extension KiwiCore {
         case .emptyAction: return "expected an action"
         case .needsModifier: return "\(input) needs a modifier"
         case .singleModifierScroll:
-            return "a scroll needs two or more modifiers"
+            return "a scroll needs two or more modifiers, or hyper"
         case .shiftOnWheel:
             return "a wheel cannot use shift: macOS makes it sideways"
         case .familyNotOffered:

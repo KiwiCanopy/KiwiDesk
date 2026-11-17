@@ -27,6 +27,8 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         initialState: []
     )
     private let deliver: Deliver
+    /// Read at each chord build (#3407).
+    private let hyper: HyperHold
     // Tap-thread state below; `installed` is written before the
     // start semaphore signals and read after it waits.
     private var router = ScrollGestureRouter()
@@ -35,14 +37,19 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
     private var runLoop: CFRunLoop?
     private var installed = false
 
-    private init(deliver: @escaping Deliver) {
+    /// Unstarted: `live` starts it; a suite drives `handle` alone.
+    init(hyper: HyperHold, deliver: @escaping Deliver) {
+        self.hyper = hyper
         self.deliver = deliver
     }
 
     /// Builds and starts the tap; nil when macOS refuses it,
     /// which is what a missing Accessibility grant looks like.
-    static func live(deliver: @escaping Deliver) -> ScrollTapHandle? {
-        let tap = ScrollGestureTap(deliver: deliver)
+    static func live(
+        hyper: HyperHold,
+        deliver: @escaping Deliver
+    ) -> ScrollTapHandle? {
+        let tap = ScrollGestureTap(hyper: hyper, deliver: deliver)
         return tap.start() ? tap : nil
     }
 
@@ -112,7 +119,7 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
     }
 
     /// The callback body, on the tap thread.
-    private func handle(
+    func handle(
         _ type: CGEventType,
         _ event: CGEvent
     ) -> Unmanaged<CGEvent>? {
@@ -132,7 +139,7 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         let consume = autoreleasepool {
             router.chords = chords.withLock { $0 }
             let routed = router.route(
-                Self.sample(of: event),
+                Self.sample(of: event, hyper: hyper.isHeld),
                 now: CFAbsoluteTimeGetCurrent()
             )
             send(routed.events)
@@ -146,9 +153,10 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         if !events.isEmpty { deliver(events) }
     }
 
-    static func sample(of event: CGEvent) -> ScrollSample {
+    static func sample(of event: CGEvent, hyper: Bool) -> ScrollSample {
         ScrollSample(
             flags: event.flags,
+            hyper: hyper,
             pointDeltaX: event.getDoubleValueField(
                 .scrollWheelEventPointDeltaAxis2
             ),

@@ -44,6 +44,7 @@ extension KiwiCore {
         keys.onHyperShortcutsChange = { [weak self] in
             self?.onAppWideChange()
         }
+        wireHyperHold()
         keys.onSideTapStatusChange = { [weak self] in
             self?.onAppWideChange()
         }
