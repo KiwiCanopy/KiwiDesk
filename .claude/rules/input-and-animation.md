@@ -229,8 +229,10 @@ editing here:
     of whether a click closes. A click inside a passed screenshot's
     capture passes and keeps the sequence open; a new
     `SystemShortcut` answers whether it captures through its
-    `sequenceTier`, and a capture ends at a close, at any key-down
-    and at `KeySequenceRouter.captureLimit` (#3412,
+    `sequenceTier`. While a capture is open its keys
+    (`KeySequenceRouter.captureKeys`) pass to the screenshot ahead of
+    every other key and keep it; it ends at a close, at any other
+    key-down and at `KeySequenceRouter.captureLimit` (#3412,
     `KeySequenceCaptureTests`, `KeySequenceTapThreadTests` ▸
     `screenshotClickKeeps`). A leader never reaches Carbon:
     activation skips a press row on its chord, and a refused tap
@@ -248,7 +250,8 @@ editing here:
     still list it.
   - **While a sequence is open, a recorded step key outranks a
     scroll key, and a scroll key outranks macOS's pass-through
-    (#3175, #3173).** The router's order is esc / ⌫, the leader, a
+    (#3175, #3173).** The router's order is a capture's keys
+    (#3412), esc / ⌫, the leader, a
     step key, a scroll key (the plain arrows and page keys, then
     `kiwihub.set_key`'s second chords, matched whole), the macOS
     tiers, the beep. A new kind of key while open takes its place

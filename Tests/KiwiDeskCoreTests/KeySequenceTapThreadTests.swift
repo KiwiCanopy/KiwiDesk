@@ -123,6 +123,8 @@ struct KeySequenceTapThreadTests {
         _ = tap.sequenceEvent(.keyDown, leader)
         let shot = try key(21, [.maskCommand, .maskShift])  // ⌘⇧4
         #expect(!tap.sequenceEvent(.keyDown, shot))
+        // Escape reaches the screenshot and keeps the capture (#3412).
+        #expect(!tap.sequenceEvent(.keyDown, try key(53)))
         #expect(!tap.sequenceEvent(.leftMouseDown, click))
         #expect(tap.drainSequenceDecisions().map(\.outcome) == [.stepped])
         #expect(!tap.sequenceEvent(.leftMouseDown, click))

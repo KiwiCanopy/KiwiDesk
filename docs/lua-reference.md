@@ -8669,7 +8669,10 @@ working.
 A screenshot's own click leaves the sequence open: after **⌘⇧4** or
 **⌃⌘⇧4**, the one click or drag that takes the shot does not cancel
 it, and after **⌘⇧5** the toolbar's clicks do not, until the next key
-press. Past 60 seconds a click cancels again
+press. **Space**, **Return** and **Escape** reach the screenshot in
+the meantime and are no such key press: **Escape** cancels the
+screenshot and leaves the sequence open. Past 60 seconds a click
+cancels again
 ([#3412](https://github.com/KiwiCanopy/KiwiDesk/issues/3412)).
 
 The previous input source (**⌃Space** by default) is treated like

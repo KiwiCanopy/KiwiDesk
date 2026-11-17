@@ -112,6 +112,12 @@ struct KeySequenceRouter: Sendable {
         return .pass
     }
 
+    /// The screenshot UI's own keys, plain, which a capture passes
+    /// (#3412 ▸ Ruling amendment): Space, Return and Escape.
+    static let captureKeys: Set<UInt32> = [
+        UInt32(kVK_Space), UInt32(kVK_Return), UInt32(kVK_Escape),
+    ]
+
     /// Whether a passed screenshot holds the click close now.
     var isCapturing: Bool { open?.capture != nil }
 
@@ -134,15 +140,20 @@ struct KeySequenceRouter: Sendable {
     /// recorded for it, held modifiers included (#1871 ▸ step keys).
     /// While open: esc and ⌫, the leader, a step key, a scroll key
     /// (#3175), then a macOS shortcut's tier (#3173), else the beep.
-    /// A repeat moves nothing but a scroll and a macOS shortcut. Any
-    /// key-down ends a screenshot's capture (#3412); `now` is the tap
-    /// thread's uptime, which a capture's bound counts from.
+    /// A repeat moves nothing but a scroll and a macOS shortcut. A
+    /// capture's keys pass to the screenshot and keep it; any other
+    /// key-down ends it (#3412). `now` is the tap thread's uptime.
     mutating func press(
         keyCode: UInt32,
         held: HotkeyModifiers,
         isRepeat: Bool,
         now: TimeInterval
     ) -> Outcome {
+        if open?.capture != nil, held.unsided.isEmpty,
+            Self.captureKeys.contains(keyCode)
+        {
+            return .passed(closing: false)
+        }
         open?.capture = nil
         guard let current = open else {
             guard !isRepeat,

@@ -7,6 +7,8 @@ import Testing
 /// through one click, ⌘⇧5 through its clicks until a key-down, and
 /// each within `KeySequenceRouter.captureLimit`. The other shortcuts
 /// that leave the panel up take no click, so a click still closes.
+/// While a capture is open, Space, Return and Escape pass to the
+/// screenshot and keep it (#3412 ▸ Ruling amendment).
 @Suite("Key sequence screenshot capture")
 struct KeySequenceCaptureTests {
     typealias Router = KeySequenceRouterTests
@@ -79,6 +81,32 @@ struct KeySequenceCaptureTests {
         #expect(press(&router, "q", at: 1) == .unbound)
         #expect(!router.isCapturing)
         #expect(router.mouseDown(at: 2) == .closed)
+    }
+
+    @Test("a capture passes the screenshot's keys and keeps going")
+    func captureKeysPass() {
+        for chord in ["cmd+shift+4", "cmd+shift+5"] {
+            for key in ["space", "return", "escape"] {
+                var router = passed(chord)
+                let outcome = press(&router, key, at: 1)
+                #expect(outcome == .passed(closing: false), "\(chord) \(key)")
+                #expect(!outcome.swallows, "\(chord) \(key)")
+                #expect(router.isOpen, "\(chord) \(key)")
+                #expect(router.isCapturing, "\(chord) \(key)")
+                #expect(router.mouseDown(at: 2) == .pass, "\(chord) \(key)")
+            }
+        }
+    }
+
+    @Test("without a capture, those keys do what they always did")
+    func captureKeysNeedACapture() {
+        var router = passed("cmd+shift+3")
+        #expect(press(&router, "space", at: 1) == .unbound)
+        #expect(press(&router, "escape", at: 1) == .closed)
+        // With a modifier held, Space is no screenshot key.
+        var held = passed("cmd+shift+5")
+        #expect(press(&held, "shift+space", at: 1) == .unbound)
+        #expect(!held.isCapturing)
     }
 
     @Test("the capture ends at its bound")
