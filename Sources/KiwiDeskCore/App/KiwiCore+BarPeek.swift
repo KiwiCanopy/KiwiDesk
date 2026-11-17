@@ -26,6 +26,9 @@ extension KiwiCore {
         peek.land = { [weak self] landing in
             self?.barMenuHooks.openSettings(landing)
         }
+        peek.keys = { [weak self] in
+            self?.appWide.kiwiHubKeys ?? KiwiHubKeys()
+        }
         peek.openMenu = { [weak self] source, space, anchor in
             self?.presentBarWindowMenu(source, space: space, at: anchor)
         }

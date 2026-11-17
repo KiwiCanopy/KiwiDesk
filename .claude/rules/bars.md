@@ -1299,7 +1299,11 @@ Obligations:
   holds every key-capable Core window to that override. A list a key
   opened alone walks with that chord's ⌘ still held, since its own
   keys land before the chord lets go (#2974, `PocketListKeyboardTests` ▸
-  `commandHeldWalks`). Its
+  `commandHeldWalks`). It walks with KiwiHub's ↑ ↓ alternatives too,
+  read at each press through the one `BarPeekListKeys.arrow`,
+  ahead of the chord swallow (#3398, `PocketListHubKeyTests`); a
+  key the list answers that KiwiHub does not joins
+  `KiwiHubKeyRefusal.panelKeeps`, so no alternative shadows it. Its
   landings run on the peek's `schedule`, which both `makeTestCore`
   twins pin.
 - **Every peek row is its window's button, picked through the

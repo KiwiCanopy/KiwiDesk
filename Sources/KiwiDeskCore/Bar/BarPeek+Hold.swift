@@ -131,6 +131,7 @@ extension BarPeek {
             self?.schedule(span, body)
         }
         made.now = { [weak self] in self?.now() ?? 0 }
+        made.keys = { [weak self] in self?.keys() ?? KiwiHubKeys() }
         made.pointer = { [weak self] in
             self?.pointerOnScreen() ?? BarPeekPanel.offScreen
         }

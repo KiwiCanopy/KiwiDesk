@@ -11,12 +11,16 @@ final class BarPeekWindow: NSPanel {
     var walksHeldKeys = false
     /// A key pressed while the panel is key; true where it was used.
     var onKey: @MainActor (UInt16) -> Bool = { _ in false }
+    /// KiwiHub's navigation alternatives, read at each press
+    /// (#3398).
+    var keys: @MainActor () -> KiwiHubKeys = { KiwiHubKeys() }
 
     override var canBecomeKey: Bool { takesKey }
     override var canBecomeMain: Bool { false }
 
     override func keyDown(with event: NSEvent) {
-        if !onKey(event.keyCode) { super.keyDown(with: event) }
+        let code = arrow(of: event) ?? event.keyCode
+        if !onKey(code) { super.keyDown(with: event) }
     }
 
     /// A chord while the list is key is the user's for the app
@@ -29,9 +33,22 @@ final class BarPeekWindow: NSPanel {
         guard takesKey, event.modifierFlags.contains(.command) else {
             return super.performKeyEquivalent(with: event)
         }
+        // A ⌘ alternative walks, never closes (#3398).
+        if let code = arrow(of: event) {
+            _ = onKey(code)
+            return true
+        }
         let walks =
             walksHeldKeys && BarPeekPanel.ListKey.all.contains(event.keyCode)
         _ = onKey(walks ? event.keyCode : UInt16.max)
         return true
+    }
+
+    private func arrow(of event: NSEvent) -> UInt16? {
+        BarPeekListKeys.arrow(
+            keyCode: event.keyCode,
+            modifiers: event.modifierFlags,
+            keys: keys()
+        )
     }
 }
