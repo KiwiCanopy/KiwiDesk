@@ -210,6 +210,10 @@ struct PocketRiseSequenceTests {
 
     @Test("a view's sink ends only on its own token")
     func endSinkTakesItsOwn() throws {
+        // A sink plays only with motion on, which another suite's
+        // core may have left off (`ReduceMotion.kiwiDesk`).
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
         let view = PocketPlateView(
             frame: CGRect(x: 0, y: 0, width: 80, height: 80)
         )
