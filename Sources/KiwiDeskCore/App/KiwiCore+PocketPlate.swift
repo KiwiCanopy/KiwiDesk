@@ -144,20 +144,23 @@ extension KiwiCore {
         let inside = pocketPlateWindows
         let dragging = pocketPlate.dragging != nil
         guard pocketStands else { return [] }
-        let shelf = LiquidGlassGate.rendered(tiler.settings.kiwishelf)
         let name = L(
             "pocket.plate.ax",
             "Pocket, windows inside: %1$d",
             // What its press opens, under Hidden an app's own too.
             pocketListWindows.count
         )
-        let edge = shelf.pocketEdge
-        let rise = Self.pocketRiseSide(thickness: shelf.thickness)
+        let rise = Self.pocketRiseSide(
+            thickness: tiler.settings.kiwishelf.thickness
+        )
         // A list open on a risen pocket holds it out (#2678 review 1).
         let listed = pocketListedDisplay
         return state.workspaces.allDisplays.compactMap {
             display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
+            // The pocket's edge as this screen has it (#3376).
+            let shelf = LiquidGlassGate.rendered(self.shelf(on: display.id))
+            let edge = shelf.pocketEdge
             let place = pocketPlace(on: display.id)
             // A handle's pocket rises out of it as its approach
             // opens (#3368), during a drag or a play, and while its
@@ -289,6 +292,16 @@ extension KiwiCore {
         shelves.peek.openMenu(.pocket(pocketListWindows), nil, view)
     }
 
+    /// The edge `view`'s pocket stands on, as its screen has it
+    /// (#3376); the pocket's own edge for a view no screen holds.
+    private func pocketEdge(of view: PocketPlateView) -> AppBarEdge {
+        let display = state.workspaces.allDisplays.first {
+            pocketPlate.view(on: $0.id) === view
+        }
+        return display.map { shelf(on: $0.id) }?.pocketEdge
+            ?? tiler.settings.kiwishelf.pocketEdge
+    }
+
     /// Grows the list of the windows inside out of `view`; `keyed`
     /// says a key opened it (#2974).
     func openPocketList(from view: PocketPlateView, keyed: Bool = false) {
@@ -296,7 +309,7 @@ extension KiwiCore {
             view,
             source: .pocket(pocketListWindows),
             space: nil,
-            edge: tiler.settings.kiwishelf.pocketEdge,
+            edge: pocketEdge(of: view),
             keyed: keyed
         )
     }

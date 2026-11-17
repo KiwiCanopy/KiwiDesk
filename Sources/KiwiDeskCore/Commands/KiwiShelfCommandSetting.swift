@@ -28,6 +28,11 @@ enum KiwiShelfCommandSetting {
     case revealTimeout(Double)
     case revealStyle(KiwiShelf.RevealStyle)
     case pocketEdge(AppBarEdge)
+    /// `set_pocket_edge(edge, screen)` — one screen's pocket edge
+    /// (#3376), the screen already resolved to its fingerprint;
+    /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
+    /// among:)` with `liveScreenEdgeScope`.
+    case pocketScreenEdge(AppBarEdge, screen: String)
     case pocketPosition(CGFloat)
     case pocketVisibility(ShelfVisibility)
     case maximizedVisibility(KiwiShelf.MaximizedVisibility)
@@ -86,8 +91,11 @@ enum KiwiShelfCommandSetting {
             else { return .failure("expected a percentage") }
             return .success(.minimum(value))
         case "pocket_edge":
-            return BarSettingChoice.value(args, AppBarEdge.self)
-                .map(Self.pocketEdge)
+            return BarSettingChoice.edge(args).map { parsed in
+                parsed.screen.map {
+                    .pocketScreenEdge(parsed.edge, screen: $0)
+                } ?? .pocketEdge(parsed.edge)
+            }
         case "pocket_visibility":
             return BarSettingChoice.value(args, ShelfVisibility.self)
                 .map(Self.pocketVisibility)
@@ -219,7 +227,8 @@ enum KiwiShelfCommandSetting {
         case .alignment(let value): shelf.alignment = value
         case .order(let value): shelf.order = value
         case .revealStyle(let value): shelf.revealStyle = value
-        case .pocketEdge(let value): shelf.pocketEdge = value
+        case .pocketEdge(let value): shelf.pocketEdges.setEdge(value)
+        case .pocketScreenEdge: break
         case .pocketVisibility(let value): shelf.pocketVisibility = value
         case .maximizedVisibility(let value):
             shelf.maximizedVisibility = value

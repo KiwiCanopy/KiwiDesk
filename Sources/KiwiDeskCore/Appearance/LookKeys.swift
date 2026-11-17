@@ -92,9 +92,11 @@ public enum LookKeys {
             + "gaps, set on that Space and kept through a look",
         "space_bar.edge_override": screenEdges,
         "app_bar.edge_override": screenEdges,
+        "kiwishelf.pocket_edge_override": screenEdges,
     ]
 
-    /// Why a bar's per-screen edges stay out (#1948).
+    /// Why a bar's and the pocket's per-screen edges stay out
+    /// (#1948, #3376).
     private static let screenEdges =
         "a screen's own edge names this Mac's screens, and kept "
         + "through a look it stays the strongest"

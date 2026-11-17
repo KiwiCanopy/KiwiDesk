@@ -7069,6 +7069,13 @@ first run and a look seed, not a runtime link: the pocket edge is
 one for every screen, so a screen's own Space Bar edge (#1948)
 leaves the pocket where it is.
 
+:::unreleased
+*Amended (#3376):* the pocket's edge may now differ per screen, on
+the bars' per-screen doors (▸ *a bar's edge may differ per
+screen*). A screen's own Space Bar edge still does not move it: a
+screen's pocket edge is its own entry, never a link to its bar.
+:::
+
 **Several windows keeps it on screen, empty included, on every
 display.** One window keeps the pocket out of sight, since the key
 reaches what it holds. Under Several windows the drop target and
@@ -20560,6 +20567,22 @@ one screen into two; but a hidden drawer tells a one-screen user
 nothing about the option, while the `?` names the one thing that
 unlocks it, a profile for more screens, so the grey promises
 nothing a setting would have to keep.
+
+:::unreleased
+*Amended: the pocket's edge may differ per screen too.*
+([#3376](https://github.com/KiwiCanopy/KiwiDesk/issues/3376),
+ruled 2026-11-17.) The pocket sits on the shelf's edges, so a
+screen whose bars move to its long side wants its pocket there
+as well. It is the same sparse shape — `kiwishelf.pocket_edge_override`
+beside `kiwishelf.pocket_edge`, keyed by fingerprint — written by
+`kiwishelf.set_pocket_edge(edge, screen)` through the bars' doors,
+so its collapse, its scope and a look's leaving it alone are the
+bars' rules above, and a forgotten screen setup drops its entries
+as it drops theirs (#3324). Each screen's pocket reads its edge
+from the one per-screen resolution the bars take, so what a screen
+draws and what it reserves cannot disagree. The rest of the
+pocket's placement — its position and its Show — stays one value.
+:::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen

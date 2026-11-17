@@ -67,7 +67,8 @@ extension SettingsRevertRegister {
             \.scrollGesture.naturalMouse
         ),
         .shortcuts(.gestureBindings): gestureRow,
-        .kiwishelf(.pocketEdge): .leaf(\.settings.kiwishelf.pocketEdge),
+        .kiwishelf(.pocketEdge): pocketEdge,
+        .kiwishelf(.pocketScreenEdge): pocketEdge,
         .kiwishelf(.pocketPosition): .leaf(
             \.settings.kiwishelf.pocketPosition
         ),
@@ -137,6 +138,13 @@ extension SettingsRevertRegister {
             )
         }
     }
+
+    /// The pocket's edge and its per-screen map go back as one
+    /// pair, as a bar's do (#3376).
+    private static let pocketEdge = RevertWriter.all([
+        .leaf(\.settings.kiwishelf.pocketEdge),
+        .leaf(\.settings.kiwishelf.pocketEdgeOverride),
+    ])
 
     /// The shortcut layers whole, with the Desktop base drafted
     /// beside them (#1870) and every key reach and layer edit, as

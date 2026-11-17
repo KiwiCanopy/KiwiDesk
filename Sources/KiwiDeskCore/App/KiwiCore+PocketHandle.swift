@@ -26,7 +26,7 @@ extension KiwiCore {
         on display: DisplayID,
         risen: Bool
     ) -> CGRect? {
-        let shelf = tiler.settings.kiwishelf
+        let shelf = self.shelf(on: display)
         // Reaching the edge across the outer margin, as the bars'
         // hover bands do; the handle draws past it (#2678).
         return pocketHandleFrame(
@@ -53,7 +53,7 @@ extension KiwiCore {
     /// deep, one outer margin in from the edge, centred where the
     /// handle stands (#2784).
     func pocketMarkFrame(on display: DisplayID) -> CGRect? {
-        let shelf = tiler.settings.kiwishelf
+        let shelf = self.shelf(on: display)
         let side = shelf.thickness
         guard
             let band = pocketHandleFrame(
@@ -74,7 +74,7 @@ extension KiwiCore {
         guard let screen = TilingEngine.screen(for: display) else {
             return nil
         }
-        let shelf = tiler.settings.kiwishelf
+        let shelf = self.shelf(on: display)
         let visible = GeometryUtils.axVisibleFrame(of: screen)
         // Where the shown pocket stands on an Auto edge, else at
         // Position (#2678).
@@ -167,7 +167,7 @@ extension KiwiCore {
     func pocketLanding(on display: DisplayID) -> CGRect? {
         // The one door for where the pocket is (#2678 review 5).
         guard pocketStands(on: display) else { return nil }
-        let shelf = tiler.settings.kiwishelf
+        let shelf = self.shelf(on: display)
         switch pocketPlace(on: display) {
         case .section(let frame), .inside(let frame): return frame
         case .whole:

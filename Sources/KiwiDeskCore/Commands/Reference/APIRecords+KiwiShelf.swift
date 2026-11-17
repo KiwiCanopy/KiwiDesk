@@ -172,8 +172,10 @@ extension APIReference {
             .number("ratio")
         ),
         "set_pocket_edge": APIRecord(
-            "Sets the screen edge the pocket sits on.",
-            .choice("edge", AppBarEdge.self)
+            "Sets the pocket's screen edge on all screens, or on "
+                + "one named by number, fingerprint or name.",
+            .choice("edge", AppBarEdge.self),
+            .text("screen", optional: true)
         ),
         "set_pocket_visibility": APIRecord(
             "Sets when the pocket shows: always, auto (its handle) "

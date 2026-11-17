@@ -11,7 +11,7 @@ extension KiwiCore {
         .pocket(
             on: ShelfManager.Key(
                 display: display,
-                edge: tiler.settings.kiwishelf.pocketEdge
+                edge: shelf(on: display).pocketEdge
             )
         )
     }
@@ -23,7 +23,6 @@ extension KiwiCore {
     /// `markBands`, which places the handle.
     func filePocketApproaches(into hiding: inout HidingShelves) {
         guard pocketStands else { return }
-        let edge = tiler.settings.kiwishelf.pocketEdge
         let primary = GeometryUtils.primaryHeight
         let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
         let screens = ScreenList.all.map(\.frame)
@@ -35,6 +34,7 @@ extension KiwiCore {
                 let screen = TilingEngine.screen(for: display.id)
             else { continue }
             let tab = flip(rest)
+            let edge = shelf(on: display.id).pocketEdge
             hiding.targets[pocketApproachKey(on: display.id)] = .along(
                 tab,
                 edge: edge,

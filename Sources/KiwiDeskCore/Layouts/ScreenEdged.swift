@@ -1,7 +1,8 @@
 import Foundation
 
 /// A bar whose edge may differ per screen (#1948): the Space
-/// Bar's and the App Bar's style. `edgeOverride` is the sparse
+/// Bar's and the App Bar's style, and the pocket's edges
+/// (`PocketEdges`, #3376). `edgeOverride` is the sparse
 /// `space_bar.edge_override` / `app_bar.edge_override` map, keyed
 /// by `Display.fingerprint` as a Monitor pin is; a screen with no
 /// entry uses the bar's `edge`.
@@ -90,10 +91,12 @@ extension ScreenEdged {
 }
 
 extension TilingSettings {
-    /// Both bars' per-screen edges kept to `scope` (#3324).
+    /// Both bars' and the pocket's per-screen edges kept to
+    /// `scope` (#3324, #3376).
     public mutating func keepScreenEdges(in scope: ScreenEdgeScope) {
         spaceBarStyle.keepScreens(in: scope)
         appBarStyle.keepScreens(in: scope)
+        kiwishelf.pocketEdges.keepScreens(in: scope)
     }
 }
 
@@ -101,8 +104,8 @@ extension KeyedEncodingContainer {
     /// Leaves an empty `[String: AppBarEdge]` out of the JSON
     /// (#1948). The scope is the TYPE, module-wide: any encode of
     /// that type through a keyed container resolves here, the
-    /// bars' synthesized encode of `edgeOverride` included — today
-    /// its only one (`SettingsCodingTests` ▸
+    /// bars' synthesized encode of `edgeOverride` and the shelf's
+    /// of `pocketEdgeOverride` (#3376) (`SettingsCodingTests` ▸
     /// `screenEdgesEncodeSparse`). A store of that type that must
     /// encode an empty map needs a type of its own.
     mutating func encode(

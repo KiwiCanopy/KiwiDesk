@@ -87,12 +87,25 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("kiwishelf.set_".count)
         )
+        let given: [JSONValue]
+        switch screenResolvedEdgeArgs(field: field, args) {
+        case .success(let resolved): given = resolved
+        case .failure(let error): return .fail(error.message)
+        }
         switch KiwiShelfCommandSetting.parse(
             field: field,
-            args: args
+            args: given
         ) {
         case .success(let setting):
-            setting.apply(to: &tiler.settings.kiwishelf)
+            if case .pocketScreenEdge(let edge, let screen) = setting {
+                tiler.settings.kiwishelf.pocketEdges.setEdge(
+                    edge,
+                    on: screen,
+                    among: liveScreenEdgeScope
+                )
+            } else {
+                setting.apply(to: &tiler.settings.kiwishelf)
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)

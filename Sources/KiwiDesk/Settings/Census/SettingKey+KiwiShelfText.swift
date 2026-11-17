@@ -135,6 +135,9 @@ extension KiwiShelfKey {
             )
         case .pocketVisibility:
             return .text("kiwishelf.show.pocket")
+        // Lua-only: no row draws it yet (#3376).
+        case .pocketScreenEdge:
+            return .none
         case .maximizedVisibility:
             return .text(
                 "layout_defaults.maximize.show_bars",

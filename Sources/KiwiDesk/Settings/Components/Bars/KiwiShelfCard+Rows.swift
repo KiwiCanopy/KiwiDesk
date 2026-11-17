@@ -131,7 +131,8 @@ extension KiwiShelfCard {
             EmptyView()
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
             .fillFade, .tintHubAndPlates, .readingContrast,
-            .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,
+            .spaceBarScreenEdge, .appBarScreenEdge, .pocketScreenEdge,
+            .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,
             .groupBadgeTextColor, .handleColor:

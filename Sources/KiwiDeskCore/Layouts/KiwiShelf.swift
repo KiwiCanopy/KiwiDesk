@@ -133,8 +133,13 @@ public struct KiwiShelf: Sendable, Equatable {
     public var revealTimeout: Double = 0
     /// How a revealed shelf comes onto its edge (#2497).
     public var revealStyle: RevealStyle = .slide
-    /// The screen edge the pocket sits on (#2678).
+    /// The screen edge the pocket sits on (#2678), on every screen
+    /// without an entry in `pocketEdgeOverride`. Written through
+    /// `pocketEdges`' `ScreenEdged` doors.
     public var pocketEdge = AppBarEdge.bottom
+    /// A screen's own pocket edge, keyed by `Display.fingerprint`
+    /// (#3376): `kiwishelf.pocket_edge_override`, sparse.
+    public var pocketEdgeOverride: [String: AppBarEdge] = [:]
     /// Where along `pocketEdge` the pocket sits, in percent; on a
     /// bar's edge it takes the nearer end (`pocketLeansEnd`).
     public var pocketPosition: CGFloat = Self.defaultPocketPosition

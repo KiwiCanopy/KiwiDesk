@@ -5,15 +5,18 @@ import Foundation
 /// for them (#1517, #1524, #1731), each answered per screen
 /// (#1948). Split from `TilingSettings+Resolution.swift`.
 extension TilingSettings {
-    /// Whether either bar gives some screen an edge of its own.
+    /// Whether either bar or the pocket gives some screen an edge
+    /// of its own (#1948, #3376).
     public var hasScreenEdges: Bool {
         !spaceBarStyle.edgeOverride.isEmpty
             || !appBarStyle.edgeOverride.isEmpty
+            || !kiwishelf.pocketEdgeOverride.isEmpty
     }
 
     /// These settings as `screen` (a `Display.fingerprint`) shows
-    /// them: each bar's `edge` resolved for that screen — its own
-    /// where it has one, else the bar's (#1948). The ONE
+    /// them: each bar's `edge` and the pocket's resolved for that
+    /// screen — its own where it has one, else the bar's or the
+    /// pocket's (#1948, #3376). The ONE
     /// per-screen step, taken before `barEdges(space:app:)` folds
     /// the edges, so the reservation and the live plan read one
     /// answer; nil keeps each bar's own edge. The copy holds no
@@ -23,6 +26,7 @@ extension TilingSettings {
         var out = self
         out.spaceBarStyle.setEdge(spaceBarStyle.edge(on: screen))
         out.appBarStyle.setEdge(appBarStyle.edge(on: screen))
+        out.kiwishelf = kiwishelf.onScreen(screen)
         return out
     }
 
@@ -97,6 +101,7 @@ extension TilingSettings {
     public var screenVariants: [TilingSettings] {
         let screens = Set(spaceBarStyle.edgeOverride.keys)
             .union(appBarStyle.edgeOverride.keys)
+            .union(kiwishelf.pocketEdgeOverride.keys)
         return [onScreen(nil)] + screens.sorted().map { onScreen($0) }
     }
 

@@ -21,6 +21,15 @@ extension KiwiCore {
         tiler.settings.onScreen(screenFingerprint(of: display))
     }
 
+    /// The shelf as `display` shows it: the pocket's edge resolved
+    /// for that screen (#3376). The pocket's readers of a display's
+    /// edge take this, or `settings(on:)`, never
+    /// `tiler.settings.kiwishelf.pocketEdge`
+    /// (`PocketEdgeCensusTests`).
+    func shelf(on display: DisplayID) -> KiwiShelf {
+        tiler.settings.kiwishelf.onScreen(screenFingerprint(of: display))
+    }
+
     /// The settings `display`'s shelf reads: each bar's edge as
     /// that screen has it, and every bar and the Pocket Hidden on a
     /// tiling-off Space whose tick hides the bars (#3151) or where
@@ -133,6 +142,10 @@ extension KiwiCore {
         )
     }
 
+    /// The setters whose optional second argument names a screen:
+    /// a bar's `set_edge` (#1948) and `set_pocket_edge` (#3376).
+    static let screenEdgeFields: Set<String> = ["edge", "pocket_edge"]
+
     /// `set_edge`'s arguments with the optional screen resolved
     /// to the fingerprint it is stored under, the edge checked
     /// first so a bad edge answers as one: a connected screen by
@@ -145,7 +158,8 @@ extension KiwiCore {
         field: String,
         _ args: [JSONValue]
     ) -> Result<[JSONValue], AppBarSettingError> {
-        guard field == "edge", args.count > 1 else {
+        guard Self.screenEdgeFields.contains(field), args.count > 1
+        else {
             return .success(args)
         }
         if case .failure(let error) = BarSettingChoice.value(
