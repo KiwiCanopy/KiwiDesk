@@ -48,10 +48,13 @@ struct KeepColorsOfferTests {
 
     @Test("colours a saved palette reproduces are not offered")
     func paletteColoursAreNot() {
+        // The default palette's colours, its handle painted (#3377).
+        var settings = TilingSettings()
+        PaletteCatalog.defaultPalette().apply(to: &settings)
         #expect(
             KeepColorsOffer.afterClicking(
                 look(fill: "#111111"),
-                over: TilingSettings(),
+                over: settings,
                 prior: nil,
                 palettes: PaletteCatalog.bundled()
             ) == nil

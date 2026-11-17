@@ -22,11 +22,10 @@ public enum PaletteCatalog {
     /// extracted from a fresh `TilingSettings`, with the handle
     /// painted in its accent as every bundled palette's is (#3377).
     public static func defaultPalette() -> ColorPalette {
-        var colors = ColorPaletteKeys.extract(from: TilingSettings())
-        for (path, source) in ColorPaletteKeys.bundledPaint {
-            colors[path] = colors[source]
-        }
-        return ColorPalette(name: defaultName, colors: colors)
+        ColorPalette(
+            name: defaultName,
+            colors: ColorPaletteKeys.extract(from: TilingSettings())
+        ).bundledPainted
     }
 
     /// The authored palettes from `Resources/Palettes`.
@@ -43,6 +42,31 @@ public enum PaletteCatalog {
                 from: data
             )
         else { return [] }
-        return palettes
+        return palettes.map(\.bundledPainted)
+    }
+}
+
+extension ColorPalette {
+    /// This palette with each `ColorPaletteKeys.bundledPaint` path
+    /// painted from its source colour — the one door every bundled
+    /// palette and the starter take (#3377).
+    var bundledPainted: ColorPalette {
+        var out = self
+        for (path, source) in ColorPaletteKeys.bundledPaint {
+            if let colour = colors[source] { out.colors[path] = colour }
+        }
+        return out
+    }
+}
+
+extension TilingSettings {
+    /// Paints each `ColorPaletteKeys.bundledPaint` path from its
+    /// source, as a bundled palette would: the starter's door, so a
+    /// first run wears Glass whole (#3377, #1739).
+    mutating func wearBundledPaint() {
+        ColorPalette(
+            name: "",
+            colors: ColorPaletteKeys.extract(from: self)
+        ).bundledPainted.apply(to: &self)
     }
 }

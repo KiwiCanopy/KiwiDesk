@@ -22,15 +22,15 @@ struct ColorPaletteMatchTests {
         }
     }
 
-    /// The shipped defaults ARE the default palette, so a fresh
-    /// config already reads as wearing it — the shelf marks one
-    /// card on first open rather than none.
-    @Test("Fresh settings read as the default palette")
+    /// A first run's starter wears the default palette, its
+    /// handle painted as the palette paints it (#3377), so the
+    /// shelf marks one card on first open rather than none.
+    @Test("A first run reads as the default palette")
     func freshSettingsWearTheDefault() {
-        #expect(
-            PaletteCatalog.defaultPalette()
-                .isApplied(to: TilingSettings())
-        )
+        let sizes = [CGSize(width: 1512, height: 982)]
+        let starter = StarterSetup.standardLayout(sizes: sizes)
+            .settings(sizes: sizes)
+        #expect(PaletteCatalog.defaultPalette().isApplied(to: starter))
     }
 
     /// One hand edit in Colors & glass unmarks the card. This

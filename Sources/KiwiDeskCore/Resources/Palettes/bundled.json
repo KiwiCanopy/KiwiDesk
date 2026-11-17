@@ -4,7 +4,6 @@
     "colors": {
       "kiwishelf.item_color": "#EAF3EE",
       "kiwishelf.active_item_color": "#D9A521",
-      "kiwishelf.handle_color": "#D9A521",
       "kiwishelf.highlight_color": "#D9A521",
       "kiwishelf.hover_fill_color": "#E8C34D80",
       "kiwishelf.hover_item_color": "#EAF3EE",
@@ -24,7 +23,6 @@
     "colors": {
       "kiwishelf.item_color": "#1C1C1E",
       "kiwishelf.active_item_color": "#0A84FF",
-      "kiwishelf.handle_color": "#0A84FF",
       "kiwishelf.highlight_color": "#0A84FF",
       "kiwishelf.hover_fill_color": "#0A84FF80",
       "kiwishelf.hover_item_color": "#1C1C1E",
@@ -44,7 +42,6 @@
     "colors": {
       "kiwishelf.item_color": "#E5E5EA",
       "kiwishelf.active_item_color": "#5E9EFF",
-      "kiwishelf.handle_color": "#5E9EFF",
       "kiwishelf.highlight_color": "#5E9EFF",
       "kiwishelf.hover_fill_color": "#5E9EFF80",
       "kiwishelf.hover_item_color": "#FFFFFF",
@@ -64,7 +61,6 @@
     "colors": {
       "kiwishelf.item_color": "#E5E5EA",
       "kiwishelf.active_item_color": "#64D2FF",
-      "kiwishelf.handle_color": "#64D2FF",
       "kiwishelf.highlight_color": "#64D2FF",
       "kiwishelf.hover_fill_color": "#64D2FF80",
       "kiwishelf.hover_item_color": "#FFFFFF",
@@ -84,7 +80,6 @@
     "colors": {
       "kiwishelf.item_color": "#E5E5EA",
       "kiwishelf.active_item_color": "#FFFFFF",
-      "kiwishelf.handle_color": "#FFFFFF",
       "kiwishelf.highlight_color": "#FFFFFF",
       "kiwishelf.hover_fill_color": "#FFFFFF40",
       "kiwishelf.hover_item_color": "#000000",
@@ -104,7 +99,6 @@
     "colors": {
       "kiwishelf.item_color": "#FFFFFF",
       "kiwishelf.active_item_color": "#FF8099",
-      "kiwishelf.handle_color": "#FF8099",
       "kiwishelf.highlight_color": "#FF8099",
       "kiwishelf.hover_fill_color": "#FF809980",
       "kiwishelf.hover_item_color": "#FFFFFF",
@@ -124,7 +118,6 @@
     "colors": {
       "kiwishelf.item_color": "#E8EAF6",
       "kiwishelf.active_item_color": "#5E5CE6",
-      "kiwishelf.handle_color": "#5E5CE6",
       "kiwishelf.highlight_color": "#5E5CE6",
       "kiwishelf.hover_fill_color": "#5E5CE680",
       "kiwishelf.hover_item_color": "#FFFFFF",
@@ -144,7 +137,6 @@
     "colors": {
       "kiwishelf.item_color": "#D8FFC2",
       "kiwishelf.active_item_color": "#86EA43",
-      "kiwishelf.handle_color": "#86EA43",
       "kiwishelf.highlight_color": "#86EA43",
       "kiwishelf.hover_fill_color": "#86EA4380",
       "kiwishelf.hover_item_color": "#FFFFFF",
@@ -164,7 +156,6 @@
     "colors": {
       "kiwishelf.item_color": "#C0CAF5",
       "kiwishelf.active_item_color": "#7AA2F7",
-      "kiwishelf.handle_color": "#7AA2F7",
       "kiwishelf.highlight_color": "#7AA2F7",
       "kiwishelf.hover_fill_color": "#7AA2F780",
       "kiwishelf.hover_item_color": "#FFFFFF",

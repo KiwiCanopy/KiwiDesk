@@ -3724,9 +3724,8 @@ hides, and of its progress fill and the pocket's tab. A picked
 colour rests at 38% of its own opacity and fills at 90%, beside a
 neutral fine line of the opposite tone. `""` (the default) is
 Automatic: the system label colour at those strengths, which follows
-light and dark mode. Every bundled palette sets it to its own
-`active_item_color`; a fresh config keeps Automatic until a palette
-is applied.
+light and dark mode. Every bundled palette, and a first run's
+config, sets it to the palette's own `active_item_color`.
 :::
 
 **Example:**

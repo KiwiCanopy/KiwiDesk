@@ -275,11 +275,11 @@ change here:
   the minimum window size the MAIN screen's, and the gaps the
   shipped default on every screen, which clears the default ring
   and keeps Glass a first run's look** (#1662, #1739,
-  `StarterTuningTests`, `LookCatalogSeamTests`) — save the
-  `ColorPaletteKeys.adaptive` paths, which the starter leaves
-  Automatic and Glass paints, so picking Glass on a first run
-  writes those alone (#3377, `LookCatalogTests`,
-  `OnboardingLooksTests`). Never seed them in the starter. The shelf depth
+  `StarterTuningTests`, `LookCatalogSeamTests`). The starter
+  paints every `ColorPaletteKeys.bundledPaint` path through
+  `TilingSettings.wearBundledPaint()`, as Glass does, never
+  leaving one Automatic for Glass to change (#3377,
+  `ShelfHandleColorTests` ▸ `starterWearsTheAccent`). The shelf depth
   steps down by the MAIN screen's full frame height in
   `StarterSetup.settings(sizes:)` alone, never in the shape
   tuning every preset shares (#1952, `StarterCompactShelfTests`

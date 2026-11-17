@@ -136,10 +136,12 @@ struct ColorPaletteTests {
     func defaultPaletteIsDefaults() {
         let def = PaletteCatalog.defaultPalette()
         #expect(def.name == PaletteCatalog.defaultName)
-        // Save the handle, painted in the accent (#3377).
+        // Save the bundled paint, the handle in the accent (#3377).
         var shipped = ColorPaletteKeys.extract(from: TilingSettings())
-        shipped["kiwishelf.handle_color"] =
-            shipped["kiwishelf.active_item_color"]
+        for (path, source) in ColorPaletteKeys.bundledPaint {
+            #expect(shipped[path]?.isEmpty == true, "\(path)")
+            shipped[path] = shipped[source]
+        }
         #expect(def.colors == shipped)
         #expect(def.colors.count == ColorPaletteKeys.all.count)
     }

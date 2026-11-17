@@ -127,12 +127,21 @@ struct ShelfHandleColorTests {
         }
     }
 
-    /// Automatic still reads as wearing any palette, so a fresh
-    /// config wears the default; a picked handle colour does not.
-    @Test("Automatic matches a palette's handle, a pick does not")
-    func automaticMatchesThePalette() throws {
+    /// The starter paints the handle as Glass and the default
+    /// palette do, so a first run wears both whole (#3377, #1739);
+    /// Automatic is a colour of its own and wears no palette.
+    @Test("A first run's handle is the default accent, Automatic is not")
+    func starterWearsTheAccent() throws {
+        let sizes = [CGSize(width: 1512, height: 982)]
+        let starter = StarterSetup.standardLayout(sizes: sizes)
+            .settings(sizes: sizes)
         let fresh = TilingSettings()
-        #expect(PaletteCatalog.defaultPalette().isApplied(to: fresh))
+        #expect(fresh.kiwishelf.handleColor.isEmpty)
+        #expect(
+            starter.kiwishelf.handleColor
+                == fresh.kiwishelf.activeItemColor
+        )
+        #expect(!PaletteCatalog.defaultPalette().isApplied(to: fresh))
         let gold = try #require(
             PaletteCatalog.authored().first {
                 $0.name == "Kiwi Gold"
@@ -140,14 +149,8 @@ struct ShelfHandleColorTests {
         )
         var settings = fresh
         gold.apply(to: &settings)
-        #expect(
-            settings.kiwishelf.handleColor
-                == gold.colors["kiwishelf.active_item_color"]
-        )
         #expect(gold.isApplied(to: settings))
         settings.kiwishelf.handleColor = ""
-        #expect(gold.isApplied(to: settings))
-        settings.kiwishelf.handleColor = "#123456"
         #expect(!gold.isApplied(to: settings))
     }
 
