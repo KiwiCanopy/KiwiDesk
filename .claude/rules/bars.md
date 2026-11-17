@@ -678,14 +678,23 @@ twice, was a question the user answered twice. The argument is
   `animations.expand_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it
-  joins and a leaving one shrinks back into it; a shelf shown at
+  joins and a leaving one shrinks back into it, its content held
+  where its slot lays it (#3386)**: its frame origin less its
+  bounds origin stays its slot's on every frame, so a write of a
+  section's frame on the strip moves both through the one
+  `BarMotion.setFrameHoldingContent`, its origin read from the one
+  `ShelfOverlay.restingOrigin`, and every path that adds a section
+  root to a strip writes that origin, since a leaver removed before
+  it lands keeps a stale one (`ShelfJoinerInPlaceTests`); **a shelf
+  shown at
   rest on an edge of its own fades in and out, plate included**
   (owner ruling, #1838) — a revealed one takes the reveal's motion
   (below). The fade-out keeps the panel until it lands,
   a show meanwhile fades it back, the shelf reports leaving
   exactly once, and `ShelfManager` retires it only then
   (`ShelfFadeTests`). The Space Bar's front-app segment, joining
-  or leaving a SHOWN bar, does the same inside its section: it
+  or leaving a SHOWN bar, grows and shrinks the same way inside
+  its section, its content collapsing toward its leading edge: it
   grows out of the run's end on the plate glide and shrinks back
   into it (`SpaceBarOverlay+FrontGrow`), its glass cutting, its
   windows dropped as a target at once, and snapping where no glide

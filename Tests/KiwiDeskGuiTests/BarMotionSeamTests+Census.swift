@@ -47,6 +47,10 @@ extension BarMotionSeamTests {
         "duration": [],
         "runPlateGlide": ["shelfGlide", "expanding("],
         "setFrame": ["travels(", "isReduced"],
+        "setFrameHoldingContent": [
+            "travels(", "isReduced", "slidesBounds(",
+        ],
+        "slidesBounds": [],
         "setAlpha": ["fades(", "isReduced"],
         "fades": [],
         "fadePeek": ["peekFadeDuration(", "isReduced", "peekMotion"],

@@ -201,6 +201,78 @@ enum BarMotion {
         }
     }
 
+    /// The key of a section's bounds-origin slide (#3386).
+    static let boundsSlideKey = "boundsOrigin"
+
+    /// Moves `view` to `frame` and its bounds origin to `origin` on
+    /// one gate, so its content holds still while the frame clips
+    /// it (#3386): the frame travels as `setFrame` does and the
+    /// origin beside it, from where its layer is drawn. The origin
+    /// lands at once and its layer travels on the open group's
+    /// length and curve, since AppKit's animator steps a bounds
+    /// origin on the main thread, a frame behind the frame. The
+    /// frame is written first, so the origin's slide is the last
+    /// animation on the layer's bounds.
+    @MainActor
+    static func setFrameHoldingContent(
+        _ view: NSView,
+        to frame: CGRect,
+        boundsOrigin origin: CGPoint,
+        animated: Bool
+    ) {
+        let travel = travels(
+            animated,
+            from: view.frame,
+            to: frame,
+            reduceMotion: isReduced && !inExpand
+        )
+        // A write that moves nothing leaves a glide in flight to it.
+        guard travel || view.frame != frame || view.bounds.origin != origin
+        else { return }
+        let layer = view.layer
+        let drawn =
+            layer?.animation(forKey: boundsSlideKey) == nil
+            ? nil : layer?.presentation()?.bounds.origin
+        let from = drawn ?? view.bounds.origin
+        layer?.removeAnimation(forKey: boundsSlideKey)
+        if travel {
+            view.animator().frame = frame
+        } else {
+            view.frame = frame
+        }
+        view.setBoundsOrigin(origin)
+        let context = NSAnimationContext.current
+        guard let layer,
+            slidesBounds(
+                travel,
+                from: from,
+                to: origin,
+                duration: context.duration
+            )
+        else { return }
+        let slide = CABasicAnimation(keyPath: "bounds.origin")
+        slide.fromValue = NSValue(point: from)
+        slide.toValue = NSValue(point: origin)
+        slide.duration = context.duration
+        slide.timingFunction =
+            context.timingFunction
+            ?? CAMediaTimingFunction(name: .default)
+        layer.add(slide, forKey: boundsSlideKey)
+    }
+
+    /// Whether a bounds origin slides beside its frame: only where
+    /// the frame travels, the origin moves and the group has a
+    /// length, since Core Animation plays a zero length as its
+    /// 0.25 s default.
+    static func slidesBounds(
+        _ travels: Bool,
+        from: CGPoint,
+        to origin: CGPoint,
+        duration: TimeInterval
+    ) -> Bool {
+        travels && from != origin && duration > 0
+    }
+
     /// Whether a frame write may travel. A view still at `.zero`
     /// has never been laid out, so its first frame is an
     /// appearance rather than a move, and a write that changes
