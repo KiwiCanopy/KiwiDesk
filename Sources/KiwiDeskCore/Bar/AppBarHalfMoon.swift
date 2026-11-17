@@ -5,7 +5,8 @@ import AppKit
 /// item's window is partly visible. The half on the side of the
 /// window still on screen is filled; a window covered without a
 /// side draws the ring alone. Its slot is reserved on every item,
-/// so no item's length changes with it.
+/// so no item's length changes with it, and mirrored past the icon
+/// on a vertical bar, so the item stays even about it (#3387).
 final class AppBarHalfMoon: NSView {
     let ring = CAShapeLayer()
     let half = CAShapeLayer()
@@ -37,6 +38,13 @@ final class AppBarHalfMoon: NSView {
     nonisolated static func reserve(contentDepth: CGFloat) -> CGFloat {
         diameter(contentDepth: contentDepth)
             + AppBarItemView.contentPadding / 2
+    }
+
+    /// The length a vertical slot takes along the run: the content
+    /// square with the disc's reserve mirrored at both ends, so the
+    /// icon sits centred whether the disc draws or not (#3387).
+    nonisolated static func verticalSlot(contentDepth: CGFloat) -> CGFloat {
+        contentDepth + 2 * reserve(contentDepth: contentDepth)
     }
 
     private var drawn: (side: BarVisibility.Side?, ink: NSColor)?

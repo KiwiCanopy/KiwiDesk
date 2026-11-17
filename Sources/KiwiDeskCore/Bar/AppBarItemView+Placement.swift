@@ -132,10 +132,10 @@ extension AppBarItemView {
         )
     }
 
-    /// The icon square in a vertical slot of `size`, centred with
-    /// the half-moon's slot above it (#2234) and kept
-    /// `contentPadding` off the leading end; nil where the item
-    /// draws no icon.
+    /// The icon square in a vertical slot of `size`, centred on the
+    /// slot (#3387) and never closer to the leading end than the
+    /// half-moon's slot above it (#2234) and `contentPadding`; nil
+    /// where the item draws no icon.
     func verticalIconSquare(in size: CGSize) -> CGRect? {
         let pad = Self.contentPadding
         let side = iconSlotHidden ? 0 : max(contentSide(in: size) - pad * 2, 0)
@@ -145,7 +145,7 @@ extension AppBarItemView {
         )
         return CGRect(
             x: (size.width - side) / 2,
-            y: max((size.height - side - moon) / 2, pad) + moon,
+            y: max((size.height - side) / 2, pad + moon),
             width: side,
             height: side
         )

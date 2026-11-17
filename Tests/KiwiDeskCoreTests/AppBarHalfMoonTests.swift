@@ -14,7 +14,8 @@ struct AppBarHalfMoonTests {
 
     private func item(
         _ visibility: BarVisibility,
-        edge: AppBarEdge = .top
+        edge: AppBarEdge = .top,
+        length: CGFloat = 60
     ) -> AppBarItemView {
         var look = AppBarLook()
         look.edge = edge
@@ -23,7 +24,7 @@ struct AppBarHalfMoonTests {
         let view = AppBarItemView(
             frame: horizontal
                 ? CGRect(x: 0, y: 0, width: 160, height: Self.depth)
-                : CGRect(x: 0, y: 0, width: Self.depth, height: 60)
+                : CGRect(x: 0, y: 0, width: Self.depth, height: length)
         )
         view.configure(
             id: WindowID(1),
@@ -74,6 +75,28 @@ struct AppBarHalfMoonTests {
         let moon = view.halfMoon.frame
         #expect(moon.maxY <= view.iconView.frame.minY)
         #expect(abs(moon.midX - view.iconView.frame.midX) <= 0.5)
+    }
+
+    @Test("A side bar's pill is even about its icon, disc or not")
+    func sideBarPillIsSymmetric() {
+        for visibility: BarVisibility in [.visible, .partly(shown: .top)] {
+            var look = AppBarLook()
+            look.edge = .left
+            let slot = AppBarOverlay.autoSlotWidth(
+                items: [],
+                style: look,
+                horizontal: false,
+                thickness: Self.depth
+            )
+            let view = item(visibility, edge: .left, length: slot)
+            let icon = view.iconView.frame
+            #expect(abs(icon.minY - (slot - icon.maxY)) <= 0.5)
+            if case .partly = visibility {
+                let moon = view.halfMoon.frame
+                #expect(moon.minY >= AppBarItemView.contentPadding)
+                #expect(moon.maxY <= icon.minY)
+            }
+        }
     }
 
     @Test("The filled half is the side still on screen")
