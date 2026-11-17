@@ -87,6 +87,16 @@ extension SystemShortcut {
                 "system_shortcut.screenshot_tools",
                 "Screenshot Tools"
             )
+        case .screenshotToClipboard:
+            return L(
+                "system_shortcut.screenshot_clipboard",
+                "Screenshot to Clipboard"
+            )
+        case .screenshotSelectionToClipboard:
+            return L(
+                "system_shortcut.screenshot_selection_clipboard",
+                "Screenshot Selection to Clipboard"
+            )
         case .inputSourceNext:
             return L(
                 "system_shortcut.input_source_next",

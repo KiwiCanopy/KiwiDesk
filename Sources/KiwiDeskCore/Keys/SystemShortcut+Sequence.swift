@@ -28,6 +28,8 @@ extension SystemShortcut {
         case .screenshot: return (28, true)
         case .screenshotSelection: return (30, true)
         case .screenshotTools: return (184, true)
+        case .screenshotToClipboard: return (29, true)
+        case .screenshotSelectionToClipboard: return (31, true)
         case .zoomToggle: return (15, false)
         case .zoomIn: return (17, false)
         case .zoomOut: return (19, false)
@@ -78,6 +80,7 @@ extension SystemShortcut {
     public var sequenceTier: SequencePassTier {
         switch self {
         case .screenshot, .screenshotSelection, .screenshotTools,
+            .screenshotToClipboard, .screenshotSelectionToClipboard,
             .zoomToggle, .zoomIn, .zoomOut, .invertColors,
             .increaseContrast, .decreaseContrast, .dockHiding:
             return .staysOpen

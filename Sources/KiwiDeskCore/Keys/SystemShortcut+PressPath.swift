@@ -22,6 +22,7 @@ extension SystemShortcut {
         case .spotlight, .appSwitcher, .missionControlSpaceLeft,
             .missionControlSpaceRight, .missionControl, .appWindows,
             .screenshot, .screenshotSelection, .screenshotTools,
+            .screenshotToClipboard, .screenshotSelectionToClipboard,
             .dockHiding, .finderSearch:
             return path == .keyboardTap
         case .forceQuit, .zoomToggle, .zoomIn, .zoomOut, .invertColors,
