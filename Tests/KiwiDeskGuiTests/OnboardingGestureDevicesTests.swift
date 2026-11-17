@@ -57,6 +57,30 @@ struct OnboardingGestureDevicesTests {
         #expect(cap(byID["kiwivision"])?.caption == "4-finger tap")
         // VoiceOver keeps the whole motion.
         #expect(byID["space"]?.spoken?.contains("left/right") == true)
+        #expect(byID["focus"]?.spoken?.contains("left/right") == false)
+    }
+
+    @Test("a row's spoken way follows the way its arrows draw")
+    func spokenWayFollowsTheBadge() {
+        LocalizationManager.shared.select("en")
+        let swipe2 = GestureKey(.swipe2, hyper)
+        let rows = OnboardingGestures.families(
+            bindings: [
+                swipe2: .split(GestureSplit(axes: [.leftRight: .focus]))
+            ],
+            screens: 1,
+            layer: nil
+        )
+        let focus = rows.first { $0.id == "focus" }
+        #expect(
+            cap(focus)?.glyph
+                == ShortcutGestureBadge(
+                    key: swipe2,
+                    direction: nil,
+                    axis: .horizontal
+                ).symbol
+        )
+        #expect(focus?.spoken?.contains("left/right") == true)
     }
 
     @Test("the seeded mouse rows, in order, each on the mouse cap")

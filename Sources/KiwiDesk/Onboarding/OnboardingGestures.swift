@@ -48,13 +48,14 @@ enum OnboardingGestures {
         }
         var rows: [OnboardingKeyFamily] = []
         if let key = swipe({ $0.step(toward: .left) == .family(.focus) }) {
+            let reach = ways(key) { $0 == .family(.focus) }
             rows.append(
                 row(
                     "focus",
                     L("onboarding.gestures.focus", "Move focus"),
                     key,
-                    fingers(key),
-                    badge(key, ways(key) { $0 == .family(.focus) })
+                    motion(key, reach),
+                    badge(key, reach)
                 )
             )
         }
@@ -62,14 +63,14 @@ enum OnboardingGestures {
             twoLast: true,
             { $0.step(toward: .left) == .family(.space) }
         ) {
-            let whole = bindings[key]?.step(toward: .up) == .family(.space)
+            let reach = ways(key) { $0 == .family(.space) }
             rows.append(
                 row(
                     "space",
                     L("onboarding.gestures.space", "Switch Spaces"),
                     key,
-                    whole ? fingers(key) : sideways(key),
-                    badge(key, ways(key) { $0 == .family(.space) })
+                    motion(key, reach),
+                    badge(key, reach)
                 )
             )
         }
@@ -101,13 +102,14 @@ enum OnboardingGestures {
         if screens > 1,
             let key = swipe({ $0.step(toward: .left) == .family(.display) })
         {
+            let reach = ways(key) { $0 == .family(.display) }
             rows.append(
                 row(
                     "display",
                     L("onboarding.gestures.display", "Focus another screen"),
                     key,
-                    fingers(key),
-                    badge(key, ways(key) { $0 == .family(.display) })
+                    motion(key, reach),
+                    badge(key, reach)
                 )
             )
         }
@@ -138,43 +140,17 @@ enum OnboardingGestures {
         return rows
     }
 
-    /// The sentence under the body, from the rows it sits over: the
-    /// focus row repeats only with long swipes on, and screens are
-    /// named only beside the row that teaches one.
-    static func footnote(
-        _ rows: [OnboardingKeyFamily],
-        longSwipes: Bool
-    ) -> String? {
-        let ids = Set(rows.map(\.id))
-        var lines: [String] = []
-        if ids.contains("focus"), longSwipes {
-            lines.append(
-                L(
-                    "onboarding.gestures.steps_focus",
-                    "Focus keeps stepping while your fingers move."
-                )
-            )
-        }
-        if ids.contains("display") {
-            lines.append(
-                L(
-                    "onboarding.gestures.steps_screens",
-                    "Spaces and screens take one step per swipe."
-                )
-            )
-        } else if ids.contains("space") {
-            lines.append(
-                L(
-                    "onboarding.gestures.steps_spaces",
-                    "Spaces take one step per swipe."
-                )
-            )
-        }
-        return lines.isEmpty ? nil : lines.joined(separator: " ")
+    /// The motion VoiceOver reads for a swipe reaching its row along
+    /// `ways`, so the words name the way the arrows draw: left and
+    /// right alone as a sideways swipe, every way as the swipe.
+    private static func motion(
+        _ key: GestureKey,
+        _ ways: Set<GestureDirection>
+    ) -> String {
+        ShortcutGestureBadge.Axis.of(ways) == .horizontal
+            ? sideways(key) : fingers(key)
     }
 
-    /// A gesture's cap: KiwiHub's glyph for `key`, and under it the
-    /// finger count (#3427), the arrows carrying the way.
     private static func badge(
         _ key: GestureKey,
         _ ways: Set<GestureDirection>,

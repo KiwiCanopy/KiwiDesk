@@ -50,4 +50,42 @@ extension OnboardingGestures {
         default: L("onboarding.gestures.tap.4", "4-finger tap")
         }
     }
+
+    /// The sentence under the body, from the rows it sits over: the
+    /// focus row repeats only with long swipes on, and screens are
+    /// named only beside the row that teaches one.
+    static func footnote(
+        _ rows: [OnboardingKeyFamily],
+        longSwipes: Bool
+    ) -> String? {
+        let ids = Set(rows.map(\.id))
+        var lines: [String] = []
+        if ids.contains("focus"), longSwipes {
+            lines.append(
+                L(
+                    "onboarding.gestures.steps_focus",
+                    "Focus keeps stepping while your fingers move."
+                )
+            )
+        }
+        if ids.contains("display") {
+            lines.append(
+                L(
+                    "onboarding.gestures.steps_screens",
+                    "Spaces and screens take one step per swipe."
+                )
+            )
+        } else if ids.contains("space") {
+            lines.append(
+                L(
+                    "onboarding.gestures.steps_spaces",
+                    "Spaces take one step per swipe."
+                )
+            )
+        }
+        return lines.isEmpty ? nil : lines.joined(separator: " ")
+    }
+
+    /// A gesture's cap: KiwiHub's glyph for `key`, and under it the
+    /// finger count (#3427), the arrows carrying the way.
 }
