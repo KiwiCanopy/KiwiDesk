@@ -53,8 +53,12 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     private var risenSide: CGFloat = 0
     /// The approach's countdown the pocket rises on (#3368).
     private(set) var rise: ShelfHandleSpec.Fill?
+    /// The sink running into the handle, nil where none does: the
+    /// one owner of a sink (#3383), whose landing ends only the sink
+    /// it was handed (`endSink(_:)`).
+    private(set) var sink: UUID?
     /// A rise taken back is sinking into the handle.
-    private(set) var sinking = false
+    var sinking: Bool { sink != nil }
     /// The shelf's outer margin, kept clear between the edge and the
     /// handle as the bars' handles keep it (#2678).
     private var outer: CGFloat = 0
@@ -92,9 +96,10 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     /// Stands as a section, or as a handle on `edge` `outer` in from
     /// it, risen to `side` where `risen`, else rising on `rise`, its
-    /// approach's countdown (#3368). Returns how long a sink back
-    /// into the handle runs, 0 where none does: the panel keeps the
-    /// risen room until `endSink`.
+    /// approach's countdown (#3368). A rise taken back, or a risen
+    /// pocket going to rest, sinks from where it is drawn (#3383).
+    /// Returns how long that sink runs, 0 where none does: the panel
+    /// keeps the risen room until `endSink(_:)` with `sink`.
     @discardableResult
     func stand(
         handle edge: AppBarEdge?,
@@ -106,13 +111,14 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     ) -> TimeInterval {
         let rising = risen && !self.risen && edge != nil
         let was = self.rise
+        let wasUp = self.risen || was != nil
         handleEdge = edge
         self.whole = whole
         self.risen = risen
         self.rise = edge == nil || risen ? nil : rise
         risenSide = side
         self.outer = outer
-        if self.rise != nil || risen { sinking = false }
+        if self.rise != nil || risen { sink = nil }
         needsLayout = true
         guard let edge else { return 0 }
         layoutSubtreeIfNeeded()
@@ -125,19 +131,25 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
                 side: side,
                 rise: next
             )
-        } else if was != nil, self.rise == nil, !risen {
-            let sink = BarMotion.playPocketSink(pocket, edge: edge, side: side)
-            sinking = sink > 0
+        } else if wasUp, self.rise == nil, !risen, !whole {
+            let span = BarMotion.playPocketSink(
+                pocket,
+                edge: edge,
+                side: side,
+                risen: !(was != nil)
+            )
+            sink = span > 0 ? UUID() : nil
             needsLayout = true
-            return sink
+            return span
         }
         return 0
     }
 
-    /// A sink landed: the pocket hides in its handle again.
-    func endSink() {
-        guard sinking else { return }
-        sinking = false
+    /// The sink `token` names landed: the pocket hides in its handle
+    /// again. A later sink or a rise meanwhile owns the pocket.
+    func endSink(_ token: UUID) {
+        guard sink == token else { return }
+        sink = nil
         pocket.layer?.removeAnimation(forKey: BarMotion.pocketRiseKey)
         needsLayout = true
     }

@@ -3614,8 +3614,10 @@ macOS's. Under Reduce Motion the pocket does not rise part way: the
 tab fills over the wait as a bar's handle does, and the pocket
 comes up when it is full. With KiwiDesk's animations off nothing
 shows during the wait.
-The tab stays the same whether the pocket is empty or not; an
-empty pocket fades its kiwis.
+An empty pocket fades its kiwis and rests its tab like a bar's
+handle; a pocket holding something rests its tab at full strength.
+Any rise, hurry or sink runs on from where the pocket is, and a
+risen pocket sinks back into its handle when it goes to rest.
 :::
 
 While you drag a window, under any value, the pocket comes up on

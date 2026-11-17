@@ -243,6 +243,8 @@ struct PocketApproachTests {
         rig.move(to: try nearTab(try #require(rig.target)))
         let view = try #require(rig.core.pocketPlate.view(on: rig.display))
         let risenSize = view.frame.size
+        // Part way up, so there is something to sink (#3383).
+        try PocketRiseSequenceTests.seed(view, rig, done: 0.5)
         rig.move(to: CGPoint(x: -10_000, y: -10_000))
         let left = try #require(rig.spec)
         #expect(left.rise == nil)

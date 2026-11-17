@@ -78,9 +78,6 @@ final class PocketPlateOverlay {
     /// Each display's sliding pocket on its way out, its leave's
     /// token, so a return in the meantime keeps its panel (#2793).
     var leaving: [DisplayID: UUID] = [:]
-    /// Each display's sinking pocket, its sink's token, so an older
-    /// landing ends no newer sink (#3368).
-    var sinks: [DisplayID: UUID] = [:]
     /// Whether a panel is on screen; a test pins it, since no test
     /// panel orders in.
     var isOnScreen: @MainActor (NSWindow) -> Bool = { $0.isVisible }
@@ -193,12 +190,12 @@ final class PocketPlateOverlay {
             shown.view.paintLit()
             paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
-            // A rise taken back sinks in the risen room it rose in,
-            // which its landing gives back (#3368).
-            let sinks =
-                spec.rise == nil && !spec.risen && spec.handle != nil
-                && (old?.rise != nil || shown.view.sinking)
-            if !sinks { Self.place(shown, at: spec.frame) }
+            // A rise taken back, or a risen pocket going to rest,
+            // sinks in the risen room it rose in, which its landing
+            // gives back (#3368, #3383).
+            if !Self.holdsRisenRoom(spec, old: old, shown: shown) {
+                Self.place(shown, at: spec.frame)
+            }
         }
         orderIn(shown)
         // Sized and ordered in first: under Hidden the handle is
@@ -214,10 +211,11 @@ final class PocketPlateOverlay {
                 rise: spec.rise
             )
             if sink > 0 {
-                landSink(on: spec.display, after: sink)
-            } else if shown.view.sinking == false,
-                old?.rise != nil, spec.rise == nil, !spec.risen
+                landSink(shown, on: spec.display, after: sink)
+            } else if !shown.view.sinking,
+                Self.holdsRisenRoom(spec, old: old, shown: shown)
             {
+                // Nothing was up to sink: the room goes at once.
                 Self.place(shown, at: spec.frame)
             }
         }

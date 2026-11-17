@@ -100,12 +100,15 @@ struct ShelfHandleDrawTests {
     @Test("the pocket's tab brightens in place on hover")
     func tabBrightens() throws {
         let size = CGSize(width: 40, height: PocketHandleView.restDepth)
-        // The tab's core row, mid-tab, in a draw `hovered` or not.
-        let core = { (hovered: Bool, out: Bool) throws -> CGFloat in
+        // The tab's core row, mid-tab, in a draw `hovered` or not, of
+        // an empty pocket unless `holds` (#3384).
+        let core = {
+            (hovered: Bool, out: Bool, holds: Bool) throws -> CGFloat in
             let view = PocketHandleView(
                 frame: CGRect(origin: .zero, size: size)
             )
             view.appearance = NSAppearance(named: .darkAqua)
+            view.faded = !holds
             view.wear(
                 KiwiShelf(),
                 markHex: "#FF0000",
@@ -147,14 +150,14 @@ struct ShelfHandleDrawTests {
         #expect(endMiddle > 0.3, "tab end \(endMiddle)")
         #expect(corner < 0.8 * endMiddle, "tab corner \(corner)")
         let rest = over(ShelfHandleSpec.restStrength)
-        #expect(abs(try core(false, false) - rest) < 0.05)
-        #expect(
-            abs(try core(true, false) - over(ShelfHandleSpec.fillStrength))
-                < 0.05
-        )
-        // Risen, the tab stays at rest: Core hands no hover then
+        let full = over(ShelfHandleSpec.fillStrength)
+        #expect(abs(try core(false, false, false) - rest) < 0.05)
+        #expect(abs(try core(true, false, false) - full) < 0.05)
+        // Holding something, the tab rests at full strength (#3384).
+        #expect(abs(try core(false, false, true) - full) < 0.05)
+        // Risen, an empty tab stays at rest: Core hands no hover then
         // (`PocketApproachTests` ▸ `hoverLightsInPlace`).
-        #expect(abs(try core(false, true) - rest) < 0.05)
+        #expect(abs(try core(false, true, false) - rest) < 0.05)
     }
 
     @Test(

@@ -175,11 +175,15 @@ final class ShelfRevealer {
         }
         cancelTimer(key)
         handleTimers.removeValue(forKey: key)?.cancel()
-        fills[key] = nil
+        let cleared = fills.removeValue(forKey: key) != nil
         ceded.remove(key)
         owned[key] = nil
+        let was = reveal(of: key).isShown
         let next = reveal(of: key).toggled(now: now(), duration: duration)
         set(next, for: key)
+        // A cleared fill is a change the phase alone may not report
+        // (#3383).
+        if cleared, was == next.isShown { onChange() }
         if next.isShown { suppressed.remove(key) }
         if next == .hidden {
             if target.zone.contains(location()) { suppressed.insert(key) }
@@ -270,15 +274,18 @@ final class ShelfRevealer {
         onChange()
     }
 
+    /// Sets `key`'s phase, reporting a change of whether it shows or
+    /// a fill it cleared (#3383).
     func set(_ next: ShelfReveal, for key: Key) {
+        var cleared = false
         if next.isShown {
-            fills[key] = nil
+            cleared = fills.removeValue(forKey: key) != nil
             ceded.remove(key)
             owned[key] = nil
         }
         let was = reveal(of: key).isShown
         phases[key] = next == .hidden ? nil : next
-        if was != next.isShown { onChange() }
+        if was != next.isShown || cleared { onChange() }
     }
 
     func arm(
@@ -296,6 +303,9 @@ final class ShelfRevealer {
         timers.removeValue(forKey: key)?.cancel()
     }
 
+    /// Drops a key the pass no longer files. Reports nothing: it runs
+    /// inside `sync`, ahead of every reader of this pass's fills
+    /// (`KiwiCore.updateBars`, #3383).
     private func forget(_ key: Key) {
         cancelTimer(key)
         handleTimers.removeValue(forKey: key)?.cancel()

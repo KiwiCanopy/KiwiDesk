@@ -87,10 +87,10 @@ extension PocketApproachTests {
         var full: CGFloat = 0
         light?.performAsCurrentDrawingAppearance {
             rest =
-                PocketHandleView.tabCore(hex: "", hovered: false)
+                PocketHandleView.tabCore(hex: "", lit: false)
                 .alphaComponent
             full =
-                PocketHandleView.tabCore(hex: "", hovered: true)
+                PocketHandleView.tabCore(hex: "", lit: true)
                 .alphaComponent
         }
         #expect(abs(rest - ShelfHandleSpec.restStrength) < 0.001)

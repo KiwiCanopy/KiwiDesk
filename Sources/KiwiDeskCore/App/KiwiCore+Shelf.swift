@@ -203,11 +203,12 @@ extension KiwiCore {
         pocketPlate.riding = riding
         pocketPlate.markBands = hiding.pocketBands
         filePocketApproaches(into: &hiding)
+        // The revealer first: the pocket reads this pass's fills, a
+        // key the sync forgets included (#3383), and the shelves
+        // judge this pass's hiding edges (#761).
+        syncHidingShelves(hiding)
         pocketPlate.barStrips = pocketStrips
         updatePocketPlate(slots: pocketSlots)
-        // The revealer first, so the shelves judge this pass's
-        // hiding edges (#761).
-        syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
         // KiwiVision stands down where the shelf does, never for a

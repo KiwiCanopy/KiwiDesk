@@ -63,6 +63,25 @@ struct ShelfRevealPocketKeyTests {
         #expect(revealer.reveal(of: pocket) == .hidden)
     }
 
+    @Test("standing a key that held a fill reports the change (#3383)")
+    func clearedFillReports() {
+        let (revealer, _, _) = Suite.make()
+        revealer.sync([pocket: Suite.flush])
+        revealer.set(.hover, for: pocket)
+        let fill = ShelfHandleSpec.Fill(
+            origin: 0.5,
+            started: Date(timeIntervalSince1970: 1_000),
+            until: Date(timeIntervalSince1970: 1_001)
+        )
+        revealer.setFill(pocket, fill)
+        var changes = 0
+        revealer.onChange = { changes += 1 }
+        // Shown before and after: only the cleared fill changed.
+        revealer.set(.pinned(until: nil), for: pocket)
+        #expect(revealer.fills[pocket] == nil)
+        #expect(changes == 1)
+    }
+
     @Test("a shelf surface holds the bars, never the pocket")
     func holdSkipsTheRisenPocket() {
         let (revealer, timers, pointer) = Suite.make()

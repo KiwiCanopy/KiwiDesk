@@ -6,7 +6,10 @@ import QuartzCore
 /// upright, all one transform pivoting on the pocket's base behind
 /// the tab. Its approach scrubs it up as a countdown and a leave
 /// sinks it back from where it stands, one animation each (#3368);
-/// a stand ahead of the countdown finishes on a damped spring. Under
+/// a stand ahead of the countdown finishes on a damped spring. Every
+/// transition reads where the pocket is drawn, removes the running
+/// animation and adds one lasting the distance left times its pace
+/// (#3383). Under
 /// Reduce Motion it stands out at once. The One-window pocket, which
 /// has no handle, slides out of its edge instead (#2793).
 extension BarMotion {
@@ -115,10 +118,12 @@ extension BarMotion {
         layer.add(scrub, forKey: pocketRiseKey)
     }
 
-    /// The countdown's scrub: still at the kiwis over `rise`'s delay,
-    /// then linear to the risen pocket as the dwell ends; one taken
-    /// over from `from` runs at once. Nil under `reduceMotion` or with
-    /// no side. `beginTime` is the delay, relative.
+    /// The countdown's scrub, from `from` — where the pocket is
+    /// drawn, nil at the handle's kiwis — to risen, lasting the
+    /// distance left times `rise`'s pace; still over `rise`'s delay
+    /// only while nothing has risen yet. Nil under `reduceMotion`,
+    /// with no side, or already risen. `beginTime` is the delay,
+    /// relative.
     @MainActor
     static func pocketScrub(
         edge: AppBarEdge,
@@ -128,13 +133,14 @@ extension BarMotion {
         reduceMotion: Bool
     ) -> CABasicAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
-        let delay = from == nil ? PocketRiseTimeline.delay(of: rise) : 0
-        let length = rise.length - delay
-        guard length > 0 else { return nil }
+        let start = pocketRiseStart(edge: edge, side: side)
+        let shown = from ?? start
+        let done = PocketRiseTimeline.progress(shown: shown, start: start)
+        let delay = done > 0 ? 0 : PocketRiseTimeline.delay(of: rise)
+        let length = (1 - done) * PocketRiseTimeline.pace(of: rise)
+        guard length > 0.001 else { return nil }
         let scrub = CABasicAnimation(keyPath: "transform")
-        scrub.fromValue = NSValue(
-            caTransform3D: from ?? pocketRiseStart(edge: edge, side: side)
-        )
+        scrub.fromValue = NSValue(caTransform3D: shown)
         scrub.toValue = NSValue(caTransform3D: CATransform3DIdentity)
         scrub.beginTime = delay
         scrub.duration = length
@@ -148,16 +154,19 @@ extension BarMotion {
     static let pocketSinkSpan: TimeInterval = 0.2
 
     /// Sinks `pocket` back into its handle from where its rise
-    /// stands; returns how long that takes, 0 where nothing runs.
+    /// stands — risen where none runs and `risen` — and returns how
+    /// long that takes, 0 where nothing is up to sink.
     @MainActor
     @discardableResult
     static func playPocketSink(
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
-        side: CGFloat
+        side: CGFloat,
+        risen: Bool = false
     ) -> TimeInterval {
         guard let layer = pocket.layer,
             let from = pocketRiseShown(pocket)
+                ?? (risen ? CATransform3DIdentity : nil)
         else { return 0 }
         layer.removeAnimation(forKey: pocketRiseKey)
         guard
@@ -172,9 +181,10 @@ extension BarMotion {
         return sink.duration
     }
 
-    /// The sink from `from` back to the handle's kiwis, held there
-    /// until its landing removes it; nil under `reduceMotion` or with
-    /// no side.
+    /// The sink from `from` back to the handle's kiwis, lasting the
+    /// distance up times `pocketSinkSpan`, held there until its
+    /// landing removes it; nil under `reduceMotion`, with no side, or
+    /// with nothing up.
     @MainActor
     static func pocketSink(
         edge: AppBarEdge,
@@ -183,12 +193,13 @@ extension BarMotion {
         reduceMotion: Bool
     ) -> CABasicAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
+        let start = pocketRiseStart(edge: edge, side: side)
+        let up = PocketRiseTimeline.progress(shown: from, start: start)
+        guard up > 0.001 else { return nil }
         let sink = CABasicAnimation(keyPath: "transform")
         sink.fromValue = NSValue(caTransform3D: from)
-        sink.toValue = NSValue(
-            caTransform3D: pocketRiseStart(edge: edge, side: side)
-        )
-        sink.duration = pocketSinkSpan
+        sink.toValue = NSValue(caTransform3D: start)
+        sink.duration = up * pocketSinkSpan
         sink.timingFunction = CAMediaTimingFunction(name: .easeIn)
         sink.fillMode = .forwards
         sink.isRemovedOnCompletion = false
