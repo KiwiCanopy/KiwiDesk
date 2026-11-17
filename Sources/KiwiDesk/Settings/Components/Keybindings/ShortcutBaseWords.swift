@@ -10,25 +10,29 @@ enum ShortcutBaseWords {
         L("shortcuts.base", "Shortcuts use")
     }
 
+    /// The detail behind the row's `?` (#3433).
     static var help: String {
         L(
             "shortcuts.base.help",
-            "Pick ✦ to put KiwiDesk's shortcuts on the Hyper key. A "
+            "Pick ✦ to put KiwiDesk's shortcuts on the Hyper key: "
+                + "every ⌃⌥ shortcut moves to ✦, keeping ⇧ and ⌘. "
+                + "%1$@ takes ✦⌥, since ⇧⌘3–5 are macOS's "
+                + "screenshots, and resize shortcuts stay on ⌥⌘. A "
                 + "shortcut you set on another key stays where you put "
                 + "it, and one whose ✦ key another shortcut holds "
-                + "stays on ⌃⌥."
+                + "stays on ⌃⌥.",
+            L("shortcuts.go_to_desktop", "Go to Desktop")
         )
     }
 
-    /// Under the switch while a key is set.
+    /// Under the switch while a key is set: where new shortcuts
+    /// start, the rest behind the `?` (#3433).
     static var caption: String {
         L(
             "shortcuts.base.caption",
-            "✦ moves every ⌃⌥ shortcut to Hyper, keeping "
-                + "⇧ and ⌘. %1$@ takes ✦⌥, since ⇧⌘3–5 are "
-                + "macOS's screenshots. Resize shortcuts stay on "
-                + "⌥⌘. Applies to all profiles when you save.",
-            L("shortcuts.go_to_desktop", "Go to Desktop")
+            "Shortcuts KiwiDesk adds later, like a new Desktop's, "
+                + "start there too. Applies to all profiles when you "
+                + "save."
         )
     }
 

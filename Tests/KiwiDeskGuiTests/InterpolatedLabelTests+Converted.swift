@@ -270,9 +270,9 @@ extension InterpolatedLabelTests {
         //    same card as the entry above, reached from the
         //    other end of the app.
         "shortcuts.desktops.help": 1,
-        // #2460. The switch's caption names the Go to Desktop row
-        //    by its label key.
-        "shortcuts.base.caption": 1,
+        // #2460, #3433. The switch's `?` names the Go to Desktop
+        //    row by its label key.
+        "shortcuts.base.help": 1,
         // 7. #1394. A screen-count mismatch is the one drift
         //    Save cannot take up, so the hint that greys Save
         //    and the header's status line both name the button
