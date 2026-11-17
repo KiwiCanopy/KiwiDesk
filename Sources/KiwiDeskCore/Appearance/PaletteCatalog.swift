@@ -1,8 +1,9 @@
 import Foundation
 
 /// Built-in and default color palette provider (#375). The default
-/// is DERIVED from the shipped struct defaults at load, so it
-/// always equals reset-to-default and cannot drift.
+/// is DERIVED from the shipped struct defaults at load, with
+/// `ColorPaletteKeys.bundledPaint` applied (#3377), so it cannot
+/// drift.
 public enum PaletteCatalog {
     /// The name of the always-present default palette.
     public static let defaultName = "Kiwi (Default)"
