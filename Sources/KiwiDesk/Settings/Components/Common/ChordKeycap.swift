@@ -18,18 +18,7 @@ struct ChordKeycap: View {
             Text(text)
         }
         .font(.system(size: 12, weight: .semibold).monospaced())
-        .foregroundStyle(SettingsTheme.ink)
-        .padding(.horizontal, 9)
-        .padding(.vertical, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(SettingsTheme.sunken)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(SettingsTheme.ink2.opacity(0.3), lineWidth: 1.2)
-        )
-        .fixedSize()
+        .keycapChrome()
     }
 
     /// The "+" between two caps.
@@ -38,5 +27,24 @@ struct ChordKeycap: View {
             .font(.system(size: 12, weight: .medium))
             .foregroundStyle(SettingsTheme.ink3)
             .padding(.vertical, 4)
+    }
+}
+
+extension View {
+    /// A keycap's chip: the one shape every `ChordKeycap` and the
+    /// tour's gesture cap draw (#3427).
+    func keycapChrome() -> some View {
+        foregroundStyle(SettingsTheme.ink)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(SettingsTheme.sunken)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(SettingsTheme.ink2.opacity(0.3), lineWidth: 1.2)
+            )
+            .fixedSize()
     }
 }

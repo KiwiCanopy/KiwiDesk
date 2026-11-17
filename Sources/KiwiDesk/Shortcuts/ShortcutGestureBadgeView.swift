@@ -20,7 +20,7 @@ struct ShortcutGestureBadgeView: View {
                     Text(verbatim: first.chord)
                         .font(.callout)
                 }
-                glyph(first)
+                GestureGlyph(symbol: first.symbol, side: Self.side)
                 if badges.count > 1 {
                     Text(verbatim: "+\(badges.count - 1)")
                         .font(.caption)
@@ -32,21 +32,6 @@ struct ShortcutGestureBadgeView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(spoken)
         }
-    }
-
-    private func glyph(_ badge: ShortcutGestureBadge) -> some View {
-        Group {
-            if let custom = CustomGlyph(name: badge.symbol) {
-                Image(nsImage: custom.image)
-                    .renderingMode(.template)
-                    .resizable()
-            } else {
-                Image(systemName: badge.symbol)
-                    .resizable()
-                    .scaledToFit()
-            }
-        }
-        .frame(width: Self.side, height: Self.side)
     }
 
     /// The hover over "+N": each other gesture, on a line of its own.

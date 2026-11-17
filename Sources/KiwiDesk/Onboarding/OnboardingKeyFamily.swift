@@ -47,6 +47,11 @@ enum OnboardingChord: Equatable {
     /// written in full, drawn on its own keycap (#2877), and no
     /// modifier to name in words.
     case mixed([String])
+    /// A gesture held with keys (#3427): the keys named as
+    /// `shared` names them, then one cap holding the gesture's
+    /// `GestureGlyph` with `caption` under it — the finger count, or
+    /// the mouse's motion.
+    case gesture(HotkeyModifiers, glyph: String, caption: String)
 
     @MainActor var glyphs: String {
         switch self {
@@ -58,6 +63,8 @@ enum OnboardingChord: Equatable {
             return symbols + " " + keys
         case .mixed(let chords):
             return chords.joined(separator: "  ")
+        case .gesture(let modifiers, _, let caption):
+            return OnboardingChord.shared(modifiers, keys: caption).glyphs
         }
     }
 }

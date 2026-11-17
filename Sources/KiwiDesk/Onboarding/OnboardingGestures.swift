@@ -34,14 +34,28 @@ enum OnboardingGestures {
                     && bindings[$0].map(holds) == true
             }
         }
+        // The ways `key` reaches what its row teaches, which pick its
+        // badge as KiwiHub picks it (`ShortcutGestureBadge.covering`).
+        func ways(
+            _ key: GestureKey,
+            _ hits: (GestureStep?) -> Bool
+        ) -> Set<GestureDirection> {
+            Set(
+                key.input.directions.filter {
+                    hits(bindings[key]?.step(toward: $0))
+                }
+            )
+        }
         var rows: [OnboardingKeyFamily] = []
         if let key = swipe({ $0.step(toward: .left) == .family(.focus) }) {
+            let reach = ways(key) { $0 == .family(.focus) }
             rows.append(
                 row(
                     "focus",
                     L("onboarding.gestures.focus", "Move focus"),
                     key,
-                    fingers(key)
+                    motion(key, reach),
+                    badge(key, reach)
                 )
             )
         }
@@ -49,13 +63,14 @@ enum OnboardingGestures {
             twoLast: true,
             { $0.step(toward: .left) == .family(.space) }
         ) {
-            let whole = bindings[key]?.step(toward: .up) == .family(.space)
+            let reach = ways(key) { $0 == .family(.space) }
             rows.append(
                 row(
                     "space",
                     L("onboarding.gestures.space", "Switch Spaces"),
                     key,
-                    whole ? fingers(key) : sideways(key)
+                    motion(key, reach),
+                    badge(key, reach)
                 )
             )
         }
@@ -73,19 +88,28 @@ enum OnboardingGestures {
                         "Open the Desktop overview"
                     ),
                     key,
-                    upward(key)
+                    upward(key),
+                    badge(
+                        key,
+                        ways(key) {
+                            guard case .lua(let run) = $0 else { return false }
+                            return run.lua == KiwiHubSide.desktops.lua
+                        }
+                    )
                 )
             )
         }
         if screens > 1,
             let key = swipe({ $0.step(toward: .left) == .family(.display) })
         {
+            let reach = ways(key) { $0 == .family(.display) }
             rows.append(
                 row(
                     "display",
                     L("onboarding.gestures.display", "Focus another screen"),
                     key,
-                    fingers(key)
+                    motion(key, reach),
+                    badge(key, reach)
                 )
             )
         }
@@ -103,7 +127,8 @@ enum OnboardingGestures {
                         "Turn KiwiVision on or off"
                     ),
                     key,
-                    tap(key)
+                    tap(key),
+                    badge(key, [], caption: tap(key))
                 )
             )
         }
@@ -115,46 +140,36 @@ enum OnboardingGestures {
         return rows
     }
 
-    /// The sentence under the body, from the rows it sits over: the
-    /// focus row repeats only with long swipes on, and screens are
-    /// named only beside the row that teaches one.
-    static func footnote(
-        _ rows: [OnboardingKeyFamily],
-        longSwipes: Bool
-    ) -> String? {
-        let ids = Set(rows.map(\.id))
-        var lines: [String] = []
-        if ids.contains("focus"), longSwipes {
-            lines.append(
-                L(
-                    "onboarding.gestures.steps_focus",
-                    "Focus keeps stepping while your fingers move."
-                )
-            )
-        }
-        if ids.contains("display") {
-            lines.append(
-                L(
-                    "onboarding.gestures.steps_screens",
-                    "Spaces and screens take one step per swipe."
-                )
-            )
-        } else if ids.contains("space") {
-            lines.append(
-                L(
-                    "onboarding.gestures.steps_spaces",
-                    "Spaces take one step per swipe."
-                )
-            )
-        }
-        return lines.isEmpty ? nil : lines.joined(separator: " ")
+    /// The motion VoiceOver reads for a swipe reaching its row along
+    /// `ways`, so the words name the way the arrows draw: left and
+    /// right alone as a sideways swipe, every way as the swipe.
+    private static func motion(
+        _ key: GestureKey,
+        _ ways: Set<GestureDirection>
+    ) -> String {
+        ShortcutGestureBadge.Axis.of(ways) == .horizontal
+            ? sideways(key) : fingers(key)
     }
 
-    private static func row(
+    private static func badge(
+        _ key: GestureKey,
+        _ ways: Set<GestureDirection>,
+        caption: String? = nil
+    ) -> OnboardingGestureCap {
+        OnboardingGestureCap(
+            glyph: ShortcutGestureBadge.covering(key, ways: ways).symbol,
+            caption: caption ?? fingers(key)
+        )
+    }
+
+    /// One row: the keys, the gesture's cap, and the whole motion in
+    /// words for VoiceOver alone.
+    static func row(
         _ id: String,
         _ label: String,
         _ key: GestureKey,
-        _ motion: String
+        _ motion: String,
+        _ cap: OnboardingGestureCap
     ) -> OnboardingKeyFamily {
         let modifiers = HotkeyModifiers(key.chord)
         let spoken =
@@ -170,56 +185,17 @@ enum OnboardingGestures {
         return OnboardingKeyFamily(
             id: id,
             label: label,
-            chord: .shared(modifiers, keys: motion),
+            chord: .gesture(
+                modifiers,
+                glyph: cap.glyph,
+                caption: cap.caption
+            ),
             spoken: spoken
         )
     }
 
-    // One key per finger count and motion: the count is a closed set,
-    // so no frame asks a noun to agree with a number.
-
-    private static func fingers(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 3: L("onboarding.gestures.fingers.3", "3 fingers")
-        case 4: L("onboarding.gestures.fingers.4", "4 fingers")
-        case 5: L("onboarding.gestures.fingers.5", "5 fingers")
-        default: L("onboarding.gestures.fingers.2", "2 fingers")
-        }
-    }
-
-    private static func sideways(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 2:
-            L("onboarding.gestures.sideways.2", "2 fingers left/right")
-        case 4:
-            L("onboarding.gestures.sideways.4", "4 fingers left/right")
-        case 5:
-            L("onboarding.gestures.sideways.5", "5 fingers left/right")
-        default:
-            L("onboarding.gestures.sideways.3", "3 fingers left/right")
-        }
-    }
-
-    private static func upward(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 2: L("onboarding.gestures.up.2", "2 fingers up")
-        case 4: L("onboarding.gestures.up.4", "4 fingers up")
-        case 5: L("onboarding.gestures.up.5", "5 fingers up")
-        default: L("onboarding.gestures.up.3", "3 fingers up")
-        }
-    }
-
-    private static func tap(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 2: L("onboarding.gestures.tap.2", "2-finger tap")
-        case 3: L("onboarding.gestures.tap.3", "3-finger tap")
-        case 5: L("onboarding.gestures.tap.5", "5-finger tap")
-        default: L("onboarding.gestures.tap.4", "4-finger tap")
-        }
-    }
-
     /// ⌃⌥K: every gesture, set apart as the keys step sets KiwiHub.
-    private static func gateway(_ layer: KeyLayer?) -> OnboardingKeyFamily? {
+    static func gateway(_ layer: KeyLayer?) -> OnboardingKeyFamily? {
         guard let layer,
             let combo = OnboardingKeys.combo(
                 lua: KiwiHubSide.shortcuts.lua,

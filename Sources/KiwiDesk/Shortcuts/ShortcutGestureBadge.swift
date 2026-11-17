@@ -70,6 +70,20 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
         }
     }
 
+    /// The one badge for `key` reaching an action along `ways`: its
+    /// way where there is one, its axis where both ways of one axis
+    /// reach it (#3380), else no way. KiwiHub and the tour both draw
+    /// through it (#3427).
+    @MainActor static func covering(
+        _ key: GestureKey,
+        ways: Set<GestureDirection>
+    ) -> ShortcutGestureBadge {
+        guard ways.count > 1 else {
+            return ShortcutGestureBadge(key: key, direction: ways.first)
+        }
+        return ShortcutGestureBadge(key: key, direction: nil, axis: .of(ways))
+    }
+
     var id: String {
         key.spelling + (direction.map { ":" + $0.rawValue } ?? "")
     }
