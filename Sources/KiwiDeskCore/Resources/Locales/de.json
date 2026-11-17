@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "Tut noch nichts",
   "shortcuts.sequence.group": "Gruppe",
   "shortcuts.sequence.icon": "Symbol",
-  "shortcuts.sequence.key_count": "Tasten: %1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "Name",
   "shortcuts.sequence.name_ax": "Name für %1$@",

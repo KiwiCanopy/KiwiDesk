@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "아직 아무 동작도 하지 않습니다",
   "shortcuts.sequence.group": "그룹",
   "shortcuts.sequence.icon": "아이콘",
-  "shortcuts.sequence.key_count": "키 수: %1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "이름",
   "shortcuts.sequence.name_ax": "%1$@의 이름",

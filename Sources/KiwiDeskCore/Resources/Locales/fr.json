@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "Ne fait encore rien",
   "shortcuts.sequence.group": "Groupe",
   "shortcuts.sequence.icon": "Icône",
-  "shortcuts.sequence.key_count": "Touches : %1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "Nom",
   "shortcuts.sequence.name_ax": "Nom de %1$@",

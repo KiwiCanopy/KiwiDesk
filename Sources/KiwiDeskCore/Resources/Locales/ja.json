@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "まだ何もしません",
   "shortcuts.sequence.group": "グループ",
   "shortcuts.sequence.icon": "アイコン",
-  "shortcuts.sequence.key_count": "キー数：%1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "名前",
   "shortcuts.sequence.name_ax": "%1$@の名前",

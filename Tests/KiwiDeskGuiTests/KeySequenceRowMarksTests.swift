@@ -61,7 +61,7 @@ struct KeySequenceRowMarksTests {
         #expect(!branch.contains("disclosure("))
     }
 
-    @Test("A branch's one button leads with the layer and ends in a pencil")
+    @Test("A branch's one button leads with its symbol and ends in a pencil")
     func branchMarks() throws {
         let branch = try Self.body(
             "var branchContainer:",
@@ -71,7 +71,7 @@ struct KeySequenceRowMarksTests {
             branch.contains(
                 "Button{editingBranch=SequenceBranchRequest(id:node.id)"
                     + "}label:{HStack(spacing:4){"
-                    + "Image(systemName:Self.branchSymbol)"
+                    + "Image(systemName:BranchMark.symbol(of:node))"
             )
         )
         // The pencil follows the name inside the button's label.
@@ -86,7 +86,8 @@ struct KeySequenceRowMarksTests {
         // The marks are decorative; the button keeps its name.
         #expect(
             branch.contains(
-                "Image(systemName:Self.branchSymbol).accessibilityHidden(true)"
+                "Image(systemName:BranchMark.symbol(of:node))"
+                    + ".accessibilityHidden(true)"
             )
         )
         #expect(

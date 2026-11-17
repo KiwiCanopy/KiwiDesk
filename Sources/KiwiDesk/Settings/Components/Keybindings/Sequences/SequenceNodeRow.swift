@@ -65,31 +65,16 @@ struct SequenceNodeRow: View {
 
     // MARK: - Lines
 
-    /// The leader's row carries the sequence's reach, as a shortcut
-    /// row does (#3124).
+    /// The leader in the step keys' order (#3381 ▸ c2): its chord in
+    /// their key column, its pill, then the sequence's reach and
+    /// trash, as a shortcut row's (#3124).
     @ViewBuilder private var leaderLine: some View {
         disclosure(width: SettingsMetrics.shortcutIconSlot)
-        TextField(
-            L("shortcuts.sequence.name", "Name"),
-            text: editing.field(node.id, \.label)
-        )
-        .textFieldStyle(.roundedBorder)
-        .frame(maxWidth: 180)
-        .accessibilityLabel(nameLabel)
-        Text(
-            L(
-                "shortcuts.sequence.key_count",
-                "Keys: %1$d",
-                node.steps?.count ?? 0
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        // The name field gives way first at a narrow width.
-        .fixedSize()
+        recorder.fixedSize()
+            .padding(.leading, Self.leaderKeyInset)
+        branchContainer
         Spacer(minLength: 8)
         KeyReachColumn(model: model, layer: layerName, binding: node)
-        recorder
         KeyReachTrash(
             model: model,
             layer: layerName,
@@ -119,6 +104,10 @@ struct SequenceNodeRow: View {
 
     /// A key line's fold slot, in points (#3241).
     static let foldSlot: CGFloat = 12
+
+    /// What brings the leader's chord to its keys' column: the
+    /// 1 pt rail and the fold slot each key line leads with.
+    static let leaderKeyInset: CGFloat = 1 + foldSlot
 
     /// The fold, its own button so it never shares the name's click
     /// (#3162 ▸ Ruling amendment).

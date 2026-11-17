@@ -171,10 +171,21 @@ struct KeySequenceCardTests {
         #expect(
             leader.contains(
                 "KeyReachColumn(model:model,layer:layerName,binding:node)"
-                    + "recorderKeyReachTrash(model:model,layer:layerName,"
+                    + "KeyReachTrash(model:model,layer:layerName,"
                     + "binding:node){requestDelete()}"
             )
         )
+        // The leader in the step keys' order (#3381 ▸ c2): its chord
+        // at their column, its pill, then reach; no name field and
+        // no key count.
+        #expect(
+            leader.contains(
+                "recorder.fixedSize().padding(.leading,Self.leaderKeyInset)"
+                    + "branchContainerSpacer(minLength:8)KeyReachColumn("
+            )
+        )
+        #expect(!leader.contains("TextField("))
+        #expect(!row.contains("key_count"))
         let key = try #require(
             SourceScan.declarationBody(after: "private var keyLine", in: row)
         )

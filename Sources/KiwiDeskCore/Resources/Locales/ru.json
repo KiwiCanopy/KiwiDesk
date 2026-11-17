@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "Пока ничего не делает",
   "shortcuts.sequence.group": "Группа",
   "shortcuts.sequence.icon": "Значок",
-  "shortcuts.sequence.key_count": "Клавиш: %1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "Имя",
   "shortcuts.sequence.name_ax": "Имя для %1$@",

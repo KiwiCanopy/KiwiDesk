@@ -3,9 +3,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The key sequence hint panel (#1871 ▸ hint panel), built from the
-/// key panel's Shortcuts side: the leader's name, the breadcrumb,
-/// the keys that open more keys marked ›, then the step's end keys
-/// as the Shortcuts side files them, and how to leave. It takes no
+/// key panel's Shortcuts side: the headline breadcrumb, the keys
+/// that open more keys marked ›, then the step's end keys as the
+/// Shortcuts side files them, and how to leave. It takes no
 /// keys of its own: the keyboard tap reads every press. Past
 /// KiwiHub's sheet cap only the end keys scroll, under a fade, and
 /// the footer says how (#3175).
@@ -66,19 +66,30 @@ struct KeySequenceHintView: View {
         )
     }
 
+    /// "📁 Leader › 📁 Windows" on one line, cut from the head so
+    /// the step the user stands on stays in view (#3381).
     private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(hint.title)
-                .font(.headline)
-                .lineLimit(1)
-                .accessibilityAddTraits(.isHeader)
-            Text(hint.breadcrumb)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .truncationMode(.head)
-                .accessibilityLabel(hint.spokenBreadcrumb)
+        Self.headline(hint.crumbs)
+            .font(.headline)
+            .lineLimit(1)
+            .truncationMode(.head)
+            .accessibilityLabel(hint.spokenHeadline)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    static func headline(_ crumbs: [KeySequenceHint.Key]) -> Text {
+        var line = Text(verbatim: "")
+        for (index, key) in crumbs.enumerated() {
+            if index > 0 { line = line + separator }
+            line =
+                line + Text(Image(systemName: key.symbol))
+                + Text(verbatim: " " + key.shown)
         }
+        return line
+    }
+
+    private static var separator: Text {
+        Text(verbatim: " › ").foregroundStyle(.secondary)
     }
 
     /// What the end keys may stand: the cap less the branch rows

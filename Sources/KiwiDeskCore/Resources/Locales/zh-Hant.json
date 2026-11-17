@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "尚未執行任何動作",
   "shortcuts.sequence.group": "群組",
   "shortcuts.sequence.icon": "圖像",
-  "shortcuts.sequence.key_count": "按鍵數：%1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "名稱",
   "shortcuts.sequence.name_ax": "%1$@的名稱",

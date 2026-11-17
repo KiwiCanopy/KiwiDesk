@@ -2569,7 +2569,6 @@
   "shortcuts.sequence.empty": "尚未执行任何操作",
   "shortcuts.sequence.group": "分组",
   "shortcuts.sequence.icon": "图标",
-  "shortcuts.sequence.key_count": "按键数：%1$d",
   "shortcuts.sequence.lua": "Lua…",
   "shortcuts.sequence.name": "名称",
   "shortcuts.sequence.name_ax": "%1$@的名称",

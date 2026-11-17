@@ -36,7 +36,7 @@ struct KeySequenceHintFallbackTests {
             KeySequenceProgress(leader: "ctrl+alt+space", path: [])
         )
         let (hint, _) = try #require(controller.hint())
-        #expect(hint.title == "Leader")
+        #expect(hint.headline == "Leader")
         #expect(hint.endKeys.bindings.map(\.combo) == ["h"])
         controller.follow(nil)
     }

@@ -131,7 +131,7 @@ final class KeySequenceHintController {
             element: NSApp as Any,
             notification: .announcementRequested,
             userInfo: [
-                .announcement: hint.spokenBreadcrumb,
+                .announcement: hint.spokenHeadline,
                 .priority: NSAccessibilityPriorityLevel.high.rawValue,
             ]
         )

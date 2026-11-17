@@ -58,7 +58,6 @@ struct KeySequenceHintPlacementTests {
         func cap(branches: Int, sheetCap: CGFloat = 400) -> CGFloat {
             KeySequenceHintView(
                 hint: KeySequenceHint(
-                    title: "Leader",
                     crumbs: [key],
                     branches: Array(repeating: key, count: branches),
                     endKeys: KeyLayer(name: KeyLayer.defaultName, bindings: [])
