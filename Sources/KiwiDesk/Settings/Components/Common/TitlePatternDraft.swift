@@ -1,8 +1,8 @@
 import Foundation
 
-/// The pattern `WindowTitleEditor` holds before Add (#3340): a
+/// The pattern `TitlePatternPopover` holds before Add (#3340): a
 /// picked open title or a typed one, never stored until committed,
-/// so the caller's preview checks every pattern first.
+/// so the popover's preview checks every pattern first.
 struct TitlePatternDraft: Equatable {
     /// The field's text.
     var text = ""
@@ -13,7 +13,7 @@ struct TitlePatternDraft: Equatable {
     private(set) var picks = 0
 
     /// Opens the field on `title`, replacing any text being typed;
-    /// an empty title is Other (Specify)….
+    /// an empty title opens it empty.
     mutating func start(with title: String = "") {
         text = title
         isOpen = true

@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// What a titled Space rule being composed would do to the app's
-/// open windows (#3341): the draft staged into the engine's own
-/// resolution — `TitledSpaceRules`, then the bare rule — never a
-/// `contains` of its own (`docs/design-decisions.md` ▸ App rules).
+/// open windows (#3341), drawn in the title popover (#3373): the
+/// draft staged into the engine's own resolution —
+/// `TitledSpaceRules`, then the bare rule — never a `contains` of
+/// its own (`docs/design-decisions.md` ▸ App rules).
 struct SpaceRuleMatchPreview: View {
     @ObservedObject var model: SettingsModel
     /// The row composing, before its edit.
@@ -96,24 +97,25 @@ struct SpaceRuleMatchPreview: View {
     /// The app's open window titles, deduplicated and sorted.
     var titles: [String] {
         Set(
-            model.core.state.windows.all
-                .filter {
-                    AppRef(bundleID: $0.appBundleID, name: $0.appName)
-                        .listKey == row.app && !$0.title.isEmpty
-                }
+            AppRuleWindows.of(row.app, in: model.core)
                 .map(\.title)
+                .filter { !$0.isEmpty }
         ).sorted()
     }
 
     /// The engine's answer for `title` with the draft staged: the
-    /// row's rule replaced by the typed one.
+    /// row's rule replaced by the typed one. The row's own rule is
+    /// out while the field is empty too, and a fragment another row
+    /// holds stages nothing, since Add refuses it.
     func verdict(for title: String) -> Verdict {
         var config = model.config
+        SpaceRuleEdit.drop(row, from: &config)
         let typed = pending.trimmed
+        let staged = SpaceRuleRow(app: row.app, fragment: typed)
         var own: String?
-        if !typed.isEmpty, let space {
-            SpaceRuleEdit.drop(row, from: &config)
-            let staged = SpaceRuleRow(app: row.app, fragment: typed)
+        if !typed.isEmpty, let space,
+            config.titledAppRules[staged.key] == nil
+        {
             config.titledAppRules[staged.key] = space
             own = staged.key
         }

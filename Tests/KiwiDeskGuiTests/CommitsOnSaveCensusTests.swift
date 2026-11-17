@@ -18,6 +18,7 @@ struct CommitsOnSaveCensusTests {
         "AppPickerButton.swift": "an app search; Return adds",
         "SequenceActionMenu.swift": "an action search; Return picks",
         "LayerAddPopover.swift": "the new-layer field; Return adds",
+        "TitlePatternPopover.swift": "a title popover; Return or Add",
     ]
 
     private func flat(_ path: String) throws -> String {

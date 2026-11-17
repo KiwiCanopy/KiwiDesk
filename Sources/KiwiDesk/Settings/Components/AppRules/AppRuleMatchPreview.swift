@@ -91,10 +91,8 @@ struct AppRuleMatchPreview: View {
     /// Open windows deduped by title in stable alphabetical order.
     var windows: [PreviewWindow] {
         var byTitle: [String: Bool] = [:]
-        for window in model.core.state.windows.all
-        where AppRef(bundleID: window.appBundleID, name: window.appName)
-            .listKey == app && !window.title.isEmpty
-        {
+        for window in AppRuleWindows.of(app, in: model.core)
+        where !window.title.isEmpty {
             byTitle[window.title] =
                 (byTitle[window.title] ?? false) || window.isFloating
         }

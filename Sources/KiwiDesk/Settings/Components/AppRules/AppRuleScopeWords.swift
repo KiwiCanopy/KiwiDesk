@@ -15,7 +15,7 @@ enum AppRuleScopeWords {
         L("app_rules.space.scope.all_other", "All other windows")
     }
 
-    /// The menu item opening the composer.
+    /// The Float menu's item opening the pattern editor.
     static var titledItem: String {
         L("app_rules.float.scope.titled", "Windows titled…")
     }
@@ -27,6 +27,11 @@ enum AppRuleScopeWords {
             "Windows titled “%1$@”",
             fragment
         )
+    }
+
+    /// A titled row's item opening the popover on its own title.
+    static var changeTitle: String {
+        L("app_rules.space.scope.change_title", "Change Title…")
     }
 
     static var addTitled: String {
@@ -52,15 +57,6 @@ enum AppRuleScopeWords {
             "%1$@ already has a row for “%2$@”.",
             app,
             fragment
-        )
-    }
-
-    /// The composer's caption, from the ruling.
-    static var caption: String {
-        L(
-            "app_rules.space.titled.caption",
-            "New windows whose title contains the pattern open in "
-                + "this row's Space."
         )
     }
 

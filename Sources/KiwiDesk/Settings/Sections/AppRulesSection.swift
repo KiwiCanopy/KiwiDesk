@@ -20,8 +20,8 @@ struct AppRulesSection: View {
     /// store — without this the list drops the row mid-gesture
     /// (#1022). It names at most one row and holds no value.
     @State var composingTitles: String?
-    /// The Space card's one open composer (#3341), owned here for the
-    /// same reason: a new titled row holds no stored rule yet.
+    /// The Space card's one open title popover (#3373), owned here
+    /// so the card has one at a time and a reload closes it.
     @State var composingSpace: SpaceComposer?
     @State var newSpaceApp = ""
     @State var newFloatingApp = ""

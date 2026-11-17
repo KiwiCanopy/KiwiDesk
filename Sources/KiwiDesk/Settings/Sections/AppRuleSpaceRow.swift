@@ -18,40 +18,22 @@ struct AppRuleSpaceRow: View {
     let gates: AppRulesGates
     /// Whether the section draws the "Applies to" column.
     let showsReach: Bool
-    /// The section's one open composer.
+    /// The section's one open title popover (#3373).
     @Binding var composing: SpaceComposer?
     let onDelete: (RuleRemoval) -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
-    /// The pattern being composed in the scope cell.
-    @State var draft = TitlePatternDraft()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(
-                alignment: .firstTextBaseline,
-                spacing: SettingsMetrics.appRuleColumnSpacing
-            ) {
-                identity
-                scopeCell
-                if !isDraft { controls }
-            }
-            .font(.callout)
-            if composingHere {
-                VStack(alignment: .leading, spacing: 3) {
-                    SpaceRuleMatchPreview(
-                        model: model,
-                        row: row,
-                        space: composedSpace,
-                        pending: draft.isOpen ? draft.text : ""
-                    )
-                    Text(AppRuleScopeWords.caption)
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.leading, SettingsMetrics.appRuleIdentityInset)
-            }
+        HStack(
+            alignment: .firstTextBaseline,
+            spacing: SettingsMetrics.appRuleColumnSpacing
+        ) {
+            identity
+            scopeCell
+            controls
         }
+        .font(.callout)
         // A row past its group's first names its app for VoiceOver,
         // the name being drawn on the first row alone.
         .modifier(SpaceRowGroupName(name: first ? nil : appName))

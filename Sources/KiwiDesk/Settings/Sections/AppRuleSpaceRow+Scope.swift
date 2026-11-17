@@ -1,70 +1,95 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The section's one open Space composer (#3341): the row whose
-/// fragment is being written, or a new titled row for `app`.
-struct SpaceComposer: Equatable {
-    let app: String
-    /// The row composing; nil for a new titled row.
-    let row: SpaceRuleRow?
+/// The section's one open title popover (#3373): the row it hangs
+/// off, and whether it changes that row's title or adds a rule.
+struct SpaceComposer: Identifiable, Equatable {
+    let request: TitlePatternRequest
+    /// The row whose scope cell the popover hangs off.
+    let row: SpaceRuleRow
+    /// Change Title…: the popover rewrites `row`'s fragment. Add
+    /// Rule…: it adds a titled rule in `row`'s Space.
+    let changes: Bool
+
+    var id: UUID { request.id }
+
+    init(row: SpaceRuleRow, changes: Bool) {
+        self.row = row
+        self.changes = changes
+        request = TitlePatternRequest(
+            seed: changes ? row.fragment ?? "" : ""
+        )
+    }
 }
 
-/// A Space row's scope cell (#3341): which of the app's windows the
-/// row takes, as a menu, or the composer in its place while one of
-/// its fragments is written. A pattern scopes exactly this row,
-/// beside its own Space menu, and no chip editor hangs under it
-/// (#1608 ▸ amended).
+/// A Space row's scope cell (#3341, #3373): which of the app's
+/// windows the row takes, as a menu, with the title popover hung
+/// off it. A pattern scopes exactly this row, beside its own Space
+/// menu, and no chip editor hangs under it (#1608 ▸ amended).
 extension AppRuleSpaceRow {
-    /// A new titled row, drawn with its composer and no Space yet.
-    var isDraft: Bool { row.fragment == "" }
-
-    var composingHere: Bool {
-        guard let composing, composing.app == row.app else { return false }
-        return isDraft ? composing.row == nil : composing.row == row
+    var scopeCell: some View {
+        scopeMenu
+            .popover(item: composerBinding, arrowEdge: .bottom) {
+                composer in
+                TitlePatternPopover(
+                    model: model,
+                    app: row.app,
+                    covered: siblings,
+                    seed: composer.request.seed,
+                    refusal: { refusal($0, changing: composer) },
+                    preview: { pending in
+                        SpaceRuleMatchPreview(
+                            model: model,
+                            row: composer.changes
+                                ? row
+                                : SpaceRuleRow(app: row.app, fragment: ""),
+                            space: SpaceRuleRows.space(
+                                of: row,
+                                in: model.config
+                            ),
+                            pending: pending
+                        )
+                    },
+                    onCommit: { commit($0, from: composer) },
+                    onCancel: { composing = nil }
+                )
+                .settingsPopoverChrome()
+            }
     }
 
-    /// The Space the composed rule opens windows in: the row's own,
-    /// or for a new row the one a picker pick takes.
-    var composedSpace: SpaceID? {
-        isDraft
-            ? AppRulePin.engagedSpace(model.config)
-            : SpaceRuleRows.space(of: row, in: model.config)
+    /// The section's composer, shown only off the row it names.
+    private var composerBinding: Binding<SpaceComposer?> {
+        Binding(
+            get: { composing?.row == row ? composing : nil },
+            // A late dismiss of this row's popover never closes
+            // another row's.
+            set: { if $0 == nil, composing?.row == row { composing = nil } }
+        )
     }
 
-    @ViewBuilder var scopeCell: some View {
-        if composingHere {
-            TitlePatternComposer(
-                model: model,
-                draft: $draft,
-                app: row.app,
-                covered: siblings,
-                refusal: refusal,
-                onCommit: commit,
-                onCancel: { composing = nil }
-            )
-            .onAppear { draft.start(with: row.fragment ?? "") }
-        } else {
-            scopeMenu
-        }
-    }
-
-    /// "All windows" and "Windows titled…", as on a Float row, and
-    /// the door to another titled row of the app.
+    /// The bare row: its one scope, checked, and the door to a
+    /// titled rule. A titled row: every window (greyed while the
+    /// app has a bare row), its own title, and another rule (#3373).
     private var scopeMenu: some View {
         Menu {
-            Button(AppRuleScopeWords.all) {
-                let bare = SpaceRuleRow(app: row.app, fragment: nil)
-                model.moveSpaceRule(from: row, to: bare) {
-                    SpaceRuleEdit.makeBare(row, in: &$0)
+            if row.fragment == nil {
+                // Checked under the cell's own words: "All other
+                // windows" beside titled rows.
+                Toggle(scopeLabel, isOn: .constant(true))
+            } else {
+                Button(AppRuleScopeWords.all) {
+                    let bare = SpaceRuleRow(app: row.app, fragment: nil)
+                    model.moveSpaceRule(from: row, to: bare) {
+                        SpaceRuleEdit.makeBare(row, in: &$0)
+                    }
                 }
+                .disabled(hasBare)
+                if hasBare {
+                    Button(AppRuleScopeWords.allTaken) {}.disabled(true)
+                }
+                Button(AppRuleScopeWords.changeTitle) { open(true) }
             }
-            .disabled(row.fragment != nil && hasBare)
-            if row.fragment != nil, hasBare {
-                Button(AppRuleScopeWords.allTaken) {}.disabled(true)
-            }
-            Button(AppRuleScopeWords.titledItem) { open(row) }
-            Divider()
-            Button(AppRuleScopeWords.addTitled) { open(nil) }
+            Button(AppRuleScopeWords.addTitled) { open(false) }
         } label: {
             AppRuleMenuLabel(text: scopeLabel, chevron: false)
                 .truncationMode(.middle)
@@ -89,13 +114,17 @@ extension AppRuleSpaceRow {
 
     private var hasBare: Bool { model.config.appRules[row.app] != nil }
 
-    private func open(_ target: SpaceRuleRow?) {
-        composing = SpaceComposer(app: row.app, row: target)
+    private func open(_ changes: Bool) {
+        composing = SpaceComposer(row: row, changes: changes)
     }
 
-    /// A fragment the app's other titled rows hold already.
-    private func refusal(_ typed: String) -> String? {
-        let current = isDraft ? nil : row.fragment
+    /// A fragment the app's titled rows hold already; Change Title…
+    /// may keep its own.
+    private func refusal(
+        _ typed: String,
+        changing composer: SpaceComposer
+    ) -> String? {
+        let current = composer.changes ? row.fragment : nil
         guard
             SpaceRuleEdit.repeats(
                 typed,
@@ -107,21 +136,25 @@ extension AppRuleSpaceRow {
         return AppRuleScopeWords.duplicate(app: appName, typed)
     }
 
-    private func commit(_ fragment: String) {
+    /// Change Title… rewrites the row; Add Rule… adds a titled rule
+    /// in the row's Space, whose own menu then moves it.
+    private func commit(_ fragment: String, from composer: SpaceComposer) {
         composing = nil
-        if isDraft {
-            guard let space = composedSpace else { return }
+        if composer.changes {
+            let moved = SpaceRuleRow(app: row.app, fragment: fragment)
+            model.moveSpaceRule(from: row, to: moved) {
+                SpaceRuleEdit.setFragment(fragment, of: row, in: &$0)
+            }
+        } else {
+            guard
+                let space = SpaceRuleRows.space(of: row, in: model.config)
+            else { return }
             SpaceRuleEdit.addTitled(
                 fragment,
                 for: row.app,
                 in: space,
                 config: &model.config
             )
-        } else {
-            let moved = SpaceRuleRow(app: row.app, fragment: fragment)
-            model.moveSpaceRule(from: row, to: moved) {
-                SpaceRuleEdit.setFragment(fragment, of: row, in: &$0)
-            }
         }
         returningRow = SpaceRuleRow(app: row.app, fragment: fragment).key
     }
