@@ -67,7 +67,21 @@ struct SettingsRevertRegisterTests {
     /// master copies exactly its followers.
     @Test("each writer copies the path its key names")
     func writersCopyTheirPaths() {
+        // A per-screen edge map's stem: an edge whose ↺ must take
+        // the map beside it (#1948, #3376).
+        let maps = Set(
+            SettingKey.allCases.map { spelled($0.id) }.filter {
+                $0.hasSuffix("Override[]")
+            }.map { String($0.dropLast("[]".count)) }
+        )
         for (key, writer) in SettingsRevertRegister.writers {
+            let own = spelled(key.id)
+            if maps.contains(own + "Override") {
+                #expect(
+                    Set(writer.paths).isSuperset(of: [own, own + "Override"]),
+                    Comment(rawValue: "\(key.id) ← \(writer.paths)")
+                )
+            }
             let id = spelled(key.id)
             // A master writes exactly its followers, and beside a
             // follower bar edge the per-screen map the doors clear

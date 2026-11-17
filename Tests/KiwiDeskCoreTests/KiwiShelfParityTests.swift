@@ -120,6 +120,13 @@ struct KiwiShelfCommandParityTests {
                 (try? parsed.get()) != nil,
                 "parse rejected \(key.stringValue)"
             )
+            // The per-screen map parses to its own case (#3376).
+            if key == .pocketEdgeOverride {
+                guard case .pocketScreenEdge? = try? parsed.get() else {
+                    Issue.record("pocket_edge_override parsed as no screen")
+                    continue
+                }
+            }
         }
     }
 
