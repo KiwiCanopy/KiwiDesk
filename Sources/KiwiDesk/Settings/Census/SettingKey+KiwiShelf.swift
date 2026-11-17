@@ -45,8 +45,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case readingContrast = "settings.kiwishelf.readingContrast"
     case revealStyle = "settings.kiwishelf.revealStyle"
     case pocketEdge = "settings.kiwishelf.pocketEdge"
-    /// The pocket's per-screen edges (#3376), Lua-only until
-    /// Settings draws a row for them.
+    /// The pocket's per-screen edges (#3376): a row per screen in
+    /// the Pocket's Per screen drawer.
     case pocketScreenEdge = "settings.kiwishelf.pocketEdgeOverride[screen]"
     case pocketPosition = "settings.kiwishelf.pocketPosition"
     /// The pocket's Show (#2978), behind the Show master's drawer.
@@ -72,10 +72,11 @@ extension KiwiShelfKey {
             // A master acknowledges divergence through its `?`
             // and carries no gate (`GapsBordersGates.acknowledged`).
             return .row(.bars, .kiwishelf, .atRest)
-        case .thickness, .alignment, .pocketEdge, .pocketPosition:
+        case .thickness, .alignment, .pocketPosition:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
-            .appBarScreenEdge, .pocketVisibility:
+            .appBarScreenEdge, .pocketEdge, .pocketScreenEdge,
+            .pocketVisibility:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
@@ -138,9 +139,6 @@ extension KiwiShelfKey {
             // Written by the one Liquid Glass row (#1307).
             return .luaOnly
         case .dimFactor:
-            return .luaOnly
-        case .pocketScreenEdge:
-            // Lua/CLI until its Settings row lands (#3376).
             return .luaOnly
         case .revealTimeout:
             // Lua/CLI until its Settings row lands (#761).

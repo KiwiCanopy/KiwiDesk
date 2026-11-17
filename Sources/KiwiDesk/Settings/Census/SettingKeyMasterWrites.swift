@@ -10,6 +10,7 @@ extension SettingKey {
         .kiwishelf(.edge): [
             "settings.spaceBarStyle.edge",
             "settings.appBarStyle.edge",
+            "settings.kiwishelf.pocketEdge",
         ],
         // Every bar's own visibility (#761): the Space Bar's and each
         // layout that hosts an App Bar, read off Core's hosting set,

@@ -9,18 +9,13 @@ struct BarsControls: Sendable {
         "bars.switch.kiwishelf",
         "KiwiShelf"
     )
-    /// Where the pocket sits (#2678).
-    let kiwishelfPocketEdge = SettingsControl(
-        "kiwishelf.pocket_edge",
-        "Pocket edge"
-    )
     let kiwishelfPocketPosition = SettingsControl(
         "kiwishelf.pocket_position",
         "Pocket position"
     )
     let kiwishelfEdges = SettingsDrawer(
-        "kiwishelf.each_bar",
-        "Each bar",
+        "kiwishelf.edge.each",
+        "Each bar and Pocket",
         instance: "kiwishelf",
         children: KiwiShelfEdgeControls()
     )
@@ -194,7 +189,8 @@ struct SpaceBarTuningControls: Sendable {
     )
 }
 
-/// KiwiShelf ▸ Position ▸ Each bar rows (#1731), in
+/// KiwiShelf ▸ Position ▸ Each bar and Pocket rows (#1731,
+/// #3376), in
 /// `BarsRowOrder.kiwishelfEdges`' order.
 struct KiwiShelfEdgeControls: Sendable {
     let kiwishelfSpaceBarEdge = SettingsControl(
@@ -211,6 +207,14 @@ struct KiwiShelfEdgeControls: Sendable {
     )
     let kiwishelfAppBarScreenEdges = SettingsControl(
         "kiwishelf.edge.per_screen.app_bar",
+        "Per screen"
+    )
+    let kiwishelfPocketEdge = SettingsControl(
+        "kiwishelf.edge.pocket",
+        "Pocket"
+    )
+    let kiwishelfPocketScreenEdges = SettingsControl(
+        "kiwishelf.edge.per_screen.pocket",
         "Per screen"
     )
 }

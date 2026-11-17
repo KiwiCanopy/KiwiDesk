@@ -88,8 +88,10 @@ struct SettingsRevertRegisterTests {
             // follower bar edge the per-screen map the doors clear
             // with it.
             if let followers = SettingKey.masterWrites[key] {
-                let maps = followers.filter { $0.hasSuffix(".edge") }
-                    .map { $0 + "Override" }
+                let maps = followers.filter {
+                    $0.hasSuffix(".edge") || $0.hasSuffix(".pocketEdge")
+                }
+                .map { $0 + "Override" }
                 #expect(Set(writer.paths) == Set(followers + maps))
                 continue
             }

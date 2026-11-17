@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The Trackpad card's foot (#3369 ▸ Ruling): Long swipes, one
-/// setting per profile, never per binding, with its "Applies to".
+/// setting per profile, never per binding, with its "Applies to",
+/// on the gesture rows' columns.
 /// It greys, never hides, while no two-finger swipe runs the pan,
 /// and its reason is drawn outside the grey (gui.md ▸ a dim is not
 /// a sentence).
@@ -22,6 +23,7 @@ struct GestureLongSwipesRow: View {
                 help: nil,
                 isOn: $model.config.scrollGesture.longSwipes,
                 grey: greyed ? Self.caption : nil,
+                columns: .gestures,
                 reach: { reach }
             )
             .searchAnchored(
@@ -31,7 +33,7 @@ struct GestureLongSwipesRow: View {
                 Text(Self.caption)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
-                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
+                    .padding(.leading, GestureListRow.textIndent)
             }
         }
     }

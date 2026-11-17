@@ -3498,8 +3498,9 @@ collapse as a bar's are; a call without a screen sets every
 screen and clears their own edges, and a look leaves each screen's
 own untouched. The edges are stored per profile under
 `kiwishelf.pocket_edge_override`, keyed by fingerprint. Settings
-sets them only as a whole: its pocket Edge pick sets every screen,
-clearing their own.
+sets them under Position ▸ Each bar and Pocket: its Pocket row sets
+every screen, and its Per screen rows set one each, as a bar's do.
+Position sets both bars and the pocket on every screen.
 
 ```lua
 kiwishelf.set_pocket_edge("left", "LG HDR 4K:3840x2160")

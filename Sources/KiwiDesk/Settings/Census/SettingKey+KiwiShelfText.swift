@@ -129,15 +129,11 @@ extension KiwiShelfKey {
                 help: "kiwishelf.icon_source.help"
             )
         case .pocketEdge:
-            return .text(
-                "kiwishelf.pocket_edge",
-                help: "kiwishelf.pocket_edge.help"
-            )
+            return .text("kiwishelf.edge.pocket")
         case .pocketVisibility:
             return .text("kiwishelf.show.pocket")
-        // Lua-only: no row draws it yet (#3376).
         case .pocketScreenEdge:
-            return .none
+            return .text("kiwishelf.edge.per_screen.pocket")
         case .maximizedVisibility:
             return .text(
                 "layout_defaults.maximize.show_bars",

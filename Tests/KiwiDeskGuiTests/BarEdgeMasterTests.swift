@@ -5,9 +5,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// KiwiShelf's Position master (#1731): both bars' edges from one
-/// row, with no segment selected and a `?` while they sit apart,
-/// and the rows that only mean something on a shared edge greyed.
+/// KiwiShelf's Position master (#1731): both bars' edges and the
+/// pocket's (#3401) from one row, with no segment selected and a
+/// `?` while they sit apart, and the rows that only mean something
+/// on a shared edge greyed.
 @MainActor
 @Suite("Bar edge master (#1731)")
 struct BarEdgeMasterTests {
@@ -29,6 +30,9 @@ struct BarEdgeMasterTests {
                 .followersDiffer(for: .kiwishelf(.edge))
         )
         model.config.settings.appBarStyle.edge = .top
+        // The pocket must share it too (#3401).
+        #expect(model.barEdgeMaster.wrappedValue == nil)
+        model.config.settings.kiwishelf.pocketEdges.setEdge(.top)
         #expect(model.barEdgeMaster.wrappedValue == .top)
         #expect(
             !GapsBordersGates(settings: model.config.settings)
@@ -42,10 +46,30 @@ struct BarEdgeMasterTests {
         model.barEdgeMaster.wrappedValue = .left
         #expect(model.config.settings.spaceBarStyle.edge == .left)
         #expect(model.config.settings.appBarStyle.edge == .left)
+        #expect(model.config.settings.kiwishelf.pocketEdge == .left)
         let before = model.config
         model.barEdgeMaster.wrappedValue = .left
         model.barEdgeMaster.wrappedValue = nil
         #expect(model.config == before)
+    }
+
+    @Test("the pocket on another edge or screen leaves the master unset")
+    func pocketSplitsTheMaster() {
+        let model = split()
+        model.barEdgeMaster.wrappedValue = .top
+        #expect(model.barEdgeMaster.wrappedValue == .top)
+        model.barEdge(\.kiwishelf.pocketEdges).wrappedValue = .left
+        #expect(model.barEdgeMaster.wrappedValue == nil)
+        #expect(
+            GapsBordersGates(settings: model.config.settings)
+                .followersDiffer(for: .kiwishelf(.edge))
+        )
+        // A pick re-fuses all three, clearing the pocket's screens.
+        model.config.settings.kiwishelf.pocketEdgeOverride = ["S:1x1": .right]
+        model.barEdgeMaster.wrappedValue = .bottom
+        #expect(model.config.settings.kiwishelf.pocketEdge == .bottom)
+        #expect(model.config.settings.kiwishelf.pocketEdgeOverride.isEmpty)
+        #expect(model.barEdgeMaster.wrappedValue == .bottom)
     }
 
     @Test("order and minimum grey while the bars are split")
@@ -66,6 +90,7 @@ struct BarEdgeMasterTests {
             Set(SettingKey.masterWrites[.kiwishelf(.edge)] ?? [])
                 == [
                     "settings.spaceBarStyle.edge", "settings.appBarStyle.edge",
+                    "settings.kiwishelf.pocketEdge",
                 ]
         )
     }

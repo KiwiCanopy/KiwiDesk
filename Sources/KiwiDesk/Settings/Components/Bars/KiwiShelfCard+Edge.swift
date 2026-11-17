@@ -1,10 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Position (#1731): the master writes both bars' edges; the Each
-/// bar drawer holds one per bar and opens by itself while they
-/// differ, when the master selects nothing and says why through
-/// its `?` (`GapsBordersGates.followersDiffer`).
+/// Position (#1731): the master writes both bars' edges and the
+/// Pocket's (#3376); the Each bar and Pocket drawer holds one row
+/// each and opens by itself while they differ, when the master
+/// selects nothing and says why through its `?`
+/// (`GapsBordersGates.followersDiffer`).
 extension KiwiShelfCard {
     var edgesSplit: Bool {
         GapsBordersGates(settings: model.config.settings)
@@ -16,9 +17,10 @@ extension KiwiShelfCard {
             ? BarsGateHelp.edgesDiffer
             : L(
                 "kiwishelf.edge.label.help",
-                "Which screen edge the bars sit on. Put each on its "
-                    + "own edge under \u{201C}%1$@\u{201D}.",
-                L("kiwishelf.each_bar", "Each bar")
+                "Which screen edge the bars and the Pocket sit on. "
+                    + "Put each on its own edge under "
+                    + "\u{201C}%1$@\u{201D}.",
+                L("kiwishelf.edge.each", "Each bar and Pocket")
             )
     }
 
@@ -70,6 +72,21 @@ extension KiwiShelfCard {
                     SettingsCatalog.bars.kiwishelfEdges.children
                         .kiwishelfAppBarScreenEdges
                 )
+                pocketEdgeRow
+                ScreenEdgesDrawer(
+                    model: model,
+                    bar: \.kiwishelf.pocketEdges,
+                    title: L(
+                        "kiwishelf.edge.per_screen.pocket",
+                        "Per screen"
+                    ),
+                    barName: L("kiwishelf.edge.pocket", "Pocket"),
+                    options: edgeOptions
+                )
+                .searchAnchored(
+                    SettingsCatalog.bars.kiwishelfEdges.children
+                        .kiwishelfPocketScreenEdges
+                )
             }
             .padding(.top, 8)
         }
@@ -98,6 +115,20 @@ extension KiwiShelfCard {
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
                 .kiwishelfAppBarEdge
+        )
+    }
+
+    var pocketEdgeRow: some View {
+        SegmentedPicker(
+            L("kiwishelf.edge.pocket", "Pocket"),
+            selection: model.barEdge(\.kiwishelf.pocketEdges),
+            options: edgeOptions,
+            help: model.config.settings.kiwishelf.pocketEdges
+                .screensDiffer ? BarsGateHelp.pocketScreensDiffer : nil
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfEdges.children
+                .kiwishelfPocketEdge
         )
     }
 

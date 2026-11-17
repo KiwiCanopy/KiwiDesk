@@ -7083,6 +7083,12 @@ leaves the pocket where it is.
 the bars' per-screen doors (▸ *a bar's edge may differ per
 screen*). A screen's own Space Bar edge still does not move it: a
 screen's pocket edge is its own entry, never a link to its bar.
+
+*Amended (#3401):* the pocket's edge leaves its own row for
+Position, whose master writes it with the bars' and whose drawer
+gives it a row and Per screen rows beside theirs (▸ *a bar's edge
+may differ per screen*); Position stays on KiwiShelf's card below
+the Show group, and the pocket's Position row below Alignment.
 :::
 
 **Several windows keeps it on screen, empty included, on every
@@ -19938,6 +19944,12 @@ Each bar holds the rest.
 *Amended* (#2978): the master writes the pocket's own Show too (▸
 *The pocket belongs to KiwiShelf*).
 
+:::unreleased
+*Amended* (#3401): the Position master writes the pocket's edge
+too, and its drawer is *Each bar and Pocket*, as Show's is (▸
+*The pocket belongs to KiwiShelf*).
+:::
+
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
@@ -20635,8 +20647,16 @@ as it drops theirs (#3324). Each screen's pocket reads its edge
 from the one per-screen resolution the bars take, so what a screen
 draws and what it reserves cannot disagree. The rest of the
 pocket's placement — its position and its Show — stays one value.
-Settings draws no per-screen row for it yet, so its Edge pick
-writes every screen, as a bar's pick does.
+
+*Amended: Position places the pocket too.*
+([#3401](https://github.com/KiwiCanopy/KiwiDesk/issues/3401),
+ruled 2026-11-17.) The pocket sits on the shelf's edges, so the
+master that says where the shelf sits writes its edge with the
+bars' and agrees only while all three share one edge on every
+screen. Its drawer, Each bar and Pocket, gives the pocket a row and
+Per screen rows of its own beside each bar's, and the separate
+Pocket edge row is gone: two rows writing one value would let the
+master and the row disagree about which was the pocket's edge.
 :::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228

@@ -31,6 +31,18 @@ struct GestureChordRecorder: View {
 
     private var recording: Bool { coordinator.active == fieldID }
 
+    /// The empty recorder's width, drawn hidden: the well and the ×
+    /// slot, as `body` lays them out, so a row holding no recorder
+    /// lines its reach up with the gesture rows'.
+    static var footprint: some View {
+        HStack(spacing: 6) {
+            KeyRecorderField.recordWell(" ") {}
+            Color.clear.frame(width: KeyRecorderField.iconSlotWidth)
+        }
+        .hidden()
+        .accessibilityHidden(true)
+    }
+
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             HStack(spacing: 6) {

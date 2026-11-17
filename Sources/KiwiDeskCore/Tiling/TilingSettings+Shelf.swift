@@ -201,15 +201,19 @@ extension TilingSettings {
             ? spaceBarStyle.edge : nil
     }
 
-    /// The edge both bars sit on on EVERY screen — what Settings'
-    /// Position master selects — or nil while the bars differ or
-    /// a screen draws an edge of its own (`ScreenEdged.screensDiffer`,
-    /// #1948): a level whose lower levels disagree shows none.
+    /// The edge both bars and the pocket sit on on EVERY screen —
+    /// what Settings' Position master selects — or nil while they
+    /// differ or a screen draws an edge of its own
+    /// (`ScreenEdged.screensDiffer`, #1948, #3376): a level whose
+    /// lower levels disagree shows none.
     public var uniformBarEdge: AppBarEdge? {
         guard !spaceBarStyle.screensDiffer,
-            !appBarStyle.screensDiffer
+            !appBarStyle.screensDiffer,
+            !kiwishelf.pocketEdges.screensDiffer,
+            let edge = sharedBarEdge,
+            kiwishelf.pocketEdge == edge
         else { return nil }
-        return sharedBarEdge
+        return edge
     }
 
     /// Insets visible bounds by the reservation of every edge a

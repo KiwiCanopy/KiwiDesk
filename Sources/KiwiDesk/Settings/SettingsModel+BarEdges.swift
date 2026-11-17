@@ -2,14 +2,14 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The KiwiShelf Position master (#1731, `SettingKey.masterWrites`):
-/// both bars' edges from one row.
+/// both bars' edges and the pocket's from one row.
 extension SettingsModel {
     /// Master Position binding (#1731) — OPTIONAL, nil while the
-    /// bars or their screens sit on different edges
+    /// bars, the pocket or their screens sit on different edges
     /// (`TilingSettings.uniformBarEdge`; `SegmentedPicker` renders
-    /// no selection). A pick sets both bars on every screen in one
-    /// write, re-fusing them and clearing each screen's own edge
-    /// (#1948); the getter never stores.
+    /// no selection). A pick sets both bars and the pocket on every
+    /// screen in one write, re-fusing them and clearing each
+    /// screen's own edge (#1948, #3376); the getter never stores.
     var barEdgeMaster: Binding<AppBarEdge?> {
         Binding(
             get: { self.config.settings.uniformBarEdge },
@@ -18,6 +18,7 @@ extension SettingsModel {
                 var next = self.config.settings
                 next.spaceBarStyle.setEdge(edge)
                 next.appBarStyle.setEdge(edge)
+                next.kiwishelf.pocketEdges.setEdge(edge)
                 guard next != self.config.settings else { return }
                 self.config.settings = next
             }

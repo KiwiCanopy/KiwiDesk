@@ -71,7 +71,7 @@ extension SettingsValueReadout {
             return [
                 .change(
                     census,
-                    label: SettingsCatalog.bars.kiwishelfPocketEdge.text,
+                    label: label(for: census),
                     old: AppBarOptions.edgeName(o.pocketEdge),
                     new: AppBarOptions.edgeName(n.pocketEdge)
                 )

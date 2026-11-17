@@ -21,6 +21,8 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
     var checkbox: Binding<Bool>?
     /// Why the checkbox is greyed, nil while it is live.
     var checkboxGrey: String?
+    /// Whose columns the row takes (owner, 2026-11-17).
+    var columns: Columns = .shortcuts
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
 
@@ -41,35 +43,73 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
     /// The glyph every setting row draws in its icon slot.
     static var settingGlyph: String { "slider.horizontal.3" }
 
+    /// The key rows' columns, or a gesture card's: its icon on the
+    /// gesture icons and its reach on theirs, by their own metrics
+    /// (owner, 2026-11-17).
+    enum Columns {
+        case shortcuts, gestures
+    }
+
     var body: some View {
+        switch columns {
+        case .shortcuts: shortcutsRow
+        case .gestures: gesturesRow
+        }
+    }
+
+    private var shortcutsRow: some View {
         HStack(alignment: .firstTextBaseline) {
             // A setting row wears the one setting glyph, never a
             // topic's (owner, 2026-10-27).
             IconGlyphLabel(icon: Self.settingGlyph)
                 .frame(width: SettingsMetrics.shortcutIconSlot)
                 .accessibilityHidden(true)
-            if let checkbox {
-                Toggle(title, isOn: checkbox)
-                    .toggleStyle(.checkbox)
-                    .modifier(
-                        GreyOut(
-                            active: checkboxGrey != nil,
-                            help: checkboxGrey ?? ""
-                        )
-                    )
-            } else {
-                Text(title)
-                    .accessibilityHidden(true)
-            }
-            if let help {
-                HelpButton(explanation: help, subject: helpSubject)
-            }
+            titled
             Spacer()
             reach
             KeyRecorderField.footprint.overlay { control }
             if reservesTrashSlot {
                 AppRuleDeleteButton.slot
             }
+        }
+    }
+
+    /// `GestureListRow`'s columns, spelled from its constants.
+    private var gesturesRow: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: GestureListRow.columnGap) {
+                Color.clear.frame(
+                    width: GestureListRow.disclosureWidth,
+                    height: 1
+                )
+                IconGlyphLabel(icon: Self.settingGlyph)
+                    .frame(width: GestureIcon.width)
+                    .accessibilityHidden(true)
+                titled
+            }
+            Spacer(minLength: 8)
+            reach
+            GestureChordRecorder.footprint.overlay { control }
+            AppRuleDeleteButton.slot
+        }
+    }
+
+    @ViewBuilder private var titled: some View {
+        if let checkbox {
+            Toggle(title, isOn: checkbox)
+                .toggleStyle(.checkbox)
+                .modifier(
+                    GreyOut(
+                        active: checkboxGrey != nil,
+                        help: checkboxGrey ?? ""
+                    )
+                )
+        } else {
+            Text(title)
+                .accessibilityHidden(true)
+        }
+        if let help {
+            HelpButton(explanation: help, subject: helpSubject)
         }
     }
 }
@@ -98,6 +138,7 @@ extension ShortcutSettingRow where Control == EmptyView {
         help: String?,
         isOn: Binding<Bool>,
         grey: String? = nil,
+        columns: Columns = .shortcuts,
         @ViewBuilder reach: () -> Reach
     ) {
         self.init(
@@ -108,5 +149,6 @@ extension ShortcutSettingRow where Control == EmptyView {
         )
         checkbox = isOn
         checkboxGrey = grey
+        self.columns = columns
     }
 }

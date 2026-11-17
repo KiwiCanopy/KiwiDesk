@@ -140,8 +140,8 @@ extension SettingsRevertRegister {
     }
 
     /// The pocket's edge and its per-screen map go back as one
-    /// pair, as a bar's do (#3376).
-    private static let pocketEdge = RevertWriter.all([
+    /// pair, as a bar's do (#3376); the Position master's too.
+    static let pocketEdge = RevertWriter.all([
         .leaf(\.settings.kiwishelf.pocketEdge),
         .leaf(\.settings.kiwishelf.pocketEdgeOverride),
     ])

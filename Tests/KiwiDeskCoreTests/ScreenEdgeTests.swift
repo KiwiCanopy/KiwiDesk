@@ -213,6 +213,7 @@ struct ScreenEdgeTests {
         let both = ScreenEdgeScope(screens: [Self.studio, Self.laptop])
         var settings = TilingSettings()
         settings.barEdge = .bottom
+        settings.kiwishelf.pocketEdges.setEdge(.top)
         settings.spaceBarStyle.setEdge(.top, on: Self.studio, among: both)
         settings.appBarStyle.setEdge(.top, on: Self.studio, among: both)
         #expect(settings.uniformBarEdge == nil)
@@ -268,6 +269,7 @@ struct ScreenEdgeTests {
     func uniformEdge() {
         var settings = TilingSettings()
         settings.barEdge = .left
+        settings.kiwishelf.pocketEdges.setEdge(.left)
         #expect(settings.uniformBarEdge == .left)
         settings.appBarStyle.setEdge(
             .right,

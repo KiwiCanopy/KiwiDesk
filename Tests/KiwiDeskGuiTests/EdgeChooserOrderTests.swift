@@ -53,10 +53,6 @@ struct EdgeChooserOrderTests {
                 "Settings/Components/Bars/KiwiShelfCard+Edge.swift",
                 "AppBarOptions.edge.map"
             ),
-            (
-                "Settings/Components/Bars/KiwiShelfCard+Pocket.swift",
-                "AppBarOptions.edge.map"
-            ),
         ]
     )
     func choosersReadTheList(file: String, needle: String) throws {

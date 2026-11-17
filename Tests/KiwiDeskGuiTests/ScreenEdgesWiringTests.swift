@@ -27,9 +27,9 @@ struct ScreenEdgesWiringTests {
     @Test("each drawer greys its rows on one screen and says why")
     func drawersGreyOnOneScreen() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
-        #expect(count("ScreenEdgesDrawer(", in: card) == 2)
+        #expect(count("ScreenEdgesDrawer(", in: card) == 3)
         #expect(count("ifmodel.offersScreenEdges(", in: card) == 0)
-        for bar in ["spaceBarStyle", "appBarStyle"] {
+        for bar in ["spaceBarStyle", "appBarStyle", "kiwishelf.pocketEdges"] {
             #expect(
                 count(
                     "ScreenEdgesDrawer(model:model,bar:\\.\(bar),",

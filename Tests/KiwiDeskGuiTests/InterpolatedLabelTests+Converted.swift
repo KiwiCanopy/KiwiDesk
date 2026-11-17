@@ -117,6 +117,7 @@ extension InterpolatedLabelTests {
         "shortcuts.import.help": 1,
         "kiwishelf.background_fit.boxed_only": 1,
         "kiwishelf.edge.screens_differ.help": 2,
+        "kiwishelf.edge.pocket.screens_differ.help": 1,
         "space_bar.color.focused_item.help": 2,
         "spaces.delete_confirm.message": 2,
         // The entries below were ALWAYS interpolating and were

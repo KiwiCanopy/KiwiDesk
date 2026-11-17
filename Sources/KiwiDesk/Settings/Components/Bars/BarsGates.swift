@@ -86,15 +86,16 @@ struct BarsGates {
 /// Explanatory hover/help text for bar gate reasons (#678).
 @MainActor
 enum BarsGateHelp {
-    /// The Position master's acknowledgement while the bars sit
-    /// on different edges (#1731) — not an `InertReason`: the
-    /// master stays live, and a pick re-fuses them.
+    /// The Position master's acknowledgement while the bars or the
+    /// Pocket sit on different edges (#1731, #3376) — not an
+    /// `InertReason`: the master stays live, and a pick re-fuses
+    /// them.
     static var edgesDiffer: String {
         L(
             "kiwishelf.edge.differ.help",
-            "The bars, or one bar's screens, sit on different "
-                + "edges right now; choosing here puts both bars on "
-                + "one edge on every screen."
+            "The bars and the Pocket, or their screens, sit on "
+                + "different edges right now; choosing here puts "
+                + "them all on one edge on every screen."
         )
     }
 
@@ -133,6 +134,17 @@ enum BarsGateHelp {
             appBar
                 ? L("kiwishelf.edge.per_screen.app_bar", "Per screen")
                 : L("kiwishelf.edge.per_screen.space_bar", "Per screen")
+        )
+    }
+
+    /// The Pocket row's `?` while its screens differ (#3376).
+    static var pocketScreensDiffer: String {
+        L(
+            "kiwishelf.edge.pocket.screens_differ.help",
+            "Your screens put the Pocket on different edges — "
+                + "see \u{201C}%1$@\u{201D} below. Picking an edge "
+                + "here puts it there on every screen.",
+            L("kiwishelf.edge.per_screen.pocket", "Per screen")
         )
     }
 
