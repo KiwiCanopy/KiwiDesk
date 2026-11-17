@@ -448,7 +448,12 @@ twice, was a question the user answered twice. The argument is
   frame's own font size (`TitleSlotPreviewTests`); a preview
   strip with no room for titles draws its mock items' icon alone
   and measures that glyph as drawn (#2781,
-  `MockAppItemLengthTests`).
+  `MockAppItemLengthTests`). **A vertical App Bar slot's length
+  is the one `AppBarHalfMoon.verticalSlot`**, the content square
+  with the half-moon's reserve at both ends, which the item's
+  centred icon needs to sit even; never the content depth plus a
+  reserve spelled beside it (#3387, `AppBarHalfMoonTests` ▸
+  `sideBarPillIsSymmetric`).
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
   never a single-bar sync.** It builds each display's plan once
   from both bars' content and syncs both managers from it, so a

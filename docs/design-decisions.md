@@ -19554,7 +19554,9 @@ even about its icon whether the disc draws or not. Centring the icon
 in a slot reserved above it alone left no room for the disc, and a
 disc on the icon's corner would overturn its place above the icon.
 The cost is a longer item along the run, so a crowded side bar
-scrolls sooner.
+scrolls sooner. A horizontal item keeps #2643's trade: its title slot
+already sets it off centre, and a mirrored reserve there would
+lengthen every item for nothing.
 :::
 
 **A sliver is not a part.** (Owner and ui-designer, 2026-10-18.) A
