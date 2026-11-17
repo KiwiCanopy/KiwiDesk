@@ -35,8 +35,8 @@ extension OnboardingView {
 
     /// The picked option's Spaces, one column per screen, each row
     /// playing its layout's story once, staggered (#1750, #3294).
-    /// It takes the height the page has free and fades its edge
-    /// while rows overflow (#2705).
+    /// It takes the height the page has free and, for Current
+    /// alone, fades its edge while rows overflow (#2705, #3375).
     private func spaceColumns(_ start: OnboardingStartModel) -> some View {
         ScrollView(.vertical) {
             OnboardingScreenColumns(
@@ -47,7 +47,7 @@ extension OnboardingView {
             )
             .padding(.bottom, 2)
         }
-        .moreBelowFade()
+        .moreBelowFade(start.selected == .current)
         .frame(maxHeight: .infinity, alignment: .top)
         .layoutPriority(1)
         .accessibilityElement(children: .contain)
