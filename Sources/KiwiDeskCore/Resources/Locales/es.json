@@ -1667,7 +1667,7 @@
   "mac_checklist.switch_on_activate.caption": "Activar una app te llevaría de golpe a otro Escritorio; con KiwiDesk vas allí a propósito, con «%1$@» o con un atajo de Escritorio. %2$@",
   "mac_checklist.unreadable": "KiwiDesk no ha podido leer este ajuste — márcalo cuando lo hayas configurado. %1$@",
   "maximize.refused.monocle": "En %1$@, una ventana en mosaico ya llena la pantalla",
-  "maximize.refused.window": "Los diálogos, los paneles, las ventanas a pantalla completa y la ventana Pocket no se pueden maximizar",
+  "maximize.refused.window": "Los diálogos, los paneles y las ventanas a pantalla completa no se pueden maximizar",
   "menu.accessibility_paused": "Gestión de ventanas en pausa…",
   "menu.accessibility_paused.tooltip": "Haz clic para conceder el permiso de Accesibilidad y reanudar el mosaico.",
   "menu.app.about": "Acerca de %1$@",

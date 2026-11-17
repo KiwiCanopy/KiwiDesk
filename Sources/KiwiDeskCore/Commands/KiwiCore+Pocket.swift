@@ -228,8 +228,10 @@ extension KiwiCore {
         guard state.pocketPhase(of: id) == .out,
             let window = state.windows[id]
         else { return }
+        // Confined as the payment would place it, so it files under
+        // the screen it goes back on.
         let returns = state.maximizedFloatReturn[id].flatMap {
-            $0.pid == window.pid ? $0.frame : nil
+            $0.pid == window.pid ? returnFrame($0.frame, of: id) : nil
         }
         let dropped = pocketPlate.dropStart.flatMap {
             $0.window == id ? $0.frame : nil

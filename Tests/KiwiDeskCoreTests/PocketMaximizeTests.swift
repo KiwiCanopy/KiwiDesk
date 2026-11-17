@@ -33,6 +33,8 @@ struct PocketMaximizeTests {
         )
         let area = GeometryUtils.axVisibleFrame(of: screen)
         core.tiler.visibleBounds = { _ in area }
+        // One screen, so a return frame reads as on it (#531).
+        core.tiler.allScreenBounds = { [area] }
         core.execute("set_mode", args: [.string("1"), .string("bsp")])
         core.state.workspaces.assign(SpaceID("1"), to: id)
         for raw: UInt32 in [2, 1] {
@@ -96,8 +98,11 @@ struct PocketMaximizeTests {
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: one) == .pocketed)
         #expect(maximized(core) == nil)
+        // In the pocket nothing pays the return: its frames are the
+        // pocket's.
+        #expect(core.state.maximizedFloatReturn[one] == nil)
         let filed = try #require(core.state.pocket.first?.frames.values.first)
-        #expect(filed.size == own.size)
+        #expect(filed == own)
         // The take-out lands it plain, at that frame.
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: one) == .out)
@@ -105,7 +110,27 @@ struct PocketMaximizeTests {
         let back = try #require(
             core.tiler.stashOriginal(one) ?? core.state.windows[one]?.frame
         )
+        // The size: a delivered frame may be nudged into the grow
+        // bounds, as `PocketWindowTests` ▸ `takeOutKeepsTheSize` says.
         #expect(back.size == own.size)
+    }
+
+    @Test("a return record of another process is not the frame filed")
+    func otherProcessRecordIsNotFiled() throws {
+        let (core, area) = try core()
+        let own = outWindow(core, area)
+        // A record left by an earlier process under this id.
+        let stale = CGRect(
+            x: area.minX + 10,
+            y: area.minY + 10,
+            width: 260,
+            height: 180
+        )
+        core.state.maximizedFloatReturn[one] = .init(pid: 1, frame: stale)
+        core.execute("pocket")
+        let filed = try #require(core.state.pocket.first?.frames.values.first)
+        #expect(filed.size != stale.size)
+        #expect(filed.size == own.size)
     }
 
     @Test("marking a maximized float keeps its Maximize")

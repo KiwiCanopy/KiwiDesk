@@ -52,7 +52,7 @@ extension KiwiCore {
     /// drawn on, as a remembered float frame is (#1675), and centred
     /// there first where it lies on another screen: the window or
     /// its Space moved screens while it filled one.
-    private func returnFrame(_ frame: CGRect, of id: WindowID) -> CGRect {
+    func returnFrame(_ frame: CGRect, of id: WindowID) -> CGRect {
         guard let space = floatPlacementSpace(of: id),
             let region = floatGrowBounds(on: space)
         else { return frame }

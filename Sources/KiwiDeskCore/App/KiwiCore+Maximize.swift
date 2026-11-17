@@ -61,13 +61,13 @@ extension KiwiCore {
                     id,
                     text: L(
                         "maximize.refused.window",
-                        "Dialogs, panels, full-screen windows and the "
-                            + "Pocket window can't be maximized"
+                        "Dialogs, panels and full-screen windows can't be "
+                            + "maximized"
                     )
                 )
                 return .fail(
-                    "a dialog, a panel, a full-screen window or the "
-                        + "pocket window cannot be maximized"
+                    "a dialog, a panel or a full-screen window cannot be "
+                        + "maximized"
                 )
             }
             // A press of the shape KiwiVision fills would change

@@ -6648,7 +6648,6 @@ and the float raise keeps the maximized float lowest of the floats
 while it does not hold focus, so it cannot bury the one in front.
 Dialogs, full-screen windows and the Pocket window stay refused.
 
-:::unreleased
 *Amended (#3385, ruled 2026-11-17):* a pocket window that is out —
 floating on screen — maximizes as any float does; only a window in
 the pocket is refused, since it is drawn nowhere and is never the
@@ -6659,7 +6658,6 @@ Space and a take-out lands on whichever Space is active, so keeping
 it across a pocketing would need a second copy of it; whether a
 take-out should re-maximize is the owner's to rule, and the filed
 frame is the one place that would change.
-:::
 
 The frame it returns to is its own record,
 `maximizedFloatReturn`, written at the press, never `floatFrames`,

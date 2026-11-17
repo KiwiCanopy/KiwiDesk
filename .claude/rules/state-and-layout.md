@@ -1115,7 +1115,11 @@ editing here:
     filed at the put-back and never re-places it, the centring
     being the fallback for a screen with no filed frame
     (`PocketWindowTests` ▸ `takeOutKeepsTheSize`,
-    `fallbackPlacesBeforeThePark`). Emptying the slot is
+    `fallbackPlacesBeforeThePark`). A frame filed while the window
+    is maximized is the frame its Maximize returns to, confined
+    through the payment's own `returnFrame`, never the fill, and the
+    put-back ends that Maximize (#3385, `PocketMaximizeTests` ▸
+    `putBackFilesTheReturn`). Emptying the slot is
     `releasePocketWindow`, for a quit and an unmark alike; the unmark's filing goes through
     `fileMembership`, and it then tiles through the Tile's own
     `setFloating` unless the reason `tileRefusal` names
