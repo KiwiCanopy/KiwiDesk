@@ -472,7 +472,12 @@ why they are here rather than beside the views:
   the catalog already contains. `AppSymbolNounTests` is the
   third (#1690): an option whose label must stay out of every
   row naming the general concept, the rows derived from the
-  English.
+  English. A bare name interpolated into prose whose row label
+  carries a number is a second key for one name, so the pair is
+  held per catalog: the bare name is the label with its number
+  taken out, and a locale that differs takes a reasoned exception,
+  never a wider strip (#3439, `GoToDesktopLabelParityTests` ▸
+  `everyCatalogAgrees`).
 
 ## Registering a new locale
 
