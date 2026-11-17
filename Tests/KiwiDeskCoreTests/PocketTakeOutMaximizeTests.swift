@@ -150,6 +150,8 @@ struct PocketTakeOutMaximizeTests {
         core.execute("toggle_maximized")
         core.execute("pocket")
         core.execute("pocket")
+        // The take-out spent it.
+        #expect(core.state.pocketSlot(of: one)?.returnMaximized == nil)
         core.execute("toggle_maximized")
         #expect(maximize(core) == nil)
         core.execute("pocket")

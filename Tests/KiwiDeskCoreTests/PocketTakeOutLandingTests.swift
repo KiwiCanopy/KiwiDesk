@@ -73,6 +73,21 @@ struct PocketTakeOutLandingTests {
         #expect(played == area)
     }
 
+    @Test("an in-place Height take-out plays to the frame it is sent")
+    func inPlaceHeightPlaysToTheIssue() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        let args: [JSONValue] = [
+            .string("height"), .number(0.5), .string("in_place"),
+        ]
+        #expect(core.execute("toggle_maximized", args: args).isSuccess)
+        let played = try #require(takeOut(core))
+        let sent = try #require(core.tiler.commandedFrame(of: one))
+        #expect(played == sent)
+        #expect(played.height == area.height)
+        #expect(played.width == area.width / 2)
+    }
+
     @Test("a plain take-out plays to its frame")
     func plainPlaysToItsFrame() throws {
         guard NSScreen.main != nil else { return }

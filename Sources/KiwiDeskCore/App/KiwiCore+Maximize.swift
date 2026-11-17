@@ -97,10 +97,7 @@ extension KiwiCore {
     /// on the active Space `spaceID`, through a press's admission
     /// (#3408), and returns the frame it fills. Its return record is
     /// `frame`, never the park it left. Nil, recording nothing, where
-    /// that Space stores any Maximize — the verdict would miss one
-    /// awaiting its window's return — or the press would refuse. The
-    /// press's Monocle and KiwiVision refusals name tiles only, and
-    /// an out pocket window is always a float.
+    /// that Space stores any Maximize or the press would refuse.
     func maximizeOnTakeOut(
         _ id: WindowID,
         _ shape: MaximizeShape,
