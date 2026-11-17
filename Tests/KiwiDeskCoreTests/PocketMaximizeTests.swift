@@ -115,6 +115,25 @@ struct PocketMaximizeTests {
         #expect(back.size == own.size)
     }
 
+    @Test("a pocketed window is never maximized, nor paid its return")
+    func pocketedIsRefused() throws {
+        let (core, area) = try core()
+        let own = outWindow(core, area)
+        core.execute("toggle_maximized")
+        core.execute("pocket")
+        let space = try #require(core.state.workspaces[SpaceID("1")])
+        #expect(!core.state.mayMaximizeAsFloat(one, on: space))
+        // A record left for it now is not paid: its frames are the
+        // pocket's, so it stays where the pocket put it.
+        core.state.maximizedFloatReturn[one] = .init(
+            pid: 900_001,
+            frame: own
+        )
+        let parked = core.state.windows[one]?.frame
+        #expect(core.payMaximizedFloatReturns()[one] == nil)
+        #expect(core.state.windows[one]?.frame == parked)
+    }
+
     @Test("a return record of another process is not the frame filed")
     func otherProcessRecordIsNotFiled() throws {
         let (core, area) = try core()
