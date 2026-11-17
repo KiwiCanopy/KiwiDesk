@@ -60,7 +60,8 @@ struct ShelfJoinerInPlaceTests {
                 CGRect(x: 0, y: 0, width: 400, height: 40),
                 CGRect(x: 400, y: 0, width: 600, height: 40)
             ),
-            // Seam on its leading end: it grows rightwards.
+            // Seam on its leading end: it grows rightwards, with no
+            // offset to hold — the negative control.
             (
                 CGRect(x: 600, y: 0, width: 400, height: 40),
                 CGRect(x: 0, y: 0, width: 600, height: 40)
@@ -113,6 +114,89 @@ struct ShelfJoinerInPlaceTests {
         #expect(view.frame.width == 0)
         #expect(view.frame.minX == leaverSlot.maxX)
         #expect(Self.contentOrigin(view, on: overlay) == leaverSlot.origin)
+    }
+
+    @Test("The origin slides only beside a travelling frame, timed")
+    func slideDecision() {
+        let a = CGPoint(x: 400, y: 0)
+        #expect(
+            BarMotion.slidesBounds(true, from: a, to: .zero, duration: 0.3)
+        )
+        #expect(
+            !BarMotion.slidesBounds(false, from: a, to: .zero, duration: 0.3)
+        )
+        #expect(!BarMotion.slidesBounds(true, from: a, to: a, duration: 0.3))
+        // A zero length would play as Core Animation's 0.25 s default.
+        #expect(!BarMotion.slidesBounds(true, from: a, to: .zero, duration: 0))
+    }
+
+    /// Lays out a leave of a left-hand section inside a glide of
+    /// `length`, motion on.
+    private static func leave(length: TimeInterval) -> NSView {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        let view = AppBarOverlay.FlippedView()
+        view.wantsLayer = true
+        let leaver = Self.section(
+            view,
+            slot: CGRect(x: 0, y: 0, width: 400, height: 40)
+        )
+        let other = Self.section(
+            AppBarOverlay.FlippedView(),
+            slot: CGRect(x: 400, y: 0, width: 600, height: 40)
+        )
+        let overlay = Self.shown(
+            [leaver, other],
+            in: Self.strip,
+            edge: .top
+        )
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = length
+            overlay.place(
+                [other],
+                in: Self.strip,
+                horizontal: true,
+                animated: true
+            )
+        }
+        return view
+    }
+
+    @Test("A leave slides the origin on the glide's own length")
+    func leaveSlidesOnTheGlide() throws {
+        let view = Self.leave(length: 0.3)
+        let slide = try #require(
+            view.layer?.animation(forKey: BarMotion.boundsSlideKey)
+                as? CABasicAnimation
+        )
+        #expect(abs(slide.duration - 0.3) < 1e-6)
+        #expect(
+            slide.toValue as? NSValue == NSValue(point: view.bounds.origin)
+        )
+    }
+
+    @Test("A glide of no length slides no origin")
+    func zeroLengthSlidesNothing() {
+        let view = Self.leave(length: 0)
+        #expect(view.layer?.animation(forKey: BarMotion.boundsSlideKey) == nil)
+    }
+
+    @Test("A joiner on a strip off the screen's origin stands in place")
+    func offsetStripJoiner() {
+        let strip = CGRect(x: 100, y: 0, width: 1000, height: 40)
+        let other = Self.section(
+            AppBarOverlay.FlippedView(),
+            slot: CGRect(x: 500, y: 0, width: 600, height: 40)
+        )
+        let overlay = Self.shown([other], in: strip, edge: .top)
+        let view = AppBarOverlay.FlippedView()
+        let joiner = Self.section(
+            view,
+            slot: CGRect(x: 100, y: 0, width: 400, height: 40)
+        )
+        overlay.standGlideStarts([joiner, other], in: strip, horizontal: true)
+        // Slots are screen coordinates; the strip's own start is 0.
+        #expect(Self.contentOrigin(view, on: overlay) == .zero)
     }
 
     @Test("A side shelf's joiner stands at its slot too")

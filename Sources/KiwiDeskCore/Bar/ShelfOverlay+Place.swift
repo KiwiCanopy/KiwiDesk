@@ -131,12 +131,12 @@ extension ShelfOverlay {
                 to: Self.facing(view.frame, others: sections, in: strip),
                 horizontal: horizontal
             )
-            BarMotion.setBoundsOrigin(
+            BarMotion.setFrameHoldingContent(
                 view,
-                to: Self.restingOrigin(of: gone, slot: view.frame),
+                to: gone,
+                boundsOrigin: Self.restingOrigin(of: gone, slot: view.frame),
                 animated: true
             )
-            BarMotion.setFrame(view, to: gone, animated: true)
             BarMotion.setAlpha(view, to: 0, animated: true)
         }
         if !leaving.isEmpty {
@@ -171,14 +171,10 @@ extension ShelfOverlay {
                 )
             }
             let frame = Self.slotFrame(section, in: strip)
-            BarMotion.setFrame(
+            BarMotion.setFrameHoldingContent(
                 section.view,
                 to: frame,
-                animated: animated && !joining
-            )
-            BarMotion.setBoundsOrigin(
-                section.view,
-                to: .zero,
+                boundsOrigin: .zero,
                 animated: animated && !joining
             )
             BarMotion.setAlpha(section.view, to: 1, animated: animated)
