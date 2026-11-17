@@ -210,7 +210,9 @@ enum BarMotion {
     /// origin beside it, from where its layer is drawn. The origin
     /// lands at once and its layer travels on the open group's
     /// length and curve, since AppKit's animator steps a bounds
-    /// origin on the main thread, a frame behind the frame.
+    /// origin on the main thread, a frame behind the frame. The
+    /// frame is written first, so the origin's slide is the last
+    /// animation on the layer's bounds.
     @MainActor
     static func setFrameHoldingContent(
         _ view: NSView,
