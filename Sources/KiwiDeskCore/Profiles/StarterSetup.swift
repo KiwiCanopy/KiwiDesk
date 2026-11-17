@@ -179,6 +179,7 @@ public enum StarterSetup {
         if sizes[0].height < compactMainHeight {
             settings.kiwishelf.thickness = compactThickness
         }
+        settings.wearBundledPaint()
         return settings
     }
 

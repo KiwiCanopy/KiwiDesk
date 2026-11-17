@@ -351,6 +351,14 @@ twice, was a question the user answered twice. The argument is
   (`ShelfHandleFillTests` ▸ `hairlineIsNeutral`,
   `PocketTabInkSeamTests`, `ShelfHandleColorTests`,
   `ShelfHandleColorWiringTests`).
+- **A `ColorPaletteKeys.adaptive` path takes a
+  `ColorPaletteKeys.bundledPaint` entry, and every bundled palette
+  paints it from that source through `ColorPalette.bundledPainted`,
+  never a hand-spelled JSON value** (#3377,
+  `ShelfHandleColorTests` ▸ `bundledPalettesPaintTheAccent`). A
+  source it paints the handle from clears the core-vs-hairline
+  lightness floor measured through `ColorVision`
+  (`ShelfHandleColorTests` ▸ `bundledHandleClearsTheHairline`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

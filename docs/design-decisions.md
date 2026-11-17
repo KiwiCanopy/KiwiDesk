@@ -18532,26 +18532,44 @@ default is a pairing the palette's own colours define, so a
 palette that left it out would keep the last palette's ring
 beside its own text.
 
+:::unreleased
 A third kind joined with
 [#3357](https://github.com/KiwiCanopy/KiwiDesk/issues/3357): an
 **adaptive** colour, `ColorPaletteKeys.adaptive`, a `_color` key
 outside a mark struct whose Automatic is a system ink, as a mark
-tint's is — an Auto bar's resting handle in the label colour. It
-takes a mark tint's rule, not a follower's: the authored palettes
-leave it out, so a bundled palette keeps the handle following
-light and dark, and the derived default palette carries it empty
-so a reset reaches it. A colour joins only where its Automatic is
-that kind of adaptive ink; one whose Automatic is another palette
-colour is a follower.
+tint's is — an Auto bar's resting handle in the label colour. A
+colour joins only where its Automatic is that kind of adaptive
+ink; one whose Automatic is another palette colour is a follower.
+Unlike a mark tint, every bundled palette paints it, the derived
+default included, in its own `active_item_color`
+([#3377](https://github.com/KiwiCanopy/KiwiDesk/issues/3377),
+amending #3357's ruling 3), through `ColorPaletteKeys.bundledPaint`
+at load. The handle is the bar's own edge, so under a chosen
+palette a grey line opening a gold bar reads as someone else's;
+the two-tone hairline (#3361) keeps any accent legible over light
+and dark content. The base value stays Automatic, and Automatic
+matches no bundled palette: a palette is applied only where the
+handle wears its accent, one meaning of "applied" for every
+reader. The first-run starter paints it the same way, so a first
+run still wears Glass and the default palette whole (#1739). The
+costs are the pocket's — under a bundled palette the handle no
+longer follows light and dark — and two more: a palette switch
+overwrites a handle colour the user picked, and a config that
+never stored the key (an upgrade, a Lua-owned config) reads as
+wearing no bundled palette until one is picked.
+`ShelfHandleColorTests` ▸ `bundledHandleClearsTheHairline` holds
+every bundled handle clear of the luma pivot where the hairline
+flips tone; the drawn composite is not gated, since a light core
+over a white ground nears the hairline in every palette by the
+two-tone design.
 
-:::unreleased
-A colour the user picked on `kiwishelf.handle_color`,
-`sticky.color` or `floating.color` survives a switch to a bundled
-palette, and the palette still reads as applied, since `isApplied`
-compares only the keys a palette sets. That is the point of
-leaving them out: a palette recolours the shelf, and a colour the
-user chose for their own handle or marks is theirs to take back,
-never one a palette quietly overwrites.
+A colour the user picked on `sticky.color` or `floating.color`
+survives a switch to a bundled palette, and the palette still
+reads as applied, since `isApplied` compares only the keys a
+palette sets. That is the point of leaving them out: a palette
+recolours the shelf, and a colour the user chose for their own
+marks is theirs to take back, never one a palette quietly
+overwrites.
 :::
 
 **Palette colors follow a rough matching guide.** (#408
@@ -20007,8 +20025,8 @@ Dock stays shown for as long as the pointer stays there. So:
   long side at 35%, so one handle reads over a light and a dark
   window at once, where a single tone vanished over one of them.
   The core carries the ink and runs the fill; the hairline stays
-  constant, and beside a colour picked in #3357 it is neutral, its
-  tone
+  constant, and beside a colour picked in #3357, or the accent a
+  bundled palette paints there (#3377), it is neutral, its tone
   chosen once as the opposite of the colour's lightness, so the
   user's colour is never thinned into a second one. The handle
   sits flush on the edge: with nothing thickening, there is no

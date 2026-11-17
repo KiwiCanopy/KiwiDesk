@@ -136,12 +136,13 @@ struct ColorPaletteTests {
     func defaultPaletteIsDefaults() {
         let def = PaletteCatalog.defaultPalette()
         #expect(def.name == PaletteCatalog.defaultName)
-        #expect(
-            def.colors
-                == ColorPaletteKeys.extract(
-                    from: TilingSettings()
-                )
-        )
+        // Save the bundled paint, the handle in the accent (#3377).
+        var shipped = ColorPaletteKeys.extract(from: TilingSettings())
+        for (path, source) in ColorPaletteKeys.bundledPaint {
+            #expect(shipped[path]?.isEmpty == true, "\(path)")
+            shipped[path] = shipped[source]
+        }
+        #expect(def.colors == shipped)
         #expect(def.colors.count == ColorPaletteKeys.all.count)
     }
 

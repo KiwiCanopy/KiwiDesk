@@ -48,15 +48,25 @@ public enum ColorPaletteKeys {
 
     /// Colours outside a mark struct whose Automatic is an
     /// adaptive system ink (#3357): an Auto bar's resting handle
-    /// in the label colour. Bundled palettes leave them out.
+    /// in the label colour. Every bundled palette and the starter
+    /// paint it through `bundledPaint` (#3377).
     public static let adaptive: Set<String> = [
         "kiwishelf.handle_color"
+    ]
+
+    /// The colour each bundled palette paints an adaptive path in,
+    /// keyed to that path (#3377): the handle wears the palette's
+    /// accent. An authoring rule applied at load, never a runtime
+    /// reading of Automatic, which is `followers`' kind.
+    public static let bundledPaint: [String: String] = [
+        "kiwishelf.handle_color": "kiwishelf.active_item_color"
     ]
 
     /// Colours whose Automatic is ANOTHER colour of the palette
     /// rather than an adaptive tint, keyed to the path they follow
     /// (#1856): the front chip's ring follows the front app's own
     /// text, as every bundled palette pairs a text with its ring.
+    /// A runtime reading, unlike `bundledPaint`'s load-time paint.
     public static let followers: [String: String] = [
         "space_bar.focused_highlight_color":
             "space_bar.focused_item_color"

@@ -29,8 +29,9 @@ struct PaletteShelfSaveNoticeTests {
 
     @Test("Colors matching built-in palette produce already-saved notice")
     func matchingBuiltinNotice() {
-        let (_, shelf) = makeShelf()
-        // Fresh model has default colors matching "Kiwi (Default)".
+        let (model, shelf) = makeShelf()
+        // The default palette's colours, its handle painted (#3377).
+        PaletteCatalog.defaultPalette().apply(to: &model.config.settings)
         #expect(
             shelf.saveNotice("My New Palette")
                 == "These colors are already saved as “Kiwi (Default)”."
