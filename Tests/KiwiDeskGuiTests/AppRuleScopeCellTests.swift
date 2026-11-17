@@ -11,8 +11,8 @@ import Testing
 /// title cut in the middle, so an app's Space and "Applies to"
 /// columns line up. Nothing headless can open a `Menu`, so the
 /// wiring is held on the source, scoped to a brace-balanced body;
-/// the width is held by rendering the menu through the builder the
-/// row draws. Main-actor spend: one file read, a few string
+/// the width is held by rendering a menu with the label and style
+/// the row draws. Main-actor spend: one file read, a few string
 /// measurements and four hosted menus.
 @Suite("App Rules scope cell (#3415)", .serialized)
 @MainActor
@@ -125,12 +125,18 @@ struct AppRuleScopeCellTests {
     @Test("the cell keeps one width and draws the rendered menu")
     func cellKeepsItsWidth() throws {
         let menu = try body(of: "private var scopeMenu: some View")
-        // The builder the render below measures, with no style of
-        // the row's own on top that the render would not see.
-        #expect(menu.contains("AppRuleScopeFit.menu(scopeLabel){"))
+        // The label and style the render below measures, with no
+        // style of the row's own on top that the render would not
+        // see.
+        #expect(
+            menu.contains(
+                "label:{AppRuleScopeFit.label(scopeLabel)}"
+                    + ".modifier(AppRuleScopeFit.Style())"
+            )
+        )
         for style in [
-            "Menu{", ".menuStyle(", ".fixedSize(", ".font(",
-            ".menuTriggerHover(", ".padding(",
+            ".menuStyle(", ".fixedSize(", ".font(",
+            ".menuTriggerHover(", ".padding(", "AppRuleMenuLabel(",
         ] {
             #expect(!menu.contains(style), "scopeMenu restyles: \(style)")
         }
@@ -145,9 +151,12 @@ struct AppRuleScopeCellTests {
         _ text: String,
         width: CGFloat = .greatestFiniteMagnitude
     ) -> CGFloat {
-        let menu = AppRuleScopeFit.menu(text, width: width) {
+        let menu = Menu {
             Button("x") {}
+        } label: {
+            AppRuleScopeFit.label(text, width: width)
         }
+        .modifier(AppRuleScopeFit.Style())
         .font(.callout)
         return NSHostingView(rootView: menu).fittingSize.width
     }

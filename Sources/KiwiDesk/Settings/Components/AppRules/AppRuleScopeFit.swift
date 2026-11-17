@@ -48,20 +48,25 @@ enum AppRuleScopeFit {
             + String(chars.suffix(tail))
     }
 
-    /// The scope cell's menu, its title fitted to `width`: the one
-    /// chain the row draws and `AppRuleScopeCellTests` renders.
-    static func menu<Items: View>(
+    /// The scope cell's menu label, its title fitted to `width`.
+    static func label(
         _ text: String,
-        width: CGFloat = SettingsMetrics.appRuleScopeLabel,
-        @ViewBuilder items: () -> Items
+        width: CGFloat = SettingsMetrics.appRuleScopeLabel
     ) -> some View {
-        Menu(content: items) {
-            AppRuleMenuLabel(text: middle(text, width: width), chevron: false)
+        AppRuleMenuLabel(text: middle(text, width: width), chevron: false)
+    }
+
+    /// The scope cell menu's whole style: the one chain the row
+    /// draws and `AppRuleScopeCellTests` renders. The `Menu` itself
+    /// stays at its call site, where the menu scans read it.
+    struct Style: ViewModifier {
+        func body(content: Content) -> some View {
+            content
+                .menuStyle(.borderlessButton)
+                .neutralMenuLabel()
+                .fixedSize()
+                .menuTriggerHover()
         }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .fixedSize()
-        .menuTriggerHover()
     }
 
     private static func measure(_ text: String, _ font: NSFont) -> CGFloat {
