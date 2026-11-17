@@ -29,6 +29,7 @@ struct TitlePatternPopoverTests {
             covered: [],
             seed: seed,
             refusal: { $0 == refused ? "taken" : nil },
+            preview: { _ in EmptyView() },
             onCommit: { added.patterns.append($0) },
             onCancel: {}
         )
@@ -63,7 +64,8 @@ struct TitlePatternPopoverTests {
         RunLoop.main.run(until: Date().addingTimeInterval(0.15))
     }
 
-    @Test("the field opens on its seed, focused")
+    /// The harness focuses the field itself; this holds the seed.
+    @Test("the field opens on its seed")
     func opensOnTheSeed() throws {
         let added = Added()
         let window = try hosted(
@@ -115,5 +117,51 @@ struct TitlePatternPopoverTests {
         model.commitFocusedField()
         spin()
         #expect(added.patterns.isEmpty)
+    }
+
+    @Test("a blur adds nothing")
+    func blurIsNoAdd() throws {
+        let added = Added()
+        let window = try hosted(makeTestModel(), seed: "Work", into: added)
+        defer { window.orderOut(nil) }
+        #expect(window.firstResponder is NSTextView)
+        window.makeFirstResponder(nil)
+        spin()
+        #expect(!(window.firstResponder is NSTextView))
+        #expect(added.patterns.isEmpty)
+    }
+
+    /// The live check rides in the popover as the pattern is typed
+    /// (#123, #3373): each host hands its engine-backed preview the
+    /// popover's pending text, and the popover draws it.
+    @Test("each popover draws its preview of the typed pattern")
+    func previewsTakeThePending() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        func squashed(_ path: String) throws -> String {
+            try SourceScan.strippedSource(
+                at: root.appendingPathComponent(path)
+            )
+            .split(whereSeparator: \.isWhitespace).joined()
+        }
+        let settings = "Sources/KiwiDesk/Settings/"
+        #expect(
+            try squashed(
+                settings + "Components/Common/TitlePatternPopover.swift"
+            ).contains("preview(draft.text)")
+        )
+        let space = try squashed(
+            settings + "Sections/AppRuleSpaceRow+Scope.swift"
+        )
+        #expect(space.contains("SpaceRuleMatchPreview("))
+        #expect(space.contains("pending:pending"))
+        #expect(
+            try squashed(
+                settings + "Components/Common/WindowTitleEditor.swift"
+            ).contains("preview:preview,")
+        )
+        #expect(
+            try squashed(settings + "Sections/AppRuleFloatRow.swift")
+                .contains("pending:pending")
+        )
     }
 }

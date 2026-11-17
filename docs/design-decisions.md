@@ -23716,9 +23716,9 @@ moves it. A freshly added app is a plain All windows row. The Float
 editor's **Add Window** opens the same popover over its chips, its
 own menu keeping *All windows* and *Windows titled…* as peers, as
 above; a lens's app titles in KiwiVision share that editor and so
-the popover. The inline composer's match preview went with it: a
-row of constant height has no room under it, and the popover's
-list of open titles is the check a user makes before picking one.
+the popover. The live check of what a typed pattern matches moves
+into the popover with the field, so a title rule is still verified
+before it is stored, through the engine's own resolution as above.
 :::
 A third card, **Automatic floating**, carries the escape for a
 guess (#2173): its checkbox on top and the **Tile instead** list

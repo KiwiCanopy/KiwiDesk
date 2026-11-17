@@ -17,8 +17,7 @@ struct SpaceComposer: Identifiable, Equatable {
         self.row = row
         self.changes = changes
         request = TitlePatternRequest(
-            seed: changes ? row.fragment ?? "" : "",
-            anchor: row.key
+            seed: changes ? row.fragment ?? "" : ""
         )
     }
 }
@@ -38,6 +37,19 @@ extension AppRuleSpaceRow {
                     covered: siblings,
                     seed: composer.request.seed,
                     refusal: { refusal($0, changing: composer) },
+                    preview: { pending in
+                        SpaceRuleMatchPreview(
+                            model: model,
+                            row: composer.changes
+                                ? row
+                                : SpaceRuleRow(app: row.app, fragment: ""),
+                            space: SpaceRuleRows.space(
+                                of: row,
+                                in: model.config
+                            ),
+                            pending: pending
+                        )
+                    },
                     onCommit: { commit($0, from: composer) },
                     onCancel: { composing = nil }
                 )
@@ -49,7 +61,9 @@ extension AppRuleSpaceRow {
     private var composerBinding: Binding<SpaceComposer?> {
         Binding(
             get: { composing?.row == row ? composing : nil },
-            set: { if $0 == nil { composing = nil } }
+            // A late dismiss of this row's popover never closes
+            // another row's.
+            set: { if $0 == nil, composing?.row == row { composing = nil } }
         )
     }
 
@@ -59,10 +73,9 @@ extension AppRuleSpaceRow {
     private var scopeMenu: some View {
         Menu {
             if row.fragment == nil {
-                Toggle(
-                    AppRuleScopeWords.all,
-                    isOn: .constant(true)
-                )
+                // Checked under the cell's own words: "All other
+                // windows" beside titled rows.
+                Toggle(scopeLabel, isOn: .constant(true))
             } else {
                 Button(AppRuleScopeWords.all) {
                     let bare = SpaceRuleRow(app: row.app, fragment: nil)

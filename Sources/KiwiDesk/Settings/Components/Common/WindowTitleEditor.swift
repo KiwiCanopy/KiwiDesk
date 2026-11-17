@@ -13,10 +13,11 @@ struct WindowTitleEditor<Preview: View>: View {
     /// The app's bundle id, whose open windows the popover offers.
     let app: String
     let caption: String
-    /// What the stored patterns match.
-    @ViewBuilder let preview: () -> Preview
-    /// The open popover; internal so a test can mount it open.
-    @State var request: TitlePatternRequest?
+    /// What the patterns match, handed the one being typed: under
+    /// the chips with none, in the popover as it is typed.
+    @ViewBuilder let preview: (String) -> Preview
+    /// The open popover.
+    @State private var request: TitlePatternRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -27,7 +28,7 @@ struct WindowTitleEditor<Preview: View>: View {
                 }
                 addButton
             }
-            preview()
+            preview("")
             Text(caption)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
@@ -36,7 +37,7 @@ struct WindowTitleEditor<Preview: View>: View {
 
     private var addButton: some View {
         Button {
-            request = TitlePatternRequest(seed: "", anchor: app)
+            request = TitlePatternRequest(seed: "")
         } label: {
             Label(
                 L("app_rules.add_window", "Add Window"),
@@ -53,6 +54,7 @@ struct WindowTitleEditor<Preview: View>: View {
                 app: app,
                 covered: shown,
                 seed: request.seed,
+                preview: preview,
                 onCommit: { pattern in
                     addPattern(pattern)
                     self.request = nil

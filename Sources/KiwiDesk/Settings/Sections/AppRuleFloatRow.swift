@@ -59,8 +59,12 @@ struct AppRuleFloatRow: View {
                         "Windows whose title contains a pattern "
                             + "stay floating."
                     )
-                ) {
-                    AppRuleMatchPreview(model: model, app: app)
+                ) { pending in
+                    AppRuleMatchPreview(
+                        model: model,
+                        app: app,
+                        pending: pending
+                    )
                 }
                 .padding(.leading, editorInset)
             }

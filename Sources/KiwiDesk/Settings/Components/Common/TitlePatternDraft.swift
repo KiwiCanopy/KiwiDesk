@@ -2,7 +2,7 @@ import Foundation
 
 /// The pattern `TitlePatternPopover` holds before Add (#3340): a
 /// picked open title or a typed one, never stored until committed,
-/// so the caller's preview checks every pattern first.
+/// so the popover's preview checks every pattern first.
 struct TitlePatternDraft: Equatable {
     /// The field's text.
     var text = ""

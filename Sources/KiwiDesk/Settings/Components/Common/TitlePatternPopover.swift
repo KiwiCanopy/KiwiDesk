@@ -8,18 +8,16 @@ struct TitlePatternRequest: Identifiable, Equatable {
     /// The text the field opens holding: a titled row's fragment
     /// for Change Title…, empty otherwise.
     let seed: String
-    /// What the popover hangs off: a Space row's key, or a Float
-    /// row's app.
-    let anchor: String
 }
 
 /// Composes one title pattern in a popover (#3340, #3341, #3373):
 /// the app's open titles listed, the "Title contains…" field below
-/// them, the refusal caption, Cancel and Add. A picked title fills
+/// them, the refusal caption, the caller's live check of what the
+/// typed pattern would match (#123), Cancel and Add. A picked title fills
 /// the field selected, so Return keeps it whole and an arrow key
 /// trims it. Shared by a Space row's scope cell and the Float rows'
 /// chip editor (`WindowTitleEditor`).
-struct TitlePatternPopover: View {
+struct TitlePatternPopover<Preview: View>: View {
     @ObservedObject var model: SettingsModel
     /// The app's rule key, whose open windows the list offers.
     let app: String
@@ -28,12 +26,14 @@ struct TitlePatternPopover: View {
     let seed: String
     /// Why the typed pattern cannot be added; nil where it can.
     var refusal: (String) -> String? = { _ in nil }
+    /// What the patterns would match, handed the one being typed.
+    @ViewBuilder let preview: (String) -> Preview
     let onCommit: (String) -> Void
     let onCancel: () -> Void
     @State private var draft = TitlePatternDraft()
     @FocusState private var fieldFocused: Bool
 
-    private static let width: CGFloat = 280
+    private static var width: CGFloat { 280 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -45,6 +45,7 @@ struct TitlePatternPopover: View {
                     .foregroundStyle(SettingsTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            preview(draft.text)
             HStack(spacing: 8) {
                 Spacer(minLength: 0)
                 Button(L("app_rules.title_popover.cancel", "Cancel")) {
@@ -90,7 +91,7 @@ struct TitlePatternPopover: View {
                         .foregroundStyle(SettingsTheme.ink)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 6)
-                        .hoverHighlight()
+                        .rowHoverHighlight()
                     }
                 }
             }
@@ -122,13 +123,7 @@ struct TitlePatternPopover: View {
 
     private var openTitles: [String] {
         Set(
-            model.core.state.windows.all
-                // A lens stores its members lowercased (#2103 ruling
-                // 31); a bundle id compares without case.
-                .filter {
-                    $0.appBundleID?.lowercased() == app.lowercased()
-                }
-                .map(\.title)
+            AppRuleWindows.of(app, in: model.core).map(\.title)
         )
         .subtracting(covered)
         .filter { !$0.isEmpty }
