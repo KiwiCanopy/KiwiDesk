@@ -6657,6 +6657,19 @@ a take-out lands it plain at that frame. A Maximize belongs to a
 Space and a take-out lands on whichever Space is active, so keeping
 it across a pocketing would need a second copy of it.
 
+*Amended* (owner with ui-designer, then architect-reviewer,
+2026-11-17, #3408): a window that went into the Pocket maximized
+comes out maximized, as a zoomed window comes back zoomed from the
+Dock. Plain read as the Pocket forgetting what the user did to the
+window. The slot keeps the Maximize's shape alone, beside the frame
+it files, so `Space.maximized` stays the one owner and no second
+copy rides the Pocket. The take-out maximizes on the Space it lands
+on, as a press would, with the filed frame as the return record, so
+a second press puts the window back where it came out. Where that
+Space already holds a Maximize or refuses one, it lands plain and
+says nothing: the take-out is not a press, and a refusal pill there
+would answer a question nobody asked.
+
 The frame it returns to is its own record,
 `maximizedFloatReturn`, written at the press, never `floatFrames`,
 which is a tile's memory of its float frame and is consumed by the

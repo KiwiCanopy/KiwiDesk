@@ -156,6 +156,16 @@ extension StateCoordinator {
         pocket[index].frames[screen] = frame
     }
 
+    /// Records the Maximize `id` goes into the pocket with, or nil
+    /// (#3408).
+    mutating func setPocketReturnMaximized(
+        _ shape: MaximizeShape?,
+        of id: WindowID
+    ) {
+        guard let index = pocketIndex(of: id) else { return }
+        pocket[index].returnMaximized = shape
+    }
+
     /// The slots follow a native-tab re-key (#308).
     mutating func rekeyPocket(_ old: WindowID, to new: WindowID) {
         for index in pocket.indices {

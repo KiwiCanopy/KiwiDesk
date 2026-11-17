@@ -172,9 +172,18 @@ extension KiwiCore {
                 FloatRecovery.centred(window.frame.size, in: $0)
             }
         if let frame { tiler.seedStash(id, frame: frame) }
+        // It went in maximized: it comes out so, where it may, and
+        // the plate lands on the fill (#3408).
+        let shape = state.pocketSlot(of: id)?.returnMaximized
+        state.setPocketReturnMaximized(nil, of: id)
+        let lands = frame.map { frame in
+            shape.flatMap {
+                maximizeOnTakeOut(id, $0, returningTo: frame, on: target)
+            } ?? frame
+        }
         onLog("pocket: w\(id.raw) out on space \(target)")
         // Its one write lands as the plate does (#2680).
-        let play = frame.flatMap {
+        let play = lands.flatMap {
             playBriefPocket(
                 .outOf,
                 window: id,
@@ -183,9 +192,9 @@ extension KiwiCore {
                     .kiwiDisplayID
             )
         }
-        if let frame, let lands = play?.flightEnd {
-            tiler.applier.holdWrites([id], until: .now() + lands)
-            holdRingThroughLanding(id, target: frame, lands: lands)
+        if let lands, let at = play?.flightEnd {
+            tiler.applier.holdWrites([id], until: .now() + at)
+            holdRingThroughLanding(id, target: lands, lands: at)
         }
         refreshStickyReach()
         retile(stateChange: [id])
@@ -222,12 +231,21 @@ extension KiwiCore {
 
     /// Files the window's frame under the screen it sits on, while
     /// it is out. A maximized window files the frame its Maximize
-    /// returns to, never the fill, so a take-out lands it plain
-    /// there (#3385); the put-back ends the Maximize.
+    /// returns to, never the fill, and its Maximize, which the
+    /// put-back ends and the take-out puts back (#3385, #3408).
     private func rememberPocketFrame(of id: WindowID) {
         guard state.pocketPhase(of: id) == .out,
             let window = state.windows[id]
         else { return }
+        // The verdict of the Space it is drawn on, never the return
+        // record, which can outlive the Maximize.
+        let maximized = state.renderSpace(of: window)
+            .flatMap { state.workspaces[$0] }
+            .flatMap {
+                state.handMaximizedWindow(of: $0) == id
+                    ? state.maximizedShape(of: $0) : nil
+            }
+        state.setPocketReturnMaximized(maximized, of: id)
         // Confined as the payment would place it, so it files under
         // the screen it goes back on.
         let returns = state.maximizedFloatReturn[id].flatMap {

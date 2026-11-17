@@ -6873,8 +6873,10 @@ and `"in_place"` centres it on the frame it had.
 A pocket window out of the Pocket maximizes as any floating window
 does, and marking a maximized floating window with
 [`toggle_pocket_window`](#toggle_pocket_window) keeps it maximized.
-Put back in the Pocket while maximized, it comes out at the frame it
-had before the maximize, not maximized.
+Put back in the Pocket while maximized, it comes out maximized again,
+on the Space it comes out on, and a second press returns it to the
+frame it had before the maximize. Where that Space already shows a
+maximized window, it comes out at that frame instead.
 :::
 
 A sticky window fills the screen of the Space it is drawn on. Its
