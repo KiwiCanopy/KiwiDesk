@@ -175,6 +175,41 @@ struct ShelfJoinerInPlaceTests {
         )
     }
 
+    @Test("A re-place that moves nothing keeps the slide in flight")
+    func rePlaceKeepsTheSlide() throws {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        let other = Self.section(
+            AppBarOverlay.FlippedView(),
+            slot: CGRect(x: 400, y: 0, width: 600, height: 40)
+        )
+        let overlay = Self.shown([other], in: Self.strip, edge: .top)
+        let view = AppBarOverlay.FlippedView()
+        view.wantsLayer = true
+        let joiner = Self.section(
+            view,
+            slot: CGRect(x: 0, y: 0, width: 400, height: 40)
+        )
+        for _ in 0..<2 {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.3
+                overlay.standGlideStarts(
+                    [joiner, other],
+                    in: Self.strip,
+                    horizontal: true
+                )
+                overlay.place(
+                    [joiner, other],
+                    in: Self.strip,
+                    horizontal: true,
+                    animated: true
+                )
+            }
+        }
+        #expect(view.layer?.animation(forKey: BarMotion.boundsSlideKey) != nil)
+        #expect(view.bounds.origin == .zero)
+    }
+
     @Test("A glide of no length slides no origin")
     func zeroLengthSlidesNothing() {
         let view = Self.leave(length: 0)

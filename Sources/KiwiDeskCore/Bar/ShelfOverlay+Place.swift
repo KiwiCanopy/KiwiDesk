@@ -36,16 +36,23 @@ extension ShelfOverlay {
                         positioned: .below,
                         relativeTo: divider
                     )
-                    section.view.frame = frame
-                    section.view.setBoundsOrigin(
-                        Self.restingOrigin(
+                    BarMotion.setFrameHoldingContent(
+                        section.view,
+                        to: frame,
+                        boundsOrigin: Self.restingOrigin(
                             of: frame,
                             slot: Self.slotFrame(section, in: strip)
-                        )
+                        ),
+                        animated: false
                     )
                     section.view.alphaValue = 0
                 case .start(let frame):
-                    section.view.frame = frame
+                    BarMotion.setFrameHoldingContent(
+                        section.view,
+                        to: frame,
+                        boundsOrigin: .zero,
+                        animated: false
+                    )
                 }
             }
         }

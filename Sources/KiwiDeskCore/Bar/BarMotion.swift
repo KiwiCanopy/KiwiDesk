@@ -224,6 +224,9 @@ enum BarMotion {
             to: frame,
             reduceMotion: isReduced && !inExpand
         )
+        // A write that moves nothing leaves a glide in flight to it.
+        guard travel || view.frame != frame || view.bounds.origin != origin
+        else { return }
         let layer = view.layer
         let drawn =
             layer?.animation(forKey: boundsSlideKey) == nil
