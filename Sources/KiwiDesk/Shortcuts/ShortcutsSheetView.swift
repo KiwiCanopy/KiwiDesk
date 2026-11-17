@@ -15,14 +15,23 @@ struct ShortcutsSheetView: View {
 
     var body: some View {
         if let reference, !reference.isEmpty {
+            let sections = sections(reference)
+            let rows = sections.flatMap(\.rows)
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(
-                    Array(sections(reference).enumerated()),
+                    Array(sections.enumerated()),
                     id: \.offset
                 ) { index, section in
                     sectionView(section, first: index == 0)
                 }
             }
+            // One chord column for the whole panel (#3424).
+            .modifier(
+                ShortcutPanelColumns(
+                    badges: rows.contains { !$0.gestures.isEmpty },
+                    chords: rows.contains { !$0.combo.isEmpty }
+                )
+            )
             .environment(\.shortcutMatch, needle)
         } else {
             placeholder
@@ -106,12 +115,6 @@ struct ShortcutsSheetView: View {
             }
             .opacity(section.dims ? 0.6 : 1)
         }
-        .modifier(
-            ShortcutSectionColumns(
-                badges: section.rows.contains { !$0.gestures.isEmpty },
-                chords: section.rows.contains { !$0.combo.isEmpty }
-            )
-        )
         .padding(.top, first ? 0 : 16)
     }
 

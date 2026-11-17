@@ -1,18 +1,19 @@
 import SwiftUI
 
-/// A shortcuts panel section's columns (#3380 ▸ Ruling): the
-/// gesture badges right-aligned against a thin divider, then the
-/// chords right-aligned in one width, the section's widest. A
-/// section with no gesture keeps no badge column. Read by
-/// `ShortcutRowView` from the environment; nil draws a row on its
-/// own, as the hint panel's branch rows do.
+/// The shortcuts panel's columns (#3380 ▸ Ruling, amended by
+/// #3424): the gesture badges right-aligned against a thin divider,
+/// then the chords right-aligned in one width, the panel's widest,
+/// so every section's divider sits at one x. A panel with no
+/// gesture keeps no badge column. Read by `ShortcutRowView` from
+/// the environment; nil draws a row on its own, as the hint panel's
+/// branch rows do.
 struct ShortcutColumns: Equatable {
-    /// Whether any row of the section carries a gesture.
+    /// Whether any row of the panel carries a gesture.
     var badges: Bool
-    /// Whether any row of the section carries a chord: the divider
+    /// Whether any row of the panel carries a chord: the divider
     /// parts the badges from the chords, so it needs both.
     var chords: Bool
-    /// The section's widest chord, measured as drawn.
+    /// The panel's widest chord, measured as drawn.
     var chord: CGFloat = 0
 
     /// The divider's slot, kept on a row without a gesture so the
@@ -22,7 +23,7 @@ struct ShortcutColumns: Equatable {
     static let dividerLength: CGFloat = 14
 }
 
-/// Each chord's drawn width, folded to the section's widest.
+/// Each chord's drawn width, folded to the panel's widest.
 struct ShortcutChordWidthKey: PreferenceKey {
     static let defaultValue: CGFloat = 0
 
@@ -31,8 +32,9 @@ struct ShortcutChordWidthKey: PreferenceKey {
     }
 }
 
-/// Measures a section's chords and hands its rows the columns.
-struct ShortcutSectionColumns: ViewModifier {
+/// Measures the panel's chords and hands every row the columns,
+/// once for all its sections (#3424).
+struct ShortcutPanelColumns: ViewModifier {
     let badges: Bool
     let chords: Bool
     @State private var chord: CGFloat = 0
@@ -56,7 +58,7 @@ private struct ShortcutColumnsKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    /// The section's columns; nil outside a section.
+    /// The panel's columns; nil outside the panel's sections.
     var shortcutColumns: ShortcutColumns? {
         get { self[ShortcutColumnsKey.self] }
         set { self[ShortcutColumnsKey.self] = newValue }
