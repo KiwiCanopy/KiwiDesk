@@ -678,7 +678,11 @@ twice, was a question the user answered twice. The argument is
   `animations.expand_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it
-  joins and a leaving one shrinks back into it; a shelf shown at
+  joins and a leaving one shrinks back into it, its content held
+  where its slot lays it through the one
+  `ShelfOverlay.restingOrigin`, its bounds origin travelling
+  beside its frame through `BarMotion.setBoundsOrigin` (#3386,
+  `ShelfJoinerInPlaceTests`); a shelf shown at
   rest on an edge of its own fades in and out, plate included**
   (owner ruling, #1838) — a revealed one takes the reveal's motion
   (below). The fade-out keeps the panel until it lands,

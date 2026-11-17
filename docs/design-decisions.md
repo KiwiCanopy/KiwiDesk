@@ -20303,6 +20303,16 @@ since the fixed plate glide, just over a quarter second until
 #1838, read as a snap for a bar coming and going; `on_expand` turns it off, outside the window
 animations' master.
 
+:::unreleased
+*Amended* (orchestrator, 2026-11-17, #3386): the growing or
+shrinking section reveals its content in place from the seam. Its
+content stays where its slot lays it while the frame grows out of
+the seam or shrinks back into it, so a joiner reads the same
+whichever end faces the section it joins. Content pinned to the
+section's leading end rolled in with the moving edge on one side
+and was revealed in place on the other.
+:::
+
 *A minimum, not a share.* Each section is as long as its items
 while both fit. Once the shelf is full the Space section
 shrinks, never below the **Space Bar minimum**, and the App

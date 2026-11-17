@@ -2,7 +2,9 @@ import AppKit
 
 /// Placing the sections on the strip (#1517, #1838). A section
 /// joining grows out of the one it joins and fades in, a leaving one
-/// shrinks back into it and fades out, and one already on the strip
+/// shrinks back into it and fades out — its content held where it
+/// rests while the frame clips it from the seam (#3386) — and one
+/// already on the strip
 /// glides from where its content was DRAWN — all on the plate
 /// glide. A section re-lays its content for the new slot at once, so
 /// a glide from its old frame jumped that content aside first.
@@ -35,6 +37,12 @@ extension ShelfOverlay {
                         relativeTo: divider
                     )
                     section.view.frame = frame
+                    section.view.setBoundsOrigin(
+                        Self.restingOrigin(
+                            of: frame,
+                            slot: Self.slotFrame(section, in: strip)
+                        )
+                    )
                     section.view.alphaValue = 0
                 case .start(let frame):
                     section.view.frame = frame
@@ -118,15 +126,17 @@ extension ShelfOverlay {
             // A section leaving shrinks back into the one it leaves.
             view.isHidden = false
             leaving.append(view)
-            BarMotion.setFrame(
+            let gone = Self.collapsed(
+                view.frame,
+                to: Self.facing(view.frame, others: sections, in: strip),
+                horizontal: horizontal
+            )
+            BarMotion.setBoundsOrigin(
                 view,
-                to: Self.collapsed(
-                    view.frame,
-                    to: Self.facing(view.frame, others: sections, in: strip),
-                    horizontal: horizontal
-                ),
+                to: Self.restingOrigin(of: gone, slot: view.frame),
                 animated: true
             )
+            BarMotion.setFrame(view, to: gone, animated: true)
             BarMotion.setAlpha(view, to: 0, animated: true)
         }
         if !leaving.isEmpty {
@@ -166,6 +176,11 @@ extension ShelfOverlay {
                 to: frame,
                 animated: animated && !joining
             )
+            BarMotion.setBoundsOrigin(
+                section.view,
+                to: .zero,
+                animated: animated && !joining
+            )
             BarMotion.setAlpha(section.view, to: 1, animated: animated)
             placedContent[key] = section.content
         }
@@ -197,6 +212,16 @@ extension ShelfOverlay {
             start.origin.y = from.minY + shift
         }
         return start
+    }
+
+    /// The bounds origin that keeps a section's content where `slot`
+    /// lays it while its frame is `frame` (#3386), in the flipped
+    /// coordinates the strip and every section share.
+    nonisolated static func restingOrigin(
+        of frame: CGRect,
+        slot: CGRect
+    ) -> CGPoint {
+        CGPoint(x: frame.minX - slot.minX, y: frame.minY - slot.minY)
     }
 
     /// `frame` shrunk to nothing at `alignment`'s anchor — its

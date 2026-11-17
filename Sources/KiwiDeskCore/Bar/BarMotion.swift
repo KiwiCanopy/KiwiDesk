@@ -201,6 +201,34 @@ enum BarMotion {
         }
     }
 
+    /// Moves `view`'s bounds origin to `origin` beside a `setFrame`
+    /// of the same view, under the same gate, so its content holds
+    /// still while the frame clips it (#3386). The value lands at
+    /// once and its layer travels on the open group's length and
+    /// curve: AppKit's own animator steps a bounds origin on the
+    /// main thread, a frame behind the layer's frame.
+    @MainActor
+    static func setBoundsOrigin(
+        _ view: NSView,
+        to origin: CGPoint,
+        animated: Bool
+    ) {
+        let from = view.bounds.origin
+        view.setBoundsOrigin(origin)
+        guard animated, !(isReduced && !inExpand), from != origin,
+            let layer = view.layer
+        else { return }
+        let context = NSAnimationContext.current
+        let slide = CABasicAnimation(keyPath: "bounds.origin")
+        slide.fromValue = NSValue(point: from)
+        slide.toValue = NSValue(point: origin)
+        slide.duration = context.duration
+        slide.timingFunction =
+            context.timingFunction
+            ?? CAMediaTimingFunction(name: .default)
+        layer.add(slide, forKey: "boundsOrigin")
+    }
+
     /// Whether a frame write may travel. A view still at `.zero`
     /// has never been laid out, so its first frame is an
     /// appearance rather than a move, and a write that changes
