@@ -13,8 +13,10 @@ extension SystemShortcut {
     /// macOS when its press comes through `path` — the one rule a row,
     /// a leader and a step key are read by (#3311). A case is true
     /// only on a path measured to win it, ⌘⇧3 and ⌃← as mirrors of
-    /// their measured twins; the measurements are `docs/design-decisions.md`
-    /// ▸ the #3239, #3311 and #3331 amendments.
+    /// their measured twins and the clipboard screenshots (#3382) as
+    /// mirrors of their file twins; the measurements are
+    /// `docs/design-decisions.md` ▸ the #3239, #3311 and #3331
+    /// amendments.
     public func losesToKiwiDesk(on path: PressPath) -> Bool {
         switch self {
         case .inputSourceNext, .inputSourcePrevious:
