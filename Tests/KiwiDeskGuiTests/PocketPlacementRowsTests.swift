@@ -46,7 +46,12 @@ struct PocketPlacementRowsTests {
             to: ".kiwishelfPocketEdge"
         )
         #expect(row.contains("model.barEdge(\\.kiwishelf.pocketEdges)"))
-        #expect(row.contains("BarsGateHelp.pocketScreensDiffer"))
+        #expect(
+            row.contains(
+                "help:screensDifferHelp(\\.kiwishelf.pocketEdges,"
+                    + "BarsGateHelp.pocketScreensDiffer)"
+            )
+        )
     }
 
     @Test("the rule shows under the row only while it applies")

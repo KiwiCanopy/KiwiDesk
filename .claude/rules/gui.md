@@ -2259,7 +2259,11 @@ in the reach column, text under it at
 `SettingsMetrics.shortcutTextIndent` — never a hand-built row
 beside it; a new one joins `ShortcutSettingRowSeamTests`' register
 only with its reason (`ShortcutSettingRowSeamTests` ▸
-`footprintHasOneHome`, `navRowReadsTheResolver`). **A setting row
+`footprintHasOneHome`, `navRowReadsTheResolver`). On a gesture card
+it takes `ShortcutSettingRow.Columns.gestures`, the gesture rows'
+columns read from `GestureListRow`'s constants, with text under it
+at `GestureListRow.textIndent` (#3401, `GesturesScrollWiringTests` ▸
+`longSwipesTakesTheRowColumns`). **A setting row
 wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
 the key rows' ink, never a topic glyph of its own**
 (`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).

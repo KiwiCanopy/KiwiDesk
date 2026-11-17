@@ -35,16 +35,17 @@ extension TilingSettings {
         return kiwishelf.pocketVisibility == .always ? .mark : .handle
     }
 
-    /// Whether the pocket rests on a bar's edge on some screen:
-    /// it is not Hidden and its edge is either bar's there, where
-    /// it takes the bar's nearer end (#2678) — what Settings'
-    /// Pocket position row says under itself (#3376).
+    /// Whether the pocket rests as a section of the bars in some
+    /// layout on some screen, where it takes the bar's nearer end
+    /// (#2678) — what Settings' Pocket position row says under
+    /// itself (#3401). Asked of `pocketRest`, never of the edges.
     public var pocketSharesABarEdge: Bool {
-        pocketRests
-            && screenVariants.contains { screen in
-                let edge = screen.kiwishelf.pocketEdge
-                return edge == screen.spaceBarStyle.edge
-                    || edge == screen.appBarStyle.edge
+        let screens: [String?] = [nil] + edgeScreens.map(Optional.some)
+        return pocketRests
+            && screens.contains { screen in
+                LayoutMode.allCases.contains {
+                    pocketRest(in: $0, on: screen) == .section
+                }
             }
     }
 

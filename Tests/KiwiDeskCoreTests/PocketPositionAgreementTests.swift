@@ -23,10 +23,10 @@ struct PocketPositionAgreementTests {
     @Test("the master selects an edge only while the pocket shares it")
     func pocketJoinsTheAgreement() {
         var settings = together(.top)
-        #expect(settings.uniformBarEdge == .top)
+        #expect(settings.uniformShelfEdge == .top)
         settings.kiwishelf.pocketEdges.setEdge(.left)
         #expect(settings.sharedBarEdge == .top)
-        #expect(settings.uniformBarEdge == nil)
+        #expect(settings.uniformShelfEdge == nil)
     }
 
     @Test("a screen of the pocket's own leaves the master unset")
@@ -38,22 +38,40 @@ struct PocketPositionAgreementTests {
             among: Self.both
         )
         #expect(settings.kiwishelf.pocketEdge == .top)
-        #expect(settings.uniformBarEdge == nil)
+        #expect(settings.uniformShelfEdge == nil)
     }
 
-    @Test("the note shows while the pocket rests on a bar's edge")
-    func noteFollowsTheSharedEdge() {
-        var settings = together(.top)
+    /// Shown bars on `edge`, the pocket there under Auto, and no
+    /// App Bar drawn in any layout, so the Space Bar alone decides.
+    private func spaceBarOnly(_ edge: AppBarEdge) -> TilingSettings {
+        var settings = together(edge)
+        settings.spaceBarStyle.visibility = .always
         settings.kiwishelf.pocketVisibility = .auto
+        for mode in LayoutMode.allCases {
+            settings.setAppBarVisibility(.hidden, in: mode)
+        }
+        return settings
+    }
+
+    @Test("the note shows while the pocket rests as a bar's section")
+    func noteFollowsTheSection() {
+        var settings = spaceBarOnly(.top)
         #expect(settings.pocketSharesABarEdge)
-        // Either bar's edge counts.
-        settings.spaceBarStyle.setEdge(.bottom)
-        #expect(settings.pocketSharesABarEdge)
-        settings.appBarStyle.setEdge(.left)
+        // A bar on the edge that draws nothing at rest leaves the
+        // pocket a handle, so it takes its own position.
+        settings.spaceBarStyle.visibility = .auto
         #expect(!settings.pocketSharesABarEdge)
-        // A screen putting it on a bar's edge counts.
+        settings.spaceBarStyle.visibility = .hidden
+        #expect(!settings.pocketSharesABarEdge)
+        // A hidden App Bar on that edge does not make it a section.
+        settings.appBarStyle.setEdge(.top)
+        #expect(!settings.pocketSharesABarEdge)
+        // A screen that puts the pocket on the shown bar's edge.
+        settings = spaceBarOnly(.top)
+        settings.kiwishelf.pocketEdges.setEdge(.left)
+        #expect(!settings.pocketSharesABarEdge)
         settings.kiwishelf.pocketEdges.setEdge(
-            .left,
+            .top,
             on: Self.studio,
             among: Self.both
         )

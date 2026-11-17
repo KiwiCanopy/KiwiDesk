@@ -52,14 +52,14 @@ struct GestureListRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
+            HStack(spacing: Self.rowGap) {
                 HStack(spacing: Self.columnGap) {
                     disclosureSlot
                     GestureIcon(input: key.input)
                     gesturePicker
                     actionContainer
                 }
-                Spacer(minLength: 8)
+                Spacer(minLength: Self.rowGap)
                 reachColumn
                 GestureChordRecorder(
                     name: recorderName,
@@ -107,6 +107,9 @@ struct GestureListRow: View {
     /// The gap between a row's columns, which its direction sub-rows
     /// share so they line up by construction (ui-designer).
     static let columnGap: CGFloat = 6
+    /// The gap between the row's leading block and its trailing
+    /// controls, which a setting row on these columns shares.
+    static let rowGap: CGFloat = 8
 
     /// Filled on a row with directions; empty elsewhere so every
     /// icon lines up.

@@ -88,14 +88,14 @@ struct GesturesScrollWiringTests {
                 .dropFirst().first
         )
         let columns: [String] = [
-            "someView{HStack(spacing:8){",
+            "someView{HStack(spacing:GestureListRow.rowGap){",
             "HStack(spacing:GestureListRow.columnGap){",
             "Color.clear.frame(width:GestureListRow",
             ".disclosureWidth,height:1)",
             "IconGlyphLabel(icon:Self.settingGlyph)",
             ".frame(width:GestureIcon.width)",
             ".accessibilityHidden(true)titled}",
-            "Spacer(minLength:8)reach",
+            "Spacer(minLength:GestureListRow.rowGap)reach",
             "GestureChordRecorder.footprint.overlay{control}",
             "AppRuleDeleteButton.slot}}",
         ]
@@ -103,13 +103,21 @@ struct GesturesScrollWiringTests {
         #expect(gestures.hasPrefix(needle))
         // The row it lines up with: the same columns, in order.
         let list = Self.squash(try Self.source("GestureListRow.swift"))
-        #expect(
-            list.contains(
-                "HStack(spacing:8){HStack(spacing:Self.columnGap){"
-                    + "disclosureSlotGestureIcon(input:key.input)"
-            )
+        let listRow: [String] = [
+            "HStack(spacing:Self.rowGap){HStack(spacing:Self.columnGap){",
+            "disclosureSlotGestureIcon(input:key.input)",
+            "gesturePickeractionContainer}",
+            "Spacer(minLength:Self.rowGap)reachColumn",
+            "GestureChordRecorder(",
+        ]
+        #expect(list.contains(listRow.joined()))
+        // The recorder, then the trash, and nothing after them.
+        let tail = try #require(
+            list.components(separatedBy: "GestureChordRecorder(")
+                .dropFirst().first
         )
-        #expect(list.contains("Spacer(minLength:8)reachColumn"))
+        let trash = "armsOnAppear:armsOnAppear)AppRuleDeleteButton("
+        #expect(tail.contains(trash))
         let recorder = Self.squash(
             try Self.source("GestureChordRecorder.swift")
         )

@@ -99,10 +99,16 @@ extension TilingSettings {
     /// screen asks each; the set errs toward "acts", never toward
     /// a wrong grey.
     public var screenVariants: [TilingSettings] {
-        let screens = Set(spaceBarStyle.edgeOverride.keys)
+        [onScreen(nil)] + edgeScreens.map { onScreen($0) }
+    }
+
+    /// Every screen a bar or the pocket holds an edge of its own
+    /// on, A–Z: the screens `screenVariants` adds to the bars' own.
+    public var edgeScreens: [String] {
+        Set(spaceBarStyle.edgeOverride.keys)
             .union(appBarStyle.edgeOverride.keys)
             .union(kiwishelf.pocketEdgeOverride.keys)
-        return [onScreen(nil)] + screens.sorted().map { onScreen($0) }
+            .sorted()
     }
 
     /// The edges a space laid out in `mode` on `screen` reserves
@@ -195,7 +201,8 @@ extension TilingSettings {
     /// The edge both bars sit on while they share one — one fused
     /// shelf — or nil while they are split, a bar per edge (#1731).
     /// The one comparison of the bars' own edges; the Position
-    /// master asks `uniformBarEdge`, which adds the screens.
+    /// master asks `uniformShelfEdge`, which adds the pocket and the
+    /// screens.
     public var sharedBarEdge: AppBarEdge? {
         spaceBarStyle.edge == appBarStyle.edge
             ? spaceBarStyle.edge : nil
@@ -206,7 +213,7 @@ extension TilingSettings {
     /// differ or a screen draws an edge of its own
     /// (`ScreenEdged.screensDiffer`, #1948, #3376): a level whose
     /// lower levels disagree shows none.
-    public var uniformBarEdge: AppBarEdge? {
+    public var uniformShelfEdge: AppBarEdge? {
         guard !spaceBarStyle.screensDiffer,
             !appBarStyle.screensDiffer,
             !kiwishelf.pocketEdges.screensDiffer,

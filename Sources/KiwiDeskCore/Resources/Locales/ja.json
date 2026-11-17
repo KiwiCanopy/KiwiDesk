@@ -1149,7 +1149,7 @@
   "kiwishelf.count.before.ax": "前方の残り: %1$d",
   "kiwishelf.durations": "継続時間",
   "kiwishelf.edge.app_bar": "App Bar",
-  "kiwishelf.edge.differ.help": "現在、バーと Pocket、またはそれぞれの画面ごとの端がそろっていません。ここで選ぶと、どの画面でもすべてが同じ端に置かれます。",
+  "kiwishelf.edge.differ.help": "現在、バーと Pocket の端、またはそれらの画面ごとの端がそろっていません。ここで選ぶと、どの画面でもすべてが同じ端に置かれます。",
   "kiwishelf.edge.each": "各バーと Pocket",
   "kiwishelf.edge.label": "位置",
   "kiwishelf.edge.label.help": "バーと Pocket を置く画面の端です。「%1$@」で、それぞれを別の端に置けます。",

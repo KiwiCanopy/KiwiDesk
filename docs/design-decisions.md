@@ -7085,10 +7085,8 @@ screen*). A screen's own Space Bar edge still does not move it: a
 screen's pocket edge is its own entry, never a link to its bar.
 
 *Amended (#3401):* the pocket's edge leaves its own row for
-Position, whose master writes it with the bars' and whose drawer
-gives it a row and Per screen rows beside theirs (▸ *a bar's edge
-may differ per screen*); Position stays on KiwiShelf's card below
-the Show group, and the pocket's Position row below Alignment.
+Position, whose master and drawer write it beside the bars' (▸ *a
+bar's edge may differ per screen*).
 :::
 
 **Several windows keeps it on screen, empty included, on every
@@ -19946,8 +19944,8 @@ Each bar holds the rest.
 
 :::unreleased
 *Amended* (#3401): the Position master writes the pocket's edge
-too, and its drawer is *Each bar and Pocket*, as Show's is (▸
-*The pocket belongs to KiwiShelf*).
+too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
+bar's edge may differ per screen*).
 :::
 
 A shortcut shows only the bar it names. On an `always` bar it
@@ -20607,7 +20605,8 @@ map names this Mac's screens, which a look shared to another Mac
 cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.
 
-In Settings each bar row under Each bar gets a Per screen drawer,
+In Settings each bar row under Each bar and Pocket gets a Per
+screen drawer,
 one picker per screen of the profile's own monitor set.
 A screen with no row of its own (one plugged in after the save)
 follows its bar, so leaving it out loses nothing. The rows list the
@@ -21438,9 +21437,10 @@ fade where it says arrow.
 **The bar cards share one canonical row order.** (#374, re-cut
 by the #678 Phase 2 census render, by #1517 and by #2507.) The
 KiwiShelf card owns existence and placement: the Show master and
-its Each bar and Pocket drawer, then Position and its Each bar drawer and
-Alignment — where the bars sit, coarse to fine — then Thickness
-and its Style and Margins drawers. Order and Space Bar minimum
+its Each bar and Pocket drawer, then Position and its Each bar and
+Pocket drawer and Alignment — where the bars sit, coarse to fine —
+then Thickness, then Pocket position, and the Style and Margins
+drawers. Order and Space Bar minimum
 close the Style drawer: they change how the joined run draws —
 which bar leads, how much of a crowded edge the Space Bar keeps —
 and matter only where the bars share an edge. A master's drawer

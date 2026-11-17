@@ -97,7 +97,10 @@ extension KiwiShelfCard {
             L("kiwishelf.edge.space_bar", "Space Bar"),
             selection: model.barEdge(\.spaceBarStyle),
             options: edgeOptions,
-            help: screensDifferHelp(\.spaceBarStyle, appBar: false)
+            help: screensDifferHelp(
+                \.spaceBarStyle,
+                BarsGateHelp.screensDiffer(appBar: false)
+            )
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
@@ -110,7 +113,10 @@ extension KiwiShelfCard {
             L("kiwishelf.edge.app_bar", "App Bar"),
             selection: model.barEdge(\.appBarStyle),
             options: edgeOptions,
-            help: screensDifferHelp(\.appBarStyle, appBar: true)
+            help: screensDifferHelp(
+                \.appBarStyle,
+                BarsGateHelp.screensDiffer(appBar: true)
+            )
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
@@ -123,8 +129,10 @@ extension KiwiShelfCard {
             L("kiwishelf.edge.pocket", "Pocket"),
             selection: model.barEdge(\.kiwishelf.pocketEdges),
             options: edgeOptions,
-            help: model.config.settings.kiwishelf.pocketEdges
-                .screensDiffer ? BarsGateHelp.pocketScreensDiffer : nil
+            help: screensDifferHelp(
+                \.kiwishelf.pocketEdges,
+                BarsGateHelp.pocketScreensDiffer
+            )
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
@@ -132,14 +140,15 @@ extension KiwiShelfCard {
         )
     }
 
-    /// The `?` a bar row shows while its screens differ (#1948).
+    /// The `?` an edge row shows while its screens differ (#1948,
+    /// #3401): `sentence`, or none.
     private func screensDifferHelp<Bar: ScreenEdged>(
         _ bar: KeyPath<TilingSettings, Bar>,
-        appBar: Bool
+        _ sentence: @autoclosure () -> String
     ) -> String? {
         guard model.config.settings[keyPath: bar].screensDiffer
         else { return nil }
-        return BarsGateHelp.screensDiffer(appBar: appBar)
+        return sentence()
     }
 
     private var edgeOptions: [(String, AppBarEdge)] {

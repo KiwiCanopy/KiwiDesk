@@ -27,9 +27,10 @@ struct ScreenEdgesWiringTests {
     @Test("each drawer greys its rows on one screen and says why")
     func drawersGreyOnOneScreen() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
-        #expect(count("ScreenEdgesDrawer(", in: card) == 3)
+        let owners = ["spaceBarStyle", "appBarStyle", "kiwishelf.pocketEdges"]
+        #expect(count("ScreenEdgesDrawer(", in: card) == owners.count)
         #expect(count("ifmodel.offersScreenEdges(", in: card) == 0)
-        for bar in ["spaceBarStyle", "appBarStyle", "kiwishelf.pocketEdges"] {
+        for bar in owners {
             #expect(
                 count(
                     "ScreenEdgesDrawer(model:model,bar:\\.\(bar),",
@@ -68,18 +69,31 @@ struct ScreenEdgesWiringTests {
     @Test("each bar row explains an empty selection")
     func barRowsCarryTheirHelp() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
-        #expect(count("help:screensDifferHelp(", in: card) == 2)
-        // Each row names its own bar's drawer.
-        for (bar, app) in [("spaceBarStyle", false), ("appBarStyle", true)] {
+        // Each row names its own drawer, and asks of its own screens.
+        let rows = [
+            ("spaceBarStyle", "BarsGateHelp.screensDiffer(appBar:false)"),
+            ("appBarStyle", "BarsGateHelp.screensDiffer(appBar:true)"),
+            ("kiwishelf.pocketEdges", "BarsGateHelp.pocketScreensDiffer"),
+        ]
+        #expect(count("help:screensDifferHelp(", in: card) == rows.count)
+        for (owner, sentence) in rows {
             #expect(
                 count(
-                    "selection:model.barEdge(\\.\(bar)),"
+                    "selection:model.barEdge(\\.\(owner)),"
                         + "options:edgeOptions,"
-                        + "help:screensDifferHelp(\\.\(bar),appBar:\(app))",
+                        + "help:screensDifferHelp(\\.\(owner),\(sentence))",
                     in: card
                 ) == 1
             )
         }
+        // The `?` only while that owner's screens differ.
+        #expect(
+            count(
+                "guardmodel.config.settings[keyPath:bar].screensDiffer"
+                    + "else{returnnil}returnsentence()",
+                in: card
+            ) == 1
+        )
     }
 
     @Test("a drawer held open greys its chevron")

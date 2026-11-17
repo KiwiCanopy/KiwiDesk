@@ -68,14 +68,12 @@ extension SettingsValueReadout {
                 AppBarOptions.order
             )
         case .pocketEdge:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: AppBarOptions.edgeName(o.pocketEdge),
-                    new: AppBarOptions.edgeName(n.pocketEdge)
-                )
-            ]
+            return spaceBarChoiceRow(
+                census,
+                o.pocketEdge,
+                n.pocketEdge,
+                AppBarOptions.edge
+            )
         case .pocketScreenEdge:
             return screenEdgeRows(
                 census,
@@ -271,9 +269,9 @@ extension SettingsValueReadout {
 
     /// The Position master's value: the edge both bars share, or
     /// "mixed" while they or their screens differ
-    /// (`TilingSettings.uniformBarEdge`).
+    /// (`TilingSettings.uniformShelfEdge`).
     static func agreedEdge(_ settings: TilingSettings) -> String {
-        guard let edge = settings.uniformBarEdge else {
+        guard let edge = settings.uniformShelfEdge else {
             return L("diff.value.mixed", "mixed")
         }
         return AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""

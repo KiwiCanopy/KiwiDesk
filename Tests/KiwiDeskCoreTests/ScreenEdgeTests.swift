@@ -216,12 +216,12 @@ struct ScreenEdgeTests {
         settings.kiwishelf.pocketEdges.setEdge(.top)
         settings.spaceBarStyle.setEdge(.top, on: Self.studio, among: both)
         settings.appBarStyle.setEdge(.top, on: Self.studio, among: both)
-        #expect(settings.uniformBarEdge == nil)
+        #expect(settings.uniformShelfEdge == nil)
         // A look sets top and keeps the studio's pin.
         settings.spaceBarStyle.setEdgeKeepingScreens(.top)
         settings.appBarStyle.setEdgeKeepingScreens(.top)
         #expect(settings.spaceBarStyle.edgeOverride == [Self.studio: .top])
-        #expect(settings.uniformBarEdge == .top)
+        #expect(settings.uniformShelfEdge == .top)
         // The laptop's write of the bar's edge stores nothing, and
         // every screen drawing top collapses the pin.
         settings.spaceBarStyle.setEdge(.top, on: Self.laptop, among: both)
@@ -270,13 +270,13 @@ struct ScreenEdgeTests {
         var settings = TilingSettings()
         settings.barEdge = .left
         settings.kiwishelf.pocketEdges.setEdge(.left)
-        #expect(settings.uniformBarEdge == .left)
+        #expect(settings.uniformShelfEdge == .left)
         settings.appBarStyle.setEdge(
             .right,
             on: Self.studio,
             among: ScreenEdgeScope(screens: [Self.studio, Self.laptop])
         )
         #expect(settings.sharedBarEdge == .left)
-        #expect(settings.uniformBarEdge == nil)
+        #expect(settings.uniformShelfEdge == nil)
     }
 }

@@ -6,13 +6,13 @@ import SwiftUI
 extension SettingsModel {
     /// Master Position binding (#1731) — OPTIONAL, nil while the
     /// bars, the pocket or their screens sit on different edges
-    /// (`TilingSettings.uniformBarEdge`; `SegmentedPicker` renders
+    /// (`TilingSettings.uniformShelfEdge`; `SegmentedPicker` renders
     /// no selection). A pick sets both bars and the pocket on every
     /// screen in one write, re-fusing them and clearing each
     /// screen's own edge (#1948, #3376); the getter never stores.
     var barEdgeMaster: Binding<AppBarEdge?> {
         Binding(
-            get: { self.config.settings.uniformBarEdge },
+            get: { self.config.settings.uniformShelfEdge },
             set: { edge in
                 guard let edge else { return }
                 var next = self.config.settings

@@ -76,7 +76,7 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
 
     /// `GestureListRow`'s columns, spelled from its constants.
     private var gesturesRow: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: GestureListRow.rowGap) {
             HStack(spacing: GestureListRow.columnGap) {
                 Color.clear.frame(
                     width: GestureListRow.disclosureWidth,
@@ -87,7 +87,7 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
                     .accessibilityHidden(true)
                 titled
             }
-            Spacer(minLength: 8)
+            Spacer(minLength: GestureListRow.rowGap)
             reach
             GestureChordRecorder.footprint.overlay { control }
             AppRuleDeleteButton.slot
