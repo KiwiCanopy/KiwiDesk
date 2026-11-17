@@ -36,8 +36,13 @@ struct GestureRefusalHyperTests {
         #expect(
             source.contains("@Environment(\\.hyperKeyIsOff) var hyperOff")
         )
-        #expect(
-            source.components(separatedBy: "hyperOff: hyperOff").count == 5
-        )
+        // Every sentence the row asks for hands the mount's reading.
+        let asks =
+            source.components(separatedBy: "GestureRefusalWords.sentence(")
+            .count - 1
+        let handed =
+            source.components(separatedBy: "hyperOff: hyperOff").count - 1
+        #expect(asks > 0)
+        #expect(handed == asks)
     }
 }
