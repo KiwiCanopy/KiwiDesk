@@ -92,6 +92,8 @@ final class ShelfOverlay {
     }
     /// Whether a fade-out is in flight.
     var isLeaving: Bool { leaving != nil }
+    /// The sections the last `show` brought on screen (#3388).
+    private(set) var arrived: [NSView] = []
     /// Schedules a landing once the plate glide has run — the
     /// glide's own timer; a test hands a queue it drains by hand.
     var afterGlide: (@escaping @MainActor () -> Void) -> Void = {
@@ -141,8 +143,8 @@ final class ShelfOverlay {
     /// with `shelf` as rendered — glass already gated by
     /// `LiquidGlassGate` — and shows it, fading in where it appears
     /// (#1838); `sheen` paints the plate's border with the ramp
-    /// (#1644). Returns the sections it brought on screen.
-    @discardableResult
+    /// (#1644). `arrived` then names the sections it brought on
+    /// screen.
     func show(
         strip: CGRect,
         edge: AppBarEdge,
@@ -151,11 +153,12 @@ final class ShelfOverlay {
         sections: [Section],
         divider range: ShelfArrangement.Divider? = nil,
         pocket mount: ShelfPocketPiece.Mount? = nil
-    ) -> [NSView] {
+    ) {
+        arrived = []
         guard !sections.isEmpty, strip.width >= 1, strip.height >= 1
         else {
             hide(animated: true)
-            return []
+            return
         }
         let next = Drawn(
             strip: strip,
@@ -172,7 +175,7 @@ final class ShelfOverlay {
         // lays out moves nothing (#1901).
         if panel?.isVisible == true, leaving == nil, drawn == next {
             WorkMeter.shared.add(\.shelfShowsSkipped)
-            return []
+            return
         }
         drawn = next
         let panel = self.panel ?? makePanel()
@@ -186,7 +189,7 @@ final class ShelfOverlay {
         let inFlight = BarMotion.revealShift(of: content)
         let hadPocket = pocket.isMounted
         let slidesBack = fadesBack && leavingSlides
-        let arrived = Self.arrivals(
+        arrived = Self.arrivals(
             sections,
             shownBefore: glides && !fadesBack,
             on: stripView,
@@ -266,16 +269,16 @@ final class ShelfOverlay {
         )
         if !panel.isVisible {
             #if DEBUG
-                guard ordersPanel else { return arrived }
+                guard ordersPanel else { return }
             #endif
             if slides {
                 panel.orderFrontRegardless()
                 revealIn(ordering: true)
-                return arrived
+                return
             }
             guard travels else {
                 panel.orderFrontRegardless()
-                return arrived
+                return
             }
             // Shown transparent and committed so, laid out already,
             // so the fade starts from it (#1838).
@@ -287,7 +290,6 @@ final class ShelfOverlay {
                 setContentAlpha(1, animated: true)
             }
         }
-        return arrived
     }
 
     /// Orders the shelf out — after fading out where `animated`

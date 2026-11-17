@@ -124,6 +124,27 @@ struct BarPeekArrivalTests {
         #expect(core.shelves.peek.pending != nil)
     }
 
+    @Test("A kept shelf revealed again under the pointer opens no peek")
+    func keptShelfRevealOpensNothing() throws {
+        let core = seededCore()
+        defer { close(core) }
+        var dwells = 0
+        core.shelves.peek.schedule = { _, _ in dwells += 1 }
+        render(core)
+        // Ordered out and kept, its sections still on the strip, as
+        // a hiding shelf is between reveals (#761).
+        let overlay = try #require(
+            core.shelves.overlayForTesting(display, edge: .top)
+        )
+        overlay.hide(animated: false)
+        try #require(!overlay.isVisible)
+        restOnWeb(core, nudge: 0)
+        render(core)
+        #expect(overlay.isVisible)
+        #expect(dwells == 0)
+        #expect(core.shelves.peek.pending == nil)
+    }
+
     @Test("A section a show brings on screen is an arrival")
     func arrivalPredicate() {
         let strip = NSView()

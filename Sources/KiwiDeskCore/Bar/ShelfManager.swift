@@ -228,7 +228,7 @@ final class ShelfManager {
         overlay.handle.onReset = { [weak self] in
             self?.onMinimum(KiwiShelf.resetMinimum, true)
         }
-        let arrived = overlay.show(
+        overlay.show(
             strip: shelf.strip,
             edge: shelf.edge,
             shelf: LiquidGlassGate.rendered(shelf.shelf),
@@ -242,7 +242,7 @@ final class ShelfManager {
         // one point where both sections and the panel are placed.
         // A section that came on screen under the pointer opens no
         // peek until the pointer moves (#3388).
-        peek.arrive(arrived)
+        peek.arrive(overlay.arrived)
         shelf.space?.syncHoverToPointer()
         shelf.app?.syncHoverToPointer()
         overlay.handle.syncHoverToPointer()

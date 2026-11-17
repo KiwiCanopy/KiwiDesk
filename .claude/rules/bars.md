@@ -1193,7 +1193,10 @@ Obligations:
   swaps in no peek until the pointer moves, while a reading still
   closes one — which sections arrived is `ShelfOverlay.show`'s
   answer alone (`ShelfOverlay.arrivals`), stamped by the one
-  `BarPeek.arrive` (#3388, `BarPeekArrivalTests`), and
+  `BarPeek.arrive` (#3388, `BarPeekArrivalTests`; a panel the
+  `ordersPanels` pin keeps ordered out reads as arriving every
+  pass, so a wired suite asserting a re-read opens a peek sets
+  it), and
   `ShelfManager.sync`'s hide arm is the one home for "its shelf
   left" — a fullscreen or presentation stand-down, every bar on it
   hidden, a display gone — since the panel joins every Space
