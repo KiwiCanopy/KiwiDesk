@@ -25,6 +25,62 @@ public struct KnownMonitorSet: Hashable, Sendable {
     }
 }
 
+extension KnownMonitorSet {
+    /// The card's and `list_monitor_sets`' one order (#3374): the
+    /// connected setup first, then by screen count, then by the
+    /// screens' names collated in `locale` — the app's language,
+    /// which the card's labels are drawn in — then by their sizes,
+    /// so a same-named pair the card labels by size reads in size
+    /// order; the profile settles what is left.
+    public static func listOrder(
+        in locale: Locale
+    ) -> (KnownMonitorSet, KnownMonitorSet) -> Bool {
+        { a, b in
+            if a.isConnected != b.isConnected { return a.isConnected }
+            if a.monitors.count != b.monitors.count {
+                return a.monitors.count < b.monitors.count
+            }
+            for (x, y) in [(a.names, b.names), (a.sizes, b.sizes)] {
+                switch x.compare(
+                    y,
+                    options: collation,
+                    range: nil,
+                    locale: locale
+                ) {
+                case .orderedAscending: return true
+                case .orderedDescending: return false
+                case .orderedSame: continue
+                }
+            }
+            return (a.profile, a.monitors.joined(separator: "\n"))
+                < (b.profile, b.monitors.joined(separator: "\n"))
+        }
+    }
+
+    /// `localizedStandardCompare`'s options short of its forced
+    /// order, so equal names fall through to the sizes.
+    private static let collation: String.CompareOptions = [
+        .caseInsensitive, .numeric, .widthInsensitive,
+    ]
+
+    /// The group a divider closes in the card: the connected setup
+    /// alone, then one per screen count.
+    public var listGroup: Int { isConnected ? 0 : monitors.count }
+
+    /// The screens' names, the label's words without its list
+    /// punctuation, which is the GUI's to localize.
+    private var names: String {
+        monitors.map { Display.fingerprintParts($0).name }
+            .joined(separator: "\n")
+    }
+
+    /// The screens' sizes, in the same order.
+    private var sizes: String {
+        monitors.map { Display.fingerprintParts($0).size }
+            .joined(separator: "\n")
+    }
+}
+
 /// Why a forget wrote nothing — a case, never a GUI sentence
 /// (core-boundaries.md). `description` is the CLI's English.
 public enum MonitorSetForgetError: Error, Equatable,
@@ -61,8 +117,15 @@ public enum MonitorSetForgetError: Error, Equatable,
 /// beside the claim-only chips, whose ruling amends #1530 in
 /// `docs/design-decisions.md`.
 extension KiwiCore {
-    /// Every stored setup with its holder — the connected one
-    /// first, then by profile, then by screens.
+    /// The app's language, which the card's labels are drawn in;
+    /// English where the app shows inline English.
+    static var listLocale: Locale {
+        Locale(
+            identifier: LocalizationManager.shared.effectiveLocale ?? "en"
+        )
+    }
+
+    /// Every stored setup with its holder, in `listOrder`.
     public func knownMonitorSets() -> [KnownMonitorSet] {
         profiles.allProfiles()
             .flatMap { profile in
@@ -75,13 +138,7 @@ extension KiwiCore {
                     )
                 }
             }
-            .sorted {
-                if $0.isConnected != $1.isConnected {
-                    return $0.isConnected
-                }
-                return ($0.profile, $0.monitors.joined(separator: "\n"))
-                    < ($1.profile, $1.monitors.joined(separator: "\n"))
-            }
+            .sorted(by: KnownMonitorSet.listOrder(in: Self.listLocale))
     }
 
     /// Forgets the stored setup `monitors` through the one strip a

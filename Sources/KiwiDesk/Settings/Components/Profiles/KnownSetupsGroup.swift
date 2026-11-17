@@ -32,13 +32,30 @@ struct KnownSetupsGroup: View {
                         SettingsCatalog.profiles.knownSetups.children
                             .forget
                     )
-                ForEach(model.knownSetups, id: \.self) { setup in
+                // Core's order (#3374); a rule closes each group.
+                let setups = model.knownSetups
+                ForEach(
+                    Array(setups.enumerated()),
+                    id: \.element
+                ) { index, setup in
+                    if index > 0,
+                        setups[index - 1].listGroup != setup.listGroup
+                    {
+                        groupRule
+                    }
                     row(setup)
                 }
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    /// A rule between a card's groups (gui.md ▸ Colour).
+    private var groupRule: some View {
+        SettingsTheme.hairlineSubtle
+            .frame(height: 1)
+            .accessibilityHidden(true)
     }
 
     private var caption: String {
