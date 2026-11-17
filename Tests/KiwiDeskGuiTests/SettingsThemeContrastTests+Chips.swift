@@ -179,18 +179,16 @@ extension SettingsThemeContrastTests {
         )
     }
 
-    /// A choice chip's label — a layer, a preset share or weight
-    /// — when chosen, on the accent wash in place of the rest
-    /// fill; unchosen it is a button chip's (`buttonChips`, and
-    /// the jump chips' rows for the page). The panel carries the
-    /// keyboard's scope chips and the Spaces preview's chips.
-    /// The chosen choice chip is opaque accent, so its ground
+    /// A choice chip's label — a layer, a preset share or weight;
+    /// unchosen it is a button chip's (`buttonChips`). The chosen
+    /// choice chip is opaque accent, so its ground
     /// does not reach the label (#2047 amended, 5.0.0).
     private static let choiceChips: [Pairing] = [
+        // Read from the chip itself, so a swapped ink reds here.
         Pairing(
-            "accentInk on a chosen choice chip",
-            SettingsTheme.accentInk,
-            on: SettingsTheme.accent
+            "the chosen choice chip's ink on its fill",
+            ChoiceChip.ink(selected: true),
+            on: ChoiceChip.fill(selected: true, hovering: false)
         )
     ]
 

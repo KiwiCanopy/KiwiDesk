@@ -66,9 +66,10 @@ struct ChoiceChipTests {
             )
             // The hover is the surface's own: a site holding hover
             // state beside it is a second copy of the gate.
+            // The chosen weight is the surface's too (5.0.0).
             for banned in [
                 ".primary.opacity(", ".secondary.opacity(",
-                ".onHover{", "hovering", "Hovered",
+                ".onHover{", "hovering", "Hovered", ".fontWeight(",
             ] {
                 #expect(
                     !source.contains(banned),
@@ -98,7 +99,8 @@ struct ChoiceChipTests {
         .split(whereSeparator: \.isWhitespace)
         .joined()
         for needle in [
-            "hovering:hovering&&isEnabled",
+            // The fill reads the chip's own selection (guard-prover).
+            "ChoiceChip.fill(selected:selected,hovering:hovering&&isEnabled)",
             ".onHover{hovering=isEnabled&&$0}",
             ".onChange(of:isEnabled){_,nowinif!now{hovering=false}}",
             ".animation(reduceMotion?nil:",
@@ -114,8 +116,28 @@ struct ChoiceChipTests {
             source.split(whereSeparator: \.isWhitespace).joined()
                 .contains(
                     "modifier(ChoiceChipSurface(selected:selected,"
-                        + "edged:edged))"
+                        + "edged:edged,emboldens:edged&&emboldens))"
                 )
+        )
+    }
+
+    /// A weight chip is a sample of its weight, so the chosen one
+    /// keeps it rather than going semibold (5.0.0).
+    @Test("a weight sample opts out of the chosen weight")
+    func weightSamplesKeepTheirWeight() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("Components/Bars/FontWeightRow.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        #expect(
+            source.contains(
+                "font:.callout.weight(named.swiftUIWeight),"
+                    + "selected:shown==named.value,emboldens:false"
+            )
         )
     }
 

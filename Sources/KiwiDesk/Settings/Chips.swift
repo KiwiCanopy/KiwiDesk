@@ -73,7 +73,8 @@ extension View {
 /// constant edge, the chosen one drawn like a selected segment —
 /// solid accent, `accentInk`, a semibold label over the width
 /// every chip reserves. A glyph-only one (`edged: false`) takes
-/// no edge.
+/// no edge and no weight, and a chip whose label shows a weight of
+/// its own (`emboldens: false`) keeps it.
 enum ChoiceChip {
     static func fill(selected: Bool, hovering: Bool) -> Color {
         if selected { return SettingsTheme.accent }
@@ -91,9 +92,16 @@ extension View {
     /// under Reduce Motion the lift is immediate.
     func choiceChip(
         selected: Bool = false,
-        edged: Bool = true
+        edged: Bool = true,
+        emboldens: Bool = true
     ) -> some View {
-        modifier(ChoiceChipSurface(selected: selected, edged: edged))
+        modifier(
+            ChoiceChipSurface(
+                selected: selected,
+                edged: edged,
+                emboldens: edged && emboldens
+            )
+        )
     }
 }
 
@@ -101,43 +109,53 @@ extension View {
 private struct ChoiceChipSurface: ViewModifier {
     let selected: Bool
     let edged: Bool
+    let emboldens: Bool
     @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     func body(content: Content) -> some View {
-        // The semibold copy reserves the chosen width, so a
-        // selection never reflows the strip.
-        ZStack {
-            content.fontWeight(.semibold).hidden()
-                .accessibilityHidden(true)
-            content.fontWeight(selected ? .semibold : nil)
-        }
-        .foregroundStyle(ChoiceChip.ink(selected: selected))
-        .background(
-            Capsule().fill(
-                ChoiceChip.fill(
-                    selected: selected,
-                    hovering: hovering && isEnabled
+        label(content)
+            .foregroundStyle(ChoiceChip.ink(selected: selected))
+            .background(
+                Capsule().fill(
+                    ChoiceChip.fill(
+                        selected: selected,
+                        hovering: hovering && isEnabled
+                    )
                 )
             )
-        )
-        .overlay {
-            if edged {
-                Capsule().strokeBorder(
-                    SettingsTheme.chipEdge,
-                    lineWidth: 1
-                )
+            .overlay {
+                if edged {
+                    Capsule().strokeBorder(
+                        SettingsTheme.chipEdge,
+                        lineWidth: 1
+                    )
+                }
             }
-        }
-        .animation(
-            reduceMotion ? nil : .easeOut(duration: 0.12),
-            value: hovering
-        )
-        .onHover { hovering = isEnabled && $0 }
-        .onChange(of: isEnabled) { _, now in
-            if !now { hovering = false }
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hovering
+            )
+            .onHover { hovering = isEnabled && $0 }
+            .onChange(of: isEnabled) { _, now in
+                if !now { hovering = false }
+            }
+    }
+
+    /// The chosen label goes semibold over a hidden semibold copy
+    /// that reserves its width, so a selection never reflows the
+    /// strip.
+    @ViewBuilder private func label(_ content: Content) -> some View {
+        if emboldens {
+            ZStack {
+                content.fontWeight(.semibold).hidden()
+                    .accessibilityHidden(true)
+                content.fontWeight(selected ? .semibold : nil)
+            }
+        } else {
+            content
         }
     }
 }
