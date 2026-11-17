@@ -1,15 +1,9 @@
 import Foundation
 
 /// Stamps the handle colour a bundled palette paints (#3377) into a
-/// stored colour set that wears that palette in every other key and
-/// leaves the handle Automatic (#3409, `HandleStampMigrationTests`):
-/// matching is strict, so without it an upgraded Kiwi (Default) or
-/// Glass reads as no palette. A set that differs elsewhere was
-/// custom and stays custom. Reached by PATH: a profile's
-/// `settings`, `gui.json`'s shared `look.colors`, a saved look's
-/// `colors` in `looks.json`, and a bundle's copies of all three.
-/// A palette library and a look's credit (`origin`, `based_on`)
-/// are never stamped.
+/// stored colour set wearing that palette in every other key with
+/// its handle Automatic (#3409, `HandleStampMigrationTests`), by
+/// PATH; a palette library and a look's credit are never stamped.
 extension ConfigMigration {
     /// The formats this step introduced, per shape, spelled as
     /// history: a set stamped later with an Automatic handle is the
@@ -54,9 +48,26 @@ extension ConfigMigration {
         }
     }
 
-    /// The paths, per shape. An exported look file classifies as
-    /// a `gui.json` root and carries its body under `look`, so the
-    /// gui arm reaches it through `lookExportSteps` too.
+    /// An exported look file's body, under `look`, ungated: the
+    /// `lookExportSteps` entry lifting to `handleStampLookFormat` is
+    /// its floor, since the file is never rewritten.
+    @Sendable
+    static func migratingHandleStampLookExport(_ data: Data) -> Data? {
+        surgicallyApplying(
+            data,
+            rewriting: { node in
+                guard var root = node as? [String: Any],
+                    let look = root[handleStampLookKey] as? [String: Any],
+                    let out = stampedLook(look)
+                else { return (node, false) }
+                root[handleStampLookKey] = out
+                return (root, true)
+            },
+            editing: { _ in nil }
+        )
+    }
+
+    /// The paths, per shape.
     static func withHandleStamped(_ node: Any) -> (Any, Bool) {
         guard var root = node as? [String: Any] else { return (node, false) }
         var changed = false
@@ -121,7 +132,7 @@ extension ConfigMigration {
         _ settings: [String: Any]
     ) -> [String: Any]? {
         var colors: [String: String] = [:]
-        for path in handleStampPalettes[0].colors.keys {
+        for path in handleStampShipped.keys {
             let parts = path.split(separator: ".").map(String.init)
             guard parts.count == 2,
                 let group = settings[parts[0]] as? [String: Any],
@@ -149,6 +160,12 @@ extension ConfigMigration {
         return out
     }
 
+    /// The frozen default palette: every colour path 5.0 stores.
+    static var handleStampShipped: [String: String] {
+        handleStampPalettes.first { $0.name == "Kiwi (Default)" }?.colors
+            ?? [:]
+    }
+
     /// The handle the first frozen palette `colors` wears paints,
     /// where its stored handle is absent or Automatic. An absent
     /// path reads the shipped colour, as the decoder and
@@ -158,7 +175,7 @@ extension ConfigMigration {
         guard (colors[handleStampPath] ?? "").isEmpty,
             colors[handleStampSourcePath] != nil
         else { return nil }
-        let shipped = handleStampPalettes[0].colors
+        let shipped = handleStampShipped
         for palette in handleStampPalettes {
             guard let handle = palette.colors[handleStampPath],
                 !handle.isEmpty
@@ -175,13 +192,10 @@ extension ConfigMigration {
         return nil
     }
 
-    /// The text with each stamp written in place, where the walk
-    /// writes one handle value: an Automatic handle's `""` replaced,
-    /// or, in a file that names no handle, the value inserted after
-    /// each `kiwishelf` and `colors` opener. Trade: the edit reaches
-    /// every such member and opener, a credit's included, so a file
-    /// the walk stamps only in part fails the envelope's compare and
-    /// is re-serialized by the walk instead.
+    /// The walk's one handle value written into the text: over each
+    /// Automatic `""`, or after each `kiwishelf` and `colors` opener
+    /// where the file names no handle; the envelope refuses an
+    /// over-edit.
     static func handleStampText(_ text: String) -> Data? {
         guard
             let root = try? JSONSerialization.jsonObject(
@@ -189,14 +203,13 @@ extension ConfigMigration {
             ),
             let handle = loneHandleStamp(in: root)
         else { return nil }
-        let keys = [handleStampKey, handleStampPath]
+        let keys = handleStampKeys
         let named = keys.contains { text.contains("\"\($0)\"") }
         var out = text
         if named {
             for key in keys {
-                let name = NSRegularExpression.escapedPattern(for: key)
                 out = out.replacingOccurrences(
-                    of: "(\"\(name)\"\\s*:\\s*)\"\"",
+                    of: "(\"\(pattern(key))\"\\s*:\\s*)\"\"",
                     with: "$1\"\(handle)\"",
                     options: .regularExpression
                 )
@@ -217,6 +230,14 @@ extension ConfigMigration {
         return out == text ? nil : Data(out.utf8)
     }
 
+    private static var handleStampKeys: [String] {
+        [handleStampKey, handleStampPath]
+    }
+
+    private static func pattern(_ key: String) -> String {
+        NSRegularExpression.escapedPattern(for: key)
+    }
+
     /// The one handle value the walk writes, or nil where it
     /// writes none or several.
     private static func loneHandleStamp(in root: Any) -> String? {
@@ -225,10 +246,10 @@ extension ConfigMigration {
             let data = try? JSONSerialization.data(withJSONObject: stamped),
             let text = String(data: data, encoding: .utf8)
         else { return nil }
+        let names = handleStampKeys.map(pattern).joined(separator: "|")
         let values = Set(
             captures(
-                "\"(?:\(handleStampKey)|kiwishelf\\.handle_color)\""
-                    + "\\s*:\\s*\"([^\"]*)\"",
+                "\"(?:\(names))\"\\s*:\\s*\"([^\"]*)\"",
                 in: text
             )
         )

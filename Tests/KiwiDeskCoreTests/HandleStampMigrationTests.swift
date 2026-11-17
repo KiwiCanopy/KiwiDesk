@@ -192,7 +192,8 @@ struct HandleStampMigrationTests {
             read.looks.first?.colors[Self.handle]
                 == slate["kiwishelf.active_item_color"]
         )
-        #expect(read.looks.last?.colors[Self.handle] == nil)
+        #expect(read.looks.count == 2)
+        #expect(try #require(read.looks.last).colors[Self.handle] == nil)
     }
 
     /// From 4.2.1's backup stamp (43): its shared look, its profiles
@@ -228,7 +229,8 @@ struct HandleStampMigrationTests {
             [ColorPalette].self,
             #require(root["palettes"])
         )
-        #expect(palettes.first?.colors[Self.handle] ?? "" == "")
+        let mine = try #require(palettes.first)
+        #expect(mine.colors[Self.handle] ?? "" == "")
         let looks = try decode([ShelfLook].self, #require(root["looks"]))
         #expect(
             looks.first?.colors[Self.handle]
@@ -248,6 +250,8 @@ struct HandleStampMigrationTests {
             read.look.colors[Self.handle]
                 == TilingSettings().kiwishelf.activeItemColor
         )
+        // At the format it introduced the entry stands down.
+        #expect(ConfigMigration.crossingLookExport(data, from: 6) == data)
     }
 
     /// At the formats it introduced the step stands down, so an

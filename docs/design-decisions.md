@@ -18611,9 +18611,10 @@ reader. The first-run starter paints it the same way, so a first
 run still wears Glass and the default palette whole (#1739). The
 costs are the pocket's — under a bundled palette the handle no
 longer follows light and dark — and two more: a palette switch
-overwrites a handle colour the user picked, and an `init.lua`
-that paints a bundled palette's colours but not the handle reads
-as wearing none until one is picked. A stored file that never
+overwrites a handle colour the user picked, and a Lua-owned
+config reads as wearing no bundled palette unless its `init.lua`
+paints the handle too, one that sets no colour at all included,
+since no crossing reaches the script. A stored file that never
 had the key crosses once instead
 ([#3409](https://github.com/KiwiCanopy/KiwiDesk/issues/3409),
 `migratingHandleStamp`): a colour set matching a bundled palette
