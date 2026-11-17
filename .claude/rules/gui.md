@@ -2279,9 +2279,12 @@ its host (#3258; `ShortcutKeyRowSeamTests` ▸ `registerIsComplete`,
 (`ShortcutKeyRowOfferTests` ▸ `stealFollowsTheHolder`).
 
 **A list of `ShortcutRowView`s takes its columns from
-`ShortcutSectionColumns`** (#3380): the badges against a divider,
-the chords at the section's widest, a section with no gesture
-keeping no badge column; a new host of such a list applies it, and
+`ShortcutPanelColumns`, applied once over the whole list** (#3380,
+amended by #3424): the badges against a divider, the chords at the
+list's widest, so every section's divider sits at one x, and a list
+with no gesture keeping no badge column. A list laid out in side-by-
+side visual columns sizes each visual column instead. A new host of
+such a list applies it, and
 a row with no columns in its environment is a lone row, such as the
 hint panel's branch rows (`ShortcutGestureColumnsTests` ▸
 `columnsAreWired`). A Gestures row's label and mark come from one

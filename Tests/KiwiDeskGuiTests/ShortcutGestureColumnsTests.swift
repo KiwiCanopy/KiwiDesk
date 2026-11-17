@@ -213,10 +213,11 @@ struct ShortcutGestureColumnsTests {
     }
 
     /// The layout is SwiftUI's to draw, so the wiring is read from
-    /// the source: the section hands its rows the columns, a row
+    /// the source: the panel hands every row one set of columns,
+    /// sized over all its sections (#3424), a row
     /// draws the divider only beside a gesture and keeps its slot
-    /// otherwise, and the chord takes the section's width.
-    @Test("a section lays out its badges and chords in columns")
+    /// otherwise, and the chord takes the panel's width.
+    @Test("the panel lays out its badges and chords in columns")
     func columnsAreWired() throws {
         let dir = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Shortcuts")
@@ -226,13 +227,22 @@ struct ShortcutGestureColumnsTests {
             ).filter { !$0.isWhitespace }
         }
         let sheet = try flat("ShortcutsSheetView.swift")
+        #expect(sheet.contains("letrows=sections.flatMap(\\.rows)"))
         #expect(
             sheet.contains(
-                ".modifier(ShortcutSectionColumns(badges:section.rows"
-                    + ".contains{!$0.gestures.isEmpty},chords:section.rows"
+                ".modifier(ShortcutPanelColumns(badges:rows"
+                    + ".contains{!$0.gestures.isEmpty},chords:rows"
                     + ".contains{!$0.combo.isEmpty}))"
             )
         )
+        // Once, on the panel: no section sizes its own.
+        #expect(sheet.occurrences(of: "ShortcutPanelColumns(") == 1)
+        let section = try #require(
+            sheet.range(of: "privatefuncsectionView(").map {
+                String(sheet[$0.upperBound...])
+            }
+        )
+        #expect(!section.contains("Columns("))
         let row = try flat("ShortcutsBands.swift")
         #expect(
             row.contains(

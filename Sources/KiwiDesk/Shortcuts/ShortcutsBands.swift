@@ -51,8 +51,8 @@ struct ShortcutRowView: View {
     }
 
     /// The badge, then the divider where the row has a gesture; in
-    /// a section with a badge column a row without one keeps the
-    /// divider's slot (#3380). Outside a section, the badge alone.
+    /// a panel with a badge column a row without one keeps the
+    /// divider's slot (#3380). Outside the panel, the badge alone.
     @ViewBuilder private var gestureColumn: some View {
         if let columns {
             if columns.badges {
@@ -79,7 +79,7 @@ struct ShortcutRowView: View {
         .accessibilityHidden(true)
     }
 
-    /// The chord, right-aligned in the section's widest chord.
+    /// The chord, right-aligned in the panel's widest chord.
     private var chord: some View {
         Text(row.combo)
             .font(.callout)
