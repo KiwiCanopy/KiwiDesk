@@ -2404,6 +2404,13 @@ trackpad shows the scroller only during a gesture
 (`docs/design-decisions.md` ▸ The platform's own indicator does not
 work), so a tour row cut at its edge is the only cue there.
 
+**A vertical scroller hidden by ruling spells
+`.scrollIndicators(.never, …)` or `showsIndicators: false`, never
+`.hidden`**: measured on macOS 27.2, 2026-11-17, `.hidden` keeps an
+AppKit scroller while a mouse is connected (#3413,
+`ShortcutsPanelScrollTests` ▸ `hiddenIsHeld`, whose `allowed` map
+is the one copy of the `.hidden` sites left).
+
 **A strip's content in those two trees clears an overlay scroller
 through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
 that strip's content width and viewport (`StripScrollerTests` ▸

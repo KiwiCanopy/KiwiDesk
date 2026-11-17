@@ -96,6 +96,52 @@ struct ShortcutsPanelScrollTests {
         }
     }
 
+    /// The key sequence panel's sheet draws no scroller; its fade
+    /// is the one cue, as on KiwiHub (#3413). `.never`, because
+    /// `.hidden` keeps an AppKit scroller while a mouse is connected
+    /// (measured, macOS 27.2, 2026-11-17), so `.hidden` reds too.
+    @Test("the sequence panel's sheet draws no scroller")
+    func theSheetHidesItsScroller() throws {
+        let text = try Self.source("JumpShortcutsView.swift")
+        let scroll = try #require(
+            SourceScan.declarationBody(
+                after: "private var scrollView",
+                in: text
+            )
+        )
+        let plain = try #require(
+            scroll.range(of: "} else {").map {
+                String(scroll[$0.upperBound...])
+            }
+        )
+        #expect(plain.contains("ScrollView {"))
+        #expect(
+            plain.occurrences(of: ".scrollIndicators(.never, axes: .vertical)")
+                == 1
+        )
+    }
+
+    /// A scroller hidden by ruling spells `.never` (gui.md ▸ the
+    /// #2901 section), so `.hidden` is held to its one older site,
+    /// whose intent for a mouse user is open (#3413 follow-up).
+    @Test("no other view spells a hide as .hidden")
+    func hiddenIsHeld() throws {
+        let allowed = ["SettingsDetailPanel.swift": 1]
+        var found: [String: Int] = [:]
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources")
+        let files = try SourceScan.swiftSources(under: root)
+        #expect(files.count > 100)
+        for url in files {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            let count = text.occurrences(of: ".scrollIndicators(.hidden")
+            if count > 0 { found[url.lastPathComponent] = count }
+        }
+        #expect(found == allowed)
+    }
+
     /// The fold's verdict is arithmetic and lives in ONE place,
     /// so it is asserted directly at the boundary rather than
     /// scanned for. Equal is NOT overflow: the sheet is clamped

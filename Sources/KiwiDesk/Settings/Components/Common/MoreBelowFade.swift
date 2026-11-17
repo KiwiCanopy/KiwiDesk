@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// A scroll view's cue that it holds more than it shows: the
-/// scroller flashes on open and the content's bottom edge fades
-/// while more is below (#1542 ruling, #2705). The content itself
-/// fades, since a painted band would show on glass (#1849).
+/// A scroll view's cue that it holds more than it shows: its
+/// scroller, where it draws one, flashes on open, and the content's
+/// bottom edge fades while more is below (#1542 ruling, #2705). The
+/// content itself fades, since a painted band would show on glass
+/// (#1849).
 /// Both cues are macOS 15 APIs; macOS 14 keeps the plain scroller.
 struct MoreBelowFade: ViewModifier {
     /// Whether the edge fades. Off drops the fade alone: the content
