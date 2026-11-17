@@ -173,8 +173,8 @@ enum SettingsTheme {
     /// `page` (#1520, #1173); colour-vision checked against a
     /// resting and a hovered neighbour (`ChipMarkSeparationTests`).
     static let chipMarked = token(
-        light: accentLight,
-        dark: accentDark,
+        light: 0x8D_B3_54,
+        dark: 0xAA_CB_5D,
         lightAlpha: 0.50,
         darkAlpha: 0.32
     )
@@ -183,8 +183,8 @@ enum SettingsTheme {
     /// the jump chip's leaves too little to a hovered cell there.
     /// Its glyph held down measures to the non-text floor.
     static let iconCellMarked = token(
-        light: accentLight,
-        dark: accentDark,
+        light: 0x8D_B3_54,
+        dark: 0xAA_CB_5D,
         lightAlpha: 0.50,
         darkAlpha: 0.36
     )
@@ -229,9 +229,7 @@ enum SettingsTheme {
     // MARK: - Accent
 
     /// KiwiDesk green accent, brighter on dark's black page.
-    static let accent = token(light: accentLight, dark: accentDark)
-    private static let accentLight: UInt32 = 0x8D_B3_54
-    private static let accentDark: UInt32 = 0xAA_CB_5D
+    static let accent = token(light: 0x8D_B3_54, dark: 0xAA_CB_5D)
 
     /// Text and glyphs drawn on `accent` (dark in both modes for contrast).
     static let accentInk = token(
