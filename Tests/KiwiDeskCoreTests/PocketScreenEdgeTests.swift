@@ -36,6 +36,7 @@ struct PocketScreenEdgeTests {
         return core
     }
 
+    @discardableResult
     private func set(
         _ core: KiwiCore,
         _ args: JSONValue...
