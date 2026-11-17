@@ -43,7 +43,12 @@ enum BarHoverHit {
         at windowPoint: CGPoint,
         in content: NSView
     ) -> Bool {
-        let point = content.convert(windowPoint, from: nil)
+        // `hitTest` reads its superview's coordinates: the content
+        // root is flipped, so its own would mirror y and land on
+        // another item along a side bar (#3414).
+        let point =
+            content.superview?.convert(windowPoint, from: nil)
+            ?? windowPoint
         guard let hit = content.hitTest(point) else { return false }
         return hit === view || hit.isDescendant(of: view)
     }
