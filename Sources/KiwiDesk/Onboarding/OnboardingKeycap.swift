@@ -24,6 +24,14 @@ struct OnboardingKeycap: View {
                 ForEach(Array(chords.enumerated()), id: \.offset) {
                     chip($0.element)
                 }
+            case .gesture(let modifiers, let glyph, let caption):
+                ForEach(
+                    OnboardingModifierNames.named(modifiers)
+                ) { modifier in
+                    namedChip(modifier)
+                    plus
+                }
+                gestureChip(glyph, caption)
             }
         }
         // Whole or not at all: a tight row wraps its label rather
@@ -46,6 +54,26 @@ struct OnboardingKeycap: View {
         }
         .fixedSize()
     }
+
+    /// A gesture's cap (#3427): KiwiHub's glyph on a keycap, its
+    /// finger count or motion under it as a modifier's name sits.
+    private func gestureChip(
+        _ glyph: String,
+        _ caption: String
+    ) -> some View {
+        VStack(spacing: 3) {
+            GestureGlyph(symbol: glyph, side: Self.glyphSide)
+                .keycapChrome()
+            Text(caption)
+                .font(.system(size: 9.5))
+                .foregroundStyle(SettingsTheme.ink3)
+        }
+        .fixedSize()
+        .accessibilityHidden(true)
+    }
+
+    /// The gesture glyph's side on its cap.
+    static let glyphSide: CGFloat = 16
 
     /// Separator between shortcut key chips.
     private var plus: some View {

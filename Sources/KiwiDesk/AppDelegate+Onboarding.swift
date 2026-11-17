@@ -72,6 +72,9 @@ extension AppDelegate {
         onboardingModel.gestureRows = { [weak self] in
             self?.onboardingGestureFamilies() ?? []
         }
+        onboardingModel.mouseGestureRows = { [weak self] in
+            self?.onboardingMouseGestureFamilies() ?? []
+        }
         onboardingModel.longSwipes = { [weak self] in
             self?.core.mouse.scroll.longSwipes ?? true
         }
@@ -185,6 +188,14 @@ extension AppDelegate {
         OnboardingGestures.families(
             bindings: core.mouse.gestures.resolved,
             screens: NSScreen.screens.count,
+            layer: core.loadGuiConfig().layers.first(where: \.isDefault)
+        )
+    }
+
+    /// The Gestures step's mouse rows from the live bindings (#3427).
+    private func onboardingMouseGestureFamilies() -> [OnboardingKeyFamily] {
+        OnboardingGestures.mouseFamilies(
+            bindings: core.mouse.gestures.resolved,
             layer: core.loadGuiConfig().layers.first(where: \.isDefault)
         )
     }

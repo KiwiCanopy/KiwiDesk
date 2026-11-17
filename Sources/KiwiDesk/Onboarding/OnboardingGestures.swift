@@ -41,7 +41,8 @@ enum OnboardingGestures {
                     "focus",
                     L("onboarding.gestures.focus", "Move focus"),
                     key,
-                    fingers(key)
+                    fingers(key),
+                    badge(key, nil, nil)
                 )
             )
         }
@@ -55,7 +56,8 @@ enum OnboardingGestures {
                     "space",
                     L("onboarding.gestures.space", "Switch Spaces"),
                     key,
-                    whole ? fingers(key) : sideways(key)
+                    whole ? fingers(key) : sideways(key),
+                    badge(key, nil, whole ? nil : .horizontal)
                 )
             )
         }
@@ -73,7 +75,8 @@ enum OnboardingGestures {
                         "Open the Desktop overview"
                     ),
                     key,
-                    upward(key)
+                    upward(key),
+                    badge(key, .up, nil)
                 )
             )
         }
@@ -85,7 +88,8 @@ enum OnboardingGestures {
                     "display",
                     L("onboarding.gestures.display", "Focus another screen"),
                     key,
-                    fingers(key)
+                    fingers(key),
+                    badge(key, nil, nil)
                 )
             )
         }
@@ -103,7 +107,8 @@ enum OnboardingGestures {
                         "Turn KiwiVision on or off"
                     ),
                     key,
-                    tap(key)
+                    tap(key),
+                    badge(key, nil, nil, caption: tap(key))
                 )
             )
         }
@@ -150,11 +155,32 @@ enum OnboardingGestures {
         return lines.isEmpty ? nil : lines.joined(separator: " ")
     }
 
-    private static func row(
+    /// A gesture's cap: KiwiHub's glyph for `key`, and under it the
+    /// finger count (#3427), the arrows carrying the way.
+    private static func badge(
+        _ key: GestureKey,
+        _ direction: GestureDirection?,
+        _ axis: ShortcutGestureBadge.Axis?,
+        caption: String? = nil
+    ) -> OnboardingGestureCap {
+        OnboardingGestureCap(
+            glyph: ShortcutGestureBadge(
+                key: key,
+                direction: direction,
+                axis: axis
+            ).symbol,
+            caption: caption ?? fingers(key)
+        )
+    }
+
+    /// One row: the keys, the gesture's cap, and the whole motion in
+    /// words for VoiceOver alone.
+    static func row(
         _ id: String,
         _ label: String,
         _ key: GestureKey,
-        _ motion: String
+        _ motion: String,
+        _ cap: OnboardingGestureCap
     ) -> OnboardingKeyFamily {
         let modifiers = HotkeyModifiers(key.chord)
         let spoken =
@@ -170,56 +196,17 @@ enum OnboardingGestures {
         return OnboardingKeyFamily(
             id: id,
             label: label,
-            chord: .shared(modifiers, keys: motion),
+            chord: .gesture(
+                modifiers,
+                glyph: cap.glyph,
+                caption: cap.caption
+            ),
             spoken: spoken
         )
     }
 
-    // One key per finger count and motion: the count is a closed set,
-    // so no frame asks a noun to agree with a number.
-
-    private static func fingers(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 3: L("onboarding.gestures.fingers.3", "3 fingers")
-        case 4: L("onboarding.gestures.fingers.4", "4 fingers")
-        case 5: L("onboarding.gestures.fingers.5", "5 fingers")
-        default: L("onboarding.gestures.fingers.2", "2 fingers")
-        }
-    }
-
-    private static func sideways(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 2:
-            L("onboarding.gestures.sideways.2", "2 fingers left/right")
-        case 4:
-            L("onboarding.gestures.sideways.4", "4 fingers left/right")
-        case 5:
-            L("onboarding.gestures.sideways.5", "5 fingers left/right")
-        default:
-            L("onboarding.gestures.sideways.3", "3 fingers left/right")
-        }
-    }
-
-    private static func upward(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 2: L("onboarding.gestures.up.2", "2 fingers up")
-        case 4: L("onboarding.gestures.up.4", "4 fingers up")
-        case 5: L("onboarding.gestures.up.5", "5 fingers up")
-        default: L("onboarding.gestures.up.3", "3 fingers up")
-        }
-    }
-
-    private static func tap(_ key: GestureKey) -> String {
-        switch key.input.fingers {
-        case 2: L("onboarding.gestures.tap.2", "2-finger tap")
-        case 3: L("onboarding.gestures.tap.3", "3-finger tap")
-        case 5: L("onboarding.gestures.tap.5", "5-finger tap")
-        default: L("onboarding.gestures.tap.4", "4-finger tap")
-        }
-    }
-
     /// ⌃⌥K: every gesture, set apart as the keys step sets KiwiHub.
-    private static func gateway(_ layer: KeyLayer?) -> OnboardingKeyFamily? {
+    static func gateway(_ layer: KeyLayer?) -> OnboardingKeyFamily? {
         guard let layer,
             let combo = OnboardingKeys.combo(
                 lua: KiwiHubSide.shortcuts.lua,
