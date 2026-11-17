@@ -918,10 +918,11 @@ render content into it (#1517). Obligations:
   and the re-read share one gate (`SpaceBarStuckHoverTests`,
   `ShelfWiringSeamTests` ▸ `itemsGateHover`); the pointer read is
   a seam `makeTestCore` pins (`MouseButtonSeamGuardTests`). A hit
-  test of a bar panel hands `hitTest` a point in the content root's
-  SUPERVIEW coordinates: the root is flipped, and its own would
-  mirror y, which only a side bar's stacked items can see (#3414,
-  `BarHoverHitSideBarTests`).
+  test of a bar panel's content root takes a point in the root's
+  SUPERVIEW coordinates — a window point, as the panels' press
+  routing hands it — never one converted into the flipped root,
+  which mirrors y where only a side bar's stacked items can see it
+  (#3414, `BarHoverHitSideBarTests`).
 - **Reduce transparency stands the shelf plate down in
   `ShelfManager.relayout`**, which hands the overlay the gated
   shelf from one `LiquidGlassGate.rendered` call and reads the
