@@ -63,8 +63,12 @@ struct PocketPositionAgreementTests {
         #expect(!settings.pocketSharesABarEdge)
         settings.spaceBarStyle.visibility = .hidden
         #expect(!settings.pocketSharesABarEdge)
-        // A hidden App Bar on that edge does not make it a section.
-        settings.appBarStyle.setEdge(.top)
+        // The App Bar alone makes it a section where a layout
+        // shows it on that edge, and not once that layout hides it.
+        #expect(settings.appBarStyle.edge == .top)
+        settings.setAppBarVisibility(.always, in: .monocle)
+        #expect(settings.pocketSharesABarEdge)
+        settings.setAppBarVisibility(.hidden, in: .monocle)
         #expect(!settings.pocketSharesABarEdge)
         // A screen that puts the pocket on the shown bar's edge.
         settings = spaceBarOnly(.top)

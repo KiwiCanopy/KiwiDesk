@@ -118,6 +118,7 @@ struct GesturesScrollWiringTests {
         )
         let trash = "armsOnAppear:armsOnAppear)AppRuleDeleteButton("
         #expect(tail.contains(trash))
+        #expect(tail.contains("onRemove()}}iflethint{"))
         let recorder = Self.squash(
             try Self.source("GestureChordRecorder.swift")
         )
