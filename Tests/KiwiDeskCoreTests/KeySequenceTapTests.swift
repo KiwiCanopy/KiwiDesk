@@ -75,9 +75,15 @@ struct KeySequenceTapTests {
         let (manager, taps) = rig()
         manager.defineSequence(try sequence("ctrl+alt+space"), in: "default")
         let tap = try #require(taps().last)
-        let screenshot = try #require(KeyCombo.parse("cmd+shift+4"))
+        let screenshot = try #require(KeyCombo.parse("cmd+shift+3"))
+        let selection = try #require(KeyCombo.parse("cmd+shift+4"))
         let spotlight = try #require(KeyCombo.parse("cmd+space"))
         #expect(tap.passing.staysOpen.contains(screenshot))
+        #expect(
+            tap.passing.captures.contains(
+                SequencePassCapture(combo: selection, spentByClick: true)
+            )
+        )
         #expect(tap.passing.closes.contains(spotlight))
     }
 

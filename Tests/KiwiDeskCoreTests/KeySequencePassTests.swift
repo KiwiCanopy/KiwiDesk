@@ -40,7 +40,8 @@ struct KeySequencePassTests {
         return router.press(
             keyCode: combo.keyCode,
             held: combo.modifiers,
-            isRepeat: isRepeat
+            isRepeat: isRepeat,
+            now: 0
         )
     }
 

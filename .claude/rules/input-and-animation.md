@@ -224,8 +224,15 @@ editing here:
     reach the front app. It is declared first, so an open sequence
     outranks a sided chord, swallows every key-down while one is
     open save a macOS shortcut it passes (#3173, below), which
-    `.modifierTaps` still hears, and closes one on a
-    mouse-down, the one click door. A leader never reaches Carbon:
+    `.modifierTaps` still hears, and hands each mouse-down, the
+    one click door, to `KeySequenceRouter.mouseDown`, the one judge
+    of whether a click closes. A click inside a passed screenshot's
+    capture passes and keeps the sequence open; a new
+    `SystemShortcut` answers whether it captures through its
+    `sequenceTier`, and a capture ends at a close, at any key-down
+    and at `KeySequenceRouter.captureLimit` (#3412,
+    `KeySequenceCaptureTests`, `KeySequenceTapThreadTests` ▸
+    `screenshotClickKeeps`). A leader never reaches Carbon:
     activation skips a press row on its chord, and a refused tap
     lists the leader in `activationFailures`
     (`KeySequenceInstallTests` ▸ `leaderWinsItsChord`,
@@ -370,7 +377,7 @@ editing here:
     its door or why none is owed (`ModifierGrabWiringTests`,
     `PointerButtonWiringTests`). The
     keyboard tap's listen-only mouse-down, which ends a modifier
-    tap's count and closes an open key sequence (#1871), has no
+    tap's count and may close an open key sequence (#1871), has no
     door: a grab or a bound button swallowed ahead of it leaves a
     ⌃ released within `ModifierTapDetector.pressLimit` of its
     press read as a tap, and a sequence open through the press

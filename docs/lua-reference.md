@@ -8666,6 +8666,12 @@ runs it rather than scrolling; Settings flags a step key on Zoom,
 Invert colours, contrast, Desktop switching or Force Quit as not
 working.
 
+A screenshot's own click leaves the sequence open: after **⌘⇧4** or
+**⌃⌘⇧4**, the one click or drag that takes the shot does not cancel
+it, and after **⌘⇧5** the toolbar's clicks do not, until the next key
+press. Past 60 seconds a click cancels again
+([#3412](https://github.com/KiwiCanopy/KiwiDesk/issues/3412)).
+
 The previous input source (**⌃Space** by default) is treated like
 the next one: it closes an open sequence, and a step key or a
 leader on its chord wins it.

@@ -255,6 +255,12 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         return swallowed ? nil : pass
     }
 
+    /// The tap's own uptime clock, in seconds: `CGEvent.timestamp`'s
+    /// unit differs by architecture (mach ticks on arm64).
+    static func uptime() -> TimeInterval {
+        TimeInterval(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e9
+    }
+
     /// What `.modifierTaps` hears of an event, nil for nothing.
     private static func tapInput(
         _ type: CGEventType,
@@ -265,13 +271,10 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             return .mouseDown
         case .flagsChanged:
-            // The tap's own uptime clock: `CGEvent.timestamp`'s
-            // unit differs by architecture (mach ticks on arm64).
-            let time =
-                TimeInterval(
-                    clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
-                ) / 1e9
-            return .flags(HotkeyModifiers.held(by: event.flags), at: time)
+            return .flags(
+                HotkeyModifiers.held(by: event.flags),
+                at: uptime()
+            )
         default: return nil
         }
     }

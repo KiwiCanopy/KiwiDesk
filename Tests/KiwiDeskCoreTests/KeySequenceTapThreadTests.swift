@@ -35,6 +35,7 @@ struct KeySequenceTapThreadTests {
                         ]
                     )
                 ],
+                sequencePassing: .live(reading: { _ in nil }),
                 sequenceGeneration: 3
             )
         )
@@ -102,6 +103,40 @@ struct KeySequenceTapThreadTests {
             tap.drainSequenceDecisions().map(\.outcome) == [.stepped, .closed]
         )
         #expect(!tap.sequenceEvent(.keyDown, try key(17)))
+    }
+
+    /// #3412: the screenshot's own click passes and keeps the
+    /// sequence open, and the next one closes it; Dock hiding stays
+    /// open but takes no click, so its click closes.
+    @Test("a selection screenshot's click keeps the sequence open")
+    func screenshotClickKeeps() throws {
+        let click = try #require(
+            CGEvent(
+                mouseEventSource: nil,
+                mouseType: .leftMouseDown,
+                mouseCursorPosition: .zero,
+                mouseButton: .left
+            )
+        )
+        let leader = try key(49, [.maskControl, .maskAlternate])
+        let (tap, _) = try tap("ctrl+alt+space")
+        _ = tap.sequenceEvent(.keyDown, leader)
+        let shot = try key(21, [.maskCommand, .maskShift])  // ⌘⇧4
+        #expect(!tap.sequenceEvent(.keyDown, shot))
+        #expect(!tap.sequenceEvent(.leftMouseDown, click))
+        #expect(tap.drainSequenceDecisions().map(\.outcome) == [.stepped])
+        #expect(!tap.sequenceEvent(.leftMouseDown, click))
+        #expect(tap.drainSequenceDecisions().map(\.outcome) == [.closed])
+        // ⌥⌘D, Dock hiding: passes and stays open; its click closes.
+        let (dock, _) = try tap("ctrl+alt+space")
+        _ = dock.sequenceEvent(.keyDown, leader)
+        let hide = try key(2, [.maskCommand, .maskAlternate])
+        #expect(!dock.sequenceEvent(.keyDown, hide))
+        #expect(!dock.sequenceEvent(.leftMouseDown, click))
+        #expect(
+            dock.drainSequenceDecisions().map(\.outcome)
+                == [.stepped, .closed]
+        )
     }
 
     @Test("a main-actor close is taken at the next event, with its epoch")
