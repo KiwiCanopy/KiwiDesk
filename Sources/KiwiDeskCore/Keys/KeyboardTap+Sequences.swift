@@ -3,8 +3,9 @@ import os
 
 /// The open sequence's pass-or-swallow trace (#3382), one line per
 /// key-down a sequence decides. `privacy: .public`, or macOS
-/// redacts every line (#951); it logs only while a sequence is
-/// open or opening, never ordinary typing.
+/// redacts every line (#951). It logs a key the router answers
+/// with more than `.pass`, which it does only while a sequence is
+/// open or opening, never ordinary typing, and never a repeat.
 let sequenceLog = Logger(subsystem: KiwiLog.subsystem, category: "keys")
 
 /// The `.sequences` consumer's tap-thread state (#1871): the router
@@ -100,7 +101,10 @@ extension KeyboardTap {
                     isRepeat: isRepeat
                 )
                 swallow = outcome.swallows
-                if outcome != .pass { decided = outcome }
+                // A held key's repeats are left out of the trace.
+                if outcome != .pass, outcome != .repeated {
+                    decided = outcome
+                }
                 _ = state.record(outcome)
             case .leftMouseDown, .rightMouseDown, .otherMouseDown:
                 if state.router.isOpen {

@@ -13,8 +13,7 @@ extension SystemShortcut {
     /// macOS when its press comes through `path` — the one rule a row,
     /// a leader and a step key are read by (#3311). A case is true
     /// only on a path measured to win it, ⌘⇧3 and ⌃← as mirrors of
-    /// their measured twins and the clipboard screenshots (#3382) as
-    /// mirrors of their file twins; the measurements are
+    /// their measured twins; the measurements are
     /// `docs/design-decisions.md` ▸ the #3239, #3311 and #3331
     /// amendments.
     public func losesToKiwiDesk(on path: PressPath) -> Bool {
@@ -24,9 +23,12 @@ extension SystemShortcut {
         case .spotlight, .appSwitcher, .missionControlSpaceLeft,
             .missionControlSpaceRight, .missionControl, .appWindows,
             .screenshot, .screenshotSelection, .screenshotTools,
-            .screenshotToClipboard, .screenshotSelectionToClipboard,
             .dockHiding, .finderSearch:
             return path == .keyboardTap
+        // The clipboard screenshots are unmeasured on every path
+        // (#3382), so macOS keeps them.
+        case .screenshotToClipboard, .screenshotSelectionToClipboard:
+            return false
         case .forceQuit, .zoomToggle, .zoomIn, .zoomOut, .invertColors,
             .increaseContrast, .decreaseContrast, .switchToDesktop1,
             .switchToDesktop2, .switchToDesktop3, .switchToDesktop4,

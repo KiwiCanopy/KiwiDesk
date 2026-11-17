@@ -68,7 +68,6 @@ struct PressPathConflictTests {
             Set(tap) == [
                 .spotlight, .finderSearch, .missionControl, .appWindows,
                 .screenshot, .screenshotSelection, .screenshotTools,
-                .screenshotToClipboard, .screenshotSelectionToClipboard,
                 .missionControlSpaceLeft, .missionControlSpaceRight,
                 .appSwitcher, .dockHiding, .inputSourceNext,
                 .inputSourcePrevious,

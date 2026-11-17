@@ -112,6 +112,10 @@ struct KeySequencePassTests {
         let file = SystemShortcut.screenshotSelection.symbolicHotkey!.id
         let clip = SystemShortcut.screenshotSelectionToClipboard
             .symbolicHotkey!.id
+        // The ids the owner's plist holds them under, as read.
+        #expect(file == 30)
+        #expect(clip == 31)
+        #expect(SystemShortcut.screenshotToClipboard.symbolicHotkey?.id == 29)
         let cmdShift4 = SymbolicHotkeys.chord([52, kVK_ANSI_4, 0x12_0000])
         var router = router {
             switch $0 {
