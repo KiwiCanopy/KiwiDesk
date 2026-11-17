@@ -49,22 +49,25 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
             } ?? input
     }
 
-    /// The way a badge names: its direction, or both of its axis's
-    /// ("Left or Right", #3380); nil for a gesture with no way.
+    /// The way a badge names: its direction, or either of its axis's
+    /// ("Left or right", #3380), one phrase per axis so no locale
+    /// bends a standalone direction word; nil for no way.
     @MainActor static func way(
         _ direction: GestureDirection?,
         _ axis: Axis?
     ) -> String? {
         if let direction { return GestureListWords.direction(direction) }
-        guard let axis else { return nil }
-        let (a, b): (GestureDirection, GestureDirection) =
-            axis == .vertical ? (.up, .down) : (.left, .right)
-        return L(
-            "shortcuts.gestures.axis_ways",
-            "%1$@ or %2$@",
-            GestureListWords.direction(a),
-            GestureListWords.direction(b)
-        )
+        switch axis {
+        case .horizontal:
+            return L(
+                "shortcuts.gestures.axis_ways.left_right",
+                "Left or right"
+            )
+        case .vertical:
+            return L("shortcuts.gestures.axis_ways.up_down", "Up or down")
+        case nil:
+            return nil
+        }
     }
 
     var id: String {

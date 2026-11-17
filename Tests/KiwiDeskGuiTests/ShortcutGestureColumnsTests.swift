@@ -100,14 +100,14 @@ struct ShortcutGestureColumnsTests {
             direction: nil,
             axis: .horizontal
         )
-        #expect(horizontal.words.hasSuffix("Left or Right"))
-        #expect(horizontal.spoken.contains("Left or Right"))
+        #expect(horizontal.words.hasSuffix("Left or right"))
+        #expect(horizontal.spoken.contains("Left or right"))
         let vertical = ShortcutGestureBadge(
             key: key,
             direction: nil,
             axis: .vertical
         )
-        #expect(vertical.words.hasSuffix("Up or Down"))
+        #expect(vertical.words.hasSuffix("Up or down"))
         // A direction keeps its one way, and the axis is dropped.
         let way = ShortcutGestureBadge(
             key: key,

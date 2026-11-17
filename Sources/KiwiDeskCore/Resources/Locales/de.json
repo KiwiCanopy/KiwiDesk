@@ -2270,6 +2270,8 @@
   "shortcuts.gestures.axis_action": "%1$@, %2$@",
   "shortcuts.gestures.axis_directions.left_right": "Richtungen links und rechts",
   "shortcuts.gestures.axis_directions.up_down": "Richtungen oben und unten",
+  "shortcuts.gestures.axis_ways.left_right": "Nach links oder rechts",
+  "shortcuts.gestures.axis_ways.up_down": "Nach oben oder unten",
   "shortcuts.gestures.choose_action": "Aktion auswählen…",
   "shortcuts.gestures.context_menu": "Ein Rechtsklick auf KiwiShelf öffnet ein Menü zu dem, was du angeklickt hast: das Layout eines Space und wie viele Glyphen er zeigt, was mit einem Fenster oder seiner App geschehen soll, und die Einstellungen von KiwiShelf.",
   "shortcuts.gestures.direction.back": "Zurück",

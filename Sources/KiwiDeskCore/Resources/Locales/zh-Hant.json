@@ -2270,6 +2270,8 @@
   "shortcuts.gestures.axis_action": "%1$@，%2$@",
   "shortcuts.gestures.axis_directions.left_right": "左右方向",
   "shortcuts.gestures.axis_directions.up_down": "上下方向",
+  "shortcuts.gestures.axis_ways.left_right": "向左或向右",
+  "shortcuts.gestures.axis_ways.up_down": "向上或向下",
   "shortcuts.gestures.choose_action": "選擇操作…",
   "shortcuts.gestures.context_menu": "右鍵點按 KiwiShelf，即可打開與所點項目對應的選單：空間的佈局及其顯示的圖形數量、對視窗或其 App 的操作，以及 KiwiShelf 的設定。",
   "shortcuts.gestures.direction.back": "後退",
