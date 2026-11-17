@@ -24,17 +24,22 @@ extension SequenceNodeRow {
                 HStack(spacing: 4) {
                     Image(systemName: BranchMark.symbol(of: node))
                         .accessibilityHidden(true)
-                    branchTitle.fixedSize(horizontal: true, vertical: false)
+                    // The one part that gives way (#3425): the tail
+                    // truncates and hover reads it whole.
+                    branchTitle
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                     Image(systemName: "pencil")
                         .foregroundStyle(SettingsTheme.ink2)
                         .accessibilityHidden(true)
                 }
             }
             .buttonStyle(.plain)
+            .help(node.label)
             .accessibilityLabel(nameLabel)
             .accessibilityValue(node.label)
         }
-        .fixedSize()
+        .fixedSize(horizontal: false, vertical: true)
         .popover(item: $editingBranch) { _ in
             branchPopover.settingsPopoverChrome()
         }

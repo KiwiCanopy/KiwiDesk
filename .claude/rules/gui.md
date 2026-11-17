@@ -2276,7 +2276,12 @@ and a new mount joins `ShortcutKeyRowSeamTests`' register with
 its host (#3258; `ShortcutKeyRowSeamTests` ▸ `registerIsComplete`,
 `rowsTakeTheDoor`). The line draws the field's re-checked offer
 (#34), never the one stored at the refusal
-(`ShortcutKeyRowOfferTests` ▸ `stealFollowsTheHolder`).
+(`ShortcutKeyRowOfferTests` ▸ `stealFollowsTheHolder`). In a key
+sequence line the pill's title is the one part that gives way: it
+truncates at its tail with the full name on hover, while the
+chord, the icons, the reach column and the remove keep their size;
+a new container on that line joins `KeySequenceIndentTests` ▸
+`titleGivesWay` (#3425).
 
 **A list of `ShortcutRowView`s takes its columns from
 `ShortcutPanelColumns`, applied once over the whole list** (#3380,

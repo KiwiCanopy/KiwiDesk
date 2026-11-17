@@ -171,17 +171,19 @@ struct KeySequenceCardTests {
         #expect(
             leader.contains(
                 "KeyReachColumn(model:model,layer:layerName,binding:node)"
+                    + ".layoutPriority(1)"
                     + "KeyReachTrash(model:model,layer:layerName,"
                     + "binding:node){requestDelete()}"
             )
         )
-        // The leader in the step keys' order (#3381 ▸ c2): its chord
-        // at their column, its pill, then reach; no name field and
+        // The leader in the step keys' order (#3381 ▸ c2, #3425): its
+        // fold, its chord, its pill, then reach; no name field and
         // no key count. The Spacer is glue holding the run contiguous,
         // not a value under guard.
         #expect(
             leader.contains(
-                "recorder.fixedSize().padding(.leading,Self.leaderKeyInset)"
+                "disclosure(width:Self.foldSlot)"
+                    + "recorder.fixedSize().layoutPriority(1)"
                     + "branchContainerSpacer(minLength:8)KeyReachColumn("
             )
         )

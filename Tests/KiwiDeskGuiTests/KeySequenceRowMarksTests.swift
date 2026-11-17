@@ -77,7 +77,7 @@ struct KeySequenceRowMarksTests {
         // The pencil follows the name inside the button's label.
         #expect(
             branch.contains(
-                "branchTitle.fixedSize(horizontal:true,vertical:false)"
+                "branchTitle.lineLimit(1).truncationMode(.tail)"
                     + "Image(systemName:\"pencil\")"
             )
         )
@@ -99,7 +99,8 @@ struct KeySequenceRowMarksTests {
         )
         #expect(
             branch.contains(
-                ".buttonStyle(.plain).accessibilityLabel(nameLabel)"
+                ".buttonStyle(.plain).help(node.label)"
+                    + ".accessibilityLabel(nameLabel)"
                     + ".accessibilityValue(node.label)"
             )
         )
@@ -116,14 +117,14 @@ struct KeySequenceRowMarksTests {
                 "ifmarksKind{Image(systemName:Self.luaSymbol)"
             )
         )
-        let name = try #require(trigger.range(of: "Text(title)"))
+        let name = try #require(trigger.range(of: "titleText"))
         let expand = try #require(
             trigger.range(
                 of: "Image(systemName:\"arrow.up.left.and.arrow.down.right\")"
             )
         )
         #expect(name.lowerBound < expand.lowerBound)
-        #expect(trigger.contains("appIconcommandGlyphText(title)"))
+        #expect(trigger.contains("appIconcommandGlyphtitleText"))
         #expect(
             trigger.contains(
                 "Image(systemName:Self.luaSymbol).accessibilityHidden(true)"

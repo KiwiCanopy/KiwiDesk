@@ -40,18 +40,31 @@ struct KeySequencesCard: View {
     @ViewBuilder private func rows(
         _ catalog: SequenceActionCatalog
     ) -> some View {
-        ForEach(sequences) { sequence in
-            SequenceNodeRow(
-                model: model,
-                editing: SequenceEditing(
-                    bindings: $bindings,
-                    rootID: sequence.id
-                ),
-                node: sequence,
-                catalog: catalog,
-                collapsed: $collapsed,
-                fresh: $fresh
-            )
+        // A rule between two sequences, none above Add Sequence
+        // (#3425).
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(sequences.enumerated()), id: \.element.id) {
+                index,
+                sequence in
+                if index > 0 {
+                    SettingsTheme.hairlineSubtle
+                        .frame(height: 1)
+                        .padding(.vertical, 10)
+                        .accessibilityHidden(true)
+                }
+                SequenceNodeRow(
+                    model: model,
+                    editing: SequenceEditing(
+                        bindings: $bindings,
+                        rootID: sequence.id
+                    ),
+                    node: sequence,
+                    path: [sequence.combo],
+                    catalog: catalog,
+                    collapsed: $collapsed,
+                    fresh: $fresh
+                )
+            }
         }
         Button(action: add) {
             Label(
