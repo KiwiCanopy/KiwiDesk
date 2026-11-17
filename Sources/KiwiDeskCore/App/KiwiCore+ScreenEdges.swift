@@ -1,12 +1,14 @@
 import Foundation
 
-/// A bar's edge per screen (#1948): which screen a display is to
-/// the per-screen map, which screens a write judges, and how
-/// `set_edge`'s optional screen argument names one.
+/// A bar's and the pocket's edge per screen (#1948, #3376): which
+/// screen a display is to the per-screen maps, which screens a
+/// write judges, and how `set_edge`'s and `set_pocket_edge`'s
+/// optional screen argument names one.
 extension KiwiCore {
-    /// The fingerprint `display`'s bar edges resolve under — the
-    /// key `space_bar.edge_override` / `app_bar.edge_override` is
-    /// stored by — or nil for a display no longer connected. The
+    /// The fingerprint `display`'s bar and pocket edges resolve
+    /// under — the key `space_bar.edge_override`,
+    /// `app_bar.edge_override` and `kiwishelf.pocket_edge_override`
+    /// are stored by — or nil for a display no longer connected. The
     /// ONE screen identity: the engine's `screenFingerprint` seam
     /// is wired to it in `bootstrapCoreServices`.
     func screenFingerprint(of display: DisplayID) -> String? {
@@ -25,7 +27,9 @@ extension KiwiCore {
     /// for that screen (#3376). The pocket's readers of a display's
     /// edge take this, or `settings(on:)`, never
     /// `tiler.settings.kiwishelf.pocketEdge`
-    /// (`PocketEdgeCensusTests`).
+    /// (`PocketEdgeCensusTests`). It answers the edge and the look
+    /// only: what the screen shows — its Pocket's visibility — is
+    /// `shelfSettings(on:)`'s.
     func shelf(on display: DisplayID) -> KiwiShelf {
         tiler.settings.kiwishelf.onScreen(screenFingerprint(of: display))
     }
@@ -142,11 +146,8 @@ extension KiwiCore {
         )
     }
 
-    /// The setters whose optional second argument names a screen:
-    /// a bar's `set_edge` (#1948) and `set_pocket_edge` (#3376).
-    static let screenEdgeFields: Set<String> = ["edge", "pocket_edge"]
-
-    /// `set_edge`'s arguments with the optional screen resolved
+    /// `screenField`'s arguments — a bar's `edge` (#1948), the
+    /// shelf's `pocket_edge` (#3376) — with the optional screen resolved
     /// to the fingerprint it is stored under, the edge checked
     /// first so a bad edge answers as one: a connected screen by
     /// number, fingerprint or name, as `pin_space_to_display`
@@ -156,10 +157,10 @@ extension KiwiCore {
     /// a screen that is not connected. Other fields pass through.
     func screenResolvedEdgeArgs(
         field: String,
+        screenField: String,
         _ args: [JSONValue]
     ) -> Result<[JSONValue], AppBarSettingError> {
-        guard Self.screenEdgeFields.contains(field), args.count > 1
-        else {
+        guard field == screenField, args.count > 1 else {
             return .success(args)
         }
         if case .failure(let error) = BarSettingChoice.value(

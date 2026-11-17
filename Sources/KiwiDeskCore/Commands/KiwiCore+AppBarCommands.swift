@@ -17,7 +17,8 @@ extension KiwiCore {
             command.dropFirst("app_bar.set_".count)
         )
         let given: [JSONValue]
-        switch screenResolvedEdgeArgs(field: field, args) {
+        switch screenResolvedEdgeArgs(field: field, screenField: "edge", args)
+        {
         case .success(let resolved): given = resolved
         case .failure(let error): return .fail(error.message)
         }
@@ -52,7 +53,8 @@ extension KiwiCore {
             command.dropFirst("space_bar.set_".count)
         )
         let given: [JSONValue]
-        switch screenResolvedEdgeArgs(field: field, args) {
+        switch screenResolvedEdgeArgs(field: field, screenField: "edge", args)
+        {
         case .success(let resolved): given = resolved
         case .failure(let error): return .fail(error.message)
         }
@@ -88,7 +90,11 @@ extension KiwiCore {
             command.dropFirst("kiwishelf.set_".count)
         )
         let given: [JSONValue]
-        switch screenResolvedEdgeArgs(field: field, args) {
+        switch screenResolvedEdgeArgs(
+            field: field,
+            screenField: "pocket_edge",
+            args
+        ) {
         case .success(let resolved): given = resolved
         case .failure(let error): return .fail(error.message)
         }

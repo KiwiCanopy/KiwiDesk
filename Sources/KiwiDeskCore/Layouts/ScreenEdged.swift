@@ -3,7 +3,8 @@ import Foundation
 /// A bar whose edge may differ per screen (#1948): the Space
 /// Bar's and the App Bar's style, and the pocket's edges
 /// (`PocketEdges`, #3376). `edgeOverride` is the sparse
-/// `space_bar.edge_override` / `app_bar.edge_override` map, keyed
+/// `space_bar.edge_override` / `app_bar.edge_override` /
+/// `kiwishelf.pocket_edge_override` map, keyed
 /// by `Display.fingerprint` as a Monitor pin is; a screen with no
 /// entry uses the bar's `edge`.
 ///

@@ -15,7 +15,9 @@ import Testing
 /// or names its reason here. Blind spots, review's: a SwiftUI
 /// binding's dynamic member (`shelf.pocketEdge` on a
 /// `Binding<KiwiShelf>`) reads like a read, and a read through a
-/// local copy of the unresolved shelf is not seen.
+/// local copy of the unresolved shelf is not seen — the wiring
+/// suite (`PocketScreenEdgeWiringTests`) holds the handle, the
+/// mark, the approach and the panel's spec instead.
 @Suite("Pocket edge census (#3376)")
 struct PocketEdgeCensusTests {
     private static let root = SourceScan.repoRoot(from: #filePath)

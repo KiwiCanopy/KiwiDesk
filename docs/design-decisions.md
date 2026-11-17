@@ -20582,6 +20582,8 @@ as it drops theirs (#3324). Each screen's pocket reads its edge
 from the one per-screen resolution the bars take, so what a screen
 draws and what it reserves cannot disagree. The rest of the
 pocket's placement — its position and its Show — stays one value.
+Settings draws no per-screen row for it yet, so its Edge pick
+writes every screen, as a bar's pick does.
 :::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228

@@ -189,7 +189,14 @@ twice, was a question the user answered twice. The argument is
   caller collapses by hand (`BarEdgeWriteCensusTests` ▸
   `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
   `screenEdgeScope(monitorSets:)` (`BarEdgeWriteCensusTests` ▸
-  `scopeHasOneHome`). The empty map stays out of the JSON
+  `scopeHasOneHome`). **Write the pocket's edge through the same
+  doors (#3376)**, on `KiwiShelf.pocketEdges`, and read a
+  display's pocket edge through `KiwiCore.shelf(on:)` or
+  `settings(on:)`, never `tiler.settings.kiwishelf.pocketEdge`,
+  which answers for no screen (`PocketEdgeCensusTests`,
+  `PocketScreenEdgeWiringTests`); a new per-display reader of the
+  edge owes the wiring suite a clause, since the census reads one
+  spelling. The empty map stays out of the JSON
   through a `KeyedEncodingContainer` overload whose scope is the
   TYPE `[String: AppBarEdge]`, module-wide: a store of that type
   that must encode an empty map takes a type of its own.
