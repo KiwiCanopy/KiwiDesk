@@ -37,7 +37,10 @@ struct OnboardingPage<Content: View, Action: View>: View {
                     footnoteText(footnote)
                 }
             }
+            // The content takes the spare height before the footer,
+            // whose bottom pin would split it in half (#3375).
             content
+                .layoutPriority(1)
             footer
         }
         .frame(maxWidth: .infinity, alignment: .leading)
