@@ -45,6 +45,9 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case readingContrast = "settings.kiwishelf.readingContrast"
     case revealStyle = "settings.kiwishelf.revealStyle"
     case pocketEdge = "settings.kiwishelf.pocketEdge"
+    /// The pocket's per-screen edges (#3376), Lua-only until
+    /// Settings draws a row for them.
+    case pocketScreenEdge = "settings.kiwishelf.pocketEdgeOverride[screen]"
     case pocketPosition = "settings.kiwishelf.pocketPosition"
     /// The pocket's Show (#2978), behind the Show master's drawer.
     case pocketVisibility = "settings.kiwishelf.pocketVisibility"
@@ -135,6 +138,9 @@ extension KiwiShelfKey {
             // Written by the one Liquid Glass row (#1307).
             return .luaOnly
         case .dimFactor:
+            return .luaOnly
+        case .pocketScreenEdge:
+            // Lua/CLI until its Settings row lands (#3376).
             return .luaOnly
         case .revealTimeout:
             // Lua/CLI until its Settings row lands (#761).

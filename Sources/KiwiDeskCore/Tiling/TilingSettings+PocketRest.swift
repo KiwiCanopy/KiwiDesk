@@ -78,6 +78,6 @@ extension TilingSettings {
     /// the starter and every bundled look do (owner, 2026-10-30);
     /// the type default stays bottom.
     public mutating func restPocketWithTheSpaceBar() {
-        kiwishelf.pocketEdge = spaceBarStyle.edge
+        kiwishelf.pocketEdges.setEdge(spaceBarStyle.edge)
     }
 }

@@ -8,7 +8,11 @@ extension KiwiShelfCard {
     var pocketEdgeRow: some View {
         SegmentedPicker(
             SettingsCatalog.bars.kiwishelfPocketEdge.text,
-            selection: shelf.pocketEdge,
+            // A pick sets every screen, as a bar's does (#3376).
+            selection: Binding(
+                get: { shelf.wrappedValue.pocketEdge },
+                set: { shelf.wrappedValue.pocketEdges.setEdge($0) }
+            ),
             options: AppBarOptions.edge.map { ($0.1, $0.0) },
             help: L(
                 "kiwishelf.pocket_edge.help",

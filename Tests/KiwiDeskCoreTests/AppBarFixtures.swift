@@ -73,6 +73,7 @@ enum AppBarFixtures {
         shelf.readingContrast = 3
         shelf.pocketEdge = .left
         shelf.pocketPosition = 30
+        shelf.pocketEdgeOverride = ["S:1x1": .left]
         shelf.pocketVisibility = .hidden
         shelf.maximizedVisibility = .hidden
         return shelf

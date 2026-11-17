@@ -53,7 +53,7 @@ extension KiwiCore {
     /// key-opened list has no other twin to say why it did not open.
     private func cuePocketListStandDown(on display: DisplayID) {
         guard let screen = screen(for: display) else { return }
-        let edge = tiler.settings.kiwishelf.pocketEdge
+        let edge = shelf(on: display).pocketEdge
         soundIfDrawn(
             flashRefusalPill(
                 near: refusalStrip(of: screen, edge: edge),

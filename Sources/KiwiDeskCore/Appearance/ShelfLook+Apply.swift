@@ -77,6 +77,10 @@ extension ShelfLook {
             // Glass is one switch over every surface (#1307).
             if case .liquidGlass(let on) = setting {
                 settings.setLiquidGlass(on)
+            } else if case .pocketEdge(let edge) = setting {
+                // A look sets the pocket's edge and keeps each
+                // screen's own, as a bar's (#3376).
+                settings.kiwishelf.pocketEdges.setEdgeKeepingScreens(edge)
             } else {
                 setting.apply(to: &settings.kiwishelf)
             }

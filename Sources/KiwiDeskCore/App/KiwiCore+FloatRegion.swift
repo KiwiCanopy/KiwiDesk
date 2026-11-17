@@ -217,7 +217,7 @@ extension KiwiCore {
             shown.pocketReservation(in: mode, on: screen) != nil,
             let display, let mark = pocketMarkFrame(on: display)
         else { return bars }
-        return bars + [(mark, tiler.settings.kiwishelf.pocketEdge)]
+        return bars + [(mark, shown.kiwishelf.pocketEdge)]
     }
 
     /// Every bar strip painted over `space`, reserved or drawn over

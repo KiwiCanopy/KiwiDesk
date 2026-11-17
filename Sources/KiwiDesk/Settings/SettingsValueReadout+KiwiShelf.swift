@@ -76,6 +76,13 @@ extension SettingsValueReadout {
                     new: AppBarOptions.edgeName(n.pocketEdge)
                 )
             ]
+        case .pocketScreenEdge:
+            return screenEdgeRows(
+                census,
+                bar: .pocketEdge,
+                old.settings.kiwishelf.pocketEdges,
+                new.settings.kiwishelf.pocketEdges
+            )
         case .pocketPosition:
             return [
                 .change(

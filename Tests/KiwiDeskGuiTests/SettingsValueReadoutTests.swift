@@ -139,6 +139,17 @@ struct SettingsValueReadoutTests {
         edited.floatRules = ["com.apple.calculator"]
         expectRows(.appRules(.floatRules), clean, edited)
 
+        // A screen's own edge (#1948, #3376).
+        edited = clean
+        edited.settings.spaceBarStyle.edgeOverride["S:1x1"] = .left
+        expectRows(.kiwishelf(.spaceBarScreenEdge), clean, edited)
+        edited = clean
+        edited.settings.appBarStyle.edgeOverride["S:1x1"] = .left
+        expectRows(.kiwishelf(.appBarScreenEdge), clean, edited)
+        edited = clean
+        edited.settings.kiwishelf.pocketEdgeOverride["S:1x1"] = .left
+        expectRows(.kiwishelf(.pocketScreenEdge), clean, edited)
+
         edited = clean
         edited.gesture[GestureKey(.tap5)] = .bound(.family(.space))
         expectRows(.shortcuts(.gestureBindings), clean, edited)

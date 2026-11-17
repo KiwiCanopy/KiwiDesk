@@ -12,7 +12,7 @@ extension KiwiCore {
         guard !pocketRests(on: display),
             let strip = pocketPlate.barStrips[display]
         else { return nil }
-        let shelf = tiler.settings.kiwishelf
+        let shelf = self.shelf(on: display)
         return Self.pocketInsideFrame(
             strip: strip,
             edge: shelf.pocketEdge,

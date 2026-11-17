@@ -58,15 +58,26 @@ struct OverlayGlassGateTests {
             stored: "glass: tiler.settings.shortcutPanelLiquidGlass"
         ),
         (
+            // The shelf as each screen has it (#3376).
             file: "App/KiwiCore+PocketPlate.swift",
             function: "func pocketPlateSpecs(",
-            stored: "tiler.settings.kiwishelf"
+            stored: "self.shelf(on: display.id)"
         ),
         (
             file: "Commands/KiwiCore+SpaceSlide.swift",
             function: "func prepareSpaceSlide(",
             stored: "glass: tiler.settings.shortcutPanelLiquidGlass"
         ),
+    ]
+
+    /// The read a render hands the gate where the argument's last
+    /// word is not it: a per-screen door's argument is the screen,
+    /// which the body names freely. Each also names the global
+    /// shelf it stands for, which its body must not read at all.
+    private static let doors: [String: (leaf: String, global: String)] = [
+        "App/KiwiCore+PocketPlate.swift": (
+            leaf: "shelf(on:", global: "settings.kiwishelf"
+        )
     ]
 
     /// Exactly one gate read, handed the stored leaf, which the
@@ -99,14 +110,22 @@ struct OverlayGlassGateTests {
                 )?.trimmingCharacters(in: .whitespacesAndNewlines)
             )
             #expect(stored == render.stored, "\(render.file)")
+            let door = Self.doors[render.file]
             let leaf = try #require(
-                stored.split(separator: " ", maxSplits: 1).last
+                door?.leaf
+                    ?? stored.split(separator: " ", maxSplits: 1).last
                     .map(String.init)
             )
             #expect(
                 body.occurrences(of: leaf) == 1,
                 "\(render.file) reads \(leaf) beside the gate"
             )
+            if let global = door?.global {
+                #expect(
+                    body.occurrences(of: global) == 0,
+                    "\(render.file) reads \(global) beside the gate"
+                )
+            }
         }
     }
 

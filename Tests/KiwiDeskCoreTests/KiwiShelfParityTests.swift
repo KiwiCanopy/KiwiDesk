@@ -80,7 +80,8 @@ struct KiwiShelfCommandParityTests {
             .iconSource(.appFont), .dimFactor(0.3),
             .revealTimeout(5), .revealStyle(.grow), .fillFade(40),
             .tintHubAndPlates(false), .readingContrast(3),
-            .pocketEdge(.left), .pocketPosition(30),
+            .pocketEdge(.left),
+            .pocketScreenEdge(.left, screen: "S:1x1"), .pocketPosition(30),
             .pocketVisibility(.hidden), .maximizedVisibility(.hidden),
         ]
     }
@@ -90,7 +91,17 @@ struct KiwiShelfCommandParityTests {
         var touched: Set<String> = []
         for setting in Self.everySetting {
             var shelf = KiwiShelf()
-            setting.apply(to: &shelf)
+            // A screened edge needs the screens a write judges, so
+            // `KiwiCore` applies it through the door (#3376).
+            if case .pocketScreenEdge(let edge, let screen) = setting {
+                shelf.pocketEdges.setEdge(
+                    edge,
+                    on: screen,
+                    among: ScreenEdgeScope(screens: ["T:1x1"])
+                )
+            } else {
+                setting.apply(to: &shelf)
+            }
             let changed = changedFields(shelf, from: KiwiShelf())
             #expect(changed.count == 1)
             touched.formUnion(changed)
@@ -102,13 +113,20 @@ struct KiwiShelfCommandParityTests {
     func parseCoverage() {
         for key in KiwiShelf.CodingKeys.allCases {
             let parsed = KiwiShelfCommandSetting.parse(
-                field: key.stringValue,
+                field: BarStyleKeys.setterField(of: key.stringValue),
                 args: sampleArgs(for: key)
             )
             #expect(
                 (try? parsed.get()) != nil,
                 "parse rejected \(key.stringValue)"
             )
+            // The per-screen map parses to its own case (#3376).
+            if key == .pocketEdgeOverride {
+                guard case .pocketScreenEdge? = try? parsed.get() else {
+                    Issue.record("pocket_edge_override parsed as no screen")
+                    continue
+                }
+            }
         }
     }
 
@@ -116,7 +134,7 @@ struct KiwiShelfCommandParityTests {
     func namespaceParity() {
         let expected = Set(
             KiwiShelf.CodingKeys.allCases.map {
-                "set_\($0.stringValue)"
+                "set_\(BarStyleKeys.setterField(of: $0.stringValue))"
             }
         )
         #expect(
@@ -153,6 +171,7 @@ struct KiwiShelfCommandParityTests {
         case .tintHubAndPlates: return [.bool(false)]
         case .readingContrast: return [.number(3)]
         case .pocketEdge: return [.string("left")]
+        case .pocketEdgeOverride: return [.string("left"), .string("S:1x1")]
         case .pocketPosition: return [.number(30)]
         case .pocketVisibility: return [.string("hidden")]
         case .maximizedVisibility: return [.string("hidden")]

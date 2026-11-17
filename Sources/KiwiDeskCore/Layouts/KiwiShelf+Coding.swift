@@ -46,6 +46,7 @@ extension KiwiShelf {
         case revealTimeout = "reveal_timeout"
         case revealStyle = "reveal_style"
         case pocketEdge = "pocket_edge"
+        case pocketEdgeOverride = "pocket_edge_override"
         case pocketPosition = "pocket_position"
         case pocketVisibility = "pocket_visibility"
         case maximizedVisibility = "maximized_visibility"
@@ -149,6 +150,11 @@ extension KiwiShelf {
         pocketEdge =
             try c.decodeIfPresent(AppBarEdge.self, forKey: .pocketEdge)
             ?? d.pocketEdge
+        pocketEdgeOverride =
+            try c.decodeIfPresent(
+                [String: AppBarEdge].self,
+                forKey: .pocketEdgeOverride
+            ) ?? d.pocketEdgeOverride
         pocketPosition = Self.clampPocketPosition(
             try c.decodeIfPresent(CGFloat.self, forKey: .pocketPosition)
                 ?? d.pocketPosition
