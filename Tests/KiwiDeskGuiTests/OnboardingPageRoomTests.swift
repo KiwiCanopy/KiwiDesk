@@ -13,11 +13,13 @@ import Testing
 @Suite("A tour page's content takes the spare height (#3375)")
 @MainActor
 struct OnboardingPageRoomTests {
-    /// The page's height inside the tour window, as
-    /// `OnboardingBarsFitTests` derives it.
+    /// The page's room in the tour window, as
+    /// `OnboardingBarsFitTests` derives its budget.
     private static let size = CGSize(
         width: OnboardingView.size.width - 2 * OnboardingView.inset.width,
-        height: OnboardingView.size.height - 2 * OnboardingView.inset.height
+        height: OnboardingView.size.height
+            - 2 * OnboardingView.inset.height
+            - OnboardingProgressRow.pipHeight - OnboardingView.spacing
     )
 
     private final class Box { var height: CGFloat = 0 }

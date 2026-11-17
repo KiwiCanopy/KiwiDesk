@@ -6,8 +6,9 @@ import SwiftUI
 /// fades, since a painted band would show on glass (#1849).
 /// Both cues are macOS 15 APIs; macOS 14 keeps the plain scroller.
 struct MoreBelowFade: ViewModifier {
-    /// Whether the edge fades; off, the content is drawn whole and
-    /// the scroll view keeps its identity.
+    /// Whether the edge fades. Off drops the fade alone: the content
+    /// is drawn whole, the scroller still flashes on open, and the
+    /// scroll view keeps its identity.
     var fades = true
     @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @State private var moreBelow = false
@@ -45,7 +46,7 @@ struct MoreBelowFade: ViewModifier {
         }
         .animation(
             reduceMotion ? nil : .easeOut(duration: 0.2),
-            value: moreBelow
+            value: fades && moreBelow
         )
     }
 }
