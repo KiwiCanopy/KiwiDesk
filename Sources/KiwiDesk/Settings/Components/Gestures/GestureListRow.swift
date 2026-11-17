@@ -162,13 +162,13 @@ struct GestureListRow: View {
     private var hint: String? {
         if let clash { return clash }
         if let refusal = key.refusal ?? action?.refusal(on: key) {
-            return GestureRefusalWords.sentence(refusal)
+            return GestureRefusalWords.sentence(refusal, hyperOff: hyperOff)
         }
         if let held = GestureListEdits.heldByDrag(
             key,
             in: model.config.gesture
         ) {
-            return GestureRefusalWords.sentence(held)
+            return GestureRefusalWords.sentence(held, hyperOff: hyperOff)
         }
         if key.input == .sideButtons, key.chord.isEmpty, let action {
             return GestureListWords.takenButtons(
@@ -220,7 +220,7 @@ struct GestureListRow: View {
             return GestureRefusalWords.taken
         }
         if let refusal = target.refusal ?? action?.refusal(on: target) {
-            return GestureRefusalWords.sentence(refusal)
+            return GestureRefusalWords.sentence(refusal, hyperOff: hyperOff)
         }
         var base = model.config.gesture
         GestureListEdits.remove(key, in: &base)
@@ -228,8 +228,11 @@ struct GestureListRow: View {
             of: target,
             base: base,
             profile: nil
-        ).map(GestureRefusalWords.sentence)
+        ).map { GestureRefusalWords.sentence($0, hyperOff: hyperOff) }
     }
+
+    /// No Hyper key is set, as the recorder mount reads it (#3407).
+    private var hyperOff: Bool { model.appWide.hyperKey == nil }
 
     func rekey(to target: GestureKey) {
         clash = nil

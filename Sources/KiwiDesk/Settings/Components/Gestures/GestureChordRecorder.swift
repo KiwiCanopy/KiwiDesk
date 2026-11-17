@@ -81,7 +81,7 @@ struct GestureChordRecorder: View {
             // Dim, never disable: re-recording is how a row leaves
             // Hyper, as a key row's well (#1870, #3407).
             .opacity(hyperDormant ? 0.55 : 1)
-            .help(Self.recordHelp)
+            .help(hyperDormant ? Self.dormantCaption : Self.recordHelp)
             .accessibilityLabel(name)
             .accessibilityValue(SidedChordWords.label(label))
             .accessibilityHint(hyperDormant ? Self.dormantCaption : "")

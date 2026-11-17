@@ -243,6 +243,7 @@ extension HotkeyModifiers {
     /// The keys a gesture holds, as the keycaps draw them.
     init(_ chord: ScrollChord) {
         var keys: HotkeyModifiers = []
+        if chord.contains(.hyper) { keys.insert(.hyper) }
         if chord.contains(.control) { keys.insert(.control) }
         if chord.contains(.option) { keys.insert(.option) }
         if chord.contains(.shift) { keys.insert(.shift) }

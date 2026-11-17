@@ -51,13 +51,17 @@ struct RuleReachChecklist: View {
 
     private var name: String { subject }
 
+    private var header: String {
+        L("app_rules.reach.subject", "%1$@ · %2$@", name, value)
+    }
+
     private func content(_ reading: RuleReachReading) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(
-                L("app_rules.reach.subject", "%1$@ · %2$@", name, value)
-            )
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink3)
+            Text(header)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink3)
+                // A gesture row's ✦ is read by its key's name (#3407).
+                .accessibilityLabel(SidedChordWords.label(header))
             allProfiles(reading)
             Divider()
             ForEach(reading.profiles, id: \.self) { profile in

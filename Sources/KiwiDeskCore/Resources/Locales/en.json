@@ -2360,6 +2360,7 @@
   "shortcuts.gestures.refusal.no_directions": "This gesture has no directions.",
   "shortcuts.gestures.refusal.shift": "macOS turns ⇧ and the wheel into a sideways scroll.",
   "shortcuts.gestures.refusal.single_key": "Hold two or more keys, or Hyper: macOS and apps scroll with one.",
+  "shortcuts.gestures.refusal.single_key_no_hyper": "Hold two or more keys: macOS and apps scroll with one. Hyper works too once a Hyper key is set.",
   "shortcuts.gestures.refusal.taken": "Another row already holds these keys.",
   "shortcuts.gestures.remove": "Remove gesture",
   "shortcuts.gestures.row_name": "%1$@ with %2$@",

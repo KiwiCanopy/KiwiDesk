@@ -436,15 +436,16 @@ editing here:
 - **A gesture reader learns Hyper only from the one `HyperHold`,
   at its chord build (#3407).** Hyper is a Carbon F18 layer, never
   an event flag, so the scroll tap, the pointer tap and the touch
-  reader each pass `hyper: hyper.isHeld` to the chord they build
-  from an event, and the hold is the keybinding manager's, handed
-  to every reader by `KiwiCore.wireHyperHold`. `HyperLayer.isHeld`
+  reader each pass `hyper: hyper.isHeld` at the chord build, and
+  the hold is the keybinding manager's, handed to every reader by
+  `KiwiCore.wireHyperHold` and from each front to its factory
+  (`HyperHoldFactoryTests`). `HyperLayer.isHeld`
   reads and writes that box, so the watchdog and the disarm reach
   it through `hyperReleased`; never keep a second copy of the
   hold, and never a process-wide one, which parallel suites would
-  share (`HyperHoldWiringTests`, `HyperHoldSeamTests`). A hold
-  ending mid-gesture ends it at the next event, as a lifted
-  modifier does: add no re-evaluation on the tap thread.
+  share (`HyperHoldWiringTests`, `HyperHoldSeamTests`). When a
+  hold ends mid-gesture the next event decides, as for a lifted
+  modifier: add no re-evaluation on the tap thread.
 - **A chord's admissibility is `SystemShortcuts.map`'s to state,
   never prose's (#1075).** That map is the one derivation the
   conflict ring and the Settings keyboard board already share

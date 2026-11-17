@@ -17891,6 +17891,20 @@ preference would guard a case that cannot arise. The refusal is
 what makes the warning unnecessary, not the ⌃⌥ default:
 allowing a one-modifier chord anywhere re-opens it.
 
+:::unreleased
+*Amended (#3407, owner 2026-11-17): Hyper counts as two.* A
+gesture's keys may be the Hyper key alone or with any modifiers,
+because Hyper reaches no app, so it is as safe from an app's own
+one-modifier scroll as two modifiers are. That re-opens the Zoom
+case above for one shape: Hyper is no event flag, so a
+`hyper+control` scroll reaches macOS carrying ⌃ alone, the flag
+Zoom fires on. Whether KiwiDesk's scroll tap, which consumes that
+event, keeps Zoom from zooming is unmeasured; a posted event
+proves nothing here, so it waits for a device sitting with
+Zoom's modifier set to ⌃. Until then the refusal still keeps every
+chord without Hyper clear of Zoom, and no warning is added.
+:::
+
 **The two scroll gestures take different chords, and ⌃⌥⌘ is the
 Space step's** (#1519, owner ruling 2026-09-29).
 Both read either scroll axis — a Scrolling row can run

@@ -1392,6 +1392,11 @@ chosen key, the Hyper key row's **Take Over** and
 While no shortcut in the active layer uses `hyper`, pressing the
 key does nothing and draws a short note saying so.
 
+:::unreleased
+A gesture whose keys hold `hyper` counts as a use too, so the
+press draws no note ([Gestures](#gestures)).
+:::
+
 The GUI twin is the **Hyper key** row in **Shortcuts ▸ Built-in ▸
 Modifier keys**, a recorder that takes one key — left and right
 apart. Like
@@ -5476,9 +5481,9 @@ the Hyper key `set_hyper_key` sets — and `""` holds none. A tap,
 `wheel_click` and `side_buttons` may hold none; every other input
 needs at least one, so a plain click stays the app's. `wheel`,
 `wheel_x` and `swipe2` need two or more, or `hyper` alone or with
-others, since no app answers Hyper; `wheel` and `wheel_x` refuse
-`shift`, which macOS turns into a sideways scroll. A `hyper` key
-binds while no Hyper key is set, and does nothing until one is.
+others; `wheel` and `wheel_x` refuse `shift`, which macOS turns
+into a sideways scroll. Keys holding `hyper` bind while no Hyper
+key is set, and do nothing until one is.
 :::
 
 ### Gesture actions
@@ -5697,9 +5702,9 @@ The bindings are stored in `gui.json` as the `gesture` object, the
 base every profile starts with, laid over the defaults above. A
 profile file may carry a `gesture` object of the same shape, which
 outranks the base key by key. A key is the input, then `:` and its
-keys by their full names in the order `control+option+shift+command`
-(`"wheel:control+option"`), or the input alone where it holds
-none. A key the object leaves out
+keys by their full names in the order
+`hyper+control+option+shift+command` (`"wheel:control+option"`,
+`"wheel:hyper"`), or the input alone where it holds none. A key the object leaves out
 inherits, and `null` turns it off, a default included. A binding
 stores Lua under `lua`, with the shortcut row's optional `kind`,
 `desc`, `group` and `symbol`; a family under `family`; a grab

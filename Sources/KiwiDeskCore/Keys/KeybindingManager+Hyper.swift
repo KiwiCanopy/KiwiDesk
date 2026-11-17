@@ -81,10 +81,12 @@ extension KeybindingManager {
         if isSuspended || !hyperEnabled { disarmHyperTrigger() }
     }
 
-    /// Whether the active layer gives Hyper anything to do — what
-    /// the Settings caption reads (#2480). Read off the layer, so a
+    /// Whether Hyper has anything to do — what the Settings caption
+    /// reads (#2480): a resolved gesture key holding it (#3407), or
+    /// a shortcut of the active layer, read off the layer so a
     /// recorder's suspend, which drops the registered rows, moves
-    /// nothing.
+    /// nothing. The bare-press cue reads the registered rows
+    /// instead, with the same gesture term.
     public var hyperHasShortcuts: Bool {
         hyper.gestureBound
             || bindings(for: currentLayer).keys.contains {
