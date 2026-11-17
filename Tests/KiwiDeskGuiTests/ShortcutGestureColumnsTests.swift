@@ -228,21 +228,25 @@ struct ShortcutGestureColumnsTests {
         }
         let sheet = try flat("ShortcutsSheetView.swift")
         #expect(sheet.contains("letrows=sections.flatMap(\\.rows)"))
+        // On the stack, after the sections' `ForEach` closes: inside
+        // it, each section would fold its own width (#3424).
         #expect(
             sheet.contains(
-                ".modifier(ShortcutPanelColumns(badges:rows"
+                "sectionView(section,first:index==0)}}"
+                    + ".modifier(ShortcutPanelColumns(badges:rows"
                     + ".contains{!$0.gestures.isEmpty},chords:rows"
                     + ".contains{!$0.combo.isEmpty}))"
             )
         )
-        // Once, on the panel: no section sizes its own.
-        #expect(sheet.occurrences(of: "ShortcutPanelColumns(") == 1)
-        let section = try #require(
-            sheet.range(of: "privatefuncsectionView(").map {
-                String(sheet[$0.upperBound...])
-            }
-        )
-        #expect(!section.contains("Columns("))
+        // Once in the app: no section or host sizes its own.
+        let app = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let calls = try SourceScan.swiftSources(under: app).map {
+            try SourceScan.strippedSource(at: $0)
+                .occurrences(of: "ShortcutPanelColumns(")
+        }
+        #expect(calls.count > 100)
+        #expect(calls.reduce(0, +) == 1)
         let row = try flat("ShortcutsBands.swift")
         #expect(
             row.contains(
