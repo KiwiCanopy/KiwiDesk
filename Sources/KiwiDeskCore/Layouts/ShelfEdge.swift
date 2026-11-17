@@ -90,6 +90,13 @@ public struct ShelfEdge: Sendable, Equatable {
     /// motion — Hidden as well as Auto — where one shown beside an
     /// always sibling joins it (#2497).
     public var drawsNothingAtRest: Bool { drawnAtRest.isEmpty }
+
+    /// Whether a bar rests on the edge, drawn or as a handle —
+    /// `hover` the bars a maximized window's screen brings in: where
+    /// the pocket may take a slot (#3432).
+    public func restsAny(hover: Set<ShelfBar>) -> Bool {
+        !drawsNothingAtRest || !handled(hover: hover).isEmpty
+    }
 }
 
 /// What the shelves take off a screen in one layout: the edges

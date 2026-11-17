@@ -169,24 +169,7 @@ struct MaximizedBarsTests {
         #expect(!settings.maximizedHoverBars(in: .monocle).contains(.app))
     }
 
-    @Test("The Pocket rides under Auto unless it is stored Hidden")
-    func pocketRides() {
-        let core = makeCore()
-        // Control: nothing is maximized, so nothing rides.
-        #expect(!core.maximizedPocketRides(on: display))
-        core.execute("toggle_maximized")
-        #expect(core.maximizedPocketRides(on: display))
-        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
-        #expect(!core.maximizedPocketRides(on: display))
-        core.tiler.settings.kiwishelf.pocketVisibility = .auto
-        core.execute(
-            "kiwishelf.set_maximized_visibility",
-            args: [.string("hidden")]
-        )
-        #expect(!core.maximizedPocketRides(on: display))
-    }
-
-    @Test("Something reveals unless every bar and the Pocket hide")
+    @Test("Something reveals unless every bar hides; never the Pocket")
     func revealsAnything() {
         var settings = TilingSettings()
         settings.spaceBarStyle.visibility = .hidden
@@ -197,9 +180,10 @@ struct MaximizedBarsTests {
             settings[keyPath: path].visibility = .hidden
         }
         #expect(!settings.maximizedRevealsAnything)
+        // A reveal never brings the Pocket (#3432).
         var pocket = settings
-        pocket.kiwishelf.pocketVisibility = .auto
-        #expect(pocket.maximizedRevealsAnything)
+        pocket.kiwishelf.pocketVisibility = .always
+        #expect(!pocket.maximizedRevealsAnything)
         var bar = settings
         bar.spaceBarStyle.visibility = .always
         #expect(bar.maximizedRevealsAnything)

@@ -6876,18 +6876,15 @@ since the tick asks for Hidden.
 
 *The Pocket follows the same value* (owner, 2026-11-15). It rests on
 the shelf, so it reads Hidden through the same door: nothing of it
-rests over the window. Under Auto a bar revealed on the Pocket's
-edge brings it in as that shelf's section, floating with the bar,
-unless the Pocket is stored Hidden; under Hidden it stays away. The
-Pocket keys pocket and take out as before. One answer per screen,
-`maximizedPocketRides(on:)`, decides it, and the bar pass files the
-screens where it rode, which the Pocket's stand reads, so a pocket
-never stands for a reveal no bar made.
+rests over the window, and a bar revealed there comes in alone
+(owner, 2026-11-17, #3432): no reveal brings the Pocket. Its keys,
+its list, a window drag and the play reach it.
 
 *The row greys only when nothing could come in* (owner, 2026-11-15):
-the Space Bar, every layout's App Bar and the Pocket all stored
-Hidden. Its reason names the KiwiShelf card where those are set,
-through one reason value that picks both the grey and its sentence.
+the Space Bar and every layout's App Bar all stored Hidden; the
+Pocket's Show counts for nothing, since no reveal brings it. Its
+reason names the KiwiShelf card where those are set, through one
+reason value that picks both the grey and its sentence.
 Where even one could show, the row is live and reveals only what is
 not Hidden. It is independent of "Maximize follows focus": both are
 per-profile values in one card, and neither greys on the other.
@@ -7102,6 +7099,16 @@ screen's pocket edge is its own entry, never a link to its bar.
 *Amended (#3401):* the pocket's edge leaves its own row for
 Position, whose master and drawer write it beside the bars' (▸ *a
 bar's edge may differ per screen*).
+
+*Amended (#3432, owner 2026-11-17):* a bar's reveal never brings the
+pocket. Beside an Auto bar the pocket's handle rests in its own slot
+of the resting bars' arrangement, and a reveal or a retract leaves
+it there, risen or not: a revealed bar is the bar's run alone.
+Joining the reveal pulled the pocket into the bar's section and took
+its own approach away while the bar showed, so a pocket that rested
+low on a side edge rose with a Space Bar the pointer reached for at
+its top, and went dead after the bar left. The cost is that a bar
+coming in stands beside a handle rather than carrying a section.
 :::
 
 **Several windows keeps it on screen, empty included, on every

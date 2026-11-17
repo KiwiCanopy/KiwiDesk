@@ -23,11 +23,6 @@ extension KiwiCore {
             )
         /// The bars drawn this pass, each in its resting slot.
         let drawn: Set<ShelfBar>
-        /// Whether the pocket stands on this edge this pass — the
-        /// one answer its slot, its Auto mark band and the reveal
-        /// target read (#2678).
-        var carriesPocket = false
-
         /// A plan over `arrangement`, the resting bars', drawing
         /// `drawn` — every bar it places unless named.
         init(
@@ -37,8 +32,7 @@ extension KiwiCore {
             arrangement: ShelfArrangement,
             shelfEdge: ShelfEdge,
             needs: [ShelfBar: CGFloat] = [:],
-            drawn: Set<ShelfBar>? = nil,
-            carriesPocket: Bool = false
+            drawn: Set<ShelfBar>? = nil
         ) {
             self.edge = edge
             self.strip = strip
@@ -53,12 +47,15 @@ extension KiwiCore {
                         arrangement.app.map { _ in ShelfBar.app },
                     ].compactMap { $0 }
                 )
-            self.carriesPocket = carriesPocket
         }
 
-        /// The drawn bars' slots of the resting arrangement.
+        /// The drawn bars' slots of the resting arrangement. A reveal
+        /// onto an edge that draws nothing at rest brings the bar
+        /// alone: the pocket keeps its handle in its slot (#3432).
         var arrangement: ShelfArrangement {
-            resting.arrangement.keeping(drawn)
+            var kept = resting.arrangement.keeping(drawn)
+            if shelfEdge.drawsNothingAtRest { kept.pocket = nil }
+            return kept
         }
         /// Each drawn bar's natural run length, which its slot
         /// draws in (`ShelfArrangement.Slot.drawing`).
@@ -131,7 +128,10 @@ extension KiwiCore {
                         && bars.contains(.space) ? spaceItems : nil,
                     app: settings.appBarStyle.edge == edge
                         && bars.contains(.app) ? app : nil,
-                    pocket: pocket && edge == settings.kiwishelf.pocketEdge,
+                    // A slot only beside a bar that rests here,
+                    // drawn or as a handle (#3432).
+                    pocket: pocket && edge == settings.kiwishelf.pocketEdge
+                        && shelfEdge.restsAny(hover: hover),
                     drawn: shown
                 )
             }
@@ -201,7 +201,10 @@ extension KiwiCore {
                 // it where nothing draws (#2678).
                 pocket: pocket && (spaceNeed != nil || appNeed != nil)
                     ? .init(
-                        need: ShelfArrangement.pocketNeed(depth: depth),
+                        need: ShelfArrangement.pocketNeed(
+                            depth: depth,
+                            asHandle: shelfEdge.drawsNothingAtRest
+                        ),
                         leadsEnd: shelf.pocketLeansEnd
                     )
                     : nil
@@ -210,8 +213,7 @@ extension KiwiCore {
             needs: [.space: spaceNeed, .app: appNeed].compactMapValues {
                 $0
             },
-            drawn: drawn,
-            carriesPocket: pocket
+            drawn: drawn
         )
     }
 }

@@ -64,7 +64,6 @@ extension KiwiCore {
             overflowMarks.standingDown = []
             updateOverflowMarks()
             pocketPlate.standingDown = []
-            pocketPlate.riding = []
             updatePocketPlate(slots: [:])
             return
         }
@@ -72,8 +71,6 @@ extension KiwiCore {
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
-        // A maximize's Pocket rides a revealed bar (#3346 ▸ 8).
-        var riding: Set<DisplayID> = []
         // The overflow marks sit on windows a maximize covers, so
         // they stand down there too (#2448, #3346).
         var marksStandingDown: Set<DisplayID> = []
@@ -116,7 +113,6 @@ extension KiwiCore {
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
             let reveal = shelves.reveal
-            let rides = maximizedPocketRides(on: display.id)
             let hover = maximizedHoverBars(on: display.id)
             let planned = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
@@ -124,7 +120,7 @@ extension KiwiCore {
                 mode: shownMode(on: display.id),
                 spaceItems: items,
                 app: app,
-                pocket: pocketRests(on: display.id) || rides,
+                pocket: pocketRests(on: display.id),
                 hover: hover,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
@@ -143,7 +139,6 @@ extension KiwiCore {
                 let slot = plan.arrangement.pocket
             {
                 pocketSlots[display.id] = plan.segment(slot)
-                if rides { riding.insert(display.id) }
             }
             pocketStrips[display.id] = Self.pocketStrip(
                 in: planned,
@@ -200,11 +195,12 @@ extension KiwiCore {
         // the shelf: synced first, so each shelf mounts this pass's
         // pocket (#2678).
         pocketPlate.standingDown = standingDown
-        pocketPlate.riding = riding
         pocketPlate.markBands = hiding.pocketBands
-        filePocketApproaches(into: &hiding)
         pocketPlate.barStrips = pocketStrips
-        updatePocketPlate(slots: pocketSlots)
+        // This pass's place, never the last pass's slot (#3432).
+        pocketPlate.slots = pocketSlots
+        filePocketApproaches(into: &hiding)
+        updatePocketPlate()
         // The revealer first, so the shelves judge this pass's
         // hiding edges (#761).
         syncHidingShelves(hiding)

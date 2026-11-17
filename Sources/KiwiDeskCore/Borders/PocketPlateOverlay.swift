@@ -49,9 +49,6 @@ final class PocketPlateOverlay {
     }
     /// The screens the last bar pass stood down on.
     var standingDown: Set<DisplayID> = []
-    /// The screens whose pocket rides a revealed bar over a
-    /// maximized window this pass (#3346 ▸ 8).
-    var riding: Set<DisplayID> = []
     /// Each screen's pocket slot from the last bar pass, AX.
     var slots: [DisplayID: CGRect] = [:]
     /// Each screen's handle band along an edge of Auto marks, its

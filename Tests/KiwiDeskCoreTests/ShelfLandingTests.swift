@@ -175,14 +175,19 @@ struct ShelfLandingTests {
         #expect(handleSlot(.space, revealed) != nil)
     }
 
-    @Test("the pocket keeps its slot across a reveal")
+    @Test("the pocket keeps its resting slot and joins no reveal")
     func pocketStays() throws {
+        let rest = try plan([], pocket: true)
         let one = try plan([.app], pocket: true)
         let both = try plan([.app, .space], pocket: true)
-        let slot = try #require(one.arrangement.pocket)
-        #expect(both.arrangement.pocket == slot)
+        // The resting bars leave the pocket its slot (#2678).
+        let slot = try #require(rest.resting.arrangement.pocket)
+        #expect(one.resting.arrangement.pocket == slot)
+        #expect(both.resting.arrangement.pocket == slot)
         #expect(one.arrangement.app == both.arrangement.app)
-        // An edge drawing no bar takes the pocket's handle (#2678).
-        #expect(try plan([], pocket: true).arrangement.pocket == nil)
+        // A reveal brings the bars alone (#3432).
+        #expect(rest.arrangement.pocket == nil)
+        #expect(one.arrangement.pocket == nil)
+        #expect(both.arrangement.pocket == nil)
     }
 }

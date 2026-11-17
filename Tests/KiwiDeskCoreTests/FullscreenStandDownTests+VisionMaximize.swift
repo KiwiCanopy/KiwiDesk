@@ -137,11 +137,11 @@ extension FullscreenStandDownTests {
         #expect(hidden == nil)
     }
 
-    /// Over a maximized window the Pocket rests nowhere, and comes in
-    /// as the section of a bar revealed on its edge under Auto, never
-    /// when stored Hidden (#3346 ▸ 8).
-    @Test("a Maximize's Pocket rides a revealed bar alone")
-    func maximizePocketRides() throws {
+    /// Over a maximized window the Pocket rests nowhere, and a bar
+    /// revealed on its edge comes in alone (#3432, retiring #3346 ▸
+    /// 8).
+    @Test("a Maximize's revealed bar comes in without the Pocket")
+    func maximizeRevealLeavesThePocket() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, display) = try #require(
             makeMaximizeCore(isUser: true)
@@ -151,16 +151,21 @@ extension FullscreenStandDownTests {
         core.tiler.settings.kiwishelf.pocketVisibility = .always
         #expect(core.execute("toggle_maximized").isSuccess)
         core.updateBars()
-        // Control: at rest nothing stands over the window.
-        #expect(!core.pocketPlate.riding.contains(display))
         #expect(!core.pocketStands(on: display))
-        core.execute("space_bar.toggle_reveal")
+        let bar = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(
+                display: display,
+                edge: core.tiler.settings.spaceBarStyle.edge
+            ),
+            bar: .space
+        )
+        #expect(core.execute("space_bar.toggle_reveal").isSuccess)
         core.updateBars()
-        #expect(core.pocketPlate.riding.contains(display))
-        #expect(core.pocketStands(on: display))
-        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
-        core.updateBars()
-        #expect(!core.pocketPlate.riding.contains(display))
+        // Control: the reveal took, so the bar is drawn.
+        #expect(core.shelves.reveal.reveal(of: bar).isShown)
+        #expect(core.pocketPlate.slots[display] == nil)
+        #expect(core.pocketPlate.markBands[display] == nil)
+        #expect(!core.pocketStands(on: display))
     }
 
     /// The overflow marks sit on windows a maximize covers, so they

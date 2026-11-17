@@ -47,7 +47,14 @@ struct MaximizeShowBarsRowTests {
             LayoutDefaultsGates(settings: settings).inertReason(for: key)
                 == .nothingRevealsMaximized
         )
-        settings.kiwishelf.pocketVisibility = .auto
+        // A reveal never brings the Pocket, so it keeps no row live
+        // (#3432); a bar does.
+        settings.kiwishelf.pocketVisibility = .always
+        #expect(
+            LayoutDefaultsGates(settings: settings).inertReason(for: key)
+                == .nothingRevealsMaximized
+        )
+        settings.spaceBarStyle.visibility = .auto
         #expect(
             LayoutDefaultsGates(settings: settings).inertReason(for: key)
                 == nil
