@@ -8,7 +8,8 @@ import KiwiDeskCore
 /// deactivation cancels too, since a system chord (⌘Tab) steals
 /// focus mid-recording (`ChordRecorderTests`). In `.modifiers`
 /// mode (a scroll gesture's chord, #1656) keys are ignored and the
-/// largest modifier set held at once commits when all are released.
+/// largest modifier set held at once commits when all are released,
+/// Hyper among them while it is on (#3407).
 /// In `.sourceKey` mode (the Hyper key, #1870) the first physical
 /// key pressed commits, a modifier by its own sided key code.
 /// With Hyper on, `.combo` mode reads the remapped key's F18 as
@@ -53,8 +54,9 @@ final class ChordRecorder {
     private var suppressedKeyUps: Set<UInt16> = []
     private(set) var mode = Mode.combo
     /// `.modifiers` mode: the largest set held so far.
-    private var heldMost: NSEvent.ModifierFlags = []
-    /// `.combo` mode: whether F18 is the Hyper key, and held.
+    private var heldMost: ScrollChord = []
+    /// `.combo` and `.modifiers` mode: whether F18 is the Hyper
+    /// key, and held.
     private var hyperOn = false
     private var hyperHeld = false
     /// `.combo` mode: what a press keeps of a side, nil for none.
@@ -176,9 +178,13 @@ final class ChordRecorder {
                 .command, .option, .control, .shift,
             ])
             suppressedKeyUps.insert(keyCode)
-            if mode == .combo, hyperOn, keyCode == Self.hyperCode {
+            if mode != .sourceKey, hyperOn, keyCode == Self.hyperCode {
                 hyperHeld = true
-                onPreview(previewSymbols(flags))
+                if mode == .modifiers {
+                    _ = modifiersChanged(flags)
+                } else {
+                    onPreview(previewSymbols(flags))
+                }
                 return true
             }
             if keyCode == 53, held.isEmpty, !hyperHeld {
@@ -208,6 +214,11 @@ final class ChordRecorder {
             // its original responder.
             if keyCode == Self.hyperCode, hyperHeld {
                 hyperHeld = false
+                if mode == .modifiers {
+                    let swallow = consumeSuppressedKeyUp(keyCode)
+                    _ = modifiersChanged(flags)
+                    return swallow
+                }
                 onPreview(previewSymbols(flags))
             }
             return consumeSuppressedKeyUp(keyCode)
@@ -234,16 +245,17 @@ final class ChordRecorder {
     /// `.modifiers` mode: tracks the largest set, previews what is
     /// held, and commits once nothing is.
     private func modifiersChanged(_ flags: NSEvent.ModifierFlags) -> Bool {
-        let held = flags.intersection([.command, .option, .control, .shift])
+        var held = Self.scrollChord(flags)
+        if hyperHeld { held.insert(.hyper) }
         if held.rawValue.nonzeroBitCount > heldMost.rawValue.nonzeroBitCount {
             heldMost = held
         }
         guard held.isEmpty else {
-            onPreview(Self.modifierSymbols(held))
+            onPreview(ScrollChordGlyphs.text(held))
             return false
         }
         if !heldMost.isEmpty {
-            finish(.modifiers(Self.scrollChord(heldMost)))
+            finish(.modifiers(heldMost))
         }
         return false
     }

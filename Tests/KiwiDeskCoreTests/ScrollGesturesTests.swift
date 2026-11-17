@@ -23,7 +23,7 @@ struct ScrollGesturesTests {
     private func front() -> (ScrollGestures, () -> [FakeTap]) {
         let gestures = ScrollGestures()
         var made: [FakeTap] = []
-        gestures.makeTap = { deliver in
+        gestures.makeTap = { _, deliver in
             let tap = FakeTap()
             tap.deliver = deliver
             made.append(tap)
@@ -263,7 +263,7 @@ struct ScrollGesturesTests {
     func trackerCarriesTheTap() {
         let tracker = MouseTracker()
         var made = 0
-        tracker.scroll.makeTap = { _ in
+        tracker.scroll.makeTap = { _, _ in
             made += 1
             return FakeTap()
         }
@@ -283,7 +283,7 @@ struct ScrollGesturesTests {
     func refusalRetries() {
         let gestures = ScrollGestures()
         var attempts = 0
-        gestures.makeTap = { _ in
+        gestures.makeTap = { _, _ in
             attempts += 1
             return nil
         }

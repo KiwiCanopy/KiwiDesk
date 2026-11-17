@@ -67,7 +67,7 @@ struct PointerButtonWiringTests {
         #expect(settings.takes(.other(4), chord: []))
         #expect(!settings.takes(.other(3), chord: [.control]))
         var asked: [CGEventMask] = []
-        core.mouse.pointer.makeTap = { mask, _ in
+        core.mouse.pointer.makeTap = { mask, _, _ in
             asked.append(mask)
             return nil
         }
@@ -154,7 +154,7 @@ struct PointerButtonWiringTests {
         let core = try core()
         let key = GestureKey(.click, [.control, .shift])
         bind(core, [key: .run(LuaAction(lua: "kiwi_clicked = true"))])
-        core.mouse.pointer.makeTap = { _, _ in Tap() }
+        core.mouse.pointer.makeTap = { _, _, _ in Tap() }
         core.mouse.pointer.start()
         press(core, key)
         #expect(core.mouse.pointer.buttonsHeld.count == 1)
@@ -172,7 +172,7 @@ struct PointerButtonWiringTests {
         let core = try core()
         let key = GestureKey(.click, [.control, .shift])
         bind(core, [key: .run(LuaAction(lua: "kiwi_clicked = true"))])
-        core.mouse.pointer.makeTap = { _, _ in Tap() }
+        core.mouse.pointer.makeTap = { _, _, _ in Tap() }
         core.mouse.pointer.start()
         press(core, key)
         core.mouse.pointer.stop()

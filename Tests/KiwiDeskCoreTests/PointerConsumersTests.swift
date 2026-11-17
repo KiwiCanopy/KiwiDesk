@@ -30,7 +30,7 @@ struct PointerConsumersTests {
 
         init(wired: Bool = true) {
             front.onLog = { _ in }
-            front.makeTap = { [unowned self] mask, _ in
+            front.makeTap = { [unowned self] mask, _, _ in
                 masks.append(mask)
                 guard !refuse else { return nil }
                 let tap = FakeTap()
@@ -123,7 +123,7 @@ struct PointerConsumersTests {
     func staleTapIsDropped() async {
         var delivers: [PointerTap.Deliver] = []
         let rig = Rig()
-        rig.front.makeTap = { _, deliver in
+        rig.front.makeTap = { _, _, deliver in
             delivers.append(deliver)
             return FakeTap()
         }
@@ -220,7 +220,7 @@ struct PointerConsumersTests {
     func trackerReadsTheGrab() {
         let tracker = MouseTracker()
         tracker.pressedButtons = { 0 }
-        tracker.pointer.makeTap = { _, _ in FakeTap() }
+        tracker.pointer.makeTap = { _, _, _ in FakeTap() }
         tracker.pointer.onLog = { _ in }
         tracker.pointer.setGrabHandler { _ in }
         #expect(!tracker.leftButtonHeld && !tracker.anyButtonHeld)

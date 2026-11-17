@@ -11,12 +11,18 @@ public final class TouchGestures {
         @MainActor (GestureKey, GestureAction, TrackpadGestureEvent)
         -> Void
     typealias MakeReader =
-        @MainActor (@escaping TouchReader.Deliver) -> TouchReaderHandle?
+        @MainActor (HyperHold, @escaping TouchReader.Deliver)
+        -> TouchReaderHandle?
 
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// Builds the machine reader. Live in production; both
     /// `makeTestCore` twins pin one that touches nothing.
-    var makeReader: MakeReader = { TouchReader.live(deliver: $0) }
+    var makeReader: MakeReader = {
+        TouchReader.live(hyper: $0, deliver: $1)
+    }
+    /// The Hyper hold the reader reads (#3407); `KiwiCore` hands
+    /// it the keybinding manager's at bootstrap.
+    var hyperHold = HyperHold()
     /// What macOS answers itself, read afresh for each batch of
     /// recognized gestures, which are rare, so a change in System
     /// Settings ▸ Trackpad lands at the next gesture.
@@ -172,7 +178,7 @@ public final class TouchGestures {
             return
         }
         guard reader == nil else { return }
-        reader = makeReader { [weak self] events in
+        reader = makeReader(hyperHold) { [weak self] events in
             DispatchQueue.main.async {
                 MainActor.assumeIsolated { self?.receive(events) }
             }

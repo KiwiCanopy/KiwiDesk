@@ -28,6 +28,8 @@ struct GestureListRow: View {
     let offered: [GestureInput]
     let catalog: SequenceActionCatalog
     @Binding var open: Set<UUID>
+    /// No Hyper key is set: the recorder mount's one reading (#3407).
+    @Environment(\.hyperKeyIsOff) var hyperOff
     var armsOnAppear = false
     /// The row now binds nothing the map holds: it stays as pending.
     let onUnbound: () -> Void
@@ -162,13 +164,13 @@ struct GestureListRow: View {
     private var hint: String? {
         if let clash { return clash }
         if let refusal = key.refusal ?? action?.refusal(on: key) {
-            return GestureRefusalWords.sentence(refusal)
+            return GestureRefusalWords.sentence(refusal, hyperOff: hyperOff)
         }
         if let held = GestureListEdits.heldByDrag(
             key,
             in: model.config.gesture
         ) {
-            return GestureRefusalWords.sentence(held)
+            return GestureRefusalWords.sentence(held, hyperOff: hyperOff)
         }
         if key.input == .sideButtons, key.chord.isEmpty, let action {
             return GestureListWords.takenButtons(
@@ -220,7 +222,7 @@ struct GestureListRow: View {
             return GestureRefusalWords.taken
         }
         if let refusal = target.refusal ?? action?.refusal(on: target) {
-            return GestureRefusalWords.sentence(refusal)
+            return GestureRefusalWords.sentence(refusal, hyperOff: hyperOff)
         }
         var base = model.config.gesture
         GestureListEdits.remove(key, in: &base)
@@ -228,7 +230,7 @@ struct GestureListRow: View {
             of: target,
             base: base,
             profile: nil
-        ).map(GestureRefusalWords.sentence)
+        ).map { GestureRefusalWords.sentence($0, hyperOff: hyperOff) }
     }
 
     func rekey(to target: GestureKey) {

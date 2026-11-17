@@ -72,13 +72,18 @@ public final class PointerConsumers {
     public typealias GestureHandler =
         @MainActor (TrackpadGestureEvent) -> Void
     typealias MakeTap =
-        @MainActor (CGEventMask, @escaping PointerTap.Deliver)
+        @MainActor (CGEventMask, HyperHold, @escaping PointerTap.Deliver)
         -> PointerTapHandle?
 
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// Builds the machine tap. Live in production; `makeTestCore`
     /// pins one that touches nothing.
-    var makeTap: MakeTap = { PointerTap.live(mask: $0, deliver: $1) }
+    var makeTap: MakeTap = {
+        PointerTap.live(mask: $0, hyper: $1, deliver: $2)
+    }
+    /// The Hyper hold the tap reads (#3407); `KiwiCore` hands it
+    /// the keybinding manager's at bootstrap.
+    var hyperHold = HyperHold()
 
     /// The grab's settings as the tap reads them, sanitised; written
     /// by `KiwiCore.applyGestures` alone, from the drag bindings.
@@ -284,7 +289,7 @@ public final class PointerConsumers {
         if tap == nil {
             tapGeneration += 1
             let generation = tapGeneration
-            tap = makeTap(mask) { [weak self] delivery in
+            tap = makeTap(mask, hyperHold) { [weak self] delivery in
                 DispatchQueue.main.async {
                     MainActor.assumeIsolated {
                         self?.receive(delivery, fromTap: generation)

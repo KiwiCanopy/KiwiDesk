@@ -12,7 +12,15 @@ struct HyperLayer {
     var triggerIDs: Set<UInt32> = []
     /// The bare registrations of the current hold.
     var heldIDs: [UInt32] = []
-    var isHeld = false
+    /// The hold's one store, which the taps read off main (#3407).
+    let hold = HyperHold()
+    var isHeld: Bool {
+        get { hold.isHeld }
+        nonmutating set { hold.isHeld = newValue }
+    }
+    /// A resolved gesture key holds Hyper: a press has work even
+    /// with no Hyper shortcut (#2480, #3407).
+    var gestureBound = false
     /// The last `hyperHasShortcuts` reported (#2480).
     var hadShortcuts = false
     /// Cancels the watchdog of the current hold.
@@ -73,14 +81,27 @@ extension KeybindingManager {
         if isSuspended || !hyperEnabled { disarmHyperTrigger() }
     }
 
-    /// Whether the active layer gives Hyper anything to do — what
-    /// the Settings caption reads (#2480). Read off the layer, so a
+    /// Whether Hyper has anything to do — what the Settings caption
+    /// reads (#2480): a resolved gesture key holding it (#3407), or
+    /// a shortcut of the active layer, read off the layer so a
     /// recorder's suspend, which drops the registered rows, moves
-    /// nothing.
+    /// nothing. The bare-press cue reads the registered rows
+    /// instead, with the same gesture term.
     public var hyperHasShortcuts: Bool {
-        bindings(for: currentLayer).keys.contains {
-            $0.modifiers.contains(.hyper)
-        }
+        hyper.gestureBound
+            || bindings(for: currentLayer).keys.contains {
+                $0.modifiers.contains(.hyper)
+            }
+    }
+
+    /// The hold the gesture taps read (#3407).
+    public var hyperHold: HyperHold { hyper.hold }
+
+    /// Whether a resolved gesture key holds Hyper; written by
+    /// `KiwiCore.applyGestures` alone.
+    func setHyperGestureBound(_ bound: Bool) {
+        hyper.gestureBound = bound
+        noteHyperShortcuts()
     }
 
     /// Reports a flip of `hyperHasShortcuts` once per change.
@@ -110,7 +131,7 @@ extension KeybindingManager {
     func hyperPressed() {
         guard !hyper.isHeld, !isSuspended else { return }
         // Once per hold: key repeat never re-enters past the guard.
-        if hyper.rows.isEmpty { onBareHyper() }
+        if hyper.rows.isEmpty, !hyper.gestureBound { onBareHyper() }
         hyper.isHeld = true
         registerHeldRows()
         hyper.cancelWatchdog = hyperSchedule(HyperLayer.maxHoldSeconds) {

@@ -140,7 +140,7 @@ struct ScrollTapSeamTests {
         let factories: [(String, String, String)] = [
             (
                 "ScrollGestureTap.live", "ScrollGestures.swift",
-                "mouse.scroll.makeTap = { _ in nil }"
+                "mouse.scroll.makeTap = { _, _ in nil }"
             ),
             (
                 "KeyboardTap.live", "KeybindingManager.swift",
@@ -148,7 +148,7 @@ struct ScrollTapSeamTests {
             ),
             (
                 "PointerTap.live", "PointerConsumers.swift",
-                "mouse.pointer.makeTap = { _, _ in nil }"
+                "mouse.pointer.makeTap = { _, _, _ in nil }"
             ),
         ]
         for (factory, home, pin) in factories {

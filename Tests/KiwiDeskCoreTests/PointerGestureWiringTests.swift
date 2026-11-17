@@ -27,7 +27,7 @@ struct PointerGestureWiringTests {
         front.onLog = { _ in }
         var masks: [CGEventMask] = []
         var taps: [FakeTap] = []
-        front.makeTap = { mask, _ in
+        front.makeTap = { mask, _, _ in
             masks.append(mask)
             let tap = FakeTap()
             taps.append(tap)
@@ -56,7 +56,7 @@ struct PointerGestureWiringTests {
     func deliveryReachesTheHandler() {
         let front = PointerConsumers()
         front.onLog = { _ in }
-        front.makeTap = { _, _ in FakeTap() }
+        front.makeTap = { _, _, _ in FakeTap() }
         var heard: [TrackpadGestureEvent] = []
         front.setGestureHandler { heard.append($0) }
         front.start()
@@ -92,7 +92,7 @@ struct PointerGestureWiringTests {
         core.loadConfig()
         let lua = try #require(core.keys.lua)
         var masks: [CGEventMask] = []
-        core.mouse.pointer.makeTap = { mask, _ in
+        core.mouse.pointer.makeTap = { mask, _, _ in
             masks.append(mask)
             return FakeTap()
         }

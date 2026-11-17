@@ -2,9 +2,11 @@ import Foundation
 
 extension ScrollChord: Codable {
     /// Keybindings' modifier spelling (`KeyCombo.parse`), in their
-    /// canonical order; the empty string is off.
+    /// canonical order, Hyper first as `KeyCombo` writes it; the
+    /// empty string is off.
     public var spelling: String {
         var parts: [String] = []
+        if contains(.hyper) { parts.append("hyper") }
         if contains(.control) { parts.append("control") }
         if contains(.option) { parts.append("option") }
         if contains(.shift) { parts.append("shift") }
@@ -25,6 +27,7 @@ extension ScrollChord: Codable {
             case "option", "opt", "alt": modifier = .option
             case "command", "cmd": modifier = .command
             case "shift": modifier = .shift
+            case "hyper": modifier = .hyper
             default: return nil
             }
             guard !chord.contains(modifier) else { return nil }

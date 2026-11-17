@@ -41,12 +41,14 @@ public struct ScrollSample: Equatable, Sendable {
         self.location = location
     }
 
-    /// Builds a sample from the event's raw fields.
+    /// Builds a sample from the event's raw fields, Hyper from
+    /// its hold (#3407).
     /// `invertedBySystem` is `NSEvent.isDirectionInvertedFromDevice`
     /// — true while macOS's Natural scrolling is on, when the raw
     /// delta is already in the natural convention.
     public init(
         flags: CGEventFlags,
+        hyper: Bool,
         pointDeltaX: Double,
         pointDeltaY: Double,
         invertedBySystem: Bool,
@@ -56,7 +58,7 @@ public struct ScrollSample: Equatable, Sendable {
     ) {
         let sign: Double = invertedBySystem ? 1 : -1
         self.init(
-            chord: ScrollChord(flags: flags),
+            chord: ScrollChord(flags: flags, hyper: hyper),
             delta: CGVector(
                 dx: pointDeltaX * sign,
                 dy: pointDeltaY * sign

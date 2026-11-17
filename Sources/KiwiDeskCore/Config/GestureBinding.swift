@@ -159,9 +159,11 @@ extension GestureKey {
     /// The refusal of these keys for this input, whatever the
     /// action; nil when they stand. Settings judges a row's keys
     /// with it before an action is picked.
+    /// Hyper reaches no app, so it alone stands for the two
+    /// modifiers a scroll needs (#3407 ▸ Ruling).
     public var refusal: GestureRefusal? {
         if input.needsModifier, chord.isEmpty { return .needsModifier }
-        if input.isWheel || input.isPhasedScroll,
+        if input.isWheel || input.isPhasedScroll, !chord.contains(.hyper),
             chord.rawValue.nonzeroBitCount < 2
         {
             return .singleModifierScroll

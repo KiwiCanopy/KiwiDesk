@@ -41,6 +41,8 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
     )
     private let deliver: Deliver
     private let mask: CGEventMask
+    /// Read at each chord build (#3407).
+    private let hyper: HyperHold
     // Tap-thread state below; `installed` is written before the
     // start semaphore signals and read after it waits.
     private var router = PointerTapRouter()
@@ -48,8 +50,14 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
     private var runLoop: CFRunLoop?
     private var installed = false
 
-    private init(mask: CGEventMask, deliver: @escaping Deliver) {
+    /// Unstarted: `live` starts it; a suite drives `handle` alone.
+    init(
+        mask: CGEventMask,
+        hyper: HyperHold,
+        deliver: @escaping Deliver
+    ) {
         self.mask = mask
+        self.hyper = hyper
         self.deliver = deliver
     }
 
@@ -58,9 +66,10 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
     /// looks like.
     static func live(
         mask: CGEventMask,
+        hyper: HyperHold,
         deliver: @escaping Deliver
     ) -> PointerTapHandle? {
-        let tap = PointerTap(mask: mask, deliver: deliver)
+        let tap = PointerTap(mask: mask, hyper: hyper, deliver: deliver)
         return tap.start() ? tap : nil
     }
 
@@ -120,7 +129,7 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
     }
 
     /// The callback body, on the tap thread.
-    private func handle(
+    func handle(
         _ type: CGEventType,
         _ event: CGEvent
     ) -> Unmanaged<CGEvent>? {
@@ -151,7 +160,10 @@ final class PointerTap: PointerTapHandle, @unchecked Sendable {
                 PointerSample(
                     kind: kind,
                     location: event.location,
-                    chord: ScrollChord(flags: event.flags)
+                    chord: ScrollChord(
+                        flags: event.flags,
+                        hyper: hyper.isHeld
+                    )
                 ),
                 now: now
             )
