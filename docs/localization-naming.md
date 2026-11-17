@@ -379,6 +379,16 @@ you were editing.
    less naturally at the very sites it was chosen for. The fix is
    a label whose object is the window, not a second verb.
 
+**A term macOS itself shows takes Apple's word in your locale**,
+read from the OS's own `.loctable`, never from memory;
+`docs/translating.md` ▸ the `system_shortcut.*` keys is the same
+rule for Apple's feature names. The *bundle ID* is the worked
+case (#3410): its noun follows `spext_bundleid` in
+SPExtensionsReporter's `Localizable.loctable` — `de` *Paket-ID*,
+not *Bundle-ID*; `pt-BR` *ID do Pacote*. Apple's noun is what
+decides, so a catalog that spells *ID* out as *identifier*, as
+`ja`, `ko` and `ru` do, still follows it.
+
 A rival word is usually still *correct somewhere else in the same
 file* — `it`'s «disposizione» renders English *arrangement* in ten
 keys, `ru`'s «раскладка» is also a keyboard layout, `es`'s
