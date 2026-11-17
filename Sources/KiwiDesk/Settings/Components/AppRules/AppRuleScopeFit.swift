@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 /// A scope label cut in its middle to fit the scope cell (#3415).
 /// A borderless `Menu`'s title is drawn by AppKit, which ignores a
@@ -34,12 +35,32 @@ enum AppRuleScopeFit {
         return cut(chars, low)
     }
 
-    /// `chars` with `keep` of them kept, split head-heavy.
+    /// `text` with `keep` of its characters kept around "…", split
+    /// head-heavy: the cut `middle` picks the longest fitting one of.
+    static func cut(_ text: String, keeping keep: Int) -> String {
+        cut(Array(text), keep)
+    }
+
     private static func cut(_ chars: [Character], _ keep: Int) -> String {
         let head = (keep + 1) / 2
         let tail = keep - head
         return String(chars.prefix(head)) + "…"
             + String(chars.suffix(tail))
+    }
+
+    /// The scope cell's menu, its title fitted to `width`: the one
+    /// chain the row draws and `AppRuleScopeCellTests` renders.
+    static func menu<Items: View>(
+        _ text: String,
+        width: CGFloat = SettingsMetrics.appRuleScopeLabel,
+        @ViewBuilder items: () -> Items
+    ) -> some View {
+        Menu(content: items) {
+            AppRuleMenuLabel(text: middle(text, width: width), chevron: false)
+        }
+        .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
+        .fixedSize()
     }
 
     private static func measure(_ text: String, _ font: NSFont) -> CGFloat {

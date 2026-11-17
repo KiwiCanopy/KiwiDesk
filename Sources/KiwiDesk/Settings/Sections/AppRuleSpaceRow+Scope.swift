@@ -79,7 +79,7 @@ extension AppRuleSpaceRow {
     /// (greyed while the app has one), its own title, and another
     /// rule (#3373, #3415).
     private var scopeMenu: some View {
-        Menu {
+        AppRuleScopeFit.menu(scopeLabel) {
             if row.fragment == nil {
                 // Checked under the cell's own words: "All other
                 // windows" beside titled rows.
@@ -98,15 +98,7 @@ extension AppRuleSpaceRow {
                 Button(AppRuleScopeWords.changeTitle) { open(true) }
             }
             Button(AppRuleScopeWords.addTitled) { open(false) }
-        } label: {
-            AppRuleMenuLabel(
-                text: AppRuleScopeFit.middle(scopeLabel),
-                chevron: false
-            )
         }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .fixedSize()
         .menuTriggerHover()
         .help(row.fragment ?? "")
         .accessibilityLabel(AppRuleScopeWords.menuName)

@@ -11,8 +11,9 @@ import Testing
 /// title cut in the middle, so an app's Space and "Applies to"
 /// columns line up. Nothing headless can open a `Menu`, so the
 /// wiring is held on the source, scoped to a brace-balanced body;
-/// the width is held by rendering the menu. Main-actor spend: one
-/// file read, a few string measurements and three hosted menus.
+/// the width is held by rendering the menu through the builder the
+/// row draws. Main-actor spend: one file read, a few string
+/// measurements and four hosted menus.
 @Suite("App Rules scope cell (#3415)", .serialized)
 @MainActor
 struct AppRuleScopeCellTests {
@@ -105,6 +106,8 @@ struct AppRuleScopeCellTests {
         let menu = try body(of: "private var scopeMenu: some View")
         #expect(menu.contains("Button(becomesLabel)"))
         #expect(!menu.contains("Button(AppRuleScopeWords.all)"))
+        // The item stays greyed while the app has its bare row.
+        #expect(menu.contains(".disabled(hasBare)"))
         for label in ["var becomesLabel: String", "var scopeLabel: String"] {
             #expect(
                 try body(of: label).contains(
@@ -119,25 +122,29 @@ struct AppRuleScopeCellTests {
         )
     }
 
-    @Test("the cell keeps one width and draws a fitted title")
+    @Test("the cell keeps one width and draws the rendered menu")
     func cellKeepsItsWidth() throws {
         let menu = try body(of: "private var scopeMenu: some View")
-        #expect(menu.contains("text:AppRuleScopeFit.middle(scopeLabel)"))
+        // The builder the render below measures, with no style of
+        // the row's own on top that the render would not see.
+        #expect(menu.contains("AppRuleScopeFit.menu(scopeLabel){"))
+        for style in ["Menu{", ".menuStyle(", ".fixedSize(", ".font("] {
+            #expect(!menu.contains(style), "scopeMenu restyles: \(style)")
+        }
         let file = Self.squashed(try raw())
         let column = "width:SettingsMetrics.appRuleScopeColumn"
         #expect(file.components(separatedBy: column).count == 2)
     }
 
-    /// The scope cell's menu, styled as `scopeMenu` draws it.
-    private func renderedWidth(_ text: String) -> CGFloat {
-        let menu = Menu {
+    /// The scope cell's menu as the row builds it, fitted to
+    /// `width`, in the row's `.callout`.
+    private func renderedWidth(
+        _ text: String,
+        width: CGFloat = .greatestFiniteMagnitude
+    ) -> CGFloat {
+        let menu = AppRuleScopeFit.menu(text, width: width) {
             Button("x") {}
-        } label: {
-            AppRuleMenuLabel(text: text, chevron: false)
         }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .fixedSize()
         .font(.callout)
         return NSHostingView(rootView: menu).fittingSize.width
     }
@@ -164,11 +171,14 @@ struct AppRuleScopeCellTests {
     @Test("a fitted title and the widest bare scope fit the column")
     func renderedMenuFitsTheColumn() {
         let long = "Windows titled “Quarterly report draft, final v7 copy”"
-        let fitted = AppRuleScopeFit.middle(long)
-        #expect(fitted != long)
+        #expect(AppRuleScopeFit.middle(long) != long)
+        let fitted = renderedWidth(
+            long,
+            width: SettingsMetrics.appRuleScopeLabel
+        )
         #expect(
-            renderedWidth(fitted) <= SettingsMetrics.appRuleScopeColumn,
-            "“\(fitted)” renders past the column"
+            fitted <= SettingsMetrics.appRuleScopeColumn,
+            "“\(long)” fitted renders \(fitted) pt, past the column"
         )
         let whole = renderedWidth(
             String(repeating: "W", count: 200)
@@ -196,5 +206,13 @@ struct AppRuleScopeCellTests {
         #expect(fitted.contains("…"))
         #expect(fitted.hasPrefix("Windows"))
         #expect(fitted.hasSuffix("v7”"))
+        // The longest such cut: one character more is past the width.
+        let kept = fitted.count - 1
+        #expect(fitted == AppRuleScopeFit.cut(text, keeping: kept))
+        let longer = AppRuleScopeFit.cut(text, keeping: kept + 1)
+        #expect(
+            (longer as NSString).size(withAttributes: [.font: font]).width
+                > 160
+        )
     }
 }
