@@ -83,5 +83,29 @@ struct OnboardingPageRoomTests {
         .split(whereSeparator: \.isWhitespace).joined()
         #expect(source.contains(".moreBelowFade(start.selected==.current)"))
         #expect(!source.contains(".moreBelowFade()"))
+        #expect(
+            source.components(separatedBy: ".moreBelowFade(").count == 2,
+            "the list takes one fade"
+        )
+    }
+
+    @Test("a fade that is off leaves the edge opaque")
+    func offLeavesTheEdge() throws {
+        let fade = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "MoreBelowFade.swift"
+            )
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            fade.contains(
+                ".opacity(Self.edgeOpacity(fades:fades,moreBelow:moreBelow))"
+            ),
+            "the gradient no longer draws the verdict"
+        )
+        #expect(MoreBelowFade.edgeOpacity(fades: true, moreBelow: true) == 0)
+        #expect(MoreBelowFade.edgeOpacity(fades: false, moreBelow: true) == 1)
+        #expect(MoreBelowFade.edgeOpacity(fades: true, moreBelow: false) == 1)
     }
 }

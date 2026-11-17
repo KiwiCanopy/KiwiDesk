@@ -30,6 +30,12 @@ struct MoreBelowFade: ViewModifier {
         }
     }
 
+    /// The bottom edge's alpha: clear while more is below and the
+    /// edge fades, else opaque.
+    static func edgeOpacity(fades: Bool, moreBelow: Bool) -> Double {
+        fades && moreBelow ? 0 : 1
+    }
+
     private var fade: some View {
         // A mask reads alpha alone; `.primary` is any opaque ink.
         VStack(spacing: 0) {
@@ -37,7 +43,9 @@ struct MoreBelowFade: ViewModifier {
             LinearGradient(
                 colors: [
                     .primary,
-                    .primary.opacity(fades && moreBelow ? 0 : 1),
+                    .primary.opacity(
+                        Self.edgeOpacity(fades: fades, moreBelow: moreBelow)
+                    ),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -46,7 +54,7 @@ struct MoreBelowFade: ViewModifier {
         }
         .animation(
             reduceMotion ? nil : .easeOut(duration: 0.2),
-            value: fades && moreBelow
+            value: Self.edgeOpacity(fades: fades, moreBelow: moreBelow)
         )
     }
 }
