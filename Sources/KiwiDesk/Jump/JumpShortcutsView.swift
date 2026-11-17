@@ -42,9 +42,12 @@ struct JumpShortcutsView: View {
         if fades {
             FadingScroll(inset: verticalInset) { sheetContent }
         } else {
+            // `.never`, as `FadingScroll` hides KiwiHub's: `.hidden`
+            // keeps the scroller while a mouse is connected (#3413).
             ScrollView {
                 sheetContent.padding(.vertical, verticalInset)
             }
+            .scrollIndicators(.never, axes: .vertical)
         }
     }
 

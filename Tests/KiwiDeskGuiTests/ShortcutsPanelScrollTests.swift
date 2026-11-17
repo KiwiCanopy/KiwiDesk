@@ -96,6 +96,32 @@ struct ShortcutsPanelScrollTests {
         }
     }
 
+    /// The key sequence panel's sheet draws no scroller; its fade
+    /// is the one cue, as on KiwiHub (#3413). `.never`, because
+    /// `.hidden` keeps an AppKit scroller while a mouse is connected
+    /// (measured, macOS 27.2, 2026-11-17), so `.hidden` reds too.
+    @Test("the sequence panel's sheet draws no scroller")
+    func theSheetHidesItsScroller() throws {
+        let text = try Self.source("JumpShortcutsView.swift")
+        let scroll = try #require(
+            SourceScan.declarationBody(
+                after: "private var scrollView",
+                in: text
+            )
+        )
+        let plain = try #require(
+            scroll.range(of: "} else {").map {
+                String(scroll[$0.upperBound...])
+            }
+        )
+        #expect(plain.contains("ScrollView {"))
+        #expect(
+            plain.occurrences(of: ".scrollIndicators(.never, axes: .vertical)")
+                == 1
+        )
+        #expect(!text.contains(".scrollIndicators(.hidden"))
+    }
+
     /// The fold's verdict is arithmetic and lives in ONE place,
     /// so it is asserted directly at the boundary rather than
     /// scanned for. Equal is NOT overflow: the sheet is clamped
