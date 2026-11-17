@@ -27,14 +27,17 @@ extension JumpPanelController {
     /// Builds the shortcuts reference for the active key layer
     /// (`ShortcutsReferenceBuilder`, #820).
     func buildReference() -> ShortcutsReference? {
-        Self.reference(core: core)
+        Self.reference(core: core, gestures: true)
     }
 
     /// The reference for what `stepping` makes of the active layer —
     /// the layer itself, or the step of a key sequence the hint
-    /// panel lists (#1871) — nil where it makes nothing.
+    /// panel lists (#1871) — nil where it makes nothing. `gestures`
+    /// adds the gesture badges and rows, which KiwiHub's sheet draws
+    /// and the hint panel never does (#3380, #3428).
     static func reference(
         core: KiwiCore,
+        gestures: Bool,
         stepping: (KeyLayer) -> KeyLayer? = { $0 }
     ) -> ShortcutsReference? {
         var layers: [KeyLayer]
@@ -103,6 +106,13 @@ extension JumpPanelController {
             lenses: core.kiwiVisionLensChoices.map(\.name),
             unread: unread
         )
+        guard gestures else {
+            return withAppGlyphs(
+                reference,
+                settings: config.settings,
+                core: core
+            )
+        }
         let named = KeybindingCatalog.namedCommands(
             spaces: config.spaces,
             layerNames: layers.map(\.name),
