@@ -119,7 +119,27 @@ struct ShortcutsPanelScrollTests {
             plain.occurrences(of: ".scrollIndicators(.never, axes: .vertical)")
                 == 1
         )
-        #expect(!text.contains(".scrollIndicators(.hidden"))
+    }
+
+    /// A scroller hidden by ruling spells `.never` (gui.md ▸ the
+    /// #2901 section), so `.hidden` is held to its one older site,
+    /// whose intent for a mouse user is open (#3413 follow-up).
+    @Test("no other view spells a hide as .hidden")
+    func hiddenIsHeld() throws {
+        let allowed = ["SettingsDetailPanel.swift": 1]
+        var found: [String: Int] = [:]
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources")
+        let files = try SourceScan.swiftSources(under: root)
+        #expect(files.count > 100)
+        for url in files {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            let count = text.occurrences(of: ".scrollIndicators(.hidden")
+            if count > 0 { found[url.lastPathComponent] = count }
+        }
+        #expect(found == allowed)
     }
 
     /// The fold's verdict is arithmetic and lives in ONE place,
