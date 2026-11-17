@@ -207,6 +207,29 @@ struct MonitorSetForgetTests {
         )
     }
 
+    @Test("names compare numerically, and the holder settles a tie")
+    func numericThenHolder() {
+        func set(_ name: String, _ profile: String) -> KnownMonitorSet {
+            KnownMonitorSet(
+                monitors: ["\(name):100x100"],
+                profile: profile,
+                isConnected: false,
+                isProfilesLast: false
+            )
+        }
+        let sorted = [
+            set("Dell 10", "A"), set("Alpha", "Z"), set("Dell 2", "A"),
+            set("Alpha", "A"),
+        ]
+        .sorted(by: KnownMonitorSet.listOrder(in: Locale(identifier: "en")))
+        #expect(
+            sorted.map { "\($0.monitors[0]) \($0.profile)" } == [
+                "Alpha:100x100 A", "Alpha:100x100 Z",
+                "Dell 2:100x100 A", "Dell 10:100x100 A",
+            ]
+        )
+    }
+
     @Test("names collate in the locale handed in")
     func collatesInTheLocale() {
         func set(_ name: String) -> KnownMonitorSet {
