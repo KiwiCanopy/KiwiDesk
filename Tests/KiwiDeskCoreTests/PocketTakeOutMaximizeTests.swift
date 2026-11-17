@@ -129,7 +129,7 @@ struct PocketTakeOutMaximizeTests {
     @Test("a take-out a press would refuse comes out plain, spent")
     func refusedIsPlain() throws {
         let (core, area) = try core()
-        _ = outWindow(core, area)
+        let own = outWindow(core, area)
         core.execute("toggle_maximized")
         core.execute("pocket")
         // A transient overlay takes no Maximize from a press.
@@ -141,6 +141,16 @@ struct PocketTakeOutMaximizeTests {
         #expect(maximize(core) == nil)
         #expect(core.state.maximizedFloatReturn[one] == nil)
         #expect(core.state.pocketSlot(of: one)?.returnMaximized == nil)
+        // The admission refuses it, not the retile's reaper after it:
+        // a take-out it let through would play to the fill.
+        let fill = core.maximizeOnTakeOut(
+            one,
+            .full,
+            returningTo: own,
+            on: SpaceID("1")
+        )
+        #expect(fill == nil)
+        #expect(maximize(core) == nil)
     }
 
     @Test("a plain put-back comes out plain, the flag spent")
