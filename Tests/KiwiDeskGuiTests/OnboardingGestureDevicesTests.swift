@@ -93,6 +93,20 @@ struct OnboardingGestureDevicesTests {
         let buttons = mouseRows(bound).first { $0.id == "buttons" }
         #expect(buttons?.label == "Switch Spaces")
         #expect(mouseRows([:]).isEmpty)
+        // A family the row cannot name is not taught as focus.
+        var swap = base
+        swap[GestureKey(.sideButtons)] = .family(.swap)
+        #expect(!mouseRows(swap).contains { $0.id == "buttons" })
+    }
+
+    @Test("a wheel split along its axis reads as its family")
+    func splitWheelReads() {
+        let rows = mouseRows([
+            GestureKey(.wheel, hyper): .split(
+                GestureSplit(axes: [.upDown: .walk])
+            )
+        ])
+        #expect(rows.map(\.id) == ["focus"])
     }
 
     @Test("the mouse footnote names what its rows scroll")

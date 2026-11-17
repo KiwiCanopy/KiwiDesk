@@ -34,6 +34,18 @@ enum OnboardingGestures {
                     && bindings[$0].map(holds) == true
             }
         }
+        // The ways `key` reaches what its row teaches, which pick its
+        // badge as KiwiHub picks it (`ShortcutGestureBadge.covering`).
+        func ways(
+            _ key: GestureKey,
+            _ hits: (GestureStep?) -> Bool
+        ) -> Set<GestureDirection> {
+            Set(
+                key.input.directions.filter {
+                    hits(bindings[key]?.step(toward: $0))
+                }
+            )
+        }
         var rows: [OnboardingKeyFamily] = []
         if let key = swipe({ $0.step(toward: .left) == .family(.focus) }) {
             rows.append(
@@ -42,7 +54,7 @@ enum OnboardingGestures {
                     L("onboarding.gestures.focus", "Move focus"),
                     key,
                     fingers(key),
-                    badge(key, nil, nil)
+                    badge(key, ways(key) { $0 == .family(.focus) })
                 )
             )
         }
@@ -57,7 +69,7 @@ enum OnboardingGestures {
                     L("onboarding.gestures.space", "Switch Spaces"),
                     key,
                     whole ? fingers(key) : sideways(key),
-                    badge(key, nil, whole ? nil : .horizontal)
+                    badge(key, ways(key) { $0 == .family(.space) })
                 )
             )
         }
@@ -76,7 +88,13 @@ enum OnboardingGestures {
                     ),
                     key,
                     upward(key),
-                    badge(key, .up, nil)
+                    badge(
+                        key,
+                        ways(key) {
+                            guard case .lua(let run) = $0 else { return false }
+                            return run.lua == KiwiHubSide.desktops.lua
+                        }
+                    )
                 )
             )
         }
@@ -89,7 +107,7 @@ enum OnboardingGestures {
                     L("onboarding.gestures.display", "Focus another screen"),
                     key,
                     fingers(key),
-                    badge(key, nil, nil)
+                    badge(key, ways(key) { $0 == .family(.display) })
                 )
             )
         }
@@ -108,7 +126,7 @@ enum OnboardingGestures {
                     ),
                     key,
                     tap(key),
-                    badge(key, nil, nil, caption: tap(key))
+                    badge(key, [], caption: tap(key))
                 )
             )
         }
@@ -159,16 +177,11 @@ enum OnboardingGestures {
     /// finger count (#3427), the arrows carrying the way.
     private static func badge(
         _ key: GestureKey,
-        _ direction: GestureDirection?,
-        _ axis: ShortcutGestureBadge.Axis?,
+        _ ways: Set<GestureDirection>,
         caption: String? = nil
     ) -> OnboardingGestureCap {
         OnboardingGestureCap(
-            glyph: ShortcutGestureBadge(
-                key: key,
-                direction: direction,
-                axis: axis
-            ).symbol,
+            glyph: ShortcutGestureBadge.covering(key, ways: ways).symbol,
             caption: caption ?? fingers(key)
         )
     }

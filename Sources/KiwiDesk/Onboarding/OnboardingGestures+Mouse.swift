@@ -14,22 +14,31 @@ extension OnboardingGestures {
         layer: KeyLayer?
     ) -> [OnboardingKeyFamily] {
         let keys = bindings.keys.sorted()
+        // Read as the trackpad rows read theirs: what one way of
+        // `input` steps to.
         func first(
             _ input: GestureInput,
-            _ holds: (GestureAction) -> Bool
+            toward way: GestureDirection?,
+            _ holds: (GestureStep?) -> Bool
         ) -> GestureKey? {
-            keys.first { $0.input == input && bindings[$0].map(holds) == true }
+            keys.first {
+                $0.input == input && holds(bindings[$0]?.step(toward: way))
+            }
+        }
+        // A drag binds a grab, which no way steps through.
+        func grab(_ action: ModifierDragAction) -> GestureKey? {
+            keys.first { $0.input == .drag && bindings[$0] == .grab(action) }
         }
         let focus = L("onboarding.gestures.focus", "Move focus")
         let space = L("onboarding.gestures.space", "Switch Spaces")
         var rows: [OnboardingKeyFamily] = []
-        if let key = first(.wheel, { Self.family($0)?.runsThePan == true }) {
+        if let key = first(.wheel, toward: .up, { Self.pans($0) }) {
             rows.append(mouse("focus", focus, key, scroll))
         }
-        if let key = first(.wheelX, { Self.family($0) == .space }) {
+        if let key = first(.wheelX, toward: .left, { $0 == .family(.space) }) {
             rows.append(mouse("space", space, key, scrollSideways))
         }
-        if let key = first(.drag, { $0 == .grab(.move) }) {
+        if let key = grab(.move) {
             rows.append(
                 mouse(
                     "move",
@@ -39,7 +48,7 @@ extension OnboardingGestures {
                 )
             )
         }
-        if let key = first(.drag, { $0 == .grab(.resize) }) {
+        if let key = grab(.resize) {
             rows.append(
                 mouse(
                     "resize",
@@ -49,10 +58,13 @@ extension OnboardingGestures {
                 )
             )
         }
-        if let key = first(.sideButtons, { Self.family($0) != nil }),
-            let family = bindings[key].flatMap(Self.family)
-        {
-            let label = family == .space ? space : focus
+        // The side buttons teach the two things the step names: a
+        // focus that pans, or the Space step.
+        let toSpace: (GestureStep?) -> Bool = { $0 == .family(.space) }
+        let teaches: (GestureStep?) -> Bool = { pans($0) || toSpace($0) }
+        if let key = first(.sideButtons, toward: .back, teaches) {
+            let step = bindings[key]?.step(toward: .back)
+            let label = toSpace(step) ? space : focus
             rows.append(mouse("buttons", label, key, sideButtons))
         }
         rows = Array(rows.prefix(limit))
@@ -88,10 +100,11 @@ extension OnboardingGestures {
         }
     }
 
-    /// The family a whole-input binding runs, nil for any other.
-    private static func family(_ action: GestureAction) -> GestureFamily? {
-        if case .family(let family) = action { return family }
-        return nil
+    /// Whether `step` runs the pan, focus moving as far as the
+    /// wheel turns (`GestureFamily.runsThePan`).
+    private static func pans(_ step: GestureStep?) -> Bool {
+        if case .family(let family) = step { return family.runsThePan }
+        return false
     }
 
     private static func mouse(

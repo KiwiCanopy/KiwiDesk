@@ -98,16 +98,9 @@ final class OnboardingModel {
     var longSwipes: () -> Bool = { true }
     /// Each device's rows this presentation teaches, read when it
     /// planned; a device with none is not offered.
-    private(set) var gestureRowsByDevice:
-        [GestureInput.Device: [OnboardingKeyFamily]] = [:]
+    var gestureRowsByDevice: [GestureInput.Device: [OnboardingKeyFamily]] = [:]
     /// The device the step shows: Trackpad first where it has rows.
     var gestureDevice: GestureInput.Device = .trackpad
-    /// The rows the step shows now.
-    var gestureFamilies: [OnboardingKeyFamily] {
-        gestureRowsByDevice[gestureDevice] ?? []
-    }
-    /// Whether the step offers Trackpad | Mouse: both have rows.
-    var offersGestureDevices: Bool { gestureRowsByDevice.count == 2 }
 
     /// Zero-based index of current step in `plannedSteps`.
     var progressIndex: Int? {
@@ -298,21 +291,5 @@ final class OnboardingModel {
     func commitLoginItemThen(_ exit: () -> Void) {
         onSetLoginItem(openAtLogin)
         exit()
-    }
-}
-
-extension OnboardingModel {
-    /// Reads each device's rows and picks the one shown (#3427): a
-    /// Mac without a trackpad has mouse rows only.
-    fileprivate func planGestures() {
-        var rows: [GestureInput.Device: [OnboardingKeyFamily]] = [:]
-        if hasTrackpad() {
-            let trackpad = gestureRows()
-            if !trackpad.isEmpty { rows[.trackpad] = trackpad }
-        }
-        let mouse = mouseGestureRows()
-        if !mouse.isEmpty { rows[.mouse] = mouse }
-        gestureRowsByDevice = rows
-        gestureDevice = rows[.trackpad] == nil ? .mouse : .trackpad
     }
 }

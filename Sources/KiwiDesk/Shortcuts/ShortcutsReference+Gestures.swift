@@ -150,13 +150,7 @@ extension ShortcutsReferenceBuilder {
         for (key, reached) in byKey {
             if reached.count > 1 {
                 let ways = Set(reached.compactMap(\.badge.direction))
-                badges.append(
-                    ShortcutGestureBadge(
-                        key: key,
-                        direction: nil,
-                        axis: .of(ways)
-                    )
-                )
+                badges.append(.covering(key, ways: ways))
             } else {
                 badges += reached.map(\.badge)
             }
