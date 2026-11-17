@@ -104,14 +104,18 @@ struct SpaceRuleMatchPreview: View {
     }
 
     /// The engine's answer for `title` with the draft staged: the
-    /// row's rule replaced by the typed one.
+    /// row's rule replaced by the typed one. The row's own rule is
+    /// out while the field is empty too, and a fragment another row
+    /// holds stages nothing, since Add refuses it.
     func verdict(for title: String) -> Verdict {
         var config = model.config
+        SpaceRuleEdit.drop(row, from: &config)
         let typed = pending.trimmed
+        let staged = SpaceRuleRow(app: row.app, fragment: typed)
         var own: String?
-        if !typed.isEmpty, let space {
-            SpaceRuleEdit.drop(row, from: &config)
-            let staged = SpaceRuleRow(app: row.app, fragment: typed)
+        if !typed.isEmpty, let space,
+            config.titledAppRules[staged.key] == nil
+        {
             config.titledAppRules[staged.key] = space
             own = staged.key
         }

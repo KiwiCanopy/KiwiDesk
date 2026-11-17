@@ -117,4 +117,44 @@ struct SpaceRuleEditTests {
             typing.verdict(for: "x - Brave – Home") == .otherRule("2")
         )
     }
+
+    /// Add Rule…'s door (#3373): a new titled rule staged beside the
+    /// app's rules in its anchor row's Space, every other rule keeping
+    /// its own verdict, and a fragment another row holds staging
+    /// nothing.
+    @Test("the Add Rule preview stages a rule beside the others")
+    func addRulePreviewStagesBeside() {
+        let model = makeTestModel()
+        model.config = config()
+        let adding = SpaceRuleRow(app: brave, fragment: "")
+        let preview = SpaceRuleMatchPreview(
+            model: model,
+            row: adding,
+            space: "3",
+            pending: "Shop"
+        )
+        #expect(preview.verdict(for: "Cart - Brave – Shop") == .opensIn("3"))
+        #expect(preview.verdict(for: "Mail – Work") == .otherRule("3"))
+        #expect(preview.verdict(for: "News") == .otherRule("1"))
+        let repeating = SpaceRuleMatchPreview(
+            model: model,
+            row: adding,
+            space: "1",
+            pending: "Work"
+        )
+        #expect(repeating.verdict(for: "Mail – Work") == .otherRule("3"))
+    }
+
+    @Test("a cleared Change Title field leaves the row's rule out")
+    func clearedFieldDropsTheRow() {
+        let model = makeTestModel()
+        model.config = config()
+        let preview = SpaceRuleMatchPreview(
+            model: model,
+            row: SpaceRuleRow(app: brave, fragment: "Work"),
+            space: "3",
+            pending: ""
+        )
+        #expect(preview.verdict(for: "Mail – Work") == .otherRule("1"))
+    }
 }

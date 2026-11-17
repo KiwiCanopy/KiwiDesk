@@ -152,8 +152,17 @@ struct TitlePatternPopoverTests {
         let space = try squashed(
             settings + "Sections/AppRuleSpaceRow+Scope.swift"
         )
-        #expect(space.contains("SpaceRuleMatchPreview("))
-        #expect(space.contains("pending:pending"))
+        #expect(
+            space.contains(
+                "space:SpaceRuleRows.space(of:row,in:model.config),"
+                    + "pending:pending)"
+            )
+        )
+        #expect(
+            space.contains(
+                "?row:SpaceRuleRow(app:row.app,fragment:\"\"),"
+            )
+        )
         #expect(
             try squashed(
                 settings + "Components/Common/WindowTitleEditor.swift"
@@ -161,7 +170,9 @@ struct TitlePatternPopoverTests {
         )
         #expect(
             try squashed(settings + "Sections/AppRuleFloatRow.swift")
-                .contains("pending:pending")
+                .contains(
+                    "AppRuleMatchPreview(model:model,app:app,pending:pending)"
+                )
         )
     }
 }
