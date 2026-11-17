@@ -62,7 +62,8 @@ struct AppRuleListsWiringTests {
 
     /// The scope fix itself: the chip editor hangs under the FLOAT
     /// row, and the Space row mounts none — its one pattern is
-    /// composed in its own scope cell (#1608 ▸ amended by #3341).
+    /// composed in a popover off its scope cell (#1608 ▸ amended by
+    /// #3341, #3373).
     @Test("the pattern editor lives in the Float row alone")
     func patternEditorScopesToFloat() throws {
         #expect(

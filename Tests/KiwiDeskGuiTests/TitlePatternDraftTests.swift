@@ -26,7 +26,7 @@ struct TitlePatternDraftTests {
         #expect(draft.picks == picks + 1)
     }
 
-    @Test("Other (Specify)… opens the field empty")
+    @Test("an empty start opens the field empty")
     func specifyOpensEmpty() {
         var draft = TitlePatternDraft()
         draft.start(with: "Stale")
@@ -63,52 +63,42 @@ struct TitlePatternDraftTests {
         #expect(draft.text.isEmpty)
     }
 
-    /// The wiring: a `Menu` cannot be clicked headless, so the
-    /// open-title button is held on the add menu's source.
-    @Test("an open title's button opens the draft, never adds")
-    func openTitleOpensTheDraft() throws {
+    /// The wiring (#3373): a listed open title fills the field,
+    /// never adds, and the field adds only through the popover's
+    /// own confirm, never through a Save's commit request.
+    @Test("an open title fills the field, never adds")
+    func openTitleFillsTheField() throws {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Common/"
-                    + "TitlePatternComposer.swift"
+                    + "TitlePatternPopover.swift"
             )
         let text = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
         )
-        let menu = try #require(
+        let list = try #require(
             SourceScan.declarationBody(
-                after: "private var addWindowMenu",
+                after: "private var titleList",
                 in: text
             ),
-            "addWindowMenu is gone from TitlePatternComposer"
+            "titleList is gone from TitlePatternPopover"
         )
-        let squashed = menu.split(whereSeparator: \.isWhitespace)
+        let squashed = list.split(whereSeparator: \.isWhitespace)
             .joined()
         #expect(
-            squashed.contains("Button(title){startDraft(with:title)}"),
-            "a picked title no longer opens the pattern field"
+            squashed.contains("Button{draft.start(with:title)}"),
+            "a listed title no longer fills the pattern field"
         )
         #expect(
             !squashed.contains("onCommit("),
-            "the add menu stores a pattern without the field again"
-        )
-        let start = try #require(
-            SourceScan.declarationBody(
-                after: "private func startDraft",
-                in: text
-            ),
-            "startDraft is gone from TitlePatternComposer"
-        )
-        #expect(
-            start.contains("draft.start(with: title)"),
-            "a picked title opens an empty field"
+            "the list stores a pattern without the field again"
         )
         let commit = try #require(
             SourceScan.declarationBody(
                 after: "private func commitDraft",
                 in: text
             ),
-            "commitDraft is gone from TitlePatternComposer"
+            "commitDraft is gone from TitlePatternPopover"
         )
         #expect(
             commit.contains("onCommit(pattern)"),
@@ -119,19 +109,17 @@ struct TitlePatternDraftTests {
                 after: "private var patternField",
                 in: text
             ),
-            "patternField is gone from TitlePatternComposer"
+            "patternField is gone from TitlePatternPopover"
         )
         let squashedField = field.split(whereSeparator: \.isWhitespace)
             .joined()
         #expect(
-            squashedField.contains(".onExitCommand{draft.cancel()"),
-            "Escape no longer drops the pending pattern"
+            squashedField.contains(".onSubmit(commitDraft)"),
+            "Return no longer adds the pattern"
         )
         #expect(
-            squashedField.contains(
-                ".commitsOnSave($fieldFocused){commitDraft()}"
-            ),
-            "a Save or a blur drops a pending pattern again"
+            !squashedField.contains(".commitsOnSave("),
+            "a blur or a Save adds from the popover again"
         )
     }
 }

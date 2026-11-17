@@ -52,7 +52,7 @@ struct KiwiVisionLensAppsCard: View {
                 caption: (lens.titles[app] ?? []).isEmpty
                     ? KiwiVisionLensWords.titledEmptyCaption
                     : KiwiVisionLensWords.titledCaption
-            ) { _ in EmptyView() }
+            ) { EmptyView() }
             .padding(.leading, AppIconCache.side + 6)
         }
     }

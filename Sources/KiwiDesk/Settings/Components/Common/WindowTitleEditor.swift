@@ -2,40 +2,64 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Editor for the title patterns that pick some of an app's
-/// windows (#68 §3.11, #2103 ruling 43): a chip per pattern, the
-/// one `TitlePatternComposer`, the caller's preview of what the
-/// patterns match and its caption. A pattern
-/// matches as `WindowTitleMatch` reads it; where the patterns are
-/// stored is the caller's.
+/// windows (#68 §3.11, #2103 ruling 43): a chip per pattern, an
+/// Add Window button opening the one `TitlePatternPopover`
+/// (#3373), the caller's preview of what the patterns match and
+/// its caption. A pattern matches as `WindowTitleMatch` reads it;
+/// where the patterns are stored is the caller's.
 struct WindowTitleEditor<Preview: View>: View {
     @ObservedObject var model: SettingsModel
     @Binding var patterns: [String]
-    /// The app's bundle id, whose open windows the menu offers.
+    /// The app's bundle id, whose open windows the popover offers.
     let app: String
     let caption: String
-    /// What the patterns match, handed the pattern being typed.
-    @ViewBuilder let preview: (String) -> Preview
-    /// The pending pattern; internal so a test can mount it open.
-    @State var draft = TitlePatternDraft()
+    /// What the stored patterns match.
+    @ViewBuilder let preview: () -> Preview
+    /// The open popover; internal so a test can mount it open.
+    @State var request: TitlePatternRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if !shown.isEmpty {
-                WrapChips(shown) { pattern in
+            // The chips' own flow, the add button after them.
+            FlowLayout(spacing: ChipMetrics.spacing) {
+                ForEach(shown, id: \.self) { pattern in
                     patternChip(pattern)
                 }
+                addButton
             }
-            TitlePatternComposer(
-                model: model,
-                draft: $draft,
-                app: app,
-                covered: shown,
-                onCommit: addPattern
-            )
-            preview(draft.isOpen ? draft.text : "")
+            preview()
             Text(caption)
                 .font(.caption)
                 .foregroundStyle(.tertiary)
+        }
+    }
+
+    private var addButton: some View {
+        Button {
+            request = TitlePatternRequest(seed: "", anchor: app)
+        } label: {
+            Label(
+                L("app_rules.add_window", "Add Window"),
+                systemImage: "plus"
+            )
+            .font(.caption)
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(SettingsTheme.ink2)
+        .hoverHighlight()
+        .popover(item: $request, arrowEdge: .bottom) { request in
+            TitlePatternPopover(
+                model: model,
+                app: app,
+                covered: shown,
+                seed: request.seed,
+                onCommit: { pattern in
+                    addPattern(pattern)
+                    self.request = nil
+                },
+                onCancel: { self.request = nil }
+            )
+            .settingsPopoverChrome()
         }
     }
 

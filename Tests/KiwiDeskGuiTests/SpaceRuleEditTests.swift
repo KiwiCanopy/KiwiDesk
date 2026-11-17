@@ -88,33 +88,4 @@ struct SpaceRuleEditTests {
             )
         )
     }
-
-    @Test("the preview stages the draft into the engine's resolution")
-    func previewReadsTheEngine() {
-        let model = makeTestModel()
-        model.config = config()
-        let bare = SpaceRuleRow(app: brave, fragment: nil)
-        let preview = SpaceRuleMatchPreview(
-            model: model,
-            row: bare,
-            space: "1",
-            pending: "Shop"
-        )
-        #expect(preview.verdict(for: "Cart - Brave – Shop") == .opensIn("1"))
-        #expect(preview.verdict(for: "Mail – Work") == .otherRule("3"))
-        // The bare row became the composed one, so nothing else
-        // catches a title neither rule names.
-        #expect(preview.verdict(for: "News") == .noRule)
-        let typing = SpaceRuleMatchPreview(
-            model: model,
-            row: SpaceRuleRow(app: brave, fragment: "Work"),
-            space: "3",
-            pending: ""
-        )
-        #expect(typing.verdict(for: "News") == .otherRule("1"))
-        // A titled rule beats the bare one the app also has.
-        #expect(
-            typing.verdict(for: "x - Brave – Home") == .otherRule("2")
-        )
-    }
 }

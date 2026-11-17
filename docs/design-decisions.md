@@ -23692,6 +23692,33 @@ an absent rule as a row. A titled rule files a window once, at its
 creation or at its first matching title before the user acts, and
 never on a later title change: a tab switch would take every other
 tab with it.
+
+*Each row's scope menu offers only what its row can become, and a
+title is written in a popover (#3373, owner, 2026-11-17, amending
+the above and #3350).* The bare row's menu holds its one scope,
+checked, and **Add Rule for Windows Titled…**; a titled row's holds
+**All windows** (greyed, with its reason beneath, while the app
+already has a bare row), **Change Title…** and the same Add Rule.
+"Windows titled…" left the bare row's menu: there it would turn the
+app's catch-all into a titled rule, which a titled rule and the
+bare row's trash already do in two plain steps. The title is
+written in a popover anchored to the scope cell rather than in
+place of it, so a row keeps its height while one is composed: the
+app's open titles listed (those with a row left out), a click
+filling the field with its text selected to trim, the field, the
+refusal caption, Cancel and Add. It adds only through its own
+confirm, never on a blur, since an outside click that dismisses a
+popover would otherwise read as Add. A free-text "Other (Specify)…"
+beside an open field and a "+ Add Window" menu inside the composer
+both repeated the field, and are gone. Add Rule… files the new rule
+in the Space of the row it was opened from, whose own menu then
+moves it. A freshly added app is a plain All windows row. The Float
+editor's **Add Window** opens the same popover over its chips, its
+own menu keeping *All windows* and *Windows titled…* as peers, as
+above; a lens's app titles in KiwiVision share that editor and so
+the popover. The inline composer's match preview went with it: a
+row of constant height has no room under it, and the popover's
+list of open titles is the check a user makes before picking one.
 :::
 A third card, **Automatic floating**, carries the escape for a
 guess (#2173): its checkbox on top and the **Tile instead** list
