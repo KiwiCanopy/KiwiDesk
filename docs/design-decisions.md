@@ -21439,8 +21439,7 @@ by the #678 Phase 2 census render, by #1517 and by #2507.) The
 KiwiShelf card owns existence and placement: the Show master and
 its Each bar and Pocket drawer, then Position and its Each bar and
 Pocket drawer and Alignment — where the bars sit, coarse to fine —
-then Thickness, then Pocket position, and the Style and Margins
-drawers. Order and Space Bar minimum
+then Thickness and its Style and Margins drawers. Order and Space Bar minimum
 close the Style drawer: they change how the joined run draws —
 which bar leads, how much of a crowded edge the Space Bar keeps —
 and matter only where the bars share an edge. A master's drawer
@@ -21452,6 +21451,13 @@ focused-window colour among them. A new bar row slots into this
 order — in the census
 order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
+
+:::unreleased
+*Amended (#3401, owner 2026-11-17):* Pocket position sits directly
+under Alignment, above Thickness's rule: it is where the pocket sits
+along the edge Position gives it, so it belongs with the placement
+rows rather than after the strip's depth.
+:::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
 owner ruling 2026-10-21).** Nothing hides rows by experience

@@ -25,10 +25,12 @@ enum BarsRowOrder {
     ]
 
     /// KiwiShelf card, at rest below the Show group: where the
-    /// bars sit, coarse to fine.
+    /// bars sit, coarse to fine, then where the pocket sits along
+    /// its edge (owner, 2026-11-17, #3401).
     static let kiwishelfPlacement: [SettingKey] = [
         .kiwishelf(.edge),
         .kiwishelf(.alignment),
+        .kiwishelf(.pocketPosition),
     ]
 
     /// KiwiShelf card, after a rule: how deep the strip is.
@@ -36,15 +38,9 @@ enum BarsRowOrder {
         .kiwishelf(.thickness)
     ]
 
-    /// KiwiShelf card, after a rule: where the pocket sits along
-    /// its edge (#2678); the edge is Position's (#3376).
-    static let kiwishelfPocket: [SettingKey] = [
-        .kiwishelf(.pocketPosition)
-    ]
-
     /// KiwiShelf card, every at-rest row below the Show group.
     static var kiwishelfAtRest: [SettingKey] {
-        kiwishelfPlacement + kiwishelfDepth + kiwishelfPocket
+        kiwishelfPlacement + kiwishelfDepth
     }
 
     /// KiwiShelf card, behind Position's Each bar and Pocket
