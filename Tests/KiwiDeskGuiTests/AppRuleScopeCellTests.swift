@@ -11,8 +11,8 @@ import Testing
 /// title cut in the middle, so an app's Space and "Applies to"
 /// columns line up. Nothing headless can open a `Menu`, so the
 /// wiring is held on the source, scoped to a brace-balanced body;
-/// the width is held by rendering a menu with the label and style
-/// the row draws. Main-actor spend: one file read, a few string
+/// the width is held by rendering the label and style chain the
+/// row spells (`chain`). Main-actor spend: one file read, a few string
 /// measurements and four hosted menus.
 @Suite("App Rules scope cell (#3415)", .serialized)
 @MainActor
@@ -59,6 +59,14 @@ struct AppRuleScopeCellTests {
         )
         return Self.squashed(found)
     }
+
+    /// The scope menu's label and style, squashed: the one chain the
+    /// row spells and `renderedWidth` mirrors, held contiguous so a
+    /// modifier added inside it breaks the match.
+    static let chain =
+        "label:{AppRuleMenuLabel(text:AppRuleScopeFit.middle(scopeLabel),"
+        + "chevron:false)}.menuStyle(.borderlessButton)"
+        + ".neutralMenuLabel().fixedSize().menuTriggerHover()"
 
     private func row(_ fragment: String?) -> SpaceRuleRow {
         SpaceRuleRow(app: app, fragment: fragment)
@@ -125,21 +133,18 @@ struct AppRuleScopeCellTests {
     @Test("the cell keeps one width and draws the rendered menu")
     func cellKeepsItsWidth() throws {
         let menu = try body(of: "private var scopeMenu: some View")
-        // The label and style the render below measures, with no
-        // style of the row's own on top that the render would not
-        // see.
-        #expect(
-            menu.contains(
-                "label:{AppRuleScopeFit.label(scopeLabel)}"
-                    + ".modifier(AppRuleScopeFit.Style())"
-            )
-        )
+        // The chain the render below measures, whole, and no style
+        // after it the render would not see.
+        #expect(menu.contains(Self.chain), "scopeMenu left the chain")
+        // Nothing else styles the control the render measures.
+        let after = menu.components(separatedBy: Self.chain).last ?? ""
         for style in [
-            ".menuStyle(", ".fixedSize(", ".font(",
-            ".menuTriggerHover(", ".padding(", "AppRuleMenuLabel(",
+            ".menuStyle(", ".fixedSize(", ".font(", ".padding(",
+            ".controlSize(", ".buttonStyle(", ".labelStyle(", ".frame(",
         ] {
-            #expect(!menu.contains(style), "scopeMenu restyles: \(style)")
+            #expect(!after.contains(style), "scopeMenu restyles: \(style)")
         }
+        #expect(menu.components(separatedBy: ".menuStyle(").count == 2)
         let file = Self.squashed(try raw())
         let column = "width:SettingsMetrics.appRuleScopeColumn"
         #expect(file.components(separatedBy: column).count == 2)
@@ -154,9 +159,16 @@ struct AppRuleScopeCellTests {
         let menu = Menu {
             Button("x") {}
         } label: {
-            AppRuleScopeFit.label(text, width: width)
+            AppRuleMenuLabel(
+                text: AppRuleScopeFit.middle(text, width: width),
+                chevron: false
+            )
         }
-        .modifier(AppRuleScopeFit.Style())
+        // `Self.chain`, which `cellKeepsItsWidth` finds in the row.
+        .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
+        .fixedSize()
+        .menuTriggerHover()
         .font(.callout)
         return NSHostingView(rootView: menu).fittingSize.width
     }

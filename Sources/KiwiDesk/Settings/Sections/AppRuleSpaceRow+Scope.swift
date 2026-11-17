@@ -99,9 +99,16 @@ extension AppRuleSpaceRow {
             }
             Button(AppRuleScopeWords.addTitled) { open(false) }
         } label: {
-            AppRuleScopeFit.label(scopeLabel)
+            AppRuleMenuLabel(
+                text: AppRuleScopeFit.middle(scopeLabel),
+                chevron: false
+            )
         }
-        .modifier(AppRuleScopeFit.Style())
+        // The chain `AppRuleScopeCellTests` renders, spelled whole.
+        .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
+        .fixedSize()
+        .menuTriggerHover()
         .help(row.fragment ?? "")
         .accessibilityLabel(AppRuleScopeWords.menuName)
         .accessibilityValue(scopeLabel)
