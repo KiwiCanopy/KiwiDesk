@@ -8,8 +8,7 @@ import Testing
 /// The tour's keycap keeps its whole width when its row is tight
 /// (#3426): offered less, it does not give the room up by squeezing
 /// a "+" between the caps to nothing, so the row's label wraps
-/// instead. Rendered at 2x, as tests.md asks of a pixel probe.
-/// Main-actor spend: four small renders.
+/// instead. Main-actor spend: three small renders.
 @Suite("Tour keycap keeps its width (#3426)")
 @MainActor
 struct OnboardingKeycapFitTests {
