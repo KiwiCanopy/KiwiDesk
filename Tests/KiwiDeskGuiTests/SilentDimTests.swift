@@ -102,6 +102,12 @@ struct SilentDimTests {
             + "off Hyper, and carries its own accessibilityHint "
             + "and help (`shortcuts.hyper_move.dormant`); the "
             + "Hyper card's caption above says why too",
+        "GestureChordRecorder.swift":
+            "a gesture's Hyper chord while no Hyper key is set "
+            + "(#3407), as the key recorder's: the well stays live, "
+            + "since re-recording is a way off Hyper, and the reason "
+            + "is a caption drawn under it, its hint and its help "
+            + "(`shortcuts.gestures.hyper_dormant`)",
         "FollowsMainTray.swift":
             "a COLOUR's alpha, not a view dim: the drop-target "
             + "highlight's own fill fades in and out with the "
