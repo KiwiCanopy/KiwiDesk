@@ -116,6 +116,10 @@ extension JumpPanelController {
             name: { run in
                 named.first { $0.lua == run.lua }?.resolvedLabel
                     ?? GestureListWords.runName(run)
+            },
+            icon: { run in
+                named.first { $0.lua == run.lua }
+                    .flatMap(ShortcutsReferenceBuilder.icon(for:))
             }
         )
         return withAppGlyphs(

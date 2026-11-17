@@ -5,15 +5,38 @@ import KiwiDeskCore
 /// swipe goes where it runs one direction's action. A whole family
 /// on a folded row names no direction.
 struct ShortcutGestureBadge: Hashable, Identifiable {
+    /// The one axis a family reaches a row along both ways of
+    /// (#3380): its badge draws two opposed arrows.
+    enum Axis: Hashable {
+        case horizontal, vertical
+
+        /// The axis `ways` span exactly; nil for one way, four, or
+        /// any other mix.
+        static func of(_ ways: Set<GestureDirection>) -> Axis? {
+            switch ways {
+            case [.left, .right]: .horizontal
+            case [.up, .down]: .vertical
+            default: nil
+            }
+        }
+    }
+
     let key: GestureKey
     let direction: GestureDirection?
+    /// Set only with no `direction`, for a two-way family.
+    var axis: Axis? = nil
     /// What the gesture is called, its way included — read aloud and
     /// matched by a search; worded once, on the main actor.
     let words: String
 
-    @MainActor init(key: GestureKey, direction: GestureDirection?) {
+    @MainActor init(
+        key: GestureKey,
+        direction: GestureDirection?,
+        axis: Axis? = nil
+    ) {
         self.key = key
         self.direction = direction
+        self.axis = direction == nil ? axis : nil
         let input = GestureListWords.input(key.input)
         words =
             direction.map {
@@ -31,9 +54,18 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
     }
 
     /// The badge's glyph: a swipe's direction badge (variant A
-    /// tightened) where it names a way, else the gesture's own
-    /// glyph — a whole family's being today's swipe glyph.
+    /// tightened) where it names a way, its axis badge where a family
+    /// runs both ways of one axis (#3380), else the gesture's own
+    /// glyph — a four-way family's being today's swipe glyph.
     @MainActor var symbol: String {
+        if let axis, let fingers = key.input.fingers,
+            !key.input.directions.isEmpty, (2...4).contains(fingers)
+        {
+            return CustomGlyph.swipeAxis(
+                fingers,
+                vertical: axis == .vertical
+            ).name
+        }
         if let direction, let fingers = key.input.fingers,
             !key.input.directions.isEmpty,
             CustomGlyph.badgeDirections.contains(direction),
