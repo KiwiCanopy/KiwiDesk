@@ -8,8 +8,8 @@ import Testing
 /// not ask for** (#3388): a bar revealed under Off lands under the
 /// resting pointer, and the placement's hover re-read then found an
 /// item there and opened its peek, which stood until the pointer
-/// crossed the item. The re-read of a section already on the strip
-/// still opens one, as a resting pointer's does (#1946).
+/// crossed the item. Once the pointer moves, a reading opens one as
+/// ever (#1946).
 @Suite("Bar peek on an arriving section (#3388)", .serialized)
 @MainActor
 struct BarPeekArrivalTests {
@@ -75,7 +75,7 @@ struct BarPeekArrivalTests {
 
     /// Rests the pointer on Space 2's Web glyph, wherever the bar
     /// draws it.
-    private func restOnWeb(_ core: KiwiCore) {
+    private func restOnWeb(_ core: KiwiCore, nudge: CGFloat) {
         let display = display
         let two = two
         BarHoverHit.pointerOverride = { window in
@@ -87,7 +87,7 @@ struct BarPeekArrivalTests {
                 web.window === window
             else { return BarHoverHit.offWindow }
             return web.convert(
-                CGPoint(x: web.bounds.midX, y: web.bounds.midY),
+                CGPoint(x: web.bounds.midX + nudge, y: web.bounds.midY),
                 to: nil
             )
         }
@@ -99,21 +99,58 @@ struct BarPeekArrivalTests {
         BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
     }
 
-    @Test("A bar arriving under the pointer opens no peek")
-    func arrivalOpensNothing() {
+    @Test("A bar arriving under the pointer opens no peek until it moves")
+    func arrivalOpensNothing() throws {
         let core = seededCore()
         defer { close(core) }
         var dwells = 0
         core.shelves.peek.schedule = { _, _ in dwells += 1 }
-        restOnWeb(core)
+        restOnWeb(core, nudge: 0)
+        render(core)
+        #expect(dwells == 0)
+        // Placed again with the pointer where it rested: still none.
         render(core)
         #expect(dwells == 0)
         #expect(core.shelves.peek.pending == nil)
-        // Placed again, already on its strip: the resting pointer
-        // opens the peek as ever.
-        render(core)
+        // The pointer moves on the glyph: its peek opens as ever.
+        restOnWeb(core, nudge: 1)
+        let item = try #require(
+            core.spaceBars.overlayForTesting(display)?.itemViews.first {
+                $0.space == two
+            }
+        )
+        item.syncHoverToPointer()
         #expect(dwells == 1)
         #expect(core.shelves.peek.pending != nil)
+    }
+
+    @Test("A section a show brings on screen is an arrival")
+    func arrivalPredicate() {
+        let strip = NSView()
+        let placed = NSView()
+        strip.addSubview(placed)
+        let fresh = NSView()
+        let sections = [placed, fresh].map {
+            ShelfOverlay.Section(
+                view: $0,
+                slot: .zero,
+                plate: .zero,
+                content: .zero
+            )
+        }
+        let arrived = { (shown: Bool, leaving: [NSView: UUID]) in
+            ShelfOverlay.arrivals(
+                sections,
+                shownBefore: shown,
+                on: strip,
+                leaving: leaving
+            )
+        }
+        // A shelf kept ordered out between reveals keeps its
+        // sections on the strip: all arrive with its panel.
+        #expect(arrived(false, [:]) == [placed, fresh])
+        #expect(arrived(true, [:]) == [fresh])
+        #expect(arrived(true, [placed: UUID()]) == [placed, fresh])
     }
 
     @Test("An arriving section's reading still closes a peek")
@@ -121,20 +158,30 @@ struct BarPeekArrivalTests {
         let peek = BarPeek(menus: NotificationCenter())
         var dwells = 0
         peek.schedule = { _, _ in dwells += 1 }
+        let window = NSPanel(
+            contentRect: CGRect(x: 0, y: 0, width: 200, height: 40),
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: true
+        )
+        defer { window.orderOut(nil) }
         let root = AppBarOverlay.FlippedView()
         let item = AppBarOverlay.FlippedView()
         root.addSubview(item)
+        window.contentView?.addSubview(root)
+        var point = CGPoint(x: 10, y: 10)
+        BarHoverHit.pointerOverride = { _ in point }
         let source = BarPeekSource.glyph([WindowID(4)])
-        peek.rereading(arrived: [root]) {
-            peek.pointer(in: item, on: item, source: source, edge: .top)
-        }
+        peek.arrive([root])
+        peek.pointer(in: item, on: item, source: source, edge: .top)
         #expect(dwells == 0)
+        point.x += 1
         peek.pointer(in: item, on: item, source: source, edge: .top)
         #expect(dwells == 1)
         #expect(peek.pending != nil)
-        peek.rereading(arrived: [root]) {
-            peek.pointer(in: item, on: nil, source: nil, edge: .top)
-        }
+        point.x += 1
+        peek.arrive([root])
+        peek.pointer(in: item, on: nil, source: nil, edge: .top)
         #expect(peek.pending == nil)
     }
 }

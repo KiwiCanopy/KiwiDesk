@@ -63,8 +63,9 @@ final class BarPeek {
     /// An anchor a click or a move closed: it peeks again only
     /// once the pointer has left it, as a tooltip does.
     private var spent: Anchor?
-    /// Section roots that joined their strip in this placement.
-    var arrived: [NSView] = []
+    /// Sections that came on screen under the pointer, and where it
+    /// rested then; written by `BarPeek+Arrival.swift` alone.
+    var arrivals: [Arrival] = []
     private var closedAt: TimeInterval?
     /// Stamps every timer it schedules; a phase change outdates them.
     private var generation = 0

@@ -1,24 +1,50 @@
 import AppKit
 
-/// A section that joins its strip lands under a resting pointer
-/// that asked for nothing, and AppKit then sends its items no
-/// entry and no exit (#3388): the placement's hover re-read finds
-/// them under the pointer, and a peek opened from it stood until
-/// the pointer crossed the item. Inside `rereading(arrived:_:)` a
-/// reading on such a section opens and swaps in no peek; it still
-/// closes one, and the pointer's next move opens it as ever.
+/// A section that comes on screen under a resting pointer opens and
+/// swaps in no peek until the pointer moves (#3388): the pointer
+/// asked for nothing, and a peek opened from the placement's hover
+/// re-read was seen standing on the device until the pointer crossed
+/// its item. A reading still closes a peek, and the first reading
+/// after the pointer moves opens one as ever.
 extension BarPeek {
-    /// Runs the placement's hover re-read with `roots` — the
-    /// section roots that joined their strip in this placement —
-    /// opening no peek on them.
-    func rereading(arrived roots: [NSView], _ body: () -> Void) {
-        arrived = roots
-        defer { arrived = [] }
-        body()
+    /// A section `ShelfOverlay.show` brought on screen, and the
+    /// pointer's resting point in its window then.
+    struct Arrival {
+        weak var root: NSView?
+        let window: NSWindow
+        let point: CGPoint
     }
 
-    /// Whether `anchor` sits in a section that just arrived.
+    /// Marks `roots` arrived under the pointer where it rests now.
+    func arrive(_ roots: [NSView]) {
+        arrivals.removeAll { mark in
+            mark.root == nil || roots.contains { $0 === mark.root }
+        }
+        for root in roots {
+            guard let window = root.window else { continue }
+            arrivals.append(
+                Arrival(
+                    root: root,
+                    window: window,
+                    point: BarHoverHit.restingPoint(in: window)
+                )
+            )
+        }
+    }
+
+    /// Whether `anchor` sits in a section the pointer has not moved
+    /// over since it arrived; a moved pointer ends the mark.
     func arrives(_ anchor: NSView) -> Bool {
-        arrived.contains { anchor.isDescendant(of: $0) }
+        guard
+            let index = arrivals.firstIndex(where: { mark in
+                mark.root.map { anchor.isDescendant(of: $0) } == true
+            })
+        else { return false }
+        let mark = arrivals[index]
+        if BarHoverHit.restingPoint(in: mark.window) == mark.point {
+            return true
+        }
+        arrivals.remove(at: index)
+        return false
     }
 }
