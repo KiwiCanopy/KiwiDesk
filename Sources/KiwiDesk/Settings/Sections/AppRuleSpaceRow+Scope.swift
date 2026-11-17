@@ -68,8 +68,9 @@ extension AppRuleSpaceRow {
     }
 
     /// The bare row: its one scope, checked, and the door to a
-    /// titled rule. A titled row: every window (greyed while the
-    /// app has a bare row), its own title, and another rule (#3373).
+    /// titled rule. A titled row: the bare row it would become
+    /// (greyed while the app has one), its own title, and another
+    /// rule (#3373, #3415).
     private var scopeMenu: some View {
         Menu {
             if row.fragment == nil {
@@ -77,7 +78,7 @@ extension AppRuleSpaceRow {
                 // windows" beside titled rows.
                 Toggle(scopeLabel, isOn: .constant(true))
             } else {
-                Button(AppRuleScopeWords.all) {
+                Button(becomesLabel) {
                     let bare = SpaceRuleRow(app: row.app, fragment: nil)
                     model.moveSpaceRule(from: row, to: bare) {
                         SpaceRuleEdit.makeBare(row, in: &$0)
@@ -91,14 +92,22 @@ extension AppRuleSpaceRow {
             }
             Button(AppRuleScopeWords.addTitled) { open(false) }
         } label: {
-            AppRuleMenuLabel(text: scopeLabel, chevron: false)
-                .truncationMode(.middle)
+            AppRuleMenuLabel(
+                text: AppRuleScopeFit.middle(scopeLabel),
+                chevron: false
+            )
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
         .menuTriggerHover()
         .help(row.fragment ?? "")
+        // One width for every row, so the Space and "Applies to"
+        // columns line up across an app's rows (#3415).
+        .frame(
+            width: SettingsMetrics.appRuleScopeColumn,
+            alignment: .leading
+        )
         .accessibilityLabel(AppRuleScopeWords.menuName)
         .accessibilityValue(scopeLabel)
     }
@@ -106,10 +115,18 @@ extension AppRuleSpaceRow {
     /// The drawn and spoken scope, one expression.
     var scopeLabel: String {
         guard let fragment = row.fragment else {
-            return siblings.isEmpty
-                ? AppRuleScopeWords.all : AppRuleScopeWords.allOther
+            return AppRuleScopeWords.bare(besideOthers: !siblings.isEmpty)
         }
         return AppRuleScopeWords.titled(fragment)
+    }
+
+    /// The bare row a titled row's scope item would make: "All
+    /// other windows" while the app keeps other rows (#3415).
+    var becomesLabel: String {
+        AppRuleScopeWords.bare(
+            besideOthers: hasBare
+                || siblings.contains { $0 != row.fragment }
+        )
     }
 
     private var hasBare: Bool { model.config.appRules[row.app] != nil }

@@ -86,6 +86,15 @@ enum SettingsMetrics {
     /// hugs instead.
     static let appRuleNameColumn: CGFloat = 160
 
+    /// A Space row's scope label at most (#3415): the widest bare
+    /// scope in any catalog fits whole (`AppRuleScopeWidthTests`),
+    /// a longer title is cut in its middle (`AppRuleScopeFit`).
+    static let appRuleScopeLabel: CGFloat = 160
+    /// The scope cell's one width: its label plus the menu's own
+    /// indicator (24–29 pt rendered, 2026-11-17), so every row's
+    /// Space column starts at one edge.
+    static let appRuleScopeColumn: CGFloat = appRuleScopeLabel + 32
+
     /// The gap between an App Rules row's columns, read by the
     /// rows and by the pattern editor's inset alike.
     static let appRuleColumnSpacing: CGFloat = 8

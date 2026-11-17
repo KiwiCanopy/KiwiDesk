@@ -15,6 +15,12 @@ enum AppRuleScopeWords {
         L("app_rules.space.scope.all_other", "All other windows")
     }
 
+    /// The bare row's words: "All other windows" while the app
+    /// keeps other rows, else "All windows" (#3341, #3415).
+    static func bare(besideOthers: Bool) -> String {
+        besideOthers ? allOther : all
+    }
+
     /// The Float menu's item opening the pattern editor.
     static var titledItem: String {
         L("app_rules.float.scope.titled", "Windows titled…")
