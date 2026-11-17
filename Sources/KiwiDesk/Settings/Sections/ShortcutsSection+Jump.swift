@@ -13,6 +13,10 @@ extension ShortcutsSection {
             tracker: jumpTracker,
             readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
             spokenReadout: editingReadout(selected),
+            readoutIcon: ShortcutGlyph(
+                layer: selected,
+                in: model.config.layers
+            ),
             groups: ShortcutsJumpGroup.shown(
                 desktopsDrawn: MacOSDesktopsGroup.hasRows(expander)
             )

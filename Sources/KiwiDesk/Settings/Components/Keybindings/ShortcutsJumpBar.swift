@@ -14,6 +14,9 @@ struct ShortcutsJumpBar: View {
     /// The same sentence with the layer's full name, for
     /// VoiceOver; nil speaks what is drawn.
     var spokenReadout: String? = nil
+    /// The edited layer's icon, ahead of the whole sentence; nil
+    /// for `default` and a layer without one (#3431).
+    var readoutIcon: ShortcutGlyph? = nil
     /// The chips drawn, in page order.
     let groups: [ShortcutsJumpGroup]
     let jump: (ShortcutsJumpGroup) -> Void
@@ -77,11 +80,23 @@ struct ShortcutsJumpBar: View {
         }
     }
 
+    /// The icon leads the sentence, never sits inside it, since
+    /// word order differs per locale; it stays with the text on a
+    /// wrap and VoiceOver hears the sentence alone (#3431).
     private func readoutText(_ text: String) -> some View {
-        Text(text)
-            .font(.callout)
-            .foregroundStyle(SettingsTheme.ink2)
-            .accessibilityLabel(spokenReadout ?? text)
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if let readoutIcon {
+                ShortcutGlyphView(
+                    glyph: readoutIcon,
+                    side: ShortcutLayerChip.iconSide
+                )
+            }
+            Text(text)
+        }
+        .font(.callout)
+        .foregroundStyle(SettingsTheme.ink2)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spokenReadout ?? text)
     }
 
     private var chips: some View {

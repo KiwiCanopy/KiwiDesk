@@ -114,7 +114,7 @@ struct LayerStripEditor: View {
     /// The draft layer's icon, as its switch rows read it — never
     /// `default`'s (#3267 ▸ Ruling 3).
     private func chipIcon(_ name: String) -> ShortcutGlyph? {
-        ShortcutGlyph(icon: KeyLayer.icons(of: model.config.layers)[name])
+        ShortcutGlyph(layer: name, in: model.config.layers)
     }
 
     @ViewBuilder

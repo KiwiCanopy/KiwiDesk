@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// "Tell left and right modifiers apart" (#2601), the Modifier keys
-/// card's third row: a checkbox in the shortcut rows' icon slot,
-/// app-wide and written at once like the layout cue (#1741), greyed
+/// card's third row: a peer checkbox row in the shared setting row's
+/// shape, the setting glyph in its icon slot (#3434), app-wide and
+/// written at once like the layout cue (#1741), greyed
 /// only where `init.lua` owns the config — the card's caption says
 /// so already. The `?` carries the privacy line; a caption shows
 /// only a live fact (#2601 ▸ Ruling 2).
@@ -17,25 +18,26 @@ struct ModifierSidesRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            ToggleRow(
-                label: ModifierSidesWords.title,
+            ShortcutSettingRow(
+                title: ModifierSidesWords.title,
+                help: ModifierSidesWords.help,
                 isOn: Binding(
                     get: { model.appWide.modifierSides },
                     set: { on in model.setAppWide { $0.modifierSides = on } }
                 ),
-                help: ModifierSidesWords.help,
-                disabled: reason == .appWideLuaOwned
+                grey: reason == .appWideLuaOwned
+                    ? GeneralGateHelp.sentence(for: .luaOwned) : nil,
+                reach: { EmptyView() }
             )
             .searchAnchored(
                 SettingsCatalog.shortcuts.modifierKeys.children.modifierSides
             )
             if reason != .appWideLuaOwned {
                 LiveSettingCaption()
-                    .padding(.leading, ToggleRow.captionIndent)
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
             }
             if let text = captionText { caption(text) }
         }
-        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     private var captionText: String? {
@@ -62,7 +64,7 @@ struct ModifierSidesRow: View {
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, ToggleRow.captionIndent)
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 }
 

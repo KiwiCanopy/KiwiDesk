@@ -98,6 +98,20 @@ struct ShortcutsJumpTests {
         #expect(reading.marked == .showHide)
     }
 
+    /// Modifier keys and Layers sit above the first chipped group
+    /// and take no chip; scrolling through them keeps the first
+    /// group marked until a header reaches the bar (#3431).
+    @Test("the first group stays marked until a header reaches the bar")
+    func firstPointOfScroll() {
+        for offset in [1.0, 60, 95] {
+            let reading = ShortcutsJumpReading.read(
+                page(scrolledBy: offset, banner: 120)
+            )
+            #expect(reading.underlapped, "\(offset)")
+            #expect(reading.marked == .showHide, "\(offset)")
+        }
+    }
+
     @Test("the group whose header reached the bar is marked")
     func headerUnderTheBar() {
         let reading = ShortcutsJumpReading.read(page(scrolledBy: 300))
@@ -116,15 +130,16 @@ struct ShortcutsJumpTests {
         let landed = ShortcutsJumpReading.read(page(scrolledBy: 288))
         #expect(landed.marked == .focus)
         let short = ShortcutsJumpReading.read(page(scrolledBy: 270))
-        #expect(short.marked == nil)
+        #expect(short.marked == .showHide)
     }
 
-    /// Scrolled past Show & hide into a stretch no chip names, no
-    /// chip is current: none of them names what is under the bar.
-    @Test("chrome no chip names marks nothing")
+    /// Scrolled past Show & hide into a stretch no chip names, the
+    /// last group whose header reached the bar stays marked: a chip
+    /// is marked at every scroll position (#3431).
+    @Test("between groups the last one reached stays marked")
     func betweenGroups() {
         let reading = ShortcutsJumpReading.read(page(scrolledBy: 200))
-        #expect(reading.marked == nil)
+        #expect(reading.marked == .showHide)
         #expect(reading.underlapped)
     }
 
@@ -136,10 +151,8 @@ struct ShortcutsJumpTests {
         #expect(reading.marked == .pocket)
     }
 
-    /// Guards only the two-edit regression while the branch order
-    /// stands: unscrolled, `read` marks the first group before it
-    /// asks about the end, so the end rule's own `minY < 0` clause
-    /// is not observable here — dropping it alone stays green.
+    /// A page that fits marks its first group, never its last: the
+    /// end rule's own `minY < 0` clause is what keeps it there.
     @Test("a page that fits is never at its end")
     func shortPageHasNoEnd() {
         let reading = ShortcutsJumpReading.read(

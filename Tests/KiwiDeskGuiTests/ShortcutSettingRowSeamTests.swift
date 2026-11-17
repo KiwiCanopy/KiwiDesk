@@ -27,6 +27,9 @@ struct ShortcutSettingRowSeamTests {
     private static let settingRows: [String: String] = [
         "FocusWrapRow.swift": "focus wrap, a choice of reach",
         "LayoutCycleRow.swift": "the layouts a cycle key walks",
+        "ModifierSidesRow.swift":
+            "whether a recorded chord keeps its side, a peer checkbox "
+            + "in the Modifier keys card (#3434)",
         "ShortcutBaseRow.swift": "which base the shortcuts start from",
         "SpaceHistoryRow.swift": "how the Space history is kept",
         "TilingOffRows.swift": "what a Space without tiling does",

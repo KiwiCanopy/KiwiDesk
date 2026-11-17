@@ -63,7 +63,23 @@ struct ModifierSidesCardTests {
             )
         )
         #expect(row.contains(".inertReason(for: .shortcuts(.modifierSides))"))
-        #expect(row.contains("disabled: reason == .appWideLuaOwned"))
+        // A peer checkbox row in the shared shape (#3434), greyed
+        // with its reason where init.lua owns it.
+        #expect(row.contains("ShortcutSettingRow("))
+        #expect(!row.contains("ToggleRow("))
+        let flat = row.filter { !$0.isWhitespace }
+        #expect(
+            flat.contains(
+                "grey:reason==.appWideLuaOwned"
+                    + "?GeneralGateHelp.sentence(for:.luaOwned):nil"
+            )
+        )
+        // Text under it starts where a setting row's does (gui.md).
+        #expect(
+            flat.occurrences(
+                of: ".padding(.leading,SettingsMetrics.shortcutTextIndent)"
+            ) == 2
+        )
     }
 
     @Test("the model counts sided rows and hands the recorder its sides")

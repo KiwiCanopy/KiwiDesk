@@ -24,6 +24,7 @@ struct ShortcutGlyphDoorTests {
     /// Who draws a `ShortcutGlyph`; a new surface joins with its view.
     private static let drawers: Set<String> = [
         "Settings/Components/Keybindings/KeybindingNavRow.swift",
+        "Settings/Components/Keybindings/ShortcutsJumpBar.swift",
         "Settings/Components/Keybindings/Sequences/"
             + "SequenceActionMenu+Trigger.swift",
         "Settings/Components/Keybindings/Sequences/"
