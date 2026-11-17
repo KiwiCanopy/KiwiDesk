@@ -268,7 +268,7 @@ extension BarPeekPanel {
     /// `flags` are the press's, read by `listKey(_:_:)`.
     func morphKey(
         _ code: UInt16,
-        _ flags: NSEvent.ModifierFlags = []
+        _ flags: NSEvent.ModifierFlags
     ) -> Bool {
         guard morph != nil else { return false }
         // Closing, the panel still holds the keyboard until it lands:

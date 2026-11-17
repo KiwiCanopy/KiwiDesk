@@ -311,7 +311,7 @@ struct OverflowMarkClickTests {
         rig.land()
         let markPanel = try #require(try rig.overlay.panel)
         #expect(markPanel.ignoresMouseEvents)
-        #expect(rig.peek.panel.morphKey(53))
+        #expect(rig.peek.panel.morphKey(53, []))
         #expect(markPanel.ignoresMouseEvents)
         #expect(rig.peek.panel.morph != nil)
         rig.land()
