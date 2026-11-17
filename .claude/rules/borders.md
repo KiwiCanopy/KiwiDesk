@@ -493,7 +493,8 @@ arrangement places it (`ShelfMarkPlacement.pocketBand`,
 `ShelfHandleStripTests` ▸ `pocketStandsOnTheSlot`), else at
 Position — never a frame of its own beside them. A bar's reveal or
 retract leaves that place alone, the handle and a risen pocket
-included (#3432, `PocketHandleBesideRevealTests`). The Hidden pocket slides out of its edge
+included (#3432, `PocketHandleBesideRevealTests`). The Hidden
+pocket slides out of its edge
 (`BarMotion.playPocketEntrance`) and its panel orders out only at
 the slide back's landing, through the overlay's `afterLeave`, a
 return before it keeping the panel; every order-out drops its hover

@@ -69,14 +69,13 @@ extension ShelfArrangement {
     /// The arrangement with only `bars`' slots kept (#3359): each
     /// keeps its offset, so a bar drawn while its sibling rests as
     /// a handle stands where the pair places it. The divider goes
-    /// with either bar, and the pocket's section with both, since
-    /// an edge drawing none takes the pocket's handle (#2678).
+    /// with either bar; the pocket's slot is the plan's to drop
+    /// (`KiwiCore.ShelfPlan.arrangement`, #3432).
     public func keeping(_ bars: Set<ShelfBar>) -> ShelfArrangement {
         var kept = self
         if !bars.contains(.space) { kept.space = nil }
         if !bars.contains(.app) { kept.app = nil }
         if kept.space == nil || kept.app == nil { kept.divider = nil }
-        if kept.space == nil, kept.app == nil { kept.pocket = nil }
         return kept
     }
 }

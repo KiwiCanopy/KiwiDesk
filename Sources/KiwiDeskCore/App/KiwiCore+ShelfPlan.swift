@@ -23,10 +23,6 @@ extension KiwiCore {
             )
         /// The bars drawn this pass, each in its resting slot.
         let drawn: Set<ShelfBar>
-        /// Whether the pocket stands on this edge this pass, which
-        /// files its handle's band (#2678).
-        var carriesPocket = false
-
         /// A plan over `arrangement`, the resting bars', drawing
         /// `drawn` — every bar it places unless named.
         init(
@@ -36,8 +32,7 @@ extension KiwiCore {
             arrangement: ShelfArrangement,
             shelfEdge: ShelfEdge,
             needs: [ShelfBar: CGFloat] = [:],
-            drawn: Set<ShelfBar>? = nil,
-            carriesPocket: Bool = false
+            drawn: Set<ShelfBar>? = nil
         ) {
             self.edge = edge
             self.strip = strip
@@ -52,7 +47,6 @@ extension KiwiCore {
                         arrangement.app.map { _ in ShelfBar.app },
                     ].compactMap { $0 }
                 )
-            self.carriesPocket = carriesPocket
         }
 
         /// The drawn bars' slots of the resting arrangement. A reveal
@@ -134,7 +128,11 @@ extension KiwiCore {
                         && bars.contains(.space) ? spaceItems : nil,
                     app: settings.appBarStyle.edge == edge
                         && bars.contains(.app) ? app : nil,
-                    pocket: pocket && edge == settings.kiwishelf.pocketEdge,
+                    // A slot only beside a bar that rests here,
+                    // drawn or as a handle (#3432).
+                    pocket: pocket && edge == settings.kiwishelf.pocketEdge
+                        && !(shelfEdge.drawsNothingAtRest
+                            && shelfEdge.handled(hover: hover).isEmpty),
                     drawn: shown
                 )
             }
@@ -213,8 +211,7 @@ extension KiwiCore {
             needs: [.space: spaceNeed, .app: appNeed].compactMapValues {
                 $0
             },
-            drawn: drawn,
-            carriesPocket: pocket
+            drawn: drawn
         )
     }
 }

@@ -51,6 +51,12 @@ extension KiwiCore {
                 // Across the band alone, never past its ends.
                 cut: (lead: true, trail: true)
             )
+            // A bar's approach on the edge stops at the tab (#3432).
+            let shelfKey = ShelfManager.Key(display: display.id, edge: edge)
+            for bar in [ShelfBar.space, .app] {
+                let key = ShelfRevealer.Key(shelf: shelfKey, bar: bar)
+                hiding.targets[key] = hiding.targets[key]?.yielding(to: tab)
+            }
         }
     }
 

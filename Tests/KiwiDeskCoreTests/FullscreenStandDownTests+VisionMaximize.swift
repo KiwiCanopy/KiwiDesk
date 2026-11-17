@@ -164,6 +164,7 @@ extension FullscreenStandDownTests {
         // Control: the reveal took, so the bar is drawn.
         #expect(core.shelves.reveal.reveal(of: bar).isShown)
         #expect(core.pocketPlate.slots[display] == nil)
+        #expect(core.pocketPlate.markBands[display] == nil)
         #expect(!core.pocketStands(on: display))
     }
 

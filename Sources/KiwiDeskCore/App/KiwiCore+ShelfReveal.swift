@@ -122,9 +122,7 @@ extension KiwiCore {
             }
             // The pocket's handle rests in its slot beside the bars'
             // handles, whatever a reveal draws (#2678, #3432).
-            if plan.carriesPocket, !handled.isEmpty,
-                let pocket = placed.arrangement.pocket
-            {
+            if !handled.isEmpty, let pocket = placed.arrangement.pocket {
                 let band = ShelfMarkPlacement.pocketBand(
                     slot: pocket.offset...(pocket.offset + pocket.length),
                     length: plan.length

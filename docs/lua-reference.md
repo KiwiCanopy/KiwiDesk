@@ -3530,15 +3530,17 @@ Under `"hidden"`
 the pocket stands at the position on every edge. Otherwise, on an
 edge where a bar shows, it takes the shelf's nearer end instead — its
 start below `50`, its end from `50` — outside the bars' items, so it
-stays put while they scroll; on
+stays put while they scroll; on an edge where an `"auto"` bar rests
+hidden, its handle, or under `"always"` its whole mark, stands where
+the pocket shows once the bar comes in; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
 
 :::unreleased
-On an edge where an `"auto"` bar rests hidden, the pocket's handle,
-or under `"always"` its whole mark, stands in its own slot beside the
-bar's handle, and stays there while the bar comes in and goes. A bar
-coming in never brings the pocket with it.
+A bar coming in no longer brings the pocket with it: beside an
+`"auto"` bar the handle, or the whole mark, stands in its own slot
+next to the bar's handle and stays there while the bar comes in and
+goes.
 :::
 
 **Example:**
@@ -3575,10 +3577,9 @@ where it shows only during a window drag or while a window goes in or
 out.
 
 :::unreleased
-A maximized window keeps it off the screen at rest too; it comes in
-only as
-[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
-says.
+A maximized window keeps it off the screen at rest too; there it
+shows only for a window drag, a window going in or out, its keys or
+its list.
 :::
 
 Windows keep clear of the

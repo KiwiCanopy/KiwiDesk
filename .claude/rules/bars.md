@@ -1000,11 +1000,16 @@ Obligations:
   `ShelfEdge.drawsNothingAtRest`) while the resting arrangement keeps
   it, so the handle rests in its slot band (`pocketBands`) and a
   reveal or retract leaves its place and its approach alone; a
-  revealed bar's held section is its own run (`KiwiCore+ShelfReveal`).
-  `pocketPlace(on:)` reads this pass's slots: the bar pass files them
-  before `filePocketApproaches` (`PocketHandleBesideRevealTests`).
-  Where a Hidden bar shares the pocket's edge, the handle rests at
-  Position and a reveal of that bar may run over it, unruled.
+  revealed bar's held section is its own run
+  (`PocketHandleBesideRevealTests` ▸ `revealLeavesTheHandle`). File
+  the pass's pocket slots before `filePocketApproaches`, since
+  `pocketPlace(on:)` reads them (`PocketHandleBesideRevealTests` ▸
+  `filesThePassSlot`). A bar's approach on the pocket's edge stops at
+  the pocket's tab, through the one `Target.yielding(to:)`, so a
+  point opens one (`approachesApart`).
+  An edge where no bar rests, drawn or as a handle, asks no pocket
+  slot, and its handle stands at Position; a placement that keeps a
+  Hidden bar's reveal off it is a ruling here first (#3432).
 - **Every `ShelfArrangement.arrange` caller states its pocket** —
   the bars-alone placement is reached only through it — so the
   Settings preview places the bars where the engine does

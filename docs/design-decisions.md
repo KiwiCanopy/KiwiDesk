@@ -6876,18 +6876,13 @@ since the tick asks for Hidden.
 
 *The Pocket follows the same value* (owner, 2026-11-15). It rests on
 the shelf, so it reads Hidden through the same door: nothing of it
-rests over the window. The Pocket keys pocket and take out as
-before.
-
-*Amended (#3432, owner 2026-11-17):* a bar revealed over the window
-comes in alone. The Pocket no longer rides it as its section, which
-was the one place a reveal still brought it; its key, its list, a
-window drag and the play reach it there. The row greys once the
-Space Bar and every App Bar are Hidden, whatever the Pocket's Show.
+rests over the window, and a bar revealed there comes in alone
+(owner, 2026-11-17, #3432): no reveal brings the Pocket. Its keys,
+its list, a window drag and the play reach it.
 
 *The row greys only when nothing could come in* (owner, 2026-11-15):
-the Space Bar, every layout's App Bar and the Pocket all stored
-Hidden. Its reason names the KiwiShelf card where those are set,
+the Space Bar and every layout's App Bar all stored Hidden; the
+Pocket's Show counts for nothing, since no reveal brings it. Its reason names the KiwiShelf card where those are set,
 through one reason value that picks both the grey and its sentence.
 Where even one could show, the row is live and reveals only what is
 not Hidden. It is independent of "Maximize follows focus": both are
@@ -7112,9 +7107,7 @@ Joining the reveal pulled the pocket into the bar's section and took
 its own approach away while the bar showed, so a pocket that rested
 low on a side edge rose with a Space Bar the pointer reached for at
 its top, and went dead after the bar left. The cost is that a bar
-coming in stands beside a handle rather than carrying a section. A
-Hidden bar on the pocket's edge leaves the handle at Position, where
-its reveal may run over it; that case is unruled.
+coming in stands beside a handle rather than carrying a section.
 :::
 
 **Several windows keeps it on screen, empty included, on every

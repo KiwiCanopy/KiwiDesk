@@ -124,6 +124,35 @@ extension ShelfRevealer {
         /// Whether the pointer can open it.
         var hovers: Bool { approach != nil }
 
+        /// This target with its approach stopped at `tab`, Cocoa, on
+        /// the end facing it: the pocket's tab beside a bar's run,
+        /// so a point opens one of them (#3432).
+        func yielding(to tab: CGRect) -> Target {
+            guard var cut = approach, cut.intersects(tab) else {
+                return self
+            }
+            if edge.isHorizontal {
+                let (low, high) = (cut.minX, cut.maxX)
+                if tab.midX > cut.midX {
+                    cut.size.width = max(0, tab.minX - low)
+                } else {
+                    cut.origin.x = min(tab.maxX, high)
+                    cut.size.width = max(0, high - cut.origin.x)
+                }
+            } else {
+                let (low, high) = (cut.minY, cut.maxY)
+                if tab.midY > cut.midY {
+                    cut.size.height = max(0, tab.minY - low)
+                } else {
+                    cut.origin.y = min(tab.maxY, high)
+                    cut.size.height = max(0, high - cut.origin.y)
+                }
+            }
+            var out = self
+            out.approach = cut
+            return out
+        }
+
         /// Where a fill entered at `point` starts (#3360 ▸ 7): the
         /// share of the handle's run, from its AX leading end — the
         /// left, or the top — nearest the point.

@@ -65,11 +65,19 @@ struct PocketHandleBesideRevealTests {
         let core = rig.core
         let band = try #require(core.pocketPlate.markBands[rig.display])
         let rest = try #require(rig.spec)
-        // AX, along the left edge.
+        // AX, along the left edge: in its slot, not at Position.
         let handle = try #require(
             core.pocketHandleFrame(on: rig.display, risen: false)
         )
+        let screen = try #require(NSScreen.main)
+        let position = KiwiCore.pocketHandleFrame(
+            visible: GeometryUtils.axVisibleFrame(of: screen),
+            edge: .left,
+            position: core.shelf(on: rig.display).pocketPosition,
+            depth: handle.width
+        )
         #expect(band.contains(handle.midY))
+        #expect(abs(handle.midY - position.midY) > 1)
         #expect(core.toggleBarReveal(bar))
         #expect(core.shelves.reveal.reveal(of: bar).isShown)
         // The bar comes in alone: no section, the handle standing.
@@ -82,11 +90,44 @@ struct PocketHandleBesideRevealTests {
         #expect(!held.intersects(try #require(rig.target?.handle)))
     }
 
+    @Test("the bar's approach stops short of the pocket's tab")
+    func approachesApart() throws {
+        let (rig, bar) = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        let core = rig.core
+        // The run ends against the pocket's slot, at the edge's end.
+        core.tiler.settings.kiwishelf.alignment = .end
+        core.updateBars()
+        let barApproach = try #require(
+            core.shelves.reveal.targets[bar]?.approach
+        )
+        let tab = try #require(rig.target?.approach)
+        #expect(!barApproach.intersects(tab))
+    }
+
+    @Test("a pass files the approach from its own slots")
+    func filesThePassSlot() throws {
+        let (rig, _) = try rig(.always)
+        defer { BarMotion.reducedOverride = nil }
+        let core = rig.core
+        // Control: beside an Always bar the pocket is a section.
+        #expect(core.pocketPlate.slots[rig.display] != nil)
+        #expect(rig.target == nil)
+        // One pass after the bar turns Auto: no slot, and the
+        // approach is filed in that same pass.
+        core.tiler.settings.spaceBarStyle.visibility = .auto
+        core.updateBars()
+        #expect(core.pocketPlate.slots[rig.display] == nil)
+        #expect(rig.target != nil)
+    }
+
     @Test("a Hidden bar's reveal leaves the pocket where it rests")
     func hiddenRevealLeavesThePocket() throws {
         let (rig, bar) = try rig(.hidden)
         defer { BarMotion.reducedOverride = nil }
         let core = rig.core
+        // No bar rests here, so the pocket keeps no slot or band.
+        #expect(core.pocketPlate.markBands[rig.display] == nil)
         let rest = try #require(rig.spec)
         #expect(core.toggleBarReveal(bar))
         #expect(core.shelves.reveal.reveal(of: bar).isShown)
