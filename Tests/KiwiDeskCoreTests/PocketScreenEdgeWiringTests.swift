@@ -66,6 +66,8 @@ struct PocketScreenEdgeWiringTests {
         )
         pin(core, id, .left)
         let mark = try #require(core.pocketMarkFrame(on: id))
+        // A square, cut across the band the screen's edge runs.
+        #expect(abs(mark.width - mark.height) < 0.5)
         let visible = GeometryUtils.axVisibleFrame(
             of: try #require(NSScreen.main)
         )
@@ -85,6 +87,8 @@ struct PocketScreenEdgeWiringTests {
         )
         let tab = try #require(target.handle)
         #expect(tab.height > tab.width)
+        // The approach reaches in from the screen's own edge.
+        #expect(target.edge == .right)
         core.updatePocketPlate(slots: [:])
         let spec = try #require(core.pocketPlate.specs[id])
         #expect(spec.handle == .right)
