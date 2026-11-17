@@ -96,6 +96,50 @@ struct PocketRiseSequenceTests {
         #expect(held.duration == 1)
     }
 
+    @Test("an open after the rise is drawn up springs from up")
+    func openFromUp() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        rig.move(
+            to: try PocketApproachTests().nearTab(try #require(rig.target))
+        )
+        let view = try view(rig)
+        // The rise ran out and nothing runs: the pocket stands up.
+        view.pocket.layer?.removeAllAnimations()
+        rig.timers.fireAll()
+        rig.pass()
+        #expect(rig.spec?.risen == true)
+        let spring = try #require(
+            view.pocket.layer?.animation(forKey: BarMotion.pocketRiseKey)
+                as? CASpringAnimation
+        )
+        let from = try #require(
+            (spring.fromValue as? NSValue)?.caTransform3DValue
+        )
+        #expect(CATransform3DIsIdentity(from))
+    }
+
+    @Test("the whole mark ends a sink that runs")
+    func wholeEndsTheSink() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        rig.move(
+            to: try PocketApproachTests().nearTab(try #require(rig.target))
+        )
+        let view = try view(rig)
+        try Self.seed(view, rig, done: 0.5)
+        rig.move(to: CGPoint(x: -10_000, y: -10_000))
+        #expect(view.sinking)
+        rig.core.execute(
+            "kiwishelf.set_pocket_visibility",
+            args: [.string("always")]
+        )
+        rig.pass()
+        #expect(rig.spec?.whole == true)
+        #expect(!view.sinking)
+        #expect(running(view) == nil)
+    }
+
     @Test("a leave sinks the distance up, in the risen room")
     func leaveSinksFromWhereItIs() throws {
         let rig = try rig()
