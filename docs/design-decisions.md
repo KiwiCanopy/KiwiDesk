@@ -18536,22 +18536,40 @@ A third kind joined with
 [#3357](https://github.com/KiwiCanopy/KiwiDesk/issues/3357): an
 **adaptive** colour, `ColorPaletteKeys.adaptive`, a `_color` key
 outside a mark struct whose Automatic is a system ink, as a mark
-tint's is — an Auto bar's resting handle in the label colour. It
-takes a mark tint's rule, not a follower's: the authored palettes
-leave it out, so a bundled palette keeps the handle following
-light and dark, and the derived default palette carries it empty
-so a reset reaches it. A colour joins only where its Automatic is
-that kind of adaptive ink; one whose Automatic is another palette
-colour is a follower.
+tint's is — an Auto bar's resting handle in the label colour. A
+colour joins only where its Automatic is that kind of adaptive
+ink; one whose Automatic is another palette colour is a follower.
 
 :::unreleased
-A colour the user picked on `kiwishelf.handle_color`,
-`sticky.color` or `floating.color` survives a switch to a bundled
-palette, and the palette still reads as applied, since `isApplied`
-compares only the keys a palette sets. That is the point of
-leaving them out: a palette recolours the shelf, and a colour the
-user chose for their own handle or marks is theirs to take back,
-never one a palette quietly overwrites.
+Unlike a mark tint, every bundled palette paints the handle, the
+derived default included, in its own `active_item_color`
+([#3377](https://github.com/KiwiCanopy/KiwiDesk/issues/3377),
+amending #3357's ruling 3). The handle is the bar's own edge, so
+under a chosen palette a grey line opening a gold bar reads as
+someone else's; the two-tone hairline (#3361) keeps any accent
+legible over light and dark content, so the light/dark-following
+ink buys nothing a palette needs. The base value stays Automatic,
+so a fresh config — a first run's starter included — keeps the
+label ink, and Automatic on an adaptive path matches whatever a
+palette paints there: a fresh config still reads as wearing the
+default palette and Glass, and setting the handle back to
+Automatic does not unmark the card. Picking Glass or Kiwi
+(Default) on a first run therefore writes the handle alone, the
+one exception to Glass being exactly a first run's look (#1739). The cost
+is the one the pocket accepts: a palette switch now overwrites a
+handle colour the user picked. `ShelfHandleColorTests` holds
+every bundled handle 0.04 of luma off the 0.5 pivot where the
+hairline flips tone, measured with `ColorVision`; the drawn
+composite is not gated, since a light core over a white ground
+nears the hairline in every palette by the two-tone design.
+
+A colour the user picked on `sticky.color` or `floating.color`
+survives a switch to a bundled palette, and the palette still
+reads as applied, since `isApplied` compares only the keys a
+palette sets. That is the point of leaving them out: a palette
+recolours the shelf, and a colour the user chose for their own
+marks is theirs to take back, never one a palette quietly
+overwrites.
 :::
 
 **Palette colors follow a rough matching guide.** (#408

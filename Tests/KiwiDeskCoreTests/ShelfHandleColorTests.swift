@@ -7,7 +7,7 @@ import Testing
 /// The handle's colour (#3357, #3360): `kiwishelf.handle_color`,
 /// empty for Automatic — the label ink at the rest and fill
 /// strengths — taken by the verb, the decoder and a palette, and
-/// left out of every bundled palette.
+/// painted by every bundled palette in its accent (#3377).
 @Suite("Shelf handle colour (#3357, #3360)")
 struct ShelfHandleColorTests {
     @Test("Automatic is the default, and absent decodes to it")
@@ -76,18 +76,79 @@ struct ShelfHandleColorTests {
         #expect(settings.kiwishelf.handleColor.isEmpty)
     }
 
-    /// Ruling 3: a bundled palette shows Automatic for every
-    /// `adaptive` colour. The derived default palette carries
-    /// every path, these empty.
-    @Test("No bundled palette sets an adaptive colour")
-    func bundledPalettesLeaveItOut() {
+    /// #3377 ruling 1: every bundled palette, the derived default
+    /// included, paints the handle in its own accent.
+    @Test("Every bundled palette paints the handle in its accent")
+    func bundledPalettesPaintTheAccent() {
         #expect(ColorPaletteKeys.adaptive.contains("kiwishelf.handle_color"))
+        #expect(KiwiShelf().handleColor.isEmpty)
+        #expect(
+            Set(ColorPaletteKeys.bundledPaint.keys)
+                == ColorPaletteKeys.adaptive
+        )
         for palette in PaletteCatalog.bundled() {
-            for path in ColorPaletteKeys.adaptive
-            where !(palette.colors[path] ?? "").isEmpty {
-                Issue.record("\(palette.name) sets \(path)")
+            for (path, source) in ColorPaletteKeys.bundledPaint {
+                let paint = palette.colors[path]
+                let name = Comment(rawValue: "\(palette.name) \(path)")
+                #expect(paint != nil, name)
+                #expect(paint == palette.colors[source], name)
             }
         }
+    }
+
+    /// The core-vs-hairline lightness gate (#3377 ruling 3). The
+    /// hairline takes the tone opposite the core's encoded luma, so
+    /// their opaque distance is at least 0.5 by construction; the
+    /// risk is a core near the 0.5 pivot, where a one-byte retune
+    /// flips the rim. The floor keeps every bundled core 0.04 of
+    /// luma off the pivot. The drawn composite is not gated: it is
+    /// near zero for any light core on a white ground in every
+    /// palette, a property of the two-tone design.
+    static let pivotFloor = 0.54
+
+    @Test("Every bundled handle stays distinguishable from its hairline")
+    @MainActor
+    func bundledHandleClearsTheHairline() throws {
+        for palette in PaletteCatalog.bundled() {
+            let hex = try #require(palette.colors["kiwishelf.handle_color"])
+            let core = try #require(ColorPalette.rgbHex(hex))
+            let rim = try #require(
+                ShelfHandleSpec.hairlineColor(hex: hex)
+                    .usingColorSpace(.sRGB)
+            )
+            let tone = rim.redComponent > 0.5 ? "#FFFFFF" : "#000000"
+            let distance = try #require(
+                ColorVision.lumaDistance(core, over: tone)
+            )
+            #expect(
+                distance >= Self.pivotFloor,
+                "\(palette.name): \(distance)"
+            )
+        }
+    }
+
+    /// Automatic still reads as wearing any palette, so a fresh
+    /// config wears the default; a picked handle colour does not.
+    @Test("Automatic matches a palette's handle, a pick does not")
+    func automaticMatchesThePalette() throws {
+        let fresh = TilingSettings()
+        #expect(PaletteCatalog.defaultPalette().isApplied(to: fresh))
+        let gold = try #require(
+            PaletteCatalog.authored().first {
+                $0.name == "Kiwi Gold"
+            }
+        )
+        var settings = fresh
+        gold.apply(to: &settings)
+        #expect(
+            settings.kiwishelf.handleColor
+                == gold.colors["kiwishelf.active_item_color"]
+        )
+        #expect(gold.isApplied(to: settings))
+        settings.kiwishelf.handleColor = ""
+        #expect(gold.isApplied(to: settings))
+        settings.kiwishelf.handleColor = "#123456"
+        #expect(!gold.isApplied(to: settings))
     }
 
     @Test("Automatic is the label ink at each strength in either mode")

@@ -19,12 +19,14 @@ public enum PaletteCatalog {
     }
 
     /// The default palette: the current shipped color defaults,
-    /// extracted from a fresh `TilingSettings`.
+    /// extracted from a fresh `TilingSettings`, with the handle
+    /// painted in its accent as every bundled palette's is (#3377).
     public static func defaultPalette() -> ColorPalette {
-        ColorPalette(
-            name: defaultName,
-            colors: ColorPaletteKeys.extract(from: TilingSettings())
-        )
+        var colors = ColorPaletteKeys.extract(from: TilingSettings())
+        for (path, source) in ColorPaletteKeys.bundledPaint {
+            colors[path] = colors[source]
+        }
+        return ColorPalette(name: defaultName, colors: colors)
     }
 
     /// The authored palettes from `Resources/Palettes`.

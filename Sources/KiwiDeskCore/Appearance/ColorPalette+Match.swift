@@ -27,6 +27,12 @@ extension ColorPalette {
         guard !colors.isEmpty else { return false }
         return colors.allSatisfy { path, hex in
             guard let current = live[path] else { return false }
+            // Automatic on an adaptive path matches whatever the
+            // palette paints there, so a fresh config still wears
+            // the default palette (#3377).
+            if current.isEmpty, ColorPaletteKeys.adaptive.contains(path) {
+                return true
+            }
             return Self.sameColor(hex, current)
         }
     }

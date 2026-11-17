@@ -23,6 +23,22 @@ struct LookCatalogTests {
         StarterSetup.standardLayout(sizes: sizes).settings(sizes: sizes)
     }
 
+    /// `settings` with each adaptive path it leaves Automatic
+    /// painted as `look` paints it (#3377).
+    static func wearingAdaptive(
+        of look: ShelfLook,
+        _ settings: TilingSettings
+    ) -> TilingSettings {
+        let live = ColorPaletteKeys.extract(from: settings)
+        let colors = look.colors.filter {
+            ColorPaletteKeys.adaptive.contains($0.key)
+                && live[$0.key]?.isEmpty == true
+        }
+        var out = settings
+        ColorPalette(name: "", colors: colors).apply(to: &out)
+        return out
+    }
+
     private func look(_ name: String) -> ShelfLook? {
         bundled.first { $0.name == name }
     }
@@ -108,8 +124,13 @@ struct LookCatalogTests {
         let glass = try #require(looks.first)
         #expect(glass.name == LookCatalog.defaultName)
         #expect(glass.isApplied(to: first))
+        // Save the adaptive paths: a first run keeps Automatic and
+        // Glass paints its accent there (#3377); no window moves.
+        let expected = Self.wearingAdaptive(of: glass, first)
+        #expect(expected != first)
         #expect(
-            KiwiCore.painted(first, look: glass, palette: nil) == first
+            KiwiCore.painted(first, look: glass, palette: nil)
+                == expected
         )
         for other in looks.dropFirst() {
             #expect(!other.isApplied(to: first), "\(other.name)")

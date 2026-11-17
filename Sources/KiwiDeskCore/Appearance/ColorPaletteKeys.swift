@@ -48,9 +48,18 @@ public enum ColorPaletteKeys {
 
     /// Colours outside a mark struct whose Automatic is an
     /// adaptive system ink (#3357): an Auto bar's resting handle
-    /// in the label colour. Bundled palettes leave them out.
+    /// in the label colour. Every bundled palette paints it in its
+    /// accent (#3377); Automatic still matches any palette.
     public static let adaptive: Set<String> = [
         "kiwishelf.handle_color"
+    ]
+
+    /// The colour each bundled palette paints an adaptive path in,
+    /// keyed to that path (#3377): the handle wears the palette's
+    /// accent. `ShelfHandleColorTests` holds the authored palettes
+    /// to it.
+    public static let bundledPaint: [String: String] = [
+        "kiwishelf.handle_color": "kiwishelf.active_item_color"
     ]
 
     /// Colours whose Automatic is ANOTHER colour of the palette

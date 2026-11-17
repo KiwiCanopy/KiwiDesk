@@ -2141,6 +2141,12 @@ Boxed.
   with — against that wallpaper, at the idle floor
   (`ShelfBorderContrastTests`). The switch and the width are not
   palette keys (#375).
+- **Every bundled palette, the derived default included, sets
+  `kiwishelf.handle_color` to its own `active_item_color`**, and
+  that accent clears the core-vs-hairline lightness floor
+  measured through `ColorVision` (#3377, `ShelfHandleColorTests`
+  ▸ `bundledHandleClearsTheHairline`). The base value stays
+  Automatic, which a palette match reads as wearing any palette.
 
 ## An item's content is sized to the content depth, never the thickness
 

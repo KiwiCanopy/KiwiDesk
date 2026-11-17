@@ -136,12 +136,11 @@ struct ColorPaletteTests {
     func defaultPaletteIsDefaults() {
         let def = PaletteCatalog.defaultPalette()
         #expect(def.name == PaletteCatalog.defaultName)
-        #expect(
-            def.colors
-                == ColorPaletteKeys.extract(
-                    from: TilingSettings()
-                )
-        )
+        // Save the handle, painted in the accent (#3377).
+        var shipped = ColorPaletteKeys.extract(from: TilingSettings())
+        shipped["kiwishelf.handle_color"] =
+            shipped["kiwishelf.active_item_color"]
+        #expect(def.colors == shipped)
         #expect(def.colors.count == ColorPaletteKeys.all.count)
     }
 

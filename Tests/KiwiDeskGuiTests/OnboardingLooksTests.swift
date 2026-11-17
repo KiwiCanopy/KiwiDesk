@@ -100,10 +100,11 @@ struct OnboardingLooksTests {
     }
 
     /// Glass and Kiwi (Default) are what a first run already
-    /// shows, so picking them wakes neither the file nor Revert —
-    /// measured on the real starter for each screen, never on
-    /// `TilingSettings()`, which hid a per-screen starter gap
-    /// (#1739).
+    /// shows, save the adaptive paths a first run leaves Automatic
+    /// and they paint (#3377), so once those are worn picking them
+    /// wakes neither the file nor Revert — measured on the real
+    /// starter for each screen, never on `TilingSettings()`, which
+    /// hid a per-screen starter gap (#1739).
     @Test(
         "a pick that changes nothing writes nothing",
         arguments: [
@@ -114,9 +115,17 @@ struct OnboardingLooksTests {
     func noOpPickWritesNothing(screen: CGSize) throws {
         let (model, recorder, core) = makeModel()
         let sizes = [screen]
-        recorder.live = StarterSetup.standardLayout(sizes: sizes)
+        let glass = try look(LookCatalog.defaultName, sizes: sizes)
+        let starter = StarterSetup.standardLayout(sizes: sizes)
             .settings(sizes: sizes)
-        model.pickLook(try look(LookCatalog.defaultName, sizes: sizes))
+        let adaptive = glass.colors.filter {
+            ColorPaletteKeys.adaptive.contains($0.key)
+        }
+        #expect(!adaptive.isEmpty)
+        recorder.live = starter
+        ColorPalette(name: "", colors: adaptive)
+            .apply(to: &recorder.live)
+        model.pickLook(glass)
         model.pickPalette(try palette(core, PaletteCatalog.defaultName))
         #expect(recorder.paints.isEmpty)
         #expect(recorder.captures == 0)
