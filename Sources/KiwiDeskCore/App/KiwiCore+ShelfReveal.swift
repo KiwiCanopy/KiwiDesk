@@ -122,7 +122,7 @@ extension KiwiCore {
             }
             // The pocket's handle rests in its slot beside the bars'
             // handles, whatever a reveal draws (#2678, #3432).
-            if !handled.isEmpty, let pocket = placed.arrangement.pocket {
+            if let pocket = placed.arrangement.pocket {
                 let band = ShelfMarkPlacement.pocketBand(
                     slot: pocket.offset...(pocket.offset + pocket.length),
                     length: plan.length
@@ -166,9 +166,19 @@ extension KiwiCore {
                     ),
                     section: section(bar),
                     maximized: hover.contains(bar),
+                    // Cut where a sibling's approach or the pocket's
+                    // slot meets it, so a point opens one (#3432).
                     cut: (
-                        lead: index > 0,
+                        lead: index > 0
+                            || Self.pocketLeads(
+                                placed.arrangement.pocket,
+                                slotOf(bar)
+                            ),
                         trail: index < handled.count - 1
+                            || Self.pocketTrails(
+                                placed.arrangement.pocket,
+                                slotOf(bar)
+                            )
                     )
                 )
                 // A grow reveal grows out of the leading shown bar's

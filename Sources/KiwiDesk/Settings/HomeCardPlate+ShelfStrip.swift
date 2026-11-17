@@ -20,6 +20,10 @@ struct ShelfStripPreview: View {
     /// Whether the pocket stands on this strip, at the slot Core's
     /// arrangement pins for it (#2678 review 6).
     let pocket: Bool
+    /// Whether the pocket draws as a section there; where it rests
+    /// as a handle beside an Auto bar its slot is kept and nothing
+    /// draws (#3432).
+    var pocketSection = true
     /// The pocket mark's colour, `pocket.color`; empty takes the
     /// mark's label ink (#2671).
     var pocketHex = ""
@@ -43,7 +47,7 @@ struct ShelfStripPreview: View {
             plate(placed, length: length)
             segment(space, placed.space)
             segment(app, placed.app)
-            pocketPiece(placed.pocket)
+            pocketPiece(pocketSection ? placed.pocket : nil)
             divider(placed)
         }
     }
@@ -77,7 +81,10 @@ struct ShelfStripPreview: View {
             shelf: live,
             pocket: pocket
                 ? .init(
-                    need: ShelfArrangement.pocketNeed(depth: shelf.thickness),
+                    need: ShelfArrangement.pocketNeed(
+                        depth: shelf.thickness,
+                        asHandle: !pocketSection
+                    ),
                     leadsEnd: shelf.pocketLeansEnd
                 )
                 : nil

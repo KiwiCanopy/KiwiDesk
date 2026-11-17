@@ -131,8 +131,7 @@ extension KiwiCore {
                     // A slot only beside a bar that rests here,
                     // drawn or as a handle (#3432).
                     pocket: pocket && edge == settings.kiwishelf.pocketEdge
-                        && !(shelfEdge.drawsNothingAtRest
-                            && shelfEdge.handled(hover: hover).isEmpty),
+                        && shelfEdge.restsAny(hover: hover),
                     drawn: shown
                 )
             }
@@ -202,7 +201,10 @@ extension KiwiCore {
                 // it where nothing draws (#2678).
                 pocket: pocket && (spaceNeed != nil || appNeed != nil)
                     ? .init(
-                        need: ShelfArrangement.pocketNeed(depth: depth),
+                        need: ShelfArrangement.pocketNeed(
+                            depth: depth,
+                            asHandle: shelfEdge.drawsNothingAtRest
+                        ),
                         leadsEnd: shelf.pocketLeansEnd
                     )
                     : nil

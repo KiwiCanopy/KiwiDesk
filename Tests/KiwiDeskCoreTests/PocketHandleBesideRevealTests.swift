@@ -103,6 +103,12 @@ struct PocketHandleBesideRevealTests {
         )
         let tab = try #require(rig.target?.approach)
         #expect(!barApproach.intersects(tab))
+        // The bar's handle and its shown run stay off the tab too.
+        let hover = try #require(core.shelves.reveal.targets[bar]?.handle)
+        #expect(!hover.intersects(tab))
+        #expect(core.toggleBarReveal(bar))
+        let held = try #require(core.shelves.reveal.targets[bar]?.section)
+        #expect(!held.intersects(tab))
     }
 
     @Test("a pass files the approach from its own slots")

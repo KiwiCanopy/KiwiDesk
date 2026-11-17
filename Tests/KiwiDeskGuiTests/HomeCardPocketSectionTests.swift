@@ -27,4 +27,16 @@ struct HomeCardPocketSectionTests {
         #expect(tile(.always).pocketIsSection(on: edge))
         #expect(!tile(.auto).pocketIsSection(on: edge))
     }
+
+    @Test("the strip keeps the slot and draws by the verdict")
+    func stripTakesTheVerdict() throws {
+        let file = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/HomeCardPlate+Bars.swift"
+            )
+        let source = try String(contentsOf: file, encoding: .utf8)
+        #expect(source.contains("pocketSection: pocketIsSection(on: edge)"))
+    }
 }

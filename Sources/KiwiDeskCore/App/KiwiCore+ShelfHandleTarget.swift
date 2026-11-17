@@ -19,6 +19,25 @@ extension KiwiCore.HidingShelves {
         }
     }
 
+    /// Whether the pocket's resting slot lies before `slot` along
+    /// the edge, AX: beside the leading end of the bar's approach.
+    static func pocketLeads(
+        _ pocket: ShelfArrangement.Slot?,
+        _ slot: ShelfArrangement.Slot?
+    ) -> Bool {
+        guard let pocket, let slot else { return false }
+        return pocket.offset < slot.offset
+    }
+
+    /// Whether the pocket's resting slot lies after `slot`, AX.
+    static func pocketTrails(
+        _ pocket: ShelfArrangement.Slot?,
+        _ slot: ShelfArrangement.Slot?
+    ) -> Bool {
+        guard let pocket, let slot else { return false }
+        return pocket.offset > slot.offset
+    }
+
     /// The revealer's target for `spec`'s handle, its area's
     /// screen side at AX `side` (`side(of:edge:shelf:)`, the one
     /// the handle's frame took): an approach from

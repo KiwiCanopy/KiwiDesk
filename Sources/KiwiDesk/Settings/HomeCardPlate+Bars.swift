@@ -265,7 +265,8 @@ struct HomeCardBarsTile: View {
                 edge: edge,
                 vertical: vertical,
                 scale: scale,
-                pocket: pocketIsSection(on: edge),
+                pocket: pocketStands && settings.kiwishelf.pocketEdge == edge,
+                pocketSection: pocketIsSection(on: edge),
                 pocketHex: settings.pocketStyle.color
             )
         }

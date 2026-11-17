@@ -21,6 +21,18 @@ extension ShelfArrangement {
         return mark + 2 * PocketMarkGeometry.spill(mark: mark)
     }
 
+    /// The pocket's slot along an edge `depth` deep: its need, and
+    /// where it rests as a handle (`asHandle`) no less than the
+    /// handle's band, so the tab stands in its slot and off the
+    /// bars' runs (#3432).
+    public static func pocketNeed(
+        depth: CGFloat,
+        asHandle: Bool
+    ) -> CGFloat {
+        let need = pocketNeed(depth: depth)
+        return asHandle ? max(need, ShelfMarkPlacement.bandLength) : need
+    }
+
     /// Places the bars and the pocket along an edge `length` long
     /// (#2678): the pocket is pinned at the strip's outer end on its
     /// side, whole, outside the bars' run, and the bars are placed in
