@@ -1,6 +1,13 @@
 import AppKit
 import os
 
+/// The open sequence's pass-or-swallow trace (#3382), one line per
+/// key-down a sequence decides. `privacy: .public`, or macOS
+/// redacts every line (#951). It logs a key the router answers
+/// with more than `.pass`, which it does only while a sequence is
+/// open or opening, never ordinary typing, and never a repeat.
+let sequenceLog = Logger(subsystem: KiwiLog.subsystem, category: "keys")
+
 /// The `.sequences` consumer's tap-thread state (#1871): the router
 /// and the decisions the main actor has yet to take.
 struct SequenceTapState: Sendable {
@@ -14,6 +21,15 @@ struct SequenceTapState: Sendable {
     /// the old rows is left to drain.
     mutating func reset(_ rows: KeyboardTapRows) {
         router.setSequences(rows.sequences, passing: rows.sequencePassing)
+        if !rows.sequences.isEmpty {
+            let open = rows.sequencePassing.staysOpen
+                .compactMap { $0.comboString() }.joined(separator: " ")
+            let closing = rows.sequencePassing.closes
+                .compactMap { $0.comboString() }.joined(separator: " ")
+            let line =
+                "key sequence: passes open [\(open)] closing [\(closing)]"
+            sequenceLog.log("\(line, privacy: .public)")
+        }
         router.scrollKeys = rows.sequenceScrollKeys
         generation = rows.sequenceGeneration
         waiting = []
@@ -72,10 +88,11 @@ extension KeyboardTap {
         let held = HotkeyModifiers.held(by: event.flags)
         let isRepeat =
             event.getIntegerValueField(.keyboardEventAutorepeat) != 0
-        let (swallow, heard) = sequenceState.withLock {
-            state -> (Bool, Bool) in
+        let (swallow, heard, decided) = sequenceState.withLock {
+            state -> (Bool, Bool, KeySequenceRouter.Outcome?) in
             state.takeClose()
             var swallow = false
+            var decided: KeySequenceRouter.Outcome?
             switch type {
             case .keyDown:
                 let outcome = state.router.press(
@@ -84,6 +101,10 @@ extension KeyboardTap {
                     isRepeat: isRepeat
                 )
                 swallow = outcome.swallows
+                // A held key's repeats are left out of the trace.
+                if outcome != .pass, outcome != .repeated {
+                    decided = outcome
+                }
                 _ = state.record(outcome)
             case .leftMouseDown, .rightMouseDown, .otherMouseDown:
                 if state.router.isOpen {
@@ -93,7 +114,13 @@ extension KeyboardTap {
             default:
                 break
             }
-            return (swallow, !state.waiting.isEmpty)
+            return (swallow, !state.waiting.isEmpty, decided)
+        }
+        if let decided {
+            let line =
+                "key sequence: key \(code) held \(held.rawValue) "
+                + "\(decided) -> \(swallow ? "swallow" : "pass")"
+            sequenceLog.log("\(line, privacy: .public)")
         }
         if heard { fire(Self.sequenceFireID) }
         return swallow

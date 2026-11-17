@@ -28,6 +28,10 @@ extension SystemShortcut {
         case .screenshot: return (28, true)
         case .screenshotSelection: return (30, true)
         case .screenshotTools: return (184, true)
+        // Ids 29 and 31, the clipboard twins, keycode + mask read
+        // 2026-11-17, macOS 27.2 (#3382).
+        case .screenshotToClipboard: return (29, true)
+        case .screenshotSelectionToClipboard: return (31, true)
         case .zoomToggle: return (15, false)
         case .zoomIn: return (17, false)
         case .zoomOut: return (19, false)
@@ -78,6 +82,7 @@ extension SystemShortcut {
     public var sequenceTier: SequencePassTier {
         switch self {
         case .screenshot, .screenshotSelection, .screenshotTools,
+            .screenshotToClipboard, .screenshotSelectionToClipboard,
             .zoomToggle, .zoomIn, .zoomOut, .invertColors,
             .increaseContrast, .decreaseContrast, .dockHiding:
             return .staysOpen

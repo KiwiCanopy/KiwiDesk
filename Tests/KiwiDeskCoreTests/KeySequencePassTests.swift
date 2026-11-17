@@ -104,6 +104,39 @@ struct KeySequencePassTests {
         #expect(press(&router, "cmd+shift+4") == .unbound)
     }
 
+    /// The owner's desk (#3382, read 2026-11-17): "save selected
+    /// area" (30) off, "copy selected area to the clipboard" (31)
+    /// moved onto ⌘⇧4, so ⌘⇧4 is the clipboard twin's.
+    @Test("A clipboard screenshot moved onto ⌘⇧4 passes it")
+    func clipboardTwinPasses() {
+        let file = SystemShortcut.screenshotSelection.symbolicHotkey!.id
+        let clip = SystemShortcut.screenshotSelectionToClipboard
+            .symbolicHotkey!.id
+        // The ids the owner's plist holds them under, as read.
+        #expect(file == 30)
+        #expect(clip == 31)
+        #expect(SystemShortcut.screenshotToClipboard.symbolicHotkey?.id == 29)
+        let cmdShift4 = SymbolicHotkeys.chord([52, kVK_ANSI_4, 0x12_0000])
+        var router = router {
+            switch $0 {
+            case file: SymbolicHotkeyEntry(enabled: false, combo: cmdShift4)
+            case clip: SymbolicHotkeyEntry(enabled: true, combo: cmdShift4)
+            default: nil
+            }
+        }
+        _ = press(&router, "ctrl+alt+space")
+        #expect(press(&router, "cmd+shift+4") == .passed(closing: false))
+        #expect(router.isOpen)
+        // Its own default chord passes too while 31 sits there.
+        var stock = self.router()
+        _ = press(&stock, "ctrl+alt+space")
+        #expect(press(&stock, "ctrl+cmd+shift+4") == .passed(closing: false))
+        // The ⌘⇧3 twin on its own default chord (guard-prover).
+        _ = press(&stock, "ctrl+alt+space")
+        _ = press(&stock, "ctrl+alt+space")
+        #expect(press(&stock, "ctrl+cmd+shift+3") == .passed(closing: false))
+    }
+
     @Test("A shortcut switched off in macOS stays swallowed")
     func switchedOffSwallowed() {
         let id = SystemShortcut.spotlight.symbolicHotkey!.id

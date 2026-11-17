@@ -21,6 +21,10 @@ public enum SystemShortcut: Sendable, CaseIterable {
     case screenshot
     case screenshotSelection
     case screenshotTools
+    // The clipboard twins (#3382): a user who moves ⌘⇧3 or ⌘⇧4 onto
+    // them in System Settings leaves the file variants off.
+    case screenshotToClipboard
+    case screenshotSelectionToClipboard
     // ⌥⌘ family (#1075). The Zoom trio is Accessibility-gated —
     // enablement lives in the GUI's `SystemShortcutEnablement`
     // (#1105) — and while one is ON, macOS answers the press
@@ -100,6 +104,8 @@ public enum SystemShortcuts {
             ("command+shift+3", .screenshot),
             ("command+shift+4", .screenshotSelection),
             ("command+shift+5", .screenshotTools),
+            ("control+command+shift+3", .screenshotToClipboard),
+            ("control+command+shift+4", .screenshotSelectionToClipboard),
             ("option+command+8", .zoomToggle),
             ("option+command+equal", .zoomIn),
             ("option+command+minus", .zoomOut),
