@@ -146,4 +146,65 @@ struct MonitorSetForgetTests {
         #expect(field(rows.first, "connected") == .bool(true))
         #expect(field(rows.first, "profile") == .string("Desk"))
     }
+
+    @Test("the list runs connected, then by screen count, then by name")
+    func listOrder() {
+        func set(
+            _ names: [String],
+            _ profile: String = "P",
+            connected: Bool = false
+        ) -> KnownMonitorSet {
+            KnownMonitorSet(
+                monitors: names.map { "\($0):100x100" }.sorted(),
+                profile: profile,
+                isConnected: connected,
+                isProfilesLast: false
+            )
+        }
+        let stored = [
+            set(["Zeta", "Alpha"], "A"),
+            set(["beta"], "Z"),
+            set(["Dell", "Built-in"], connected: true),
+            set(["Alpha", "Beta", "Gamma"]),
+            set(["Alpha"], "Z"),
+            set(["Alpha", "Dell"], "A"),
+            set(["Gamma"], "A"),
+        ]
+        let sorted = stored.sorted(by: KnownMonitorSet.listOrder)
+        let names = sorted.map {
+            $0.monitors.map { Display.fingerprintParts($0).name }
+        }
+        #expect(
+            names
+                == [
+                    ["Built-in", "Dell"],
+                    ["Alpha"], ["beta"], ["Gamma"],
+                    ["Alpha", "Dell"], ["Alpha", "Zeta"],
+                    ["Alpha", "Beta", "Gamma"],
+                ]
+        )
+        #expect(sorted.map(\.listGroup) == [0, 1, 1, 1, 2, 2, 3])
+    }
+
+    @Test("list_monitor_sets answers in the card's order")
+    func replyKeepsTheOrder() throws {
+        let core = makeCore()
+        connect(core, ["A", "B", "C"])
+        try core.persistProfile(named: "Wide", modes: nil)
+        connect(core, ["B"])
+        try core.persistProfile(named: "Solo", modes: nil)
+        connect(core, ["A", "B"])
+        try core.persistProfile(named: "Desk", modes: nil)
+        connect(core, ["A"])
+        try core.persistProfile(named: "Lap", modes: nil)
+        let reply = core.execute("list_monitor_sets")
+        guard case .array(let rows)? = reply.data else {
+            Issue.record("no rows")
+            return
+        }
+        #expect(
+            rows.map { field($0, "profile") }
+                == ["Lap", "Solo", "Desk", "Wide"].map { .string($0) }
+        )
+    }
 }

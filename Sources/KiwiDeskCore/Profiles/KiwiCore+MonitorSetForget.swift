@@ -25,6 +25,40 @@ public struct KnownMonitorSet: Hashable, Sendable {
     }
 }
 
+extension KnownMonitorSet {
+    /// The card's and `list_monitor_sets`' one order (#3374): the
+    /// connected setup first, then by screen count, then by the
+    /// screens' names in the user's collation; the profile and the
+    /// fingerprints settle a tie.
+    public static func listOrder(
+        _ a: KnownMonitorSet,
+        _ b: KnownMonitorSet
+    ) -> Bool {
+        if a.isConnected != b.isConnected { return a.isConnected }
+        if a.monitors.count != b.monitors.count {
+            return a.monitors.count < b.monitors.count
+        }
+        switch a.names.localizedStandardCompare(b.names) {
+        case .orderedAscending: return true
+        case .orderedDescending: return false
+        case .orderedSame:
+            return (a.profile, a.monitors.joined(separator: "\n"))
+                < (b.profile, b.monitors.joined(separator: "\n"))
+        }
+    }
+
+    /// The group a divider closes in the card: the connected setup
+    /// alone, then one per screen count.
+    public var listGroup: Int { isConnected ? 0 : monitors.count }
+
+    /// The screens' names, the label's words without its list
+    /// punctuation, which is the GUI's to localize.
+    private var names: String {
+        monitors.map { Display.fingerprintParts($0).name }
+            .joined(separator: "\n")
+    }
+}
+
 /// Why a forget wrote nothing — a case, never a GUI sentence
 /// (core-boundaries.md). `description` is the CLI's English.
 public enum MonitorSetForgetError: Error, Equatable,
@@ -61,8 +95,7 @@ public enum MonitorSetForgetError: Error, Equatable,
 /// beside the claim-only chips, whose ruling amends #1530 in
 /// `docs/design-decisions.md`.
 extension KiwiCore {
-    /// Every stored setup with its holder — the connected one
-    /// first, then by profile, then by screens.
+    /// Every stored setup with its holder, in `listOrder`.
     public func knownMonitorSets() -> [KnownMonitorSet] {
         profiles.allProfiles()
             .flatMap { profile in
@@ -75,13 +108,7 @@ extension KiwiCore {
                     )
                 }
             }
-            .sorted {
-                if $0.isConnected != $1.isConnected {
-                    return $0.isConnected
-                }
-                return ($0.profile, $0.monitors.joined(separator: "\n"))
-                    < ($1.profile, $1.monitors.joined(separator: "\n"))
-            }
+            .sorted(by: KnownMonitorSet.listOrder)
     }
 
     /// Forgets the stored setup `monitors` through the one strip a

@@ -23078,6 +23078,16 @@ behind would leave the setup known. Rows name a setup the way the
 page's chips do, the list form of the locale, rather than the
 "+" the ruling sketched, so one setup never reads two ways on one
 page.
+
+*The card's order (#3374, owner, 2026-11-17, amending the above).*
+The connected setup leads, then the rest by screen count, then by
+the screens' names in the reader's collation, with a rule between
+count groups. The order is Core's, so `list_monitor_sets` answers
+in the order the card draws and an AI app reading the list names
+the row a user points at; the card adds only the rules. Ordering
+by holder, as the card first did, scattered setups of one count
+across the list, and a user looks for a setup by its screens, not
+by which profile holds it.
 :::
 
 **[Principle]**

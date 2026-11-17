@@ -9463,9 +9463,12 @@ set becomes the default unless the count already has another.
 
 **Does:**
 
-- `list_monitor_sets` returns every stored setup, the connected one
-  first: `{screens, profile, connected, last_of_profile}`, where
-  `last_of_profile` says the setup is its profile's only one.
+- `list_monitor_sets` returns every stored setup as
+  `{screens, profile, connected, last_of_profile}`, where
+  `last_of_profile` says the setup is its profile's only one. The
+  connected setup comes first, then the rest by screen count, then
+  by the screens' names, as Settings ▸ Profiles ▸ **Known screen
+  setups** lists them.
 - `forget_monitor_set` removes that exact combination from the
   profile holding it, with its pins; every other setup, including
   ones sharing a screen, stays. A binding kept in `bindings.json`
