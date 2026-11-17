@@ -7,28 +7,25 @@ import AppKit
 /// its item. A reading still closes a peek, and the first reading
 /// after the pointer moves opens one as ever.
 extension BarPeek {
-    /// A section `ShelfOverlay.show` brought on screen, and the
-    /// pointer's resting point in its window then.
+    /// A section `ShelfOverlay.show` brought on screen, and where
+    /// the pointer rested then, in screen points: the shelf's panel
+    /// moves with its plate while the pointer rests.
     struct Arrival {
         weak var root: NSView?
-        let window: NSWindow
         let point: CGPoint
     }
 
     /// Marks `roots` arrived under the pointer where it rests now.
     func arrive(_ roots: [NSView]) {
         arrivals.removeAll { mark in
-            mark.root == nil || roots.contains { $0 === mark.root }
+            mark.root?.window == nil
+                || roots.contains { $0 === mark.root }
         }
         for root in roots {
-            guard let window = root.window else { continue }
-            arrivals.append(
-                Arrival(
-                    root: root,
-                    window: window,
-                    point: BarHoverHit.restingPoint(in: window)
-                )
-            )
+            guard let point = Self.restingScreenPoint(of: root) else {
+                continue
+            }
+            arrivals.append(Arrival(root: root, point: point))
         }
     }
 
@@ -41,10 +38,21 @@ extension BarPeek {
             })
         else { return false }
         let mark = arrivals[index]
-        if BarHoverHit.restingPoint(in: mark.window) == mark.point {
+        if let root = mark.root,
+            Self.restingScreenPoint(of: root) == mark.point
+        {
             return true
         }
         arrivals.remove(at: index)
         return false
+    }
+
+    /// Where the pointer rests, in screen points, read through the
+    /// window `view` is drawn in.
+    private static func restingScreenPoint(of view: NSView) -> CGPoint? {
+        guard let window = view.window else { return nil }
+        return window.convertPoint(
+            toScreen: BarHoverHit.restingPoint(in: window)
+        )
     }
 }

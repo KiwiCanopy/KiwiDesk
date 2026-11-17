@@ -169,10 +169,18 @@ struct BarPeekArrivalTests {
         let item = AppBarOverlay.FlippedView()
         root.addSubview(item)
         window.contentView?.addSubview(root)
+        defer {
+            BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
+        }
+        // The pointer rests at one spot on the screen.
         var point = CGPoint(x: 10, y: 10)
-        BarHoverHit.pointerOverride = { _ in point }
+        BarHoverHit.pointerOverride = { $0.convertPoint(fromScreen: point) }
         let source = BarPeekSource.glyph([WindowID(4)])
         peek.arrive([root])
+        peek.pointer(in: item, on: item, source: source, edge: .top)
+        #expect(dwells == 0)
+        // The panel moves with its plate; the pointer has not.
+        window.setFrameOrigin(CGPoint(x: 40, y: 0))
         peek.pointer(in: item, on: item, source: source, edge: .top)
         #expect(dwells == 0)
         point.x += 1
