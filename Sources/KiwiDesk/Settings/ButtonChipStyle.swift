@@ -12,12 +12,13 @@ struct ButtonChipStyle: ButtonStyle {
         ChipFace(configuration: configuration, popUp: false)
     }
 
-    /// The marking's layer over a chip's fill — the one wash the
-    /// jump chip and the icon cell share (#1173).
-    static func markFill(_ marked: Bool) -> Color {
-        SettingsTheme.accent.opacity(
-            marked ? SettingsTheme.chipMarkedOpacity : 0
-        )
+    /// The marking's layer over a chip's fill (#1173): `wash` when
+    /// marked, nothing otherwise.
+    static func markFill(
+        _ marked: Bool,
+        wash: Color = SettingsTheme.chipMarked
+    ) -> Color {
+        marked ? wash : .clear
     }
 
     /// The pointer's fill — the one ladder the jump chip shares.

@@ -116,7 +116,9 @@ struct FontWeightChips: View {
                 PresetChip(
                     title: BarFontText.weightName(named),
                     font: .callout.weight(named.swiftUIWeight),
-                    selected: shown == named.value
+                    selected: shown == named.value,
+                    // Each chip is a sample of its weight.
+                    emboldens: false
                 ) {
                     weight = named.value
                 }

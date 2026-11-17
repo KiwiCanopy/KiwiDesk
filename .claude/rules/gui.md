@@ -83,6 +83,13 @@ restated `20...80` satisfies on the day it is written.
   container is drawn on the `default` layer alone, and a hit on a
   row it draws selects that layer first (#3260,
   `DefaultShortcutsRowTests` ▸ `containerLeavesWithItsLayer`).
+- **A choice chip's label takes its ink and weight from
+  `choiceChip`, never from the site** (5.0.0, #3378): the chosen
+  chip is solid accent under `accentInk` and a semibold label over
+  a reserved width. Two ruled exceptions: an empty lens's lighter
+  label (`KiwiVisionLensChip`) and a weight sample, which passes
+  `emboldens: false` (`ChoiceChipTests` ▸ `sitesTakeTheSurface`,
+  `weightSamplesKeepTheirWeight`).
 - An affordance for a channel that **does not exist yet is removed
   outright**: dimming cannot revoke the promise its shape makes,
   and it reads broken instead of forthcoming (the site's App Store

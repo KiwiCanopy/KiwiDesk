@@ -53,6 +53,9 @@ struct PresetChip: View {
     let title: String
     let font: Font
     let selected: Bool
+    /// False where `font` shows a weight of its own, which the
+    /// chosen chip keeps (`FontWeightChips`).
+    var emboldens = true
     let action: () -> Void
 
     var body: some View {
@@ -61,7 +64,7 @@ struct PresetChip: View {
                 .font(font)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
-                .choiceChip(selected: selected)
+                .choiceChip(selected: selected, emboldens: emboldens)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)

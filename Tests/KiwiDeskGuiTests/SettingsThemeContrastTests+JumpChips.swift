@@ -11,11 +11,6 @@ import Testing
 /// chip's accent wash above it. The fills are per-appearance
 /// tokens, so they are layered at the alpha each resolves to.
 extension SettingsThemeContrastTests {
-    private static let markedWash = (
-        color: SettingsTheme.accent,
-        alpha: Double(SettingsTheme.chipMarkedOpacity)
-    )
-
     static let jumpChips: [Pairing] = [
         Pairing(
             "ink on a resting jump chip",
@@ -33,15 +28,13 @@ extension SettingsThemeContrastTests {
             "ink on the marked jump chip",
             SettingsTheme.ink,
             on: SettingsTheme.page,
-            layers: [SettingsTheme.chipRest],
-            washedWith: markedWash
+            layers: [SettingsTheme.chipRest, SettingsTheme.chipMarked]
         ),
         Pairing(
             "ink on the hovered marked jump chip",
             SettingsTheme.ink,
             on: SettingsTheme.page,
-            layers: [SettingsTheme.chipHover],
-            washedWith: markedWash
+            layers: [SettingsTheme.chipHover, SettingsTheme.chipMarked]
         ),
         Pairing(
             "ink on a pressed jump chip",
@@ -53,8 +46,7 @@ extension SettingsThemeContrastTests {
             "ink on the pressed marked jump chip",
             SettingsTheme.ink,
             on: SettingsTheme.page,
-            layers: [SettingsTheme.chipPressed],
-            washedWith: markedWash
+            layers: [SettingsTheme.chipPressed, SettingsTheme.chipMarked]
         ),
         // The icon picker's cells take the same rest, press and
         // mark on its popover, measured on `card` as the nearest
@@ -64,15 +56,18 @@ extension SettingsThemeContrastTests {
             "ink on the marked icon cell",
             SettingsTheme.ink,
             on: SettingsTheme.card,
-            layers: [SettingsTheme.chipRest],
-            washedWith: markedWash
+            layers: [SettingsTheme.chipRest, SettingsTheme.iconCellMarked]
         ),
+        // A cell carries a glyph, not text, so its transient press
+        // takes the non-text floor; at rest it keeps 4.5 (5.0.0).
         Pairing(
             "ink on the pressed marked icon cell",
             SettingsTheme.ink,
             on: SettingsTheme.card,
-            layers: [SettingsTheme.chipPressed],
-            washedWith: markedWash
+            layers: [
+                SettingsTheme.chipPressed, SettingsTheme.iconCellMarked,
+            ],
+            floor: 3
         ),
     ]
 

@@ -137,9 +137,25 @@ struct ShortcutBaseSwitchModelTests {
         #expect(row.contains("return ShortcutBaseWords.storedPage"))
         #expect(
             row.contains(
-                "? ShortcutBaseWords.keyOff : ShortcutBaseWords.noKey"
+                "return keySet ? ShortcutBaseWords.caption : "
+                    + "ShortcutBaseWords.noKey"
             )
         )
         #expect(row.contains("spokenValue: ShortcutBaseWords.spoken("))
+        // Only the dead-shortcuts caption warns (5.0.0), read from
+        // the state that picks it, and the caption draws it.
+        #expect(
+            row.contains(
+                "if keyOff { return ShortcutBaseWords.keyOff }"
+            )
+        )
+        // The branch draws the warning glyph in its ink.
+        #expect(
+            row.filter { !$0.isWhitespace }.contains(
+                "ifkeyOff{Image(systemName:"
+                    + "\"exclamationmark.triangle.fill\")"
+                    + ".foregroundStyle(SettingsTheme.warningInk)"
+            )
+        )
     }
 }

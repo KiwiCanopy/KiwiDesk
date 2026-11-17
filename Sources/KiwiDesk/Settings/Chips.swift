@@ -70,17 +70,19 @@ extension View {
 /// A choice chip's surface — one of a set, its selection the rest
 /// affordance (`ShortcutLayerChip`, `PresetChip`, #2047). A text
 /// choice is a text button chip: the chip tokens plus the
-/// constant edge, the chosen one washed with the accent instead
-/// of resting. A glyph-only one (`edged: false`) takes no edge.
+/// constant edge, the chosen one drawn like a selected segment —
+/// solid accent, `accentInk`, a semibold label over the width
+/// every chip reserves. A glyph-only one (`edged: false`) takes
+/// no edge and no weight, and a chip whose label shows a weight of
+/// its own (`emboldens: false`) keeps it.
 enum ChoiceChip {
-    /// The chosen chip's accent wash, in place of the rest fill.
-    static let selectedWashOpacity = 0.25
-
     static func fill(selected: Bool, hovering: Bool) -> Color {
-        if selected {
-            return SettingsTheme.accent.opacity(selectedWashOpacity)
-        }
+        if selected { return SettingsTheme.accent }
         return hovering ? SettingsTheme.chipHover : SettingsTheme.chipRest
+    }
+
+    static func ink(selected: Bool) -> Color {
+        selected ? SettingsTheme.accentInk : SettingsTheme.ink
     }
 }
 
@@ -90,9 +92,16 @@ extension View {
     /// under Reduce Motion the lift is immediate.
     func choiceChip(
         selected: Bool = false,
-        edged: Bool = true
+        edged: Bool = true,
+        emboldens: Bool = true
     ) -> some View {
-        modifier(ChoiceChipSurface(selected: selected, edged: edged))
+        modifier(
+            ChoiceChipSurface(
+                selected: selected,
+                edged: edged,
+                emboldens: edged && emboldens
+            )
+        )
     }
 }
 
@@ -100,14 +109,15 @@ extension View {
 private struct ChoiceChipSurface: ViewModifier {
     let selected: Bool
     let edged: Bool
+    let emboldens: Bool
     @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
     func body(content: Content) -> some View {
-        content
-            .foregroundStyle(SettingsTheme.ink)
+        label(content)
+            .foregroundStyle(ChoiceChip.ink(selected: selected))
             .background(
                 Capsule().fill(
                     ChoiceChip.fill(
@@ -132,6 +142,21 @@ private struct ChoiceChipSurface: ViewModifier {
             .onChange(of: isEnabled) { _, now in
                 if !now { hovering = false }
             }
+    }
+
+    /// The chosen label goes semibold over a hidden semibold copy
+    /// that reserves its width, so a selection never reflows the
+    /// strip.
+    @ViewBuilder private func label(_ content: Content) -> some View {
+        if emboldens {
+            ZStack {
+                content.fontWeight(.semibold).hidden()
+                    .accessibilityHidden(true)
+                content.fontWeight(selected ? .semibold : nil)
+            }
+        } else {
+            content
+        }
     }
 }
 

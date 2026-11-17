@@ -179,40 +179,27 @@ extension SettingsThemeContrastTests {
         )
     }
 
-    /// A choice chip's label — a layer, a preset share or weight
-    /// — when chosen, on the accent wash in place of the rest
-    /// fill; unchosen it is a button chip's (`buttonChips`, and
-    /// the jump chips' rows for the page). The panel carries the
-    /// keyboard's scope chips and the Spaces preview's chips.
-    private static let choiceChips: [Pairing] =
-        [
-            ("card", SettingsTheme.card),
-            ("sunken", SettingsTheme.sunken),
-            ("page", SettingsTheme.page),
-            ("panel", SettingsTheme.panel),
-        ].map { name, ground in
-            Pairing(
-                "ink on a chosen choice chip on \(name)",
-                SettingsTheme.ink,
-                on: ground,
-                washedWith: (
-                    SettingsTheme.accent,
-                    ChoiceChip.selectedWashOpacity
-                )
-            )
-        }
+    /// A choice chip's label — a layer, a preset share or weight;
+    /// unchosen it is a button chip's (`buttonChips`). The chosen
+    /// choice chip is opaque accent, so its ground
+    /// does not reach the label (#2047 amended, 5.0.0).
+    private static let choiceChips: [Pairing] = [
+        // Read from the chip itself, so a swapped ink reds here.
+        Pairing(
+            "the chosen choice chip's ink on its fill",
+            ChoiceChip.ink(selected: true),
+            on: ChoiceChip.fill(selected: true, hovering: false)
+        )
+    ]
 
     /// An empty lens's chip draws its lighter label on the page,
-    /// chosen or not (#2103 ruling 50).
+    /// chosen or not (#2103 ruling 50) — on the chosen accent, the
+    /// accent's own secondary ink.
     private static let emptyLensChips: [Pairing] = [
         Pairing(
-            "ink2 on an empty lens's chosen chip",
-            SettingsTheme.ink2,
-            on: SettingsTheme.page,
-            washedWith: (
-                SettingsTheme.accent,
-                ChoiceChip.selectedWashOpacity
-            )
+            "accentInkSecondary on an empty lens's chosen chip",
+            SettingsTheme.accentInkSecondary,
+            on: SettingsTheme.accent
         ),
         Pairing(
             "ink2 on an empty lens's chip",

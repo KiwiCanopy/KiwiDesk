@@ -243,7 +243,7 @@ private struct SpacePreviewChipRow<Content: View>: View {
 }
 
 /// One Space's chip in the preview's row: a choice chip, lifting
-/// under the pointer and washed with the accent while shown.
+/// under the pointer and drawn chosen while shown.
 private struct SpacePreviewChip: View {
     let title: String
     let isOn: Bool
@@ -253,7 +253,6 @@ private struct SpacePreviewChip: View {
         Button(action: action) {
             Text(title)
                 .font(.caption)
-                .fontWeight(.medium)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
                 .choiceChip(selected: isOn)

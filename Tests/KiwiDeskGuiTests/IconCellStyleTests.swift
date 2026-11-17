@@ -36,12 +36,17 @@ struct IconCellStyleTests {
     }
 
     /// The mark is its own layer, so a press never unmarks the
-    /// chosen icon (#1173), and the chip ladder's one wash.
+    /// chosen icon (#1173), on a wash of its own.
     @Test("the mark rides above the press layer")
     func markLayer() throws {
         let face = try squashed("IconCellStyle.swift")
-        // One marked wash: the chip ladder's, never a copy.
-        #expect(face.contains("ButtonChipStyle.markFill(marked)"))
+        // Its own wash, through the chip ladder's one mark door.
+        #expect(
+            face.contains(
+                "ButtonChipStyle.markFill(marked,"
+                    + "wash:SettingsTheme.iconCellMarked)"
+            )
+        )
         let pointer = try #require(
             face.range(of: "shape.fill(IconCellStyle.fill(")
         )

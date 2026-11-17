@@ -18,9 +18,13 @@ struct IconCellStyle: ButtonStyle {
         ButtonChipStyle.fill(pressed: pressed, hovered: hovered)
     }
 
-    /// The marking's layer, over the press — the chip ladder's.
+    /// The marking's layer, over the press — its own wash on
+    /// `card`.
     static func markFill(_ marked: Bool) -> Color {
-        ButtonChipStyle.markFill(marked)
+        ButtonChipStyle.markFill(
+            marked,
+            wash: SettingsTheme.iconCellMarked
+        )
     }
 
     static let radius: CGFloat = 6

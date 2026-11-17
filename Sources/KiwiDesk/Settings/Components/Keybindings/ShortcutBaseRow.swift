@@ -64,11 +64,8 @@ struct ShortcutBaseRow: View {
         if reason == .appWideLuaOwned {
             return GeneralGateHelp.sentence(for: .luaOwned)
         }
-        guard keySet else {
-            return model.config.shortcutBase == .hyper
-                ? ShortcutBaseWords.keyOff : ShortcutBaseWords.noKey
-        }
-        return ShortcutBaseWords.caption
+        if keyOff { return ShortcutBaseWords.keyOff }
+        return keySet ? ShortcutBaseWords.caption : ShortcutBaseWords.noKey
     }
 
     private var left: [ShortcutBaseLeftRow] { model.rowsLeftOnStandard }
@@ -87,11 +84,26 @@ struct ShortcutBaseRow: View {
         .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
+    /// The base is ✦ with no key: shortcuts on ✦ are dead, so its
+    /// caption is a warning and wears the triangle; `noKey` stays a
+    /// plain caption. A gate reason's own caption comes first.
+    private var keyOff: Bool {
+        reason != .storedProfilePage && reason != .appWideLuaOwned
+            && !keySet && model.config.shortcutBase == .hyper
+    }
+
     private func caption(_ text: String) -> some View {
-        Text(text)
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink2)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, SettingsMetrics.shortcutTextIndent)
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if keyOff {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(SettingsTheme.warningInk)
+                    .accessibilityHidden(true)
+            }
+            Text(text)
+                .foregroundStyle(SettingsTheme.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.caption)
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 }

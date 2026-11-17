@@ -113,7 +113,9 @@ struct KiwiVisionLensChip: View {
                 Text(name).lineLimit(1)
             }
             .font(.callout)
-            .foregroundStyle(empty ? SettingsTheme.ink2 : SettingsTheme.ink)
+            // An empty lens's label is the lighter ink, chosen or not
+            // (#2103 ruling 50); a full one takes the surface's.
+            .modifier(EmptyLensInk(empty: empty, selected: selected))
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .choiceChip(selected: selected)
@@ -123,5 +125,23 @@ struct KiwiVisionLensChip: View {
         .accessibilityLabel(name)
         .accessibilityValue(empty ? KiwiVisionLensWords.noApps(name) : "")
         .accessibilityAddTraits(selected ? [.isSelected] : [])
+    }
+}
+
+/// The lighter label of an empty lens: `ink2`, or the accent's own
+/// secondary ink once chosen; nothing for a full lens.
+private struct EmptyLensInk: ViewModifier {
+    let empty: Bool
+    let selected: Bool
+
+    func body(content: Content) -> some View {
+        if empty {
+            content.foregroundStyle(
+                selected
+                    ? SettingsTheme.accentInkSecondary : SettingsTheme.ink2
+            )
+        } else {
+            content
+        }
     }
 }
