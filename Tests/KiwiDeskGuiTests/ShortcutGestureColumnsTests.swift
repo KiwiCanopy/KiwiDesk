@@ -46,6 +46,12 @@ struct ShortcutGestureColumnsTests {
         icon: "arrow.clockwise"
     )
 
+    private static let starred: KeyBindingMeta = {
+        var meta = KeyBindingMeta.none
+        meta.symbol = "star"
+        return meta
+    }()
+
     private let spaces = [
         "KiwiDesk.focus_space_previous()", "KiwiDesk.focus_space_next()",
     ]
@@ -155,6 +161,13 @@ struct ShortcutGestureColumnsTests {
                 GestureKey(.drag, [.control, .command]): .grab(.move),
                 GestureKey(.tap3): .run(LuaAction(lua: "print(1)")),
                 GestureKey(.tap2): .run(LuaAction(lua: Self.reload.lua)),
+                GestureKey(.tap2, keys): .run(
+                    LuaAction(
+                        lua: Self.reload.lua,
+                        kind: .navigation,
+                        meta: Self.starred
+                    )
+                ),
                 GestureKey(.tap4): .run(
                     LuaAction(lua: app, kind: .application)
                 ),
@@ -169,11 +182,15 @@ struct ShortcutGestureColumnsTests {
             command: { $0.lua == Self.reload.lua ? Self.reload : nil }
         )
         let rows = try #require(built.groups.last?.rows)
-        func row(_ input: GestureInput) throws -> ShortcutRow {
-            try #require(rows.first { $0.gestures.first?.key.input == input })
+        func row(
+            _ input: GestureInput,
+            _ chord: ScrollChord = []
+        ) throws -> ShortcutRow {
+            let key = GestureKey(input, chord)
+            return try #require(rows.first { $0.gestures.first?.key == key })
         }
         #expect(
-            try row(.drag).icon
+            try row(.drag, [.control, .command]).icon
                 == .symbol(ShortcutsReferenceBuilder.grabIcon(.move))
         )
         #expect(try row(.tap3).icon == .symbol(LuaMark.symbol))
@@ -184,10 +201,13 @@ struct ShortcutGestureColumnsTests {
         #expect(try row(.tap5).label == "Reload")
         // The user's own Lua is never a catalogue command, even when
         // it spells one (architect review).
+        // A binding's own symbol leads ahead of the catalogue's
+        // (guard-prover).
+        #expect(try row(.tap2, keys).icon == .symbol("star"))
         #expect(try row(.tap2).label == Self.reload.lua)
         #expect(try row(.tap2).icon == .symbol(LuaMark.symbol))
         #expect(
-            try row(.swipe4).icon
+            try row(.swipe4, keys).icon
                 == .symbol(ShortcutsReferenceBuilder.familyIcon(for: .space))
         )
     }
