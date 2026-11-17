@@ -239,7 +239,7 @@ enum JumpKey: Equatable {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
         )
-        return combo(keyCode, held) == back
+        return KeyCombo(keyCode: keyCode, flags: held) == back
     }
 
     /// Whether the key is a ↩ chord or a ⌘ digit — a pick, the
@@ -254,19 +254,6 @@ enum JumpKey: Equatable {
         }
     }
 
-    /// The press as `KiwiHubKeys` spells it.
-    private static func combo(
-        _ keyCode: UInt16,
-        _ held: NSEvent.ModifierFlags
-    ) -> KeyCombo {
-        var modifiers: HotkeyModifiers = []
-        if held.contains(.control) { modifiers.insert(.control) }
-        if held.contains(.option) { modifiers.insert(.option) }
-        if held.contains(.shift) { modifiers.insert(.shift) }
-        if held.contains(.command) { modifiers.insert(.command) }
-        return KeyCombo(keyCode: UInt32(keyCode), modifiers: modifiers)
-    }
-
     /// What a Lua alternative does: its built-in key's move. ⇧
     /// previews Move here, so an alternative moves under it too, as
     /// the arrows do. ← and → move in View, Desktops and Windows'
@@ -278,8 +265,9 @@ enum JumpKey: Equatable {
         keys: KiwiHubKeys
     ) -> JumpKey? {
         guard
-            let key = keys.key(for: combo(keyCode, held))
-                ?? keys.key(for: combo(keyCode, held.subtracting(.shift)))
+            let key = keys.key(
+                forPress: KeyCombo(keyCode: keyCode, flags: held)
+            )
         else { return nil }
         switch key {
         case .up: return .step(-1)

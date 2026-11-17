@@ -309,8 +309,7 @@ final class BarPeekPanel {
         panel.level = BarPanel.aboveLevel
         panel.hasShadow = true
         panel.setAccessibilityElement(false)
-        panel.onKey = { [weak self] in self?.morphKey($0) ?? false }
-        panel.keys = { [weak self] in self?.keys() ?? KiwiHubKeys() }
+        panel.onKey = { [weak self] in self?.morphKey($0, $1) ?? false }
         root.wantsLayer = true
         root.setAccessibilityElement(false)
         stage.wantsLayer = true

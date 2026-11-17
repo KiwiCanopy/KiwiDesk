@@ -88,7 +88,6 @@ struct PocketListHubKeyTests {
     private let two = WindowID(2)
     private static let jKey: UInt16 = 38
     private static let kKey: UInt16 = 40
-    private static let dKey: UInt16 = 2
 
     private func setKey(_ core: KiwiCore, _ key: String, _ combo: String) {
         let reply = core.execute(
@@ -139,20 +138,34 @@ struct PocketListHubKeyTests {
             )
         )
         #expect(panel.body.hovered == 0)
+        // ⇧ held moves under ⌘ too.
+        #expect(
+            window.performKeyEquivalent(
+                with: key(Self.jKey, "J", [.command, .shift])
+            )
+        )
+        #expect(panel.body.hovered == 1)
         #expect(core.shelves.peek.shown != nil)
     }
 
-    @Test("a page alternative is KiwiHub's alone and closes the list")
-    func pageAlternativeCloses() throws {
+    @Test("page and sideways alternatives are KiwiHub's and close it")
+    func otherAlternativesClose() throws {
         let fixture = try PocketListFixture()
         let core = fixture.core
         defer { fixture.tearDown() }
         fixture.pocket([one, two])
-        setKey(core, "page_down", "ctrl+d")
-        core.execute("pocket.toggle_list")
-        let window = try #require(core.shelves.peek.panel.panel)
-        window.keyDown(with: key(Self.dKey, "d", [.control]))
-        #expect(core.shelves.peek.shown == nil)
+        let others: [(String, String, UInt16)] = [
+            ("page_up", "u", 32), ("page_down", "d", 2),
+            ("left", "h", 4), ("right", "l", 37),
+        ]
+        for (name, letter, code) in others {
+            setKey(core, name, "ctrl+\(letter)")
+            core.execute("pocket.toggle_list")
+            let window = try #require(core.shelves.peek.panel.panel)
+            #expect(core.shelves.peek.shown != nil)
+            window.keyDown(with: key(code, letter, [.control]))
+            #expect(core.shelves.peek.shown == nil, "\(name)")
+        }
     }
 
     private func key(

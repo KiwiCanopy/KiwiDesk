@@ -9,46 +9,33 @@ final class BarPeekWindow: NSPanel {
     /// A key opened the list: it walks with that chord's ⌘ still held
     /// (#2974), since the arrows land before the chord lets go.
     var walksHeldKeys = false
-    /// A key pressed while the panel is key; true where it was used.
-    var onKey: @MainActor (UInt16) -> Bool = { _ in false }
-    /// KiwiHub's navigation alternatives, read at each press
-    /// (#3398).
-    var keys: @MainActor () -> KiwiHubKeys = { KiwiHubKeys() }
+    /// A key pressed while the panel is key, with its modifiers;
+    /// true where it was used.
+    var onKey: @MainActor (UInt16, NSEvent.ModifierFlags) -> Bool = {
+        _,
+        _ in false
+    }
 
     override var canBecomeKey: Bool { takesKey }
     override var canBecomeMain: Bool { false }
 
     override func keyDown(with event: NSEvent) {
-        let code = arrow(of: event) ?? event.keyCode
-        if !onKey(code) { super.keyDown(with: event) }
+        if !onKey(event.keyCode, event.modifierFlags) {
+            super.keyDown(with: event)
+        }
     }
 
     /// A chord while the list is key is the user's for the app
     /// beneath, never KiwiDesk's menu: a ⌘Q must not quit KiwiDesk
-    /// (gui.md ▸ a non-activating key panel). It closes the list and
-    /// is swallowed, as any key the list does not use.
+    /// (gui.md ▸ a non-activating key panel). The list decides what
+    /// it does (`BarPeekPanel.listKey`), and it is swallowed.
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         // AppKit offers every key press here before `keyDown`, the
         // arrows included: only a ⌘ chord is the menu's to take.
         guard takesKey, event.modifierFlags.contains(.command) else {
             return super.performKeyEquivalent(with: event)
         }
-        // A ⌘ alternative walks, never closes (#3398).
-        if let code = arrow(of: event) {
-            _ = onKey(code)
-            return true
-        }
-        let walks =
-            walksHeldKeys && BarPeekPanel.ListKey.all.contains(event.keyCode)
-        _ = onKey(walks ? event.keyCode : UInt16.max)
+        _ = onKey(event.keyCode, event.modifierFlags)
         return true
-    }
-
-    private func arrow(of event: NSEvent) -> UInt16? {
-        BarPeekListKeys.arrow(
-            keyCode: event.keyCode,
-            modifiers: event.modifierFlags,
-            keys: keys()
-        )
     }
 }
