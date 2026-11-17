@@ -23081,7 +23081,9 @@ page.
 
 *The card's order (#3374, owner, 2026-11-17, amending the above).*
 The connected setup leads, then the rest by screen count, then by
-the screens' names in the reader's collation, with a rule between
+the screens' names collated in the app's language (the one the
+card's labels are drawn in), then by their sizes, so a same-named
+pair the card labels by size reads in size order; a rule separates
 count groups. The order is Core's, so `list_monitor_sets` answers
 in the order the card draws and an AI app reading the list names
 the row a user points at; the card adds only the rules. Ordering

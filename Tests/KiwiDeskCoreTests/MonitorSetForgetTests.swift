@@ -170,7 +170,9 @@ struct MonitorSetForgetTests {
             set(["Alpha", "Dell"], "A"),
             set(["Gamma"], "A"),
         ]
-        let sorted = stored.sorted(by: KnownMonitorSet.listOrder)
+        let sorted = stored.sorted(
+            by: KnownMonitorSet.listOrder(in: Locale(identifier: "en"))
+        )
         let names = sorted.map {
             $0.monitors.map { Display.fingerprintParts($0).name }
         }
@@ -184,6 +186,48 @@ struct MonitorSetForgetTests {
                 ]
         )
         #expect(sorted.map(\.listGroup) == [0, 1, 1, 1, 2, 2, 3])
+    }
+
+    @Test("a same-named pair reads in size order, whoever holds it")
+    func sameNameBySize() {
+        func set(_ size: String, _ profile: String) -> KnownMonitorSet {
+            KnownMonitorSet(
+                monitors: ["BenQ:\(size)"],
+                profile: profile,
+                isConnected: false,
+                isProfilesLast: false
+            )
+        }
+        let sorted = [set("1920x1080", "A"), set("800x600", "Z")]
+            .sorted(
+                by: KnownMonitorSet.listOrder(in: Locale(identifier: "en"))
+            )
+        #expect(
+            sorted.map(\.monitors) == [["BenQ:800x600"], ["BenQ:1920x1080"]]
+        )
+    }
+
+    @Test("names collate in the locale handed in")
+    func collatesInTheLocale() {
+        func set(_ name: String) -> KnownMonitorSet {
+            KnownMonitorSet(
+                monitors: ["\(name):100x100"],
+                profile: "P",
+                isConnected: false,
+                isProfilesLast: false
+            )
+        }
+        func order(_ locale: String) -> [String] {
+            [set("Zeta"), set("Öra")]
+                .sorted(
+                    by: KnownMonitorSet.listOrder(
+                        in: Locale(identifier: locale)
+                    )
+                )
+                .map { Display.fingerprintParts($0.monitors[0]).name }
+        }
+        #expect(order("en") == ["Öra", "Zeta"])
+        #expect(order("sv") == ["Zeta", "Öra"])
     }
 
     @Test("list_monitor_sets answers in the card's order")
