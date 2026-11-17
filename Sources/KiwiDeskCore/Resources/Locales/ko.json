@@ -1902,7 +1902,7 @@
   "palettes.applied": "적용됨",
   "palettes.builtin": "내장",
   "palettes.bundled": "기본 제공 팔레트",
-  "palettes.caption": "번들 또는 저장된 색상 세트를 App Bar, Space Bar, 테두리, 드래그 표시에 적용합니다. 한 번만 적용되며 이후에는 연동되지 않습니다.",
+  "palettes.caption": "기본 제공 또는 저장된 색상 세트를 App Bar, Space Bar, 테두리, 드래그 표시에 적용합니다. 한 번만 적용되며 이후에는 연동되지 않습니다.",
   "palettes.default_name": "나의 팔레트",
   "palettes.delete": "팔레트 삭제",
   "palettes.empty_hint": "위의 팔레트를 클릭하면 KiwiDesk가 그 색으로 칠해집니다. 자신만의 색상을 저장하면 여기에 표시됩니다.",

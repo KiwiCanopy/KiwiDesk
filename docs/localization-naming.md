@@ -441,6 +441,14 @@ string joining the family takes the word its catalog already
 uses, found by grepping that catalog — in `zh-Hans`, by the
 countability split above.
 
+**A term macOS itself shows takes Apple's word in your locale**,
+read from the OS's own `.loctable`, never from memory. The
+*bundle ID* is the worked case (#3410): its noun follows
+`spext_bundleid` in SPExtensionsReporter's `Localizable.loctable`
+— `de` *Paket-ID*, not *Bundle-ID*; `pt-BR` *ID do Pacote*. Apple's
+noun is what decides; spelling *ID* out as *identifier*, as `ja`,
+`ko` and `ru` do, keeps it.
+
 ### Why there is no per-locale word list here
 
 A table of winning words per locale would be a copy of the
