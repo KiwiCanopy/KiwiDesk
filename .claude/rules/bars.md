@@ -1014,9 +1014,10 @@ Obligations:
   preview keeps that slot and draws no section there
   (`HomeCardPocketSectionTests`).
   An edge where no bar rests, drawn or as a handle
-  (`ShelfEdge.restsAny(hover:)`), asks no pocket slot, and its
-  handle stands at Position; a placement that keeps a Hidden bar's
-  reveal off it is a ruling here first (#3432).
+  (`ShelfEdge.restsAny(hover:)`), asks no pocket slot, and keeps its
+  handle at Position, where a Hidden bar's shortcut reveal may run
+  over it (ruled, owner 2026-11-17, #3432); moving the handle off
+  that reveal is a ruling here first.
 - **Every `ShelfArrangement.arrange` caller states its pocket** —
   the bars-alone placement is reached only through it — so the
   Settings preview places the bars where the engine does
