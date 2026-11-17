@@ -92,6 +92,8 @@ final class ShelfOverlay {
     }
     /// Whether a fade-out is in flight.
     var isLeaving: Bool { leaving != nil }
+    /// The sections the last `show` brought on screen (#3388).
+    private(set) var arrived: [NSView] = []
     /// Schedules a landing once the plate glide has run — the
     /// glide's own timer; a test hands a queue it drains by hand.
     var afterGlide: (@escaping @MainActor () -> Void) -> Void = {
@@ -141,7 +143,8 @@ final class ShelfOverlay {
     /// with `shelf` as rendered — glass already gated by
     /// `LiquidGlassGate` — and shows it, fading in where it appears
     /// (#1838); `sheen` paints the plate's border with the ramp
-    /// (#1644).
+    /// (#1644). `arrived` then names the sections it brought on
+    /// screen.
     func show(
         strip: CGRect,
         edge: AppBarEdge,
@@ -151,6 +154,7 @@ final class ShelfOverlay {
         divider range: ShelfArrangement.Divider? = nil,
         pocket mount: ShelfPocketPiece.Mount? = nil
     ) {
+        arrived = []
         guard !sections.isEmpty, strip.width >= 1, strip.height >= 1
         else {
             hide(animated: true)
@@ -185,6 +189,12 @@ final class ShelfOverlay {
         let inFlight = BarMotion.revealShift(of: content)
         let hadPocket = pocket.isMounted
         let slidesBack = fadesBack && leavingSlides
+        arrived = Self.arrivals(
+            sections,
+            shownBefore: glides && !fadesBack,
+            on: stripView,
+            leaving: leavingViews
+        )
         leaving = nil
         stripView.frame = CGRect(origin: .zero, size: strip.size)
         let horizontal = edge.isHorizontal

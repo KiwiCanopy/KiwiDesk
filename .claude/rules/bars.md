@@ -1188,7 +1188,15 @@ Obligations:
   relayout's re-read included — and close it on a click outside,
   a pick, a strip scroll, any menu opening, a relayout that moved
   its item, and its shelf leaving**: `ShelfManager.relayout`
-  re-checks the peeked item after the hover re-read, and
+  re-checks the peeked item after the hover re-read, and a
+  section that comes on screen under a resting pointer opens and
+  swaps in no peek until the pointer moves, while a reading still
+  closes one — which sections arrived is `ShelfOverlay.show`'s
+  answer alone (`ShelfOverlay.arrivals`), stamped by the one
+  `BarPeek.arrive` (#3388, `BarPeekArrivalTests`; a panel the
+  `ordersPanels` pin keeps ordered out reads as arriving every
+  pass, so a wired suite asserting a re-read opens a peek sets
+  it), and
   `ShelfManager.sync`'s hide arm is the one home for "its shelf
   left" — a fullscreen or presentation stand-down, every bar on it
   hidden, a display gone — since the panel joins every Space

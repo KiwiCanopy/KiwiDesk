@@ -27,11 +27,15 @@ enum BarHoverHit {
         guard let window = view.window,
             let content = window.contentView
         else { return false }
-        var point = window.mouseLocationOutsideOfEventStream
+        return owns(view, at: restingPoint(in: window), in: content)
+    }
+
+    /// Where the pointer rests now, in `window`'s points.
+    static func restingPoint(in window: NSWindow) -> CGPoint {
         #if DEBUG
-            if let pointerOverride { point = pointerOverride(window) }
+            if let pointerOverride { return pointerOverride(window) }
         #endif
-        return owns(view, at: point, in: content)
+        return window.mouseLocationOutsideOfEventStream
     }
 
     private static func owns(

@@ -99,6 +99,21 @@ extension ShelfOverlay {
         }
     }
 
+    /// The sections a show brings on screen, which the pointer
+    /// cannot have entered (#3388): every one where the panel was
+    /// not shown or was leaving, else one not on the strip yet or
+    /// still leaving it.
+    static func arrivals(
+        _ sections: [Section],
+        shownBefore: Bool,
+        on strip: NSView,
+        leaving: [NSView: UUID]
+    ) -> [NSView] {
+        sections.map(\.view).filter { view in
+            !shownBefore || view.superview !== strip || leaving[view] != nil
+        }
+    }
+
     /// A section's frame on the strip: origin and size in ONE
     /// write, so a section never re-lays at a new size from its old
     /// place.
