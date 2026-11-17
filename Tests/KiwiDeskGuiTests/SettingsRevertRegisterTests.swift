@@ -68,10 +68,11 @@ struct SettingsRevertRegisterTests {
     @Test("each writer copies the path its key names")
     func writersCopyTheirPaths() {
         // A per-screen edge map's stem: an edge whose ↺ must take
-        // the map beside it (#1948, #3376).
+        // the map beside it, as the doors write them together
+        // (#1948, #3376). A per-Space override reverts apart.
         let maps = Set(
             SettingKey.allCases.map { spelled($0.id) }.filter {
-                $0.hasSuffix("Override[]")
+                $0.lowercased().hasSuffix("edgeoverride[]")
             }.map { String($0.dropLast("[]".count)) }
         )
         for (key, writer) in SettingsRevertRegister.writers {
