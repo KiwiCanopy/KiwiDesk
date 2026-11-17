@@ -917,7 +917,11 @@ render content into it (#1517). Obligations:
   new hover-bearing bar view joins that sweep, and its event path
   and the re-read share one gate (`SpaceBarStuckHoverTests`,
   `ShelfWiringSeamTests` ▸ `itemsGateHover`); the pointer read is
-  a seam `makeTestCore` pins (`MouseButtonSeamGuardTests`).
+  a seam `makeTestCore` pins (`MouseButtonSeamGuardTests`). A hit
+  test of a bar panel hands `hitTest` a point in the content root's
+  SUPERVIEW coordinates: the root is flipped, and its own would
+  mirror y, which only a side bar's stacked items can see (#3414,
+  `BarHoverHitSideBarTests`).
 - **Reduce transparency stands the shelf plate down in
   `ShelfManager.relayout`**, which hands the overlay the gated
   shelf from one `LiquidGlassGate.rendered` call and reads the
