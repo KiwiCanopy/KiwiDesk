@@ -150,9 +150,6 @@ extension KiwiCore {
             // What its press opens, under Hidden an app's own too.
             pocketListWindows.count
         )
-        let rise = Self.pocketRiseSide(
-            thickness: tiler.settings.kiwishelf.thickness
-        )
         // A list open on a risen pocket holds it out (#2678 review 1).
         let listed = pocketListedDisplay
         return state.workspaces.allDisplays.compactMap {
@@ -161,6 +158,7 @@ extension KiwiCore {
             // The pocket's edge as this screen has it (#3376).
             let shelf = LiquidGlassGate.rendered(self.shelf(on: display.id))
             let edge = shelf.pocketEdge
+            let rise = Self.pocketRiseSide(thickness: shelf.thickness)
             let place = pocketPlace(on: display.id)
             // A handle's pocket rises out of it as its approach
             // opens (#3368), during a drag or a play, and while its
