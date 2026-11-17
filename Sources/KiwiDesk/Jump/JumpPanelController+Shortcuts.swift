@@ -113,14 +113,7 @@ extension JumpPanelController {
             reference,
             bindings: core.mouse.gestures.resolved,
             natural: { core.mouse.scroll.isNatural(for: $0) },
-            name: { run in
-                named.first { $0.lua == run.lua }?.resolvedLabel
-                    ?? GestureListWords.runName(run)
-            },
-            icon: { run in
-                named.first { $0.lua == run.lua }
-                    .flatMap(ShortcutsReferenceBuilder.icon(for:))
-            }
+            command: { run in named.first { $0.runs(run.lua) } }
         )
         return withAppGlyphs(
             gestured,

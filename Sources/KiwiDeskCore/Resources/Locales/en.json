@@ -2270,6 +2270,7 @@
   "shortcuts.gestures.axis_action": "%1$@, %2$@",
   "shortcuts.gestures.axis_directions.left_right": "Directions left and right",
   "shortcuts.gestures.axis_directions.up_down": "Directions up and down",
+  "shortcuts.gestures.axis_ways": "%1$@ or %2$@",
   "shortcuts.gestures.choose_action": "Choose action…",
   "shortcuts.gestures.context_menu": "Right-click the KiwiShelf for a menu of what you clicked: a Space's layout and how many glyphs it shows, what to do with a window or its app, and the KiwiShelf's settings.",
   "shortcuts.gestures.direction.back": "Back",

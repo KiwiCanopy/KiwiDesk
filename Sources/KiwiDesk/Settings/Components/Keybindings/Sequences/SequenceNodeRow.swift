@@ -105,9 +105,13 @@ struct SequenceNodeRow: View {
     /// A key line's fold slot, in points (#3241).
     static let foldSlot: CGFloat = 12
 
-    /// What brings the leader's chord to its keys' column: the
-    /// 1 pt rail and the fold slot each key line leads with.
-    static let leaderKeyInset: CGFloat = 1 + foldSlot
+    /// An open branch's rail, between half an icon slot each side,
+    /// which together match the leader's disclosure.
+    static let railWidth: CGFloat = 1
+
+    /// What brings the leader's chord to its keys' column: the rail
+    /// and the fold slot each key line leads with.
+    static let leaderKeyInset: CGFloat = railWidth + foldSlot
 
     /// The fold, its own button so it never shares the name's click
     /// (#3162 ▸ Ruling amendment).
@@ -211,7 +215,7 @@ struct SequenceNodeRow: View {
     private var keys: some View {
         HStack(alignment: .top, spacing: 0) {
             SettingsTheme.hairlineSubtle
-                .frame(width: 1)
+                .frame(width: Self.railWidth)
                 .padding(.leading, SettingsMetrics.shortcutIconSlot / 2)
                 .padding(.trailing, SettingsMetrics.shortcutIconSlot / 2)
                 .accessibilityHidden(true)

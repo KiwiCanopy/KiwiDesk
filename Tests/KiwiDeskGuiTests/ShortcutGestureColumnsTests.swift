@@ -8,7 +8,9 @@ import Testing
 /// reaching a row both ways of one axis wears that axis's glyph, a
 /// four-way one keeps today's mark, a "Gestures" row leads with its
 /// action's symbol or app, and each section lays its badges and
-/// chords out in columns behind a divider.
+/// chords out in columns behind a divider. Spend: a few builder
+/// runs and three small source reads on the main actor, which the
+/// `L()` wording and `CustomGlyph` images need.
 @MainActor
 @Suite("Shortcuts panel gesture columns")
 struct ShortcutGestureColumnsTests {
@@ -32,11 +34,17 @@ struct ShortcutGestureColumnsTests {
                 custom: []
             ),
             bindings: bindings,
-            name: { $0.lua }
+            command: { _ in nil }
         )
         let drawn = try #require(built.controls.first?.rows.first)
         return try #require(drawn.gestures.first)
     }
+
+    private static let reload = NavCommand(
+        label: "Reload",
+        lua: "KiwiDesk.reload_config()",
+        icon: "arrow.clockwise"
+    )
 
     private let spaces = [
         "KiwiDesk.focus_space_previous()", "KiwiDesk.focus_space_next()",
@@ -83,6 +91,33 @@ struct ShortcutGestureColumnsTests {
         #expect(four.symbol == GestureListWords.symbol(.swipe3))
     }
 
+    @Test("an axis badge names both of its ways")
+    func axisIsWorded() throws {
+        LocalizationManager.shared.select("en")
+        let key = GestureKey(.swipe3, keys)
+        let horizontal = ShortcutGestureBadge(
+            key: key,
+            direction: nil,
+            axis: .horizontal
+        )
+        #expect(horizontal.words.hasSuffix("Left or Right"))
+        #expect(horizontal.spoken.contains("Left or Right"))
+        let vertical = ShortcutGestureBadge(
+            key: key,
+            direction: nil,
+            axis: .vertical
+        )
+        #expect(vertical.words.hasSuffix("Up or Down"))
+        // A direction keeps its one way, and the axis is dropped.
+        let way = ShortcutGestureBadge(
+            key: key,
+            direction: .left,
+            axis: .horizontal
+        )
+        #expect(way.axis == nil)
+        #expect(way.words.hasSuffix("Left"))
+    }
+
     @Test("only an exact axis pair is an axis")
     func axisIsExact() {
         typealias Axis = ShortcutGestureBadge.Axis
@@ -119,6 +154,7 @@ struct ShortcutGestureColumnsTests {
             bindings: [
                 GestureKey(.drag, [.control, .command]): .grab(.move),
                 GestureKey(.tap3): .run(LuaAction(lua: "print(1)")),
+                GestureKey(.tap2): .run(LuaAction(lua: Self.reload.lua)),
                 GestureKey(.tap4): .run(
                     LuaAction(lua: app, kind: .application)
                 ),
@@ -130,8 +166,7 @@ struct ShortcutGestureColumnsTests {
                 ),
                 GestureKey(.swipe4, keys): .family(.space),
             ],
-            name: { $0.lua },
-            icon: { _ in .symbol("arrow.clockwise") }
+            command: { $0.lua == Self.reload.lua ? Self.reload : nil }
         )
         let rows = try #require(built.groups.last?.rows)
         func row(_ input: GestureInput) throws -> ShortcutRow {
@@ -144,7 +179,13 @@ struct ShortcutGestureColumnsTests {
         #expect(try row(.tap3).icon == .symbol(LuaMark.symbol))
         #expect(try row(.tap4).bundleID == "com.apple.safari")
         #expect(try row(.tap4).icon == nil)
-        #expect(try row(.tap5).icon == .symbol("arrow.clockwise"))
+        let reloadIcon = ShortcutsReferenceBuilder.icon(for: Self.reload)
+        #expect(try row(.tap5).icon == reloadIcon)
+        #expect(try row(.tap5).label == "Reload")
+        // The user's own Lua is never a catalogue command, even when
+        // it spells one (architect review).
+        #expect(try row(.tap2).label == Self.reload.lua)
+        #expect(try row(.tap2).icon == .symbol(LuaMark.symbol))
         #expect(
             try row(.swipe4).icon
                 == .symbol(ShortcutsReferenceBuilder.familyIcon(for: .space))
@@ -168,14 +209,22 @@ struct ShortcutGestureColumnsTests {
         #expect(
             sheet.contains(
                 ".modifier(ShortcutSectionColumns(badges:section.rows"
-                    + ".contains{!$0.gestures.isEmpty}))"
+                    + ".contains{!$0.gestures.isEmpty},chords:section.rows"
+                    + ".contains{!$0.combo.isEmpty}))"
             )
         )
         let row = try flat("ShortcutsBands.swift")
         #expect(
             row.contains(
                 "ifcolumns.badges{ShortcutGestureBadgeView(badges:"
-                    + "row.gestures)Group{if!row.gestures.isEmpty{"
+                    + "row.gestures)ifcolumns.chords{dividerSlot}}"
+            )
+        )
+        // The slot is kept on a row with no gesture; the divider is
+        // drawn only beside one.
+        #expect(
+            row.contains(
+                "ZStack{Color.clearif!row.gestures.isEmpty{"
                     + "PanelDivider(axis:.vertical,"
             )
         )

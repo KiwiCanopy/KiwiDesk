@@ -173,6 +173,10 @@ struct ShortcutSymbolFloorTests {
                 + GestureFamily.allCases.map(
                     ShortcutsReferenceBuilder.familyIcon(for:)
                 )
+                // A drag's mark leads its panel row (#3380).
+                + ModifierDragAction.allCases.map(
+                    ShortcutsReferenceBuilder.grabIcon
+                )
         )
         // A custom glyph is drawn, never looked up (#3281).
         let custom = drawn.filter { CustomGlyph(name: $0) != nil }

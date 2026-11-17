@@ -39,14 +39,32 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
         self.axis = direction == nil ? axis : nil
         let input = GestureListWords.input(key.input)
         words =
-            direction.map {
+            Self.way(direction, self.axis).map {
                 L(
                     "shortcuts.gestures.direction_action",
                     "%1$@, %2$@",
                     input,
-                    GestureListWords.direction($0)
+                    $0
                 )
             } ?? input
+    }
+
+    /// The way a badge names: its direction, or both of its axis's
+    /// ("Left or Right", #3380); nil for a gesture with no way.
+    @MainActor static func way(
+        _ direction: GestureDirection?,
+        _ axis: Axis?
+    ) -> String? {
+        if let direction { return GestureListWords.direction(direction) }
+        guard let axis else { return nil }
+        let (a, b): (GestureDirection, GestureDirection) =
+            axis == .vertical ? (.up, .down) : (.left, .right)
+        return L(
+            "shortcuts.gestures.axis_ways",
+            "%1$@ or %2$@",
+            GestureListWords.direction(a),
+            GestureListWords.direction(b)
+        )
     }
 
     var id: String {
@@ -59,7 +77,8 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
     /// glyph — a four-way family's being today's swipe glyph.
     @MainActor var symbol: String {
         if let axis, let fingers = key.input.fingers,
-            !key.input.directions.isEmpty, (2...4).contains(fingers)
+            !key.input.directions.isEmpty,
+            CustomGlyph.badgeFingers.contains(fingers)
         {
             return CustomGlyph.swipeAxis(
                 fingers,
@@ -69,7 +88,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
         if let direction, let fingers = key.input.fingers,
             !key.input.directions.isEmpty,
             CustomGlyph.badgeDirections.contains(direction),
-            (2...4).contains(fingers)
+            CustomGlyph.badgeFingers.contains(fingers)
         {
             return CustomGlyph.swipe(fingers, direction).name
         }
@@ -85,7 +104,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
     /// The badge as VoiceOver reads it: the keys, then the gesture.
     @MainActor var spoken: String {
         guard !key.chord.isEmpty else { return words }
-        guard let direction else {
+        guard let way = Self.way(direction, axis) else {
             return L(
                 "shortcuts.gestures.input_chord",
                 "%1$@, with %2$@",
@@ -97,7 +116,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
             "shortcuts.gestures.direction_action_chord",
             "%1$@, %2$@, with %3$@",
             GestureListWords.input(key.input),
-            GestureListWords.direction(direction),
+            way,
             chord
         )
     }

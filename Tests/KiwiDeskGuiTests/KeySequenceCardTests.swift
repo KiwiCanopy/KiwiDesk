@@ -177,7 +177,8 @@ struct KeySequenceCardTests {
         )
         // The leader in the step keys' order (#3381 ▸ c2): its chord
         // at their column, its pill, then reach; no name field and
-        // no key count.
+        // no key count. The Spacer is glue holding the run contiguous,
+        // not a value under guard.
         #expect(
             leader.contains(
                 "recorder.fixedSize().padding(.leading,Self.leaderKeyInset)"

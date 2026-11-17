@@ -19,7 +19,7 @@ enum CustomGlyph: Hashable {
     /// A swipe's direction badge: `n` dots and one arrow (#1873).
     case swipe(Int, GestureDirection)
     /// A family bound both ways along one axis: `n` dots and two
-    /// opposed arrows, ← over → or ↑ beside ↓ (#3380).
+    /// opposed arrows, ← over → or ↑ over ↓ (#3380).
     case swipeAxis(Int, vertical: Bool)
     /// `hand.pinch` beside a two-way arc; macOS 15 and later.
     case rotate
@@ -55,7 +55,7 @@ enum CustomGlyph: Hashable {
             [.click, .rightClick, .wheelClick, .sideButtons, .walk]
             + (2...5).flatMap { [CustomGlyph.taps($0), .swipes($0)] }
             + [2, 4].flatMap { [CustomGlyph.spread($0), .pinch($0)] }
-            + (2...4).flatMap(Self.swipeBadges)
+            + Self.badgeFingers.flatMap(Self.swipeBadges)
             + [.rotate, .turn(clockwise: true), .turn(clockwise: false)]
         guard let glyph = all.first(where: { $0.name == name }) else {
             return nil
@@ -238,13 +238,13 @@ enum CustomGlyph: Hashable {
         for y in ys { dot(5, y, n > 4 ? 1.25 : n > 3 ? 1.6 : 1.9) }
     }
 
-    /// Two opposed arrows beside the dots (#3380, the owner's
-    /// preview): ← over → for a horizontal axis, ↑ beside ↓ for a
-    /// vertical one; y is down.
+    /// Two opposed arrows beside the dots (#3380 ▸ Ruling): ← over →
+    /// for a horizontal axis, ↑ over ↓ for a vertical one; y is
+    /// down.
     private static func axisArrows(vertical: Bool) {
         if vertical {
-            arrow(NSPoint(x: 11.5, y: 17), NSPoint(x: 11.5, y: 3))
-            arrow(NSPoint(x: 16.5, y: 3), NSPoint(x: 16.5, y: 17))
+            arrow(NSPoint(x: 14, y: 9), NSPoint(x: 14, y: 1.5))
+            arrow(NSPoint(x: 14, y: 11), NSPoint(x: 14, y: 18.5))
         } else {
             arrow(NSPoint(x: 18, y: 6.5), NSPoint(x: 9.5, y: 6.5))
             arrow(NSPoint(x: 9.5, y: 13.5), NSPoint(x: 18, y: 13.5))

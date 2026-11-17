@@ -108,7 +108,8 @@ struct ShortcutsSheetView: View {
         }
         .modifier(
             ShortcutSectionColumns(
-                badges: section.rows.contains { !$0.gestures.isEmpty }
+                badges: section.rows.contains { !$0.gestures.isEmpty },
+                chords: section.rows.contains { !$0.combo.isEmpty }
             )
         )
         .padding(.top, first ? 0 : 16)

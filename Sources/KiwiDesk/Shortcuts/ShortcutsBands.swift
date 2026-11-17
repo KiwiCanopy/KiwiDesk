@@ -57,20 +57,26 @@ struct ShortcutRowView: View {
         if let columns {
             if columns.badges {
                 ShortcutGestureBadgeView(badges: row.gestures)
-                Group {
-                    if !row.gestures.isEmpty {
-                        PanelDivider(
-                            axis: .vertical,
-                            length: ShortcutColumns.dividerLength
-                        )
-                    }
-                }
-                .frame(width: ShortcutColumns.dividerSlot)
-                .accessibilityHidden(true)
+                if columns.chords { dividerSlot }
             }
         } else {
             ShortcutGestureBadgeView(badges: row.gestures)
         }
+    }
+
+    /// The divider beside a gesture, or its empty slot.
+    private var dividerSlot: some View {
+        ZStack {
+            Color.clear
+            if !row.gestures.isEmpty {
+                PanelDivider(
+                    axis: .vertical,
+                    length: ShortcutColumns.dividerLength
+                )
+            }
+        }
+        .frame(width: ShortcutColumns.dividerSlot)
+        .accessibilityHidden(true)
     }
 
     /// The chord, right-aligned in the section's widest chord.

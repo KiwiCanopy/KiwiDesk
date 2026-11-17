@@ -9,6 +9,9 @@ import SwiftUI
 struct ShortcutColumns: Equatable {
     /// Whether any row of the section carries a gesture.
     var badges: Bool
+    /// Whether any row of the section carries a chord: the divider
+    /// parts the badges from the chords, so it needs both.
+    var chords: Bool
     /// The section's widest chord, measured as drawn.
     var chord: CGFloat = 0
 
@@ -31,13 +34,18 @@ struct ShortcutChordWidthKey: PreferenceKey {
 /// Measures a section's chords and hands its rows the columns.
 struct ShortcutSectionColumns: ViewModifier {
     let badges: Bool
+    let chords: Bool
     @State private var chord: CGFloat = 0
 
     func body(content: Content) -> some View {
         content
             .environment(
                 \.shortcutColumns,
-                ShortcutColumns(badges: badges, chord: chord)
+                ShortcutColumns(
+                    badges: badges,
+                    chords: chords,
+                    chord: chord
+                )
             )
             .onPreferenceChange(ShortcutChordWidthKey.self) { chord = $0 }
     }

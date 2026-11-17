@@ -24,15 +24,9 @@ extension ShortcutsReferenceBuilder {
         _ reference: ShortcutsReference,
         bindings: [GestureKey: GestureAction],
         natural: (GestureInput) -> Bool = { _ in true },
-        name: (LuaAction) -> String,
-        icon: (LuaAction) -> ShortcutGlyph? = { _ in nil }
+        command: (LuaAction) -> NavCommand?
     ) -> ShortcutsReference {
-        var open = reaches(
-            bindings,
-            natural: natural,
-            name: name,
-            icon: icon
-        )
+        var open = reaches(bindings, natural: natural, command: command)
         var out = reference
         func attach(_ rows: inout [ShortcutRow]) {
             for index in rows.indices {
@@ -60,27 +54,29 @@ extension ShortcutsReferenceBuilder {
     static func reaches(
         _ bindings: [GestureKey: GestureAction],
         natural: (GestureInput) -> Bool,
-        name: (LuaAction) -> String,
-        icon: (LuaAction) -> ShortcutGlyph? = { _ in nil }
+        command: (LuaAction) -> NavCommand?
     ) -> [GestureReach] {
         func reach(
             _ badge: ShortcutGestureBadge,
             _ run: LuaAction
         ) -> GestureReach {
-            // An app shows its own icon; the user's Lua its symbol or
-            // the Lua mark; a command its catalogue glyph.
+            // A command's catalogue entry names it and leads it; the
+            // user's own Lua is never one. A binding's own symbol wins,
+            // as on a key row (#2544), and an app shows its icon.
+            let entry = run.kind == .custom ? nil : command(run)
             let app =
                 run.kind == .application
                 ? KeybindingCatalog.appBundleID(from: run.lua) : nil
             var glyph: ShortcutGlyph?
             if app == nil {
-                let command = run.kind == .custom ? nil : icon(run)
-                glyph = command ?? ownIcon(run.meta)
+                glyph =
+                    run.meta.usableSymbol.map { .symbol($0) }
+                    ?? entry.flatMap(icon(for:)) ?? ownIcon(run.meta)
             }
             return GestureReach(
                 badge: badge,
                 lua: run.lua,
-                label: name(run),
+                label: entry?.resolvedLabel ?? GestureListWords.runName(run),
                 icon: glyph,
                 bundleID: app
             )

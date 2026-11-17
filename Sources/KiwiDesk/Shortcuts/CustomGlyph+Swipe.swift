@@ -11,6 +11,9 @@ extension CustomGlyph {
         .left, .right, .up, .down,
     ]
 
+    /// The finger counts a direction or axis badge is drawn for.
+    static let badgeFingers = 2...4
+
     /// Dot pitch and radius per finger count, on the 20 pt grid.
     private static func badgeDots(_ n: Int) -> (pitch: CGFloat, r: CGFloat) {
         switch n {
