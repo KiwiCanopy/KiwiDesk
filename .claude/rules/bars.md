@@ -271,7 +271,9 @@ twice, was a question the user answered twice. The argument is
   pass's targets (`ShelfRevealWiringTests` ▸ `revealerSyncsFirst`,
   `ShelfAutoHideLifetimeTests` ▸ `keptBetweenReveals`). **Place
   an Auto bar's handle and its approach through the one
-  `KiwiCore.HidingShelves.target`** (#3349): the handle along the
+  `KiwiCore.HidingShelves.target`** (#3349), the pocket's tab
+  alone cutting it after (`Target.yielding(to:)`, ▸ The pocket is a
+  shelf section): the handle along the
   bar's drawn run, against the screen side of the shelf's area
   (`ShelfHandleSpec.frame`), never a fixed band or the whole edge;
   the approach about it (`ShelfReveal.approach`), cut where two
@@ -1006,7 +1008,8 @@ Obligations:
   `pocketPlace(on:)` reads them (`PocketHandleBesideRevealTests` ▸
   `filesThePassSlot`). A bar's approach on the pocket's edge stops at
   the pocket's tab, through the one `Target.yielding(to:)`, so a
-  point opens one (`approachesApart`).
+  point opens one (`PocketHandleBesideRevealTests` ▸
+  `approachesApart`).
   An edge where no bar rests, drawn or as a handle, asks no pocket
   slot, and its handle stands at Position; a placement that keeps a
   Hidden bar's reveal off it is a ruling here first (#3432).

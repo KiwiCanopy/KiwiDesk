@@ -3530,17 +3530,15 @@ Under `"hidden"`
 the pocket stands at the position on every edge. Otherwise, on an
 edge where a bar shows, it takes the shelf's nearer end instead — its
 start below `50`, its end from `50` — outside the bars' items, so it
-stays put while they scroll; on an edge where an `"auto"` bar rests
-hidden, its handle, or under `"always"` its whole mark, stands where
-the pocket shows once the bar comes in; on
+stays put while they scroll; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
 
 :::unreleased
-A bar coming in no longer brings the pocket with it: beside an
-`"auto"` bar the handle, or the whole mark, stands in its own slot
-next to the bar's handle and stays there while the bar comes in and
-goes.
+On an edge where an `"auto"` bar rests hidden, the handle, or under
+`"always"` the whole mark, stands instead in its own slot beside the
+bar's handle, and stays there while the bar comes in and goes: a bar
+coming in never brings the pocket.
 :::
 
 **Example:**

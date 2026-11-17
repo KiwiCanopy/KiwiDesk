@@ -6882,8 +6882,9 @@ its list, a window drag and the play reach it.
 
 *The row greys only when nothing could come in* (owner, 2026-11-15):
 the Space Bar and every layout's App Bar all stored Hidden; the
-Pocket's Show counts for nothing, since no reveal brings it. Its reason names the KiwiShelf card where those are set,
-through one reason value that picks both the grey and its sentence.
+Pocket's Show counts for nothing, since no reveal brings it. Its
+reason names the KiwiShelf card where those are set, through one
+reason value that picks both the grey and its sentence.
 Where even one could show, the row is live and reveals only what is
 not Hidden. It is independent of "Maximize follows focus": both are
 per-profile values in one card, and neither greys on the other.

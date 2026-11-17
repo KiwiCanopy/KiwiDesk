@@ -274,7 +274,7 @@ struct HomeCardBarsTile: View {
     /// Whether the pocket draws as a section of `edge`'s strip: only
     /// where a bar shows there at rest, never beside an Auto bar a
     /// reveal brings (#3432), read through Core's one ladder.
-    private func pocketIsSection(on edge: AppBarEdge) -> Bool {
+    func pocketIsSection(on edge: AppBarEdge) -> Bool {
         pocketStands && settings.kiwishelf.pocketEdge == edge
             && settings.pocketRest(
                 in: Self.appBarMode(settings) ?? .bsp,
