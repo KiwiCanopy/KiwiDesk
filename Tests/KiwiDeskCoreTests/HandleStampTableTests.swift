@@ -22,14 +22,16 @@ struct HandleStampTableTests {
     }
 
     /// While the looks format is the one this step introduced, its
-    /// frozen palettes are what this build ships; a later bump
-    /// retires the clause, since the table is history from then on.
-    @Test("the frozen palettes are the shipped ones")
-    func frozenIsShipped() {
-        guard
-            LookDocument.currentFormat
+    /// frozen palettes are what this build ships; a later bump skips
+    /// the test, since the table is history from then on.
+    @Test(
+        "the frozen palettes are the shipped ones",
+        .enabled(
+            if: LookDocument.currentFormat
                 == ConfigMigration.handleStampLookFormat
-        else { return }
+        )
+    )
+    func frozenIsShipped() {
         let shipped = PaletteCatalog.bundled()
         #expect(
             ConfigMigration.handleStampPalettes.map(\.name)

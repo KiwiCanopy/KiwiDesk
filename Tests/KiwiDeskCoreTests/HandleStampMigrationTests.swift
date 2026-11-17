@@ -144,11 +144,21 @@ struct HandleStampMigrationTests {
         )
     }
 
+    /// A set off by one colour stays custom, including a path only
+    /// the default palette lists (the floating mark's).
     @Test("a custom set stays custom", arguments: [true, false])
     func customStays(absent: Bool) throws {
-        let data = try stamped(profile(custom), format: 34, absent: absent)
-        let read = try settings(ConfigMigration.migrated(data))
-        #expect(read.kiwishelf.handleColor.isEmpty)
+        var floating = TilingSettings()
+        floating.floatingStyle.color = "#112233"
+        for settings in [custom, floating] {
+            let data = try stamped(
+                profile(settings),
+                format: 34,
+                absent: absent
+            )
+            let read = try self.settings(ConfigMigration.migrated(data))
+            #expect(read.kiwishelf.handleColor.isEmpty)
+        }
     }
 
     /// A handle the user painted is theirs, palette or not.
@@ -176,6 +186,30 @@ struct HandleStampMigrationTests {
             colors[Self.handle]
                 == TilingSettings().kiwishelf.activeItemColor
         )
+    }
+
+    /// A map that never stored the accent chose no palette.
+    @Test("a set without the accent is left alone")
+    func noAccentStays() throws {
+        var colors = ColorPaletteKeys.extract(from: TilingSettings())
+        colors["kiwishelf.active_item_color"] = nil
+        var config = GuiConfig()
+        config.look = LookBody(style: [:], colors: colors)
+        let gui = try stamped(config, format: 19, absent: true)
+        let read = try JSONDecoder().decode(
+            GuiConfig.self,
+            from: #require(ConfigMigration.migrated(gui))
+        )
+        #expect(try #require(read.look).colors[Self.handle] == nil)
+        let library = LookDocument(
+            looks: [ShelfLook(name: "Bare", style: [:], colors: colors)]
+        )
+        let data = try stamped(library, format: 3, absent: true)
+        let looks = try JSONDecoder().decode(
+            LookDocument.self,
+            from: #require(ConfigMigration.migrated(data))
+        ).looks
+        #expect(try #require(looks.first).colors[Self.handle] == nil)
     }
 
     /// From 4.2.1's library stamp (3): a saved look's map, a custom
