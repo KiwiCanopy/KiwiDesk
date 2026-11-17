@@ -63,6 +63,8 @@ final class BarPeek {
     /// An anchor a click or a move closed: it peeks again only
     /// once the pointer has left it, as a tooltip does.
     private var spent: Anchor?
+    /// Section roots that joined their strip in this placement.
+    var arrived: [NSView] = []
     private var closedAt: TimeInterval?
     /// Stamps every timer it schedules; a phase change outdates them.
     private var generation = 0
@@ -176,7 +178,7 @@ final class BarPeek {
         guard !menus.isTracking,
             !Self.same(spent, anchor, source),
             !Self.same(pending, anchor, source),
-            !holdsPointer
+            !holdsPointer, !arrives(anchor)
         else { return }
         let next = Anchor(
             view: anchor,

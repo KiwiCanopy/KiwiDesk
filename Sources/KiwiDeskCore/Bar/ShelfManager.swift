@@ -228,6 +228,11 @@ final class ShelfManager {
         overlay.handle.onReset = { [weak self] in
             self?.onMinimum(KiwiShelf.resetMinimum, true)
         }
+        // A section joining its strip opens no peek from the re-read
+        // below (#3388).
+        let arrived = sections.map(\.view).filter {
+            $0.superview !== overlay.stripView
+        }
         overlay.show(
             strip: shelf.strip,
             edge: shelf.edge,
@@ -240,8 +245,10 @@ final class ShelfManager {
         // Placement moves views under a resting pointer and AppKit
         // sends no exit for it: every hover is re-read here, the
         // one point where both sections and the panel are placed.
-        shelf.space?.syncHoverToPointer()
-        shelf.app?.syncHoverToPointer()
+        peek.rereading(arrived: arrived) {
+            shelf.space?.syncHoverToPointer()
+            shelf.app?.syncHoverToPointer()
+        }
         overlay.handle.syncHoverToPointer()
         // The peek's item may have moved under it, or left.
         peek.syncToAnchor()
