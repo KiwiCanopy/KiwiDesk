@@ -94,12 +94,12 @@ extension KeyboardTap {
         let isRepeat =
             event.getIntegerValueField(.keyboardEventAutorepeat) != 0
         let now = Self.uptime()
-        var kept = false
-        let (swallow, heard, decided) = sequenceState.withLock {
-            state -> (Bool, Bool, KeySequenceRouter.Outcome?) in
+        let (swallow, heard, decided, kept) = sequenceState.withLock {
+            state -> (Bool, Bool, KeySequenceRouter.Outcome?, Bool) in
             state.takeClose()
             var swallow = false
             var decided: KeySequenceRouter.Outcome?
+            var kept = false
             switch type {
             case .keyDown:
                 let outcome = state.router.press(
@@ -121,7 +121,7 @@ extension KeyboardTap {
             default:
                 break
             }
-            return (swallow, !state.waiting.isEmpty, decided)
+            return (swallow, !state.waiting.isEmpty, decided, kept)
         }
         if let decided {
             let line =
