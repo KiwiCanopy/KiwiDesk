@@ -26,6 +26,9 @@ struct OnboardingKeycap: View {
                 }
             }
         }
+        // Whole or not at all: a tight row wraps its label rather
+        // than squeezing a "+" to nothing (#3426).
+        .fixedSize()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(family.spokenGlyphs)
     }
