@@ -2287,7 +2287,11 @@ side-by-side visual columns sizes each visual column instead. A new
 host of such a list applies it, and
 a row with no columns in its environment is a lone row, such as the
 hint panel's branch rows (`ShortcutGestureColumnsTests` ▸
-`columnsAreWired`). A Gestures row's label and mark come from one
+`columnsAreWired`). A row gains gestures only through
+`withGestures`, behind `JumpPanelController.reference`'s
+`gestures:`, which the key sequence hint panel passes `false`: a
+step lists its branches and end keys alone (#3428,
+`KeySequenceHintGestureTests` ▸ `hintHasNoGesture`). A Gestures row's label and mark come from one
 catalogue lookup handed to `withGestures`, never a closure per
 field.
 

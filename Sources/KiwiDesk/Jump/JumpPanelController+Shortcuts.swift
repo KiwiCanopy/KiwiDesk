@@ -106,25 +106,21 @@ extension JumpPanelController {
             lenses: core.kiwiVisionLensChoices.map(\.name),
             unread: unread
         )
-        guard gestures else {
-            return withAppGlyphs(
+        var gestured = reference
+        if gestures {
+            let named = KeybindingCatalog.namedCommands(
+                spaces: config.spaces,
+                layerNames: layers.map(\.name),
+                steps: [Int(config.settings.resizeStep)],
+                bindings: layers.flatMap(\.bindings)
+            )
+            gestured = ShortcutsReferenceBuilder.withGestures(
                 reference,
-                settings: config.settings,
-                core: core
+                bindings: core.mouse.gestures.resolved,
+                natural: { core.mouse.scroll.isNatural(for: $0) },
+                command: { run in named.first { $0.runs(run.lua) } }
             )
         }
-        let named = KeybindingCatalog.namedCommands(
-            spaces: config.spaces,
-            layerNames: layers.map(\.name),
-            steps: [Int(config.settings.resizeStep)],
-            bindings: layers.flatMap(\.bindings)
-        )
-        let gestured = ShortcutsReferenceBuilder.withGestures(
-            reference,
-            bindings: core.mouse.gestures.resolved,
-            natural: { core.mouse.scroll.isNatural(for: $0) },
-            command: { run in named.first { $0.runs(run.lua) } }
-        )
         return withAppGlyphs(
             gestured,
             settings: config.settings,

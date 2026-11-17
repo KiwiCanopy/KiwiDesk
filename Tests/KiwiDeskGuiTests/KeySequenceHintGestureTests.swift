@@ -25,7 +25,7 @@ struct KeySequenceHintGestureTests {
         // no key holds, which KiwiHub lists as a gesture-only row.
         try """
         KiwiDesk.define_sequence("ctrl+alt+space", {
-          m = { fn = "KiwiDesk.cycle_mode()", name = "Mode" },
+          m = { fn = function() KiwiDesk.cycle_mode() end, name = "Mode" },
         }, { name = "Leader" })
         gesture.bind("tap5", "", "KiwiDesk.cycle_mode()")
         gesture.bind("swipe3", "control+option", "focus")
