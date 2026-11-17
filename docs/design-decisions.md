@@ -11476,6 +11476,31 @@ screens. ⌃⌥K closes the page, since it lists every gesture the
 page leaves out.
 :::
 
+:::unreleased
+**Amended (#3427, owner and ui-designer, 2026-11-17): the step
+draws KiwiHub's glyphs, and a mouse has rows of its own.** A
+gesture worded as "3 fingers left/right" is the widest cap on the
+page and reads as a sentence where every other row reads as keys,
+and it is not what KiwiHub shows for the same gesture, so a user
+learns two pictures of one thing. Each gesture is now the glyph
+`ShortcutGestureBadge`
+resolves for the same binding, on a keycap, with only the finger
+count under it as a modifier's name sits; the arrows carry the
+direction, and VoiceOver keeps the whole motion in words. The tour
+holds no glyph mapping of its own, so it cannot drift from KiwiHub.
+
+The trackpad-only rule falls with it: a Mac without a trackpad
+still has a mouse, and its seeded scroll and drag chords are as
+unknowable as the trackpad's. Mouse rows come from the live
+bindings too, each on the mouse's glyph with its motion as the
+caption. A trackpad Mac with both offers Trackpad | Mouse,
+Trackpad first; one device's rows alone take no control; no rows
+on either plan no step. The mouse footnote makes only the claim the
+Gestures card already makes — a scroll steps as far as you scroll
+— since long swipes, the trackpad footnote's subject, never reach a
+wheel notch.
+:::
+
 ### The tour's look is written through, and the tour owns its undo
 
 **[Principle]**
