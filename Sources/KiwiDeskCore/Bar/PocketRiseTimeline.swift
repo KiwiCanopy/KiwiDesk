@@ -1,4 +1,5 @@
 import Foundation
+import QuartzCore
 
 /// The pocket's rise as its approach's countdown (#3368 ruling 3):
 /// the revealer stamps the pocket's key a `ShelfHandleSpec.Fill` as
@@ -38,8 +39,31 @@ enum PocketRiseTimeline {
         return min(max(share, 0), 1)
     }
 
+    /// How long a WHOLE rise takes: the fast pace while the pointer
+    /// is on the tab, else `span` (#3383).
+    static func pace(onTab: Bool) -> TimeInterval {
+        onTab ? fastSpan : span
+    }
+
+    /// How far a pocket drawn at `shown` stands along its rise, 0 at
+    /// `start` (the handle's kiwis) and 1 risen (identity), read off
+    /// the translation the rise moves linearly (#3383): the one
+    /// progress every transition starts from.
+    static func progress(
+        shown: CATransform3D,
+        start: CATransform3D
+    ) -> Double {
+        let x = abs(start.m41) > abs(start.m42)
+        let whole = x ? start.m41 : start.m42
+        guard abs(whole) > 0.000_1 else { return 1 }
+        let left = (x ? shown.m41 : shown.m42) / whole
+        return Double(min(max(1 - left, 0), 1))
+    }
+
     /// `fill` moved onto the tab at `now`: the rest of the rise at
     /// the fast pace from where it is, with no restart (ruling 3).
+    /// The revealer's clock alone: the drawn rise times itself off
+    /// where it stands (`progress(shown:start:)`).
     static func hurried(
         _ fill: ShelfHandleSpec.Fill,
         at now: Date

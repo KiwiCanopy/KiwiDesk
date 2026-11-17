@@ -24,6 +24,9 @@ extension PocketPlateOverlay {
         /// The approach's countdown the pocket rises on while not yet
         /// risen (#3368 ruling 3), read by `PocketRiseTimeline`.
         var rise: ShelfHandleSpec.Fill? = nil
+        /// The rise runs at the fast pace: the pointer is on the tab
+        /// (#3383), the revealer's own reading of a hurry.
+        var riseFast = false
         /// The countdown as the tab's progress fill instead, where the
         /// rise does not play (#3368 amended).
         var tabFill: ShelfHandleSpec.Fill? = nil

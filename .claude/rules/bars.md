@@ -317,7 +317,11 @@ twice, was a question the user answered twice. The argument is
   `ShelfHandleEdgeTests` ▸ `filingAsksTheNeighbours`). **Write
   the approach state — `fills`, `ceded`, `owned` and the timers —
   only in `Bar/ShelfRevealer*.swift`**; a reader elsewhere reads, and
-  a writer outside them is review's. **An approach shows itself
+  a writer outside them is review's. Report a cleared fill through
+  `onChange`, whether the phase changed or not (#3383,
+  `ShelfRevealPocketKeyTests` ▸ `clearedFillReports`); `sync`'s
+  forget reports nothing, since it runs in the pass and a key it
+  forgets is no handle the pocket reads a fill for. **An approach shows itself
   only as the spec's one `fill`** (#3360): stamped by the revealer's
   `now` at the event that set it — the entry, or the rest on the
   `ShelfHandleSpec.hoverBand` that hurries it — and run by the view

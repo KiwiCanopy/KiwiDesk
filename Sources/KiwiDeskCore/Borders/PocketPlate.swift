@@ -53,8 +53,12 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     private var risenSide: CGFloat = 0
     /// The approach's countdown the pocket rises on (#3368).
     private(set) var rise: ShelfHandleSpec.Fill?
+    /// The sink running into the handle, nil where none does: the
+    /// one owner of a sink (#3383), whose landing ends only the sink
+    /// it was handed (`endSink(_:)`).
+    private(set) var sink: UUID?
     /// A rise taken back is sinking into the handle.
-    private(set) var sinking = false
+    var sinking: Bool { sink != nil }
     /// The shelf's outer margin, kept clear between the edge and the
     /// handle as the bars' handles keep it (#2678).
     private var outer: CGFloat = 0
@@ -90,11 +94,21 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     func listOpenChanged() { onListChanged() }
 
+    /// How a handle stood before a stand, read from the spec it last
+    /// wore — the one source of "was it up" (#3383).
+    struct Before: Equatable {
+        var risen = false
+        var rise: ShelfHandleSpec.Fill?
+        var isUp: Bool { risen || rise != nil }
+    }
+
     /// Stands as a section, or as a handle on `edge` `outer` in from
     /// it, risen to `side` where `risen`, else rising on `rise`, its
-    /// approach's countdown (#3368). Returns how long a sink back
-    /// into the handle runs, 0 where none does: the panel keeps the
-    /// risen room until `endSink`.
+    /// approach's countdown (#3368), at the fast pace while `fast`. A
+    /// rise taken back, or a risen pocket going to rest, sinks from
+    /// where it is drawn (#3383); `before` is how it stood. Returns
+    /// how long that sink runs, 0 where none does: the panel keeps
+    /// the risen room until `endSink(_:)` with `sink`.
     @discardableResult
     func stand(
         handle edge: AppBarEdge?,
@@ -102,42 +116,62 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         side: CGFloat,
         outer: CGFloat = 0,
         whole: Bool = false,
-        rise: ShelfHandleSpec.Fill? = nil
+        rise: ShelfHandleSpec.Fill? = nil,
+        fast: Bool = false,
+        before: Before = Before()
     ) -> TimeInterval {
-        let rising = risen && !self.risen && edge != nil
-        let was = self.rise
+        let rising = risen && !before.risen && edge != nil
+        let was = before.rise
         handleEdge = edge
         self.whole = whole
         self.risen = risen
         self.rise = edge == nil || risen ? nil : rise
         risenSide = side
         self.outer = outer
-        if self.rise != nil || risen { sinking = false }
+        // A rise, a risen stand or the whole mark ends any sink.
+        if self.rise != nil || risen || whole {
+            if sink != nil, whole {
+                pocket.layer?.removeAnimation(forKey: BarMotion.pocketRiseKey)
+            }
+            sink = nil
+        }
         needsLayout = true
         guard let edge else { return 0 }
         layoutSubtreeIfNeeded()
         if rising {
-            BarMotion.playPocketRise(pocket, edge: edge, side: side)
+            BarMotion.playPocketRise(
+                pocket,
+                edge: edge,
+                side: side,
+                up: was != nil
+            )
         } else if let next = self.rise, next != was {
             BarMotion.playPocketScrub(
                 pocket,
                 edge: edge,
                 side: side,
-                rise: next
+                rise: next,
+                pace: PocketRiseTimeline.pace(onTab: fast)
             )
-        } else if was != nil, self.rise == nil, !risen {
-            let sink = BarMotion.playPocketSink(pocket, edge: edge, side: side)
-            sinking = sink > 0
+        } else if before.isUp, self.rise == nil, !risen, !whole {
+            let span = BarMotion.playPocketSink(
+                pocket,
+                edge: edge,
+                side: side,
+                risen: before.risen
+            )
+            sink = span > 0 ? UUID() : nil
             needsLayout = true
-            return sink
+            return span
         }
         return 0
     }
 
-    /// A sink landed: the pocket hides in its handle again.
-    func endSink() {
-        guard sinking else { return }
-        sinking = false
+    /// The sink `token` names landed: the pocket hides in its handle
+    /// again. A later sink or a rise meanwhile owns the pocket.
+    func endSink(_ token: UUID) {
+        guard sink == token else { return }
+        sink = nil
         pocket.layer?.removeAnimation(forKey: BarMotion.pocketRiseKey)
         needsLayout = true
     }

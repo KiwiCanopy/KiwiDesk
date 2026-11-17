@@ -31,10 +31,15 @@ final class PocketHandleView: NSView {
     /// The pointer rests on the handle: the tab draws at full
     /// strength, in place (#3366 ruling 2).
     private(set) var hovered = false
-    /// The pocket is empty: the kiwis draw faded, the tab as ever
-    /// (#3368 ruling 1).
+    /// The pocket is empty and unlit: the kiwis draw faded, the tab
+    /// as ever (#3368 ruling 1).
     var faded = false {
         didSet { if faded != oldValue { needsDisplay = true } }
+    }
+    /// The pocket holds something: the tab rests at the fill strength
+    /// (#3384).
+    var holds = false {
+        didSet { if holds != oldValue { needsDisplay = true } }
     }
     /// The pocket rising out of the tab or sinking back carries the
     /// kiwis meanwhile (#3368).
@@ -88,9 +93,10 @@ final class PocketHandleView: NSView {
     }
 
     /// The tab's core: the handle's ink at rest, at the fill strength
-    /// while hovered, never lifting (#3366 ruling 2).
-    static func tabCore(hex: String, hovered: Bool) -> NSColor {
-        hovered
+    /// while `lit` — hovered, or the pocket holding something (#3384)
+    /// — never lifting (#3366 ruling 2).
+    static func tabCore(hex: String, lit: Bool) -> NSColor {
+        lit
             ? ShelfHandleSpec.fillColor(hex: hex)
             : ShelfHandleSpec.restColor(hex: hex)
     }
@@ -143,7 +149,7 @@ final class PocketHandleView: NSView {
         let ink = ShelfHandleSpec.restHex(of: shelf)
         for (capsule, colour) in [
             (parts.outer, ShelfHandleSpec.hairlineColor(hex: ink)),
-            (parts.core, Self.tabCore(hex: ink, hovered: hovered)),
+            (parts.core, Self.tabCore(hex: ink, lit: hovered || holds)),
         ] {
             let radius = ShelfHandleSpec.radius(of: capsule)
             colour.setFill()

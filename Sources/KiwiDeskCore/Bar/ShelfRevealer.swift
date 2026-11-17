@@ -179,6 +179,7 @@ final class ShelfRevealer {
         ceded.remove(key)
         owned[key] = nil
         let next = reveal(of: key).toggled(now: now(), duration: duration)
+        // A toggle always moves whether the key shows, which reports.
         set(next, for: key)
         if next.isShown { suppressed.remove(key) }
         if next == .hidden {
@@ -270,15 +271,18 @@ final class ShelfRevealer {
         onChange()
     }
 
+    /// Sets `key`'s phase, reporting a change of whether it shows or
+    /// a fill it cleared (#3383).
     func set(_ next: ShelfReveal, for key: Key) {
+        var cleared = false
         if next.isShown {
-            fills[key] = nil
+            cleared = fills.removeValue(forKey: key) != nil
             ceded.remove(key)
             owned[key] = nil
         }
         let was = reveal(of: key).isShown
         phases[key] = next == .hidden ? nil : next
-        if was != next.isShown { onChange() }
+        if was != next.isShown || cleared { onChange() }
     }
 
     func arm(
@@ -296,6 +300,10 @@ final class ShelfRevealer {
         timers.removeValue(forKey: key)?.cancel()
     }
 
+    /// Drops a key the pass no longer files. Reports nothing: it runs
+    /// inside `sync`, in the pass, and a pocket key the pass no
+    /// longer files is no handle this pass, whose fill the pocket
+    /// never reads (#3383).
     private func forget(_ key: Key) {
         cancelTimer(key)
         handleTimers.removeValue(forKey: key)?.cancel()

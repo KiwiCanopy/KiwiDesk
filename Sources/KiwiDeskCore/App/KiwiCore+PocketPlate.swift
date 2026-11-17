@@ -210,6 +210,7 @@ extension KiwiCore {
                 handle: place.isSection ? nil : edge,
                 risen: risen,
                 rise: rising,
+                riseFast: rising != nil && pocketPointerOnTab(on: display.id),
                 tabFill: tabFill,
                 hovered: tabHovered,
                 risenSide: rise,

@@ -46,21 +46,43 @@ extension PocketPlateOverlay {
         if shown.view.dropHover() { hovered.remove(display) }
     }
 
-    /// Lands a rise taken back (#3368): once its sink has run, the
-    /// pocket hides in its handle and the panel takes the spec's
-    /// resting frame, unless a rise came back meanwhile.
-    func landSink(on display: DisplayID, after span: TimeInterval) {
-        let token = UUID()
-        sinks[display] = token
+    /// Lands the sink `shown`'s view runs (#3368, #3383): once it
+    /// has run, the pocket hides in its handle and the panel takes the
+    /// spec's resting frame, unless a newer sink or a rise took the
+    /// view meanwhile — the view's token decides.
+    func landSink(
+        _ shown: Shown,
+        on display: DisplayID,
+        after span: TimeInterval
+    ) {
+        guard let token = shown.view.sink else { return }
         afterLeave(span) { [weak self] in
-            guard let self, self.sinks[display] == token else { return }
-            self.sinks[display] = nil
-            guard let spec = self.specs[display],
-                let shown = self.shown(spec), shown.view.sinking
+            guard let self, let spec = self.specs[display],
+                let shown = self.shown(spec), shown.view.sink == token
             else { return }
-            shown.view.endSink()
+            shown.view.endSink(token)
             Self.place(shown, at: spec.frame)
         }
+    }
+
+    /// How the handle stood in `old`, the spec the panel last wore:
+    /// the one "was it up" both the room and the view's sink read
+    /// (#3383). Nothing was up where `old` drew no handle.
+    static func before(_ old: Spec?) -> PocketPlateView.Before {
+        guard let old, old.handle != nil, !old.whole else { return .init() }
+        return .init(risen: old.risen, rise: old.rise)
+    }
+
+    /// Whether a handle at rest in `spec` keeps the risen room for a
+    /// sink: it was up in `old`, or its sink still runs.
+    static func holdsRisenRoom(
+        _ spec: Spec,
+        old: Spec?,
+        shown: Shown
+    ) -> Bool {
+        spec.handle != nil && !spec.whole && spec.rise == nil
+            && !spec.risen
+            && (before(old).isUp || shown.view.sinking)
     }
 
     /// Sizes a handle's panel, and its view, to `frame`.

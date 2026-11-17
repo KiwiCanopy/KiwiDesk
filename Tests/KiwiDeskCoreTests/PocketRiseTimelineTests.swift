@@ -58,6 +58,7 @@ struct PocketRiseTimelineTests {
                 edge: .bottom,
                 side: 40,
                 rise: entry,
+                pace: PocketRiseTimeline.span,
                 from: nil,
                 reduceMotion: false
             )
@@ -66,18 +67,93 @@ struct PocketRiseTimelineTests {
         #expect(abs(scrub.duration - PocketRiseTimeline.span) < 1e-6)
         #expect(scrub.fillMode == .both)
         #expect(!scrub.isRemovedOnCompletion)
-        // Taken over mid-flight, it runs from where it stands at once.
+        // Taken over a quarter up, it runs the rest at once.
         let taken = try #require(
             BarMotion.pocketScrub(
                 edge: .bottom,
                 side: 40,
                 rise: entry,
-                from: CATransform3DIdentity,
+                pace: PocketRiseTimeline.span,
+                from: Self.drawn(0.25, edge: .bottom),
                 reduceMotion: false
             )
         )
         #expect(taken.beginTime == 0)
-        #expect(abs(taken.duration - entry.length) < 1e-6)
+        #expect(abs(taken.duration - 0.75 * PocketRiseTimeline.span) < 1e-6)
+        // Already up: nothing left to run.
+        #expect(
+            BarMotion.pocketScrub(
+                edge: .bottom,
+                side: 40,
+                rise: entry,
+                pace: PocketRiseTimeline.span,
+                from: CATransform3DIdentity,
+                reduceMotion: false
+            ) == nil
+        )
+    }
+
+    /// A pocket drawn `done` of the way up on `edge`, side 40.
+    static func drawn(_ done: CGFloat, edge: AppBarEdge) -> CATransform3D {
+        let start = BarMotion.pocketRiseStart(edge: edge, side: 40)
+        var shown = CATransform3DIdentity
+        shown.m41 = start.m41 * (1 - done)
+        shown.m42 = start.m42 * (1 - done)
+        return shown
+    }
+
+    @Test("progress reads the drawn rise on every edge")
+    func progressPerEdge() {
+        for edge in AppBarEdge.allCases {
+            let start = BarMotion.pocketRiseStart(edge: edge, side: 40)
+            #expect(
+                PocketRiseTimeline.progress(shown: start, start: start) == 0
+            )
+            #expect(
+                PocketRiseTimeline.progress(
+                    shown: CATransform3DIdentity,
+                    start: start
+                ) == 1
+            )
+            let mid = PocketRiseTimeline.progress(
+                shown: Self.drawn(0.4, edge: edge),
+                start: start
+            )
+            #expect(abs(mid - 0.4) < 1e-6, Comment(rawValue: "\(edge)"))
+            // Read off the axis the rise travels: the other axis held
+            // at its start says nothing.
+            var travel = start
+            let along = abs(start.m41) > abs(start.m42)
+            if along { travel.m41 *= 0.6 } else { travel.m42 *= 0.6 }
+            let read = PocketRiseTimeline.progress(shown: travel, start: start)
+            #expect(abs(read - 0.4) < 1e-6, Comment(rawValue: "\(edge)"))
+        }
+    }
+
+    @Test("a hurry runs the distance left at the fast pace")
+    func hurrySpeed() throws {
+        let hurry = PocketRiseTimeline.hurried(
+            fill(ShelfReveal.dwellDelay),
+            at: t0.addingTimeInterval(0.2)
+        )
+        #expect(
+            PocketRiseTimeline.pace(onTab: true) == PocketRiseTimeline.fastSpan
+        )
+        #expect(
+            PocketRiseTimeline.pace(onTab: false) == PocketRiseTimeline.span
+        )
+        let scrub = try #require(
+            BarMotion.pocketScrub(
+                edge: .left,
+                side: 40,
+                rise: hurry,
+                pace: PocketRiseTimeline.fastSpan,
+                from: Self.drawn(0.6, edge: .left),
+                reduceMotion: false
+            )
+        )
+        #expect(scrub.beginTime == 0)
+        #expect(abs(scrub.duration - 0.4 * PocketRiseTimeline.fastSpan) < 1e-6)
     }
 
     @Test("Reduce Motion scrubs and sinks nothing")
@@ -87,6 +163,7 @@ struct PocketRiseTimelineTests {
                 edge: .bottom,
                 side: 40,
                 rise: fill(ShelfReveal.dwellDelay),
+                pace: PocketRiseTimeline.span,
                 from: nil,
                 reduceMotion: true
             ) == nil
@@ -112,6 +189,16 @@ struct PocketRiseTimelineTests {
             )
         )
         #expect(sink.duration == BarMotion.pocketSinkSpan)
+        // From part way up, the distance up times the pace.
+        let part = try #require(
+            BarMotion.pocketSink(
+                edge: .left,
+                side: 40,
+                from: Self.drawn(0.3, edge: .left),
+                reduceMotion: false
+            )
+        )
+        #expect(abs(part.duration - 0.3 * BarMotion.pocketSinkSpan) < 1e-6)
         #expect(!sink.isRemovedOnCompletion)
         let to = try #require((sink.toValue as? NSValue)?.caTransform3DValue)
         #expect(
