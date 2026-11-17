@@ -1,10 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Position (#1731): the master writes both bars' edges; the Each
-/// bar drawer holds one per bar and opens by itself while they
-/// differ, when the master selects nothing and says why through
-/// its `?` (`GapsBordersGates.followersDiffer`).
+/// Position (#1731): the master writes both bars' edges and the
+/// Pocket's (#3376); the Each bar and Pocket drawer holds one row
+/// each and opens by itself while they differ, when the master
+/// selects nothing and says why through its `?`
+/// (`GapsBordersGates.followersDiffer`).
 extension KiwiShelfCard {
     var edgesSplit: Bool {
         GapsBordersGates(settings: model.config.settings)
@@ -16,9 +17,10 @@ extension KiwiShelfCard {
             ? BarsGateHelp.edgesDiffer
             : L(
                 "kiwishelf.edge.label.help",
-                "Which screen edge the bars sit on. Put each on its "
-                    + "own edge under \u{201C}%1$@\u{201D}.",
-                L("kiwishelf.each_bar", "Each bar")
+                "Which screen edge the bars and the Pocket sit on. "
+                    + "Put each on its own edge under "
+                    + "\u{201C}%1$@\u{201D}.",
+                L("kiwishelf.edge.each", "Each bar and Pocket")
             )
     }
 
@@ -70,6 +72,21 @@ extension KiwiShelfCard {
                     SettingsCatalog.bars.kiwishelfEdges.children
                         .kiwishelfAppBarScreenEdges
                 )
+                pocketEdgeRow
+                ScreenEdgesDrawer(
+                    model: model,
+                    bar: \.kiwishelf.pocketEdges,
+                    title: L(
+                        "kiwishelf.edge.per_screen.pocket",
+                        "Per screen"
+                    ),
+                    barName: L("kiwishelf.edge.pocket", "Pocket"),
+                    options: edgeOptions
+                )
+                .searchAnchored(
+                    SettingsCatalog.bars.kiwishelfEdges.children
+                        .kiwishelfPocketScreenEdges
+                )
             }
             .padding(.top, 8)
         }
@@ -80,7 +97,10 @@ extension KiwiShelfCard {
             L("kiwishelf.edge.space_bar", "Space Bar"),
             selection: model.barEdge(\.spaceBarStyle),
             options: edgeOptions,
-            help: screensDifferHelp(\.spaceBarStyle, appBar: false)
+            help: screensDifferHelp(
+                \.spaceBarStyle,
+                BarsGateHelp.screensDiffer(appBar: false)
+            )
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
@@ -93,7 +113,10 @@ extension KiwiShelfCard {
             L("kiwishelf.edge.app_bar", "App Bar"),
             selection: model.barEdge(\.appBarStyle),
             options: edgeOptions,
-            help: screensDifferHelp(\.appBarStyle, appBar: true)
+            help: screensDifferHelp(
+                \.appBarStyle,
+                BarsGateHelp.screensDiffer(appBar: true)
+            )
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
@@ -101,14 +124,31 @@ extension KiwiShelfCard {
         )
     }
 
-    /// The `?` a bar row shows while its screens differ (#1948).
+    var pocketEdgeRow: some View {
+        SegmentedPicker(
+            L("kiwishelf.edge.pocket", "Pocket"),
+            selection: model.barEdge(\.kiwishelf.pocketEdges),
+            options: edgeOptions,
+            help: screensDifferHelp(
+                \.kiwishelf.pocketEdges,
+                BarsGateHelp.pocketScreensDiffer
+            )
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfEdges.children
+                .kiwishelfPocketEdge
+        )
+    }
+
+    /// The `?` an edge row shows while its screens differ (#1948,
+    /// #3401): `sentence`, or none.
     private func screensDifferHelp<Bar: ScreenEdged>(
         _ bar: KeyPath<TilingSettings, Bar>,
-        appBar: Bool
+        _ sentence: @autoclosure () -> String
     ) -> String? {
         guard model.config.settings[keyPath: bar].screensDiffer
         else { return nil }
-        return BarsGateHelp.screensDiffer(appBar: appBar)
+        return sentence()
     }
 
     private var edgeOptions: [(String, AppBarEdge)] {

@@ -224,6 +224,7 @@ settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
 settings.pocketStyle.color
 settings.kiwishelf.pocketEdge
+settings.kiwishelf.pocketEdgeOverride[screen]
 settings.kiwishelf.pocketPosition
 settings.kiwishelf.pocketVisibility
 settings.kiwishelf.maximizedVisibility

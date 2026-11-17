@@ -3497,9 +3497,11 @@ takes that edge on that screen alone. The screens are judged and
 collapse as a bar's are; a call without a screen sets every
 screen and clears their own edges, and a look leaves each screen's
 own untouched. The edges are stored per profile under
-`kiwishelf.pocket_edge_override`, keyed by fingerprint. Settings
-sets them only as a whole: its pocket Edge pick sets every screen,
-clearing their own.
+`kiwishelf.pocket_edge_override`, keyed by fingerprint. Settings ▸
+KiwiShelf writes them as **Pocket** under **Position** ▸ **Each bar
+and Pocket**, every screen at once, and as its **Per screen** rows,
+one screen each; **Position** sets the pocket's edge with both
+bars'.
 
 ```lua
 kiwishelf.set_pocket_edge("left", "LG HDR 4K:3840x2160")

@@ -38,7 +38,7 @@ extension ScreenEdged {
 
     /// Whether some screen draws an edge other than the bar's —
     /// what makes the Settings Position master show no selection
-    /// (`TilingSettings.uniformBarEdge`). A pin equal to the bar's
+    /// (`TilingSettings.uniformShelfEdge`). A pin equal to the bar's
     /// edge draws the same edge, so it differs in nothing.
     public var screensDiffer: Bool {
         edgeOverride.contains { $0.value != edge }

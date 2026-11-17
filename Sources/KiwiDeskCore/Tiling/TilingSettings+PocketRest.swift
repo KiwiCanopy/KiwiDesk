@@ -35,6 +35,20 @@ extension TilingSettings {
         return kiwishelf.pocketVisibility == .always ? .mark : .handle
     }
 
+    /// Whether the pocket rests as a section of the bars in some
+    /// layout on some screen, where it takes the bar's nearer end
+    /// (#2678) — what Settings' Pocket position row says under
+    /// itself (#3401). Asked of `pocketRest`, never of the edges.
+    public var pocketSharesABarEdge: Bool {
+        let screens: [String?] = [nil] + edgeScreens.map(Optional.some)
+        return pocketRests
+            && screens.contains { screen in
+                LayoutMode.allCases.contains {
+                    pocketRest(in: $0, on: screen) == .section
+                }
+            }
+    }
+
     /// Whether a bar keeps an Auto pocket shown on `screen` in
     /// `mode`: one drawn at rest on the pocket's edge — what
     /// Settings' Pocket row notes (#2978).

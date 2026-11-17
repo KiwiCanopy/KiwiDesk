@@ -64,6 +64,82 @@ struct GesturesScrollWiringTests {
         #expect(!row.contains("GreyOut("))
     }
 
+    /// The footer takes the gesture rows' columns (#3401): its icon
+    /// on their icon, its reach on theirs, its caption on their
+    /// pop-ups, and its recorder space the recorder's own layout.
+    @Test("Long swipes lines up with the gesture rows")
+    func longSwipesTakesTheRowColumns() throws {
+        let row = Self.squash(try Self.source("GestureLongSwipesRow.swift"))
+        #expect(row.contains("columns:.gestures,"))
+        #expect(row.contains(".padding(.leading,GestureListRow.textIndent)"))
+        let shape = Self.squash(
+            SourceScan.stripComments(
+                try String(
+                    contentsOf: Self.root.appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/ShortcutSettingRow.swift"
+                    ),
+                    encoding: .utf8
+                )
+            )
+        )
+        let gestures = try #require(
+            shape.components(separatedBy: "privatevargesturesRow:")
+                .dropFirst().first
+        )
+        let columns: [String] = [
+            "someView{HStack(spacing:GestureListRow.rowGap){",
+            "HStack(spacing:GestureListRow.columnGap){",
+            "Color.clear.frame(width:GestureListRow",
+            ".disclosureWidth,height:1)",
+            "IconGlyphLabel(icon:Self.settingGlyph)",
+            ".frame(width:GestureIcon.width)",
+            ".accessibilityHidden(true)titled}",
+            "Spacer(minLength:GestureListRow.rowGap)reach",
+            "GestureChordRecorder.footprint.overlay{control}",
+            "AppRuleDeleteButton.slot}}",
+        ]
+        let needle = columns.joined()
+        #expect(gestures.hasPrefix(needle))
+        // The row it lines up with: the same columns, in order.
+        let list = Self.squash(try Self.source("GestureListRow.swift"))
+        let listRow: [String] = [
+            "HStack(spacing:Self.rowGap){HStack(spacing:Self.columnGap){",
+            "disclosureSlotGestureIcon(input:key.input)",
+            "gesturePickeractionContainer}",
+            "Spacer(minLength:Self.rowGap)reachColumn",
+            "GestureChordRecorder(",
+        ]
+        #expect(list.contains(listRow.joined()))
+        // The recorder, then the trash, and nothing after them.
+        let tail = try #require(
+            list.components(separatedBy: "GestureChordRecorder(")
+                .dropFirst().first
+        )
+        let trash = "armsOnAppear:armsOnAppear)AppRuleDeleteButton("
+        #expect(tail.contains(trash))
+        #expect(tail.contains("onRemove()}}iflethint{"))
+        let recorder = Self.squash(
+            try Self.source("GestureChordRecorder.swift")
+        )
+        #expect(
+            recorder.contains("HStack(spacing:6){recordButtonclearButton}")
+        )
+        #expect(
+            recorder.contains(
+                "HStack(spacing:6){KeyRecorderField.recordWell(\"\"){}"
+                    + "Color.clear.frame(width:KeyRecorderField"
+                    + ".iconSlotWidth)}"
+            )
+        )
+        #expect(
+            recorder.contains(
+                "Color.clear.frame(width:KeyRecorderField.iconSlotWidth)"
+                    + ".overlay{"
+            )
+        )
+    }
+
     /// The gate answers both sides: the seeded ⌃⌥ focus swipe
     /// reaches Long swipes, and with it unbound nothing does.
     @Test("the Long swipes gate answers both sides")

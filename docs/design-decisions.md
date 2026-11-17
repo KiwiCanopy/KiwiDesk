@@ -7083,6 +7083,10 @@ leaves the pocket where it is.
 the bars' per-screen doors (▸ *a bar's edge may differ per
 screen*). A screen's own Space Bar edge still does not move it: a
 screen's pocket edge is its own entry, never a link to its bar.
+
+*Amended (#3401):* the pocket's edge leaves its own row for
+Position, whose master and drawer write it beside the bars' (▸ *a
+bar's edge may differ per screen*).
 :::
 
 **Several windows keeps it on screen, empty included, on every
@@ -19938,6 +19942,12 @@ Each bar holds the rest.
 *Amended* (#2978): the master writes the pocket's own Show too (▸
 *The pocket belongs to KiwiShelf*).
 
+:::unreleased
+*Amended* (#3401): the Position master writes the pocket's edge
+too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
+bar's edge may differ per screen*).
+:::
+
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
@@ -20595,7 +20605,8 @@ map names this Mac's screens, which a look shared to another Mac
 cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.
 
-In Settings each bar row under Each bar gets a Per screen drawer,
+In Settings each bar row under Each bar and Pocket gets a Per
+screen drawer,
 one picker per screen of the profile's own monitor set.
 A screen with no row of its own (one plugged in after the save)
 follows its bar, so leaving it out loses nothing. The rows list the
@@ -20635,8 +20646,16 @@ as it drops theirs (#3324). Each screen's pocket reads its edge
 from the one per-screen resolution the bars take, so what a screen
 draws and what it reserves cannot disagree. The rest of the
 pocket's placement — its position and its Show — stays one value.
-Settings draws no per-screen row for it yet, so its Edge pick
-writes every screen, as a bar's pick does.
+
+*Amended: Position places the pocket too.*
+([#3401](https://github.com/KiwiCanopy/KiwiDesk/issues/3401),
+ruled 2026-11-17.) The pocket sits on the shelf's edges, so the
+master that says where the shelf sits writes its edge with the
+bars' and agrees only while all three share one edge on every
+screen. Its drawer, Each bar and Pocket, gives the pocket a row and
+Per screen rows of its own beside each bar's, and the separate
+Pocket edge row is gone: two rows writing one value would let the
+master and the row disagree about which was the pocket's edge.
 :::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
@@ -21418,9 +21437,9 @@ fade where it says arrow.
 **The bar cards share one canonical row order.** (#374, re-cut
 by the #678 Phase 2 census render, by #1517 and by #2507.) The
 KiwiShelf card owns existence and placement: the Show master and
-its Each bar and Pocket drawer, then Position and its Each bar drawer and
-Alignment — where the bars sit, coarse to fine — then Thickness
-and its Style and Margins drawers. Order and Space Bar minimum
+its Each bar and Pocket drawer, then Position and its Each bar and
+Pocket drawer and Alignment — where the bars sit, coarse to fine —
+then Thickness and its Style and Margins drawers. Order and Space Bar minimum
 close the Style drawer: they change how the joined run draws —
 which bar leads, how much of a crowded edge the Space Bar keeps —
 and matter only where the bars share an edge. A master's drawer
@@ -21432,6 +21451,13 @@ focused-window colour among them. A new bar row slots into this
 order — in the census
 order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
+
+:::unreleased
+*Amended (#3401, owner 2026-11-17):* Pocket position sits directly
+under Alignment, above Thickness's rule: it is where the pocket sits
+along the edge Position gives it, so it belongs with the placement
+rows rather than after the strip's depth.
+:::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
 owner ruling 2026-10-21).** Nothing hides rows by experience

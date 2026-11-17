@@ -1,28 +1,31 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The pocket's place on KiwiShelf's card (#2678, 2026-10-29
-/// ruling): a section at a bar edge's nearer end, or a handle on an
-/// edge no bar shows.
+/// The pocket's place along its edge on KiwiShelf's card (#2678,
+/// 2026-10-29 ruling); its edge is Position's (#3376).
 extension KiwiShelfCard {
-    var pocketEdgeRow: some View {
-        SegmentedPicker(
-            SettingsCatalog.bars.kiwishelfPocketEdge.text,
-            // A pick sets every screen, as a bar's does (#3376).
-            selection: Binding(
-                get: { shelf.wrappedValue.pocketEdge },
-                set: { shelf.wrappedValue.pocketEdges.setEdge($0) }
-            ),
-            options: AppBarOptions.edge.map { ($0.1, $0.0) },
-            help: L(
-                "kiwishelf.pocket_edge.help",
-                "The screen edge the Pocket sits on."
-            )
+    /// The rule a bar's edge sets: shown under the row while the
+    /// pocket shares one, and in the `?` otherwise (#3376).
+    static var pocketPositionNote: String {
+        L(
+            "kiwishelf.pocket_position.help",
+            "On a bar's edge, the Pocket takes the bar's nearer end."
         )
-        .searchAnchored(SettingsCatalog.bars.kiwishelfPocketEdge)
     }
 
-    var pocketPositionRow: some View {
+    /// Whether the note shows under the row rather than in its `?`.
+    var pocketNoteShown: Bool {
+        model.config.settings.pocketSharesABarEdge
+    }
+
+    @ViewBuilder var pocketPositionRows: some View {
+        pocketPositionRow
+        if pocketNoteShown {
+            BarNoteRow(text: Self.pocketPositionNote)
+        }
+    }
+
+    private var pocketPositionRow: some View {
         let label = SettingsCatalog.bars.kiwishelfPocketPosition.text
         let readout = SettingsValueReadout.percent(
             Double(shelf.wrappedValue.pocketPosition) / 100
@@ -30,11 +33,7 @@ extension KiwiShelfCard {
         return SettingsRowShape {
             SettingsRowLabel(
                 label: label,
-                help: L(
-                    "kiwishelf.pocket_position.help",
-                    "On a bar's edge, the Pocket takes the bar's nearer "
-                        + "end."
-                )
+                help: pocketNoteShown ? nil : Self.pocketPositionNote
             )
         } control: {
             HStack(spacing: 6) {

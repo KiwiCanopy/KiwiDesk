@@ -95,7 +95,7 @@ struct GapsBordersGates {
         case .gaps(.inner):
             return innerGapsDiffer
         case .kiwishelf(.edge):
-            return settings.uniformBarEdge == nil
+            return settings.uniformShelfEdge == nil
         case .kiwishelf(.visibility):
             return settings.uniformBarVisibility == nil
         default:
