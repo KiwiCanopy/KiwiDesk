@@ -26,8 +26,12 @@ struct SequenceTapState: Sendable {
                 .compactMap { $0.comboString() }.joined(separator: " ")
             let closing = rows.sequencePassing.closes
                 .compactMap { $0.comboString() }.joined(separator: " ")
+            let capturing = rows.sequencePassing.captures
+                .compactMap { $0.combo.comboString() }
+                .joined(separator: " ")
             let line =
-                "key sequence: passes open [\(open)] closing [\(closing)]"
+                "key sequence: passes open [\(open)] capturing "
+                + "[\(capturing)] closing [\(closing)]"
             sequenceLog.log("\(line, privacy: .public)")
         }
         router.scrollKeys = rows.sequenceScrollKeys
@@ -81,24 +85,28 @@ extension KeyboardTap {
 
     /// Whether `event` is the consumer's to swallow: a leader, and
     /// every key-down while a sequence is open save a macOS shortcut
-    /// it lets through (#3173). A mouse-down closes an open one and
-    /// passes, the one door a click closes by.
+    /// it lets through (#3173). A mouse-down passes, and the router
+    /// decides whether it closes an open one (#3412); this is the one
+    /// door a click closes by.
     func sequenceEvent(_ type: CGEventType, _ event: CGEvent) -> Bool {
         let code = UInt32(event.getIntegerValueField(.keyboardEventKeycode))
         let held = HotkeyModifiers.held(by: event.flags)
         let isRepeat =
             event.getIntegerValueField(.keyboardEventAutorepeat) != 0
-        let (swallow, heard, decided) = sequenceState.withLock {
-            state -> (Bool, Bool, KeySequenceRouter.Outcome?) in
+        let now = Self.uptime()
+        let (swallow, heard, decided, kept) = sequenceState.withLock {
+            state -> (Bool, Bool, KeySequenceRouter.Outcome?, Bool) in
             state.takeClose()
             var swallow = false
             var decided: KeySequenceRouter.Outcome?
+            var kept = false
             switch type {
             case .keyDown:
                 let outcome = state.router.press(
                     keyCode: code,
                     held: held,
-                    isRepeat: isRepeat
+                    isRepeat: isRepeat,
+                    now: now
                 )
                 swallow = outcome.swallows
                 // A held key's repeats are left out of the trace.
@@ -107,20 +115,22 @@ extension KeyboardTap {
                 }
                 _ = state.record(outcome)
             case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-                if state.router.isOpen {
-                    state.router.close()
-                    _ = state.record(.closed)
-                }
+                let wasOpen = state.router.isOpen
+                _ = state.record(state.router.mouseDown(at: now))
+                kept = wasOpen && state.router.isOpen
             default:
                 break
             }
-            return (swallow, !state.waiting.isEmpty, decided)
+            return (swallow, !state.waiting.isEmpty, decided, kept)
         }
         if let decided {
             let line =
                 "key sequence: key \(code) held \(held.rawValue) "
                 + "\(decided) -> \(swallow ? "swallow" : "pass")"
             sequenceLog.log("\(line, privacy: .public)")
+        }
+        if kept {
+            sequenceLog.log("key sequence: click kept by a capture")
         }
         if heard { fire(Self.sequenceFireID) }
         return swallow

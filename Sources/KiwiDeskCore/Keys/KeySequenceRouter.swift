@@ -49,8 +49,28 @@ struct KeySequenceRouter: Sendable {
     /// set apart from the sequences, so a change to them alone
     /// (`KeyboardTapHandle.setSequenceScrollKeys`) closes nothing.
     var scrollKeys = KiwiHubKeys()
-    /// The open sequence, and the index of each step key taken.
-    private var open: (sequence: Int, path: [Int])?
+    /// How long a passed screenshot keeps clicks from closing the
+    /// sequence, at most (#3412): past it, an abandoned capture's
+    /// next click closes as any click does.
+    static let captureLimit: TimeInterval = 60
+
+    /// A passed screenshot's hold on the click close (#3412): clicks
+    /// before `until` pass and keep the sequence open, and one spends
+    /// it where the screenshot takes one press.
+    struct Capture: Equatable, Sendable {
+        var until: TimeInterval
+        var spentByClick: Bool
+    }
+
+    /// The open sequence, the index of each step key taken, and the
+    /// capture a passed screenshot holds; a close drops all three.
+    private struct Open {
+        var sequence: Int
+        var path: [Int]
+        var capture: Capture?
+    }
+
+    private var open: Open?
 
     /// Replaces the sequences and the macOS shortcuts they let
     /// through, closing any that is open: the step it stood on may
@@ -74,9 +94,32 @@ struct KeySequenceRouter: Sendable {
             open = nil
             return .closed
         }
-        open = (index, [])
+        open = Open(sequence: index, path: [])
         return .stepped
     }
+
+    /// A mouse-down, the one click that may close a sequence
+    /// (#1871): it closes an open one, save inside a passed
+    /// screenshot's capture (#3412), whose click passes and keeps it
+    /// open. `now` is the tap thread's uptime.
+    mutating func mouseDown(at now: TimeInterval) -> Outcome {
+        guard let current = open else { return .pass }
+        guard let capture = current.capture, now < capture.until else {
+            open = nil
+            return .closed
+        }
+        if capture.spentByClick { open?.capture = nil }
+        return .pass
+    }
+
+    /// The screenshot UI's own keys, plain, which a capture passes
+    /// (#3412 ▸ Ruling amendment): Space, Return and Escape.
+    static let captureKeys: Set<UInt32> = [
+        UInt32(kVK_Space), UInt32(kVK_Return), UInt32(kVK_Escape),
+    ]
+
+    /// Whether a passed screenshot holds the click close now.
+    var isCapturing: Bool { open?.capture != nil }
 
     var isOpen: Bool { open != nil }
 
@@ -97,12 +140,21 @@ struct KeySequenceRouter: Sendable {
     /// recorded for it, held modifiers included (#1871 ▸ step keys).
     /// While open: esc and ⌫, the leader, a step key, a scroll key
     /// (#3175), then a macOS shortcut's tier (#3173), else the beep.
-    /// A repeat moves nothing but a scroll and a macOS shortcut.
+    /// A repeat moves nothing but a scroll and a macOS shortcut. A
+    /// capture's keys pass to the screenshot and keep it; any other
+    /// key-down ends it (#3412). `now` is the tap thread's uptime.
     mutating func press(
         keyCode: UInt32,
         held: HotkeyModifiers,
-        isRepeat: Bool
+        isRepeat: Bool,
+        now: TimeInterval
     ) -> Outcome {
+        if open?.capture != nil, held.unsided.isEmpty,
+            Self.captureKeys.contains(keyCode)
+        {
+            return .passed(closing: false)
+        }
+        open?.capture = nil
         guard let current = open else {
             guard !isRepeat,
                 let index = Self.match(
@@ -111,10 +163,12 @@ struct KeySequenceRouter: Sendable {
                     held: held
                 )
             else { return .pass }
-            open = (index, [])
+            open = Open(sequence: index, path: [])
             return .stepped
         }
-        if isRepeat { return repeated(current, keyCode: keyCode, held: held) }
+        if isRepeat {
+            return repeated(current, keyCode: keyCode, held: held, now: now)
+        }
         let plain = held.unsided.isEmpty
         if plain, keyCode == UInt32(kVK_Escape) {
             open = nil
@@ -142,7 +196,7 @@ struct KeySequenceRouter: Sendable {
             )
         else {
             return Self.scroll(keyCode: keyCode, held: held, keys: scrollKeys)
-                ?? passOrBeep(keyCode: keyCode, held: held)
+                ?? passOrBeep(keyCode: keyCode, held: held, now: now)
         }
         switch keys[index].action {
         case .run(let ref):
@@ -157,9 +211,10 @@ struct KeySequenceRouter: Sendable {
     /// A held key: a scroll repeats and a macOS shortcut passes;
     /// esc, ⌫, the leader and a step key stay still.
     private mutating func repeated(
-        _ current: (sequence: Int, path: [Int]),
+        _ current: Open,
         keyCode: UInt32,
-        held: HotkeyModifiers
+        held: HotkeyModifiers,
+        now: TimeInterval
     ) -> Outcome {
         let plain = held.unsided.isEmpty
         let fixed = [kVK_Escape, kVK_Delete].map(UInt32.init)
@@ -180,7 +235,7 @@ struct KeySequenceRouter: Sendable {
         ) {
             return scroll
         }
-        let pass = passOrBeep(keyCode: keyCode, held: held)
+        let pass = passOrBeep(keyCode: keyCode, held: held, now: now)
         return pass == .unbound ? .repeated : pass
     }
 
@@ -226,12 +281,25 @@ struct KeySequenceRouter: Sendable {
     }
 
     /// A macOS shortcut no step key took: through to macOS, the
-    /// sequence closed first where it takes the keyboard.
+    /// sequence closed first where it takes the keyboard, and a
+    /// screenshot's capture opened where it takes the pointer.
     private mutating func passOrBeep(
         keyCode: UInt32,
-        held: HotkeyModifiers
+        held: HotkeyModifiers,
+        now: TimeInterval
     ) -> Outcome {
         if Self.match(passing.staysOpen, keyCode: keyCode, held: held) != nil {
+            return .passed(closing: false)
+        }
+        if let index = Self.match(
+            passing.captures.map(\.combo),
+            keyCode: keyCode,
+            held: held
+        ) {
+            open?.capture = Capture(
+                until: now + Self.captureLimit,
+                spentByClick: passing.captures[index].spentByClick
+            )
             return .passed(closing: false)
         }
         if Self.match(passing.closes, keyCode: keyCode, held: held) != nil {

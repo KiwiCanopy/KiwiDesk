@@ -50,7 +50,8 @@ struct KeySequenceRouterTests {
         return router.press(
             keyCode: combo.keyCode,
             held: combo.modifiers,
-            isRepeat: isRepeat
+            isRepeat: isRepeat,
+            now: 0
         )
     }
 
@@ -142,7 +143,8 @@ struct KeySequenceRouterTests {
             router.press(
                 keyCode: UInt32(kVK_ANSI_Keypad2),
                 held: [],
-                isRepeat: false
+                isRepeat: false,
+                now: 0
             ) == .fired(ref: 4)
         )
     }

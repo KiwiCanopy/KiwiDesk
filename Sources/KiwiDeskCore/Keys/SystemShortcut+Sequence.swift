@@ -81,10 +81,13 @@ extension SystemShortcut {
     /// answer.
     public var sequenceTier: SequencePassTier {
         switch self {
-        case .screenshot, .screenshotSelection, .screenshotTools,
-            .screenshotToClipboard, .screenshotSelectionToClipboard,
-            .zoomToggle, .zoomIn, .zoomOut, .invertColors,
-            .increaseContrast, .decreaseContrast, .dockHiding:
+        case .screenshotSelection, .screenshotSelectionToClipboard:
+            return .capturesClick
+        case .screenshotTools:
+            return .capturesClicks
+        case .screenshot, .screenshotToClipboard, .zoomToggle, .zoomIn,
+            .zoomOut, .invertColors, .increaseContrast, .decreaseContrast,
+            .dockHiding:
             return .staysOpen
         case .spotlight, .finderSearch, .appSwitcher, .forceQuit,
             .missionControl, .appWindows, .missionControlSpaceLeft,
@@ -104,9 +107,14 @@ extension SystemShortcut {
 /// Ruling): one that takes no keyboard passes and leaves the panel
 /// up; one that takes the keyboard or moves the user passes and
 /// closes the sequence; an app's own menu chord stays swallowed, or
-/// it would reach the shielded front app.
+/// it would reach the shielded front app. A screenshot that takes
+/// the pointer stays open through its clicks (#3412).
 public enum SequencePassTier: Sendable, Equatable {
     case staysOpen
+    /// Stays open, and its one click passes without closing.
+    case capturesClick
+    /// Stays open, and its clicks pass until the next key-down.
+    case capturesClicks
     case closes
     case swallowed
 }
@@ -218,6 +226,8 @@ extension SystemShortcuts {
 /// arming from `SystemShortcuts.answered`.
 struct SequencePassChords: Equatable, Sendable {
     var staysOpen: [KeyCombo] = []
+    /// The screenshots that take the pointer, apart from `staysOpen`.
+    var captures: [SequencePassCapture] = []
     var closes: [KeyCombo] = []
 
     static let none = SequencePassChords()
@@ -235,10 +245,24 @@ struct SequencePassChords: Equatable, Sendable {
         for (chord, shortcut) in answered {
             switch shortcut.sequenceTier {
             case .staysOpen: chords.staysOpen.append(chord)
+            case .capturesClick, .capturesClicks:
+                chords.captures.append(
+                    SequencePassCapture(
+                        combo: chord,
+                        spentByClick: shortcut.sequenceTier == .capturesClick
+                    )
+                )
             case .closes: chords.closes.append(chord)
             case .swallowed: break
             }
         }
         return chords
     }
+}
+
+/// A screenshot chord an open sequence passes and keeps open through
+/// its clicks (#3412): `spentByClick` where it takes one press.
+struct SequencePassCapture: Equatable, Sendable {
+    var combo: KeyCombo
+    var spentByClick: Bool
 }

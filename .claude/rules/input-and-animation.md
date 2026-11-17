@@ -224,8 +224,17 @@ editing here:
     reach the front app. It is declared first, so an open sequence
     outranks a sided chord, swallows every key-down while one is
     open save a macOS shortcut it passes (#3173, below), which
-    `.modifierTaps` still hears, and closes one on a
-    mouse-down, the one click door. A leader never reaches Carbon:
+    `.modifierTaps` still hears, and hands each mouse-down, the
+    one click door, to `KeySequenceRouter.mouseDown`, the one judge
+    of whether a click closes. A click inside a passed screenshot's
+    capture passes and keeps the sequence open; a new
+    `SystemShortcut` answers whether it captures through its
+    `sequenceTier`. While a capture is open its keys
+    (`KeySequenceRouter.captureKeys`) pass to the screenshot ahead of
+    every other key and keep it; it ends at a close, at any other
+    key-down and at `KeySequenceRouter.captureLimit` (#3412,
+    `KeySequenceCaptureTests`, `KeySequenceTapThreadTests` ▸
+    `screenshotClickKeeps`). A leader never reaches Carbon:
     activation skips a press row on its chord, and a refused tap
     lists the leader in `activationFailures`
     (`KeySequenceInstallTests` ▸ `leaderWinsItsChord`,
@@ -241,7 +250,8 @@ editing here:
     still list it.
   - **While a sequence is open, a recorded step key outranks a
     scroll key, and a scroll key outranks macOS's pass-through
-    (#3175, #3173).** The router's order is esc / ⌫, the leader, a
+    (#3175, #3173).** The router's order is a capture's keys
+    (#3412), esc / ⌫, the leader, a
     step key, a scroll key (the plain arrows and page keys, then
     `kiwihub.set_key`'s second chords, matched whole), the macOS
     tiers, the beep. A new kind of key while open takes its place
@@ -370,7 +380,7 @@ editing here:
     its door or why none is owed (`ModifierGrabWiringTests`,
     `PointerButtonWiringTests`). The
     keyboard tap's listen-only mouse-down, which ends a modifier
-    tap's count and closes an open key sequence (#1871), has no
+    tap's count and may close an open key sequence (#1871), has no
     door: a grab or a bound button swallowed ahead of it leaves a
     ⌃ released within `ModifierTapDetector.pressLimit` of its
     press read as a tap, and a sequence open through the press
