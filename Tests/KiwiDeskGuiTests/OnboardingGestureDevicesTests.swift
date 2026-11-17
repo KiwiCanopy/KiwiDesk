@@ -32,7 +32,17 @@ struct OnboardingGestureDevicesTests {
         let rows = OnboardingGestures.families(
             bindings: [
                 GestureKey(.swipe2, hyper): .family(.focus),
-                swipe3: .split(GestureSplit(axes: [.leftRight: .space])),
+                swipe3: .split(
+                    GestureSplit(
+                        axes: [.leftRight: .space],
+                        arms: [
+                            .up: LuaAction(
+                                lua: KiwiHubSide.desktops.lua,
+                                kind: .navigation
+                            )
+                        ]
+                    )
+                ),
                 GestureKey(.tap4): .run(
                     LuaAction(lua: "kiwivision.toggle()", kind: .navigation)
                 ),
@@ -55,6 +65,9 @@ struct OnboardingGestureDevicesTests {
         #expect(cap(byID["focus"])?.glyph == focus.symbol)
         #expect(cap(byID["focus"])?.caption == "2 fingers")
         #expect(cap(byID["kiwivision"])?.caption == "4-finger tap")
+        // One way reached draws that way's arrow.
+        let up = ShortcutGestureBadge(key: swipe3, direction: .up)
+        #expect(cap(byID["desktops"])?.glyph == up.symbol)
         // VoiceOver keeps the whole motion.
         #expect(byID["space"]?.spoken?.contains("left/right") == true)
         #expect(byID["focus"]?.spoken?.contains("left/right") == false)
