@@ -146,8 +146,9 @@ struct AppWidePaceCrossingTests {
         let removed = spaced.components(separatedBy: "\n")
             .filter { !$0.isEmpty && !after.contains($0) }
         // The four lengths, the member before the last cut losing
-        // the comma that no longer separates anything, and the format
-        // stamp a later bump lifts.
+        // the comma that no longer separates anything, the format
+        // stamp a later bump lifts, and the Automatic handle the
+        // default palette's stamp paints in place (#3409).
         #expect(
             removed.filter { $0.contains("duration\"") }.count == 4,
             "\(removed)"
@@ -156,6 +157,7 @@ struct AppWidePaceCrossingTests {
             removed.allSatisfy {
                 $0.contains("duration\"") || $0.contains("on_window_swap")
                     || $0.contains("\"format\"")
+                    || $0.contains("\"handle_color\" : \"\"")
             },
             "\(removed)"
         )

@@ -1,0 +1,213 @@
+import Foundation
+
+/// The bundled palettes as 5.0 shipped them, handle painted (#3409):
+/// history, so a later retune of a palette or a shipped default
+/// moves no stored file. The default comes first, every colour path
+/// it reads, since an absent stored path reads its colour.
+extension ConfigMigration {
+    static let handleStampPalettes:
+        [(name: String, colors: [String: String])] = [
+            (
+                "Kiwi (Default)",
+                [
+                    "border.focused_color": "#4A9816",
+                    "border.unfocused_color": "#8E8E93CC",
+                    "floating.color": "",
+                    "kiwishelf.active_item_color": "#8DB354",
+                    "kiwishelf.border_color": "#EAF3EE59",
+                    "kiwishelf.fill_color": "#14201CB3",
+                    "kiwishelf.group_badge_color": "#636366",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#8DB354",
+                    "kiwishelf.highlight_color": "#8DB354",
+                    "kiwishelf.hover_fill_color": "#AACB5D80",
+                    "kiwishelf.hover_item_color": "#EAF3EE",
+                    "kiwishelf.item_color": "#EAF3EE",
+                    "pocket.color": "",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#C2790A",
+                    "sticky.color": "",
+                ]
+            ),
+            (
+                "Kiwi Gold",
+                [
+                    "border.focused_color": "#D9A521",
+                    "border.unfocused_color": "#9C9080E6",
+                    "kiwishelf.active_item_color": "#D9A521",
+                    "kiwishelf.border_color": "#EAF3EE59",
+                    "kiwishelf.fill_color": "#3A3326B3",
+                    "kiwishelf.group_badge_color": "#636366",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#D9A521",
+                    "kiwishelf.highlight_color": "#D9A521",
+                    "kiwishelf.hover_fill_color": "#E8C34D80",
+                    "kiwishelf.hover_item_color": "#EAF3EE",
+                    "kiwishelf.item_color": "#EAF3EE",
+                    "pocket.color": "#9CE8C8",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#9CE8C8",
+                ]
+            ),
+            (
+                "Clean Light",
+                [
+                    "border.focused_color": "#0A84FF",
+                    "border.unfocused_color": "#8E8E93D9",
+                    "kiwishelf.active_item_color": "#0A84FF",
+                    "kiwishelf.border_color": "#1C1C1E",
+                    "kiwishelf.fill_color": "#F2F2F7B3",
+                    "kiwishelf.group_badge_color": "#636366",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#0A84FF",
+                    "kiwishelf.highlight_color": "#0A84FF",
+                    "kiwishelf.hover_fill_color": "#0A84FF80",
+                    "kiwishelf.hover_item_color": "#1C1C1E",
+                    "kiwishelf.item_color": "#1C1C1E",
+                    "pocket.color": "#0A84FF",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#FF9F0A",
+                ]
+            ),
+            (
+                "Slate",
+                [
+                    "border.focused_color": "#5E9EFF",
+                    "border.unfocused_color": "#8E8E93E6",
+                    "kiwishelf.active_item_color": "#5E9EFF",
+                    "kiwishelf.border_color": "#E5E5EA59",
+                    "kiwishelf.fill_color": "#2C2C2EB3",
+                    "kiwishelf.group_badge_color": "#636366",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#5E9EFF",
+                    "kiwishelf.highlight_color": "#5E9EFF",
+                    "kiwishelf.hover_fill_color": "#5E9EFF80",
+                    "kiwishelf.hover_item_color": "#FFFFFF",
+                    "kiwishelf.item_color": "#E5E5EA",
+                    "pocket.color": "#5E9EFF",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#FFB340",
+                ]
+            ),
+            (
+                "True Dark",
+                [
+                    "border.focused_color": "#64D2FF",
+                    "border.unfocused_color": "#8E8E93E6",
+                    "kiwishelf.active_item_color": "#64D2FF",
+                    "kiwishelf.border_color": "#FFFFFF59",
+                    "kiwishelf.fill_color": "#000000B3",
+                    "kiwishelf.group_badge_color": "#636366",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#64D2FF",
+                    "kiwishelf.highlight_color": "#64D2FF",
+                    "kiwishelf.hover_fill_color": "#64D2FF80",
+                    "kiwishelf.hover_item_color": "#FFFFFF",
+                    "kiwishelf.item_color": "#E5E5EA",
+                    "pocket.color": "#64D2FF",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#FF9F0A",
+                ]
+            ),
+            (
+                "Monochrome",
+                [
+                    "border.focused_color": "#FFFFFF",
+                    "border.unfocused_color": "#8E8E93E6",
+                    "kiwishelf.active_item_color": "#FFFFFF",
+                    "kiwishelf.border_color": "#E5E5EA59",
+                    "kiwishelf.fill_color": "#3A3A3CB3",
+                    "kiwishelf.group_badge_color": "#8E8E93",
+                    "kiwishelf.group_badge_text_color": "#000000",
+                    "kiwishelf.handle_color": "#FFFFFF",
+                    "kiwishelf.highlight_color": "#FFFFFF",
+                    "kiwishelf.hover_fill_color": "#FFFFFF40",
+                    "kiwishelf.hover_item_color": "#000000",
+                    "kiwishelf.item_color": "#E5E5EA",
+                    "pocket.color": "#FFD60A",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#FFD60A",
+                ]
+            ),
+            (
+                "Sunset",
+                [
+                    "border.focused_color": "#FF8099",
+                    "border.unfocused_color": "#6A665EE6",
+                    "kiwishelf.active_item_color": "#FF8099",
+                    "kiwishelf.border_color": "#FFFFFF59",
+                    "kiwishelf.fill_color": "#2C2C2EB3",
+                    "kiwishelf.group_badge_color": "#A8466A",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#FF8099",
+                    "kiwishelf.highlight_color": "#FF8099",
+                    "kiwishelf.hover_fill_color": "#FF809980",
+                    "kiwishelf.hover_item_color": "#FFFFFF",
+                    "kiwishelf.item_color": "#FFFFFF",
+                    "pocket.color": "#FF8099",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#64D2FF",
+                ]
+            ),
+            (
+                "Ultraviolet",
+                [
+                    "border.focused_color": "#5E5CE6",
+                    "border.unfocused_color": "#7E7E96E6",
+                    "kiwishelf.active_item_color": "#5E5CE6",
+                    "kiwishelf.border_color": "#E8EAF659",
+                    "kiwishelf.fill_color": "#1A1A2EB3",
+                    "kiwishelf.group_badge_color": "#1A8FB8",
+                    "kiwishelf.group_badge_text_color": "#0B0B14",
+                    "kiwishelf.handle_color": "#5E5CE6",
+                    "kiwishelf.highlight_color": "#5E5CE6",
+                    "kiwishelf.hover_fill_color": "#5E5CE680",
+                    "kiwishelf.hover_item_color": "#FFFFFF",
+                    "kiwishelf.item_color": "#E8EAF6",
+                    "pocket.color": "#5E5CE6",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#FFD60A",
+                ]
+            ),
+            (
+                "Kiwi Neon",
+                [
+                    "border.focused_color": "#4A9816",
+                    "border.unfocused_color": "#728272E6",
+                    "kiwishelf.active_item_color": "#86EA43",
+                    "kiwishelf.border_color": "#D8FFC259",
+                    "kiwishelf.fill_color": "#0A1F0FB3",
+                    "kiwishelf.group_badge_color": "#F91F9E",
+                    "kiwishelf.group_badge_text_color": "#000000",
+                    "kiwishelf.handle_color": "#86EA43",
+                    "kiwishelf.highlight_color": "#86EA43",
+                    "kiwishelf.hover_fill_color": "#86EA4380",
+                    "kiwishelf.hover_item_color": "#FFFFFF",
+                    "kiwishelf.item_color": "#D8FFC2",
+                    "pocket.color": "#2BE0FF",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#2BE0FF",
+                ]
+            ),
+            (
+                "Nightfall",
+                [
+                    "border.focused_color": "#7AA2F7",
+                    "border.unfocused_color": "#565F89E6",
+                    "kiwishelf.active_item_color": "#7AA2F7",
+                    "kiwishelf.border_color": "#C0CAF559",
+                    "kiwishelf.fill_color": "#1A1B26B3",
+                    "kiwishelf.group_badge_color": "#414868",
+                    "kiwishelf.group_badge_text_color": "#FFFFFF",
+                    "kiwishelf.handle_color": "#7AA2F7",
+                    "kiwishelf.highlight_color": "#7AA2F7",
+                    "kiwishelf.hover_fill_color": "#7AA2F780",
+                    "kiwishelf.hover_item_color": "#FFFFFF",
+                    "kiwishelf.item_color": "#C0CAF5",
+                    "pocket.color": "#7AA2F7",
+                    "space_bar.focused_highlight_color": "",
+                    "space_bar.focused_item_color": "#FF9E64",
+                ]
+            ),
+        ]
+}

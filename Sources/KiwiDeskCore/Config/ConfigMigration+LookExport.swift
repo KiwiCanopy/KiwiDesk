@@ -13,6 +13,7 @@ extension ConfigMigration {
             (to: 3, step: migratingRetiredDragLook),
             (to: 4, step: migratingInstantDurationsOntoToggles),
             (to: 5, step: migratingLookPaceOut),
+            (to: 6, step: migratingHandleStampLookExport),
         ]
 
     /// `data`, written at `format`, with every step above it applied.

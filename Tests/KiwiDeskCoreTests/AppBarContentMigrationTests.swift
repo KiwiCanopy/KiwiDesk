@@ -88,9 +88,13 @@ struct AppBarContentMigrationTests {
         let settings = try JSONSerialization.data(
             withJSONObject: try #require(migrated["settings"])
         )
+        // Default colours wear the default palette, so the handle
+        // stamp (#3409) paints its accent too.
+        var want = TilingSettings()
+        want.wearBundledPaint()
         #expect(
             try JSONDecoder().decode(TilingSettings.self, from: settings)
-                == TilingSettings()
+                == want
         )
     }
 
