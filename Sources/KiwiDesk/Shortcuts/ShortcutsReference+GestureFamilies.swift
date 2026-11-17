@@ -17,4 +17,12 @@ extension ShortcutsReferenceBuilder {
         case .layout: layoutCycle.drawn
         }
     }
+
+    /// A modifier drag's symbol: the move's four-way arrows, the
+    /// resize's diagonal (#3380), shared with its pop-up pin.
+    static func grabIcon(_ grab: ModifierDragAction) -> String {
+        grab == .move
+            ? "arrow.up.and.down.and.arrow.left.and.right"
+            : "arrow.up.left.and.arrow.down.right"
+    }
 }

@@ -14,15 +14,19 @@ extension ShortcutsReferenceBuilder {
         let lua: String
         /// The words a "Gestures" row reads.
         let label: String
+        /// What leads that row (#3380): a family's or a command's
+        /// symbol, the Lua mark, or the app it opens.
+        var icon: ShortcutGlyph? = nil
+        var bundleID: String? = nil
     }
 
     static func withGestures(
         _ reference: ShortcutsReference,
         bindings: [GestureKey: GestureAction],
         natural: (GestureInput) -> Bool = { _ in true },
-        name: (LuaAction) -> String
+        command: (LuaAction) -> NavCommand?
     ) -> ShortcutsReference {
-        var open = reaches(bindings, natural: natural, name: name)
+        var open = reaches(bindings, natural: natural, command: command)
         var out = reference
         func attach(_ rows: inout [ShortcutRow]) {
             for index in rows.indices {
@@ -50,32 +54,55 @@ extension ShortcutsReferenceBuilder {
     static func reaches(
         _ bindings: [GestureKey: GestureAction],
         natural: (GestureInput) -> Bool,
-        name: (LuaAction) -> String
+        command: (LuaAction) -> NavCommand?
     ) -> [GestureReach] {
-        bindings.keys.sorted().flatMap { key -> [GestureReach] in
+        func reach(
+            _ badge: ShortcutGestureBadge,
+            _ run: LuaAction
+        ) -> GestureReach {
+            // A command's catalogue entry names it and leads it; the
+            // user's own Lua is never one. A binding's own symbol wins,
+            // as on a key row (#2544), and an app shows its icon.
+            let entry = run.kind == .custom ? nil : command(run)
+            let app =
+                run.kind == .application
+                ? KeybindingCatalog.appBundleID(from: run.lua) : nil
+            var glyph: ShortcutGlyph?
+            if app == nil {
+                glyph =
+                    run.meta.usableSymbol.map { .symbol($0) }
+                    ?? entry.flatMap(icon(for:)) ?? ownIcon(run.meta)
+            }
+            return GestureReach(
+                badge: badge,
+                lua: run.lua,
+                label: entry?.resolvedLabel ?? GestureListWords.runName(run),
+                icon: glyph,
+                bundleID: app
+            )
+        }
+        return bindings.keys.sorted().flatMap { key -> [GestureReach] in
             guard let action = bindings[key] else { return [] }
             if case .grab(let grab) = action {
                 return [
                     GestureReach(
                         badge: ShortcutGestureBadge(key: key, direction: nil),
                         lua: "",
-                        label: GestureListWords.grab(grab)
+                        label: GestureListWords.grab(grab),
+                        icon: .symbol(grabIcon(grab))
                     )
                 ]
             }
             guard !key.input.directions.isEmpty else {
                 guard case .run(let run) = action else { return [] }
                 return [
-                    GestureReach(
-                        badge: ShortcutGestureBadge(key: key, direction: nil),
-                        lua: run.lua,
-                        label: name(run)
+                    reach(
+                        ShortcutGestureBadge(key: key, direction: nil),
+                        run
                     )
                 ]
             }
             return key.input.directions.compactMap { direction in
-                let label: String
-                let lua: String
                 // The way the step runs, Natural applied, so a badge
                 // sits on the row that fires (`resolvedStep`).
                 guard
@@ -84,22 +111,21 @@ extension ShortcutsReferenceBuilder {
                         natural: natural(key.input)
                     )
                 else { return nil }
+                let badge = ShortcutGestureBadge(
+                    key: key,
+                    direction: direction
+                )
                 switch step {
                 case .family(let family):
-                    lua = family.lua(way)
-                    label = GestureListWords.family(family)
+                    return GestureReach(
+                        badge: badge,
+                        lua: family.lua(way),
+                        label: GestureListWords.family(family),
+                        icon: .symbol(familyIcon(for: family))
+                    )
                 case .lua(let run):
-                    lua = run.lua
-                    label = name(run)
+                    return reach(badge, run)
                 }
-                return GestureReach(
-                    badge: ShortcutGestureBadge(
-                        key: key,
-                        direction: direction
-                    ),
-                    lua: lua,
-                    label: label
-                )
             }
         }
     }
@@ -119,10 +145,18 @@ extension ShortcutsReferenceBuilder {
         let byKey = Dictionary(grouping: hits, by: \.badge.key)
         // A gesture reaching the row more than one way — a family
         // whose up and left both step to the next Space, or every way
-        // of a folded set — wears its glyph once, with no way.
+        // of a folded set — wears its glyph once, with no way; both
+        // ways of one axis draw that axis (#3380).
         for (key, reached) in byKey {
             if reached.count > 1 {
-                badges.append(ShortcutGestureBadge(key: key, direction: nil))
+                let ways = Set(reached.compactMap(\.badge.direction))
+                badges.append(
+                    ShortcutGestureBadge(
+                        key: key,
+                        direction: nil,
+                        axis: .of(ways)
+                    )
+                )
             } else {
                 badges += reached.map(\.badge)
             }
@@ -145,25 +179,32 @@ extension ShortcutsReferenceBuilder {
             {
                 return [
                     gestureRow(
-                        GestureListWords.family(family),
-                        ShortcutGestureBadge(key: key, direction: nil)
+                        GestureReach(
+                            badge: ShortcutGestureBadge(
+                                key: key,
+                                direction: nil
+                            ),
+                            lua: "",
+                            label: GestureListWords.family(family),
+                            icon: .symbol(familyIcon(for: family))
+                        )
                     )
                 ]
             }
-            return reached.map { gestureRow($0.label, $0.badge) }
+            return reached.map(gestureRow)
         }
     }
 
-    private static func gestureRow(
-        _ label: String,
-        _ badge: ShortcutGestureBadge
-    ) -> ShortcutRow {
+    /// A "Gestures" row, led by its reach's symbol or app (#3380).
+    private static func gestureRow(_ reach: GestureReach) -> ShortcutRow {
         var row = ShortcutRow(
-            id: "gesture:" + badge.id,
-            label: label,
-            combo: ""
+            id: "gesture:" + reach.badge.id,
+            label: reach.label,
+            combo: "",
+            icon: reach.icon,
+            bundleID: reach.bundleID
         )
-        row.gestures = [badge]
+        row.gestures = [reach.badge]
         return row
     }
 }

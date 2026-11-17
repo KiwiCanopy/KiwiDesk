@@ -2274,6 +2274,16 @@ its host (#3258; `ShortcutKeyRowSeamTests` ▸ `registerIsComplete`,
 (#34), never the one stored at the refusal
 (`ShortcutKeyRowOfferTests` ▸ `stealFollowsTheHolder`).
 
+**A list of `ShortcutRowView`s takes its columns from
+`ShortcutSectionColumns`** (#3380): the badges against a divider,
+the chords at the section's widest, a section with no gesture
+keeping no badge column; a new host of such a list applies it, and
+a row with no columns in its environment is a lone row, such as the
+hint panel's branch rows (`ShortcutGestureColumnsTests` ▸
+`columnsAreWired`). A Gestures row's label and mark come from one
+catalogue lookup handed to `withGestures`, never a closure per
+field.
+
 **An app's Pocket key row is read through
 `PocketAppLuaArg.bundleID(of:)` alone** — profiles.md ▸ *A verb
 the GUI writes into a stored binding* owns the obligation.

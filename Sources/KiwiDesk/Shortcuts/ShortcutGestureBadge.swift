@@ -5,25 +5,69 @@ import KiwiDeskCore
 /// swipe goes where it runs one direction's action. A whole family
 /// on a folded row names no direction.
 struct ShortcutGestureBadge: Hashable, Identifiable {
+    /// The one axis a family reaches a row along both ways of
+    /// (#3380): its badge draws two opposed arrows.
+    enum Axis: Hashable {
+        case horizontal, vertical
+
+        /// The axis `ways` span exactly; nil for one way, four, or
+        /// any other mix.
+        static func of(_ ways: Set<GestureDirection>) -> Axis? {
+            switch ways {
+            case [.left, .right]: .horizontal
+            case [.up, .down]: .vertical
+            default: nil
+            }
+        }
+    }
+
     let key: GestureKey
     let direction: GestureDirection?
+    /// Set only with no `direction`, for a two-way family.
+    var axis: Axis? = nil
     /// What the gesture is called, its way included — read aloud and
     /// matched by a search; worded once, on the main actor.
     let words: String
 
-    @MainActor init(key: GestureKey, direction: GestureDirection?) {
+    @MainActor init(
+        key: GestureKey,
+        direction: GestureDirection?,
+        axis: Axis? = nil
+    ) {
         self.key = key
         self.direction = direction
+        self.axis = direction == nil ? axis : nil
         let input = GestureListWords.input(key.input)
         words =
-            direction.map {
+            Self.way(direction, self.axis).map {
                 L(
                     "shortcuts.gestures.direction_action",
                     "%1$@, %2$@",
                     input,
-                    GestureListWords.direction($0)
+                    $0
                 )
             } ?? input
+    }
+
+    /// The way a badge names: its direction, or either of its axis's
+    /// ("Left or right", #3380), one phrase per axis so no locale
+    /// bends a standalone direction word; nil for no way.
+    @MainActor static func way(
+        _ direction: GestureDirection?,
+        _ axis: Axis?
+    ) -> String? {
+        if let direction { return GestureListWords.direction(direction) }
+        switch axis {
+        case .horizontal:
+            return L(
+                "shortcuts.gestures.axis_ways.left_right",
+                "Left or right"
+            )
+        case .vertical:
+            return L("shortcuts.gestures.axis_ways.up_down", "Up or down")
+        case nil:
+            return nil
+        }
     }
 
     var id: String {
@@ -31,13 +75,23 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
     }
 
     /// The badge's glyph: a swipe's direction badge (variant A
-    /// tightened) where it names a way, else the gesture's own
-    /// glyph — a whole family's being today's swipe glyph.
+    /// tightened) where it names a way, its axis badge where a family
+    /// runs both ways of one axis (#3380), else the gesture's own
+    /// glyph — a four-way family's being today's swipe glyph.
     @MainActor var symbol: String {
+        if let axis, let fingers = key.input.fingers,
+            !key.input.directions.isEmpty,
+            CustomGlyph.badgeFingers.contains(fingers)
+        {
+            return CustomGlyph.swipeAxis(
+                fingers,
+                vertical: axis == .vertical
+            ).name
+        }
         if let direction, let fingers = key.input.fingers,
             !key.input.directions.isEmpty,
             CustomGlyph.badgeDirections.contains(direction),
-            (2...4).contains(fingers)
+            CustomGlyph.badgeFingers.contains(fingers)
         {
             return CustomGlyph.swipe(fingers, direction).name
         }
@@ -53,7 +107,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
     /// The badge as VoiceOver reads it: the keys, then the gesture.
     @MainActor var spoken: String {
         guard !key.chord.isEmpty else { return words }
-        guard let direction else {
+        guard let way = Self.way(direction, axis) else {
             return L(
                 "shortcuts.gestures.input_chord",
                 "%1$@, with %2$@",
@@ -65,7 +119,7 @@ struct ShortcutGestureBadge: Hashable, Identifiable {
             "shortcuts.gestures.direction_action_chord",
             "%1$@, %2$@, with %3$@",
             GestureListWords.input(key.input),
-            GestureListWords.direction(direction),
+            way,
             chord
         )
     }

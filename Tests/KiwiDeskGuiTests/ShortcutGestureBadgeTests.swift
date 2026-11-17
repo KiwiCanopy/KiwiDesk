@@ -31,7 +31,7 @@ struct ShortcutGestureBadgeTests {
         ShortcutsReferenceBuilder.withGestures(
             reference(rows),
             bindings: bindings,
-            name: { $0.lua }
+            command: { _ in nil }
         )
     }
 

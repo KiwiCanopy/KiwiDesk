@@ -6,6 +6,7 @@ struct ShortcutRowView: View {
     let row: ShortcutRow
     /// The Shortcuts side's query, drawn bold in the name (#2246).
     @Environment(\.shortcutMatch) private var match
+    @Environment(\.shortcutColumns) private var columns
 
     var body: some View {
         HStack(spacing: 8) {
@@ -34,15 +35,8 @@ struct ShortcutRowView: View {
                     .foregroundStyle(.secondary)
                     .help(row.accessoryHelp)
             }
-            ShortcutGestureBadgeView(badges: row.gestures)
-            Text(row.combo)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                // A sided chord grows; the name truncates first,
-                // never the chord (#2601).
-                .fixedSize()
-                .accessibilityLabel(row.spokenChord)
-                .help(row.spokenHelp)
+            gestureColumn
+            chord
         }
         .help(row.monospaced ? row.label : "")
         .opacity(row.unavailable ? 0.55 : 1)
@@ -54,6 +48,56 @@ struct ShortcutRowView: View {
                 )
                 : ""
         )
+    }
+
+    /// The badge, then the divider where the row has a gesture; in
+    /// a section with a badge column a row without one keeps the
+    /// divider's slot (#3380). Outside a section, the badge alone.
+    @ViewBuilder private var gestureColumn: some View {
+        if let columns {
+            if columns.badges {
+                ShortcutGestureBadgeView(badges: row.gestures)
+                if columns.chords { dividerSlot }
+            }
+        } else {
+            ShortcutGestureBadgeView(badges: row.gestures)
+        }
+    }
+
+    /// The divider beside a gesture, or its empty slot.
+    private var dividerSlot: some View {
+        ZStack {
+            Color.clear
+            if !row.gestures.isEmpty {
+                PanelDivider(
+                    axis: .vertical,
+                    length: ShortcutColumns.dividerLength
+                )
+            }
+        }
+        .frame(width: ShortcutColumns.dividerSlot)
+        .accessibilityHidden(true)
+    }
+
+    /// The chord, right-aligned in the section's widest chord.
+    private var chord: some View {
+        Text(row.combo)
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            // A sided chord grows; the name truncates first, never
+            // the chord (#2601).
+            .fixedSize()
+            .background {
+                GeometryReader { proxy in
+                    Color.clear.preference(
+                        key: ShortcutChordWidthKey.self,
+                        value: proxy.size.width
+                    )
+                }
+            }
+            .frame(minWidth: columns?.chord ?? 0, alignment: .trailing)
+            .accessibilityLabel(row.spokenChord)
+            .help(row.spokenHelp)
     }
 
     /// Which name along a key sequence's path the search matched

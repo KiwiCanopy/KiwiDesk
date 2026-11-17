@@ -2,10 +2,10 @@ import Foundation
 import KiwiDeskCore
 
 /// What the key sequence hint panel shows for one step (#1871 ▸
-/// hint panel): the leader's name as its title, the steps taken as
-/// a breadcrumb, the keys that open more keys first, then the end
-/// keys as the Shortcuts side files them. Core names the path; this
-/// reads the stored tree it names.
+/// hint panel): one headline breadcrumb of the leader and each
+/// branch taken (#3381), the keys that open more keys first, then
+/// the end keys as the Shortcuts side files them. Core names the
+/// path; this reads the stored tree it names.
 struct KeySequenceHint: Equatable {
     /// One key the breadcrumb or the branch list draws: its chord,
     /// drawn, its name and the symbol it leads with (#3162).
@@ -14,10 +14,13 @@ struct KeySequenceHint: Equatable {
         var name: String
         var symbol = BranchMark.symbol
         var id: String { chord }
+
+        /// What a crumb draws beside its symbol: its name, or its
+        /// chord while it has none (#3381).
+        var shown: String { name.isEmpty ? chord : name }
     }
 
-    var title: String
-    /// The leader, then each step key pressed.
+    /// The leader, then each branch key pressed.
     var crumbs: [Key]
     /// This step's keys that open more keys, each drawn with ›.
     var branches: [Key]
@@ -36,27 +39,20 @@ struct KeySequenceHint: Equatable {
                 $0.combo == progress.leader
             })
         else { return nil }
-        var crumbs = [Key(chord: drawn(node.combo), name: node.label)]
+        var crumbs = [crumb(node)]
         for step in progress.path {
             guard
                 let next = node.steps?.first(where: {
                     $0.combo == step && $0.isSequence
                 })
             else { return nil }
-            crumbs.append(Key(chord: drawn(next.combo), name: next.label))
+            crumbs.append(crumb(next))
             node = next
         }
         let keys = node.steps ?? []
         return KeySequenceHint(
-            title: crumbs[0].name.isEmpty ? crumbs[0].chord : crumbs[0].name,
             crumbs: crumbs,
-            branches: keys.filter(\.isSequence).map {
-                Key(
-                    chord: drawn($0.combo),
-                    name: $0.label,
-                    symbol: $0.meta.usableSymbol ?? BranchMark.symbol
-                )
-            },
+            branches: keys.filter(\.isSequence).map(crumb),
             endKeys: KeyLayer(
                 name: layer.name,
                 bindings: keys.filter { !$0.isSequence }
@@ -72,20 +68,27 @@ struct KeySequenceHint: Equatable {
         } ?? stored
     }
 
-    /// The breadcrumb as one line: "⌃⌥Space › W Windows".
-    var breadcrumb: String {
-        crumbs.enumerated().map { index, key in
-            index == 0 || key.name.isEmpty
-                ? key.chord : key.chord + " " + key.name
-        }
-        .joined(separator: " › ")
+    /// A node as a crumb or a branch row: its chord, its name and
+    /// the symbol the card's pill draws.
+    @MainActor private static func crumb(_ node: KeyBinding) -> Key {
+        Key(
+            chord: drawn(node.combo),
+            name: node.label,
+            symbol: BranchMark.symbol(of: node)
+        )
     }
 
-    /// The breadcrumb as VoiceOver reads it, each chord in words.
-    @MainActor var spokenBreadcrumb: String {
+    /// The headline's words: "Leader › Windows", a passed chord
+    /// dropped unless its crumb has no name (#3381).
+    var headline: String {
+        crumbs.map(\.shown).joined(separator: " › ")
+    }
+
+    /// The headline as VoiceOver reads it, an unnamed crumb's chord
+    /// in words.
+    @MainActor var spokenHeadline: String {
         crumbs.map { key in
-            let chord = SidedChordWords.label(key.chord)
-            return key.name.isEmpty ? chord : chord + " " + key.name
+            key.name.isEmpty ? SidedChordWords.label(key.chord) : key.name
         }
         .joined(separator: ", ")
     }

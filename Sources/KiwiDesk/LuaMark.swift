@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// The Lua mark, `</>` (#2544 ▸ Ruling): what a binding of the
 /// user's own wears without a symbol of its own, and everywhere else
@@ -9,8 +10,14 @@ enum LuaMark {
 }
 
 /// What a key that opens more keys wears without a symbol of its
-/// own (#3162 ▸ Ruling amendment): the Key sequences card's popover
-/// and the hint panel's branch rows.
+/// own (#3162 ▸ Ruling amendment): the Key sequences card's pills
+/// and popover, and the hint panel's branch rows and breadcrumb.
 enum BranchMark {
     static let symbol = "folder"
+
+    /// The symbol a branch or a leader draws: its own, else the
+    /// folder — one answer for the card and the hint panel (#3381).
+    @MainActor static func symbol(of node: KeyBinding) -> String {
+        node.meta.usableSymbol ?? symbol
+    }
 }

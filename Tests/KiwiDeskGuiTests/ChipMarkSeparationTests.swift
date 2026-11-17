@@ -71,8 +71,8 @@ struct ChipMarkSeparationTests {
     }
 
     /// A mark is the accent at its own alpha: retuning the accent
-    /// moves both marks with it (the token table's source scans
-    /// read each hex literal, so the hue is pinned here instead).
+    /// reds here until both marks follow it (each token is a hex
+    /// literal the token table's source scans read).
     @Test("each mark wears the accent's hue")
     func marksAreTheAccent() throws {
         for mark in [SettingsTheme.chipMarked, SettingsTheme.iconCellMarked] {

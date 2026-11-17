@@ -106,6 +106,12 @@ struct ShortcutsSheetView: View {
             }
             .opacity(section.dims ? 0.6 : 1)
         }
+        .modifier(
+            ShortcutSectionColumns(
+                badges: section.rows.contains { !$0.gestures.isEmpty },
+                chords: section.rows.contains { !$0.combo.isEmpty }
+            )
+        )
         .padding(.top, first ? 0 : 16)
     }
 

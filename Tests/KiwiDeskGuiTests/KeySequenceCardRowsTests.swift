@@ -211,5 +211,18 @@ struct KeySequenceCardRowsTests {
         #expect(
             ShortcutsReferenceBuilder.verbSymbols.contains(BranchMark.symbol)
         )
+        // The card's pill reads the same answer (#3381).
+        #expect(BranchMark.symbol(of: named) == "app.badge")
+        #expect(BranchMark.symbol(of: plain) == BranchMark.symbol)
+        // The headline's crumbs wear it too.
+        var leader = layer.bindings[0]
+        leader.symbol = "star"
+        let stepped = try #require(
+            KeySequenceHint.of(
+                KeySequenceProgress(leader: "ctrl+alt+space", path: ["w"]),
+                in: KeyLayer(name: KeyLayer.defaultName, bindings: [leader])
+            )
+        )
+        #expect(stepped.crumbs.map(\.symbol) == ["star", BranchMark.symbol])
     }
 }

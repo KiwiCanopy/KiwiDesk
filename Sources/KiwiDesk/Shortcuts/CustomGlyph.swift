@@ -18,6 +18,9 @@ enum CustomGlyph: Hashable {
     case pinch(Int)
     /// A swipe's direction badge: `n` dots and one arrow (#1873).
     case swipe(Int, GestureDirection)
+    /// A family bound both ways along one axis: `n` dots and two
+    /// opposed arrows, ← over → or ↑ over ↓ (#3380).
+    case swipeAxis(Int, vertical: Bool)
     /// `hand.pinch` beside a two-way arc; macOS 15 and later.
     case rotate
     /// The same with one head, the way a rotation turns: true is
@@ -38,6 +41,8 @@ enum CustomGlyph: Hashable {
         case .spread(let n): "kiwi.spread.\(n)"
         case .pinch(let n): "kiwi.pinch.\(n)"
         case .swipe(let n, let way): "kiwi.swipe.\(n).\(way.rawValue)"
+        case .swipeAxis(let n, let vertical):
+            "kiwi.swipe.\(n)." + (vertical ? "vertical" : "horizontal")
         case .rotate: "kiwi.rotate"
         case .turn(let clockwise):
             clockwise
@@ -50,14 +55,20 @@ enum CustomGlyph: Hashable {
             [.click, .rightClick, .wheelClick, .sideButtons, .walk]
             + (2...5).flatMap { [CustomGlyph.taps($0), .swipes($0)] }
             + [2, 4].flatMap { [CustomGlyph.spread($0), .pinch($0)] }
-            + (2...4).flatMap { n in
-                CustomGlyph.badgeDirections.map { .swipe(n, $0) }
-            }
+            + Self.badgeFingers.flatMap(Self.swipeBadges)
             + [.rotate, .turn(clockwise: true), .turn(clockwise: false)]
         guard let glyph = all.first(where: { $0.name == name }) else {
             return nil
         }
         self = glyph
+    }
+
+    /// A finger count's direction and axis badges.
+    private static func swipeBadges(_ n: Int) -> [CustomGlyph] {
+        let ways: [CustomGlyph] = badgeDirections.map { .swipe(n, $0) }
+        return ways + [
+            .swipeAxis(n, vertical: false), .swipeAxis(n, vertical: true),
+        ]
     }
 
     /// The glyph as a template image, one per glyph for the process.
@@ -92,6 +103,9 @@ enum CustomGlyph: Hashable {
         case .spread(let n): Self.pinchArrows(n, outward: true)
         case .pinch(let n): Self.pinchArrows(n, outward: false)
         case .swipe(let n, let way): Self.swipeBadge(n, way)
+        case .swipeAxis(let n, let vertical):
+            Self.fingerDots(n)
+            Self.axisArrows(vertical: vertical)
         case .rotate: Self.rotateHand(heads: [.clockwise, .counterClockwise])
         case .turn(let clockwise):
             Self.rotateHand(
@@ -208,6 +222,12 @@ enum CustomGlyph: Hashable {
 
     /// `n` finger dots stacked, moving right.
     private static func swipeDots(_ n: Int) {
+        fingerDots(n)
+        arrow(NSPoint(x: 9.5, y: 10), NSPoint(x: 18, y: 10))
+    }
+
+    /// `n` finger dots stacked at the grid's left.
+    private static func fingerDots(_ n: Int) {
         let ys: [CGFloat] =
             switch n {
             case 2: [7, 13]
@@ -216,7 +236,19 @@ enum CustomGlyph: Hashable {
             default: [3, 6.5, 10, 13.5, 17]
             }
         for y in ys { dot(5, y, n > 4 ? 1.25 : n > 3 ? 1.6 : 1.9) }
-        arrow(NSPoint(x: 9.5, y: 10), NSPoint(x: 18, y: 10))
+    }
+
+    /// Two opposed arrows beside the dots (#3380 ▸ Ruling): ← over →
+    /// for a horizontal axis, ↑ over ↓ for a vertical one; y is
+    /// down.
+    private static func axisArrows(vertical: Bool) {
+        if vertical {
+            arrow(NSPoint(x: 14, y: 9), NSPoint(x: 14, y: 1.5))
+            arrow(NSPoint(x: 14, y: 11), NSPoint(x: 14, y: 18.5))
+        } else {
+            arrow(NSPoint(x: 18, y: 6.5), NSPoint(x: 9.5, y: 6.5))
+            arrow(NSPoint(x: 9.5, y: 13.5), NSPoint(x: 18, y: 13.5))
+        }
     }
 
     private static func windowRow() {

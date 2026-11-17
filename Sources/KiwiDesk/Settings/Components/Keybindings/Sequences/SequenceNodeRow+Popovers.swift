@@ -12,7 +12,8 @@ struct SequenceBranchRequest: Identifiable, Equatable {
 /// the Lua bindings' editor; a branch's Name and Icon behind its
 /// tinted container.
 extension SequenceNodeRow {
-    /// "▾ Windows": the fold, then the name that opens the popover.
+    /// "📁 Windows ✎", a branch's or the leader's pill: its symbol,
+    /// its name and the pencil, one button opening Name and Icon.
     var branchContainer: some View {
         // The fold sits outside, before the key (#3241); the pencil
         // gives the container's one click a visible target.
@@ -21,7 +22,7 @@ extension SequenceNodeRow {
                 editingBranch = SequenceBranchRequest(id: node.id)
             } label: {
                 HStack(spacing: 4) {
-                    Image(systemName: Self.branchSymbol)
+                    Image(systemName: BranchMark.symbol(of: node))
                         .accessibilityHidden(true)
                     branchTitle.fixedSize(horizontal: true, vertical: false)
                     Image(systemName: "pencil")
@@ -38,9 +39,6 @@ extension SequenceNodeRow {
             branchPopover.settingsPopoverChrome()
         }
     }
-
-    /// A branch container's leading symbol (#3241).
-    static let branchSymbol = "square.stack.3d.up"
 
     @ViewBuilder private var branchTitle: some View {
         if node.label.trimmed.isEmpty {

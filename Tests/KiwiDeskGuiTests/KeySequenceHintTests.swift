@@ -43,7 +43,7 @@ struct KeySequenceHintTests {
                 in: Self.layer
             )
         )
-        #expect(hint.title == "Leader")
+        #expect(hint.headline == "Leader")
         #expect(hint.branches.map(\.name) == ["Windows"])
         #expect(hint.endKeys.bindings.map(\.combo) == ["t"])
         #expect(hint.crumbs.count == 1)
@@ -59,7 +59,8 @@ struct KeySequenceHintTests {
             )
         )
         #expect(hint.crumbs.map(\.name) == ["Leader", "Windows"])
-        #expect(hint.breadcrumb.hasSuffix(" › W Windows"))
+        // Passed chords drop: the headline names the path (#3381).
+        #expect(hint.headline == "Leader › Windows")
         #expect(hint.branches.isEmpty)
         #expect(hint.endKeys.bindings.map(\.combo) == ["h"])
     }
@@ -80,7 +81,7 @@ struct KeySequenceHintTests {
         )
     }
 
-    @Test("An unnamed leader is titled by its chord")
+    @Test("An unnamed crumb shows its chord")
     func unnamedLeader() throws {
         var layer = Self.layer
         layer.bindings[1].label = ""
@@ -90,8 +91,9 @@ struct KeySequenceHintTests {
                 in: layer
             )
         )
-        #expect(hint.title == hint.crumbs[0].chord)
-        #expect(!hint.title.isEmpty)
+        #expect(hint.crumbs[0].shown == hint.crumbs[0].chord)
+        #expect(!hint.headline.isEmpty)
+        #expect(hint.headline == hint.crumbs[0].chord)
     }
 
     @Test("The import classifier files a sequence's end keys")

@@ -85,9 +85,7 @@ extension GestureListRow {
                 SequencePickPin(
                     id: grab.rawValue,
                     title: GestureListWords.grab(grab),
-                    symbol: grab == .move
-                        ? "arrow.up.and.down.and.arrow.left.and.right"
-                        : "arrow.up.left.and.arrow.down.right",
+                    symbol: ShortcutsReferenceBuilder.grabIcon(grab),
                     picked: action == .grab(grab)
                 ) { bind(.grab(grab)) }
             }
