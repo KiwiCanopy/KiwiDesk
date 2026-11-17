@@ -23,7 +23,7 @@ struct ShelfStripPreview: View {
     /// Whether the pocket draws as a section there; where it rests
     /// as a handle beside an Auto bar its slot is kept and nothing
     /// draws (#3432).
-    var pocketSection = true
+    let pocketSection: Bool
     /// The pocket mark's colour, `pocket.color`; empty takes the
     /// mark's label ink (#2671).
     var pocketHex = ""

@@ -22,9 +22,10 @@ extension ShelfArrangement {
     }
 
     /// The pocket's slot along an edge `depth` deep: its need, and
-    /// where it rests as a handle (`asHandle`) no less than the
-    /// handle's band, so the tab stands in its slot and off the
-    /// bars' runs (#3432).
+    /// on an edge that draws nothing at rest (`asHandle`), where it
+    /// rests as its handle or its whole mark, no less than the
+    /// handle's band, so it stands in its slot and off the bars'
+    /// runs (#3432).
     public static func pocketNeed(
         depth: CGFloat,
         asHandle: Bool

@@ -116,7 +116,8 @@ struct MockAppItemLengthTests {
             edge: .top,
             vertical: false,
             scale: scale,
-            pocket: false
+            pocket: false,
+            pocketSection: true
         )
         let placed = strip.arrangement(length: Self.panelStrip)
         let appSlot = try #require(placed.app)
@@ -153,7 +154,8 @@ struct MockAppItemLengthTests {
             edge: .top,
             vertical: false,
             scale: scale,
-            pocket: false
+            pocket: false,
+            pocketSection: true
         )
         let whole = try #require(
             strip.arrangement(length: Self.panelStrip).app

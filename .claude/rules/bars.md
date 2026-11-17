@@ -1004,9 +1004,11 @@ Obligations:
   (`PocketHandleBesideRevealTests` ▸ `revealLeavesTheHandle`). File
   the pass's pocket slots before `filePocketApproaches`, since
   `pocketPlace(on:)` reads them (`PocketHandleBesideRevealTests` ▸
-  `filesThePassSlot`). Where it rests as a handle its slot is no shorter
-  than the handle's band (`ShelfArrangement.pocketNeed(depth:asHandle:)`),
-  so the tab stands in the slot and off every bar's run, and a bar's
+  `filesThePassSlot`). On an edge that draws nothing at rest, where
+  it rests as its handle or its whole mark, its slot is no shorter
+  than the handle's band
+  (`ShelfArrangement.pocketNeed(depth:asHandle:)`), so the tab
+  stands in the slot and off every bar's run, and a bar's
   approach is cut on its end facing the slot, as at a sibling
   (`PocketHandleBesideRevealTests` ▸ `approachesApart`); the Settings
   preview keeps that slot and draws no section there

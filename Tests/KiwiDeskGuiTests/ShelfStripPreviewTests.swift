@@ -57,7 +57,8 @@ struct ShelfStripPreviewTests {
             edge: .top,
             vertical: false,
             scale: 1.8,
-            pocket: pocket
+            pocket: pocket,
+            pocketSection: true
         )
     }
 
