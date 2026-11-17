@@ -28,7 +28,14 @@ struct ScrollGestureConfigTests {
         #expect(ScrollChord([]).spelling == "")
         #expect(ScrollChord(spelling: "cmd+alt") == [.command, .option])
         #expect(ScrollChord(spelling: "") == [])
-        #expect(ScrollChord(spelling: "control+hyper") == nil)
+        // Hyper is a member, written first (#3407); an unknown
+        // token still refuses.
+        #expect(ScrollChord(spelling: "control+hyper") == [.control, .hyper])
+        #expect(
+            ScrollChord(spelling: "control+hyper")?.spelling
+                == "hyper+control"
+        )
+        #expect(ScrollChord(spelling: "control+bogus") == nil)
         #expect(ScrollChord(spelling: "ctrl+control") == nil)
         #expect(
             try json(ScrollChord([.control, .option])) == "\"control+option\""
