@@ -7,11 +7,15 @@ import SwiftUI
 /// saying what it does, then its remove. A command or an app on the
 /// plain pop-up face, a Lua key's description dashed, a key that
 /// opens more keys tinted with its name. An open branch draws its
-/// keys indented behind a 1 pt rail that runs down to its "Add Key".
+/// keys one 18 pt step in, a 1 pt rail centred in that step running
+/// down to its "Add Key"; past `indentCap` its keys list flat under
+/// a caption naming the path (#3425 ▸ Ruling).
 struct SequenceNodeRow: View {
     @ObservedObject var model: SettingsModel
     let editing: SequenceEditing
     let node: KeyBinding
+    /// The stored chords from the leader down to this node.
+    let path: [String]
     let catalog: SequenceActionCatalog
     @Binding var collapsed: Set<UUID>
     /// The node just added, whose recorder arms on arrival.
@@ -65,13 +69,13 @@ struct SequenceNodeRow: View {
 
     // MARK: - Lines
 
-    /// The leader in the step keys' order (#3381 ▸ c2): its chord in
-    /// their key column, its pill, then the sequence's reach and
-    /// trash, as a shortcut row's (#3124).
+    /// The leader in the step keys' order (#3381 ▸ c2, amended by
+    /// #3425): its fold, its chord one step left of its keys', its
+    /// pill, then the sequence's reach and trash, as a shortcut
+    /// row's (#3124).
     @ViewBuilder private var leaderLine: some View {
-        disclosure(width: SettingsMetrics.shortcutIconSlot)
-        recorder.fixedSize()
-            .padding(.leading, Self.leaderKeyInset)
+        disclosure(width: Self.foldSlot)
+        recorder.fixedSize().layoutPriority(1)
         branchContainer
         Spacer(minLength: 8)
         KeyReachColumn(model: model, layer: layerName, binding: node)
@@ -93,7 +97,7 @@ struct SequenceNodeRow: View {
             Color.clear.frame(width: Self.foldSlot, height: 1)
                 .accessibilityHidden(true)
         }
-        recorder.fixedSize()
+        recorder.fixedSize().layoutPriority(1)
         if node.isSequence { branchContainer } else { endKeyContainer }
         Spacer(minLength: 8)
         AppRuleDeleteButton(
@@ -102,16 +106,17 @@ struct SequenceNodeRow: View {
         ) { _ in requestDelete() }
     }
 
-    /// A key line's fold slot, in points (#3241).
-    static let foldSlot: CGFloat = 12
+    /// Every line's fold slot, the leader's included, and so the
+    /// step each level indents by (#3425): one icon slot, 18 pt.
+    static let foldSlot = SettingsMetrics.shortcutIconSlot
 
-    /// An open branch's rail, between half an icon slot each side,
-    /// which together match the leader's disclosure.
+    /// An open branch's rail, drawn centred in its keys' step and
+    /// adding no width of its own (#3425).
     static let railWidth: CGFloat = 1
 
-    /// What brings the leader's chord to its keys' column: the rail
-    /// and the fold slot each key line leads with.
-    static let leaderKeyInset: CGFloat = railWidth + foldSlot
+    /// The deepest level that still indents (#3425): keys deeper
+    /// list flat in its column.
+    static let indentCap = 4
 
     /// The fold, its own button so it never shares the name's click
     /// (#3162 ▸ Ruling amendment).
@@ -212,19 +217,29 @@ struct SequenceNodeRow: View {
 
     // MARK: - Keys under a branch
 
+    /// Whether this branch's keys sit past `indentCap`, flat in its
+    /// own column under the path caption.
+    private var keysFlat: Bool { path.count - 1 >= Self.indentCap }
+
     private var keys: some View {
         HStack(alignment: .top, spacing: 0) {
-            SettingsTheme.hairlineSubtle
-                .frame(width: Self.railWidth)
-                .padding(.leading, SettingsMetrics.shortcutIconSlot / 2)
-                .padding(.trailing, SettingsMetrics.shortcutIconSlot / 2)
-                .accessibilityHidden(true)
+            if !keysFlat {
+                Color.clear
+                    .frame(width: Self.foldSlot)
+                    .overlay {
+                        SettingsTheme.hairlineSubtle
+                            .frame(width: Self.railWidth)
+                    }
+                    .accessibilityHidden(true)
+            }
             VStack(alignment: .leading, spacing: 6) {
+                if keysFlat { flatCaption }
                 ForEach(node.steps ?? []) { step in
                     SequenceNodeRow(
                         model: model,
                         editing: editing,
                         node: step,
+                        path: path + [step.combo],
                         catalog: catalog,
                         collapsed: $collapsed,
                         fresh: $fresh
@@ -248,6 +263,18 @@ struct SequenceNodeRow: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(name)
+    }
+
+    /// A flat branch's first line, at its keys' chord column: the
+    /// path shortened, read whole on hover and by VoiceOver (#3425).
+    private var flatCaption: some View {
+        Text(SequencePathWords.shortened(path))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .padding(.leading, Self.foldSlot + 8)
+            .help(SequencePathWords.drawn(path))
+            .accessibilityLabel(SequencePathWords.spoken(path))
     }
 
     private func requestDelete() {

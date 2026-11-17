@@ -12,7 +12,7 @@ extension SequenceActionMenu {
                         Image(systemName: Self.luaSymbol)
                             .accessibilityHidden(true)
                     }
-                    Text(title)
+                    titleText
                     if marksKind {
                         Image(systemName: "arrow.up.left.and.arrow.down.right")
                             .font(.caption2)
@@ -20,7 +20,6 @@ extension SequenceActionMenu {
                             .accessibilityHidden(true)
                     }
                 }
-                .fixedSize(horizontal: true, vertical: false)
             }
             .buttonStyle(SequenceDashedStyle())
         } else {
@@ -30,15 +29,23 @@ extension SequenceActionMenu {
                 HStack(spacing: 4) {
                     appIcon
                     commandGlyph
-                    Text(title).lineLimit(1)
+                    titleText
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-                .fixedSize(horizontal: true, vertical: false)
             }
             .settingsPopUpTrigger()
         }
+    }
+
+    /// The trigger's one part that gives way (#3425): the tail
+    /// truncates and hover reads it whole.
+    private var titleText: some View {
+        Text(title)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .help(title)
     }
 
     /// An app key's icon, as the Apps section's rows draw it.
