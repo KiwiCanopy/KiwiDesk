@@ -19,9 +19,8 @@ struct HyperHoldSeamTests {
         for name in [
             "ScrollGestureTap.swift", "PointerTap.swift", "TouchReader.swift",
         ] {
-            let source = try String(
-                contentsOf: Self.events.appendingPathComponent(name),
-                encoding: .utf8
+            let source = try SourceScan.strippedSource(
+                at: Self.events.appendingPathComponent(name)
             )
             #expect(!source.isEmpty, "\(name)")
             #expect(
@@ -48,9 +47,8 @@ struct HyperHoldSeamTests {
                 "TouchReader.live(hyper: $0, deliver: $1)"
             ),
         ] {
-            let source = try String(
-                contentsOf: Self.events.appendingPathComponent(name),
-                encoding: .utf8
+            let source = try SourceScan.strippedSource(
+                at: Self.events.appendingPathComponent(name)
             )
             #expect(source.contains(call), "\(name)")
         }

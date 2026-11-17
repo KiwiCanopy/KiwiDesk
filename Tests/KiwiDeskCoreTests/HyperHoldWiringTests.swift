@@ -47,8 +47,10 @@ private final class LiveRegistrar: HotkeyRegistrar,
 struct HyperHoldWiringTests {
     private let f18 = HyperSourceKey.triggerKeyCode
 
+    /// The flags are pinned: a nil-source event takes whatever
+    /// modifiers the host holds (tests.md ▸ pin, never inherit).
     private func scroll() throws -> CGEvent {
-        try #require(
+        let event = try #require(
             CGEvent(
                 scrollWheelEvent2Source: nil,
                 units: .pixel,
@@ -58,10 +60,12 @@ struct HyperHoldWiringTests {
                 wheel3: 0
             )
         )
+        event.flags = []
+        return event
     }
 
     private func rightDown() throws -> CGEvent {
-        try #require(
+        let event = try #require(
             CGEvent(
                 mouseEventSource: nil,
                 mouseType: .rightMouseDown,
@@ -69,6 +73,8 @@ struct HyperHoldWiringTests {
                 mouseButton: .right
             )
         )
+        event.flags = []
+        return event
     }
 
     private func scrollTap(_ hold: HyperHold) -> ScrollGestureTap {

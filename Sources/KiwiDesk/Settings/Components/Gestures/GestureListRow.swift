@@ -28,6 +28,8 @@ struct GestureListRow: View {
     let offered: [GestureInput]
     let catalog: SequenceActionCatalog
     @Binding var open: Set<UUID>
+    /// No Hyper key is set: the recorder mount's one reading (#3407).
+    @Environment(\.hyperKeyIsOff) var hyperOff
     var armsOnAppear = false
     /// The row now binds nothing the map holds: it stays as pending.
     let onUnbound: () -> Void
@@ -230,9 +232,6 @@ struct GestureListRow: View {
             profile: nil
         ).map { GestureRefusalWords.sentence($0, hyperOff: hyperOff) }
     }
-
-    /// No Hyper key is set, as the recorder mount reads it (#3407).
-    private var hyperOff: Bool { model.appWide.hyperKey == nil }
 
     func rekey(to target: GestureKey) {
         clash = nil

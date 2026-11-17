@@ -72,7 +72,7 @@ struct ChordRecorderHyperModifierTests {
                 "Sources/KiwiDesk/Settings/Components/Gestures/"
                     + "GestureChordRecorder.swift"
             )
-        let source = try String(contentsOf: file, encoding: .utf8)
+        let source = try SourceScan.strippedSource(at: file)
         #expect(source.contains("hyper: !hyperKeyIsOff,"))
         #expect(source.contains(".opacity(hyperDormant ? 0.55 : 1)"))
     }
