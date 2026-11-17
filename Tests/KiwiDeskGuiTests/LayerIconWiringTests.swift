@@ -116,10 +116,16 @@ struct LayerIconWiringTests {
         let flat = source.filter { !$0.isWhitespace }
         #expect(flat.contains("icon:chipIcon(name),"))
         #expect(
-            flat.contains(
-                "ShortcutGlyph(icon:KeyLayer.icons(of:model.config.layers)"
-                    + "[name])"
+            flat.contains("ShortcutGlyph(layer:name,in:model.config.layers)")
+        )
+        // The one layer-glyph door reads the rows' map (#3431).
+        let glyph = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Shortcuts/ShortcutGlyph.swift"
             )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            glyph.contains("self.init(icon:KeyLayer.icons(of:layers)[name])")
         )
     }
 }

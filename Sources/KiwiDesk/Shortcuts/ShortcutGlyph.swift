@@ -15,6 +15,13 @@ enum ShortcutGlyph: Hashable, Sendable {
         guard let icon, !icon.isEmpty else { return nil }
         self = KiwiCore.iconIsSymbol(icon) ? .symbol(icon) : .emoji(icon)
     }
+
+    /// The layer `name`'s glyph among `layers`, as its chip, its
+    /// switch rows and the editing readout draw it; nil for
+    /// `default` and a layer without one (#3267, #3431).
+    @MainActor init?(layer name: String, in layers: [KeyLayer]) {
+        self.init(icon: KeyLayer.icons(of: layers)[name])
+    }
 }
 
 /// Draws a `ShortcutGlyph` in a fixed `side`-point square: a symbol

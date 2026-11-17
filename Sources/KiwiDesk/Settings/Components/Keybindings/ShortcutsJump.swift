@@ -116,10 +116,10 @@ struct ShortcutsJumpReading: Equatable {
     /// the one under it — the slack a jump's landing may leave.
     static let reach: CGFloat = 24
 
-    /// A held chip wins. Unscrolled, the first group is current,
-    /// whatever sits above it; at the end of a scroll, the last.
-    /// Otherwise it is the last group whose header has reached the
-    /// bar while its card is still under it.
+    /// A held chip wins; at the end of a scroll, the last group;
+    /// otherwise the last group whose header has reached the bar,
+    /// and the first until one has, whatever sits above it. A chip
+    /// is marked at every scroll position (#3431).
     @MainActor static func read(
         _ page: ShortcutsJumpPage,
         holding hold: ShortcutsJumpGroup? = nil
@@ -132,14 +132,14 @@ struct ShortcutsJumpReading: Equatable {
         }
         if let hold {
             reading.marked = hold
-        } else if !reading.underlapped {
-            reading.marked = drawn.first?.0
         } else if atEnd(page) {
             reading.marked = drawn.last?.0
         } else if let current = drawn.last(where: {
             $0.1.minY <= reach
-        }), current.1.maxY > reach {
+        }) {
             reading.marked = current.0
+        } else {
+            reading.marked = drawn.first?.0
         }
         return reading
     }
