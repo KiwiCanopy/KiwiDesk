@@ -60,7 +60,13 @@ struct KeySequenceIndentTests {
         #expect(row.contains("ifkeysFlat{flatCaption}ForEach("))
         #expect(row.contains("path:path+[step.combo],"))
         #expect(row.contains("Text(SequencePathWords.shortened(path))"))
-        #expect(row.contains(".help(SequencePathWords.drawn(path))"))
+        #expect(
+            row.contains(
+                ".padding(.leading,SettingsMetrics.shortcutTextIndent)"
+                    + ".help(SequencePathWords.spoken(path))"
+                    + ".accessibilityLabel(SequencePathWords.spoken(path))"
+            )
+        )
         let card = try Self.flat(
             "Sources/KiwiDesk/Settings/Sections/KeySequencesCard.swift"
         )
@@ -89,10 +95,11 @@ struct KeySequenceIndentTests {
         #expect(
             trigger.contains(
                 "privatevartitleText:someView{Text(title).lineLimit(1)"
-                    + ".truncationMode(.tail).help(title)}"
+                    + ".truncationMode(.tail)}"
             )
         )
         #expect(trigger.occurrences(of: "titleText") == 3)
+        #expect(trigger.occurrences(of: ".help(title)") == 2)
         #expect(!trigger.contains(".fixedSize(horizontal:true"))
         let branch = try Self.flat(
             Self.dir + "SequenceNodeRow+Popovers.swift"
@@ -100,14 +107,21 @@ struct KeySequenceIndentTests {
         #expect(
             branch.contains(
                 "branchTitle.lineLimit(1).truncationMode(.tail)"
-                    + ".help(node.label)"
+                    + "Image(systemName:\"pencil\")"
             )
         )
+        #expect(branch.contains(".buttonStyle(.plain).help(node.label)"))
         #expect(!branch.contains("branchTitle.fixedSize("))
         let row = try Self.flat(Self.dir + "SequenceNodeRow.swift")
         #expect(
             row.occurrences(of: "recorder.fixedSize().layoutPriority(1)")
                 == 2
+        )
+        #expect(
+            row.contains(
+                "KeyReachColumn(model:model,layer:layerName,binding:node)"
+                    + ".layoutPriority(1)"
+            )
         )
     }
 }

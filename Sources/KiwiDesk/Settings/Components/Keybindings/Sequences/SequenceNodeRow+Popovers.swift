@@ -29,13 +29,13 @@ extension SequenceNodeRow {
                     branchTitle
                         .lineLimit(1)
                         .truncationMode(.tail)
-                        .help(node.label)
                     Image(systemName: "pencil")
                         .foregroundStyle(SettingsTheme.ink2)
                         .accessibilityHidden(true)
                 }
             }
             .buttonStyle(.plain)
+            .help(node.label)
             .accessibilityLabel(nameLabel)
             .accessibilityValue(node.label)
         }

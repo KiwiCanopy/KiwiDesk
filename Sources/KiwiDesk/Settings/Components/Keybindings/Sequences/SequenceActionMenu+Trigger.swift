@@ -22,6 +22,7 @@ extension SequenceActionMenu {
                 }
             }
             .buttonStyle(SequenceDashedStyle())
+            .help(title)
         } else {
             Button {
                 request = SequencePickRequest(id: face.id)
@@ -36,16 +37,16 @@ extension SequenceActionMenu {
                 }
             }
             .settingsPopUpTrigger()
+            .help(title)
         }
     }
 
     /// The trigger's one part that gives way (#3425): the tail
-    /// truncates and hover reads it whole.
+    /// truncates, and the button's hover reads it whole.
     private var titleText: some View {
         Text(title)
             .lineLimit(1)
             .truncationMode(.tail)
-            .help(title)
     }
 
     /// An app key's icon, as the Apps section's rows draw it.

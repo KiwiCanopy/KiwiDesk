@@ -159,6 +159,12 @@ struct SidedChordWordsTests {
                 "spokenCombo ?? SidedChordWords.label(combo)"
             )
         )
+        // A deep branch's path caption speaks it (#3425).
+        #expect(
+            try read(keys + "Sequences/SequenceNodeRow.swift").contains(
+                ".accessibilityLabel(SequencePathWords.spoken(path))"
+            )
+        )
         // A key sequence's path speaks each chord (#1871).
         #expect(
             try read(keys + "Sequences/SequencePathWords.swift").contains(

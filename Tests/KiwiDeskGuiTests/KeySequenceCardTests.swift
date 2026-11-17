@@ -171,6 +171,7 @@ struct KeySequenceCardTests {
         #expect(
             leader.contains(
                 "KeyReachColumn(model:model,layer:layerName,binding:node)"
+                    + ".layoutPriority(1)"
                     + "KeyReachTrash(model:model,layer:layerName,"
                     + "binding:node){requestDelete()}"
             )

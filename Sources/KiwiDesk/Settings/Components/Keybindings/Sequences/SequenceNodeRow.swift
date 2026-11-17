@@ -45,7 +45,7 @@ struct SequenceNodeRow: View {
                 Text(L("shortcuts.sequence.empty", "Does nothing yet"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
             }
             if node.isSequence, isOpen { keys }
         }
@@ -78,7 +78,9 @@ struct SequenceNodeRow: View {
         recorder.fixedSize().layoutPriority(1)
         branchContainer
         Spacer(minLength: 8)
+        // Sized ahead of the pill, whose title alone gives way.
         KeyReachColumn(model: model, layer: layerName, binding: node)
+            .layoutPriority(1)
         KeyReachTrash(
             model: model,
             layer: layerName,
@@ -272,8 +274,8 @@ struct SequenceNodeRow: View {
             .font(.caption)
             .foregroundStyle(.secondary)
             .lineLimit(1)
-            .padding(.leading, Self.foldSlot + 8)
-            .help(SequencePathWords.drawn(path))
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
+            .help(SequencePathWords.spoken(path))
             .accessibilityLabel(SequencePathWords.spoken(path))
     }
 

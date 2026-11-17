@@ -78,7 +78,7 @@ struct KeySequenceRowMarksTests {
         #expect(
             branch.contains(
                 "branchTitle.lineLimit(1).truncationMode(.tail)"
-                    + ".help(node.label)Image(systemName:\"pencil\")"
+                    + "Image(systemName:\"pencil\")"
             )
         )
         // One button: the pencil sits inside the label it opens.
@@ -99,7 +99,8 @@ struct KeySequenceRowMarksTests {
         )
         #expect(
             branch.contains(
-                ".buttonStyle(.plain).accessibilityLabel(nameLabel)"
+                ".buttonStyle(.plain).help(node.label)"
+                    + ".accessibilityLabel(nameLabel)"
                     + ".accessibilityValue(node.label)"
             )
         )
