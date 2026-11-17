@@ -128,9 +128,15 @@ struct PocketHandleBesideRevealTests {
         let core = rig.core
         // No bar rests here, so the pocket keeps no slot or band.
         #expect(core.pocketPlate.markBands[rig.display] == nil)
+        core.tiler.settings.kiwishelf.alignment = .center
+        core.updateBars()
         let rest = try #require(rig.spec)
         #expect(core.toggleBarReveal(bar))
         #expect(core.shelves.reveal.reveal(of: bar).isShown)
+        // The bar takes the whole strip: no room kept for a slot.
+        let target = try #require(core.shelves.reveal.targets[bar])
+        let held = try #require(target.section)
+        #expect(abs(held.midY - target.strip.midY) < 1)
         #expect(core.pocketPlate.slots[rig.display] == nil)
         #expect(core.pocketPlace(on: rig.display) == .handle)
         #expect(rig.spec?.frame == rest.frame)
