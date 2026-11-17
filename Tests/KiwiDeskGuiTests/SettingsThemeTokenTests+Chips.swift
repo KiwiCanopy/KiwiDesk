@@ -44,6 +44,25 @@ extension SettingsThemeTokenTests {
             SettingsTheme.chipEdge,
             lightAlpha: 0.18
         ),
+        // The marked jump chip's and icon cell's accent washes
+        // (#1520, 5.0.0): each its own value, colour-vision
+        // checked in `ChipMarkSeparationTests`.
+        Pin(
+            "chipMarked",
+            0x8D_B3_54,
+            0xAA_CB_5D,
+            SettingsTheme.chipMarked,
+            lightAlpha: 0.50,
+            darkAlpha: 0.32
+        ),
+        Pin(
+            "iconCellMarked",
+            0x8D_B3_54,
+            0xAA_CB_5D,
+            SettingsTheme.iconCellMarked,
+            lightAlpha: 0.50,
+            darkAlpha: 0.36
+        ),
         // A segmented control's well, fill and rim (#2047).
         Pin(
             "trackFill",

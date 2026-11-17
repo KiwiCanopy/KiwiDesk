@@ -184,35 +184,24 @@ extension SettingsThemeContrastTests {
     /// fill; unchosen it is a button chip's (`buttonChips`, and
     /// the jump chips' rows for the page). The panel carries the
     /// keyboard's scope chips and the Spaces preview's chips.
-    private static let choiceChips: [Pairing] =
-        [
-            ("card", SettingsTheme.card),
-            ("sunken", SettingsTheme.sunken),
-            ("page", SettingsTheme.page),
-            ("panel", SettingsTheme.panel),
-        ].map { name, ground in
-            Pairing(
-                "ink on a chosen choice chip on \(name)",
-                SettingsTheme.ink,
-                on: ground,
-                washedWith: (
-                    SettingsTheme.accent,
-                    ChoiceChip.selectedWashOpacity
-                )
-            )
-        }
+    /// The chosen choice chip is opaque accent, so its ground
+    /// does not reach the label (#2047 amended, 5.0.0).
+    private static let choiceChips: [Pairing] = [
+        Pairing(
+            "accentInk on a chosen choice chip",
+            SettingsTheme.accentInk,
+            on: SettingsTheme.accent
+        )
+    ]
 
     /// An empty lens's chip draws its lighter label on the page,
-    /// chosen or not (#2103 ruling 50).
+    /// chosen or not (#2103 ruling 50) — on the chosen accent, the
+    /// accent's own secondary ink.
     private static let emptyLensChips: [Pairing] = [
         Pairing(
-            "ink2 on an empty lens's chosen chip",
-            SettingsTheme.ink2,
-            on: SettingsTheme.page,
-            washedWith: (
-                SettingsTheme.accent,
-                ChoiceChip.selectedWashOpacity
-            )
+            "accentInkSecondary on an empty lens's chosen chip",
+            SettingsTheme.accentInkSecondary,
+            on: SettingsTheme.accent
         ),
         Pairing(
             "ink2 on an empty lens's chip",

@@ -169,6 +169,26 @@ enum SettingsTheme {
         darkAlpha: 0.22
     )
 
+    /// A marked jump chip's accent wash over its pointer fill, on
+    /// `page` (#1520, #1173); colour-vision checked against a
+    /// resting and a hovered neighbour (`ChipMarkSeparationTests`).
+    static let chipMarked = token(
+        light: 0x8D_B3_54,
+        dark: 0xAA_CB_5D,
+        lightAlpha: 0.50,
+        darkAlpha: 0.32
+    )
+
+    /// The chosen icon cell's wash, on `card` — its own value, since
+    /// the jump chip's leaves too little to a hovered cell there.
+    /// Its glyph held down measures to the non-text floor.
+    static let iconCellMarked = token(
+        light: 0x8D_B3_54,
+        dark: 0xAA_CB_5D,
+        lightAlpha: 0.50,
+        darkAlpha: 0.36
+    )
+
     /// A text button chip's edge, constant in every state — what
     /// tells it from a passive hairline capsule (#1520 amendments
     /// 5, 6).

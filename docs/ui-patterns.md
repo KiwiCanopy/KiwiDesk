@@ -1314,7 +1314,7 @@ which is its shape; custom full-row picker entries rest at
 nothing and take the chip's rest fill on hover alone; an
 unselected custom segment lifts by one rest step over its track,
 and a choice chip — a layer, a preset — rests and lifts as a
-button chip, the chosen one washed with the accent instead. A
+button chip, the chosen one drawn as described below instead. A
 draggable token chip is the one case stated as an ORDER rather
 than a step, because its kinds are drawn apart by
 outline-versus-fill and hover must not spend that channel: the
@@ -1332,6 +1332,15 @@ discoverable.
 
 On KiwiHub's tinted Fill a button chip's fills fade with the
 panel's other fills (#2725).
+:::unreleased
+The chosen choice chip is drawn like a selected segment: a solid
+accent fill, `accentInk` and a semibold label over the width every
+chip reserves, so choosing one never reflows its strip. A marked
+jump chip and a chosen icon cell keep a translucent accent wash
+over neutral ink, each at its own strength; each mark clears
+`ColorVision`'s floor against a resting and a hovered neighbour
+(`ChipMarkSeparationTests`).
+:::
 
 **A tile or card answers the pointer with its edge and a rise
 (#3042).** Home cards, Layout, palette, look and dashed tiles and

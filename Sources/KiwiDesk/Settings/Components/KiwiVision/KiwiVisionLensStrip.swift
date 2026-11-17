@@ -102,6 +102,17 @@ struct KiwiVisionLensChip: View {
     let selected: Bool
     let action: () -> Void
 
+    /// An empty lens's label is the lighter ink, chosen or not
+    /// (#2103 ruling 50) — on the chosen chip's accent, its own.
+    private var labelInk: Color {
+        switch (selected, empty) {
+        case (true, true): SettingsTheme.accentInkSecondary
+        case (true, false): SettingsTheme.accentInk
+        case (false, true): SettingsTheme.ink2
+        case (false, false): SettingsTheme.ink
+        }
+    }
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 5) {
@@ -113,7 +124,7 @@ struct KiwiVisionLensChip: View {
                 Text(name).lineLimit(1)
             }
             .font(.callout)
-            .foregroundStyle(empty ? SettingsTheme.ink2 : SettingsTheme.ink)
+            .foregroundStyle(labelInk)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .choiceChip(selected: selected)

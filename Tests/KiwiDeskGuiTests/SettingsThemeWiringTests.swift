@@ -66,6 +66,8 @@ struct SettingsThemeWiringTests {
         "hairlineSubtle": "GestureEntry.swift",
         "planeRing": "SettingsFooter.swift",
         "chipRest": "ButtonChipStyle.swift",
+        "chipMarked": "ButtonChipStyle.swift",
+        "iconCellMarked": "IconCellStyle.swift",
         "chipHover": "ButtonChipStyle.swift",
         "chipPressed": "ButtonChipStyle.swift",
         "chipEdge": "ShortcutsJumpBar.swift",

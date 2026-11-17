@@ -57,7 +57,6 @@ struct SettingsThemeMetricTests {
         "panelWidth": "SettingsDetailPanel.swift",
         "contentMaxWidth": "SettingsView+Detail.swift",
         "noticeFillOpacity": "WhatsNewTrailBanner.swift",
-        "chipMarkedOpacity": "ButtonChipStyle.swift",
         "highlightWashOpacity": "UpdateNotesGroups.swift",
     ]
 

@@ -87,11 +87,22 @@ struct ShortcutBaseRow: View {
         .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
+    /// `keyOff` is a warning — shortcuts on ✦ are dead — so it
+    /// wears the triangle; `noKey` stays a plain caption.
+    private var warns: Bool { captionText == ShortcutBaseWords.keyOff }
+
     private func caption(_ text: String) -> some View {
-        Text(text)
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink2)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, SettingsMetrics.shortcutTextIndent)
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if warns {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(SettingsTheme.warningInk)
+                    .accessibilityHidden(true)
+            }
+            Text(text)
+                .foregroundStyle(SettingsTheme.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.caption)
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 }

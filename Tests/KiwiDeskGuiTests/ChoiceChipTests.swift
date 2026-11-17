@@ -21,12 +21,14 @@ struct ChoiceChipTests {
             ChoiceChip.fill(selected: false, hovering: true)
                 == SettingsTheme.chipHover
         )
+        // The chosen chip is a selected segment: solid accent under
+        // the ink drawn on it, whatever the pointer does.
         #expect(
             ChoiceChip.fill(selected: true, hovering: true)
-                == SettingsTheme.accent.opacity(
-                    ChoiceChip.selectedWashOpacity
-                )
+                == SettingsTheme.accent
         )
+        #expect(ChoiceChip.ink(selected: true) == SettingsTheme.accentInk)
+        #expect(ChoiceChip.ink(selected: false) == SettingsTheme.ink)
     }
 
     /// Every choice-chip site paints through the one surface, and
@@ -100,6 +102,10 @@ struct ChoiceChipTests {
             ".onHover{hovering=isEnabled&&$0}",
             ".onChange(of:isEnabled){_,nowinif!now{hovering=false}}",
             ".animation(reduceMotion?nil:",
+            // The chosen weight, over a reserved semibold width.
+            "content.fontWeight(.semibold).hidden()",
+            "content.fontWeight(selected?.semibold:nil)",
+            ".foregroundStyle(ChoiceChip.ink(selected:selected))",
         ] {
             #expect(surface.contains(needle), Comment(rawValue: needle))
         }

@@ -141,5 +141,13 @@ struct ShortcutBaseSwitchModelTests {
             )
         )
         #expect(row.contains("spokenValue: ShortcutBaseWords.spoken("))
+        // Only the dead-shortcuts caption warns (5.0.0).
+        #expect(
+            row.contains(
+                "private var warns: Bool { captionText == "
+                    + "ShortcutBaseWords.keyOff }"
+            )
+        )
+        #expect(row.contains("if warns {"))
     }
 }

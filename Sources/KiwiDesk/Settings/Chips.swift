@@ -70,17 +70,18 @@ extension View {
 /// A choice chip's surface — one of a set, its selection the rest
 /// affordance (`ShortcutLayerChip`, `PresetChip`, #2047). A text
 /// choice is a text button chip: the chip tokens plus the
-/// constant edge, the chosen one washed with the accent instead
-/// of resting. A glyph-only one (`edged: false`) takes no edge.
+/// constant edge, the chosen one drawn like a selected segment —
+/// solid accent, `accentInk`, a semibold label over the width
+/// every chip reserves. A glyph-only one (`edged: false`) takes
+/// no edge.
 enum ChoiceChip {
-    /// The chosen chip's accent wash, in place of the rest fill.
-    static let selectedWashOpacity = 0.25
-
     static func fill(selected: Bool, hovering: Bool) -> Color {
-        if selected {
-            return SettingsTheme.accent.opacity(selectedWashOpacity)
-        }
+        if selected { return SettingsTheme.accent }
         return hovering ? SettingsTheme.chipHover : SettingsTheme.chipRest
+    }
+
+    static func ink(selected: Bool) -> Color {
+        selected ? SettingsTheme.accentInk : SettingsTheme.ink
     }
 }
 
@@ -106,32 +107,38 @@ private struct ChoiceChipSurface: ViewModifier {
     private var reduceMotion
 
     func body(content: Content) -> some View {
-        content
-            .foregroundStyle(SettingsTheme.ink)
-            .background(
-                Capsule().fill(
-                    ChoiceChip.fill(
-                        selected: selected,
-                        hovering: hovering && isEnabled
-                    )
+        // The semibold copy reserves the chosen width, so a
+        // selection never reflows the strip.
+        ZStack {
+            content.fontWeight(.semibold).hidden()
+                .accessibilityHidden(true)
+            content.fontWeight(selected ? .semibold : nil)
+        }
+        .foregroundStyle(ChoiceChip.ink(selected: selected))
+        .background(
+            Capsule().fill(
+                ChoiceChip.fill(
+                    selected: selected,
+                    hovering: hovering && isEnabled
                 )
             )
-            .overlay {
-                if edged {
-                    Capsule().strokeBorder(
-                        SettingsTheme.chipEdge,
-                        lineWidth: 1
-                    )
-                }
+        )
+        .overlay {
+            if edged {
+                Capsule().strokeBorder(
+                    SettingsTheme.chipEdge,
+                    lineWidth: 1
+                )
             }
-            .animation(
-                reduceMotion ? nil : .easeOut(duration: 0.12),
-                value: hovering
-            )
-            .onHover { hovering = isEnabled && $0 }
-            .onChange(of: isEnabled) { _, now in
-                if !now { hovering = false }
-            }
+        }
+        .animation(
+            reduceMotion ? nil : .easeOut(duration: 0.12),
+            value: hovering
+        )
+        .onHover { hovering = isEnabled && $0 }
+        .onChange(of: isEnabled) { _, now in
+            if !now { hovering = false }
+        }
     }
 }
 
