@@ -6664,11 +6664,13 @@ Dock. Plain read as the Pocket forgetting what the user did to the
 window. The slot keeps the Maximize's shape alone, beside the frame
 it files, so `Space.maximized` stays the one owner and no second
 copy rides the Pocket. The take-out maximizes on the Space it lands
-on, as a press would, with the filed frame as the return record, so
-a second press puts the window back where it came out. Where that
-Space already holds a Maximize or refuses one, it lands plain and
-says nothing: the take-out is not a press, and a refusal pill there
-would answer a question nobody asked.
+on, as a press would, with the frame it comes out at as the return
+record, so a second press puts the window back where it came out.
+Where that Space already holds a Maximize or refuses one, it lands
+plain and says nothing: the take-out is not a press, and a refusal
+pill there would answer a question nobody asked. A KiwiVision fill
+is no Maximize, so a take-out still maximizes over one, as a press
+on the float would.
 
 The frame it returns to is its own record,
 `maximizedFloatReturn`, written at the press, never `floatFrames`,

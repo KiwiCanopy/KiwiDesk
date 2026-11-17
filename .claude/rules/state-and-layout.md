@@ -1120,7 +1120,19 @@ editing here:
     the payment's own `returnFrame(_:of:)`, never the fill, and
     ends that Maximize through the verdict, adding no ender of its
     own (#3385, `PocketMaximizeTests` ▸ `putBackFilesTheReturn`,
-    `PocketMaximizeTests` ▸ `filedReturnIsConfined`). Emptying the slot is
+    `PocketMaximizeTests` ▸ `filedReturnIsConfined`). The put-back
+    files that Maximize's shape on the slot, read from the verdict
+    of the Space the window is drawn on, never from
+    `maximizedFloatReturn`, which can outlive the Maximize; the
+    take-out spends it and maximizes only through
+    `maximizeOnTakeOut`, which admits through the press's
+    `maximizeAdmits` seeded with the frame the window comes out
+    at, never the park, and lands plain beside any stored
+    Maximize, so `Space.maximized` stays the one owner (#3408,
+    `PocketTakeOutMaximizeTests` ▸ `takeOutRemaximizes`,
+    `PocketTakeOutMaximizeTests` ▸ `staleRecordIsNoFlag`,
+    `PocketTakeOutMaximizeTests` ▸ `renderSpaceMaximizeIsRead`).
+    Emptying the slot is
     `releasePocketWindow`, for a quit and an unmark alike; the unmark's filing goes through
     `fileMembership`, and it then tiles through the Tile's own
     `setFloating` unless the reason `tileRefusal` names

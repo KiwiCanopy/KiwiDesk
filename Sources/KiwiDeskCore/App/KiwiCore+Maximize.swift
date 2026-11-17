@@ -94,10 +94,13 @@ extension KiwiCore {
     }
 
     /// Maximizes `id`, just out of the pocket at `frame`, as `shape`
-    /// on the active Space `spaceID`, through a press's own gates
+    /// on the active Space `spaceID`, through a press's admission
     /// (#3408), and returns the frame it fills. Its return record is
     /// `frame`, never the park it left. Nil, recording nothing, where
-    /// that Space holds any Maximize or a press would refuse.
+    /// that Space stores any Maximize — the verdict would miss one
+    /// awaiting its window's return — or the press would refuse. The
+    /// press's Monocle and KiwiVision refusals name tiles only, and
+    /// an out pocket window is always a float.
     func maximizeOnTakeOut(
         _ id: WindowID,
         _ shape: MaximizeShape,
@@ -107,19 +110,13 @@ extension KiwiCore {
         guard spaceID == state.workspaces.activeSpace,
             let space = state.workspaces[spaceID],
             space.maximized == nil,
-            !(state.visionFilledWindow(of: space) == id
-                && state.maximizedShape(of: space)?.matches(shape) == true),
             let screen = TilingEngine.screen(for: spaceID, in: state),
             let follows = maximizeAdmits(id, on: space, returningTo: frame)
         else { return nil }
         state.workspaces.withSpace(spaceID) {
             $0.maximized = Maximize(window: id, shape: shape, follows: follows)
         }
-        return TilingEngine.maximizedBounds(
-            shape,
-            screen: tiler.visibleBounds(screen),
-            slot: frame
-        )
+        return tiler.maximizedBounds(shape, on: screen, slot: frame)
     }
 
     /// Whether a press may maximize `id` on `space`, and the follow

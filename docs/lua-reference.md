@@ -6874,9 +6874,10 @@ A pocket window out of the Pocket maximizes as any floating window
 does, and marking a maximized floating window with
 [`toggle_pocket_window`](#toggle_pocket_window) keeps it maximized.
 Put back in the Pocket while maximized, it comes out maximized again,
-on the Space it comes out on, and a second press returns it to the
-frame it had before the maximize. Where that Space already shows a
-maximized window, it comes out at that frame instead.
+in the shape it had, on the Space it comes out on, and a second press
+returns it to the frame it comes out at. Where that Space already
+holds a maximized window, or would refuse a Maximize, it comes out at
+that frame instead, with no pill.
 :::
 
 A sticky window fills the screen of the Space it is drawn on. Its
@@ -7198,6 +7199,12 @@ with [`toggle_pocket_window`](#toggle_pocket_window); each
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
   window.
+
+:::unreleased
+A window put back while maximized comes out maximized again, as
+[`toggle_maximized`](#toggle_maximized) says, so that take-out does
+resize it.
+:::
 
 While the window's app is hidden, taking it out or putting it back
 fails with `the pocket window's app is hidden or relaunching` until

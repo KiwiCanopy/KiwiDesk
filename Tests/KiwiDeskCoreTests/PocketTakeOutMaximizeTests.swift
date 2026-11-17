@@ -126,6 +126,23 @@ struct PocketTakeOutMaximizeTests {
         #expect(back.size == own.size)
     }
 
+    @Test("a take-out a press would refuse comes out plain, spent")
+    func refusedIsPlain() throws {
+        let (core, area) = try core()
+        _ = outWindow(core, area)
+        core.execute("toggle_maximized")
+        core.execute("pocket")
+        // A transient overlay takes no Maximize from a press.
+        var window = try #require(core.state.windows[one])
+        window.isTransientOverlay = true
+        core.state.windows.upsert(window)
+        core.execute("pocket")
+        #expect(core.state.pocketPhase(of: one) == .out)
+        #expect(maximize(core) == nil)
+        #expect(core.state.maximizedFloatReturn[one] == nil)
+        #expect(core.state.pocketSlot(of: one)?.returnMaximized == nil)
+    }
+
     @Test("a plain put-back comes out plain, the flag spent")
     func plainStaysPlain() throws {
         let (core, area) = try core()
