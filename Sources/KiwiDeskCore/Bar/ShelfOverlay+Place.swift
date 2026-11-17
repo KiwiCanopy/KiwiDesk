@@ -103,7 +103,7 @@ extension ShelfOverlay {
     /// cannot have entered (#3388): every one where the panel was
     /// not shown or was leaving, else one not on the strip yet or
     /// still leaving it.
-    nonisolated static func arrivals(
+    static func arrivals(
         _ sections: [Section],
         shownBefore: Bool,
         on strip: NSView,
