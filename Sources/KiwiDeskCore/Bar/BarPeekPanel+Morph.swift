@@ -263,24 +263,18 @@ extension BarPeekPanel {
         onClose()
     }
 
-    /// The keys a grown list uses.
-    enum ListKey {
-        static let escape: UInt16 = 53
-        static let down: UInt16 = 125
-        static let up: UInt16 = 126
-        static let enter: UInt16 = 36
-        static let keypadEnter: UInt16 = 76
-        static let all = [escape, down, up, enter, keypadEnter]
-    }
-
     /// A key on the grown list: Escape closes it, the arrows walk
     /// its rows, Return picks the lifted one; any other closes it.
-    func morphKey(_ code: UInt16) -> Bool {
+    /// `flags` are the press's, read by `listKey(_:_:)`.
+    func morphKey(
+        _ code: UInt16,
+        _ flags: NSEvent.ModifierFlags
+    ) -> Bool {
         guard morph != nil else { return false }
         // Closing, the panel still holds the keyboard until it lands:
         // a key then is swallowed, never a beep.
         guard drawn != nil else { return true }
-        switch code {
+        switch listKey(code, flags) {
         case ListKey.escape: onClose()
         case ListKey.down: body.stepHover(by: 1)
         case ListKey.up: body.stepHover(by: -1)

@@ -109,12 +109,12 @@ struct PocketListKeyboardTests {
         let walked = core.shelves.peek.panel
         var landings: [@MainActor () -> Void] = []
         core.shelves.peek.schedule = { _, body in landings.append(body) }
-        #expect(walked.morphKey(Self.down))
+        #expect(walked.morphKey(Self.down, []))
         core.execute("pocket.toggle_list")
         #expect(walked.leaving != nil)
         core.execute("pocket.toggle_list")
         #expect(walked.body.hovered == 0)
-        #expect(walked.morphKey(Self.down))
+        #expect(walked.morphKey(Self.down, []))
         core.execute("pocket.toggle_list")
         landings.forEach { $0() }
         #expect(walked.morph == nil)
@@ -122,7 +122,7 @@ struct PocketListKeyboardTests {
         #expect(walked.body.hovered == 0)
         // A redraw of the list keeps the row the arrows reached.
         let panel = core.shelves.peek.panel
-        #expect(panel.morphKey(Self.down))
+        #expect(panel.morphKey(Self.down, []))
         #expect(panel.body.hovered == 1)
         // A pointer leaving its row, or a press off every row, leaves
         // the row to Return; a click's list drops it (`clickDropsHover`).
@@ -154,16 +154,16 @@ struct PocketListKeyboardTests {
         var picked: [WindowID] = []
         core.shelves.peek.pick = { id, _ in picked.append(id) }
         let panel = core.shelves.peek.panel
-        #expect(panel.morphKey(Self.down))
-        #expect(panel.morphKey(Self.up))
+        #expect(panel.morphKey(Self.down, []))
+        #expect(panel.morphKey(Self.up, []))
         #expect(panel.body.hovered == 0)
-        #expect(panel.morphKey(Self.down))
-        #expect(panel.morphKey(Self.enter))
+        #expect(panel.morphKey(Self.down, []))
+        #expect(panel.morphKey(Self.enter, []))
         #expect(picked == [two])
         #expect(core.shelves.peek.shown == nil)
         core.execute("pocket.toggle_list")
         #expect(core.shelves.peek.shown != nil)
-        #expect(panel.morphKey(Self.escape))
+        #expect(panel.morphKey(Self.escape, []))
         #expect(core.shelves.peek.shown == nil)
     }
 

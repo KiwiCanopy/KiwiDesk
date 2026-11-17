@@ -126,7 +126,7 @@ struct PocketListSpeechTests {
         )
         var moved: [NSView] = []
         body.moveVoiceOver = { moved.append($0) }
-        #expect(peek.panel.morphKey(Self.down))
+        #expect(peek.panel.morphKey(Self.down, []))
         #expect(moved == [buttons[1]])
         var picked: [WindowID] = []
         peek.pick = { id, _ in picked.append(id) }

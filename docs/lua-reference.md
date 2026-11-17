@@ -8031,6 +8031,12 @@ the arrows and page keys do, unless a step key takes the combo.
 :::
 
 :::unreleased
+The combos for `"up"` and `"down"` also walk the Pocket's list
+that [`pocket.toggle_list`](#pockettoggle_list) opens, as **↑**
+and **↓** do.
+:::
+
+:::unreleased
 Four more keys name the Desktop overview's own presses:
 `"open_space"` (**⌘↓**), `"leave_space"` (**⌘↑**), `"pick_up"`
 (**⌘Return**) and `"follow"` (**⌃Return**); their combos act on

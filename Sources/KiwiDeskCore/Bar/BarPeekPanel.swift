@@ -59,6 +59,9 @@ final class BarPeekPanel {
     }
     /// The grown list's header pressed to close it (#2563).
     var onClose: @MainActor () -> Void = {}
+    /// KiwiHub's navigation alternatives: the peek's `keys`, wired
+    /// by it (#3398).
+    var keys: @MainActor () -> KiwiHubKeys = { KiwiHubKeys() }
 
     var isShown: Bool { panel?.isVisible == true && drawn != nil }
 
@@ -306,7 +309,7 @@ final class BarPeekPanel {
         panel.level = BarPanel.aboveLevel
         panel.hasShadow = true
         panel.setAccessibilityElement(false)
-        panel.onKey = { [weak self] in self?.morphKey($0) ?? false }
+        panel.onKey = { [weak self] in self?.morphKey($0, $1) ?? false }
         root.wantsLayer = true
         root.setAccessibilityElement(false)
         stage.wantsLayer = true

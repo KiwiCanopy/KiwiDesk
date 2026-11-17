@@ -44,6 +44,9 @@ final class BarPeek {
     var now: @MainActor () -> TimeInterval = {
         ProcessInfo.processInfo.systemUptime
     }
+    /// KiwiHub's navigation alternatives, which also walk the
+    /// Pocket's grown list (#3398); the core wires its app-wide set.
+    var keys: @MainActor () -> KiwiHubKeys = { KiwiHubKeys() }
     /// The pointer on screen, for the hull; both `makeTestCore`
     /// twins pin it off every screen.
     var pointerOnScreen: @MainActor () -> CGPoint = {

@@ -13,13 +13,13 @@ extension OverflowMarkClickTests {
         try rig.click()
         let panel = rig.peek.panel
         #expect(panel.panel?.canBecomeKey == true)
-        #expect(panel.morphKey(125))
+        #expect(panel.morphKey(125, []))
         #expect(panel.body.hovered == 0)
-        #expect(panel.morphKey(125))
+        #expect(panel.morphKey(125, []))
         #expect(panel.body.hovered == 1)
-        #expect(panel.morphKey(126))
+        #expect(panel.morphKey(126, []))
         #expect(panel.body.hovered == 0)
-        #expect(panel.morphKey(53))
+        #expect(panel.morphKey(53, []))
         #expect(rig.peek.shown == nil)
     }
 
@@ -48,7 +48,7 @@ extension OverflowMarkClickTests {
         let rig = Rig()
         defer { rig.close() }
         try rig.click()
-        #expect(rig.peek.panel.morphKey(0))
+        #expect(rig.peek.panel.morphKey(0, []))
         #expect(rig.peek.shown == nil)
     }
 
