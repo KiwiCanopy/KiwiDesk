@@ -176,10 +176,13 @@ extension AppBarOverlay {
         thickness: CGFloat
     ) -> CGFloat {
         let depth = style.contentDepth(forDepth: thickness)
+        // Vertical circle slots take no end inset (#1763); the room
+        // past the icon is the half-moon's reserve, mirrored (#3387).
+        guard horizontal else {
+            return AppBarHalfMoon.verticalSlot(contentDepth: depth)
+        }
         // Every item reserves the half-moon's slot (#2234).
         let moon = AppBarHalfMoon.reserve(contentDepth: depth)
-        // Vertical circle slots take no end inset (#1763).
-        guard horizontal else { return depth + moon }
         let pad = AppBarItemView.contentPadding
         let iconSide = max(depth - pad * 2, 0)
         let title = titleSlot(style, thickness: thickness)
