@@ -128,7 +128,10 @@ struct AppRuleScopeCellTests {
         // The builder the render below measures, with no style of
         // the row's own on top that the render would not see.
         #expect(menu.contains("AppRuleScopeFit.menu(scopeLabel){"))
-        for style in ["Menu{", ".menuStyle(", ".fixedSize(", ".font("] {
+        for style in [
+            "Menu{", ".menuStyle(", ".fixedSize(", ".font(",
+            ".menuTriggerHover(", ".padding(",
+        ] {
             #expect(!menu.contains(style), "scopeMenu restyles: \(style)")
         }
         let file = Self.squashed(try raw())

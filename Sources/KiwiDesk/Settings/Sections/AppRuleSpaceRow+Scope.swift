@@ -99,7 +99,6 @@ extension AppRuleSpaceRow {
             }
             Button(AppRuleScopeWords.addTitled) { open(false) }
         }
-        .menuTriggerHover()
         .help(row.fragment ?? "")
         .accessibilityLabel(AppRuleScopeWords.menuName)
         .accessibilityValue(scopeLabel)

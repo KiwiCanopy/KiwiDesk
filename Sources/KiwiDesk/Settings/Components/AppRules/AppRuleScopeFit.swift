@@ -61,6 +61,7 @@ enum AppRuleScopeFit {
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
         .fixedSize()
+        .menuTriggerHover()
     }
 
     private static func measure(_ text: String, _ font: NSFont) -> CGFloat {
