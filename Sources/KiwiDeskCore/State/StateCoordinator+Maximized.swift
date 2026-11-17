@@ -52,13 +52,13 @@ extension StateCoordinator {
 
     /// Whether a press may maximize `id` as a float of `space`, read
     /// without writing (#3036): an effective float drawn there,
-    /// never native full screen, a transient overlay or a window
-    /// in the pocket. An out pocket window maximizes as any float;
-    /// putting it back ends the Maximize (#3385).
+    /// never native full screen or a transient overlay. A window in
+    /// the pocket is drawn nowhere, so it has no render Space
+    /// (`pocketWindow`); an out pocket window maximizes as any
+    /// float (#3385).
     func mayMaximizeAsFloat(_ id: WindowID, on space: Space) -> Bool {
         guard let window = windows[id],
             !window.isFullscreen, !window.isTransientOverlay,
-            pocketPhase(of: id) != .pocketed,
             renderSpace(of: window) == space.id
         else { return false }
         return EffectiveFloat.applies(

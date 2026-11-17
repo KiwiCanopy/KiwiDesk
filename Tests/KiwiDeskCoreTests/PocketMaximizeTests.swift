@@ -152,6 +152,27 @@ struct PocketMaximizeTests {
         #expect(filed.size == own.size)
     }
 
+    @Test("a return frame off the screen is filed confined to it")
+    func filedReturnIsConfined() throws {
+        let (core, area) = try core()
+        _ = outWindow(core, area)
+        // A return record reaching past the screen's right edge.
+        let out = CGRect(
+            x: area.maxX - 100,
+            y: area.minY + 40,
+            width: 500,
+            height: 300
+        )
+        core.state.maximizedFloatReturn[one] = .init(
+            pid: 900_001,
+            frame: out
+        )
+        core.execute("pocket")
+        let filed = try #require(core.state.pocket.first?.frames.values.first)
+        #expect(filed.size == out.size)
+        #expect(area.contains(filed))
+    }
+
     @Test("marking a maximized float keeps its Maximize")
     func markKeepsTheMaximize() throws {
         let (core, area) = try core()

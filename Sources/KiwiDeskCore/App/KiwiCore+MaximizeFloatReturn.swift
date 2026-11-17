@@ -23,14 +23,13 @@ extension KiwiCore {
                 continue
             }
             state.maximizedFloatReturn[id] = nil
-            guard window.pid == saved.pid,
+            guard let target = returnFrame(saved, of: window),
                 // In the pocket its frames are the pocket's; out, it
                 // goes back as any float (#3385).
                 state.pocketPhase(of: id) != .pocketed,
                 isEffectiveFloatForPlacement(id)
             else { continue }
             tiler.forgetSizeBound(id)
-            let target = returnFrame(saved.frame, of: id)
             paid[id] = target
             if placementIsSeed(id) {
                 tiler.seedStash(id, frame: target)
@@ -48,11 +47,24 @@ extension KiwiCore {
         return paid
     }
 
+    /// The frame `saved` puts `window` back at: its record confined
+    /// as below, or nil for a record another process left under
+    /// this id. The payment and the pocket's put-back both read it
+    /// (#3385), so the two never disagree on where a Maximize
+    /// returns to.
+    func returnFrame(
+        _ saved: StateCoordinator.FloatFrame,
+        of window: ManagedWindow
+    ) -> CGRect? {
+        saved.pid == window.pid
+            ? returnFrame(saved.frame, of: window.id) : nil
+    }
+
     /// `frame` confined to the float region of the Space `id` is
     /// drawn on, as a remembered float frame is (#1675), and centred
     /// there first where it lies on another screen: the window or
     /// its Space moved screens while it filled one.
-    func returnFrame(_ frame: CGRect, of id: WindowID) -> CGRect {
+    private func returnFrame(_ frame: CGRect, of id: WindowID) -> CGRect {
         guard let space = floatPlacementSpace(of: id),
             let region = floatGrowBounds(on: space)
         else { return frame }

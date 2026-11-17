@@ -231,7 +231,7 @@ extension KiwiCore {
         // Confined as the payment would place it, so it files under
         // the screen it goes back on.
         let returns = state.maximizedFloatReturn[id].flatMap {
-            $0.pid == window.pid ? returnFrame($0.frame, of: id) : nil
+            returnFrame($0, of: window)
         }
         let dropped = pocketPlate.dropStart.flatMap {
             $0.window == id ? $0.frame : nil
