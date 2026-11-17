@@ -24,7 +24,9 @@ extension KiwiCore {
             }
             state.maximizedFloatReturn[id] = nil
             guard window.pid == saved.pid,
-                state.pocketSlot(of: id) == nil,
+                // In the pocket its frames are the pocket's; out, it
+                // goes back as any float (#3385).
+                state.pocketPhase(of: id) != .pocketed,
                 isEffectiveFloatForPlacement(id)
             else { continue }
             tiler.forgetSizeBound(id)

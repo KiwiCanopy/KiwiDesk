@@ -6867,6 +6867,13 @@ window and the Pocket window. A floating window takes an axis too,
 and `"in_place"` centres it on the frame it had.
 :::
 
+:::unreleased
+A pocket window out of the Pocket maximizes as any floating window
+does; one in the Pocket fails. Putting it back in the Pocket puts it
+back first, and it comes out at the frame it had before the
+maximize.
+:::
+
 A sticky window fills the screen of the Space it is drawn on. Its
 maximize ends when you leave that Space, and it does not come back
 when you return. KiwiDesk's own restart ends it too while the
