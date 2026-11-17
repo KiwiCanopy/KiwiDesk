@@ -129,6 +129,9 @@ struct ConfigMigrationTests {
         // A v0.9.7 profile predates the shared look, so it arrives
         // wearing its own (#1752).
         original.look = .own
+        // Its default colours wear the default palette, so the
+        // handle stamp (#3409) paints its accent.
+        original.settings.wearBundledPaint()
         #expect(profile == original)
         #expect(
             !String(decoding: migrated, as: UTF8.self)

@@ -18611,9 +18611,17 @@ reader. The first-run starter paints it the same way, so a first
 run still wears Glass and the default palette whole (#1739). The
 costs are the pocket's — under a bundled palette the handle no
 longer follows light and dark — and two more: a palette switch
-overwrites a handle colour the user picked, and a config that
-never stored the key (an upgrade, a Lua-owned config) reads as
-wearing no bundled palette until one is picked.
+overwrites a handle colour the user picked, and an `init.lua`
+that paints a bundled palette's colours but not the handle reads
+as wearing none until one is picked. A stored file that never
+had the key crosses once instead
+([#3409](https://github.com/KiwiCanopy/KiwiDesk/issues/3409),
+`migratingHandleStamp`): a colour set matching a bundled palette
+in every key but an Automatic handle takes that palette's handle,
+in a profile, the shared look, a saved look and a backup's
+copies, while a set that differs elsewhere stays custom and a
+palette library is never touched. The palettes it matches are
+frozen as 5.0 shipped them, so a later retune moves no file.
 `ShelfHandleColorTests` ▸ `bundledHandleClearsTheHairline` holds
 every bundled handle clear of the luma pivot where the hairline
 flips tone; the drawn composite is not gated, since a light core

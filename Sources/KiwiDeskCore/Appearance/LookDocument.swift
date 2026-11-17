@@ -10,8 +10,10 @@ struct LookDocument: Codable {
     /// `on_expand` / `expand_duration` (owner ruling, 2026-10-21), 3
     /// since the drag markers' palette paths retired (#2797), 4
     /// since a 0 reveal or expand duration is its toggle off (#3236),
-    /// 5 since a look carries no animation length (#3237).
-    static let currentFormat = 5
+    /// 5 since a look carries no animation length (#3237), 6 since
+    /// a look wearing a bundled palette with an Automatic handle
+    /// takes that palette's handle colour (#3409).
+    static let currentFormat = 6
 
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()

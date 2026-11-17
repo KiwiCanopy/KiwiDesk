@@ -256,8 +256,8 @@ struct ConfigMigrationWiringTests {
         #expect(!migrated.contains("0.40000000000000002"))
         #expect(!migrated.contains("icon_and_name"))
 
-        // The content lines are gone; of the rest exactly two
-        // change: the stamp and the lifted track limit.
+        // The content lines are gone; of the rest exactly three
+        // change: the stamp, the lifted track limit and the handle.
         let before = old.split(
             separator: "\n",
             omittingEmptySubsequences: false
@@ -272,10 +272,20 @@ struct ConfigMigrationWiringTests {
         .filter { $0 != #"  "look" : "own","# }
         #expect(before.count == after.count)
         let changed = zip(before, after).filter { $0 != $1 }
-        #expect(changed.count == 2)
+        // Three, counting the handle the default palette paints
+        // (#3409), written in place over its Automatic `""`.
+        #expect(changed.count == 3)
         #expect(
             changed.contains {
                 $0.1.contains("\"limit\" : \(TrackParams().limit)")
+            }
+        )
+        #expect(
+            changed.contains {
+                $0.1.contains(
+                    "\"handle_color\" : "
+                        + "\"\(TilingSettings().kiwishelf.activeItemColor)\""
+                )
             }
         )
         #expect(

@@ -113,5 +113,9 @@ extension GuiConfig {
     /// scroll-gesture base turns on, the new default
     /// (`migratingLongSwipesOn`); and the point `step_distance`
     /// leaves for the mm `step_length` (`migratingStepDistanceOut`).
-    public static let currentFormat = 27
+    ///
+    /// **28 (#3409)**: a shared look wearing a bundled palette with
+    /// an Automatic handle takes that palette's handle colour
+    /// (`migratingHandleStamp`).
+    public static let currentFormat = 28
 }

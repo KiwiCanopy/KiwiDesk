@@ -51,10 +51,13 @@ extension Profile {
     /// own look carries no animation length (#3237), 39 the
     /// `gesture` map may hold the four-finger pinch and spread
     /// slots, with no step (#1873), 40 its scroll-gesture override
-    /// loses the point `step_distance` (`migratingStepDistanceOut`).
+    /// loses the point `step_distance` (`migratingStepDistanceOut`),
+    /// 41 settings wearing a bundled palette with an Automatic
+    /// handle take that palette's handle colour (#3409,
+    /// `migratingHandleStamp`).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 40
+    public static let currentFormat = 41
 }

@@ -64,6 +64,7 @@ public enum ConfigMigration {
         migratingAbsentSlideAndFade,
         migratingLongSwipesOn,
         migratingStepDistanceOut,
+        migratingHandleStamp,
     ]
 
     /// Runs after `steps`, and is skipped by

@@ -120,7 +120,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 51 = a stored `long_swipes: false` in a bundle's `config`
     /// turns on (#1873); a profile's override keeps its own; and
     /// every `scroll_gesture` group loses the point `step_distance`.
-    public static let currentFormat = 51
+    /// 52 = a colour set wearing a bundled palette with an Automatic
+    /// handle takes that palette's handle colour (#3409), in its
+    /// `config`'s shared look, its `[Profile]` and its looks.
+    public static let currentFormat = 52
 
     public let format: Int
 

@@ -370,6 +370,10 @@ twice, was a question the user answered twice. The argument is
   source it paints the handle from clears the core-vs-hairline
   lightness floor measured through `ColorVision`
   (`ShelfHandleColorTests` ▸ `bundledHandleClearsTheHairline`).
+  A new entry owes stored files the crossing #3409 gave the
+  handle, a step of its own with its own frozen palettes, or every
+  upgraded set wearing a bundled palette reads as custom
+  (`HandleStampMigrationTests`).
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one
