@@ -79,12 +79,7 @@ extension AppRulesSection {
     private func deleteSpace(_ row: SpaceRuleRow, _ removal: RuleRemoval) {
         let keys = spaceGroups.flatMap { $0 }.map(\.key)
         let neighbour = DeletionFocus.neighbour(after: row.key, in: keys)
-        if row.fragment == nil {
-            model.recordRemoval(.space, row.app, removal)
-        } else {
-            model.recordRemoval(.titledSpace, row.key, removal)
-        }
-        SpaceRuleEdit.drop(row, from: &model.config)
+        model.removeSpaceRule(row, removal)
         returningSpaceRow = neighbour
     }
 

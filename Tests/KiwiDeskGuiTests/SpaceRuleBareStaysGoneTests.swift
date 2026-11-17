@@ -5,9 +5,11 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A bare Space row the user removed stays removed when a titled
-/// rule is added from a titled row (#3415): the owner's sequence on
-/// the live page, through the section's own writes, Save
-/// (`updateActiveProfile`) and a reload.
+/// rule is added from a titled row (#3415): the owner's sequence,
+/// through the writes the trash and Add Rule… call
+/// (`SettingsModel.removeSpaceRule`, `SpaceRuleEdit.addTitled`
+/// beside a row), Save and a reload. Main-actor spend: a test core
+/// and model per case, two profiles and `gui.json` written, re-read.
 @Suite("A removed bare Space row stays gone (#3415)", .serialized)
 @MainActor
 struct SpaceRuleBareStaysGoneTests {
@@ -49,22 +51,19 @@ struct SpaceRuleBareStaysGoneTests {
         )
     }
 
-    /// The trash on the bare row, then Add Rule… on the titled row:
-    /// the section's `deleteSpace` and the scope cell's commit.
+    /// The trash on the bare row, then Add Rule… on the titled row,
+    /// through the writes the section and the scope cell call.
     private func removeBareThenAdd(
         _ model: SettingsModel,
         _ removal: RuleRemoval
     ) throws {
-        model.recordRemoval(.space, app, removal)
-        SpaceRuleEdit.drop(bare, from: &model.config)
-        let space = try #require(
-            SpaceRuleRows.space(of: work, in: model.config)
-        )
-        SpaceRuleEdit.addTitled(
-            "Job",
-            for: app,
-            in: space,
-            config: &model.config
+        model.removeSpaceRule(bare, removal)
+        #expect(
+            SpaceRuleEdit.addTitled(
+                "Job",
+                beside: work,
+                config: &model.config
+            )
         )
     }
 

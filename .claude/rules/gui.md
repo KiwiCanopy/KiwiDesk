@@ -2583,6 +2583,14 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   `guard-prover` round forged) and derives the flag count from
   the `NSMenu()` count, so a nested menu there that skipped it
   reds.
+- **A borderless `Menu`'s title must fit before AppKit draws it.**
+  AppKit draws that title itself, in the control font, and ignores
+  a SwiftUI `.frame`, `.truncationMode` or `.font` on the label
+  (rendered 2026-11-17, #3415). A title that must fit a width
+  arrives pre-fitted, measured in the drawn font, as the App Rules
+  scope cell's does (`AppRuleScopeFit`; `AppRuleScopeCellTests` ▸
+  `measuresTheDrawnFont`); a truncation modifier on such a label
+  is dead code.
 - **Modifiers on a bare `ForEach` apply PER CHILD, never to the
   run.** A container that hands a `ForEach` straight to its
   chrome (a background well, padding, a border) stamps that

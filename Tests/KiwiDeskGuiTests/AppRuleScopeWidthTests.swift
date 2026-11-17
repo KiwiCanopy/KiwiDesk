@@ -7,9 +7,10 @@ import Testing
 
 /// A bare Space row's scope fits its cell whole in every catalog
 /// (#3415): the cell is one fixed width so the Space and "Applies
-/// to" columns line up, and only a titled row's pattern may
-/// truncate. Measured in the row's own font (`.callout`) against
-/// `SettingsMetrics.appRuleScopeLabel`.
+/// to" columns line up, and only a titled row's pattern may be cut.
+/// Measured in the font AppKit draws the title in
+/// (`AppRuleScopeFit.font`) against `SettingsMetrics.appRuleScopeLabel`.
+/// Main-actor spend: two string measurements per catalog.
 @Suite("Bare scopes fit the scope cell in every locale (#3415)", .serialized)
 @MainActor
 struct AppRuleScopeWidthTests {

@@ -55,6 +55,13 @@ extension AppRuleSpaceRow {
                 )
                 .settingsPopoverChrome()
             }
+            // One width for every row, so the Space and "Applies to"
+            // columns line up across an app's rows (#3415); outside
+            // the popover, whose arrow stays on the menu.
+            .frame(
+                width: SettingsMetrics.appRuleScopeColumn,
+                alignment: .leading
+            )
     }
 
     /// The section's composer, shown only off the row it names.
@@ -102,12 +109,6 @@ extension AppRuleSpaceRow {
         .fixedSize()
         .menuTriggerHover()
         .help(row.fragment ?? "")
-        // One width for every row, so the Space and "Applies to"
-        // columns line up across an app's rows (#3415).
-        .frame(
-            width: SettingsMetrics.appRuleScopeColumn,
-            alignment: .leading
-        )
         .accessibilityLabel(AppRuleScopeWords.menuName)
         .accessibilityValue(scopeLabel)
     }
@@ -115,7 +116,7 @@ extension AppRuleSpaceRow {
     /// The drawn and spoken scope, one expression.
     var scopeLabel: String {
         guard let fragment = row.fragment else {
-            return AppRuleScopeWords.bare(besideOthers: !siblings.isEmpty)
+            return AppRuleScopeWords.bare(besideOthers: othersBeside)
         }
         return AppRuleScopeWords.titled(fragment)
     }
@@ -123,10 +124,11 @@ extension AppRuleSpaceRow {
     /// The bare row a titled row's scope item would make: "All
     /// other windows" while the app keeps other rows (#3415).
     var becomesLabel: String {
-        AppRuleScopeWords.bare(
-            besideOthers: hasBare
-                || siblings.contains { $0 != row.fragment }
-        )
+        AppRuleScopeWords.bare(besideOthers: othersBeside)
+    }
+
+    private var othersBeside: Bool {
+        SpaceRuleRows.othersBeside(row, in: model.config)
     }
 
     private var hasBare: Bool { model.config.appRules[row.app] != nil }
@@ -164,14 +166,12 @@ extension AppRuleSpaceRow {
             }
         } else {
             guard
-                let space = SpaceRuleRows.space(of: row, in: model.config)
+                SpaceRuleEdit.addTitled(
+                    fragment,
+                    beside: row,
+                    config: &model.config
+                )
             else { return }
-            SpaceRuleEdit.addTitled(
-                fragment,
-                for: row.app,
-                in: space,
-                config: &model.config
-            )
         }
         returningRow = SpaceRuleRow(app: row.app, fragment: fragment).key
     }

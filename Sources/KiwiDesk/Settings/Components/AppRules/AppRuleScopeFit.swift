@@ -1,13 +1,16 @@
 import AppKit
 
 /// A scope label cut in its middle to fit the scope cell (#3415).
-/// A `Menu` label's title is drawn by AppKit, which ignores a
-/// SwiftUI frame or truncation mode on it, so the string arrives
-/// already fitted. Main-actor: it measures with AppKit's fonts.
+/// A borderless `Menu`'s title is drawn by AppKit, which ignores a
+/// SwiftUI frame, truncation mode and font on it, so the string
+/// arrives already fitted. Main-actor: it measures with AppKit.
 @MainActor
 enum AppRuleScopeFit {
-    /// The row's own text style, which the label is drawn in.
-    static var font: NSFont { NSFont.preferredFont(forTextStyle: .callout) }
+    /// The font AppKit draws the menu's title in: the control's,
+    /// whatever the row's SwiftUI font (`AppRuleScopeCellTests`).
+    static var font: NSFont {
+        NSFont.systemFont(ofSize: NSFont.systemFontSize)
+    }
 
     /// `text` whole when it fits `width`, else its head and tail
     /// around "…", the longest such cut that fits.

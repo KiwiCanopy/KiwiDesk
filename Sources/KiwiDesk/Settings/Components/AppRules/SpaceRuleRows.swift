@@ -40,6 +40,16 @@ enum SpaceRuleRows {
         )
     }
 
+    /// Whether `row`'s app has rows besides it (#3415): what makes a
+    /// bare row, or the bare row a titled one would become, "All
+    /// other windows".
+    static func othersBeside(
+        _ row: SpaceRuleRow,
+        in config: GuiConfig
+    ) -> Bool {
+        groups(config, apps: [row.app]).joined().contains { $0 != row }
+    }
+
     /// The Space `row` opens its windows in.
     static func space(of row: SpaceRuleRow, in config: GuiConfig) -> SpaceID? {
         guard row.fragment != nil else { return config.appRules[row.app] }
@@ -75,6 +85,21 @@ enum SpaceRuleEdit {
     ) {
         let row = SpaceRuleRow(app: app, fragment: fragment)
         config.titledAppRules[row.key] = space
+    }
+
+    /// Add Rule… off `row`: a titled rule in `row`'s Space, which
+    /// the new row's own menu then moves. False when `row` has no
+    /// Space to give it.
+    @discardableResult
+    static func addTitled(
+        _ fragment: String,
+        beside row: SpaceRuleRow,
+        config: inout GuiConfig
+    ) -> Bool {
+        guard let space = SpaceRuleRows.space(of: row, in: config)
+        else { return false }
+        addTitled(fragment, for: row.app, in: space, config: &config)
+        return true
     }
 
     /// A titled row turned to every window: it becomes the bare row,
