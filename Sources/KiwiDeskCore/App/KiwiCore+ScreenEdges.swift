@@ -71,13 +71,6 @@ extension KiwiCore {
         } ?? []
     }
 
-    /// Whether `display`'s Pocket comes in with a bar revealed over
-    /// its maximized window (#3346 ▸ 8).
-    func maximizedPocketRides(on display: DisplayID) -> Bool {
-        maximizedStored(on: display)?.settings.maximizedPocketRides
-            == true
-    }
-
     /// The stored settings and layout of a screen showing a
     /// maximized window, nil elsewhere and where the tiling-off tick
     /// hides the bars, which asks for Hidden.

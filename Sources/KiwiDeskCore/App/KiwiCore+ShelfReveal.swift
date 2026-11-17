@@ -100,17 +100,10 @@ extension KiwiCore {
                     plan.segment(placed.needs[bar].map(slot.drawing) ?? slot)
                 }
             }
-            // The pocket's slot holds the bar beside it, never one a
-            // sibling's strip lies between (#2678): its section
-            // spans the pocket too.
-            let pocketBar = Self.pocketBar(of: placed.arrangement)
+            // A shown bar is held over its own run alone: the pocket
+            // keeps its own approach (#3432).
             let section = { (bar: ShelfBar) -> CGRect? in
-                run(bar).map { run in
-                    guard bar == pocketBar,
-                        let pocket = placed.arrangement.pocket
-                    else { return flip(run) }
-                    return flip(run.union(plan.segment(pocket)))
-                }
+                run(bar).map(flip)
             }
             // The handle draws the shelf as rendered: Reduce
             // transparency makes its fill opaque (#1374).
@@ -127,10 +120,10 @@ extension KiwiCore {
                     section: section(bar)
                 )
             }
-            // The pocket's handle stands where the shown pocket does
-            // (#2678).
+            // The pocket's handle rests in its slot beside the bars'
+            // handles, whatever a reveal draws (#2678, #3432).
             if plan.carriesPocket, !handled.isEmpty,
-                let pocket = plan.arrangement.pocket
+                let pocket = placed.arrangement.pocket
             {
                 let band = ShelfMarkPlacement.pocketBand(
                     slot: pocket.offset...(pocket.offset + pocket.length),

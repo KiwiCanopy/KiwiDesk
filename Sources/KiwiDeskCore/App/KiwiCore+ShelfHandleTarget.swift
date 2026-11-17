@@ -19,25 +19,6 @@ extension KiwiCore.HidingShelves {
         }
     }
 
-    /// The bar the pocket's slot sits beside (#2678): the nearer of
-    /// the two by slot middle.
-    static func pocketBar(of arrangement: ShelfArrangement) -> ShelfBar? {
-        guard let pocket = arrangement.pocket else { return nil }
-        var nearest = CGFloat.greatestFiniteMagnitude
-        var bar: ShelfBar?
-        for candidate in [ShelfBar.space, .app] {
-            let slot =
-                candidate == .space ? arrangement.space : arrangement.app
-            guard let slot else { continue }
-            let distance = abs(slot.offset + slot.length / 2 - pocket.offset)
-            if distance < nearest {
-                nearest = distance
-                bar = candidate
-            }
-        }
-        return bar
-    }
-
     /// The revealer's target for `spec`'s handle, its area's
     /// screen side at AX `side` (`side(of:edge:shelf:)`, the one
     /// the handle's frame took): an approach from

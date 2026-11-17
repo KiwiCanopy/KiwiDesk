@@ -12,8 +12,8 @@ struct LayoutDefaultsGates {
         case rigidGrid
         case autoSizedGrid
         case autoTracks
-        /// Every bar and the Pocket are Hidden, so the maximized
-        /// edge reveal brings nothing in (#3346 ▸ 9).
+        /// Every bar is Hidden, so the maximized edge reveal brings
+        /// nothing in (#3346 ▸ 9).
         case nothingRevealsMaximized
     }
 
@@ -130,7 +130,7 @@ enum LayoutDefaultsGateHelp {
     static var nothingRevealsMaximized: String {
         L(
             "layout_defaults.maximize.show_bars.nothing_shows",
-            "Works when the Space Bar, an App Bar or the Pocket is "
+            "Works when the Space Bar or an App Bar is "
                 + "set to \u{201C}%1$@\u{201D} or \u{201C}%2$@\u{201D} "
                 + "in %3$@.",
             L("bar.visibility.always", "Always"),

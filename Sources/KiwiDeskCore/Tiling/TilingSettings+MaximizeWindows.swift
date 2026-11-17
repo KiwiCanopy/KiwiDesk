@@ -45,21 +45,14 @@ extension TilingSettings {
     }
 
     /// Whether `maximized_visibility` could reveal anything (#3346 ▸
-    /// 9): the Space Bar, some layout's App Bar or the Pocket is
-    /// stored to show unprompted. What Settings asks to grey its row.
+    /// 9): the Space Bar or some layout's App Bar is stored to show
+    /// unprompted; a reveal never brings the Pocket (#3432). What
+    /// Settings asks to grey its row.
     public var maximizedRevealsAnything: Bool {
         spaceBarStyle.visibility.showsUnprompted
-            || kiwishelf.pocketVisibility.showsUnprompted
             || LayoutMode.allCases.contains {
                 appBarVisibility(in: $0)?.showsUnprompted == true
             }
-    }
-
-    /// Whether the Pocket comes in with a revealed bar over a
-    /// maximized window (#3346 ▸ 8): Auto, and its stored Show is not
-    /// Hidden. It never rests there.
-    public var maximizedPocketRides: Bool {
-        maximizedRevealLive && kiwishelf.pocketVisibility.showsUnprompted
     }
 
     /// These settings with every bar and the Pocket set to Hidden in

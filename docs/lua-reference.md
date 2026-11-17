@@ -3530,11 +3530,16 @@ Under `"hidden"`
 the pocket stands at the position on every edge. Otherwise, on an
 edge where a bar shows, it takes the shelf's nearer end instead — its
 start below `50`, its end from `50` — outside the bars' items, so it
-stays put while they scroll; on an edge where an `"auto"` bar rests
-hidden, its handle, or under `"always"` its whole mark, stands where
-the pocket shows once the bar comes in; on
+stays put while they scroll; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
+
+:::unreleased
+On an edge where an `"auto"` bar rests hidden, the pocket's handle,
+or under `"always"` its whole mark, stands in its own slot beside the
+bar's handle, and stays there while the bar comes in and goes. A bar
+coming in never brings the pocket with it.
+:::
 
 **Example:**
 
@@ -3664,14 +3669,12 @@ shortcut shows it over the window.
 - `"hidden"` leaves only the shortcuts.
 
 A bar set to `"hidden"` stays hidden under `"auto"` as well, while a
-bar set to `"always"` comes in like an `"auto"` one. Under `"auto"` a
-bar brought in on the pocket's edge brings the pocket in with it,
-unless
-[`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
-is `"hidden"`; the pocket keys work under either value. Settings ▸
-Layout Defaults ▸ Maximize writes it as **Show bars at the screen
-edge**, greyed while the Space Bar, every App Bar and the pocket are
-`"hidden"`. A look never carries it.
+bar set to `"always"` comes in like an `"auto"` one. A bar comes in
+alone: the pocket stays away from the window, and its keys, its list
+and a window drag reach it under either value. Settings ▸ Layout
+Defaults ▸ Maximize writes it as **Show bars at the screen edge**,
+greyed while the Space Bar and every App Bar are `"hidden"`. A look
+never carries it.
 
 **Example:**
 

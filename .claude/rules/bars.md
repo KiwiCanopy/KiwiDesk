@@ -537,14 +537,13 @@ twice, was a question the user answered twice. The argument is
   filing alone — never to `layoutBounds`, so a maximize never comes
   out of the bar reading as `.auto`, which a layout would read. A
   stored Hidden bar gets no handle, and the tiling-off tick
-  wins over it (`MaximizedBarsTests`). **Let the Pocket ride a
-  revealed bar there only through `KiwiCore.maximizedPocketRides(on:)`**,
-  filed by the bar pass as `PocketPlateOverlay.riding`, which
-  `pocketStands(on:)` reads beside its rest — never a rest of its
-  own over the window; a reader of whether the Pocket stands there
-  takes `pocketStands(on:)` or the pass's slots, never
-  `pocketRests(on:)` alone (`FullscreenStandDownTests` ▸
-  `maximizePocketRides`, `MaximizedBarsTests` ▸ `pocketRides`).
+  wins over it (`MaximizedBarsTests`). **A bar revealed over a
+  maximized window comes in alone** (#3432, retiring #3346 ▸ 8):
+  the Pocket stands there only by its key, its list, a drag or a
+  play, and a reader of whether it stands takes `pocketStands(on:)`
+  or the pass's slots, never `pocketRests(on:)` alone
+  (`FullscreenStandDownTests` ▸ `maximizeRevealLeavesThePocket`;
+  `MaximizedBarsTests` ▸ `revealsAnything`, which counts no Pocket).
   **A maximizing Monocle (#2976) is no stand-down**: a bar's
   VISIBILITY answered for a mode is read through the one
   `TilingSettings.barVisibilities(in:)`, which reads both bars Hidden
@@ -990,12 +989,22 @@ Obligations:
   `content` alone beside them; the pocket's room opens for the
   motion it resolves to (`openPocketRoom`) and settles with the
   shelf's (`ShelfPocketPanelTests`).
-- **Its panel is the shelf's for every hold and reading**: the
-  reveal target's held section takes the pocket's slot
-  (`KiwiCore+ShelfReveal`), `ShelfManager.surfaceHolds` and the
-  peek's shelf read both panels, and a shelf leaving closes a peek
-  on either (`PocketShelfWiringTests` ▸ `barPassMountsThePocket`
-  holds the shelf reading; the hold and the close are review's).
+- **Its panel is the shelf's for every hold and reading**:
+  `ShelfManager.surfaceHolds` and the peek's shelf read both panels,
+  and a shelf leaving closes a peek on either
+  (`PocketShelfWiringTests` ▸ `barPassMountsThePocket` holds the
+  shelf reading; the hold and the close are review's).
+- **A reveal never brings the pocket** (#3432): on an edge that
+  draws nothing at rest, the revealed plan's arrangement drops the
+  pocket's slot (`ShelfPlan.arrangement`, by the one
+  `ShelfEdge.drawsNothingAtRest`) while the resting arrangement keeps
+  it, so the handle rests in its slot band (`pocketBands`) and a
+  reveal or retract leaves its place and its approach alone; a
+  revealed bar's held section is its own run (`KiwiCore+ShelfReveal`).
+  `pocketPlace(on:)` reads this pass's slots: the bar pass files them
+  before `filePocketApproaches` (`PocketHandleBesideRevealTests`).
+  Where a Hidden bar shares the pocket's edge, the handle rests at
+  Position and a reveal of that bar may run over it, unruled.
 - **Every `ShelfArrangement.arrange` caller states its pocket** —
   the bars-alone placement is reached only through it — so the
   Settings preview places the bars where the engine does

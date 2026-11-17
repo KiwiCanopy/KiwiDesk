@@ -23,9 +23,8 @@ extension KiwiCore {
             )
         /// The bars drawn this pass, each in its resting slot.
         let drawn: Set<ShelfBar>
-        /// Whether the pocket stands on this edge this pass — the
-        /// one answer its slot, its Auto mark band and the reveal
-        /// target read (#2678).
+        /// Whether the pocket stands on this edge this pass, which
+        /// files its handle's band (#2678).
         var carriesPocket = false
 
         /// A plan over `arrangement`, the resting bars', drawing
@@ -56,9 +55,13 @@ extension KiwiCore {
             self.carriesPocket = carriesPocket
         }
 
-        /// The drawn bars' slots of the resting arrangement.
+        /// The drawn bars' slots of the resting arrangement. A reveal
+        /// onto an edge that draws nothing at rest brings the bar
+        /// alone: the pocket keeps its handle in its slot (#3432).
         var arrangement: ShelfArrangement {
-            resting.arrangement.keeping(drawn)
+            var kept = resting.arrangement.keeping(drawn)
+            if shelfEdge.drawsNothingAtRest { kept.pocket = nil }
+            return kept
         }
         /// Each drawn bar's natural run length, which its slot
         /// draws in (`ShelfArrangement.Slot.drawing`).

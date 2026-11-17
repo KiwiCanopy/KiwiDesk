@@ -33,8 +33,7 @@ extension KiwiCore {
     /// draws and where a play lands both read (#2678 review 5).
     func pocketStands(on display: DisplayID) -> Bool {
         Self.pocketStands(
-            rests: pocketRests(on: display)
-                || pocketPlate.riding.contains(display),
+            rests: pocketRests(on: display),
             dragging: pocketPlate.dragging != nil,
             playing: !pocketPlate.playing.isEmpty,
             listing: pocketListedDisplay == display
