@@ -39,11 +39,10 @@ enum PocketRiseTimeline {
         return min(max(share, 0), 1)
     }
 
-    /// How long a WHOLE rise on `fill` takes: the fast pace for a
-    /// fill no longer than the reveal delay — an entry on the tab, or
-    /// a hurry — else `span` (#3383).
-    static func pace(of fill: ShelfHandleSpec.Fill) -> TimeInterval {
-        fill.length > ShelfReveal.revealDelay ? span : fastSpan
+    /// How long a WHOLE rise takes: the fast pace while the pointer
+    /// is on the tab, else `span` (#3383).
+    static func pace(onTab: Bool) -> TimeInterval {
+        onTab ? fastSpan : span
     }
 
     /// How far a pocket drawn at `shown` stands along its rise, 0 at

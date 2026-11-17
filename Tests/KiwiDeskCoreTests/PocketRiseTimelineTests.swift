@@ -58,6 +58,7 @@ struct PocketRiseTimelineTests {
                 edge: .bottom,
                 side: 40,
                 rise: entry,
+                pace: PocketRiseTimeline.span,
                 from: nil,
                 reduceMotion: false
             )
@@ -72,6 +73,7 @@ struct PocketRiseTimelineTests {
                 edge: .bottom,
                 side: 40,
                 rise: entry,
+                pace: PocketRiseTimeline.span,
                 from: Self.drawn(0.25, edge: .bottom),
                 reduceMotion: false
             )
@@ -84,6 +86,7 @@ struct PocketRiseTimelineTests {
                 edge: .bottom,
                 side: 40,
                 rise: entry,
+                pace: PocketRiseTimeline.span,
                 from: CATransform3DIdentity,
                 reduceMotion: false
             ) == nil
@@ -117,6 +120,13 @@ struct PocketRiseTimelineTests {
                 start: start
             )
             #expect(abs(mid - 0.4) < 1e-6, Comment(rawValue: "\(edge)"))
+            // Read off the axis the rise travels: the other axis held
+            // at its start says nothing.
+            var travel = start
+            let along = abs(start.m41) > abs(start.m42)
+            if along { travel.m41 *= 0.6 } else { travel.m42 *= 0.6 }
+            let read = PocketRiseTimeline.progress(shown: travel, start: start)
+            #expect(abs(read - 0.4) < 1e-6, Comment(rawValue: "\(edge)"))
         }
     }
 
@@ -127,17 +137,17 @@ struct PocketRiseTimelineTests {
             at: t0.addingTimeInterval(0.2)
         )
         #expect(
-            PocketRiseTimeline.pace(of: hurry) == PocketRiseTimeline.fastSpan
+            PocketRiseTimeline.pace(onTab: true) == PocketRiseTimeline.fastSpan
         )
         #expect(
-            PocketRiseTimeline.pace(of: fill(ShelfReveal.dwellDelay))
-                == PocketRiseTimeline.span
+            PocketRiseTimeline.pace(onTab: false) == PocketRiseTimeline.span
         )
         let scrub = try #require(
             BarMotion.pocketScrub(
                 edge: .left,
                 side: 40,
                 rise: hurry,
+                pace: PocketRiseTimeline.fastSpan,
                 from: Self.drawn(0.6, edge: .left),
                 reduceMotion: false
             )
@@ -153,6 +163,7 @@ struct PocketRiseTimelineTests {
                 edge: .bottom,
                 side: 40,
                 rise: fill(ShelfReveal.dwellDelay),
+                pace: PocketRiseTimeline.span,
                 from: nil,
                 reduceMotion: true
             ) == nil

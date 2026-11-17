@@ -7304,32 +7304,37 @@ focused-window ring; a coloured glow is the focused ring's alone.
 
 :::unreleased
 *Amended* (owner, 2026-11-16, #3368): **on a handle, the kiwis
-alone fade.** The tab is constant, a bar handle's two-tone line at
-its ink and depth, empty or not, and the empty fade moves off the
+alone fade.** The tab keeps a bar handle's two-tone line at its
+ink and depth, empty or not, and the empty fade moves off the
 handle's panel onto the kiwis, in the tab and risen out of it. A
 faded panel thinned the tab to about 15% beside the bar handles'
 38%, so it read as a thinner, lighter line than its neighbours,
 and the kiwis already say what the pocket holds. The whole mark
 under Always keeps its fade.
 
-*Amended* (owner, 2026-11-17, #3384, reversing the line above it
-in #3368): **a tab whose pocket holds something rests at full
-strength,** the progress fill's 90%, and an empty one at the bar
-handles' rest strength. The ui-designer's concern stands — a bright
-tab can read as a bar about to open — and the owner weighed it
-against being able to tell at a glance that something is inside,
-which the kiwis alone, at a handle's size, say too quietly.
+*Amended* (owner, 2026-11-17, #3384, reversing #3368's rule that a
+tab holding something keeps the rest strength): **a tab whose
+pocket holds something rests at full strength,** the progress
+fill's 90%, and an empty one at the bar handles' rest strength. The
+ui-designer's concern stands — a bright tab can read as a bar about
+to open — and the owner weighed it against being able to tell at a
+glance that something is inside, which the kiwis alone, at a
+handle's size, say too quietly. The cost: on a pocket holding
+something the hover no longer shows on the tab, and the rise is its
+answer.
 
 *Amended* (2026-11-17, #3383, on the architect's shape): **the rise
 has one 0–1 progress, read where the pocket is drawn.** Each
 transition — the countdown, a hurry on the tab, a leave, a risen
 pocket going to rest — removes the running animation and adds one
-lasting the distance left times its pace: 0.25 s for a whole rise,
-0.15 s for a whole hurry, 0.2 s for a whole sink. A pace read off
-the revealer's clock instead let the drawn rise and the clock part
-when an animation was taken over, which stuck the pocket part way
-up or jumped it. A risen pocket going to rest sinks like a rise
-taken back, so nothing pops into the tab.
+lasting the distance left times its pace: the rise and the hurry
+above, and 0.2 s for a whole sink. A pace read off the revealer's
+clock instead let the drawn rise and the clock part when an
+animation was taken over, which stuck the pocket part way up or
+jumped it. The clock still decides when the pocket opens; the
+spring that open runs starts from where the pocket is drawn, so the
+two may part by a moment without a jump. A risen pocket going to
+rest sinks like a rise taken back, so nothing pops into the tab.
 :::
 
 **Remove from Pocket takes the float row's slot (#2612 ▸ 4).** A

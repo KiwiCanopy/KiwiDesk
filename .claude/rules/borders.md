@@ -528,12 +528,18 @@ the fill strength in place, through the one
 and while the pocket holds something it rests there too (#3384,
 `ShelfHandleDrawTests` ▸ `tabBrightens`); an empty pocket fades its
 kiwis alone through `paintFade`, the whole mark its panel
-(`PocketApproachTests` ▸ `kiwisFade`, `wholeMarkFades`). **Every rise
-transition starts from where the pocket is drawn and runs the
-distance left times its pace, through `PocketRiseTimeline.progress`**
-— never a duration off the revealer's clock — and a risen pocket going
-to rest sinks; the view's `sink` token is the one owner of a sink,
-its landing ending only its own (#3383, `PocketRiseSequenceTests`).
+(`PocketApproachTests` ▸ `kiwisFade`, `wholeMarkFades`); the tab
+rests full from what the pocket holds (`PocketHandleView.holds`),
+never from its light. **Every rise transition starts from where the
+pocket is drawn and runs the distance left times its pace, through
+`PocketRiseTimeline.progress(shown:start:)`**, the pace the spec's
+`riseFast` names; the revealer's clock decides only WHEN it opens,
+and `risen` arriving runs the damped spring from where it is drawn,
+so the two may part without a jump. A risen pocket going to rest
+sinks; whether a handle was up is read from the spec it last wore
+(`PocketPlateOverlay.before`), never the view's own state; and the
+view's `sink` token is the one owner of a sink, its landing ending
+only its own (#3383, `PocketRiseSequenceTests`).
 **What it counts and shows for is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it: the
 general list, then while it rests the apps' own pocket

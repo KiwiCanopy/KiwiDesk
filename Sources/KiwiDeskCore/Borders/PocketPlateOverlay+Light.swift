@@ -58,6 +58,8 @@ extension PocketPlateOverlay {
         shown.panel?.alphaValue = tab ? 1 : alpha
         shown.holder?.alphaValue = alpha
         shown.view.handle.faded = tab && faded
+        // What it holds, not the light, rests the tab full (#3384).
+        shown.view.handle.holds = tab && !spec.windows.isEmpty
         shown.view.pocket.alphaValue = tab ? alpha : 1
     }
 }

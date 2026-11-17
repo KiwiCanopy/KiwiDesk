@@ -3601,8 +3601,8 @@ on a push against the edge or a window drag. Under Reduce Motion
 the kiwis do not peek.
 
 :::unreleased
-On a handle the hover moves nothing: the tab goes to full strength
-in place. Within about 24 points of the edge over the handle, the
+On a handle the hover moves nothing: an empty pocket's tab goes to
+full strength in place. Within about 24 points of the edge over the handle, the
 pocket waits 0.15 s, then rises over the next 0.25 s. On the tab it
 rises faster, a whole rise taking 0.15 s, and one already under way
 goes on at that pace from where it is; leaving before it is up
@@ -3616,8 +3616,7 @@ comes up when it is full. With KiwiDesk's animations off nothing
 shows during the wait.
 An empty pocket fades its kiwis and rests its tab like a bar's
 handle; a pocket holding something rests its tab at full strength.
-Any rise, hurry or sink runs on from where the pocket is, and a
-risen pocket sinks back into its handle when it goes to rest.
+A risen pocket sinks back into its handle when it goes to rest.
 :::
 
 While you drag a window, under any value, the pocket comes up on

@@ -208,7 +208,9 @@ final class PocketPlateOverlay {
                 side: spec.risenSide,
                 outer: spec.outer,
                 whole: spec.whole,
-                rise: spec.rise
+                rise: spec.rise,
+                fast: spec.riseFast,
+                before: Self.before(old)
             )
             if sink > 0 {
                 landSink(shown, on: spec.display, after: sink)

@@ -80,6 +80,22 @@ struct PocketRiseSequenceTests {
         #expect(abs(hurry.duration - 0.6 * PocketRiseTimeline.fastSpan) < 1e-3)
     }
 
+    @Test("a hurry on a rise already up keeps it drawn up")
+    func upRiseStays() throws {
+        let rig = try rig()
+        defer { BarMotion.reducedOverride = nil }
+        let target = try #require(rig.target)
+        rig.move(to: try PocketApproachTests().nearTab(target))
+        let view = try view(rig)
+        try Self.seed(view, rig, done: 1)
+        rig.pointer.now += ShelfReveal.revealDelay + 0.1
+        rig.move(to: try PocketApproachTests().onTab(target))
+        // Nothing left to run: what stood there stays, never the
+        // kiwis the open would then rise from.
+        let held = try #require(running(view))
+        #expect(held.duration == 1)
+    }
+
     @Test("a leave sinks the distance up, in the risen room")
     func leaveSinksFromWhereItIs() throws {
         let rig = try rig()
@@ -130,17 +146,46 @@ struct PocketRiseSequenceTests {
         rig.pass()
         #expect(rig.spec?.risen == true)
         let view = try view(rig)
+        let room = view.frame.size
         // Landed: no rise runs, the pocket stands risen.
         view.pocket.layer?.removeAllAnimations()
         rig.move(to: CGPoint(x: -10_000, y: -10_000))
         rig.timers.fireAll()
         rig.pass()
-        #expect(rig.spec?.risen == false)
+        let rest = try #require(rig.spec)
+        #expect(!rest.risen)
         let sink = try #require(running(view))
         #expect(abs(sink.duration - BarMotion.pocketSinkSpan) < 1e-3)
         #expect(view.sinking)
+        // It sinks in the risen room, which its landing gives back.
+        #expect(view.frame.size == room)
         landings.forEach { $0() }
         #expect(!view.sinking)
+        #expect(view.frame.size == rest.frame.size)
+    }
+
+    @Test("a view's sink ends only on its own token")
+    func endSinkTakesItsOwn() throws {
+        let view = PocketPlateView(
+            frame: CGRect(x: 0, y: 0, width: 80, height: 80)
+        )
+        view.wantsLayer = true
+        let up = PocketPlateView.Before(risen: true)
+        let first = view.stand(
+            handle: .bottom,
+            risen: false,
+            side: 40,
+            before: up
+        )
+        #expect(first > 0)
+        let older = try #require(view.sink)
+        view.stand(handle: .bottom, risen: false, side: 40, before: up)
+        let newer = try #require(view.sink)
+        #expect(older != newer)
+        view.endSink(older)
+        #expect(view.sink == newer)
+        view.endSink(newer)
+        #expect(view.sink == nil)
     }
 
     @Test("an older sink's landing ends no newer sink")

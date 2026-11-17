@@ -108,7 +108,7 @@ struct ShelfHandleDrawTests {
                 frame: CGRect(origin: .zero, size: size)
             )
             view.appearance = NSAppearance(named: .darkAqua)
-            view.faded = !holds
+            view.holds = holds
             view.wear(
                 KiwiShelf(),
                 markHex: "#FF0000",

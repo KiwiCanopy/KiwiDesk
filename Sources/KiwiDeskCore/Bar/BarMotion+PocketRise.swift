@@ -42,10 +42,13 @@ extension BarMotion {
     static func playPocketRise(
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
-        side: CGFloat
+        side: CGFloat,
+        up: Bool = false
     ) {
         guard let layer = pocket.layer else { return }
-        let from = pocketRiseShown(pocket)
+        // A rise drawn up with no animation left stands risen.
+        let from =
+            pocketRiseShown(pocket) ?? (up ? CATransform3DIdentity : nil)
         layer.removeAnimation(forKey: pocketRiseKey)
         guard
             let rise = pocketRise(
@@ -95,20 +98,26 @@ extension BarMotion {
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
         side: CGFloat,
-        rise: ShelfHandleSpec.Fill
+        rise: ShelfHandleSpec.Fill,
+        pace: TimeInterval
     ) {
         guard let layer = pocket.layer else { return }
         let from = pocketRiseShown(pocket)
-        layer.removeAnimation(forKey: pocketRiseKey)
         guard
             let scrub = pocketScrub(
                 edge: edge,
                 side: side,
                 rise: rise,
+                pace: pace,
                 from: from,
                 reduceMotion: isReduced
             )
-        else { return }
+        else {
+            // Already up, or not drawn: what runs stays, so a later
+            // rise or sink reads it where it is.
+            return
+        }
+        layer.removeAnimation(forKey: pocketRiseKey)
         if scrub.beginTime > 0 {
             scrub.beginTime += layer.convertTime(
                 CACurrentMediaTime(),
@@ -120,7 +129,7 @@ extension BarMotion {
 
     /// The countdown's scrub, from `from` — where the pocket is
     /// drawn, nil at the handle's kiwis — to risen, lasting the
-    /// distance left times `rise`'s pace; still over `rise`'s delay
+    /// distance left times `pace`, a whole rise's; still over `rise`'s delay
     /// only while nothing has risen yet. Nil under `reduceMotion`,
     /// with no side, or already risen. `beginTime` is the delay,
     /// relative.
@@ -129,6 +138,7 @@ extension BarMotion {
         edge: AppBarEdge,
         side: CGFloat,
         rise: ShelfHandleSpec.Fill,
+        pace: TimeInterval,
         from: CATransform3D?,
         reduceMotion: Bool
     ) -> CABasicAnimation? {
@@ -137,7 +147,7 @@ extension BarMotion {
         let shown = from ?? start
         let done = PocketRiseTimeline.progress(shown: shown, start: start)
         let delay = done > 0 ? 0 : PocketRiseTimeline.delay(of: rise)
-        let length = (1 - done) * PocketRiseTimeline.pace(of: rise)
+        let length = (1 - done) * pace
         guard length > 0.001 else { return nil }
         let scrub = CABasicAnimation(keyPath: "transform")
         scrub.fromValue = NSValue(caTransform3D: shown)

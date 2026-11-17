@@ -65,8 +65,16 @@ extension PocketPlateOverlay {
         }
     }
 
+    /// How the handle stood in `old`, the spec the panel last wore:
+    /// the one "was it up" both the room and the view's sink read
+    /// (#3383). Nothing was up where `old` drew no handle.
+    static func before(_ old: Spec?) -> PocketPlateView.Before {
+        guard let old, old.handle != nil, !old.whole else { return .init() }
+        return .init(risen: old.risen, rise: old.rise)
+    }
+
     /// Whether a handle at rest in `spec` keeps the risen room for a
-    /// sink: it was rising or risen in `old`, or its sink still runs.
+    /// sink: it was up in `old`, or its sink still runs.
     static func holdsRisenRoom(
         _ spec: Spec,
         old: Spec?,
@@ -74,8 +82,7 @@ extension PocketPlateOverlay {
     ) -> Bool {
         spec.handle != nil && !spec.whole && spec.rise == nil
             && !spec.risen
-            && (old?.rise != nil || old?.risen == true
-                || shown.view.sinking)
+            && (before(old).isUp || shown.view.sinking)
     }
 
     /// Sizes a handle's panel, and its view, to `frame`.
