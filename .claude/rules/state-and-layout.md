@@ -2175,6 +2175,14 @@ editing here:
   resolver rather than copying it). A count↔fraction inverse
   or a "how many fit" door is Core's, homed beside `pitched`,
   never GUI arithmetic over a screen frame.
+- **A Maximize length resolves to points only in
+  `TilingEngine.maximizedBounds`, against the fill's own region
+  (#3460)**: a `MaximizeLength` fraction or length becomes points
+  there alone, against `visibleBounds` (a Maximize hides the bars
+  and takes no gaps, so `layoutBounds` is the wrong region), and no
+  other reader converts or clamps it — a readout, KiwiVision's fill
+  or a Settings unit flip asks that function
+  (`MaximizeLengthResolutionSeamTests`, `MaximizeLengthFillTests`).
 - **A resize store holding an absolute LENGTH owes a ceiling,
   and since #1057 the whole press DECISION lives in ONE pure
   type (#966/#1057).** `ScrollSlotDomain.decide` — reached only

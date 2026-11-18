@@ -4,16 +4,19 @@ import Foundation
 /// alone (`maximize.share_override`, #3090).
 public struct MaximizeShareOverride: Codable, Sendable, Equatable {
     /// The width share of a Maximize Height in this Space.
-    public var height: Double?
+    public var height: MaximizeLength?
     /// The height share of a Maximize Width in this Space.
-    public var width: Double?
+    public var width: MaximizeLength?
 
-    public init(height: Double? = nil, width: Double? = nil) {
+    public init(
+        height: MaximizeLength? = nil,
+        width: MaximizeLength? = nil
+    ) {
         self.height = height
         self.width = width
     }
 
-    public subscript(axis: MaximizeAxis) -> Double? {
+    public subscript(axis: MaximizeAxis) -> MaximizeLength? {
         get {
             switch axis {
             case .height: height
@@ -44,7 +47,7 @@ extension MaximizeSettings {
         for axis: MaximizeAxis,
         on shape: ScreenShape,
         in space: SpaceID?
-    ) -> Double {
+    ) -> MaximizeLength {
         space.flatMap { shareOverride[$0]?[axis] }
             ?? share(for: axis, on: shape)
     }
@@ -61,7 +64,7 @@ extension MaximizeSettings {
     /// Sets or clears (`nil`) `space`'s own `axis` share; an entry
     /// left with neither axis is dropped.
     public mutating func setShareOverride(
-        _ share: Double?,
+        _ share: MaximizeLength?,
         for axis: MaximizeAxis,
         in space: SpaceID
     ) {

@@ -20,7 +20,7 @@ extension SpaceOverrideRows {
 
     private func shareRow(_ axis: MaximizeAxis) -> some View {
         let label = Self.maximizeLabel(axis)
-        let value = Binding<Double?>(
+        let value = Binding<MaximizeLength?>(
             get: { g.maximize.shareOverride[space]?[axis] },
             set: {
                 model.config.settings.maximize.setShareOverride(
@@ -43,6 +43,8 @@ extension SpaceOverrideRows {
             } control: {
                 MaximizeSharePopUp(
                     value: overrideValue(value, global: followed),
+                    axis: axis,
+                    screen: spaceScreen?.visibleFrame,
                     label: label,
                     column: label
                 )
@@ -68,7 +70,7 @@ extension SpaceOverrideRows {
 
     /// The share an unset row follows: its screen shape's, or the
     /// widescreen row's where the Space has no single screen.
-    private func followedShare(_ axis: MaximizeAxis) -> Double {
+    private func followedShare(_ axis: MaximizeAxis) -> MaximizeLength {
         g.maximize.share(for: axis, on: screenShape ?? .widescreen)
     }
 
@@ -76,13 +78,17 @@ extension SpaceOverrideRows {
     /// the screen an offline pin falls back to, else the only screen
     /// connected; nil where it may move.
     var screenShape: ScreenShape? {
+        spaceScreen.map(ScreenShape.of)
+    }
+
+    /// The one screen this Space lays out on, by the same rule.
+    var spaceScreen: Display? {
         switch model.spacePlacement(of: space) {
         case .pinned(let display)?,
             .pinnedAbsent(intent: _, fallback: let display)?:
-            return ScreenShape.of(display)
+            return display
         default:
-            return model.displays.count == 1
-                ? model.displays.first.map(ScreenShape.of) : nil
+            return model.displays.count == 1 ? model.displays.first : nil
         }
     }
 

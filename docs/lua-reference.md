@@ -6970,6 +6970,20 @@ KiwiDesk.bind("ctrl+alt+e", function()
 end)
 ```
 
+:::unreleased
+A share is a number from 0.1 to 1, a fraction of the screen, or a
+string ending in `pt`, a length that is the same on every screen,
+`"1100pt"`, from 100 pt. A length longer than the screen's axis
+fills that axis. A number above 1 is refused, never read as points.
+
+```lua
+-- A 1100 pt reading column on any screen.
+KiwiDesk.bind("ctrl+alt+r", function()
+    KiwiDesk.toggle_maximized("height", "1100pt")
+end)
+```
+:::
+
 ### maximize.set_share
 
 **Expects:** an axis, `"height"` or `"width"`, a share from 0.1 to
@@ -6992,6 +7006,15 @@ given.
 | `"portrait"` | taller than wide | 0.75 | 0.5 |
 
 The defaults are the two right-hand columns.
+
+:::unreleased
+The share may also be a length, `"1280pt"`, as
+[`toggle_maximized`](#toggle_maximized) takes. A new profile's
+`"height"` column is 0.75 on `"laptop"` and `"portrait"` and
+`"1280pt"` on `"widescreen"`, `"ultrawide"` and
+`"super_ultrawide"`; a profile already saved keeps the values it
+stored.
+:::
 
 **Example:**
 
@@ -7037,6 +7060,9 @@ Width**; [`get_settings`](#get_settings) with the Space folds it in.
 ```lua
 maximize.set_share_override("editor", "height", 2 / 3)
 ```
+
+The share may also be a length, `"1100pt"`, as
+[`toggle_maximized`](#toggle_maximized) takes.
 :::
 
 ### maximize.set_anchor_override

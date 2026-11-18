@@ -190,8 +190,8 @@ extension APIReference {
             .space("space", optional: true)
         ),
         "toggle_maximized": APIRecord(
-            "Fills the screen or one axis of it with the focused "
-                + "window until toggled or a tile takes focus.",
+            "Fills the screen or one axis (a share or \"NNNpt\") "
+                + "with the focused window until toggled.",
             .choice("axis", MaximizeAxis.self, optional: true),
             .number("share", optional: true),
             .choice("anchor", MaximizeAnchor.self, optional: true)

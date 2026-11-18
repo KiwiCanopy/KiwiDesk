@@ -45,7 +45,12 @@ struct StepperRow: View {
         self.labelHidden = labelHidden
         self.help = help
         self.liveCommit = liveCommit
-        self._text = State(initialValue: "\(value.wrappedValue)")
+        // A value outside the range is an empty field: the Maximize
+        // Custom popover clears on a unit flip it cannot convert.
+        self._text = State(
+            initialValue: range.contains(value.wrappedValue)
+                ? "\(value.wrappedValue)" : ""
+        )
     }
 
     var body: some View {
@@ -142,6 +147,6 @@ struct StepperRow: View {
         if let parsed = Int(text) {
             value = min(max(parsed, range.lowerBound), range.upperBound)
         }
-        text = "\(value)"
+        text = range.contains(value) ? "\(value)" : ""
     }
 }

@@ -50,13 +50,17 @@ private let ultrawide = CGSize(width: 3440, height: 1440)
 struct MaximizeShareScreenTests {
     @Test("The ruled defaults, per shape")
     func defaults() {
-        let expected: [ScreenShape: (Double, Double, MaximizeAnchor)] = [
-            .laptop: (3 / 4, 2 / 3, .center),
-            .widescreen: (1 / 2, 1 / 2, .center),
-            .ultrawide: (1 / 3, 1 / 2, .inPlace),
-            .superUltrawide: (1 / 4, 1 / 2, .inPlace),
-            .portrait: (3 / 4, 1 / 2, .center),
-        ]
+        // Maximize Height's width on the wide shapes is one length
+        // (owner, 2026-11-18, #3460).
+        let column = MaximizeLength.points(1280)
+        let expected:
+            [ScreenShape: (MaximizeLength, MaximizeLength, MaximizeAnchor)] = [
+                .laptop: (.fraction(3 / 4), .fraction(2 / 3), .center),
+                .widescreen: (column, .fraction(1 / 2), .center),
+                .ultrawide: (column, .fraction(1 / 2), .inPlace),
+                .superUltrawide: (column, .fraction(1 / 2), .inPlace),
+                .portrait: (.fraction(3 / 4), .fraction(1 / 2), .center),
+            ]
         #expect(Set(expected.keys) == Set(ScreenShape.allCases))
         let settings = MaximizeSettings()
         for (screen, (height, width, anchor)) in expected {
@@ -77,14 +81,14 @@ struct MaximizeShareScreenTests {
     func pressReadsTheScreen() {
         let core = makeCore(screen: laptop)
         core.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(core)?.share == 3.0 / 4)
+        #expect(shape(core)?.share == .fraction(3.0 / 4))
         #expect(shape(core)?.anchor == .center)
         core.execute("toggle_maximized", args: [.string("width")])
-        #expect(shape(core)?.share == 2.0 / 3)
+        #expect(shape(core)?.share == .fraction(2.0 / 3))
 
         let wide = makeCore(screen: ultrawide)
         wide.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(wide)?.share == 1.0 / 3)
+        #expect(shape(wide)?.share == .points(1280))
         #expect(shape(wide)?.anchor == .inPlace)
     }
 
@@ -119,12 +123,14 @@ struct MaximizeShareScreenTests {
             args: [.string("in_place"), .string("laptop")]
         )
         let settings = core.tiler.settings.maximize
-        #expect(settings.share(for: .height, on: .laptop) == 0.4)
-        #expect(settings.share(for: .height, on: .widescreen) == 0.5)
+        #expect(settings.share(for: .height, on: .laptop) == .fraction(0.4))
+        #expect(
+            settings.share(for: .height, on: .widescreen) == .points(1280)
+        )
         #expect(settings.anchor[.laptop] == .inPlace)
         #expect(settings.anchor[.portrait] == .center)
         core.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(core)?.share == 0.4)
+        #expect(shape(core)?.share == .fraction(0.4))
         #expect(shape(core)?.anchor == .inPlace)
     }
 
@@ -138,7 +144,7 @@ struct MaximizeShareScreenTests {
         core.execute("maximize.set_anchor", args: [.string("center")])
         let settings = core.tiler.settings.maximize
         for screen in ScreenShape.allCases {
-            #expect(settings.share(for: .width, on: screen) == 0.6)
+            #expect(settings.share(for: .width, on: screen) == .fraction(0.6))
             #expect(settings.anchor[screen] == .center)
         }
     }
@@ -150,7 +156,7 @@ struct MaximizeShareScreenTests {
             "toggle_maximized",
             args: [.string("height"), .number(0.6)]
         )
-        #expect(shape(core)?.share == 0.6)
+        #expect(shape(core)?.share == .fraction(0.6))
     }
 
     @Test("An unknown shape is refused and writes nothing")
@@ -175,7 +181,7 @@ struct MaximizeShareScreenTests {
     @Test("A stored row round-trips; an absent one keeps its default")
     func coding() throws {
         var settings = MaximizeSettings()
-        settings.setShare(0.4, for: .height, on: .portrait)
+        settings.setShare(.fraction(0.4), for: .height, on: .portrait)
         settings.anchor[.laptop] = .inPlace
         let data = try JSONEncoder().encode(settings)
         let back = try JSONDecoder().decode(
@@ -189,8 +195,10 @@ struct MaximizeShareScreenTests {
                 #"{"share":{"height":{"laptop":0.4}}}"#.utf8
             )
         )
-        #expect(sparse.share(for: .height, on: .laptop) == 0.4)
-        #expect(sparse.share(for: .height, on: .ultrawide) == 1.0 / 3)
+        #expect(sparse.share(for: .height, on: .laptop) == .fraction(0.4))
+        #expect(
+            sparse.share(for: .height, on: .ultrawide) == .points(1280)
+        )
         #expect(sparse.anchor == MaximizeSettings().anchor)
     }
 }

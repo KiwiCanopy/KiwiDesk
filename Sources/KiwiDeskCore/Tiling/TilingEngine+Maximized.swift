@@ -54,19 +54,18 @@ extension TilingEngine {
     /// visible bounds, from the window's `slot` (#3062): the whole
     /// screen, or its axis whole and the other at the share,
     /// centred on the screen or on the slot and kept inside it.
-    nonisolated static func maximizedBounds(
+    /// The one place a share becomes points (#3460): a fraction of
+    /// the screen's length, clamped to `fractionRange`, or a length
+    /// no longer than that axis, which then fills it.
+    nonisolated public static func maximizedBounds(
         _ shape: MaximizeShape,
         screen: CGRect,
         slot: CGRect
     ) -> CGRect {
         guard let axis = shape.axis else { return screen }
-        let share = min(
-            max(shape.share, MaximizeShape.shareRange.lowerBound),
-            MaximizeShape.shareRange.upperBound
-        )
         switch axis {
         case .height:
-            let width = (screen.width * share).rounded()
+            let width = length(shape.share, along: screen.width)
             let centre =
                 shape.anchor == .inPlace ? slot.midX : screen.midX
             return CGRect(
@@ -76,7 +75,7 @@ extension TilingEngine {
                 height: screen.height
             )
         case .width:
-            let height = (screen.height * share).rounded()
+            let height = length(shape.share, along: screen.height)
             let centre =
                 shape.anchor == .inPlace ? slot.midY : screen.midY
             return CGRect(
@@ -85,6 +84,21 @@ extension TilingEngine {
                 width: screen.width,
                 height: height
             )
+        }
+    }
+
+    /// `share` in whole points along an axis `length` long.
+    private nonisolated static func length(
+        _ share: MaximizeLength,
+        along length: CGFloat
+    ) -> CGFloat {
+        switch share {
+        case .fraction(let value):
+            let range = MaximizeLength.fractionRange
+            let clamped = min(max(value, range.lowerBound), range.upperBound)
+            return (length * clamped).rounded()
+        case .points(let value):
+            return min(value.rounded(), length)
         }
     }
 

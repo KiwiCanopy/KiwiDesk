@@ -26,8 +26,8 @@ struct SettingKeyModelParityTests {
         settings.gapsOverride["1"] = Gaps()
         settings.minWindowSizeOverride["1"] = 200
         settings.maximize.shareOverride["1"] = MaximizeShareOverride(
-            height: 0.4,
-            width: 0.4
+            height: .fraction(0.4),
+            width: .fraction(0.4)
         )
         settings.maximize.anchorOverride["1"] = .center
         settings.spaceIcons["1"] = "star"

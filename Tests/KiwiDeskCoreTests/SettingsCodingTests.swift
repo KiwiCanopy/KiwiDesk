@@ -127,7 +127,11 @@ struct SettingsCodingTests {
             #expect(Set(try object(share[axis]).keys) == shapes)
         }
         let height = try object(share["height"])
-        #expect(height["super_ultrawide"] as? Double == 0.25)
+        // A fraction stays a bare number; a length is an object
+        // (#3460).
+        #expect(height["laptop"] as? Double == 0.75)
+        let column = try object(height["super_ultrawide"])
+        #expect(column["points"] as? Double == 1280)
         let anchors = try object(maximize["anchor"])
         #expect(Set(anchors.keys) == shapes)
         #expect(anchors["ultrawide"] as? String == "in_place")

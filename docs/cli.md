@@ -875,6 +875,12 @@ clears it
 :::
 
 :::unreleased
+Every share argument also takes a length in points, `1100pt`,
+from 100 pt; a number above 1 is refused
+([`toggle_maximized`](lua-reference.md#toggle_maximized)).
+:::
+
+:::unreleased
 `toggle_maximized` takes a floating window too, whole or along one
 axis, and puts it back at the frame it had
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)).

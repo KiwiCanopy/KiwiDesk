@@ -16,9 +16,17 @@ extension SettingsValueReadout {
         let change: ShapeChange?
         switch key {
         case .maximizeHeightShare:
-            change = changed(old.heightShare, new.heightShare, percent)
+            change = changed(
+                old.heightShare,
+                new.heightShare,
+                maximizeShare
+            )
         case .maximizeWidthShare:
-            change = changed(old.widthShare, new.widthShare, percent)
+            change = changed(
+                old.widthShare,
+                new.widthShare,
+                maximizeShare
+            )
         default:
             change = changed(old.anchor, new.anchor, MaximizeCard.anchorName)
         }
@@ -49,9 +57,11 @@ extension SettingsValueReadout {
         let read: (MaximizeSettings, SpaceID) -> String? = { settings, space in
             switch key {
             case .maximizeHeightSharePerSpace:
-                settings.shareOverride[space]?.height.map(percent)
+                settings.shareOverride[space]?.height
+                    .map(maximizeShare)
             case .maximizeWidthSharePerSpace:
-                settings.shareOverride[space]?.width.map(percent)
+                settings.shareOverride[space]?.width
+                    .map(maximizeShare)
             default:
                 settings.anchorOverride[space].map(MaximizeCard.anchorName)
             }
@@ -72,6 +82,15 @@ extension SettingsValueReadout {
                 old: read(old, space) ?? unset,
                 new: read(new, space) ?? unset
             )
+        }
+    }
+
+    /// A Maximize share as a diff row narrates it: a percent, or a
+    /// length as stored (#3460).
+    static func maximizeShare(_ share: MaximizeLength) -> String {
+        switch share {
+        case .fraction(let fraction): percent(fraction)
+        case .points(let length): points(length)
         }
     }
 

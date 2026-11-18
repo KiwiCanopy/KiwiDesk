@@ -23,9 +23,20 @@ struct MaximizeShapeRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(MaximizeShapeText.name(shape))
                 if !screens.isEmpty {
-                    Text(screens.map(\.name).joined(separator: ", "))
+                    // The size Displays calls "Looks like", which a
+                    // length is measured against (#3460).
+                    Text(
+                        screens.map(MaximizeShapeText.screenLine)
+                            .joined(separator: ", ")
+                    )
+                    .font(.callout)
+                    .foregroundStyle(SettingsTheme.ink3)
+                }
+                ForEach(overflowLines, id: \.self) { line in
+                    Text(line)
                         .font(.callout)
                         .foregroundStyle(SettingsTheme.ink3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,11 +54,13 @@ struct MaximizeShapeRow: View {
         case .behaviour(.maximizeHeightShare):
             shareMenu(
                 key,
+                axis: .height,
                 value: maximize[dynamicMember: \.heightShare[shape]]
             )
         case .behaviour(.maximizeWidthShare):
             shareMenu(
                 key,
+                axis: .width,
                 value: maximize[dynamicMember: \.widthShare[shape]]
             )
         case .behaviour(.maximizeAnchor):
@@ -63,13 +76,32 @@ struct MaximizeShapeRow: View {
     /// A share's pop-up, `MaximizeSharePopUp`.
     private func shareMenu(
         _ key: SettingKey,
-        value: Binding<Double>
+        axis: MaximizeAxis,
+        value: Binding<MaximizeLength>
     ) -> some View {
         MaximizeSharePopUp(
             value: value,
+            axis: axis,
+            screen: screens.first?.visibleFrame,
             label: label(key),
             column: MaximizeCard.control(key)?.text ?? ""
         )
+    }
+
+    /// A line per connected screen a stored length overflows: the
+    /// row shows the stored value, and this says what a press does
+    /// there (#3460).
+    private var overflowLines: [String] {
+        let settings = model.config.settings.maximize
+        return MaximizeAxis.allCases.flatMap { axis in
+            screens.compactMap {
+                MaximizeShapeText.overflow(
+                    settings.share(for: axis, on: shape),
+                    axis: axis,
+                    on: $0
+                )
+            }
+        }
     }
 
     private func anchorMenu(_ key: SettingKey) -> some View {
@@ -105,6 +137,57 @@ enum MaximizeShapeText {
     /// The starter's noun for `shape` (#1662).
     static func name(_ shape: ScreenShape) -> String {
         StarterTitle.displayName(of: shape.screenClass)
+    }
+
+    /// A connected screen as the row lists it: its name and the size
+    /// Displays shows as "Looks like" (#3460).
+    static func screenLine(_ display: Display) -> String {
+        "\(display.name) · "
+            + L(
+                "diff.value.min_size",
+                "%1$@ × %2$@ pt",
+                SettingsValueReadout.trimmed(display.frame.width),
+                SettingsValueReadout.trimmed(display.frame.height)
+            )
+    }
+
+    /// The line saying a stored length is longer than `display`'s
+    /// axis, so a press fills that axis there; nil for a fraction or
+    /// a length that fits (#3460).
+    static func overflow(
+        _ share: MaximizeLength,
+        axis: MaximizeAxis,
+        on display: Display
+    ) -> String? {
+        guard let points = share.points,
+            let drawn = MaximizeCustomShare.points(
+                of: share,
+                axis: axis,
+                screen: display.visibleFrame
+            ),
+            drawn < points.rounded()
+        else { return nil }
+        let length = SettingsValueReadout.points(points)
+        switch axis {
+        case .height:
+            return L(
+                "layout_defaults.maximize.overflow.width",
+                "%1$@ is wider than %2$@ (%3$@), so it fills the "
+                    + "width there.",
+                length,
+                display.name,
+                SettingsValueReadout.points(drawn)
+            )
+        case .width:
+            return L(
+                "layout_defaults.maximize.overflow.height",
+                "%1$@ is taller than %2$@ (%3$@), so it fills the "
+                    + "height there.",
+                length,
+                display.name,
+                SettingsValueReadout.points(drawn)
+            )
+        }
     }
 
     /// The card's `?`: each shape's threshold, read from

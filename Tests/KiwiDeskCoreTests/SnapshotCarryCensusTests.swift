@@ -120,7 +120,7 @@ struct SnapshotCarryCensusTests {
                 window: self.w2,
                 shape: MaximizeShape(
                     axis: .height,
-                    share: 0.6,
+                    share: .fraction(0.6),
                     anchor: .inPlace
                 ),
                 follows: true

@@ -35,7 +35,7 @@ private func populated() -> TilingSettings {
     settings.monocle.override[probe] = MonocleOverride()
     settings.track.override[probe] = TrackOverride()
     settings.maximize.shareOverride[probe] = MaximizeShareOverride(
-        height: 0.4
+        height: .fraction(0.4)
     )
     settings.maximize.anchorOverride[probe] = .center
     return settings

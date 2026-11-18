@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -13,18 +14,36 @@ struct MaximizeShareMenuTests {
     @Test("A preset share adds no item and checks its fraction")
     func presetAddsNothing() {
         for share in FractionChips.shares {
-            #expect(MaximizeSharePopUp.offMenuShare(share.value) == nil)
-            #expect(MaximizeSharePopUp.selection(share.value) == share.value)
+            let stored = MaximizeLength.fraction(share.value)
+            #expect(MaximizeSharePopUp.offMenuShare(stored) == nil)
+            #expect(MaximizeSharePopUp.selection(stored) == stored)
         }
         // Typed to the wire's precision, a third is still ⅓.
-        #expect(MaximizeSharePopUp.offMenuShare(0.3333) == nil)
-        #expect(MaximizeSharePopUp.selection(0.3333) == 1.0 / 3)
+        #expect(MaximizeSharePopUp.offMenuShare(.fraction(0.3333)) == nil)
+        #expect(
+            MaximizeSharePopUp.selection(.fraction(0.3333))
+                == .fraction(1.0 / 3)
+        )
     }
 
     @Test("A share off the menu is its own checked item")
     func offMenuIsKept() {
-        #expect(MaximizeSharePopUp.offMenuShare(0.4) == 0.4)
-        #expect(MaximizeSharePopUp.selection(0.4) == 0.4)
+        #expect(
+            MaximizeSharePopUp.offMenuShare(.fraction(0.4)) == .fraction(0.4)
+        )
+        #expect(MaximizeSharePopUp.selection(.fraction(0.4)) == .fraction(0.4))
+    }
+
+    /// A length is never a preset: it shows as stored, in points
+    /// (#3460).
+    @Test("A length is its own checked item, shown as stored")
+    func lengthIsOffMenu() {
+        LocalizationManager.shared.select("en")
+        let length = MaximizeLength.points(1600)
+        #expect(MaximizeSharePopUp.offMenuShare(length) == length)
+        #expect(MaximizeSharePopUp.selection(length) == length)
+        #expect(MaximizeSharePopUp.glyph(length) == "1600 pt")
+        #expect(MaximizeSharePopUp.spoken(length) == "1600 points")
     }
 
     /// A typed percent that rounds to a fraction stores the fraction
@@ -40,21 +59,50 @@ struct MaximizeShareMenuTests {
         }
         #expect(MaximizeCustomShare.share(forPercent: 33) == 1.0 / 3)
         #expect(MaximizeCustomShare.share(forPercent: 40) == 0.4)
-        #expect(MaximizeSharePopUp.offMenuShare(0.4) == 0.4)
     }
 
     /// The range is Core's clamp, never a second copy (#1359).
     @Test("Custom clamps to Core's share range")
     func customClamps() {
-        let core = MaximizeShape.shareRange
+        let core = MaximizeLength.fractionRange
         #expect(
             MaximizeCustomShare.share(forPercent: 1) == core.lowerBound
         )
         #expect(
             MaximizeCustomShare.share(forPercent: 140) == core.upperBound
         )
+    }
 
-        #expect(MaximizeCustomShare.tag < 0)
+    /// A pt length never snaps, and a unit flip converts on the
+    /// row's screen, or clears with none (#3460).
+    @Test("Custom's unit flip converts on the screen, or clears")
+    func customUnitFlip() {
+        let screen = CGRect(x: 0, y: 0, width: 3200, height: 900)
+        var request = MaximizeCustomRequest(
+            stored: .fraction(1.0 / 3),
+            axis: .height,
+            screen: screen
+        )
+        request.flip(to: .points)
+        #expect(request.number == 1056)
+        #expect(request.committed == .points(1056))
+        request.flip(to: .percent)
+        #expect(request.number == 33)
+        // 33 % is ⅓, which is what was stored: nothing to write.
+        #expect(request.committed == nil)
+
+        var blind = MaximizeCustomRequest(
+            stored: .fraction(0.5),
+            axis: .height,
+            screen: nil
+        )
+        blind.flip(to: .points)
+        #expect(blind.number == 0)
+        #expect(blind.committed == nil)
+        blind.number = 1100
+        #expect(blind.committed == .points(1100))
+        blind.cancelled = true
+        #expect(blind.committed == nil)
     }
 
     /// The share pop-up offers Custom… as its last item and opens the
@@ -67,16 +115,15 @@ struct MaximizeShareMenuTests {
                 "Divider()Text(L(\"layout_defaults.maximize.custom\""
             )
         )
-        #expect(source.contains("ifpicked==MaximizeCustomShare.tag{"))
+        #expect(source.contains("case.custom:custom=MaximizeCustomRequest("))
         #expect(
             source.contains(".popover(item:customBinding)")
         )
         // The draft is written at the dismissal, never at a teardown.
         #expect(
             source.contains(
-                "ifnew==nil,letopen=custom,!open.cancelled,"
-                    + "open.percent!=open.seed{"
-                    + "value=MaximizeCustomShare.share("
+                "ifnew==nil,letopen=custom,lettyped=open.committed{"
+                    + "value=typed"
             )
         )
     }
@@ -153,7 +200,7 @@ struct MaximizeShareMenuTests {
         LocalizationManager.shared.select("en")
         let before = TilingSettings()
         var after = before
-        after.maximize.setShare(0.4, for: .height, on: .laptop)
+        after.maximize.setShare(.fraction(0.4), for: .height, on: .laptop)
         let key = SettingKey.behaviour(.maximizeHeightShare)
         let one = try #require(
             SettingsValueReadout.maximizeRows(
@@ -166,12 +213,12 @@ struct MaximizeShareMenuTests {
         #expect(one.label.hasSuffix(", Laptop"))
         #expect(
             one.oldValue
-                == SettingsValueReadout.percent(
+                == SettingsValueReadout.maximizeShare(
                     before.maximize.heightShare[.laptop]
                 )
         )
         #expect(one.newValue == SettingsValueReadout.percent(0.4))
-        after.maximize.setShare(0.4, for: .height, on: .portrait)
+        after.maximize.setShare(.fraction(0.4), for: .height, on: .portrait)
         let two = try #require(
             SettingsValueReadout.maximizeRows(
                 .maximizeHeightShare,

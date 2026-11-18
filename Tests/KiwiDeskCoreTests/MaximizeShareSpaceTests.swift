@@ -62,7 +62,7 @@ struct MaximizeShareSpaceTests {
             ).isSuccess
         )
         core.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(core)?.share == 0.4)
+        #expect(shape(core)?.share == .fraction(0.4))
         #expect(shape(core)?.anchor == .inPlace)
     }
 
@@ -74,7 +74,7 @@ struct MaximizeShareSpaceTests {
             args: [.string("1"), .string("height"), .number(0.4)]
         )
         core.execute("toggle_maximized", args: [.string("width")])
-        #expect(shape(core)?.share == 2.0 / 3)
+        #expect(shape(core)?.share == .fraction(2.0 / 3))
         #expect(shape(core)?.anchor == .center)
     }
 
@@ -89,7 +89,7 @@ struct MaximizeShareSpaceTests {
             "toggle_maximized",
             args: [.string("height"), .number(0.6), .string("center")]
         )
-        #expect(shape(core)?.share == 0.6)
+        #expect(shape(core)?.share == .fraction(0.6))
     }
 
     @Test("Another Space's override does not reach this one")
@@ -100,7 +100,7 @@ struct MaximizeShareSpaceTests {
             args: [.string("2"), .string("height"), .number(0.4)]
         )
         core.execute("toggle_maximized", args: [.string("height")])
-        #expect(shape(core)?.share == 3.0 / 4)
+        #expect(shape(core)?.share == .fraction(3.0 / 4))
     }
 
     @Test("nil clears an axis; an empty entry is dropped")
@@ -159,11 +159,15 @@ struct MaximizeShareSpaceTests {
     @Test("resolved(for:) folds the Space's values onto every shape")
     func resolvedFolds() {
         var settings = TilingSettings()
-        settings.maximize.setShareOverride(0.4, for: .width, in: space)
+        settings.maximize.setShareOverride(
+            .fraction(0.4),
+            for: .width,
+            in: space
+        )
         settings.maximize.anchorOverride[space] = .inPlace
         let resolved = settings.resolved(for: space).maximize
         for shape in ScreenShape.allCases {
-            #expect(resolved.share(for: .width, on: shape) == 0.4)
+            #expect(resolved.share(for: .width, on: shape) == .fraction(0.4))
             #expect(
                 resolved.share(for: .height, on: shape)
                     == MaximizeSettings.defaultHeightShare(shape)
@@ -173,15 +177,23 @@ struct MaximizeShareSpaceTests {
         #expect(resolved.shareOverride.isEmpty)
         #expect(resolved.anchorOverride.isEmpty)
         let apart = settings.resolved(for: other).maximize
-        #expect(apart.share(for: .width, on: .laptop) == 2.0 / 3)
+        #expect(apart.share(for: .width, on: .laptop) == .fraction(2.0 / 3))
     }
 
     @Test("Each set row counts one toward the Space's overrides")
     func countsOneEach() {
         var settings = TilingSettings()
-        settings.maximize.setShareOverride(0.4, for: .height, in: space)
+        settings.maximize.setShareOverride(
+            .fraction(0.4),
+            for: .height,
+            in: space
+        )
         #expect(settings.spaceOverrideCount(for: space) == 1)
-        settings.maximize.setShareOverride(0.4, for: .width, in: space)
+        settings.maximize.setShareOverride(
+            .fraction(0.4),
+            for: .width,
+            in: space
+        )
         settings.maximize.anchorOverride[space] = .center
         #expect(settings.spaceOverrideCount(for: space) == 3)
         #expect(settings.floatingLiveOverrideCount(for: space) == 3)
@@ -213,7 +225,7 @@ struct MaximizeShareSpaceTests {
         core.loadConfig()
         #expect(core.configIssues.isEmpty, "\(core.configIssues)")
         let set = core.tiler.settings.maximize
-        #expect(set.shareOverride[mine]?.height == 0.4)
+        #expect(set.shareOverride[mine]?.height == .fraction(0.4))
         #expect(set.anchorOverride[mine] == .center)
         try declare.write(
             to: core.configURL,
@@ -229,7 +241,7 @@ struct MaximizeShareSpaceTests {
     @Test("The keys are share_override and anchor_override")
     func keys() throws {
         var settings = MaximizeSettings()
-        settings.setShareOverride(0.4, for: .height, in: space)
+        settings.setShareOverride(.fraction(0.4), for: .height, in: space)
         settings.anchorOverride[space] = .inPlace
         let data = try JSONEncoder().encode(settings)
         let json = String(decoding: data, as: UTF8.self)

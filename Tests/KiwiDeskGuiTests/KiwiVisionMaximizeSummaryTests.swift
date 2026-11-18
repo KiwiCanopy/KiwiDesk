@@ -16,9 +16,9 @@ struct KiwiVisionMaximizeSummaryTests {
 
     private func settings() -> MaximizeSettings {
         var maximize = MaximizeSettings()
-        maximize.heightShare[.laptop] = 0.75
-        maximize.heightShare[.widescreen] = 1.0 / 3
-        maximize.widthShare[.laptop] = 0.5
+        maximize.heightShare[.laptop] = .fraction(0.75)
+        maximize.heightShare[.widescreen] = .fraction(1.0 / 3)
+        maximize.widthShare[.laptop] = .fraction(0.5)
         maximize.anchor[.laptop] = .center
         maximize.anchor[.widescreen] = .center
         return maximize
@@ -103,7 +103,7 @@ struct KiwiVisionMaximizeSummaryTests {
             shapes: [.laptop]
         )
         maximize.shareOverride[SpaceID("1")] = MaximizeShareOverride(
-            height: 0.25
+            height: .fraction(0.25)
         )
         #expect(
             Summary.prose(
