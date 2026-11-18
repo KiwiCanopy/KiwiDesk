@@ -193,7 +193,7 @@ extension KiwiCore {
         guard
             let display = TilingEngine.screen(containing: frame)?
                 .kiwiDisplayID,
-            let uuid = NativeSpaces.displayUUID(for: display)
+            let uuid = desktopMemory.readDisplayUUID(display)
         else { return nil }
         // Shared Spaces answer through their synthetic key here;
         // `cueDisplay` detects that mode from its own reading.

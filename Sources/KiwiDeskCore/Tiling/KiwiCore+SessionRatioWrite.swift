@@ -140,7 +140,7 @@ extension KiwiCore {
     func forgetSessionRatiosOnShownDesktops() {
         desktopMemory.sessionRatios[nil] = nil
         for display in state.workspaces.allDisplays {
-            let uuid = NativeSpaces.displayUUID(for: display.id) ?? ""
+            let uuid = desktopMemory.readDisplayUUID(display.id) ?? ""
             if let desktop = shownDesktop(onScreen: uuid) {
                 desktopMemory.sessionRatios[desktop] = nil
             }

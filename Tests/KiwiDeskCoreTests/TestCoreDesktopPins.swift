@@ -16,6 +16,24 @@ func pinDesktopReads(_ core: KiwiCore) {
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
     core.desktopMemory.readOffShown = { _ in false }
     core.desktopMemory.liveSpaceIsUser = { _ in true }
+    // The two reads behind every stand-down and the cold-start bar
+    // (#3442): a display's UUID read once per process, and the
+    // active Space a user Desktop unless a suite states otherwise.
+    core.desktopMemory.readDisplayUUID = { display in
+        guard NativeSpaces.displayUUIDOverride == nil else {
+            return NativeSpaces.displayUUID(for: display)
+        }
+        if let known = testDisplayUUIDs[display] { return known }
+        let live = NativeSpaces.displayUUID(for: display)
+        testDisplayUUIDs[display] = live
+        return live
+    }
+    core.desktopMemory.readActiveSpaceIsUser = {
+        statesNoTopology
+            && NativeSpaces.activeSpaceIsUserOverride == nil
+            ? true
+            : NativeSpaces.activeSpaceIsUser()
+    }
     core.desktopMemory.readDesktops = {
         statesNoTopology
             ? DesktopSnapshot(
@@ -54,3 +72,6 @@ private var statesNoTopology: Bool {
         && NativeSpaces.activeDesktopNumberOverride == nil
         && NativeSpaces.mainDisplayUUIDOverride == nil
 }
+
+/// `pinDesktopReads`' per-process memo of each display's UUID.
+@MainActor private var testDisplayUUIDs: [DisplayID: String?] = [:]

@@ -10,8 +10,8 @@ import Testing
 /// ▸ owner ruling). The row is seeded: a menu tracked in a test ends
 /// the test process, so the Sides pick itself is a device check.
 ///
-/// Main-actor spend: two hosted rows in an offscreen window and short
-/// run-loop spins.
+/// Main-actor spend: two hosted rows in an offscreen window and
+/// run-loop spins until each row's awaited layout.
 @Suite("Shortcut key row conflict line (#3258)", .serialized)
 @MainActor
 struct ShortcutKeyRowLayoutTests {
@@ -24,8 +24,13 @@ struct ShortcutKeyRowLayoutTests {
         window.orderOut(nil)
     }
 
-    private func spin() {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+    /// Runs the main run loop until `done` holds; the deadline
+    /// only bounds a hang (tests.md ▸ await the handle, #3442).
+    private func spin(until done: () -> Bool) {
+        let deadline = Date().addingTimeInterval(10)
+        while !done(), Date() < deadline {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        }
     }
 
     /// Row B at Left ⌘H; its preflight refuses Right ⌘H, row A's.
@@ -63,9 +68,11 @@ struct ShortcutKeyRowLayoutTests {
         return field
     }
 
+    /// `ready` is the laid-out state the test reads, awaited.
     private func host<V: View>(
         _ view: V,
-        width: CGFloat = 640
+        width: CGFloat = 640,
+        ready: (NSView) -> Bool
     ) -> (NSWindow, NSView) {
         let rooted =
             view
@@ -82,7 +89,7 @@ struct ShortcutKeyRowLayoutTests {
         let host = NSHostingView(rootView: rooted)
         window.contentView = host
         host.layoutSubtreeIfNeeded()
-        spin()
+        spin { ready(host) }
         return (window, host)
     }
 
@@ -103,15 +110,24 @@ struct ShortcutKeyRowLayoutTests {
 
     /// The record well's focus ring, the well's own frame.
     private func wellLine(in host: NSView) throws -> CGRect {
+        try #require(well(in: host))
+    }
+
+    /// The well's frame, nil until it has laid out.
+    private func well(in host: NSView) -> CGRect? {
         // The badge carries a ring too; the well is the widest,
         // at least `labelMinWidth`.
-        let well = frames(of: "_FocusRingView", in: host)
+        frames(of: "_FocusRingView", in: host)
             .max { $0.width < $1.width }
-        return try #require(
-            well.flatMap {
+            .flatMap {
                 $0.width >= KeyRecorderField.labelMinWidth ? $0 : nil
             }
-        )
+    }
+
+    /// Whether the well has laid out with `count` line buttons.
+    private func drawn(_ count: Int, in host: NSView) -> Bool {
+        guard let line = well(in: host) else { return false }
+        return lineButtons(below: line, in: host).count == count
     }
 
     /// The conflict line's buttons: Steal, Go to, dismiss.
@@ -154,7 +170,7 @@ struct ShortcutKeyRowLayoutTests {
                 Spacer()
                 field(reading: Self.dead)
             }
-        )
+        ) { drawn(3, in: $0) && probe.title != .zero }
         defer { Self.close(window) }
         let line = try wellLine(in: host)
         let buttons = lineButtons(below: line, in: host)
@@ -181,7 +197,7 @@ struct ShortcutKeyRowLayoutTests {
                 Spacer()
                 field(reading: Self.dead)
             }
-        )
+        ) { drawn(0, in: $0) && probe.title != .zero }
         defer { Self.close(window) }
         let line = try wellLine(in: host)
         #expect(lineButtons(below: line, in: host).isEmpty)
@@ -206,7 +222,7 @@ struct ShortcutKeyRowLayoutTests {
                 field()
             },
             width: 360
-        )
+        ) { drawn(3, in: $0) }
         defer { Self.close(window) }
         let line = try wellLine(in: host)
         let buttons = lineButtons(below: line, in: host)
@@ -229,9 +245,8 @@ struct ShortcutKeyRowLayoutTests {
                 Spacer()
                 field(commits: "rcmd+h")
             }
-        )
+        ) { drawn(3, in: $0) }
         defer { Self.close(window) }
-        spin()
         let line = try wellLine(in: host)
         let buttons = lineButtons(below: line, in: host)
         #expect(buttons.count == 3)

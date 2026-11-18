@@ -10,8 +10,8 @@ import Testing
 /// reaches the focused field before the draft is read, whichever
 /// window is key and without moving the caret.
 ///
-/// Main-actor spend: one hosted row in an offscreen window and a few
-/// short run-loop spins per test.
+/// Main-actor spend: one hosted row in an offscreen window per test,
+/// run-loop spins until each awaited state and one 0.15 s beat.
 @Suite("A Save commits the field being typed in (#2584)", .serialized)
 @MainActor
 struct SaveCommitsFocusedFieldTests {
@@ -47,22 +47,31 @@ struct SaveCommitsFocusedFieldTests {
         )
         window.contentView = NSHostingView(rootView: row)
         window.contentView?.layoutSubtreeIfNeeded()
-        spin()
+        spin { Self.textField(in: window.contentView) != nil }
         let field = try #require(Self.textField(in: window.contentView))
         #expect(window.makeFirstResponder(field))
-        spin()
+        spin {
+            (window.firstResponder as? NSTextView)?.isFieldEditor == true
+        }
         let editor = try #require(window.firstResponder as? NSTextView)
         #expect(editor.isFieldEditor)
         editor.selectAll(nil)
         editor.insertText("1234", replacementRange: editor.selectedRange())
-        spin()
+        // The field's own draft takes the text on a later turn, and
+        // nothing outside the field shows it: a fixed beat.
+        RunLoop.main.run(until: Date().addingTimeInterval(0.15))
         // The precondition the bug needs: typed, not yet committed.
         #expect(model.config.settings.mouse.hoverFocusDelayMS != 1234)
         return Typed(model: model, window: window, editor: editor)
     }
 
-    private func spin() {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.15))
+    /// Runs the main run loop until `done` holds; the deadline
+    /// only bounds a hang (tests.md ▸ await the handle, #3442).
+    private func spin(until done: () -> Bool) {
+        let deadline = Date().addingTimeInterval(10)
+        while !done(), Date() < deadline {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        }
     }
 
     private static func textField(in view: NSView?) -> NSTextField? {

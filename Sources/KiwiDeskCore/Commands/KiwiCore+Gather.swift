@@ -147,7 +147,7 @@ extension KiwiCore {
     ) -> String? {
         let shared = sharedDesktopKey(in: snapshot)
         let named = state.workspaces.display(of: target)
-            .flatMap(NativeSpaces.displayUUID(for:))
+            .flatMap { desktopMemory.readDisplayUUID($0) }
         if let named {
             return snapshot.currentSpaces[named] != nil ? named : shared
         }

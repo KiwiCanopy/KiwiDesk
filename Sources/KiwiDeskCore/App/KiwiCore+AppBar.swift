@@ -20,7 +20,7 @@ extension KiwiCore {
     func appBarFallback(
         settings: TilingSettings
     ) -> [AppBarManager.Bar] {
-        guard NativeSpaces.activeSpaceIsUser(),
+        guard desktopMemory.readActiveSpaceIsUser(),
             let space = activeSpace,
             let app = appBarContent(space: space, settings: settings),
             let screen = ScreenList.mainOrFirst,

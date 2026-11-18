@@ -105,6 +105,7 @@ extension KiwiCore {
     func screenShowsUserSpace(on display: DisplayID) -> Bool {
         NativeSpaces.currentSpaceIsUser(
             display: display,
+            uuid: desktopMemory.readDisplayUUID(display),
             filed: desktopMemory.shownUserSpaces,
             live: desktopMemory.liveSpaceIsUser
         )
