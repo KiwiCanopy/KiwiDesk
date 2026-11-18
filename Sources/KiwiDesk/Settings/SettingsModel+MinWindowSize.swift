@@ -31,7 +31,15 @@ extension SettingsModel {
     /// The profile's most-used layout among those keeping a floor,
     /// BSP where no Space uses one — Monocle has none to step from.
     var minSizeMostUsed: MinWindowSizes.Layout {
-        let counts = MinWindowSizes.Layout.allCases.map {
+        mostUsed(among: MinWindowSizes.Layout.allCases)
+    }
+
+    /// The most-used of `layouts` in the profile, BSP where no
+    /// Space uses any of them.
+    private func mostUsed(
+        among layouts: [MinWindowSizes.Layout]
+    ) -> MinWindowSizes.Layout {
+        let counts = layouts.map {
             ($0, LayoutUsage.spaces(on: $0.mode, in: config).count)
         }
         return counts.max { $0.1 < $1.1 }
@@ -65,5 +73,32 @@ extension SettingsModel {
         _ axis: MinSizeAxis
     ) -> Int {
         Int(minSizes[layout][axis])
+    }
+
+    /// The layouts whose value the fit line counts (#3461):
+    /// Scrolling keeps its axis hint, and Floating and Monocle
+    /// place nothing side by side.
+    static let minSizeFitLayouts: [MinWindowSizes.Layout] = [
+        .stack, .grid, .track, .bsp,
+    ]
+
+    /// The layout the master's fit line counts for: the most-used
+    /// one that `minSizeFitLayouts` counts, BSP where none is used.
+    /// Its value is the master's only while every layout agrees,
+    /// which is the one state the master draws the line in.
+    var minSizeFitMaster: MinWindowSizes.Layout {
+        mostUsed(among: Self.minSizeFitLayouts)
+    }
+
+    /// What each counted layout's value fits on the main screen
+    /// under the draft (#3461), the screen read once; empty with
+    /// no screen. A readout: it stores nothing.
+    func minSizeFits() -> [MinWindowSizes.Layout: MinSizeFit] {
+        let sizes = Dictionary(
+            uniqueKeysWithValues: Self.minSizeFitLayouts.map {
+                ($0, minSizes[$0])
+            }
+        )
+        return core.minSizeFits(sizes, settings: config.settings)
     }
 }

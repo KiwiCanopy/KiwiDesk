@@ -1486,6 +1486,8 @@
   "layout_defaults.min_size.bsp_height": "Altura (BSP)",
   "layout_defaults.min_size.bsp_width": "Largura (BSP)",
   "layout_defaults.min_size.caption": "As janelas nunca são dispostas menores do que isto. Para ajustar um layout à parte, use “%1$@”.",
+  "layout_defaults.min_size.fits": "Cabe em “%1$@” — Na horizontal: %2$d · Na vertical: %3$d",
+  "layout_defaults.min_size.fits_none": "Não cabe em “%1$@”: ali uma janela não consegue chegar a esse tamanho.",
   "layout_defaults.min_size.floating_height": "Altura (Floating)",
   "layout_defaults.min_size.floating_width": "Largura (Floating)",
   "layout_defaults.min_size.grid_height": "Altura (Grid)",

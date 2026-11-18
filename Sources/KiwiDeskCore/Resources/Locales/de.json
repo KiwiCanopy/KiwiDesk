@@ -1486,6 +1486,8 @@
   "layout_defaults.min_size.bsp_height": "BSP-Höhe",
   "layout_defaults.min_size.bsp_width": "BSP-Breite",
   "layout_defaults.min_size.caption": "Fenster werden nie kleiner gekachelt als dieser Wert. Ein einzelnes Layout stellst du unter „%1$@“ eigens ein.",
+  "layout_defaults.min_size.fits": "Passt auf „%1$@“ — Nebeneinander: %2$d · Untereinander: %3$d",
+  "layout_defaults.min_size.fits_none": "Passt nicht auf „%1$@“: Ein Fenster kann dort nicht so groß werden.",
   "layout_defaults.min_size.floating_height": "Floating-Höhe",
   "layout_defaults.min_size.floating_width": "Floating-Breite",
   "layout_defaults.min_size.grid_height": "Grid-Höhe",

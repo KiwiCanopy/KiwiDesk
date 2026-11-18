@@ -1486,6 +1486,8 @@
   "layout_defaults.min_size.bsp_height": "Altura (BSP)",
   "layout_defaults.min_size.bsp_width": "Anchura (BSP)",
   "layout_defaults.min_size.caption": "Las ventanas nunca se colocan en mosaico más pequeñas que esto. Ajusta un diseño aparte en «%1$@».",
+  "layout_defaults.min_size.fits": "Cabe en «%1$@» — En horizontal: %2$d · En vertical: %3$d",
+  "layout_defaults.min_size.fits_none": "No cabe en «%1$@»: ahí una ventana no puede alcanzar este tamaño.",
   "layout_defaults.min_size.floating_height": "Altura (Floating)",
   "layout_defaults.min_size.floating_width": "Anchura (Floating)",
   "layout_defaults.min_size.grid_height": "Altura (Grid)",

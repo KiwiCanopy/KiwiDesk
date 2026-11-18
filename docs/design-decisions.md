@@ -8507,7 +8507,18 @@ slot size keeps its pt, % and count units because it is a
 target, not a floor. A value per screen fails a laptop that
 docks at dozens of desks: the list grows with every one, and
 none of it is visible from the screen in front of you. Screen
-size enters once, at the seed (below).
+size enters a stored value once, at the seed (below).
+
+:::unreleased
+*Screen size also enters at a readout (#3461).* Under the value,
+Settings counts how many windows of that size fit across and down
+the main screen, so a point value means something without a unit
+picker. It stores nothing, and the stepper's band stays fixed
+rather than following the screen
+([Choosing a control](ui-patterns.md#choosing-a-control)): a band
+that moved whenever a laptop docked would be the invisible
+per-screen value this rules out.
+:::
 
 **A Space may carry its own value, and it outranks its layout's**
 (#2422). Two Spaces sharing a layout can have different jobs — a
@@ -8526,14 +8537,25 @@ not session state: a held Space's renumber and a Space drop leave
 it alone, as they leave `gap.override`, because the value belongs
 to the arrangement that declared the Space and comes back with it.
 
-**The starter setup seeds every layout from the main screen's
-width ÷ 8, rounded to 10 pt and clamped to 260–460 pt, the same
-on both axes** (#821). 300 pt was right on a 2560 pt screen,
-generous on a laptop and mean on an ultrawide; the division
-gives 320 pt at 2560 and 430 pt on a 3440 pt ultrawide, and the
-clamp keeps a laptop from a floor below 260 pt and a 5120 pt
-super ultrawide (640 pt by the division) from one above 460.
-The rounding lands on the Settings stepper's 10 pt step.
+**The starter setup seeds every layout's minimum width from the
+main screen's width ÷ 8, rounded to 10 pt and clamped to
+260–460 pt** (#821). 300 pt was right on a
+2560 pt screen, generous on a laptop and mean on an ultrawide;
+the division gives 320 pt at 2560 and 430 pt on a 3440 pt
+ultrawide, and the clamp keeps a laptop from a floor below 260 pt
+and a 5120 pt super ultrawide (640 pt by the division) from one
+above 460. The rounding lands on the Settings stepper's 10 pt
+step.
+
+:::unreleased
+*The height takes the same rule from the screen's height
+(#3462).* Seeded from the width alone, a 3200 × 900 pt screen
+started at 400 × 400, which fits two windows down, so BSP stopped
+after its first horizontal split; from the height it starts at
+400 × 260 and three fit. A profile keeps the value it stored;
+only a new setup takes the seed.
+:::
+
 One rule replaces the starter's fixed 420 pt for the ultrawides,
 so the two never become separate rules. Every layout takes the
 main screen's answer rather than its own screen's: seeded from

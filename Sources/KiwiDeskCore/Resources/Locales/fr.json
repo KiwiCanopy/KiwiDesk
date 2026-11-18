@@ -1486,6 +1486,8 @@
   "layout_defaults.min_size.bsp_height": "Hauteur (BSP)",
   "layout_defaults.min_size.bsp_width": "Largeur (BSP)",
   "layout_defaults.min_size.caption": "Les fenêtres ne sont jamais tuilées plus petites que cette valeur. Réglez une disposition à part sous « %1$@ ».",
+  "layout_defaults.min_size.fits": "Tient sur « %1$@ » — En largeur : %2$d · En hauteur : %3$d",
+  "layout_defaults.min_size.fits_none": "Ne tient pas sur « %1$@ » : une fenêtre ne peut pas y atteindre cette taille.",
   "layout_defaults.min_size.floating_height": "Hauteur (Floating)",
   "layout_defaults.min_size.floating_width": "Largeur (Floating)",
   "layout_defaults.min_size.grid_height": "Hauteur (Grid)",

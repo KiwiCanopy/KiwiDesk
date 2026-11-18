@@ -209,11 +209,21 @@ by which pane the setting lives in:
 Minimum window size takes the same idiom on each axis (#204,
 #2237): a precise pt threshold, not a feel knob, drawn as Width
 × Height on one line, each a typeable field with its own
-stepper (100–800 pt, 10 pt steps). An "All layouts" master sits
+stepper in 10 pt steps. An "All layouts" master sits
 over a "Per layout" drawer, one row per layout. The master takes
 the gap masters' acknowledging shape over an axis that reads
 "Mixed" ([Interaction states](#interaction-states)), and the
 drawer stays open while any axis is mixed.
+
+:::unreleased
+The stepper runs 100–1700 pt (#3461), a third of a 5120 pt
+screen. A caption under the master names the main screen and
+counts how many windows of that size fit across and down it,
+gaps included, or says a window there cannot reach the size.
+While the master reads "Mixed" the caption moves to the Stack,
+Grid, Track and BSP rows instead. It is a readout and stores
+nothing.
+:::
 
 KiwiVision's **Dim** is a ruled exception: a proportion,
 yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on

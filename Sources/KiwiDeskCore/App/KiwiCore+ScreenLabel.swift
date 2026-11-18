@@ -7,9 +7,15 @@ extension KiwiCore {
     /// a lone screen is never named — or for a screen state does
     /// not know.
     func screenLabel(of display: DisplayID) -> ScreenLabel? {
+        guard state.workspaces.allDisplays.count > 1 else { return nil }
+        return namedScreenLabel(of: display)
+    }
+
+    /// `display`'s label, a lone screen named too (the minimum-size
+    /// readout, #3461); nil for a screen state does not know.
+    func namedScreenLabel(of display: DisplayID) -> ScreenLabel? {
         let displays = state.workspaces.allDisplays
-        guard displays.count > 1,
-            let named = displays.first(where: { $0.id == display })
+        guard let named = displays.first(where: { $0.id == display })
         else { return nil }
         guard displays.filter({ $0.name == named.name }).count > 1 else {
             return ScreenLabel(name: named.name)

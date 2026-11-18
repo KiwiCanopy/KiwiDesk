@@ -120,6 +120,10 @@ struct LayoutBoundsRoutingTests {
         // `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)`,
         // the same seam one level down (`ScrollingColumnCapDoorTests`).
         "App/KiwiCore+ScrollingColumnCap.swift": 1,
+        // The minimum-size readout (#3461) counts for the Settings
+        // DRAFT on the same grounds: the raw size, the draft's own
+        // strip reserved one level down.
+        "App/KiwiCore+MinSizeFit.swift": 1,
         // A maximized window (#2448) fills the whole visible frame
         // because the shelf stands down while it shows, so the
         // strip `layoutBounds(on:)` reserves draws nothing there.
