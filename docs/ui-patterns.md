@@ -257,6 +257,17 @@ share is a number on a bounded range, which the stepper already
 types everywhere else. A typed percent that rounds to a menu
 fraction stores that fraction, so the menu checks it.
 
+:::unreleased
+A cell may also hold a length in points (#3460). Each fraction in
+the pop-up shows the length it fills on a connected screen of that
+shape, and a stored length shows as stored, never as a screen
+clamps it. *Custom…* gains a `% | pt` switch: % snaps as above, pt
+takes whole points from 200 in steps of 10 and never snaps, and a
+flip converts on the row's screen or clears the field with none
+connected. Under the row, a line names each connected screen a
+stored length is too long for, which a press fills on that axis.
+:::
+
 **Layout Defaults picks one layout at a time, and picks it by
 its picture (#204, #678 turn 10).** The layout modes are a
 fixed, small, mutually-exclusive set (`LayoutMode` minus

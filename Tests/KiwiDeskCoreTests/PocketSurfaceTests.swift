@@ -91,7 +91,7 @@ struct PocketSurfaceTests {
         let core = makeCore()
         core.execute("pocket")
         // The Maximize it went in with rides the slot (#3408).
-        let shape = MaximizeShape(axis: .height, share: 0.5)
+        let shape = MaximizeShape(axis: .height, share: .fraction(0.5))
         core.state.setPocketReturnMaximized(shape, of: one)
         let snapshot = core.state.inPlaceSnapshot(
             monocleShown: [:],

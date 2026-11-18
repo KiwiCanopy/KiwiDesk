@@ -189,9 +189,15 @@
         "height" : {
           "laptop" : 0.75,
           "portrait" : 0.75,
-          "super_ultrawide" : 0.25,
-          "ultrawide" : 0.3333333333333333,
-          "widescreen" : 0.5
+          "super_ultrawide" : {
+            "points" : 1280
+          },
+          "ultrawide" : {
+            "points" : 1280
+          },
+          "widescreen" : {
+            "points" : 1280
+          }
         },
         "width" : {
           "laptop" : 0.6666666666666666,

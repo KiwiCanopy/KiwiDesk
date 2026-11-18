@@ -146,6 +146,10 @@ struct SettingsAnchorIdentityTests {
         // list's card, which anchors through `.searchAnchored`.
         "AppRulesSection+Lists.swift": 2,
         "AppRulesSection+Automatic.swift": 1,
+        // Unit identity: Maximize's Custom… field rebuilds on a
+        // % | pt flip so its text shows the converted value
+        // (#3460). A popover, so nothing there is a reveal target.
+        "MaximizeCustomShare.swift": 1,
         // Scroll identity: KiwiHub's Desktops side scrolls its
         // selected screen row, card and line into view (#1229). Not
         // a Settings destination, so nothing there is a reveal

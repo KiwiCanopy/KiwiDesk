@@ -4,7 +4,8 @@ import Foundation
 /// `_override` twin; `nil` clears. A window already maximized keeps
 /// the shape it was pressed with, as `maximize.set_share` does.
 extension KiwiCore {
-    /// `maximize.set_share_override(space, axis, share|nil)`.
+    /// `maximize.set_share_override(space, axis, share|nil)`; a share
+    /// is a fraction or a `"NNNpt"` length (#3460).
     func setMaximizeShareOverride(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -14,19 +15,13 @@ extension KiwiCore {
         guard let raw = args.dropFirst().first?.stringValue,
             let axis = MaximizeAxis(rawValue: raw)
         else { return .expected(MaximizeAxis.self) }
-        let share: Double?
+        let share: MaximizeLength?
         switch args.dropFirst(2).first {
         case nil, .null?:
             share = nil
         case let value?:
-            guard let read = value.numberValue,
-                MaximizeShape.shareRange.contains(read)
-            else {
-                return .fail(
-                    "expected a share from "
-                        + "\(MaximizeShape.shareRange.lowerBound) to "
-                        + "\(MaximizeShape.shareRange.upperBound)"
-                )
+            guard let read = MaximizeLength.argument(value) else {
+                return .fail(MaximizeLength.expected)
             }
             share = read
         }

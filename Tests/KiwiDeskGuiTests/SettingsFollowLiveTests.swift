@@ -57,7 +57,7 @@ struct SettingsFollowLiveTests {
         #expect(reply.isSuccess)
     }
 
-    private var laptopHeight: WritableKeyPath<GuiConfig, Double> {
+    private var laptopHeight: WritableKeyPath<GuiConfig, MaximizeLength> {
         \.settings.maximize.heightShare[.laptop]
     }
 
@@ -67,7 +67,7 @@ struct SettingsFollowLiveTests {
         let model = try makeModel()
         setLaptopHeight(model, 0.4)
         model.liveSettingsMoved()
-        #expect(model.config[keyPath: laptopHeight] == 0.4)
+        #expect(model.config[keyPath: laptopHeight] == .fraction(0.4))
         #expect(!model.isDirty)
         // The pill lists the same value, as a live row.
         let row = try #require(
@@ -81,11 +81,11 @@ struct SettingsFollowLiveTests {
     @Test("an edited leaf keeps the user's value")
     func editedLeafStays() throws {
         let model = try makeModel()
-        model.config[keyPath: laptopHeight] = 0.6
+        model.config[keyPath: laptopHeight] = .fraction(0.6)
         #expect(model.isDirty)
         setLaptopHeight(model, 0.4)
         model.liveSettingsMoved()
-        #expect(model.config[keyPath: laptopHeight] == 0.6)
+        #expect(model.config[keyPath: laptopHeight] == .fraction(0.6))
         #expect(model.isDirty)
         // The draft's row narrates it, from live to the edit.
         let rows = SettingsDiffRowSource.rows(for: model)
@@ -98,18 +98,21 @@ struct SettingsFollowLiveTests {
     @Test("an edit beside a live change keeps both")
     func editBesideLiveChange() throws {
         let model = try makeModel()
-        model.config.settings.maximize.widthShare[.laptop] = 0.6
+        model.config.settings.maximize.widthShare[.laptop] = .fraction(0.6)
         setLaptopHeight(model, 0.4)
         model.liveSettingsMoved()
-        #expect(model.config[keyPath: laptopHeight] == 0.4)
-        #expect(model.config.settings.maximize.widthShare[.laptop] == 0.6)
+        #expect(model.config[keyPath: laptopHeight] == .fraction(0.4))
+        #expect(
+            model.config.settings.maximize.widthShare[.laptop]
+                == .fraction(0.6)
+        )
         #expect(model.draftChangeCount == 1)
         model.updateActiveProfile()
         let stored = try model.core.resolvedSettings(
             of: model.core.profiles.read(name: "Desk")
         )
-        #expect(stored.maximize.heightShare[.laptop] == 0.4)
-        #expect(stored.maximize.widthShare[.laptop] == 0.6)
+        #expect(stored.maximize.heightShare[.laptop] == .fraction(0.4))
+        #expect(stored.maximize.widthShare[.laptop] == .fraction(0.6))
     }
 
     @Test("a stored profile's draft stays as it is")
@@ -130,7 +133,7 @@ struct SettingsFollowLiveTests {
         let model = try makeModel()
         setLaptopHeight(model, 0.4)
         model.refreshOwner()
-        #expect(model.config[keyPath: laptopHeight] == 0.4)
+        #expect(model.config[keyPath: laptopHeight] == .fraction(0.4))
         #expect(model.liveUnsaved)
     }
 
@@ -140,17 +143,20 @@ struct SettingsFollowLiveTests {
     func revertFollowsAtOnce() throws {
         let model = try makeModel()
         let saved = model.config[keyPath: laptopHeight]
-        model.config.settings.maximize.widthShare[.laptop] = 0.6
+        model.config.settings.maximize.widthShare[.laptop] = .fraction(0.6)
         setLaptopHeight(model, 0.4)
         model.liveSettingsMoved()
-        #expect(model.config[keyPath: laptopHeight] == 0.4)
+        #expect(model.config[keyPath: laptopHeight] == .fraction(0.4))
         let row = try #require(
             SettingsDiffRowSource.rows(for: model)
                 .first { $0.key == .behaviour(.maximizeHeightShare) }
         )
         model.revertLive(row.keepIDs)
         #expect(model.config[keyPath: laptopHeight] == saved)
-        #expect(model.config.settings.maximize.widthShare[.laptop] == 0.6)
+        #expect(
+            model.config.settings.maximize.widthShare[.laptop]
+                == .fraction(0.6)
+        )
     }
 
     @Test("a stale page stays as it is")

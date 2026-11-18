@@ -1,23 +1,26 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A share pop-up's "Custom…" (#3062, ruling amendment 2): a
-/// typed whole percent, its snap onto the menu's fractions, and the
-/// anchored popover that takes it.
+/// A share pop-up's "Custom…" (#3062 ruling amendment 2, #3460): a
+/// typed whole percent, which snaps onto the menu's fractions, or a
+/// typed whole length in points, which never snaps, and the anchored
+/// popover that takes either.
 @MainActor
 enum MaximizeCustomShare {
-    /// The tag "Custom…" carries: no share is negative, so it never
-    /// collides with a stored value.
-    static let tag: Double = -1
-
-    /// The popover's range in percent, Core's clamp (#1359), and
-    /// its arrow step.
-    static var range: ClosedRange<Int> {
+    /// The popover's percent range, Core's clamp (#1359), and its
+    /// arrow step.
+    nonisolated static var range: ClosedRange<Int> {
         percent(
-            of: MaximizeShape.shareRange.lowerBound
-        )...percent(of: MaximizeShape.shareRange.upperBound)
+            of: MaximizeLength.fractionRange.lowerBound
+        )...percent(of: MaximizeLength.fractionRange.upperBound)
     }
     static let step = 5
+
+    /// The lengths Custom… stores (#3460): whole points from 200,
+    /// with no cap tied to one screen. The ceiling only bounds the
+    /// field.
+    nonisolated static let pointsRange = 200...20_000
+    static let pointsStep = 10
 
     /// The share a typed percent stores: a menu fraction's exact
     /// value where the percent rounds to it (33 stores ⅓, so the
@@ -30,58 +33,173 @@ enum MaximizeCustomShare {
     }
 
     /// The whole percent a stored share seeds the popover with.
-    static func percent(of share: Double) -> Int {
+    nonisolated static func percent(of share: Double) -> Int {
         Int((share * 100).rounded())
     }
 }
 
+/// The unit a Custom popover types in (#3460).
+enum MaximizeCustomUnit: Hashable {
+    case percent
+    case points
+}
+
 /// One presentation of the Custom popover (#843): a fresh id per
-/// open, the percent being typed, and whether Escape cancelled it.
-/// The row holds it, so the row writes the draft at the dismissal.
+/// open, the unit and number being typed, and whether Escape
+/// cancelled it. The row holds it, so the row writes the draft at
+/// the dismissal. A number of 0 is an empty field: a unit flip with
+/// no screen to convert on clears it.
 struct MaximizeCustomRequest: Identifiable, Equatable {
     let id = UUID()
-    /// The stored share as a whole percent, which the field opens on.
-    let seed: Int
-    var percent: Int
+    /// What the field opened on, which a dismissal leaves alone.
+    let seed: MaximizeLength
+    /// The axis the share sizes the other of.
+    let axis: MaximizeAxis
+    /// This row's screen, which a unit flip converts on; nil with
+    /// no screen of that shape.
+    let region: MaximizeRegion?
+    var unit: MaximizeCustomUnit
+    var number: Int
     var cancelled = false
 
-    init(seed: Int) {
-        self.seed = seed
-        percent = seed
+    init(
+        stored: MaximizeLength,
+        axis: MaximizeAxis,
+        region: MaximizeRegion?
+    ) {
+        seed = stored
+        self.axis = axis
+        self.region = region
+        switch stored {
+        case .fraction(let fraction):
+            unit = .percent
+            number = MaximizeCustomShare.percent(of: fraction)
+        case .points(let points):
+            unit = .points
+            number = Int(points.rounded())
+        }
+    }
+
+    /// The share the dismissal writes: nil where Escape cancelled,
+    /// the field is empty or the stored share still reads as typed.
+    @MainActor var committed: MaximizeLength? {
+        guard !cancelled, number > 0, let typed = typed,
+            !typed.matches(seed)
+        else { return nil }
+        return typed
+    }
+
+    @MainActor private var typed: MaximizeLength? {
+        switch unit {
+        case .percent:
+            let range = MaximizeCustomShare.range
+            guard range.contains(number) else { return nil }
+            if case .fraction(let stored) = seed,
+                MaximizeCustomShare.percent(of: stored) == number
+            {
+                return seed
+            }
+            return .fraction(MaximizeCustomShare.share(forPercent: number))
+        case .points:
+            let range = MaximizeCustomShare.pointsRange
+            guard range.contains(number) else { return nil }
+            return .points(CGFloat(number))
+        }
+    }
+
+    /// Switches the field to `next`, converting the number on this
+    /// row's screen through Core's resolution; with no screen the
+    /// field clears.
+    @MainActor mutating func flip(to next: MaximizeCustomUnit) {
+        guard next != unit else { return }
+        defer { unit = next }
+        guard number > 0, let region else {
+            number = 0
+            return
+        }
+        switch next {
+        case .points:
+            // The percent as the menu stores it, so 33 is ⅓.
+            let points = region.points(
+                of: .fraction(MaximizeCustomShare.share(forPercent: number)),
+                axis: axis
+            )
+            let range = MaximizeCustomShare.pointsRange
+            number = min(
+                max(Int(points), range.lowerBound),
+                range.upperBound
+            )
+        case .percent:
+            guard
+                let share = region.fraction(
+                    ofPoints: CGFloat(number),
+                    axis: axis
+                )
+            else {
+                number = 0
+                return
+            }
+            let range = MaximizeCustomShare.range
+            number = min(
+                max(MaximizeCustomShare.percent(of: share), range.lowerBound),
+                range.upperBound
+            )
+        }
     }
 }
 
-/// The Custom popover: one percent field with arrows. Return or a
-/// click outside dismisses it, which commits at the row; Escape
-/// cancels first. It has no buttons.
+/// The Custom popover: a `% | pt` switch and one field with arrows.
+/// Return or a click outside dismisses it, which commits at the
+/// row; Escape cancels first. It has no buttons.
 struct MaximizeCustomPopover: View {
-    @Binding var percent: Int
+    @Binding var request: MaximizeCustomRequest
     /// The column's label, for the spoken name.
     let column: String
-    let cancel: () -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        HStack(spacing: 8) {
-            Text(L("layout_defaults.maximize.custom.share", "Share"))
-                .accessibilityHidden(true)
-            // Live commit: a click outside closes the popover without
-            // blurring the field first, so `percent` must already
-            // hold what is typed.
-            StepperRow(
-                label: spokenName,
-                value: $percent,
-                in: MaximizeCustomShare.range,
-                step: MaximizeCustomShare.step,
-                suffix: L("layout_defaults.maximize.custom.percent", "%"),
-                labelHidden: true,
-                liveCommit: true
+        VStack(alignment: .leading, spacing: 10) {
+            SegmentedPicker(
+                L("slot_size.unit", "Size unit"),
+                selection: Binding(
+                    get: { request.unit },
+                    set: { request.flip(to: $0) }
+                ),
+                options: [
+                    (L("slot_size.percent", "Percent"), .percent),
+                    (L("slot_size.points", "Points"), .points),
+                ]
             )
+            HStack(spacing: 8) {
+                Text(L("layout_defaults.maximize.custom.share", "Size"))
+                    .accessibilityHidden(true)
+                // Live commit: a click outside closes the popover
+                // without blurring the field first, so `number` must
+                // already hold what is typed. Keyed on the unit, so a
+                // flip opens a fresh field on the converted number.
+                StepperRow(
+                    label: spokenName,
+                    value: $request.number,
+                    in: request.unit == .percent
+                        ? MaximizeCustomShare.range
+                        : MaximizeCustomShare.pointsRange,
+                    step: request.unit == .percent
+                        ? MaximizeCustomShare.step
+                        : MaximizeCustomShare.pointsStep,
+                    suffix: request.unit == .percent
+                        ? L("layout_defaults.maximize.custom.percent", "%")
+                        : L("layout_defaults.maximize.custom.points", "pt"),
+                    labelHidden: true,
+                    liveCommit: true,
+                    emptyOutsideRange: true
+                )
+                .id(request.unit)
+            }
         }
         .padding(12)
         .onSubmit { dismiss() }
         .onExitCommand {
-            cancel()
+            request.cancelled = true
             dismiss()
         }
     }
@@ -91,7 +209,7 @@ struct MaximizeCustomPopover: View {
         // the name's (gui.md ▸ a named control is valued).
         L(
             "layout_defaults.maximize.custom.ax",
-            "%1$@, custom share",
+            "%1$@, custom size",
             column
         )
     }

@@ -21,6 +21,10 @@ struct StepperRow: View {
     /// field, so the action would use the last committed value
     /// while a newer number sits unread onscreen.
     let liveCommit: Bool
+    /// A value outside `range` shows as an empty field rather than
+    /// its digits — the Maximize Custom popover's cleared field
+    /// (#3460). Off for every other row.
+    let emptyOutsideRange: Bool
 
     init(
         label: String,
@@ -30,7 +34,8 @@ struct StepperRow: View {
         suffix: String? = nil,
         labelHidden: Bool = false,
         help: String? = nil,
-        liveCommit: Bool = false
+        liveCommit: Bool = false,
+        emptyOutsideRange: Bool = false
     ) {
         assert(
             !(labelHidden && help != nil),
@@ -45,7 +50,14 @@ struct StepperRow: View {
         self.labelHidden = labelHidden
         self.help = help
         self.liveCommit = liveCommit
-        self._text = State(initialValue: "\(value.wrappedValue)")
+        self.emptyOutsideRange = emptyOutsideRange
+        self._text = State(
+            initialValue: Self.shown(
+                value.wrappedValue,
+                in: range,
+                empty: emptyOutsideRange
+            )
+        )
     }
 
     var body: some View {
@@ -110,8 +122,8 @@ struct StepperRow: View {
                 .controlSize(.large)
                 .accessibilityLabel(label)
                 .accessibilityValue(
-                    suffix.map { "\(value) \($0)" }
-                        ?? "\(value)"
+                    shown.isEmpty
+                        ? "" : suffix.map { "\(shown) \($0)" } ?? shown
                 )
         }
     }
@@ -142,6 +154,18 @@ struct StepperRow: View {
         if let parsed = Int(text) {
             value = min(max(parsed, range.lowerBound), range.upperBound)
         }
-        text = "\(value)"
+        text = shown
+    }
+
+    private var shown: String {
+        Self.shown(value, in: range, empty: emptyOutsideRange)
+    }
+
+    private static func shown(
+        _ value: Int,
+        in range: ClosedRange<Int>,
+        empty: Bool
+    ) -> String {
+        empty && !range.contains(value) ? "" : "\(value)"
     }
 }

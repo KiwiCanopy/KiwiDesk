@@ -54,19 +54,18 @@ extension TilingEngine {
     /// visible bounds, from the window's `slot` (#3062): the whole
     /// screen, or its axis whole and the other at the share,
     /// centred on the screen or on the slot and kept inside it.
+    /// The one place a share becomes points (#3460): a fraction of
+    /// the screen's length, clamped to `fractionRange`, or a length
+    /// no longer than that axis, which then fills it.
     nonisolated static func maximizedBounds(
         _ shape: MaximizeShape,
         screen: CGRect,
         slot: CGRect
     ) -> CGRect {
         guard let axis = shape.axis else { return screen }
-        let share = min(
-            max(shape.share, MaximizeShape.shareRange.lowerBound),
-            MaximizeShape.shareRange.upperBound
-        )
         switch axis {
         case .height:
-            let width = (screen.width * share).rounded()
+            let width = length(shape.share, along: screen.width)
             let centre =
                 shape.anchor == .inPlace ? slot.midX : screen.midX
             return CGRect(
@@ -76,7 +75,7 @@ extension TilingEngine {
                 height: screen.height
             )
         case .width:
-            let height = (screen.height * share).rounded()
+            let height = length(shape.share, along: screen.height)
             let centre =
                 shape.anchor == .inPlace ? slot.midY : screen.midY
             return CGRect(
@@ -85,6 +84,21 @@ extension TilingEngine {
                 width: screen.width,
                 height: height
             )
+        }
+    }
+
+    /// `share` in whole points along an axis `length` long.
+    private nonisolated static func length(
+        _ share: MaximizeLength,
+        along length: CGFloat
+    ) -> CGFloat {
+        switch share {
+        case .fraction(let value):
+            let range = MaximizeLength.fractionRange
+            let clamped = min(max(value, range.lowerBound), range.upperBound)
+            return (length * clamped).rounded()
+        case .points(let value):
+            return min(value.rounded(), length)
         }
     }
 
@@ -97,5 +111,37 @@ extension TilingEngine {
         _ high: CGFloat
     ) -> CGFloat {
         min(max(centre - length / 2, low), high - length)
+    }
+}
+
+/// A screen's Maximize region as Settings reads it (#3460): built
+/// only by `KiwiCore.maximizeRegion(on:)` from the bounds hook, so a
+/// readout, an overflow line and the Custom unit flip resolve a
+/// share as a press does, through `maximizedBounds`.
+public struct MaximizeRegion: Equatable, Sendable {
+    let bounds: CGRect
+
+    /// The length `share` fills along the other axis of `axis`.
+    public func points(
+        of share: MaximizeLength,
+        axis: MaximizeAxis
+    ) -> CGFloat {
+        let rect = TilingEngine.maximizedBounds(
+            MaximizeShape(axis: axis, share: share),
+            screen: bounds,
+            slot: bounds
+        )
+        return axis == .height ? rect.width : rect.height
+    }
+
+    /// The share of the screen `points` is along the other axis of
+    /// `axis`, the inverse a unit flip takes; nil on an empty axis.
+    public func fraction(
+        ofPoints points: CGFloat,
+        axis: MaximizeAxis
+    ) -> Double? {
+        let whole = self.points(of: .fraction(1), axis: axis)
+        guard whole > 0 else { return nil }
+        return Double(points / whole)
     }
 }

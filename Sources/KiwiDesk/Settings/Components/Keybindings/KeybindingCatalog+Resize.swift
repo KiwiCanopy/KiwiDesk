@@ -125,7 +125,7 @@ extension KeybindingCatalog {
     )
 
     /// `toggle_maximized("height")` (#3062): the full height at
-    /// the stored share of the width.
+    /// the stored share or length of the width (#3460).
     static let maximizeHeight = NavCommand(
         label: "Maximize Height",
         lua: "KiwiDesk.toggle_maximized(\"height\")",
@@ -136,7 +136,8 @@ extension KeybindingCatalog {
             L(
                 "keybinding.maximize_height.help",
                 "Fills the screen's height with this window, at a "
-                    + "share of its width, leaving the rest of the "
+                    + "share of its width or a set width, leaving the "
+                    + "rest of the "
                     + "Space as it is. Press again, or move focus to "
                     + "another window, to put it back."
             )
@@ -144,7 +145,7 @@ extension KeybindingCatalog {
     )
 
     /// `toggle_maximized("width")` (#3062): the full width at the
-    /// stored share of the height.
+    /// stored share or length of the height (#3460).
     static let maximizeWidth = NavCommand(
         label: "Maximize Width",
         lua: "KiwiDesk.toggle_maximized(\"width\")",
@@ -155,7 +156,8 @@ extension KeybindingCatalog {
             L(
                 "keybinding.maximize_width.help",
                 "Fills the screen's width with this window, at a "
-                    + "share of its height, leaving the rest of the "
+                    + "share of its height or a set height, leaving the "
+                    + "rest of the "
                     + "Space as it is. Press again, or move focus to "
                     + "another window, to put it back."
             )

@@ -6734,6 +6734,46 @@ they meant, and a press would size the window just short of the
 third the menu offers.
 
 :::unreleased
+*Amended (#3460, owner, 2026-11-18): a cell holds a fraction or a
+length in points.* A shape covers a wide range of real screens, so
+one fraction gives very different windows: ¼ of a 3200 pt Super
+Ultrawide is 800 pt, of a 5120 pt one 1280 pt. What a Maximize
+Height holds, an editor or a browser column, is sized in points,
+so a point width that is the same on every screen is the goal, not
+a defect. A length resolves at the press, in
+`TilingEngine.maximizedBounds` alone, against the fill's own
+region: a length longer than the axis fills it and keeps the
+shape's axis, and only a whole fraction is a full Maximize. % snaps
+onto the five fractions as above; pt never snaps, and Custom…
+stores whole points from 200, with no cap tied to one screen. A
+closed pt cell shows the stored length, never what a screen clamps
+it to, so the diff and the revert stay truthful, and a line under
+the row says where a connected screen is too small for it.
+
+The defaults move with it. Maximize Height's width is ¾ on Laptop
+and Portrait and 1280 pt on Widescreen, Ultrawide and Super
+Ultrawide, one constant: 1280 pt is what the old fractions gave on
+the common 2560, 3840 and 5120 pt screens (½, ⅓, ¼), so those see
+no change and narrower ones of each shape a wider column. A wider
+screen of a shape — a 5120 pt Ultrawide, whose ⅓ was 1707 pt —
+gets a narrower one, which the owner accepted for one column on
+every wide screen. A fixed
+length on a laptop would nearly fill it, so Laptop and Portrait
+keep a fraction, and Maximize Width keeps its fractions on every
+shape. A stored file keeps its fractions: a stored ¼ cannot be told
+from a chosen ¼, so there is no migration and no reset control,
+only a release note. A bare number keeps its meaning on the wire,
+so no `ConfigMigration` is owed. The cost is that a build before
+this one cannot read a points cell and loses the file, and since a
+new profile stores the 1280 pt default unasked, that reaches an
+older Mac sharing the sync folder, not only a downgrade.
+
+The scrolling ultrawide slot stays at 0.3 (ui-designer): a slot
+sets how many windows show and keeps the peek, while a Maximize
+column sets one window's width.
+:::
+
+:::unreleased
 **A Space may carry its own shares and "from", over its screen's
 row (#3090).** An editor Space and a browser Space on one screen
 share one shape row, and that row cannot serve both: the editor

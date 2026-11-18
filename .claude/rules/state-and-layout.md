@@ -2175,6 +2175,17 @@ editing here:
   resolver rather than copying it). A count↔fraction inverse
   or a "how many fit" door is Core's, homed beside `pitched`,
   never GUI arithmetic over a screen frame.
+- **A Maximize length resolves against a screen, and back, only in
+  `TilingEngine.maximizedBounds` (#3460)**, against the fill's own
+  region — `visibleBounds`, since a Maximize hides the bars and
+  takes no gaps, so `layoutBounds` is the wrong region. A reader
+  outside the press — a Settings readout, an overflow line, a unit
+  flip — takes `KiwiCore.maximizeRegion(on:)`, whose
+  `MaximizeRegion` reads the screen through that hook and answers
+  through that function, never arithmetic over a screen frame of
+  its own (`MaximizeLengthResolutionSeamTests`,
+  `MaximizeLengthFillTests`). A clamp of a typed or parsed value to
+  its own range is not a resolution.
 - **A resize store holding an absolute LENGTH owes a ceiling,
   and since #1057 the whole press DECISION lives in ONE pure
   type (#966/#1057).** `ScrollSlotDomain.decide` — reached only

@@ -56,6 +56,7 @@ private func shape(_ core: KiwiCore) -> MaximizeShape? {
 @Suite("Directional maximize (#3062)", .serialized)
 @MainActor
 struct MaximizeDirectionalTests {
+    /// Widescreen's stored width is 1280 pt (#3460).
     @Test("Height fills top to bottom at the stored share, centred")
     func heightCentred() {
         let core = makeCore()
@@ -63,7 +64,7 @@ struct MaximizeDirectionalTests {
             core.tiler.settings.maximize.share(
                 for: .height,
                 on: .widescreen
-            ) == 0.5
+            ) == .points(1280)
         )
         #expect(
             core.execute("toggle_maximized", args: [.string("height")])
@@ -72,7 +73,7 @@ struct MaximizeDirectionalTests {
         #expect(shape(core)?.axis == .height)
         #expect(
             issued(core)[w1]
-                == CGRect(x: 400, y: 25, width: 800, height: 1000)
+                == CGRect(x: 160, y: 25, width: 1280, height: 1000)
         )
     }
 

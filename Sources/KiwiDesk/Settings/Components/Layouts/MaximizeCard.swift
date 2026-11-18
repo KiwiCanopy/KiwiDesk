@@ -41,7 +41,8 @@ struct MaximizeCard: View {
             caption: L(
                 "layout_defaults.maximize.caption",
                 "How wide %1$@ makes a window, and how tall %2$@ "
-                    + "makes it, for each shape of screen. A screen's "
+                    + "makes it, for each shape of screen: a share of "
+                    + "the screen, or a set size in points. A screen's "
                     + "shape comes from its size.",
                 KeybindingCatalog.maximizeHeight.displayLabel(),
                 KeybindingCatalog.maximizeWidth.displayLabel()

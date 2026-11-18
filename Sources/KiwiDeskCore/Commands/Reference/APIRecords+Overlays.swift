@@ -98,8 +98,8 @@ extension APIReference {
 
     static let maximizeRecords: [String: APIRecord] = [
         "set_share": APIRecord(
-            "Sets a Maximize Height or Width's share of the other "
-                + "axis, 0.1 to 1, per screen shape.",
+            "Sets a Maximize Height or Width's share, 0.1 to 1 or a "
+                + "\"NNNpt\" length, per screen shape.",
             .choice("axis", MaximizeAxis.self),
             .number("share"),
             .choice("shape", ScreenShape.self, optional: true)
@@ -116,8 +116,8 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_share_override": APIRecord(
-            "Sets one Space's own Maximize Height or Width share, "
-                + "over its screen shape's; nil clears.",
+            "Sets one Space's own Maximize Height or Width share or "
+                + "\"NNNpt\" length; nil clears.",
             .space("space"),
             .choice("axis", MaximizeAxis.self),
             .number("share", optional: true)

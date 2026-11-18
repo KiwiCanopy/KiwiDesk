@@ -51,7 +51,7 @@ struct SpaceSizingCensusTests {
         space.runTails = [w2]
         space.maximized = Maximize(
             window: w2,
-            shape: MaximizeShape(axis: .width, share: 0.4)
+            shape: MaximizeShape(axis: .width, share: .fraction(0.4))
         )
         return space
     }

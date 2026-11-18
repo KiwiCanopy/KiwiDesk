@@ -34,8 +34,7 @@ extension KiwiCore {
         let settings = tiler.settings.maximize
         var share = settings.share(for: axis, on: shape, in: space)
         if args.count > 1 {
-            guard let read = args[1].numberValue,
-                MaximizeShape.shareRange.contains(read)
+            guard let read = MaximizeLength.argument(args[1])
             else { return .failure(Self.shareRefusal) }
             share = read
         }
@@ -58,9 +57,7 @@ extension KiwiCore {
     }
 
     private static let shareRefusal = MaximizeArgRefusal(
-        message: "expected a share from "
-            + "\(MaximizeShape.shareRange.lowerBound) to "
-            + "\(MaximizeShape.shareRange.upperBound)"
+        message: MaximizeLength.expected
     )
 
     /// The shape of the screen `space` lays out on, by the rule
@@ -93,8 +90,8 @@ extension KiwiCore {
             guard let raw = args.first?.stringValue,
                 let axis = MaximizeAxis(rawValue: raw)
             else { return .expected(MaximizeAxis.self) }
-            guard args.count > 1, let share = args[1].numberValue,
-                MaximizeShape.shareRange.contains(share)
+            guard args.count > 1,
+                let share = MaximizeLength.argument(args[1])
             else { return Self.shareRefusal.response }
             let shape: ScreenShape?
             switch Self.screenShapeArgument(args, at: 2) {

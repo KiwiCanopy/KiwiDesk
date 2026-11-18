@@ -39,22 +39,24 @@ public struct Maximize: Equatable, Sendable {
 }
 
 /// What one Maximize fills: the whole screen (`axis` nil), or one
-/// axis at `share` of the other, anchored by `anchor` (#3062).
+/// axis at `share` of the other, anchored by `anchor` (#3062): a
+/// fraction or a length (#3460).
 public struct MaximizeShape: Equatable, Sendable, Codable {
     public var axis: MaximizeAxis?
-    public var share: Double
+    public var share: MaximizeLength
     public var anchor: MaximizeAnchor
 
     public init(
         axis: MaximizeAxis?,
-        share: Double = 1,
+        share: MaximizeLength = .fraction(1),
         anchor: MaximizeAnchor = .center
     ) {
-        // A whole share fills the screen: it IS a full Maximize, so
-        // every reader of "fills its screen" asks `axis` alone.
-        let full = axis == nil || share >= 1
+        // A whole fraction fills the screen: it IS a full Maximize,
+        // so every reader of "fills its screen" asks `axis` alone. A
+        // length never is, whatever the screen (#3460).
+        let full = axis == nil || (share.fraction ?? 0) >= 1
         self.axis = full ? nil : axis
-        self.share = full ? 1 : share
+        self.share = full ? .fraction(1) : share
         self.anchor = full ? .center : anchor
     }
 
@@ -62,12 +64,9 @@ public struct MaximizeShape: Equatable, Sendable, Codable {
     /// of this one's, so a share typed as 0.6667 is ⅔ (#3062).
     public func matches(_ other: MaximizeShape) -> Bool {
         axis == other.axis && anchor == other.anchor
-            && abs(share - other.share) < 0.005
+            && share.matches(other.share)
     }
 
     /// Today's Maximize (#2448): the whole screen.
     public static let full = MaximizeShape(axis: nil)
-
-    /// The shares a fill accepts; a value outside is clamped here.
-    public static let shareRange: ClosedRange<Double> = 0.1...1
 }

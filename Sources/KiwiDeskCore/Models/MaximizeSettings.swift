@@ -1,7 +1,8 @@
 import Foundation
 
 /// The `maximize.*` settings (#3062): for each shape of screen, the
-/// share of the other axis each directional Maximize takes and
+/// share of the other axis (a fraction or a length, #3460) each
+/// directional Maximize takes and
 /// where it grows from. A press reads the row of the screen the
 /// window is on; a binding's own arguments win. Every shape is
 /// stored, with no value behind them (amendment, owner 2026-11-08).
@@ -31,7 +32,7 @@ public struct MaximizeSettings: Sendable, Equatable {
     public func share(
         for axis: MaximizeAxis,
         on shape: ScreenShape
-    ) -> Double {
+    ) -> MaximizeLength {
         switch axis {
         case .height: heightShare[shape]
         case .width: widthShare[shape]
@@ -40,7 +41,7 @@ public struct MaximizeSettings: Sendable, Equatable {
 
     /// Sets `axis`'s share for `shape`, or for every shape when nil.
     public mutating func setShare(
-        _ share: Double,
+        _ share: MaximizeLength,
         for axis: MaximizeAxis,
         on shape: ScreenShape?
     ) {
@@ -50,20 +51,23 @@ public struct MaximizeSettings: Sendable, Equatable {
         }
     }
 
-    /// The width share each shape starts with (owner, 2026-11-08):
-    /// a narrow screen gives a wider column, a wide one a narrower.
-    public static func defaultHeightShare(_ shape: ScreenShape) -> Double {
+    /// The width each shape starts with (owner, 2026-11-18): ¾ of
+    /// a laptop or portrait screen, where a fixed length would nearly
+    /// fill it, and one reading column on every wide one (#3460).
+    public static func defaultHeightShare(
+        _ shape: ScreenShape
+    ) -> MaximizeLength {
         switch shape {
-        case .laptop, .portrait: 3 / 4
-        case .widescreen: 1 / 2
-        case .ultrawide: 1 / 3
-        case .superUltrawide: 1 / 4
+        case .laptop, .portrait: .fraction(3 / 4)
+        case .widescreen, .ultrawide, .superUltrawide: .wideColumn
         }
     }
 
     /// The height share each shape starts with (owner, 2026-11-08).
-    public static func defaultWidthShare(_ shape: ScreenShape) -> Double {
-        shape == .laptop ? 2 / 3 : 1 / 2
+    public static func defaultWidthShare(
+        _ shape: ScreenShape
+    ) -> MaximizeLength {
+        .fraction(shape == .laptop ? 2 / 3 : 1 / 2)
     }
 
     /// Where each shape grows from by default (owner, 2026-11-08).
