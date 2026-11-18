@@ -167,6 +167,8 @@ extension EventLoop {
         detectedFullscreen[window.id] = window.isFullscreen
         detectedSubroles[window.id] = subrole
         elements[pid, default: [:]][window.id] = element
+        // A reused id's next order-in is owed its own retry (#3443).
+        transientRetried[pid]?.remove(window.id)
         observers[pid]?.observe(window: element)
         // Remember every window's frame, and which windows carry a
         // native tab group, so a later switch (this window vanishing

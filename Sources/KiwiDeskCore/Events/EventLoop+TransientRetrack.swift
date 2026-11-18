@@ -15,13 +15,14 @@ extension EventLoop {
     /// fade-in) a window can read unbacked or alpha-0 once, and
     /// both filters return with no retry — the only healing pass
     /// was whatever reconcile happened to come, which for a
-    /// fresh launch may be none. One retry per window id, so a
-    /// permanent invisible helper (#309) re-drops once on the
-    /// retry and then stays quiet; the ledger clears with its
-    /// app (`detach`) and is capped per app. The wire fires only
-    /// when the queue was empty: later drops ride the already
-    /// armed one-shot instead of pushing its deadline back with
-    /// every reschedule.
+    /// fresh launch may be none. One retry per window id until it
+    /// is adopted, so a permanent invisible helper (#309) re-drops
+    /// once on the retry and then stays quiet, while a reused
+    /// overlay's next order-in is asked again (#3443); the ledger
+    /// clears with its app (`detach`) and is capped per app. The
+    /// wire fires only when the queue was empty: later drops ride
+    /// the already armed one-shot instead of pushing its deadline
+    /// back with every reschedule.
     func markTransientDrop(pid: pid_t, id: WindowID) {
         guard
             transientRetried[pid, default: []].count

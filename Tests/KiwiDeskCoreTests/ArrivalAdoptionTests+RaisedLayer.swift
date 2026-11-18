@@ -32,4 +32,16 @@ extension ArrivalAdoptionTests {
         #expect(box.created.map(\.id) == arrivals)
         #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
     }
+
+    /// Zephium re-shows one launcher id, so a retry spent on its
+    /// first order-in would leave every later one to whatever
+    /// reconcile came (#675's one retry per id).
+    @Test("adopting a window returns its transient retry")
+    func adoptionReturnsTheRetry() {
+        let (loop, box, _, _) = makeLoop()
+        loop.transientRetried[pid] = [arrivals[0]]
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(box.created.map(\.id) == arrivals)
+        #expect(loop.transientRetried[pid]?.contains(arrivals[0]) == false)
+    }
 }
