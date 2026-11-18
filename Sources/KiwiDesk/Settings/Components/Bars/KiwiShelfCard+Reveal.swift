@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// How an Auto or Hidden bar comes onto its empty edge (#2497):
-/// in the Show group under Each bar, greyed with its sentence while
-/// no bar ever hides, as `BarsGates` answers it (owner ruling,
-/// 2026-10-21).
+/// in the Show group under Handle thickness, greyed with its
+/// sentence while no bar ever hides, as `BarsGates` answers it
+/// (owner ruling, 2026-10-21).
 extension KiwiShelfCard {
     @ViewBuilder var revealStyleRow: some View {
         let gates = BarsGates(

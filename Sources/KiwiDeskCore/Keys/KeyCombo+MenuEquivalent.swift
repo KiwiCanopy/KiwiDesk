@@ -5,21 +5,29 @@ import AppKit
 /// #2601's sided-modifier rule lives once.
 extension KeyCombo {
     /// Sets `item`'s key equivalent to this chord. A chord with a
-    /// left- or right-only modifier, or a key with no menu glyph,
+    /// left- or right-only modifier or with ✦ (AppKit's column
+    /// draws only ⌃⌥⇧⌘, #3470), a tap, or a key with no menu glyph
     /// leaves `item` untouched. `layoutChar` is the active layout's
     /// base character for a key code (the GUI's `LayoutKeyGlyph`).
     @MainActor public func applyMenuEquivalent(
         to item: NSMenuItem,
         layoutChar: (UInt32) -> String?
     ) {
-        // A menu key equivalent has no side, so drawing `R⌘H` as
-        // `⌘H` would promise the left key too (#2601); a modifier
-        // tap has no key at all (#1872).
-        guard !modifiers.isSided, !isTap else { return }
+        guard drawsInMenu else { return }
         guard let key = Self.menuKey(for: keyCode, layoutChar: layoutChar)
         else { return }
         item.keyEquivalent = key
         item.keyEquivalentModifierMask = menuModifiers
+    }
+
+    /// Whether AppKit's key-equivalent column can draw this chord
+    /// as it fires: a menu equivalent has no side, so `R⌘H` drawn
+    /// as `⌘H` would promise the left key too (#2601); a modifier
+    /// tap has no key (#1872); ✦ has no flag, so `✦L` would draw as
+    /// a bare `L` (#3470). The one rule both the drawing and the
+    /// twin check read.
+    public var drawsInMenu: Bool {
+        !modifiers.isSided && !isTap && !modifiers.contains(.hyper)
     }
 
     /// The chord's modifiers as AppKit's either-side flags.
@@ -33,10 +41,11 @@ extension KeyCombo {
     }
 
     /// Whether `event` is this chord's key with exactly its
-    /// modifiers, either side. False for a sided chord, which no
-    /// either-side flag can tell apart (#2601).
+    /// modifiers, either side. False for a chord the column cannot
+    /// draw (`drawsInMenu`), whose press no either-side flag can
+    /// tell apart.
     public func isPressed(by event: NSEvent) -> Bool {
-        guard !modifiers.isSided else { return false }
+        guard drawsInMenu else { return false }
         let held = event.modifierFlags.intersection([
             .control, .option, .shift, .command,
         ])

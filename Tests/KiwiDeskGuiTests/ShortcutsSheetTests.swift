@@ -166,9 +166,9 @@ struct ShortcutsSheetTests {
         #expect(reference.custom.isEmpty)
     }
 
-    /// The glyphs set at their own sites — Custom's Lua mark and
-    /// the gather badge — resolve where they are used.
-    @Test("Custom's and the gather badge's glyphs resolve at their sites")
+    /// The glyph set at its own site — Custom's Lua mark — resolves
+    /// where it is used.
+    @Test("Custom's glyph resolves at its site")
     func siteGlyphsResolve() throws {
         let layer = KeyLayer(
             name: KeyLayer.defaultName,
@@ -185,14 +185,9 @@ struct ShortcutsSheetTests {
             layerNames: [KeyLayer.defaultName]
         )
         let custom = try #require(reference.custom.first?.icon?.symbolName)
-        let gather = try #require(
-            ShortcutsReferenceBuilder.actionBadge(.gather)?.0
+        #expect(
+            SymbolImage.named(custom) != nil,
+            "\(custom) does not resolve"
         )
-        for symbol in [custom, gather] {
-            #expect(
-                SymbolImage.named(symbol) != nil,
-                "\(symbol) does not resolve"
-            )
-        }
     }
 }

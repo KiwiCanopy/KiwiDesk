@@ -104,8 +104,8 @@ extension StatusItemController {
             )
         }
         menu.addItem(hub)
-        // The Desktops side's own row while it has no seeded
-        // trigger (#1229 ▸ Fallbacks).
+        // The Desktops side's own row, with its live chord as the
+        // KiwiHub row's (#3470).
         let overview = NSMenuItem(
             // The Shortcuts row's own words, one key for one act.
             title: KeybindingCatalog.showDesktopOverview.resolvedLabel,
@@ -116,6 +116,12 @@ extension StatusItemController {
         overview.image = symbol(
             ShortcutsReferenceBuilder.sideSymbol(.desktops)
         )
+        if let combo = overviewComboProvider() {
+            combo.applyMenuEquivalent(
+                to: overview,
+                layoutChar: LayoutKeyGlyph.char
+            )
+        }
         menu.addItem(overview)
         if !tilingIdle, !warning, let tiling = makeTilingItem() {
             menu.addItem(tiling)
@@ -188,6 +194,12 @@ extension StatusItemController {
     }
 
     @objc private func openDesktopOverview(_ sender: NSMenuItem) {
+        if KeyCombo.isCarbonTwin(
+            of: overviewComboProvider(),
+            event: menuKeyDown()
+        ) {
+            return
+        }
         onOpenDesktopOverview()
     }
 

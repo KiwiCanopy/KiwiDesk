@@ -10,15 +10,7 @@ extension ShortcutsReferenceBuilder {
         _ layer: KeyLayer,
         consumed: inout Set<UUID>
     ) -> [ShortcutRow] {
-        buildLaunchRows(layer, consumed: &consumed)
-            .sorted { lhs, rhs in
-                let order = lhs.label
-                    .localizedCaseInsensitiveCompare(rhs.label)
-                if order != .orderedSame {
-                    return order == .orderedAscending
-                }
-                return lhs.id < rhs.id
-            }
+        buildLaunchRows(layer, consumed: &consumed).sorted(by: byAppName)
     }
 
     /// An app's Pocket key (#2612): its icon, "Pocket ‹app›", so the
@@ -28,29 +20,32 @@ extension ShortcutsReferenceBuilder {
         _ layer: KeyLayer,
         consumed: inout Set<UUID>
     ) -> [ShortcutRow] {
-        let named = layer.bindings.compactMap {
-            binding -> (name: String, row: ShortcutRow)? in
+        layer.bindings.compactMap { binding -> ShortcutRow? in
             guard !binding.combo.isEmpty,
                 let bundleID = PocketAppLuaArg.bundleID(of: binding.lua)
             else { return nil }
             consumed.insert(binding.id)
             let name = KeybindingCatalog.displayName(forBundleID: bundleID)
-            let row = ShortcutRow(
+            return ShortcutRow(
                 id: binding.id.uuidString,
                 label: binding.desc.isEmpty
                     ? KeybindingCatalog.pocketApp(bundleID).resolvedLabel
                     : binding.desc,
                 combo: glyphs(binding.combo),
-                bundleID: bundleID
+                bundleID: bundleID,
+                appName: name
             )
-            return (name, row)
         }
-        return named.sorted { lhs, rhs in
-            let order = lhs.name.localizedCaseInsensitiveCompare(rhs.name)
-            if order != .orderedSame { return order == .orderedAscending }
-            return lhs.row.id < rhs.row.id
-        }
-        .map(\.row)
+        .sorted(by: byAppName)
+    }
+
+    /// Orders app rows by the app's name, then id for a stable tie
+    /// (#334): never by a title naming the action (#3448).
+    static func byAppName(_ lhs: ShortcutRow, _ rhs: ShortcutRow) -> Bool {
+        let order = (lhs.appName ?? lhs.label)
+            .localizedCaseInsensitiveCompare(rhs.appName ?? rhs.label)
+        if order != .orderedSame { return order == .orderedAscending }
+        return lhs.id < rhs.id
     }
 
     /// Lists `pocketApps` right under the Pocket's own rows (#3449 ▸

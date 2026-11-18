@@ -208,6 +208,7 @@ final class PocketPlateOverlay {
                 rise: spec.rise,
                 fast: spec.riseFast,
                 holds: spec.holds,
+                tabDepth: PocketHandleView.tabDepth(of: spec.shelf),
                 before: Self.before(old)
             )
             if sink > 0 {
