@@ -215,6 +215,15 @@ the gap masters' acknowledging shape over an axis that reads
 "Mixed" ([Interaction states](#interaction-states)), and the
 drawer stays open while any axis is mixed.
 
+:::unreleased
+The stepper runs 100–1700 pt (#3461), a third of a 5120 pt
+screen, and a caption under the master says what the value fits
+on the main screen, gaps included: "On ‹screen›, this fits 7
+across and 2 down." While the master reads "Mixed" the caption
+moves to the Stack, Grid, Track and BSP rows instead. It is a
+readout and stores nothing.
+:::
+
 KiwiVision's **Dim** is a ruled exception: a proportion,
 yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
 the desk behind Settings shows the effect as it steps (#2103,

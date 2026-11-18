@@ -9,12 +9,37 @@ import SwiftUI
 struct MinWindowSizeRows: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = false
+    /// Bumped on a screen change, so the fit lines count again.
+    @State private var screens = 0
+
+    /// The layouts whose rows carry the fit line while the master
+    /// reads Mixed (#3461): Scrolling keeps its axis hint, and
+    /// Floating places nothing side by side.
+    static let fitLayouts: Set<MinWindowSizes.Layout> = [
+        .stack, .grid, .track, .bsp,
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            master
+            VStack(alignment: .leading, spacing: 2) {
+                master
+                if !model.minSizesDiffer {
+                    MinSizeFitLine(fit: fit(model.minSizeMostUsed))
+                }
+            }
             drawer
         }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: NSApplication.didChangeScreenParametersNotification
+            )
+        ) { _ in screens &+= 1 }
+    }
+
+    /// `layout`'s fit, read again whenever a screen changes.
+    private func fit(_ layout: MinWindowSizes.Layout) -> MinSizeFit? {
+        _ = screens
+        return model.minSizeFit(layout)
     }
 
     /// The drawer's title, which the section caption names.
@@ -104,6 +129,9 @@ struct MinWindowSizeRows: View {
                     set: { model.setMinSize($1, axis: $0, for: layout) },
                     anchor: { MinSizeText.control(layout, $0) }
                 )
+            }
+            if model.minSizesDiffer, Self.fitLayouts.contains(layout) {
+                MinSizeFitLine(fit: fit(layout))
             }
             if layout == .scrolling {
                 Text(scrollingHint)

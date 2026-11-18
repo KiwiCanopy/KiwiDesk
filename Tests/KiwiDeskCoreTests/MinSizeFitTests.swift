@@ -1,0 +1,98 @@
+import AppKit
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The minimum-size fit readout (#3461): the count is the pitch
+/// arithmetic over the layout's region with the global gaps, and
+/// the door reads the size through the one bounds hook and
+/// reserves the DRAFT's strip. The door clauses need a screen,
+/// so they skip on a host with none rather than pass by absence.
+@Suite("Minimum size fit readout")
+@MainActor
+struct MinSizeFitTests {
+    private let noOuter = Gaps(
+        outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
+        inner: Gaps.Inner(horizontal: 10, vertical: 10)
+    )
+
+    @Test("a count is the region plus one gap over the pitch")
+    func counts() {
+        // The #3461 report: 3200 × 900 at 400 with 8 pt gaps.
+        let eight = Gaps(
+            outer: Gaps.Outer(top: 8, bottom: 8, left: 8, right: 8),
+            inner: Gaps.Inner(horizontal: 8, vertical: 8)
+        )
+        let report = MinSizeFit.counts(
+            of: .square(400),
+            in: CGSize(width: 3200, height: 900),
+            gaps: eight
+        )
+        #expect(report.across == 7)
+        #expect(report.down == 2)
+        // Exactly three of 300 with two 10 pt gaps between them.
+        let exact = MinSizeFit.counts(
+            of: MinSize(width: 300, height: 500),
+            in: CGSize(width: 920, height: 999),
+            gaps: noOuter
+        )
+        #expect(exact.across == 3)
+        #expect(exact.down == 1)
+        // One point short of the third drops it.
+        let short = MinSize(width: 300, height: 300)
+        #expect(
+            MinSizeFit.counts(
+                of: short,
+                in: CGSize(width: 919, height: 300),
+                gaps: noOuter
+            ).across == 2
+        )
+        // Larger than the region fits none, never a negative.
+        let none = MinSizeFit.counts(
+            of: .square(1700),
+            in: CGSize(width: 1512, height: 982),
+            gaps: eight
+        )
+        #expect(none.across == 0)
+        #expect(none.down == 0)
+    }
+
+    @Test(
+        "the door takes the hook's size and the draft's strip",
+        .enabled(if: !NSScreen.screens.isEmpty, "needs a screen")
+    )
+    func doorReadsTheHookAndDraft() throws {
+        let core = makeTestCore()
+        // A size no shipped screen has, so a read bypassing the
+        // hook cannot answer the same counts by coincidence.
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 3110, height: 1270)
+        }
+        // The live bar is wide; the draft has none.
+        core.tiler.settings.spaceBarStyle.visibility = .always
+        core.tiler.settings.barEdge = .left
+        core.tiler.settings.kiwishelf.thickness = 700
+        var draft = TilingSettings()
+        draft.gapsGlobal = noOuter
+        draft.spaceBarStyle.visibility = .hidden
+        draft.kiwishelf.pocketVisibility = .hidden
+        let fit = try #require(
+            core.minSizeFit(.square(300), in: .bsp, settings: draft)
+        )
+        // (3110 + 10) / 310 = 10 across, (1270 + 10) / 310 = 4 down.
+        #expect(fit.across == 10)
+        #expect(fit.down == 4)
+        #expect(!fit.screen.isEmpty)
+        // The draft's own strip is reserved: 700 off the width.
+        var barred = draft
+        barred.spaceBarStyle.visibility = .always
+        barred.barEdge = .left
+        barred.kiwishelf.thickness = 700
+        let narrowed = try #require(
+            core.minSizeFit(.square(300), in: .bsp, settings: barred)
+        )
+        #expect(narrowed.across == 7)
+    }
+}

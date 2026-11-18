@@ -101,9 +101,10 @@ struct MinWindowSizeMasterTests {
         #expect(ids.count == 12)
     }
 
-    /// The master's `?`, both "Mixed" readouts and the drawer's
-    /// summary and hold-open are drawn from the model's verdict — never a
-    /// comparison re-derived in the view.
+    /// The master's `?`, both "Mixed" readouts, the drawer's
+    /// summary and hold-open, and where the fit line goes (#3461)
+    /// are drawn from the model's verdict — never a comparison
+    /// re-derived in the view.
     @Test("the master reads one verdict")
     func masterReadsOneVerdict() throws {
         let file = Self.root.appendingPathComponent(
@@ -113,7 +114,7 @@ struct MinWindowSizeMasterTests {
         let text = try SourceScan.strippedSource(at: file)
         #expect(
             text.components(separatedBy: "model.minSizesDiffer")
-                .count - 1 == 3
+                .count - 1 == 5
         )
         #expect(text.contains("width: model.minSizeShared(.width)"))
         #expect(text.contains("height: model.minSizeShared(.height)"))

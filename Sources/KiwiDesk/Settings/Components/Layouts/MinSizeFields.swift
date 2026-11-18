@@ -15,7 +15,10 @@ struct MinSizeFields: View {
     /// section is the anchor.
     var anchor: (MinSizeAxis) -> SettingsControl? = { _ in nil }
 
-    static let range = 100...800
+    /// Up to a third of a 5120 pt screen (#3461); one band for
+    /// both axes, fixed rather than read from a screen, so the
+    /// fit readout says what a value means here.
+    static let range = 100...1700
     static let step = 10
 
     var body: some View {

@@ -66,4 +66,15 @@ extension SettingsModel {
     ) -> Int {
         Int(minSizes[layout][axis])
     }
+
+    /// What `layout`'s value fits on the main screen under the
+    /// draft (#3461), the master asking for the most-used layout's
+    /// region; nil with no screen. A readout: it stores nothing.
+    func minSizeFit(_ layout: MinWindowSizes.Layout) -> MinSizeFit? {
+        core.minSizeFit(
+            minSizes[layout],
+            in: layout,
+            settings: config.settings
+        )
+    }
 }

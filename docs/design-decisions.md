@@ -8507,6 +8507,16 @@ docks at dozens of desks: the list grows with every one, and
 none of it is visible from the screen in front of you. Screen
 size enters once, at the seed (below).
 
+:::unreleased
+*Screen size also enters at a readout (#3461).* Under the value,
+Settings counts how many windows of that size fit across and down
+the main screen, so a point value means something without a unit
+picker. It stores nothing, and the stepper's band stays fixed at
+100–1700 pt rather than following the screen: a band that moved
+whenever a laptop docked would be the invisible per-screen value
+this rules out.
+:::
+
 **A Space may carry its own value, and it outranks its layout's**
 (#2422). Two Spaces sharing a layout can have different jobs — a
 Grid that watches servers wants small windows, a Grid that holds
