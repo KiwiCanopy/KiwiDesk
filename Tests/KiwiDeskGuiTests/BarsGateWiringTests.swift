@@ -95,7 +95,8 @@ struct BarsGateWiringTests {
                 // and the shut drawer says Off (#3471).
                 "caption(reason)}ifanimationsOff{animationsOffNote}}",
                 "summary:durationsSummary",
-                "animationsOff?L(\"kiwishelf.durations.summary.off\","
+                "durationsSummary:String?{"
+                    + "animationsOff?L(\"kiwishelf.durations.summary.off\","
                     + "\"Off\"):nil",
                 "prose:BarsGateHelp.animationsOffProse",
             ],
