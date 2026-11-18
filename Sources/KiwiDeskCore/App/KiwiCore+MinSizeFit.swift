@@ -23,7 +23,9 @@ public struct MinSizeFit: Equatable, Sendable {
         in region: CGRect,
         gaps: Gaps
     ) -> (across: Int, down: Int) {
-        let usable = LayoutContext.usable(region, outer: gaps.outer)
+        // `size`, not `width`/`height`: those standardize, so a
+        // carve past zero would read as a positive span.
+        let usable = LayoutContext.usable(region, outer: gaps.outer).size
         return (
             TrackLayout.fitCap(
                 crossSpan: usable.width,

@@ -31,7 +31,15 @@ extension SettingsModel {
     /// The profile's most-used layout among those keeping a floor,
     /// BSP where no Space uses one — Monocle has none to step from.
     var minSizeMostUsed: MinWindowSizes.Layout {
-        let counts = MinWindowSizes.Layout.allCases.map {
+        mostUsed(among: MinWindowSizes.Layout.allCases)
+    }
+
+    /// The most-used of `layouts` in the profile, BSP where no
+    /// Space uses any of them.
+    private func mostUsed(
+        among layouts: [MinWindowSizes.Layout]
+    ) -> MinWindowSizes.Layout {
+        let counts = layouts.map {
             ($0, LayoutUsage.spaces(on: $0.mode, in: config).count)
         }
         return counts.max { $0.1 < $1.1 }
@@ -77,11 +85,7 @@ extension SettingsModel {
     /// The layout the master's fit line counts for: the most-used
     /// one that `minSizeFitLayouts` counts, BSP where none is used.
     var minSizeFitMaster: MinWindowSizes.Layout {
-        let counted = Self.minSizeFitLayouts.map {
-            ($0, LayoutUsage.spaces(on: $0.mode, in: config).count)
-        }
-        return counted.max { $0.1 < $1.1 }
-            .flatMap { $0.1 > 0 ? $0.0 : nil } ?? .bsp
+        mostUsed(among: Self.minSizeFitLayouts)
     }
 
     /// What each counted layout's value fits on the main screen

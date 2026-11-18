@@ -8548,10 +8548,10 @@ step.
 :::unreleased
 *The height takes the same rule from the screen's height
 (#3462).* Seeded from the width alone, a 3200 × 900 pt screen
-started at 400 × 400, which fits two windows down, so BSP stopped after its first horizontal
-split; from the height it starts at 400 × 260 and three fit. A
-profile keeps the value it stored; only a new setup takes the
-seed.
+started at 400 × 400, which fits two windows down, so BSP stopped
+after its first horizontal split; from the height it starts at
+400 × 260 and three fit. A profile keeps the value it stored;
+only a new setup takes the seed.
 :::
 
 One rule replaces the starter's fixed 420 pt for the ultrawides,

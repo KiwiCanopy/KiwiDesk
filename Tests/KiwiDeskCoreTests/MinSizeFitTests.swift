@@ -45,6 +45,15 @@ struct MinSizeFitTests {
         )
         #expect(exact.across == 3)
         #expect(exact.down == 1)
+        // The outer gaps are carved first: 1216 less 16 fits two of
+        // 400, where the whole 1216 would fit three.
+        #expect(
+            MinSizeFit.counts(
+                of: .square(400),
+                in: region(1216, 500),
+                gaps: eight
+            ).across == 2
+        )
         // One point short of the third drops it.
         #expect(
             MinSizeFit.counts(
@@ -61,12 +70,17 @@ struct MinSizeFitTests {
         )
         #expect(none.across == 0)
         #expect(none.down == 0)
-        // A region smaller than its own outer gaps: a carve below
-        // zero still counts nothing rather than a negative.
+        // A region well inside its own outer gaps: the carve goes
+        // past one pitch below zero, which would truncate to -1,
+        // and still counts nothing.
+        let wide = Gaps(
+            outer: Gaps.Outer(top: 20, bottom: 20, left: 20, right: 20),
+            inner: Gaps.Inner(horizontal: 8, vertical: 8)
+        )
         let starved = MinSizeFit.counts(
-            of: .square(400),
+            of: .square(10),
             in: region(4, 4),
-            gaps: eight
+            gaps: wide
         )
         #expect(starved.across == 0)
         #expect(starved.down == 0)

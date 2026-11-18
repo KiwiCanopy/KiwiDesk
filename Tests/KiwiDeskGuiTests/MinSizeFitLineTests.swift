@@ -30,6 +30,20 @@ struct MinSizeFitLineTests {
     func sentences() {
         LocalizationManager.shared.select("en")
         let studio = ScreenLabel(name: "Studio")
+        // A twin is named by its place, never by the shared name.
+        let twin = ScreenLabel(name: "Studio", twinPlace: 1)
+        let twinName = twin.displayName
+        #expect(twinName != "Studio")
+        #expect(
+            MinSizeFitLine.sentence(
+                for: MinSizeFit(screen: twin, across: 7, down: 2)
+            ).hasPrefix("Fits on \(twinName) —")
+        )
+        #expect(
+            MinSizeFitLine.sentence(
+                for: MinSizeFit(screen: twin, across: 0, down: 2)
+            ).hasPrefix("Doesn't fit on \(twinName):")
+        )
         let fits = MinSizeFitLine.sentence(
             for: MinSizeFit(screen: studio, across: 7, down: 2)
         )
@@ -125,5 +139,27 @@ struct MinSizeFitLineTests {
         #expect(bsp.down == 4)
         // Grid's own width: (3110 + 10) / 610 = 5.
         #expect(fits[.grid]?.across == 5)
+    }
+
+    /// The door hands the DRAFT to every read that shapes the
+    /// region. The strip is driven in `MinSizeFitTests`; the pocket
+    /// rest and the per-screen edge fingerprint take fixtures no
+    /// suite builds, so their argument is held here as text.
+    @Test("the door reads the draft's pocket and screen edges")
+    func doorPassesTheDraft() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDeskCore/App/KiwiCore+MinSizeFit.swift"
+                )
+        )
+        for needle in [
+            "tiler.fingerprint(of: screen, in: settings)",
+            "pocketAtRest: settings.pocketRests",
+            "let region = settings.layoutBounds(",
+        ] {
+            #expect(source.occurrences(of: needle) == 1, "\(needle)")
+        }
+        #expect(source.occurrences(of: "tiler.settings") == 0)
     }
 }
