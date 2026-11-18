@@ -11,7 +11,8 @@ import Testing
 /// window is key and without moving the caret.
 ///
 /// Main-actor spend: one hosted row in an offscreen window per test,
-/// run-loop spins until each awaited state and one 0.15 s beat.
+/// run-loop spins until each awaited state, and a drain until the
+/// main run loop is idle.
 @Suite("A Save commits the field being typed in (#2584)", .serialized)
 @MainActor
 struct SaveCommitsFocusedFieldTests {
@@ -57,11 +58,15 @@ struct SaveCommitsFocusedFieldTests {
         #expect(editor.isFieldEditor)
         editor.selectAll(nil)
         editor.insertText("1234", replacementRange: editor.selectedRange())
-        // The field's own draft takes the text on a later turn, and
-        // nothing outside the field shows it: a fixed beat.
-        RunLoop.main.run(until: Date().addingTimeInterval(0.15))
-        // The precondition the bug needs: typed, not yet committed.
+        // The precondition the bug needs, read before the run loop
+        // gets a turn, so nothing that commits later can answer it
+        // (#3473): typed in the field, not in the draft.
+        #expect(editor.string == "1234")
         #expect(model.config.settings.mouse.hoverFocusDelayMS != 1234)
+        // The field's own draft takes the text on a later pass;
+        // nothing outside it shows that, so the main run loop runs
+        // until it has nothing left to do.
+        drainMainRunLoop()
         return Typed(model: model, window: window, editor: editor)
     }
 
@@ -75,6 +80,16 @@ struct SaveCommitsFocusedFieldTests {
         let deadline = Date().addingTimeInterval(Self.hangGuard)
         while !done(), Date() < deadline {
             RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        }
+    }
+
+    /// Runs the main run loop's pending work until a pass handles
+    /// nothing; the deadline only bounds a hang.
+    private func drainMainRunLoop() {
+        let deadline = Date().addingTimeInterval(Self.hangGuard)
+        while Date() < deadline {
+            let result = CFRunLoopRunInMode(.defaultMode, 0, true)
+            if result != .handledSource { return }
         }
     }
 
