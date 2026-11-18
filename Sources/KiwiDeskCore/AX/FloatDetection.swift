@@ -237,6 +237,16 @@ public enum FloatDetection {
         return ids.prefix(Int(count)).map { CGDisplayBounds($0) }
     }
 
+    /// Whether a window with a raised `level` is not on the public
+    /// list yet: being ordered in, its alpha and bounds unread, so
+    /// no verdict is taken on it (#3443).
+    static func isOrderingIn(
+        level: Int?,
+        listed: WindowServerSnapshot
+    ) -> Bool {
+        listed.layer == nil && (level ?? 0) != 0
+    }
+
     /// Detects unbacked auxiliary proxy windows: AX can expose a
     /// transient proxy with no WindowServer window behind it, and
     /// managing it draws a fallback border around system UI. Real
