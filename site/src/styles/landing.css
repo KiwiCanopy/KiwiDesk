@@ -1595,8 +1595,7 @@ section {
 }
 /* Each card spans the track's two rows through subgrid, so every
    byline rule sits on one line whatever the quote or role wraps
-   to (#2613). The source line sits outside both rows, in the
-   top-right corner opposite the quote mark. */
+   to (#2613). */
 .voices__track > li,
 .voice {
   display: grid;
@@ -1629,8 +1628,15 @@ section {
   opacity: 0.18;
   pointer-events: none;
 }
+/* Quote, then where it was said, then who: the source line pins to
+   the quote row's foot, right-aligned, 0.6rem above the rule. */
+.voice__body {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0.6rem;
+}
 .voice blockquote {
-  margin: 0 0 1.4rem;
+  margin: 0 0 0.9rem;
   position: relative;
 }
 .voice blockquote p {
@@ -1708,13 +1714,11 @@ a.voice__src::after {
   gap: 0.35rem;
   color: var(--text-faint);
   font-size: 0.78rem;
-  position: absolute;
-  /* Centres the line on the quote mark's ink, measured from the
-     4.5rem Georgia glyph in .voice::before; move both together. */
-  top: 0.63rem;
-  right: clamp(1.4rem, 3vw, 1.8rem);
-  max-width: calc(100% - 6rem);
-  white-space: nowrap;
+  margin-top: auto;
+  align-self: flex-end;
+  max-width: 100%;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 /* A linked source wears the name's resting underline, so every
    link in the byline reads alike, and touch, which never hovers,
