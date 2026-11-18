@@ -11,7 +11,8 @@ import Testing
 /// window is key and without moving the caret.
 ///
 /// Main-actor spend: one hosted row in an offscreen window per test,
-/// run-loop spins until each awaited state and one 0.15 s beat.
+/// run-loop spins until each awaited state, and a drain until a pass
+/// of the main run loop handles no source.
 @Suite("A Save commits the field being typed in (#2584)", .serialized)
 @MainActor
 struct SaveCommitsFocusedFieldTests {
@@ -23,16 +24,32 @@ struct SaveCommitsFocusedFieldTests {
         let editor: NSTextView
     }
 
+    /// Writes through the field's binding: a commit the test did
+    /// not ask for shows here, whatever caused it.
+    private final class Writes {
+        var count = 0
+    }
+
+    /// Attempts at a clean typing before the helper gives up: one
+    /// commit the test did not ask for (#3473, a loaded runner)
+    /// retypes rather than leaving a Save nothing to commit.
+    private static let attempts = 3
+
     private func typed(
         _ model: SettingsModel = makeTestModel()
     ) throws -> Typed {
+        let writes = Writes()
+        let original = model.config.settings.mouse.hoverFocusDelayMS
         // The field and ⌘S as the Settings root mounts them.
         let row = VStack {
             StepperRow(
                 label: "Delay",
                 value: Binding(
                     get: { model.config.settings.mouse.hoverFocusDelayMS },
-                    set: { model.config.settings.mouse.hoverFocusDelayMS = $0 }
+                    set: {
+                        writes.count += 1
+                        model.config.settings.mouse.hoverFocusDelayMS = $0
+                    }
                 ),
                 in: 0...5000
             )
@@ -49,20 +66,36 @@ struct SaveCommitsFocusedFieldTests {
         window.contentView?.layoutSubtreeIfNeeded()
         spin { Self.textField(in: window.contentView) != nil }
         let field = try #require(Self.textField(in: window.contentView))
-        #expect(window.makeFirstResponder(field))
-        spin {
-            (window.firstResponder as? NSTextView)?.isFieldEditor == true
+        for _ in 0..<Self.attempts {
+            #expect(window.makeFirstResponder(field))
+            spin {
+                (window.firstResponder as? NSTextView)?.isFieldEditor
+                    == true
+            }
+            let editor = try #require(window.firstResponder as? NSTextView)
+            editor.selectAll(nil)
+            editor.insertText(
+                "1234",
+                replacementRange: editor.selectedRange()
+            )
+            // The field's own draft takes the text on a later pass;
+            // nothing outside it shows that, so the main run loop
+            // runs until a pass handles nothing.
+            drainMainRunLoop()
+            // The precondition the bug needs, read as the Save will
+            // find it: typed in the field, not in the draft.
+            if writes.count == 0, editor.string == "1234",
+                model.config.settings.mouse.hoverFocusDelayMS != 1234
+            {
+                return Typed(model: model, window: window, editor: editor)
+            }
+            // Something committed: put the draft back and retype.
+            model.config.settings.mouse.hoverFocusDelayMS = original
+            drainMainRunLoop()
+            writes.count = 0
         }
-        let editor = try #require(window.firstResponder as? NSTextView)
-        #expect(editor.isFieldEditor)
-        editor.selectAll(nil)
-        editor.insertText("1234", replacementRange: editor.selectedRange())
-        // The field's own draft takes the text on a later turn, and
-        // nothing outside the field shows it: a fixed beat.
-        RunLoop.main.run(until: Date().addingTimeInterval(0.15))
-        // The precondition the bug needs: typed, not yet committed.
-        #expect(model.config.settings.mouse.hoverFocusDelayMS != 1234)
-        return Typed(model: model, window: window, editor: editor)
+        Issue.record("the field committed before every Save")
+        throw CancellationError()
     }
 
     /// The one hang guard: a spin exits the moment its state holds,
@@ -76,6 +109,17 @@ struct SaveCommitsFocusedFieldTests {
         while !done(), Date() < deadline {
             RunLoop.main.run(until: Date().addingTimeInterval(0.01))
         }
+    }
+
+    /// Runs the main run loop's default mode until a pass handles
+    /// no source; the deadline only bounds a hang, and records it.
+    private func drainMainRunLoop() {
+        let deadline = Date().addingTimeInterval(Self.hangGuard)
+        while Date() < deadline {
+            let result = CFRunLoopRunInMode(.defaultMode, 0, true)
+            if result != .handledSource { return }
+        }
+        Issue.record("the main run loop never went idle")
     }
 
     private static func textField(in view: NSView?) -> NSTextField? {

@@ -7242,8 +7242,8 @@ still reads as the pocket coming out rather than a jump.
 :::unreleased
 *Amended* (owner, 2026-11-16, #3361): **the tab takes a bar
 handle's ink and depth, flush on the edge, and the handle reserves
-nothing.** The tab is the bars' two-tone line, 3 points deep, so a
-row of handles still reads as one; the kiwis keep the pocket's
+nothing.** The tab is the bars' two-tone line, handle-deep (3
+points by default, #3451), so a row of handles still reads as one; the kiwis keep the pocket's
 colour and look out 5 points past it. Its hover runs no progress
 fill (its look is the #3366 amendment below; under Reduce Motion
 its countdown does, #3368 below): the fill
@@ -20268,6 +20268,26 @@ Dock stays shown for as long as the pointer stays there. So:
   ring, so its strengths show composited over the hairline's 35%:
   about 60% at rest, which one draw path for both drawers buys.
   The handle stays flush, as the two-tone bullet argues.
+- *A thickness of its own* (owner, 2026-11-18, #3451), amending
+  the capsules bullet above: **the handle's thickness
+  is a look style path, `kiwishelf.handle_thickness`, 2 to 6
+  points in whole points, default 3**, so the fixed 3-point
+  capsule above is now the default. The core grows with it and
+  the 0.5-point hairline stays, and the Pocket's tab takes the same
+  depth (#3361). Whole points keep the line on the pixel grid at 1x
+  and 2x. Below 2 the hairlines leave no core and the two tones
+  vanish. Past 6 the handle nears the fixed 9-point hover band and
+  covers more of the windows, since a handle reserves nothing. A
+  look carries it, so every bundled look names it: Glass, Pill and
+  Sakura 3, Classic and Tiler 2, Taskbar 4. It is edited with a
+  stepper in the KiwiShelf card's Show group, between Show and
+  Reveal, greyed while nothing rests as a handle anywhere. The
+  handle stays flush whatever the outer margin; a thicker handle
+  narrows the room to the windows by what it adds. It amends every
+  fixed 3 points in this list, the progress fill's line and the
+  grow origin's included. Refused: a Lua-only knob, since the
+  owner wants it to travel with a look, and a palette key, since
+  palettes carry colour alone.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one

@@ -32,7 +32,8 @@ struct ShelfHandleEdgeTests {
             frame: ShelfHandleSpec.frame(
                 along: CGRect(x: 300, y: 0, width: 400, height: 30),
                 edge: .top,
-                side: 0
+                side: 0,
+                depth: 3
             ),
             edge: .top,
             shown: false,
@@ -160,7 +161,8 @@ struct ShelfHandleEdgeTests {
             frame: ShelfHandleSpec.frame(
                 along: CGRect(x: 0, y: 300, width: 30, height: 200),
                 edge: .left,
-                side: 40
+                side: 40,
+                depth: 3
             ),
             edge: .left,
             shown: false,

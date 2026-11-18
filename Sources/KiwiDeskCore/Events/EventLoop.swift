@@ -301,18 +301,12 @@ public final class EventLoop {
             .activationPolicy
     }
 
-    /// Whether an app is hidden — ⌘H, and the state an Electron
-    /// app puts ITSELF in when its last window closes (Discord's
-    /// red X hides the application; no window is destroyed and
-    /// no AX notification is sent, #913).
-    ///
-    /// Load-bearing because AX keeps listing a hidden app's
-    /// windows, un-minimized and at their last frames, so
-    /// nothing in the window list separates them from windows
-    /// that are really up — `reconcile` read them as live and
-    /// their tiles were never released. A seam because a unit
-    /// test cannot hide a real app; also runs off the main actor
-    /// in the window-list read, like `activationPolicy`.
+    /// Whether an app is hidden — ⌘H, or an Electron app hiding
+    /// itself as its last window closes, with no AX notification
+    /// (#913). AX keeps listing a hidden app's windows at their
+    /// last frames, so only this read releases their tiles. A
+    /// seam because a test cannot hide a real app; also runs off
+    /// the main actor in the window-list read.
     var appIsHidden: (pid_t) -> Bool = {
         NSRunningApplication(processIdentifier: $0)?.isHidden
             ?? false
@@ -330,6 +324,12 @@ public final class EventLoop {
     /// Each EUI baseline the loop retires, with the value it left
     /// the flag at; the frame applier's holds restore that (#1508).
     var onEnhancedUIRetired: (pid_t, Bool) -> Void = { _, _ in }
+
+    /// A window's WindowServer level, asked before the public
+    /// list, which omits a window being ordered in (#3443).
+    var readLevel: (WindowID) -> Int? = {
+        SkyLight.windowLevel(CGWindowID($0.raw))
+    }
 
     /// The AX messaging timeout `start` applies (#672) — see
     /// `AXHelper.setGlobalMessagingTimeout`.

@@ -17,7 +17,7 @@ extension KiwiShelf {
 
     /// The depth of the pocket's handle at rest (#2784): a whole
     /// point, which lands on a pixel at 1x and 2x. A bar's handle
-    /// is its own hairline (`ShelfHandleSpec.depth`, #3349).
+    /// is its own hairline (`ShelfHandleSpec.depth(of:)`, #3349).
     public static let hiddenDepth: CGFloat = 11
 
     /// What the pocket's handle reserves (#2784): the shelf's own

@@ -142,7 +142,8 @@ extension KiwiCore {
                     frame: ShelfHandleSpec.frame(
                         along: run,
                         edge: plan.edge,
-                        side: side
+                        side: side,
+                        depth: ShelfHandleSpec.depth(of: shelf)
                     ),
                     edge: plan.edge,
                     shown: shown(bar),

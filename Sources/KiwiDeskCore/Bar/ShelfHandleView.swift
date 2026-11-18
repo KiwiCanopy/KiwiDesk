@@ -2,9 +2,10 @@ import AppKit
 
 /// The view a handle draws (#761, #3349, #3360, #3361), and
 /// VoiceOver's way to the show/hide action: its press runs the
-/// action and its value says whether the shelf is shown. A 2 pt
-/// core capsule on a 3 pt capsule of the opposite tone (#3366); only
-/// the core runs an approach's fill, clipped to it.
+/// action and its value says whether the shelf is shown. A core
+/// capsule inset a hairline in a capsule of the opposite tone, the
+/// shelf's handle thickness deep (#3366, #3451); only the core runs
+/// an approach's fill, clipped to it.
 final class ShelfHandleView: NSView {
     private(set) var spec: ShelfHandleSpec?
     /// The bar the action names, for the label.

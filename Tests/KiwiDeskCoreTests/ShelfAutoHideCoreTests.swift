@@ -65,7 +65,7 @@ struct ShelfAutoHideCoreTests {
             )
         )
         let spec = try #require(handle.view.spec)
-        #expect(spec.frame.height == ShelfHandleSpec.depth)
+        #expect(spec.frame.height == ShelfHandleSpec.depth(of: KiwiShelf()))
         // VoiceOver still hears the Space's place through it.
         #expect(spec.position?.index == 1)
         #expect(!spec.shown)
