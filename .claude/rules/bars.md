@@ -1562,8 +1562,10 @@ rather than the row it names makes the user search again. So:
   clicking the row does (#2869).** The chord rides
   `BarMenuRow.chord` into the native key-equivalent column alone —
   never the title, the subtitle or a tooltip — drawn through the
-  one `KeyCombo.applyMenuEquivalent`, which refuses a sided chord
-  (#2601). It is read through `barMenuChord(_:for:in:)`, handed the
+  one `KeyCombo.applyMenuEquivalent`, which refuses any chord its
+  `drawsInMenu` refuses — a sided chord (#2601) or a ✦ chord,
+  which AppKit's column has no flag for (#3470,
+  `StatusMenuHyperChordTests` ▸ `hyperDrawsNothing`). It is read through `barMenuChord(_:for:in:)`, handed the
   whole set the menu stands for: a `BarMenuVerb` the GUI maps to
   its catalog Lua body, matched exactly on the resolved active
   layer, and only in a single-window menu whose window is both

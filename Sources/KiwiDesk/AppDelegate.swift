@@ -150,6 +150,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 lua: KiwiHubSide.view.lua
             )
         }
+        statusItem.overviewComboProvider = { [weak self] in
+            guard let self else { return nil }
+            return ShortcutsOpenBinding.combo(
+                core: self.core,
+                lua: KeybindingCatalog.showDesktopOverview.lua
+            )
+        }
         wireTilingRow(statusItem)
         statusItem.settingsComboProvider = { [weak self] in
             guard let self else { return nil }

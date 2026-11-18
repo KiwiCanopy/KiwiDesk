@@ -2468,7 +2468,10 @@ recorder takes a side only from the
 sets beside `\.hyperKeyIsOff` (`ModifierSideRecorderTests` ▸
 `mountsWireTheSides`); a new mount joins that needle. **A menu key
 equivalent never carries a sided chord**, since it has no side to
-draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
+draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`), **nor a ✦
+chord**, which AppKit's column cannot draw: both refusals are
+`KeyCombo.drawsInMenu`'s, which the twin check reads too (#3470,
+`StatusMenuHyperChordTests` ▸ `hyperDrawsNothing`).
 
 ## SwiftUI traps
 
