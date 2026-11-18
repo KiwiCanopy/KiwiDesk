@@ -98,7 +98,8 @@ extension BarMotion {
 
     /// Whether the pocket's approach scrubs its rise: not under
     /// Reduce Motion, where it stands when the dwell ends, nor under
-    /// KiwiDesk's Off (#3368 ruling 4). Starts no motion.
+    /// KiwiDesk's Off or the Reveal off (#3368 ruling 4, #3471).
+    /// Starts no motion.
     @MainActor static var pocketScrubs: Bool {
         !isReduced && revealLength > 0
     }

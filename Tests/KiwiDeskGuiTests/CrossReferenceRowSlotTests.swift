@@ -137,12 +137,12 @@ struct CrossReferenceRowSlotTests {
         "KiwiShelfCard+Placement.swift:Self.monocleMaximizesProse",  // #2976
         "LayoutCard+Rows.swift:LayoutHelp.monocleMaximizeBarsProse",
         "MaximizeCard.swift:LayoutDefaultsGateHelp.sentence(for:reason)",
+        "KiwiShelfCard+Reveal.swift:BarsGateHelp.animationsOffProse",
     ]
 
     // MARK: - The values
 
-    /// The Spaces card's pointer to every Space's shortcuts
-    /// (#1827).
+    /// The Spaces card's pointer to every Space's shortcuts (#1827).
     @Test func theSpacesShortcutsProsePlacesItsLink() {
         #expect(SpacesSection.shortcutsProse.contains(Self.slot))
     }

@@ -7,9 +7,10 @@ import Testing
 /// The pocket handle's look and its Reduce Motion countdown (#3368),
 /// split from `PocketApproachTests` at the §2.1 ceiling: the tab is
 /// constant and the kiwis carry the empty fade; under Reduce Motion
-/// the tab counts down with the bars' fill, under Off nothing shows.
+/// the tab counts down with the bars' fill, under Off it steps to
+/// full (#3471).
 extension PocketApproachTests {
-    @Test("Reduce Motion counts down on the tab; Off shows nothing")
+    @Test("Reduce Motion counts down on the tab; Off shows it full")
     func reducedFillsTheTab() throws {
         defer { BarMotion.reducedOverride = nil }
         // Reduce Motion, then KiwiDesk's Off (no reveal length).
@@ -34,7 +35,8 @@ extension PocketApproachTests {
             view.layoutSubtreeIfNeeded()
             let tab = view.handle
             #expect(tab.fill == fill)
-            #expect(tab.fillLayer.isHidden == off, "off: \(off)")
+            #expect(!tab.fillLayer.isHidden, "off: \(off)")
+            if off { #expect(tab.fillLayer.frame == tab.fillClip.bounds) }
             #expect(
                 (tab.fillLayer.animation(forKey: BarMotion.handleFillKey)
                     != nil) == !off

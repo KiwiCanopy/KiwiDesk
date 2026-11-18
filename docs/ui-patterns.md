@@ -1163,6 +1163,9 @@ and the card points there.
 The drawer holds two switches, **Animate the reveal** and **Animate
 the expand**. Both lengths are Lua-only
 (`animations.set_reveal_duration`, `animations.set_expand_duration`).
+Under Animation speed's Off both grey, their ticks kept, and so
+does the Reveal picker; the shut drawer reads Off, and one line
+under the drawer links to the speed row (#3471).
 :::
 
 While Reduce Motion is on, the card also says so in a

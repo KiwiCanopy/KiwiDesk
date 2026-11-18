@@ -7320,9 +7320,9 @@ ui-designer consult). With the rise gone the fill is the one clock,
 so ruling 3's objection to a fill on the tab does not reach it. A
 cross-fade of the risen pocket was set aside: it puts two marks on
 screen at once, and a dissolve stand-in is what Reduce Motion here
-never takes. Under KiwiDesk's Off nothing shows during the wait,
-as Off drops the bars' fill, and the pocket stands when the dwell
-ends. While the rise runs its panel holds the risen pocket's room
+never takes. Under KiwiDesk's Off, or with the Reveal off, the
+tab's fill steps to full for the wait, as the bars' does (owner,
+2026-11-18, #3471), and the pocket stands when the dwell ends. While the rise runs its panel holds the risen pocket's room
 and takes its clicks as the risen pocket does (owner, 2026-11-16):
 one panel carries the tab and the room, and passing clicks through
 the room cost the tab its own click and hover; a click there in
@@ -7969,8 +7969,10 @@ window hands it macOS's, live.
 The Settings window keeps macOS's setting: its motion is where the
 user watches Off take effect (the box arrives, the rows grey), and
 it is ordinary window chrome. Settings reads the flag only to
-narrate it: the Animations card's box and greys, and the Switching
-Spaces captions, which say what the desk draws (*Reduce Motion
+narrate it: the Animations card's box and greys, the KiwiShelf
+card's Reveal picker, Durations switches and their reason line
+(#3471), and the
+Switching Spaces captions, which say what the desk draws (*Reduce Motion
 shows the Space*, above). `ReduceMotionHomeTests` holds the GUI tree
 to the one read outside `Sources/KiwiDesk/Settings`.
 
@@ -20259,7 +20261,10 @@ Dock stays shown for as long as the pointer stays there. So:
   is about 7 Hz (WCAG 2.3.1), and on macOS a pulse means attention
   or an error. The fill is a change of lightness in place, so it
   plays under Reduce Motion as the reveal does (owner,
-  2026-10-21), and KiwiDesk's Off drops it with the reveal. A
+  2026-10-21). With no Reveal to play, under KiwiDesk's Off or
+  with the Reveal off, it steps to full on approach instead of
+  sweeping (owner, 2026-11-18, #3471): Off promises that nothing
+  travels, not that a running wait is hidden. A
   pointer that leaves before it completes drops it, and the bar
   stays away. The push on a free edge still opens at once, and a
   grow or unfold reveal now starts from the 3-point handle itself.
@@ -21528,7 +21533,8 @@ longer grows under the pointer, so the hover growth leaves the
 three, and the handle's progress fill takes its place. It is a
 change of lightness in place rather than travel, and standing it
 down would leave the dwell with no sign of its end, which is the
-fill's whole job. KiwiDesk's Off still drops it with the reveal.
+fill's whole job. KiwiDesk's Off steps it to full rather than
+dropping it (owner, 2026-11-18, #3471).
 The pocket's tab joins it under Reduce Motion (#3368): with its
 rise stood down, the tab counts the wait down with the same fill.
 :::
@@ -21709,6 +21715,11 @@ plays with Reduce Motion on and the
 crossing turns a stored 0 into it, so a choice made in Settings
 keeps a way back there. Rejected: dropping a switch, which strands a
 migrated 0; one central Durations group.
+Under KiwiDesk's Off both switches and the Reveal picker grey,
+their stored values kept, the shut drawer reads Off, and one line
+under the drawer points at Looks & Animations ▸ Animation speed
+(owner, 2026-11-18, #3471): no reveal style plays and neither
+motion does.
 :::
 
 **The bars ship one thickness, 40 pt, on every screen, and the

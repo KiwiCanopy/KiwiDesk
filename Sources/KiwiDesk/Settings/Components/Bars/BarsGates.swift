@@ -129,6 +129,18 @@ enum BarsGateHelp {
         )
     }
 
+    /// Why the Durations rows grey under KiwiDesk's Off (#3471),
+    /// with `CrossReferenceRow.linkSlot` where the speed link goes:
+    /// the remote pointer their census `.setting` owner on Looks &
+    /// Animations asks for, the grey itself a wiring predicate.
+    static var animationsOffProse: String {
+        L(
+            "kiwishelf.durations.animations_off",
+            "Animations are off in every profile. Pick a speed in %1$@.",
+            CrossReferenceRow.linkSlot
+        )
+    }
+
     /// A bar row's `?` while its screens differ (#1948), naming
     /// that bar's own Per screen drawer.
     static func screensDiffer(appBar: Bool) -> String {
