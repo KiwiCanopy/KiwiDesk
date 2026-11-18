@@ -41,20 +41,42 @@ struct GestureListEditsTests {
     @Test("a seed's action reads back; setting it again stores nothing")
     func seedStaysSparse() throws {
         var base = GestureMap()
-        let seeded = try #require(GestureListEdits.action(of: wheel, in: base))
-        GestureListEdits.set(seeded, at: wheel, in: &base)
+        let seeded = try #require(
+            GestureListEdits.action(
+                of: wheel,
+                in: base,
+                shortcutBase: .standard
+            )
+        )
+        GestureListEdits.set(
+            seeded,
+            at: wheel,
+            in: &base,
+            shortcutBase: .standard
+        )
         #expect(base[wheel] == nil)
     }
 
     @Test("removing a seed tombstones it; removing a user row drops it")
     func remove() {
         var base = GestureMap()
-        GestureListEdits.remove(wheel, in: &base)
-        #expect(GestureListEdits.action(of: wheel, in: base) == nil)
+        GestureListEdits.remove(wheel, in: &base, shortcutBase: .standard)
+        #expect(
+            GestureListEdits.action(
+                of: wheel,
+                in: base,
+                shortcutBase: .standard
+            ) == nil
+        )
         #expect(base[wheel] != nil)
         let mine = GestureKey(.wheel, [.control, .shift])
-        GestureListEdits.set(.family(.walk), at: mine, in: &base)
-        GestureListEdits.remove(mine, in: &base)
+        GestureListEdits.set(
+            .family(.walk),
+            at: mine,
+            in: &base,
+            shortcutBase: .standard
+        )
+        GestureListEdits.remove(mine, in: &base, shortcutBase: .standard)
         #expect(base[mine] == nil)
     }
 
@@ -64,37 +86,85 @@ struct GestureListEditsTests {
         // A seed holds it (#3281: ⌃⌥ sideways switches Spaces).
         let held = GestureKey(.wheelX, [.control, .option])
         let before = base
-        #expect(!GestureListEdits.rekey(wheel, to: held, in: &base))
+        #expect(
+            !GestureListEdits.rekey(
+                wheel,
+                to: held,
+                in: &base,
+                shortcutBase: .standard
+            )
+        )
         #expect(base == before)
     }
 
     @Test("Restore Defaults returns a device's seeds and keeps others")
     func restore() {
         var base = GestureMap()
-        GestureListEdits.remove(wheel, in: &base)
+        GestureListEdits.remove(wheel, in: &base, shortcutBase: .standard)
         let mine = GestureKey(.wheel, [.control, .shift])
-        GestureListEdits.set(.family(.walk), at: mine, in: &base)
-        #expect(GestureListEdits.differsFromDefaults(on: .mouse, in: base))
-        GestureListEdits.restoreDefaults(on: .mouse, in: &base)
-        #expect(!GestureListEdits.differsFromDefaults(on: .mouse, in: base))
-        #expect(GestureListEdits.action(of: mine, in: base) == .family(.walk))
+        GestureListEdits.set(
+            .family(.walk),
+            at: mine,
+            in: &base,
+            shortcutBase: .standard
+        )
+        #expect(
+            GestureListEdits.differsFromDefaults(
+                on: .mouse,
+                in: base,
+                shortcutBase: .standard
+            )
+        )
+        GestureListEdits.restoreDefaults(
+            on: .mouse,
+            in: &base,
+            shortcutBase: .standard
+        )
+        #expect(
+            !GestureListEdits.differsFromDefaults(
+                on: .mouse,
+                in: base,
+                shortcutBase: .standard
+            )
+        )
+        #expect(
+            GestureListEdits.action(
+                of: mine,
+                in: base,
+                shortcutBase: .standard
+            ) == .family(.walk)
+        )
     }
 
     @Test("rows follow the map: kept, pending, gone and new")
     func reconcile() {
         var base = GestureMap()
-        let rows = GestureListEdits.rows(in: base, on: .mouse)
-            .map { GestureListEntry($0) }
+        let rows = GestureListEdits.rows(
+            in: base,
+            on: .mouse,
+            shortcutBase: .standard
+        )
+        .map { GestureListEntry($0) }
         let pending = GestureListEntry(GestureKey(.wheel, [.shift]))
         let dropped = rows[0]
-        GestureListEdits.remove(dropped.key, in: &base)
+        GestureListEdits.remove(
+            dropped.key,
+            in: &base,
+            shortcutBase: .standard
+        )
         let mine = GestureKey(.wheel, [.control, .shift])
-        GestureListEdits.set(.family(.walk), at: mine, in: &base)
+        GestureListEdits.set(
+            .family(.walk),
+            at: mine,
+            in: &base,
+            shortcutBase: .standard
+        )
         let next = GestureListEdits.reconcile(
             rows + [pending],
             pending: [pending.id],
             in: base,
-            on: .mouse
+            on: .mouse,
+            shortcutBase: .standard
         )
         #expect(!next.contains { $0.id == dropped.id })
         #expect(next.contains { $0.id == pending.id })

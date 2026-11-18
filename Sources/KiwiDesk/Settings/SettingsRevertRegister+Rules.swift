@@ -114,8 +114,10 @@ extension SettingsRevertRegister {
                 subject
             )
         case .gesture:
+            // Against the saved map on the draft's base (#3444).
+            let saved = clean.onShortcutBase(config.shortcutBase).gesture
             if let key = GestureKey(spelling: subject) {
-                config.gesture[key] = clean.gesture[key]
+                config.gesture[key] = saved[key]
             }
         default:
             break
@@ -183,7 +185,13 @@ extension SettingsRevertRegister {
         paths: ["config.shortcutBase"]
     ) { model, _ in
         let clean = model.cleanConfig
+        // Gestures the user left as the switch moved them go back
+        // to the saved map whole, a pinned seed included (#3444).
+        let gesturesUntouched =
+            model.config.gesture
+            == clean.onShortcutBase(model.config.shortcutBase).gesture
         model.setShortcutBase(clean.shortcutBase)
+        if gesturesUntouched { model.config.gesture = clean.gesture }
         for at in model.config.layers.indices {
             let saved = model.savedLayerName(model.config.layers[at].name)
             let was = clean.layers.first { $0.name == saved }?.bindings ?? []
@@ -217,13 +225,15 @@ extension SettingsRevertRegister {
     private static let gestureRow = RevertWriter(
         paths: ["config.gesture"]
     ) { model, instance in
+        let saved = model.cleanConfig
+            .onShortcutBase(model.config.shortcutBase).gesture
         guard let row = instance.flatMap(GestureRowInstance.init) else {
-            model.config.gesture = model.cleanConfig.gesture
+            model.config.gesture = saved
             settle(model, .gesture, nil)
             return
         }
         for key in row.keys {
-            model.config.gesture[key] = model.cleanConfig.gesture[key]
+            model.config.gesture[key] = saved[key]
             settle(model, .gesture, key.spelling)
         }
     }

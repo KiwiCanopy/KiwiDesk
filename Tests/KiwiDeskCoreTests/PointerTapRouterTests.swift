@@ -8,8 +8,10 @@ import Testing
 /// release, and a hover grab ends when a key is let go.
 @Suite("PointerTapRouter")
 struct PointerTapRouterTests {
-    private static let moveChord: ScrollChord = [.control, .command]
-    private static let resizeChord: ScrollChord = [.control, .option]
+    private static let moveChord: ScrollChord = [.control, .option]
+    private static let resizeChord: ScrollChord = [
+        .control, .option, .shift,
+    ]
 
     private func router(
         _ settings: ModifierDragSettings = .defaults
@@ -50,7 +52,7 @@ struct PointerTapRouterTests {
         var r = router()
         #expect(r.route(sample(.leftDown, []), now: 1) == .pass)
         #expect(
-            r.route(sample(.leftDown, [.control, .command, .shift]), now: 1)
+            r.route(sample(.leftDown, [.control, .option, .command]), now: 1)
                 == .pass
         )
         #expect(r.owner == nil)

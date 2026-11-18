@@ -41,7 +41,8 @@ extension KiwiCore {
             if let refusal = GestureSeeds.shadowRefusal(
                 of: key,
                 base: base,
-                profile: mouse.gestures.profileOverride
+                profile: mouse.gestures.profileOverride,
+                shortcutBase: mouse.gestures.shortcutBase
             ) {
                 return .fail(Self.gestureRefusal(refusal, key))
             }

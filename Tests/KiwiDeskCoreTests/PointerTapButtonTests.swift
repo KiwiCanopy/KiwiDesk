@@ -131,14 +131,14 @@ struct PointerTapButtonTests {
     func buttonsAheadOfTheGrab() {
         var r = router([GestureKey(.sideButtons): .family(.space)])
         r.snapshot.grab = .defaults
-        let grab = r.route(sample(.leftDown, [.control, .command]), now: 1)
+        let grab = r.route(sample(.leftDown, [.control, .option]), now: 1)
         #expect(grab.grab.first?.phase == .began)
         let back = r.route(sample(.buttonDown(.other(3)), []), now: 2)
         #expect(back.swallow)
         #expect(back.buttons.first?.direction == .back)
         // The grab still owns its stream.
         let drag = r.route(
-            sample(.leftDragged, [.control, .command]),
+            sample(.leftDragged, [.control, .option]),
             now: 3
         )
         #expect(drag.grab.first?.phase == .moved)

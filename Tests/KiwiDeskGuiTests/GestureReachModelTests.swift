@@ -140,7 +140,11 @@ struct GestureReachModelTests {
         model.reload()
 
         model.dropGesturePick(own.spelling, shared: true)
-        GestureListEdits.remove(own, in: &model.config.gesture)
+        GestureListEdits.remove(
+            own,
+            in: &model.config.gesture,
+            shortcutBase: .standard
+        )
         model.updateActiveProfile()
 
         #expect(core.guiConfigStore.load()?.gesture[own] == .bound(.run(lua)))

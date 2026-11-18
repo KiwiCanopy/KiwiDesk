@@ -26,6 +26,7 @@ extension AppRulesSection {
                         onDelete: { deleteSpace(row, $0) },
                         returningRow: $returningSpaceRow
                     )
+                    .id(Self.anchor(.space, row.key))
                 }
                 Divider()
             }
@@ -65,7 +66,8 @@ extension AppRulesSection {
     }
 
     /// Pins the picked app to the Space a new pin takes. Picking
-    /// the app is the whole gesture (#1172).
+    /// the app is the whole gesture (#1172); the new row is then
+    /// revealed and focused where the sort put it (#3450).
     private func addWithSpace(_ picked: String) {
         // Cleared whatever happens: `AppPickerButton` draws what
         // `name` holds, so a refused pick would stay drawn.
@@ -74,6 +76,8 @@ extension AppRulesSection {
             let space = AppRulePin.engagedSpace(model.config)
         else { return }
         model.config.appRules[app] = space
+        let key = SpaceRuleRow(app: app, fragment: nil).key
+        revealedRow = RowReveal(list: .space, key: key)
     }
 
     private func deleteSpace(_ row: SpaceRuleRow, _ removal: RuleRemoval) {
@@ -120,6 +124,7 @@ extension AppRulesSection {
                     onDelete: { deleteFloat(app, $0) },
                     returningRow: $returningFloatRow
                 )
+                .id(Self.anchor(.float, app))
                 Divider()
             }
             AppSelector(
@@ -141,13 +146,15 @@ extension AppRulesSection {
         return sortedByName(set)
     }
 
-    /// Floats every window of the picked app.
+    /// Floats every window of the picked app, then reveals and
+    /// focuses its row (#3450).
     private func addFloating(_ picked: String) {
         defer { newFloatingApp = "" }
         guard let app = normalized(picked, in: floatApps) else {
             return
         }
         model.config.floatRules.append(app)
+        revealedRow = RowReveal(list: .float, key: app)
     }
 
     private func deleteFloat(_ app: String, _ removal: RuleRemoval) {

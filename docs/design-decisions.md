@@ -7452,6 +7452,18 @@ too (#2923): listed apart, under a *Pocket Keys* header with its
 key, since mixed into the general groups it would break the put-in
 order ⌃⌥P steps.
 
+:::unreleased
+KiwiHub's Shortcuts side lists an app's Pocket key the same way
+(#3449, owner on ui-designer's recommendation, 2026-11-18): under
+the Pocket's own rows, wherever those are filed — Size & float
+unless a binding's group moves them — not in Apps, where its
+"Pocket <app>" title sorted out of order among the launch keys. A
+row belongs with its verb's other keys, as on the Pocket card in
+Settings. A "Pocket" subheader inside Apps was refused, since it is
+chrome that keeps a verb inside a noun group, and so was renaming
+the rows "<app> (Pocket)", which fixes the order but not the topic.
+:::
+
 **A key opens the Pocket's list, the same peek a click grows**
 (owner, 2026-11-04, #2974): the list was mouse-only, and a per-app
 key is one more chord per window. `pocket.toggle_list` on `⌃⌥⌘P`, the
@@ -11525,6 +11537,25 @@ Gestures card already makes — a scroll steps as far as you scroll
 wheel notch.
 :::
 
+:::unreleased
+**Amended (#3447, owner on ui-designer's recommendation,
+2026-11-18): a mouse row draws KiwiHub's glyph for its input, as a
+trackpad row does.** One mouse glyph on every cap broke the
+premise #3427 set for the whole step — the tour teaches KiwiHub's
+picture, not a second one — on every mouse row: a user who learned
+the wheel as a mouse meets a wheel glyph in KiwiHub and has nothing
+to match it to. The step's subtitle already names the device, and
+so does the Trackpad | Mouse picker where it is offered, so the cap
+was spending itself on a fact the page states without it. Each mouse cap is now
+`ShortcutGestureBadge.covering`'s glyph for the binding — the
+wheel, the sideways wheel, the drag, the side buttons — with the
+motion still captioned under it. Move and Resize share the drag
+glyph, as they do in KiwiHub, and the chord and the label tell
+them apart. A cap carrying both the mouse and the gesture glyph
+was refused: two pictures on one keycap is the widest cap on the
+page again, and KiwiHub draws one.
+:::
+
 ### The tour's look is written through, and the tour owns its undo
 
 **[Principle]**
@@ -14313,8 +14344,8 @@ list of other apps' taps would be stale the day it shipped.
 **Every pointer event KiwiDesk must swallow goes through one
 active tap, and only while a consumer needs it (#2447, #2764).**
 An `NSEvent` monitor hears a press but cannot drop it, so a
-gesture that takes the press — ⌃⌘ + drag moving the window under
-the pointer, ⌃⌥ + drag resizing it — needs an active `CGEventTap`.
+gesture that takes the press — ⌃⌥ + drag moving the window under
+the pointer, ⌃⌥⇧ + drag resizing it — needs an active `CGEventTap`.
 Measured with a probe at the shipped tap location
 (`.cgSessionEventTap`, active, 2026-11-08, macOS 27.2): a mask of
 the left-button trio, and that mask with the moves and the
@@ -14348,10 +14379,10 @@ START a drag, never a second drop path to keep in step.
 
 The trade: a swallowed press is one the app under the pointer
 never hears, and with no tracked window there the click is lost
-(⌃⌘-click on the desktop does nothing). The swallow also deafens
-KiwiDesk's own press listeners, so each consumer re-delivers to
-them through their own doors. The defaults are on, ⌃⌘ and ⌃⌥ with
-the button held, since a press is a clear start and its release a
+(a grab's click on the desktop does nothing). The swallow also
+deafens KiwiDesk's own press listeners, so each consumer re-delivers
+to them through their own doors. The defaults are on, ⌃⌥ and ⌃⌥⇧
+with the button held, since a press is a clear start and its release a
 clear end; "+ move (no click)" is an opt-in per action, and shows
 no warning when its chord also starts a shortcut, since pressing a
 key is deliberate (owner, 2026-11-08). One modifier alone is the
@@ -15325,6 +15356,28 @@ keeps the larger mark, so no Mac lowers it, and discarding
 carries its own mark. A Lua-owned setup leaves the mark alone, so
 moving to Settings later still offers every Desktop. Restore Defaults restores the
 tier for the Desktops the Mac has.
+
+:::unreleased
+*Amended (#3444, owner 2026-11-18):* the switch moves the mouse and
+trackpad gestures with the same mapping: every `⌃⌥` gesture row,
+`⌃⌥` drag → `✦` drag and `⌃⌥⇧` drag → `✦⇧` drag among them, and
+`⌃⌥⇧⌘` takes no exception since no gesture is a Desktop digit. The
+drags first moved onto one base for it: `⌃⌥` drag moves and `⌃⌥⇧`
+drag resizes, where `⌃⌘` had moved and `⌃⌥` resized, so the plain
+chord takes the frequent act and `⇧` the variant, as on the keyboard
+ladder. The gesture map is sparse over seeds in code, so the seeds
+read the stored base themselves rather than being rewritten into the
+file: a seed a later release adds lands on `✦` for a Hyper user, as
+a later keyboard default does. The switch renames only the keys the
+files store, a profile's override following the shared map's moves
+as a keyboard override does; a seed whose `✦` key the user's own
+gesture holds is written into the file on `⌃⌥` and listed under the
+switch with that reason. A Lua-owned setup keeps the seeds on `⌃⌥`,
+since `init.lua` declares its own bindings over them. No crossing
+pins the old drags: no release carried them, so every user first
+meets the drags on the new chords, and a pre-release `modifier_drag`
+file gains no second grab on keys its pair uses.
+:::
 
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never

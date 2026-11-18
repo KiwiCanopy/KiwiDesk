@@ -26,16 +26,26 @@ struct AppRulesSection: View {
     @State var newSpaceApp = ""
     @State var newFloatingApp = ""
     @State var newTileApp = ""
+    /// The row an add just made, scrolled to and focused once it is
+    /// drawn, since the live sort moves it away from the picker
+    /// (#3450).
+    @State var revealedRow: RowReveal?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                spaceList
-                floatList
-                automaticList
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    spaceList
+                    floatList
+                    automaticList
+                }
+                .padding(.horizontal, SettingsMetrics.paneInset)
+                .settingsPageBottom()
             }
-            .padding(.horizontal, SettingsMetrics.paneInset)
-            .settingsPageBottom()
+            .task(id: revealedRow) {
+                guard let reveal = revealedRow else { return }
+                await self.reveal(reveal, proxy)
+            }
         }
         // The composing row belongs to the draft it was opened in.
         // Every reload — an edit-target switch, a Revert — replaces
@@ -98,6 +108,40 @@ struct AppRulesSection: View {
             if order == .orderedSame { return lhs < rhs }
             return order == .orderedAscending
         }
+    }
+
+    /// A row's scroll anchor, one id space per list: an app may sit
+    /// in more than one.
+    static func anchor(_ list: RuleList, _ key: String) -> String {
+        list.rawValue + ":" + key
+    }
+
+    enum RuleList: String { case space, float, tile }
+
+    /// An added row: the list it sits in and its focus key.
+    struct RowReveal: Equatable {
+        let list: RuleList
+        let key: String
+    }
+
+    /// Scrolls to the added row, again once layout settles (a yield
+    /// does not promise it, `SettingsView.reveal`), then hands it
+    /// focus through the destination a deletion uses (#816), now
+    /// that the row is drawn.
+    private func reveal(_ row: RowReveal, _ proxy: ScrollViewProxy) async {
+        let anchor = Self.anchor(row.list, row.key)
+        proxy.scrollTo(anchor, anchor: .center)
+        try? await Task.sleep(
+            nanoseconds: SettingsReveal.nanoseconds(SettingsReveal.settle)
+        )
+        guard !Task.isCancelled else { return }
+        proxy.scrollTo(anchor, anchor: .center)
+        switch row.list {
+        case .space: returningSpaceRow = row.key
+        case .float: returningFloatRow = row.key
+        case .tile: returningTileRow = row.key
+        }
+        revealedRow = nil
     }
 
     /// Lower-cased so a hand-typed mixed-case bundle id

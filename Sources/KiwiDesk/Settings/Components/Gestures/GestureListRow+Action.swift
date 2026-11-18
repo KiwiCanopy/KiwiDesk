@@ -107,7 +107,12 @@ extension GestureListRow {
     /// back into one. The directions stay as open as they were.
     func bind(_ action: GestureAction) {
         clash = nil
-        GestureListEdits.set(action, at: key, in: &model.config.gesture)
+        GestureListEdits.set(
+            action,
+            at: key,
+            in: &model.config.gesture,
+            shortcutBase: model.config.shortcutBase
+        )
     }
 }
 

@@ -2,8 +2,9 @@ import Foundation
 
 /// The "Shortcuts use" switch (#2460): moves every row the
 /// `ShortcutBase.moved` mapping covers onto `base`, in every layer of
-/// `config`, and sets the base — the rows and the base in one draft
-/// write. Pure over the config; the GUI stages it, Save writes it.
+/// `config` and in its gesture map (#3444, `GestureBaseSwitch`), and
+/// sets the base — the rows and the base in one draft write. Pure
+/// over the config; the GUI stages it, Save writes it.
 /// A narration of the draft takes the same replay, so the rows the
 /// switch moved read as the switch's own change (`explains`). The
 /// ruling is `docs/design-decisions.md` ▸ *One switch puts KiwiDesk's
@@ -28,6 +29,12 @@ public enum ShortcutBaseSwitch {
         config.layers = config.layers.map {
             move($0, onto: base, liveSpaces: live) { _ in false }.layer
         }
+        config.gesture =
+            GestureBaseSwitch.move(
+                config.gesture,
+                from: config.shortcutBase,
+                onto: base
+            ).map
         config.shortcutBase = base
     }
 

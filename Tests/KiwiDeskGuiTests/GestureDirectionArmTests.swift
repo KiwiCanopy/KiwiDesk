@@ -94,7 +94,11 @@ struct GestureDirectionArmTests {
                 on: input
             )
         )
-        let rows = SettingsValueReadout.gestureRows(old: old, new: new)
+        let rows = SettingsValueReadout.gestureRows(
+            old: old,
+            new: new,
+            shortcutBase: .standard
+        )
         let row = try #require(rows.first)
         #expect(rows.count == 1)
         #expect(

@@ -29,7 +29,8 @@ struct GestureReachTableTests {
     private func table() -> RuleReachTable<GestureAction> {
         .gestures(
             base: base,
-            overrides: [("Work", work), ("Home", nil)]
+            overrides: [("Work", work), ("Home", nil)],
+            shortcutBase: .standard
         )
     }
 
@@ -41,7 +42,8 @@ struct GestureReachTableTests {
         for (name, override) in [("Work", work), ("Home", nil)] {
             let runtime = GestureSeeds.resolved(
                 base: base,
-                profile: override
+                profile: override,
+                shortcutBase: .standard
             )
             let resolved = table.resolved(for: name).compactMap { pair in
                 GestureKey(spelling: pair.key).map { ($0, pair.value) }
@@ -54,7 +56,9 @@ struct GestureReachTableTests {
     @Test("an untouched table writes back the files it read")
     func untouchedIsLossless() {
         let table = table()
-        #expect(table.gestureBase(original: base) == base)
+        #expect(
+            table.gestureBase(original: base, shortcutBase: .standard) == base
+        )
         #expect(table.gestureOverride(for: "Work") == work)
         #expect(table.gestureOverride(for: "Home") == nil)
     }
@@ -81,21 +85,26 @@ struct GestureReachTableTests {
         #expect(
             home?[GestureKey(.rightClick, [.control])] == .bound(.run(tap))
         )
-        #expect(table.gestureBase(original: base) == base)
+        #expect(
+            table.gestureBase(original: base, shortcutBase: .standard) == base
+        )
         #expect(table.gestureOverride(for: "Work") == work)
     }
 
     @Test("a shared row turned off writes a seed's tombstone")
     func sharedRemovalTurnsTheSeedOff() {
         var table = table()
-        let key = GestureKey(.drag, [.control, .command])
+        let key = GestureKey(.drag, [.control, .option])
         table.apply(
             key.spelling,
             value: nil,
             reach: .shared(joining: []),
             editing: "Home"
         )
-        let written = table.gestureBase(original: base)
+        let written = table.gestureBase(
+            original: base,
+            shortcutBase: .standard
+        )
         #expect(written[key] == .unbound)
         #expect(written[GestureKey(.tap3)] == .unbound)
     }
@@ -104,8 +113,16 @@ struct GestureReachTableTests {
     func overlayIsTheProfile() {
         let page = base.overlaid(by: work)
         #expect(
-            GestureSeeds.resolved(base: page, profile: nil)
-                == GestureSeeds.resolved(base: base, profile: work)
+            GestureSeeds.resolved(
+                base: page,
+                profile: nil,
+                shortcutBase: .standard
+            )
+                == GestureSeeds.resolved(
+                    base: base,
+                    profile: work,
+                    shortcutBase: .standard
+                )
         )
     }
 }

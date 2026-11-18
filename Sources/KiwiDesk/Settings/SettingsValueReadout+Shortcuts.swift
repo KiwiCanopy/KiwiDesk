@@ -56,7 +56,14 @@ extension SettingsValueReadout {
             .scrollNaturalTrackpad, .scrollNaturalMouse:
             return scrollGestureRows(key, old: old, new: new)
         case .gestureBindings:
-            return gestureRows(old: old.gesture, new: new.gesture)
+            // The keys the base switch moved are its own row's
+            // (#3444), as the layers' are.
+            let old = old.onShortcutBase(new.shortcutBase)
+            return gestureRows(
+                old: old.gesture,
+                new: new.gesture,
+                shortcutBase: new.shortcutBase
+            )
         case .shortcutBase:
             return [
                 .change(

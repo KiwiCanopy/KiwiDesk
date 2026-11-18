@@ -50,12 +50,17 @@ struct GestureListCard: View {
                 entries,
                 pending: pending,
                 in: base,
-                on: device
+                on: device,
+                shortcutBase: model.config.shortcutBase
             )
             // A row that took an action is the map's from here on.
             pending = pending.filter { id in
                 entries.first { $0.id == id }.map {
-                    GestureListEdits.action(of: $0.key, in: base) == nil
+                    GestureListEdits.action(
+                        of: $0.key,
+                        in: base,
+                        shortcutBase: model.config.shortcutBase
+                    ) == nil
                 } ?? false
             }
         }
@@ -183,7 +188,8 @@ struct GestureListCard: View {
                 .disabled(
                     !GestureListEdits.differsFromDefaults(
                         on: device,
-                        in: model.config.gesture
+                        in: model.config.gesture,
+                        shortcutBase: model.config.shortcutBase
                     )
                 )
                 .confirmationDialog(
@@ -264,13 +270,18 @@ struct GestureListCard: View {
     }
 
     private func reload() {
-        entries = GestureListEdits.rows(in: model.config.gesture, on: device)
-            .map { GestureListEntry($0) }
+        entries = GestureListEdits.rows(
+            in: model.config.gesture,
+            on: device,
+            shortcutBase: model.config.shortcutBase
+        )
+        .map { GestureListEntry($0) }
         open = Set(
             entries.filter {
                 if case .split = GestureListEdits.action(
                     of: $0.key,
-                    in: model.config.gesture
+                    in: model.config.gesture,
+                    shortcutBase: model.config.shortcutBase
                 ) {
                     return true
                 }
@@ -298,10 +309,16 @@ struct GestureListCard: View {
     }
 
     private func remove(_ entry: GestureListEntry) {
-        if GestureListEdits.action(of: entry.key, in: model.config.gesture)
-            != nil
-        {
-            GestureListEdits.remove(entry.key, in: &model.config.gesture)
+        if GestureListEdits.action(
+            of: entry.key,
+            in: model.config.gesture,
+            shortcutBase: model.config.shortcutBase
+        ) != nil {
+            GestureListEdits.remove(
+                entry.key,
+                in: &model.config.gesture,
+                shortcutBase: model.config.shortcutBase
+            )
         }
         entries.removeAll { $0.id == entry.id }
         open.remove(entry.id)

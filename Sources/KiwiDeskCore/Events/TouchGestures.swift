@@ -33,7 +33,11 @@ public final class TouchGestures {
     /// The touch inputs' bindings; the seeds' until the first
     /// resolve, as on a fresh install.
     public private(set) var bindings = TouchGestures.touchBindings(
-        GestureSeeds.resolved(base: GestureMap(), profile: nil)
+        GestureSeeds.resolved(
+            base: GestureMap(),
+            profile: nil,
+            shortcutBase: ShortcutBase.standard
+        )
     )
     /// Whether a swipe keeps its direction: the trackpad's Natural
     /// scrolling, the one flip a swipe takes (#3200 amendment).
