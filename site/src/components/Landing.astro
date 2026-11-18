@@ -953,7 +953,7 @@ const jsonLd = [
                     {v.role && (
                       <span class="voice__role" lang="en">{v.role}</span>
                     )}
-                    {v.sourceLink ? (
+                    {v.source && v.sourceLink ? (
                       <a class="voice__src" href={v.sourceLink}
                         target="_blank" rel="noopener">
                         {v.channel && (
@@ -962,7 +962,7 @@ const jsonLd = [
                         )}
                         {v.source}
                       </a>
-                    ) : (
+                    ) : v.source && (
                       <span class="voice__src">
                         {v.channel && (
                           <Icon name={`simple-icons:${v.channel}`}
