@@ -61,6 +61,8 @@ extension KiwiCore {
                 $0.kiwiDisplayID == main
             }) ?? screens.first
         else { return [:] }
+        // State names a screen once the display resolve has run; a
+        // Settings draw ahead of it names the screen as AppKit does.
         let label =
             screen.kiwiDisplayID.flatMap(namedScreenLabel(of:))
             ?? ScreenLabel(name: screen.localizedName)

@@ -84,6 +84,8 @@ extension SettingsModel {
 
     /// The layout the master's fit line counts for: the most-used
     /// one that `minSizeFitLayouts` counts, BSP where none is used.
+    /// Its value is the master's only while every layout agrees,
+    /// which is the one state the master draws the line in.
     var minSizeFitMaster: MinWindowSizes.Layout {
         mostUsed(among: Self.minSizeFitLayouts)
     }
