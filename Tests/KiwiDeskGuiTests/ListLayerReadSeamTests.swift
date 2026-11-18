@@ -107,4 +107,37 @@ struct ListLayerReadSeamTests {
             #expect(level.lowerBound < listRead.lowerBound, "\(file)")
         }
     }
+
+    /// The adoption door asks the level before the public read,
+    /// and takes no verdict on a raised window that read does not
+    /// list yet (#3443) — every door meets here, the create arm's
+    /// too, which no fixture can drive without live AX.
+    @Test("track asks the level first and waits out an order-in")
+    func trackPrefersTheLevel() throws {
+        let body = String(
+            try #require(
+                SourceScan.declarationBody(
+                    after: "func track(",
+                    in: try Self.source("Events/EventLoop+Tracking.swift")
+                ),
+                "track is gone"
+            )
+        )
+        let level = try #require(body.range(of: "readLevel(window.id)"))
+        let wait = try #require(
+            body.range(of: "FloatDetection.isOrderingIn(")
+        )
+        let layer = try #require(
+            body.range(of: "let layer = level ?? server.layer")
+        )
+        #expect(level.lowerBound < wait.lowerBound)
+        #expect(wait.lowerBound < layer.lowerBound)
+        let loop = try Self.source("Events/EventLoop.swift")
+            .filter { !$0.isWhitespace }
+        #expect(
+            loop.contains(
+                "varreadLevel:(WindowID)->Int?={SkyLight.windowLevel("
+            )
+        )
+    }
 }
