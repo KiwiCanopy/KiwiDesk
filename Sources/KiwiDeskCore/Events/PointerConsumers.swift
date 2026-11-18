@@ -12,8 +12,8 @@ import Foundation
 public final class PointerConsumers {
     /// The consumers, in the precedence a contested event takes.
     public enum Consumer: CaseIterable, Hashable, Sendable {
-        /// The modifier grab: ⌃⌘ + drag moves, ⌃⌥ + drag resizes
-        /// (#2447). It owns the button stream it began.
+        /// The modifier grab: ⌃⌥ + drag moves, ⌃⌥⇧ + drag resizes
+        /// (#2447, #3444). It owns the button stream it began.
         case grab
         /// The bound clicks and side buttons (#3281). It owns the
         /// press it took to its release.
@@ -91,7 +91,7 @@ public final class PointerConsumers {
     /// The bound buttons as the tap reads them; written by
     /// `KiwiCore.applyGestures` alone.
     public private(set) var buttonSettings = PointerButtonSettings(
-        resolved: GestureSeeds.seeds
+        resolved: GestureSeeds.seeds(on: .standard)
     )
     /// The bound pinches, rotation and swipes as the tap reads them;
     /// written through `TouchGestures.onGestureEventChords` alone.

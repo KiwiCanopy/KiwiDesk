@@ -193,7 +193,8 @@ extension KiwiCore {
             )
             profile.gesture = GestureMap.diff(
                 base: base.gesture,
-                edited: config.gesture
+                edited: config.gesture,
+                shortcutBase: base.shortcutBase
             )
             profile.spaceHistory = .sparse(
                 config.spaceHistory,

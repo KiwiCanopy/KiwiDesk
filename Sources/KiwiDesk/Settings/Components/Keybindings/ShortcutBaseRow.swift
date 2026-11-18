@@ -22,7 +22,7 @@ struct ShortcutBaseRow: View {
             }
             // Lua owning the config is the card's caption already.
             if reason != .appWideLuaOwned { caption(captionText) }
-            if !left.isEmpty { leftList }
+            if !left.isEmpty || !gesturesLeft.isEmpty { leftList }
         }
     }
 
@@ -69,12 +69,21 @@ struct ShortcutBaseRow: View {
     }
 
     private var left: [ShortcutBaseLeftRow] { model.rowsLeftOnStandard }
+    private var gesturesLeft: [GestureBaseLeftRow] {
+        model.gestureRowsLeftOnStandard
+    }
 
     private var leftList: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(ShortcutBaseWords.leftHeader(left.count))
+            Text(
+                ShortcutBaseWords.leftHeader(left.count + gesturesLeft.count)
+            )
             ForEach(left) { row in
                 Text(ShortcutBaseWords.line(row, config: model.config))
+                    .padding(.leading, 12)
+            }
+            ForEach(gesturesLeft) { row in
+                Text(ShortcutBaseWords.line(row))
                     .padding(.leading, 12)
             }
         }

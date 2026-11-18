@@ -49,7 +49,9 @@ extension KiwiCore {
                     || snapshot.storedKeyOverrides[name]
                         != snapshot.fileKeyOverrides[name])
             let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
-            let gestureTouched = !(gesture.touched[name] ?? []).isEmpty
+            let gestureTouched =
+                !(gesture.touched[name] ?? []).isEmpty
+                || snapshot.movedGestureProfiles.contains(name)
             let historyTouched = !(history.touched[name] ?? []).isEmpty
             let cycleTouched = !(cycle.touched[name] ?? []).isEmpty
             let wrapTouched = !(wrap.touched[name] ?? []).isEmpty
@@ -139,6 +141,7 @@ extension KiwiCore {
             || !titled.baseTouched.isEmpty
             || !scroll.baseTouched.isEmpty
             || !gesture.baseTouched.isEmpty
+            || snapshot.storedGestureBase != snapshot.fileGestureBase
             || !history.baseTouched.isEmpty
             || !cycle.baseTouched.isEmpty || keysMoved
             || !wrap.baseTouched.isEmpty
@@ -161,7 +164,8 @@ extension KiwiCore {
                 original: snapshot.storedScrollBase
             )
             stored.gesture = gesture.gestureBase(
-                original: snapshot.storedGestureBase
+                original: snapshot.storedGestureBase,
+                shortcutBase: snapshot.gestureShortcutBase
             )
             stored.spaceHistory = history.spaceHistoryBase
             stored.modeCycle = cycle.modeCycleBase

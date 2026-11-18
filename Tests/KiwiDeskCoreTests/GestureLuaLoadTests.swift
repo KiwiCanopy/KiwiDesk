@@ -58,7 +58,7 @@ struct GestureLuaLoadTests {
             lua: #"gesture.unbind("tap3", "")"# + "\n",
             guiConfig: GuiConfig()
         )
-        #expect(GestureSeeds.seeds[GestureKey(.tap3)] != nil)
+        #expect(GestureSeeds.seeds(on: .standard)[GestureKey(.tap3)] != nil)
         core.loadConfig()
         #expect(!core.isGuiManaged)
         #expect(core.mouse.gestures.resolved[GestureKey(.tap3)] == nil)

@@ -15,9 +15,14 @@ extension GestureSeeds {
     /// once; a change there owes this predicate the same change.
     public static func longSwipesApply(
         base: GestureMap,
-        profile: GestureMap?
+        profile: GestureMap?,
+        shortcutBase: ShortcutBase
     ) -> Bool {
-        resolved(base: base, profile: profile).contains { key, action in
+        resolved(
+            base: base,
+            profile: profile,
+            shortcutBase: shortcutBase
+        ).contains { key, action in
             guard key.input == .swipe2 else { return false }
             switch action {
             case .family(let family):
