@@ -152,7 +152,7 @@ enum ShortcutsReferenceBuilder {
             }
         }
 
-        let controls = buildControls(
+        var controls = buildControls(
             activeLayer: layer.name,
             spaces: spaces,
             spaceIcons: spaceIcons,
@@ -162,6 +162,11 @@ enum ShortcutsReferenceBuilder {
             layerIcons: layerIcons,
             lenses: lenses,
             rows: { rows($0, band: $1, regroups: true) }
+        )
+        filingPocketApps(
+            buildPocketAppRows(layer, consumed: &consumed),
+            controls: &controls,
+            regrouped: &regrouped
         )
         // Inactive orphans built before Apps/Custom (#820).
         let inactive = buildInactive(

@@ -107,8 +107,9 @@ struct BindingNameDoorTests {
                 + "names (#1871)"
         ),
         "ShortcutsReference+PocketApps.swift": (
-            1,
-            "the Apps band's sort by each launch row's app name"
+            2,
+            "the Apps band's sort by each launch row's app name, "
+                + "read off both sides of the comparison"
         ),
         "KeybindingCatalog+PocketApps.swift": (
             1,

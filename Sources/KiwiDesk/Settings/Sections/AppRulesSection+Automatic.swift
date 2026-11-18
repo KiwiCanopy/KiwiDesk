@@ -36,6 +36,7 @@ extension AppRulesSection {
                     onDelete: { deleteTile(app, $0) },
                     returningRow: $returningTileRow
                 )
+                .id(Self.anchor(.tile, app))
                 Divider()
             }
             AppSelector(
@@ -61,10 +62,16 @@ extension AppRulesSection {
         )
     }
 
+    /// Tiles the picked app, then reveals and focuses its row
+    /// (#3450).
     private func addTile(_ picked: String) {
         defer { newTileApp = "" }
         guard let app = normalized(picked, in: tileApps) else { return }
         model.config.tileRules.append(app)
+        revealedRow = RowReveal(
+            list: .tile,
+            key: FloatGuess.normalizedRule(app)
+        )
     }
 
     private func deleteTile(_ app: String, _ removal: RuleRemoval) {

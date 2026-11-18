@@ -7452,6 +7452,18 @@ too (#2923): listed apart, under a *Pocket Keys* header with its
 key, since mixed into the general groups it would break the put-in
 order ⌃⌥P steps.
 
+:::unreleased
+KiwiHub's Shortcuts side lists an app's Pocket key the same way
+(#3449, owner on ui-designer's recommendation, 2026-11-18): under
+the Pocket's own rows, wherever those are filed — Size & float
+unless a binding's group moves them — not in Apps, where its
+"Pocket <app>" title sorted out of order among the launch keys. A
+row belongs with its verb's other keys, as on the Pocket card in
+Settings. A "Pocket" subheader inside Apps was refused, since it is
+chrome that keeps a verb inside a noun group, and so was renaming
+the rows "<app> (Pocket)", which fixes the order but not the topic.
+:::
+
 **A key opens the Pocket's list, the same peek a click grows**
 (owner, 2026-11-04, #2974): the list was mouse-only, and a per-app
 key is one more chord per window. `pocket.toggle_list` on `⌃⌥⌘P`, the
@@ -11523,6 +11535,25 @@ on either plan no step. The mouse footnote makes only the claim the
 Gestures card already makes — a scroll steps as far as you scroll
 — since long swipes, the trackpad footnote's subject, never reach a
 wheel notch.
+:::
+
+:::unreleased
+**Amended (#3447, owner on ui-designer's recommendation,
+2026-11-18): a mouse row draws KiwiHub's glyph for its input, as a
+trackpad row does.** One mouse glyph on every cap broke the
+premise #3427 set for the whole step — the tour teaches KiwiHub's
+picture, not a second one — on every mouse row: a user who learned
+the wheel as a mouse meets a wheel glyph in KiwiHub and has nothing
+to match it to. The step's subtitle already names the device, and
+so does the Trackpad | Mouse picker where it is offered, so the cap
+was spending itself on a fact the page states without it. Each mouse cap is now
+`ShortcutGestureBadge.covering`'s glyph for the binding — the
+wheel, the sideways wheel, the drag, the side buttons — with the
+motion still captioned under it. Move and Resize share the drag
+glyph, as they do in KiwiHub, and the chord and the label tell
+them apart. A cap carrying both the mouse and the gesture glyph
+was refused: two pictures on one keycap is the widest cap on the
+page again, and KiwiHub draws one.
 :::
 
 ### The tour's look is written through, and the tour owns its undo
