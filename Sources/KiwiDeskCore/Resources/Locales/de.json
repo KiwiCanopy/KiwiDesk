@@ -1150,6 +1150,7 @@
   "kiwishelf.durations": "Dauer",
   "kiwishelf.durations.animations_off": "Animationen sind in allen Profilen aus. Wähle ein Tempo unter %1$@.",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
+  "kiwishelf.durations.summary.off": "Aus",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "Die Leisten und die Pocket oder ihre Bildschirme sitzen gerade an verschiedenen Kanten; eine Wahl hier setzt alle auf jedem Bildschirm an dieselbe Kante.",
   "kiwishelf.edge.each": "Jede Leiste und die Pocket",

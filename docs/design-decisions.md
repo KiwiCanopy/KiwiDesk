@@ -7970,7 +7970,8 @@ The Settings window keeps macOS's setting: its motion is where the
 user watches Off take effect (the box arrives, the rows grey), and
 it is ordinary window chrome. Settings reads the flag only to
 narrate it: the Animations card's box and greys, the KiwiShelf
-card's Durations switches and their reason line (#3471), and the
+card's Reveal picker, Durations switches and their reason line
+(#3471), and the
 Switching Spaces captions, which say what the desk draws (*Reduce Motion
 shows the Space*, above). `ReduceMotionHomeTests` holds the GUI tree
 to the one read outside `Sources/KiwiDesk/Settings`.
@@ -21692,10 +21693,11 @@ plays with Reduce Motion on and the
 crossing turns a stored 0 into it, so a choice made in Settings
 keeps a way back there. Rejected: dropping a switch, which strands a
 migrated 0; one central Durations group.
-Under KiwiDesk's Off both switches grey, their stored ticks kept,
-with one line in the drawer pointing at Looks & Animations ▸
-Animation speed (owner, 2026-11-18, #3471): neither motion plays
-there.
+Under KiwiDesk's Off both switches and the Reveal picker grey,
+their stored values kept, the shut drawer reads Off, and one line
+under the drawer points at Looks & Animations ▸ Animation speed
+(owner, 2026-11-18, #3471): no reveal style plays and neither
+motion does.
 :::
 
 **The bars ship one thickness, 40 pt, on every screen, and the

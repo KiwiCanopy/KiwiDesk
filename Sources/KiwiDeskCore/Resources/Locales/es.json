@@ -1150,6 +1150,7 @@
   "kiwishelf.durations": "Duraciones",
   "kiwishelf.durations.animations_off": "Las animaciones están desactivadas en todos los perfiles. Elige una velocidad en %1$@.",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
+  "kiwishelf.durations.summary.off": "Desactivado",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "Ahora mismo las barras y el Pocket, o sus pantallas, están en bordes distintos; elegir aquí los pone a todos en un mismo borde en todas las pantallas.",
   "kiwishelf.edge.each": "Cada barra y el Pocket",

@@ -69,7 +69,11 @@ struct BarsGateWiringTests {
             // sentence.
             "Components/Bars/KiwiShelfCard+Reveal.swift": [
                 ".inertReason(for:.kiwishelf(.revealStyle))",
-                "GreyOut(active:reason!=nil)",
+                // The picker greys under Off too (#3471), on its own
+                // anchor.
+                ".modifier(GreyOut(active:reason!=nil||animationsOff))"
+                    + ".searchAnchored(SettingsCatalog.bars"
+                    + ".kiwishelfRevealStyle)",
                 "BarsGateHelp.sentence(for:reason)",
                 // Grow's Unfold note on a Boxed shelf (#2556).
                 "ifreason==nil,gates.growPlaysAsUnfold{"
@@ -87,7 +91,12 @@ struct BarsGateWiringTests {
                     + ".kiwishelfDurations.children.onExpand)",
                 "privatevaranimationsOff:Bool{"
                     + "model.appWide.animationReduceMotion}",
-                "ifanimationsOff{animationsOffNote}",
+                // The note sits after the drawer, outside every grey,
+                // and the shut drawer says Off (#3471).
+                "caption(reason)}ifanimationsOff{animationsOffNote}}",
+                "summary:durationsSummary",
+                "animationsOff?L(\"kiwishelf.durations.summary.off\","
+                    + "\"Off\"):nil",
                 "prose:BarsGateHelp.animationsOffProse",
             ],
         ]

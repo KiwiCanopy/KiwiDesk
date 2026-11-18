@@ -118,6 +118,9 @@ extension InterpolatedLabelTests {
         "kiwishelf.background_fit.boxed_only": 1,
         "kiwishelf.edge.screens_differ.help": 2,
         "kiwishelf.edge.pocket.screens_differ.help": 1,
+        // #3471: the Off pointer names its page; the scan does not
+        // read the catalog row it also names.
+        "kiwishelf.durations.animations_off.link": 1,
         "space_bar.color.focused_item.help": 2,
         "spaces.delete_confirm.message": 2,
         // The entries below were ALWAYS interpolating and were

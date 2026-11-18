@@ -103,7 +103,8 @@ extension KiwiShelfKey {
             )
         case .revealStyle:
             // In the Show group under Handle thickness, greyed while
-            // no bar hides (owner ruling, 2026-10-21).
+            // no bar hides (owner ruling, 2026-10-21), and under
+            // KiwiDesk's Off (#3471), whose pointer sits below it.
             return .row(
                 .bars,
                 .kiwishelf,

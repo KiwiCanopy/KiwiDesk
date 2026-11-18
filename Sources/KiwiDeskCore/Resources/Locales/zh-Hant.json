@@ -1150,6 +1150,7 @@
   "kiwishelf.durations": "時間長度",
   "kiwishelf.durations.animations_off": "所有描述檔中的動畫均已關閉。請在 %1$@ 中選擇速度。",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
+  "kiwishelf.durations.summary.off": "關閉",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "目前各列與 Pocket，或它們在不同螢幕上，位於不同邊緣；在此處選擇會讓它們在每個螢幕上都位於同一邊緣。",
   "kiwishelf.edge.each": "每個列與 Pocket",
