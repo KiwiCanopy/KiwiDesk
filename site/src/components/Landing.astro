@@ -930,27 +930,29 @@ const jsonLd = [
           {voices.map((v) => (
             <li>
               <figure class="voice">
-                <blockquote lang="en">
-                  <p>{v.quote}</p>
-                </blockquote>
-                {v.source && v.sourceLink ? (
-                  <a class="voice__src" href={v.sourceLink}
-                    target="_blank" rel="noopener">
-                    {v.channel && (
-                      <Icon name={`simple-icons:${v.channel}`}
-                        width={12} height={12} aria-hidden="true" />
-                    )}
-                    {v.source}
-                  </a>
-                ) : v.source && (
-                  <span class="voice__src">
-                    {v.channel && (
-                      <Icon name={`simple-icons:${v.channel}`}
-                        width={12} height={12} aria-hidden="true" />
-                    )}
-                    {v.source}
-                  </span>
-                )}
+                <div class="voice__body">
+                  <blockquote lang="en">
+                    <p>{v.quote}</p>
+                  </blockquote>
+                  {v.source && v.sourceLink ? (
+                    <a class="voice__src" href={v.sourceLink}
+                      target="_blank" rel="noopener">
+                      {v.channel && (
+                        <Icon name={`simple-icons:${v.channel}`}
+                          width={12} height={12} aria-hidden="true" />
+                      )}
+                      {v.source}
+                    </a>
+                  ) : v.source && (
+                    <span class="voice__src">
+                      {v.channel && (
+                        <Icon name={`simple-icons:${v.channel}`}
+                          width={12} height={12} aria-hidden="true" />
+                      )}
+                      {v.source}
+                    </span>
+                  )}
+                </div>
                 <figcaption>
                   {v.avatar ? (
                     <Image class="voice__avatar" src={v.avatar}
