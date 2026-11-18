@@ -114,11 +114,11 @@ struct PresetShapeTuningTests {
         #expect(settings.stack.masterCount == 2)
         #expect(settings.grid.columns == 2)
         #expect(settings.grid.rows == 2)
-        // The floor is seeded from the MAIN screen's width, never
-        // the ultrawide's (#2237).
+        // The floor is seeded from the MAIN screen, never the
+        // ultrawide (#2237).
         #expect(
             settings.minWindowSizes
-                == StarterTuning.minWindowSizes(mainWidth: laptop.width)
+                == StarterTuning.minWindowSizes(main: laptop)
         )
     }
 

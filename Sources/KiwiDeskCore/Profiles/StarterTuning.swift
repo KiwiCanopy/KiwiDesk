@@ -52,16 +52,24 @@ public enum StarterTuning {
     }
 
     /// The minimum window size every layout starts with (#2237,
-    /// #821): the main screen's width over `minSizeDivisor`,
-    /// rounded to the Settings stepper's 10 pt and clamped into
-    /// `minSizeRange`, the same on both axes.
-    static func minWindowSizes(mainWidth: CGFloat) -> MinWindowSizes {
-        let raw = (mainWidth / minSizeDivisor / 10).rounded() * 10
-        let side = min(
+    /// #821, #3462): each axis is the main screen's length on that
+    /// axis over `minSizeDivisor`, rounded to the Settings
+    /// stepper's 10 pt and clamped into `minSizeRange`.
+    static func minWindowSizes(main: CGSize) -> MinWindowSizes {
+        MinWindowSizes(
+            all: MinSize(
+                width: minSizeSide(main.width),
+                height: minSizeSide(main.height)
+            )
+        )
+    }
+
+    private static func minSizeSide(_ length: CGFloat) -> CGFloat {
+        let raw = (length / minSizeDivisor / 10).rounded() * 10
+        return min(
             max(raw, minSizeRange.lowerBound),
             minSizeRange.upperBound
         )
-        return MinWindowSizes(all: .square(side))
     }
 
     /// A laptop seeds the floor; a screen from about 3680 pt wide

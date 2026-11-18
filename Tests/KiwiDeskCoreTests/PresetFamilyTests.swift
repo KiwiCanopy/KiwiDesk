@@ -111,7 +111,7 @@ struct PresetFamilyTests {
         // the wider screen takes the first slot.
         #expect(
             composed.settings.minWindowSizes
-                == StarterTuning.minWindowSizes(mainWidth: 1512)
+                == StarterTuning.minWindowSizes(main: laptop.frame.size)
         )
     }
 
