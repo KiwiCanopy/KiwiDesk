@@ -1483,6 +1483,8 @@
   "layout_defaults.min_size.bsp_height": "BSP height",
   "layout_defaults.min_size.bsp_width": "BSP width",
   "layout_defaults.min_size.caption": "Windows never tile smaller than this. Set a layout apart under %1$@.",
+  "layout_defaults.min_size.fits": "Fits on %1$@ — Across: %2$d · Down: %3$d",
+  "layout_defaults.min_size.fits_none": "Doesn't fit on %1$@: a window there can't reach this size.",
   "layout_defaults.min_size.floating_height": "Floating height",
   "layout_defaults.min_size.floating_width": "Floating width",
   "layout_defaults.min_size.grid_height": "Grid height",

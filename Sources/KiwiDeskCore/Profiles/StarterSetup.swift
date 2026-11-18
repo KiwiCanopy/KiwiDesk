@@ -235,7 +235,7 @@ public enum StarterSetup {
             hosts: hosts
         )
         settings.minWindowSizes = StarterTuning.minWindowSizes(
-            mainWidth: sizes[main].width
+            main: sizes[main]
         )
         settings.scrolling.override = scrollingOverrides(
             of: slots,

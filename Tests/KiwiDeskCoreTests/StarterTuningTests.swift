@@ -92,26 +92,49 @@ struct StarterTuningTests {
         )
     }
 
-    /// The first-run floor is the main screen's width over eight,
-    /// rounded to 10 pt and clamped (#2237, #821), the same on both
-    /// axes and every layout — which retired the ultrawide's 420.
-    @Test("the floor is seeded from the main screen's width")
-    func floorFollowsMainWidth() {
-        let cases: [(CGFloat, CGFloat)] = [
-            (1512, 260), (2560, 320), (3440, 430), (5120, 460),
+    /// The first-run floor is the main screen's length on each axis
+    /// over eight, rounded to 10 pt and clamped (#2237, #821,
+    /// #3462), the same for every layout. A wide, short screen
+    /// takes a lower height, so BSP splits it more than once.
+    @Test("the floor is seeded from the main screen, axis by axis")
+    func floorFollowsMainScreen() {
+        let cases: [(CGSize, MinSize)] = [
+            // 32:9, the #3462 report: 400 × 260, not 400 × 400.
+            (
+                CGSize(width: 3200, height: 900),
+                MinSize(width: 400, height: 260)
+            ),
+            // A 16:10 laptop: both axes at the floor.
+            (
+                CGSize(width: 1512, height: 982),
+                MinSize(width: 260, height: 260)
+            ),
+            // Portrait: the height reads the long side.
+            (
+                CGSize(width: 1440, height: 2560),
+                MinSize(width: 260, height: 320)
+            ),
+            (
+                CGSize(width: 3440, height: 1440),
+                MinSize(width: 430, height: 260)
+            ),
+            (
+                CGSize(width: 5120, height: 2880),
+                MinSize(width: 460, height: 360)
+            ),
         ]
-        for (width, side) in cases {
+        for (main, size) in cases {
             #expect(
-                StarterTuning.minWindowSizes(mainWidth: width)
-                    == MinWindowSizes(all: .square(side)),
-                "\(width)"
+                StarterTuning.minWindowSizes(main: main)
+                    == MinWindowSizes(all: size),
+                "\(main)"
             )
         }
         let wide = CGSize(width: 3440, height: 1440)
         let laptop = CGSize(width: 1512, height: 982)
         #expect(
             StarterSetup.settings(sizes: [wide, laptop]).minWindowSizes
-                == MinWindowSizes(all: 430)
+                == MinWindowSizes(all: MinSize(width: 430, height: 260))
         )
         #expect(
             StarterSetup.settings(sizes: [laptop, wide]).minWindowSizes

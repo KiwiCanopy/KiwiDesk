@@ -1483,6 +1483,8 @@
   "layout_defaults.min_size.bsp_height": "Высота (BSP)",
   "layout_defaults.min_size.bsp_width": "Ширина (BSP)",
   "layout_defaults.min_size.caption": "В мозаике окна никогда не бывают меньше этого значения. Чтобы задать раскладке своё значение, открой «%1$@».",
+  "layout_defaults.min_size.fits": "Помещается на экране «%1$@» — В ряд: %2$d · В столбец: %3$d",
+  "layout_defaults.min_size.fits_none": "Не помещается на экране «%1$@»: окно на нём не может быть такого размера.",
   "layout_defaults.min_size.floating_height": "Высота (Floating)",
   "layout_defaults.min_size.floating_width": "Ширина (Floating)",
   "layout_defaults.min_size.grid_height": "Высота (Grid)",
