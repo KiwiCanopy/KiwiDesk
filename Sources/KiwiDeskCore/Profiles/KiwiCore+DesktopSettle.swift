@@ -69,7 +69,7 @@ extension KiwiCore {
         // panels join every Space by construction, the switch
         // handler skipped its retile on the nil number, so
         // this sync is what retires them (review 2026-08-03).
-        guard NativeSpaces.activeSpaceIsUser() else {
+        guard desktopMemory.readActiveSpaceIsUser() else {
             updateBars()
             return
         }
