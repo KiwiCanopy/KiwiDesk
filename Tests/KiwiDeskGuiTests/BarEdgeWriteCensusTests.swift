@@ -119,6 +119,10 @@ struct BarEdgeWriteCensusTests {
                 + "`autoReadsAlways` and "
                 + "`drawsAtRest` over onScreen (#761)"
         ),
+        "TilingSettings+HandleRests.swift": (
+            1,
+            "`someHandleRests` over each screen variant (#3451)"
+        ),
         "TilingSettings+MaximizeWindows.swift": (
             2,
             "the per-mode `barEdges(in:)` and its fold of the "

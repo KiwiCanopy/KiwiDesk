@@ -144,6 +144,11 @@ extension KiwiShelfKey {
                 "kiwishelf.pocket_position",
                 help: "kiwishelf.pocket_position.help"
             )
+        case .handleThickness:
+            return .text(
+                "kiwishelf.handle_thickness",
+                help: "kiwishelf.handle_thickness.help"
+            )
         case .revealStyle:
             return .text(
                 "kiwishelf.reveal_style.label",

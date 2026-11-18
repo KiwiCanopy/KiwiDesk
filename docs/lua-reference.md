@@ -3300,6 +3300,23 @@ is the [`highlight_color`](#kiwishelf-colours).
 kiwishelf.set_highlight_width(3)
 ```
 
+:::unreleased
+### kiwishelf.set_handle_thickness
+
+**Expects:** points, 2–6 (default `3`); a value is rounded to a
+whole point and kept within the range.
+
+**Does:** sets how thick an Auto bar's handle and the Pocket's tab
+draw at the screen edge. The handle stays flush on the edge and
+reserves no room. A look carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_handle_thickness(4)
+```
+:::
+
 ### kiwishelf.set_item_gap
 
 **Expects:** points (default `6`; a negative value is raised to
@@ -4110,8 +4127,10 @@ App Bar in monocle and scrolling.
 
 :::unreleased
 An `"auto"` bar's handle is a thin line along the
-bar's whole length, flush on the edge: a 2-point capsule in the label
-ink, edged all round by a fine line of the opposite tone. It
+bar's whole length, flush on the edge: a capsule in the label ink,
+edged all round by a fine line of the opposite tone, as thick as
+[`kiwishelf.set_handle_thickness`](#kiwishelfset_handle_thickness)
+says. It
 reserves nothing and floats over the windows; clicks pass through it
 to the window beneath. With the pointer within about 24 points of
 the edge along the bar, a progress fill runs along the handle

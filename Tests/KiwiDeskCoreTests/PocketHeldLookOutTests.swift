@@ -50,7 +50,8 @@ struct PocketHeldLookOutTests {
         rep.size = size
         view.cacheDisplay(in: view.bounds, to: rep)
         // Above the tab only the kiwis draw, in their own green.
-        let tabTop = Int((height - PocketHandleView.tabDepth) * scale)
+        let depth = PocketHandleView.tabDepth(of: KiwiShelf())
+        let tabTop = Int((height - depth) * scale)
         var top: Int?
         rows: for y in 0..<tabTop {
             for x in 0..<rep.pixelsWide {
@@ -90,7 +91,10 @@ struct PocketHeldLookOutTests {
         let further =
             PocketHandleView.lookOut(holds: true)
             - PocketHandleView.lookOut(holds: false)
-        let travel = { BarMotion.pocketRiseTravel(holds: $0) }
+        let tab = PocketHandleView.tabDepth(of: KiwiShelf())
+        let travel = {
+            BarMotion.pocketRiseTravel(holds: $0, tabDepth: tab)
+        }
         #expect(abs((travel(false) - travel(true)) - further) < 0.001)
         let start = {
             BarMotion.pocketRiseStart(
@@ -122,6 +126,7 @@ struct PocketHeldLookOutTests {
             args: [.string("auto")]
         )
         let edge = core.tiler.settings.kiwishelf.pocketEdge
+        let shelf = core.tiler.settings.kiwishelf
         let depth = { (frame: CGRect) in
             edge.isHorizontal ? frame.height : frame.width
         }
@@ -140,8 +145,11 @@ struct PocketHeldLookOutTests {
         #expect(
             abs(
                 (depth(held) - depth(empty))
-                    - (PocketHandleView.restDepth(holds: true)
-                        - PocketHandleView.restDepth(holds: false))
+                    - (PocketHandleView.restDepth(holds: true, of: shelf)
+                        - PocketHandleView.restDepth(
+                            holds: false,
+                            of: shelf
+                        ))
             ) < 0.001
         )
         #expect(depth(held) > depth(empty))
@@ -185,7 +193,10 @@ struct PocketHeldLookOutTests {
             BarMotion.pocketRiseStart(
                 edge: edge,
                 side: rest.risenSide,
-                travel: BarMotion.pocketRiseTravel(holds: holds)
+                travel: BarMotion.pocketRiseTravel(
+                    holds: holds,
+                    tabDepth: PocketHandleView.tabDepth(of: rest.shelf)
+                )
             )
         }
         #expect(CATransform3DEqualToTransform(to, landing(true)))

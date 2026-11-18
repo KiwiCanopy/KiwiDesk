@@ -4,15 +4,20 @@ import AppKit
 /// ruling): the two kiwis alone looking out from behind a short tab
 /// lying flush on the screen edge, the pocket itself out of sight
 /// (owner, device 2026-10-29), turned so they face the screen. The
-/// tab wears a bar handle's two-tone ink at its depth, and runs no
-/// progress fill (#3361 ruling 3). A fixed edge mark: it never
-/// scales with the shelf and carries no count. The tab is constant;
-/// an empty pocket fades its kiwis alone (#3368 ruling 1).
+/// tab wears a bar handle's two-tone ink at its depth, the shelf's
+/// handle thickness (#3451), and runs no progress fill (#3361
+/// ruling 3). An edge mark: its kiwis never scale with the shelf,
+/// and it carries no count. An empty pocket fades its kiwis alone,
+/// the tab kept (#3368 ruling 1).
 @MainActor
 final class PocketHandleView: NSView {
-    /// The tab's depth across the edge, a bar handle's (#3361), and
-    /// its length along it.
-    static var tabDepth: CGFloat { ShelfHandleSpec.depth }
+    /// The tab's depth across the edge on `shelf`, a bar handle's
+    /// (#3361, #3451), and its length along it.
+    static func tabDepth(of shelf: KiwiShelf) -> CGFloat {
+        ShelfHandleSpec.depth(of: shelf)
+    }
+    /// The tab's depth on the shelf this view wears.
+    var tabDepth: CGFloat { Self.tabDepth(of: shelf) }
     static let tabLength: CGFloat = 30
     /// The kiwis are drawn at the mark's grid at this side, their
     /// lower part behind the tab.
@@ -21,10 +26,10 @@ final class PocketHandleView: NSView {
     /// further while the pocket `holds` something, the tab staying
     /// flush (#3446).
     static func lookOut(holds: Bool) -> CGFloat { holds ? 8 : 5 }
-    /// The handle's whole depth at rest: the tab and the kiwis past
-    /// it.
-    static func restDepth(holds: Bool) -> CGFloat {
-        tabDepth + lookOut(holds: holds)
+    /// The handle's whole depth at rest on `shelf`: the tab and the
+    /// kiwis past it.
+    static func restDepth(holds: Bool, of shelf: KiwiShelf) -> CGFloat {
+        tabDepth(of: shelf) + lookOut(holds: holds)
     }
 
     private(set) var edge = AppBarEdge.bottom
@@ -122,7 +127,7 @@ final class PocketHandleView: NSView {
         )
         let markRect = CGRect(
             x: (along - Self.markSide) / 2,
-            y: across - Self.restDepth(holds: holds),
+            y: across - Self.restDepth(holds: holds, of: shelf),
             width: Self.markSide,
             height: Self.markSide
         )
@@ -135,7 +140,7 @@ final class PocketHandleView: NSView {
                     x: 0,
                     y: 0,
                     width: along,
-                    height: across - Self.tabDepth
+                    height: across - tabDepth
                 )
             )
             mark.draw(

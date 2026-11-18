@@ -67,15 +67,17 @@ struct ShelfHandleSpec: Equatable {
     /// Whether the handle draws nothing: its bar or a sibling shows.
     var standsAside: Bool { shown || yields }
 
-    /// The handle's depth (pt): its `core` inside a `hairline` of
-    /// the opposite tone wrapping it (#3361 ruling 1, #3366).
-    static let depth: CGFloat = core + 2 * hairline
-    static let core: CGFloat = 2
+    /// The handle's depth on `shelf` (pt), `kiwishelf.handle_thickness`
+    /// (#3451): `parts(of:)` insets the core a `hairline` of the
+    /// opposite tone from it (#3361 ruling 1, #3366).
+    static func depth(of shelf: KiwiShelf) -> CGFloat {
+        shelf.resolvedHandleThickness
+    }
     static let hairline: CGFloat = 0.5
     /// The hairline's strength, constant through a fill.
     static let hairlineStrength: CGFloat = 0.35
     /// How far a grow reveal's origin grows past the handle on each
-    /// side (`BarMotion.hoverPlate`): 3 pt to 9 pt across.
+    /// side (`BarMotion.hoverPlate`).
     static let hoverGrowth: CGFloat = 3
     /// How deep the pointer rests "on" the handle, from the edge
     /// (#3360): its hover band, a value of its own.
@@ -148,7 +150,8 @@ struct ShelfHandleSpec: Equatable {
     static func frame(
         along run: CGRect,
         edge: AppBarEdge,
-        side: CGFloat
+        side: CGFloat,
+        depth: CGFloat
     ) -> CGRect {
         band(along: run, edge: edge, side: side, past: inset, deep: depth)
     }

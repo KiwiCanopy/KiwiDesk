@@ -158,6 +158,12 @@ extension SettingsValueReadout {
                 o.highlightWidth,
                 n.highlightWidth
             )
+        case .handleThickness:
+            return spaceBarPointsRow(
+                census,
+                o.handleThickness,
+                n.handleThickness
+            )
         case .itemGap:
             return spaceBarPointsRow(census, o.itemGap, n.itemGap)
         case .glyphSizeAuto:

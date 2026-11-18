@@ -350,8 +350,10 @@ twice, was a question the user answered twice. The argument is
   `restColor`, `fillColor` and `hairlineColor`** — over the one
   `ShelfHandleSpec.ink(hex:strength:)` (#3357, #3360): Automatic the
   label ink and a picked colour its own alpha times the strength — a
-  2 pt core capsule on a 3 pt neutral hairline capsule, split by the
-  one `ShelfHandleSpec.parts` and rounded by the one
+  core capsule inset `ShelfHandleSpec.hairline` in a neutral hairline
+  capsule, the one `ShelfHandleSpec.depth(of:)` deep, which is
+  `kiwishelf.handle_thickness` (#3451, `HandleThicknessWiringTests`),
+  split by the one `ShelfHandleSpec.parts` and rounded by the one
   `ShelfHandleSpec.radius(of:)`, flush on the edge (#3361, #3366;
   `ShelfHandleFillTests` ▸ `twoTone`), its body attached under the
   view that draws, which only a pixel read proves
@@ -1044,14 +1046,16 @@ Obligations:
   only through `shelfReservation(in:on:pocketAtRest:)`, an edge
   reserving the deepest strip it is asked for
   (`ShelfReservation.depth(of:)`).
-  The pocket's handle rests `PocketHandleView.restDepth(holds:)`
+  The pocket's handle rests `PocketHandleView.restDepth(holds:of:)`
   deep. Read whether it holds something through the one
   `KiwiCore.pocketHolds`, carried to the view on the spec's `holds`
   and handed to every rise as its `travel`; the frame, the kiwis and
   the travel never derive it beside it (#3446,
   `PocketHeldLookOutTests` ▸ `sinkTakesTheHeldTravel`). Its
-  `tabDepth` is a bar handle's `ShelfHandleSpec.depth`, never a depth
-  of its own; neither handle reserves anything, only the whole mark
+  tab, its risen frame's gap and its rise travel take a bar handle's
+  `ShelfHandleSpec.depth(of:)` on its screen's shelf, through
+  `PocketHandleView.tabDepth(of:)`, never a depth of their own
+  (`HandleThicknessWiringTests`); neither handle reserves anything, only the whole mark
   does (#3349, #3361, `PocketReservationTests` ▸
   `autoEdgeReservesNothing`, `PocketReservationCoreTests` ▸
   `wholeFollowsTheRest`).

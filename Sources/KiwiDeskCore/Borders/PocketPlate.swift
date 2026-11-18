@@ -51,6 +51,10 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     /// The whole mark stands at rest, with no handle (#2784).
     private(set) var whole = false
     private var risenSide: CGFloat = 0
+    /// The tab's depth on the shelf it stands on (#3451), handed to
+    /// `stand` from the spec whose shelf the handle wears, so it
+    /// equals `handle.tabDepth`.
+    private var tabDepth: CGFloat = 0
     /// The approach's countdown the pocket rises on (#3368).
     private(set) var rise: ShelfHandleSpec.Fill?
     /// The sink running into the handle, nil where none does: the
@@ -121,6 +125,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         rise: ShelfHandleSpec.Fill? = nil,
         fast: Bool = false,
         holds: Bool,
+        tabDepth: CGFloat,
         before: Before = Before()
     ) -> TimeInterval {
         let rising = risen && !before.risen && edge != nil
@@ -130,6 +135,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         self.risen = risen
         self.rise = edge == nil || risen ? nil : rise
         risenSide = side
+        self.tabDepth = tabDepth
         self.outer = outer
         // A rise, a risen stand or the whole mark ends any sink.
         if self.rise != nil || risen || whole {
@@ -141,7 +147,10 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         needsLayout = true
         guard let edge else { return 0 }
         layoutSubtreeIfNeeded()
-        let travel = BarMotion.pocketRiseTravel(holds: holds)
+        let travel = BarMotion.pocketRiseTravel(
+            holds: holds,
+            tabDepth: tabDepth
+        )
         if rising {
             BarMotion.playPocketRise(
                 pocket,
@@ -203,59 +212,13 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         handle.frame = room
         pocket.isHidden = !(risen || rise != nil || sinking)
         handle.hidesKiwis = rise != nil || sinking
-        pocket.frame = Self.risenFrame(in: room, edge: edge, side: risenSide)
+        pocket.frame = Self.risenFrame(
+            in: room,
+            edge: edge,
+            side: risenSide,
+            tabDepth: tabDepth
+        )
     }
-
-    /// The handle's room inside `bounds`, which reach the screen edge
-    /// so a push to it still finds the handle: `outer` in from `edge`.
-    static func room(
-        in bounds: CGRect,
-        edge: AppBarEdge,
-        outer: CGFloat
-    ) -> CGRect {
-        var room = bounds
-        switch edge {
-        case .bottom: room.size.height -= outer
-        case .top:
-            room.origin.y += outer
-            room.size.height -= outer
-        case .left:
-            room.origin.x += outer
-            room.size.width -= outer
-        case .right: room.size.width -= outer
-        }
-        return room
-    }
-
-    /// Where the risen pocket stands inside the handle's room: on its
-    /// centre line, its base `lift` past the tab (#2678).
-    static func risenFrame(
-        in bounds: CGRect,
-        edge: AppBarEdge,
-        side: CGFloat
-    ) -> CGRect {
-        let gap = PocketHandleView.tabDepth + lift
-        let x: CGFloat
-        let y: CGFloat
-        switch edge {
-        case .bottom:
-            x = bounds.midX - side / 2
-            y = bounds.maxY - gap - side
-        case .top:
-            x = bounds.midX - side / 2
-            y = bounds.minY + gap
-        case .left:
-            x = bounds.minX + gap
-            y = bounds.midY - side / 2
-        case .right:
-            x = bounds.maxX - gap - side
-            y = bounds.midY - side / 2
-        }
-        return CGRect(x: x, y: y, width: side, height: side)
-    }
-
-    /// The risen pocket's clearance past the tab.
-    static let lift: CGFloat = 4
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()

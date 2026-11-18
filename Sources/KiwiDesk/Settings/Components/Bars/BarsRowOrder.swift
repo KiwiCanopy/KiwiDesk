@@ -1,10 +1,11 @@
 /// Display order for the Bars settings area (#678, `BarsCensusRenderTests`).
 enum BarsRowOrder {
     /// KiwiShelf card, Show group: the master, its Each bar
-    /// drawer, the reveal, then the Space cue (#761, owner ruling
-    /// 2026-10-21).
+    /// drawer, the handle's thickness (#3451), the reveal, then the
+    /// Space cue (#761, owner ruling 2026-10-21).
     static let kiwishelfShow: [SettingKey] = [
         .kiwishelf(.visibility),
+        .kiwishelf(.handleThickness),
         .kiwishelf(.revealStyle),
     ]
 
