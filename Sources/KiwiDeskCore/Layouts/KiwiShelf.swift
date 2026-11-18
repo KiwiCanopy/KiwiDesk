@@ -70,6 +70,9 @@ public struct KiwiShelf: Sendable, Equatable {
     /// the edge mark at `edgeMarkRatio` of it (#1680). A drawing
     /// reads `resolvedHighlightWidth`, whatever wrote this.
     public var highlightWidth: CGFloat = 2
+    /// An Auto bar's handle and the Pocket's tab, deep (pt, #3451);
+    /// a drawing reads `resolvedHandleThickness`.
+    public var handleThickness: CGFloat = 3
     /// Spacing between items in pt — one rhythm for both bars.
     public var itemGap: CGFloat = 6
     /// How large an item's content draws across the shelf, in pt

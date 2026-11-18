@@ -22,6 +22,9 @@ struct BarsGates {
         /// Every bar reads Always, so nothing reveals (owner
         /// ruling, 2026-10-21).
         case noBarHides
+        /// Nothing rests as a handle, so its thickness sizes nothing
+        /// (#3451).
+        case noHandle
     }
 
     /// Runtime-gated keys this resolver answers directly. Data, so
@@ -31,6 +34,7 @@ struct BarsGates {
     static let resolved: Set<SettingKey> = [
         .kiwishelf(.revealStyle),
         .colours(.animationsOnReveal),
+        .kiwishelf(.handleThickness),
     ]
 
     /// Runtime-gated bars keys answered elsewhere.
@@ -42,6 +46,8 @@ struct BarsGates {
         case .kiwishelf(.revealStyle),
             .colours(.animationsOnReveal):
             return settings.someBarHides ? nil : .noBarHides
+        case .kiwishelf(.handleThickness):
+            return settings.someHandleRests ? nil : .noHandle
         default:
             assertionFailure("BarsGates does not own \(key.id)")
             return nil
@@ -174,6 +180,12 @@ enum BarsGateHelp {
             return L(
                 "kiwishelf.reveal_style.no_bar_hides",
                 "No bar ever hides, so there is nothing to reveal."
+            )
+        case .noHandle:
+            return L(
+                "kiwishelf.handle_thickness.no_handle",
+                "Nothing rests as a handle on any screen, so there is "
+                    + "nothing to size."
             )
         }
     }

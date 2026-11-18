@@ -23,6 +23,7 @@ extension KiwiShelf {
         case border
         case borderWidth = "border_width"
         case highlightWidth = "highlight_width"
+        case handleThickness = "handle_thickness"
         case itemGap = "item_gap"
         case glyphSize = "glyph_size"
         case fontSize = "font_size"
@@ -110,6 +111,12 @@ extension KiwiShelf {
                 CGFloat.self,
                 forKey: .highlightWidth
             ) ?? d.highlightWidth
+        )
+        handleThickness = Self.clampHandleThickness(
+            try c.decodeIfPresent(
+                CGFloat.self,
+                forKey: .handleThickness
+            ) ?? d.handleThickness
         )
         itemGap = max(
             Self.minItemGap,

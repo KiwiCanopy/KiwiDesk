@@ -39,6 +39,10 @@ struct BarsControls: Sendable {
         instance: "kiwishelf",
         children: KiwiShelfMarginControls()
     )
+    let kiwishelfHandleThickness = SettingsControl(
+        "kiwishelf.handle_thickness",
+        "Handle thickness"
+    )
     let kiwishelfRevealStyle = SettingsControl(
         "kiwishelf.reveal_style.label",
         "Reveal"

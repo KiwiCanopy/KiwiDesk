@@ -18,6 +18,7 @@ enum KiwiShelfCommandSetting {
     case border(Bool)
     case borderWidth(CGFloat)
     case highlightWidth(CGFloat)
+    case handleThickness(CGFloat)
     case itemGap(CGFloat)
     case glyphSize(CGFloat)
     case fontSize(CGFloat)
@@ -197,6 +198,7 @@ enum KiwiShelfCommandSetting {
             "corner_roundness": Self.cornerRoundness,
             "border_width": Self.borderWidth,
             "highlight_width": Self.highlightWidth,
+            "handle_thickness": Self.handleThickness,
             "item_gap": Self.itemGap,
             "glyph_size": Self.glyphSize,
             "font_size": Self.fontSize,
@@ -254,6 +256,8 @@ enum KiwiShelfCommandSetting {
             shelf.borderWidth = KiwiShelf.clampBorderWidth(value)
         case .highlightWidth(let value):
             shelf.highlightWidth = KiwiShelf.clampHighlightWidth(value)
+        case .handleThickness(let value):
+            shelf.handleThickness = KiwiShelf.clampHandleThickness(value)
         case .itemGap(let value):
             shelf.itemGap = max(KiwiShelf.minItemGap, value)
         case .glyphSize(let value):

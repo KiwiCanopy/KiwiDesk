@@ -36,10 +36,12 @@ extension KiwiCore {
             on: display,
             depth: shelf.outerMargin
                 + (risen
-                    ? PocketHandleView.tabDepth + PocketPlateView.lift
+                    ? PocketHandleView.tabDepth(of: shelf)
+                        + PocketPlateView.lift
                         + Self.pocketRiseSide(thickness: shelf.thickness)
                     : PocketHandleView.restDepth(
-                        holds: holds ?? pocketHolds
+                        holds: holds ?? pocketHolds,
+                        of: shelf
                     ))
         )
     }
@@ -197,7 +199,8 @@ extension KiwiCore {
                 outer: shelf.outerMargin
             ),
             edge: shelf.pocketEdge,
-            side: rise
+            side: rise,
+            tabDepth: PocketHandleView.tabDepth(of: shelf)
         )
     }
 

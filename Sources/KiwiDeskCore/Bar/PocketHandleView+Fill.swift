@@ -23,9 +23,9 @@ extension PocketHandleView {
         let across = edge.isHorizontal ? bounds.height : bounds.width
         return CGRect(
             x: (along - Self.tabLength) / 2,
-            y: across - Self.tabDepth,
+            y: across - tabDepth,
             width: Self.tabLength,
-            height: Self.tabDepth
+            height: tabDepth
         )
     }
 

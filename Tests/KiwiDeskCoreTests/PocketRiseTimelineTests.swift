@@ -11,7 +11,12 @@ import Testing
 @MainActor
 struct PocketRiseTimelineTests {
     /// An empty pocket's rise travel.
-    static var travel: CGFloat { BarMotion.pocketRiseTravel(holds: false) }
+    static var travel: CGFloat {
+        BarMotion.pocketRiseTravel(
+            holds: false,
+            tabDepth: PocketHandleView.tabDepth(of: KiwiShelf())
+        )
+    }
 
     private let t0 = Date(timeIntervalSince1970: 1_000)
 

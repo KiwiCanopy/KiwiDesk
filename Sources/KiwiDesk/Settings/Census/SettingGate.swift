@@ -23,6 +23,10 @@ enum SettingRuntimeGate: Hashable {
     /// Every bar reads Always on every layout and screen, so no
     /// bar ever reveals (owner ruling, 2026-10-21).
     case noBarHides
+    /// Nothing rests as a handle on any layout or screen — no Auto
+    /// bar, no Pocket handle, no maximized reveal — so the handle
+    /// thickness sizes nothing (#3451).
+    case noHandleRests
     /// No bar rests on screen in any layout or on any screen, so
     /// the tiling-off bars tick hides nothing (#3089).
     case noBarShows
