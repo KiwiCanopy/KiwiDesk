@@ -3,12 +3,9 @@ import KiwiDeskCore
 /// The Gestures step's mouse rows (#3427 ▸ Ruling): at most five,
 /// each read from the live bindings — move focus and switch Spaces
 /// by scrolling, move and resize a window by dragging, then the side
-/// buttons where bound — then ⌃⌥K. Every row's cap is the mouse,
-/// its motion under it.
+/// buttons where bound — then ⌃⌥K. Every row's cap is the glyph
+/// KiwiHub draws for its input (#3447), its motion under it.
 extension OnboardingGestures {
-    /// The mouse cap's glyph, an SF Symbol `GestureGlyph` draws.
-    static let mouseGlyph = "computermouse"
-
     static func mouseFamilies(
         bindings: [GestureKey: GestureAction],
         layer: KeyLayer?
@@ -118,7 +115,10 @@ extension OnboardingGestures {
             label,
             key,
             motion,
-            OnboardingGestureCap(glyph: mouseGlyph, caption: motion)
+            OnboardingGestureCap(
+                glyph: ShortcutGestureBadge.covering(key, ways: []).symbol,
+                caption: motion
+            )
         )
     }
 

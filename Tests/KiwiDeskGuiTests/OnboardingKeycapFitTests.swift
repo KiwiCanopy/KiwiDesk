@@ -29,7 +29,7 @@ struct OnboardingKeycapFitTests {
                 label: "Switch Spaces",
                 chord: .gesture(
                     [.control, .option],
-                    glyph: OnboardingGestures.mouseGlyph,
+                    glyph: GestureListWords.symbol(.wheelX),
                     caption: "scroll sideways"
                 )
             ),

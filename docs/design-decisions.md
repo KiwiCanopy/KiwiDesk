@@ -11525,6 +11525,25 @@ Gestures card already makes — a scroll steps as far as you scroll
 wheel notch.
 :::
 
+:::unreleased
+**Amended (#3447, owner on ui-designer's recommendation,
+2026-11-18): a mouse row draws KiwiHub's glyph for its input, as a
+trackpad row does.** One mouse glyph on every cap broke the
+premise #3427 set for the whole step — the tour teaches KiwiHub's
+picture, not a second one — on every mouse row: a user who learned
+the wheel as a mouse meets a wheel glyph in KiwiHub and has nothing
+to match it to. The step's subtitle already names the device, and
+so does the Trackpad | Mouse picker where it is offered, so the cap
+was spending itself on a fact the page states without it. Each mouse cap is now
+`ShortcutGestureBadge.covering`'s glyph for the binding — the
+wheel, the sideways wheel, the drag, the side buttons — with the
+motion still captioned under it. Move and Resize share the drag
+glyph, as they do in KiwiHub, and the chord and the label tell
+them apart. A cap carrying both the mouse and the gesture glyph
+was refused: two pictures on one keycap is the widest cap on the
+page again, and KiwiHub draws one.
+:::
+
 ### The tour's look is written through, and the tour owns its undo
 
 **[Principle]**
