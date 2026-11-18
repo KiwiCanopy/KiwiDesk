@@ -1479,6 +1479,8 @@
   "layout_defaults.min_size.bsp_height": "BSP 高度",
   "layout_defaults.min_size.bsp_width": "BSP 宽度",
   "layout_defaults.min_size.caption": "窗口平铺时不会小于此尺寸。要单独设置某个布局，请使用“%1$@”。",
+  "layout_defaults.min_size.fits": "“%1$@”上可容纳的数量 — 横向：%2$d · 纵向：%3$d",
+  "layout_defaults.min_size.fits_none": "在“%1$@”上放不下：该处的窗口无法达到此尺寸。",
   "layout_defaults.min_size.floating_height": "浮动高度",
   "layout_defaults.min_size.floating_width": "浮动宽度",
   "layout_defaults.min_size.grid_height": "网格高度",

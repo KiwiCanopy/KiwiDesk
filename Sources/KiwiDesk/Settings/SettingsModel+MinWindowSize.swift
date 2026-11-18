@@ -67,14 +67,32 @@ extension SettingsModel {
         Int(minSizes[layout][axis])
     }
 
-    /// What `layout`'s value fits on the main screen under the
-    /// draft (#3461), the master asking for the most-used layout's
-    /// region; nil with no screen. A readout: it stores nothing.
-    func minSizeFit(_ layout: MinWindowSizes.Layout) -> MinSizeFit? {
-        core.minSizeFit(
-            minSizes[layout],
-            in: layout,
-            settings: config.settings
+    /// The layouts whose value the fit line counts (#3461):
+    /// Scrolling keeps its axis hint, and Floating and Monocle
+    /// place nothing side by side.
+    static let minSizeFitLayouts: [MinWindowSizes.Layout] = [
+        .stack, .grid, .track, .bsp,
+    ]
+
+    /// The layout the master's fit line counts for: the most-used
+    /// one that `minSizeFitLayouts` counts, BSP where none is used.
+    var minSizeFitMaster: MinWindowSizes.Layout {
+        let counted = Self.minSizeFitLayouts.map {
+            ($0, LayoutUsage.spaces(on: $0.mode, in: config).count)
+        }
+        return counted.max { $0.1 < $1.1 }
+            .flatMap { $0.1 > 0 ? $0.0 : nil } ?? .bsp
+    }
+
+    /// What each counted layout's value fits on the main screen
+    /// under the draft (#3461), the screen read once; empty with
+    /// no screen. A readout: it stores nothing.
+    func minSizeFits() -> [MinWindowSizes.Layout: MinSizeFit] {
+        let sizes = Dictionary(
+            uniqueKeysWithValues: Self.minSizeFitLayouts.map {
+                ($0, minSizes[$0])
+            }
         )
+        return core.minSizeFits(sizes, settings: config.settings)
     }
 }

@@ -4,68 +4,85 @@ import CoreGraphics
 /// How many windows of a minimum size fit side by side and
 /// stacked on one screen (#3461): a readout, never stored.
 public struct MinSizeFit: Equatable, Sendable {
-    /// The screen's own name, for the GUI to quote.
-    public var screen: String
+    /// The screen counted on, for the GUI to name.
+    public var screen: ScreenLabel
     public var across: Int
     public var down: Int
 
-    public init(screen: String, across: Int, down: Int) {
+    public init(screen: ScreenLabel, across: Int, down: Int) {
         self.screen = screen
         self.across = across
         self.down = down
     }
 
-    /// Windows of `size` that fit in `region` with `gaps` between
-    /// them and around them: each axis's length less its outer
-    /// gaps, plus one inner gap, over one window and one gap.
+    /// Windows of `size` that fit in `region` with `gaps`: the
+    /// region's outer-gap carve (`LayoutContext.usable`) over the
+    /// track pitch (`TrackLayout.fitCap`), the engine's own doors.
     public static func counts(
         of size: MinSize,
-        in region: CGSize,
+        in region: CGRect,
         gaps: Gaps
     ) -> (across: Int, down: Int) {
-        func fit(_ span: CGFloat, _ side: CGFloat, _ gap: CGFloat) -> Int {
-            guard side + gap > 0 else { return 0 }
-            return max(0, Int(((span + gap) / (side + gap)).rounded(.down)))
-        }
-        let width = region.width - gaps.outer.left - gaps.outer.right
-        let height = region.height - gaps.outer.top - gaps.outer.bottom
+        let usable = LayoutContext.usable(region, outer: gaps.outer)
         return (
-            fit(width, size.width, gaps.inner.horizontal),
-            fit(height, size.height, gaps.inner.vertical)
+            TrackLayout.fitCap(
+                crossSpan: usable.width,
+                minSize: size.width,
+                gap: gaps.inner.horizontal
+            ),
+            TrackLayout.fitCap(
+                crossSpan: usable.height,
+                minSize: size.height,
+                gap: gaps.inner.vertical
+            )
         )
     }
 }
 
 extension KiwiCore {
-    /// What `size` fits on the main screen — the one with the
-    /// menu bar, whose size the starter seeds from — under
-    /// `settings`, the Settings DRAFT, in `layout`'s region; nil
-    /// with no screen.
-    /// The region is the one the layout fills, with the draft's
-    /// own strip reserved over the one bounds hook (#531), as the
-    /// scrolling column cap does, and the global gaps.
+    /// What each of `sizes` fits on the main screen — the one the
+    /// starter seeds from, `PositionalDisplays.liveMainID` — under
+    /// `settings`, the Settings DRAFT, each in its layout's region;
+    /// empty with no screen. The screen is read once for all of
+    /// them; its size comes through the one bounds hook (#531) and
+    /// the draft reserves its own strip, as the scrolling column
+    /// cap does, with the global gaps.
     @MainActor
-    public func minSizeFit(
-        _ size: MinSize,
-        in layout: MinWindowSizes.Layout,
+    public func minSizeFits(
+        _ sizes: [MinWindowSizes.Layout: MinSize],
         settings: TilingSettings
-    ) -> MinSizeFit? {
-        guard let screen = ScreenList.all.first else { return nil }
-        let region = settings.layoutBounds(
-            from: tiler.visibleBounds(screen),
-            mode: layout.mode,
-            on: tiler.fingerprint(of: screen, in: settings),
-            pocketAtRest: settings.pocketRests
-        )
-        let counts = MinSizeFit.counts(
-            of: size,
-            in: region.size,
-            gaps: settings.gapsGlobal
-        )
-        return MinSizeFit(
-            screen: screen.localizedName,
-            across: counts.across,
-            down: counts.down
-        )
+    ) -> [MinWindowSizes.Layout: MinSizeFit] {
+        let screens = ScreenList.all
+        let main = PositionalDisplays.liveMainID
+        guard
+            let screen = screens.first(where: {
+                $0.kiwiDisplayID == main
+            }) ?? screens.first
+        else { return [:] }
+        let label =
+            screen.kiwiDisplayID.flatMap(namedScreenLabel(of:))
+            ?? ScreenLabel(name: screen.localizedName)
+        let visible = tiler.visibleBounds(screen)
+        let fingerprint = tiler.fingerprint(of: screen, in: settings)
+        var fits: [MinWindowSizes.Layout: MinSizeFit] = [:]
+        for (layout, size) in sizes {
+            let region = settings.layoutBounds(
+                from: visible,
+                mode: layout.mode,
+                on: fingerprint,
+                pocketAtRest: settings.pocketRests
+            )
+            let counts = MinSizeFit.counts(
+                of: size,
+                in: region,
+                gaps: settings.gapsGlobal
+            )
+            fits[layout] = MinSizeFit(
+                screen: label,
+                across: counts.across,
+                down: counts.down
+            )
+        }
+        return fits
     }
 }

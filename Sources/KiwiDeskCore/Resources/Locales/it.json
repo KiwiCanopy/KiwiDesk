@@ -1479,6 +1479,8 @@
   "layout_defaults.min_size.bsp_height": "Altezza (BSP)",
   "layout_defaults.min_size.bsp_width": "Larghezza (BSP)",
   "layout_defaults.min_size.caption": "Le finestre non vengono mai affiancate più piccole di così. Per impostare un layout a parte usa «%1$@».",
+  "layout_defaults.min_size.fits": "Entra in «%1$@» — In orizzontale: %2$d · In verticale: %3$d",
+  "layout_defaults.min_size.fits_none": "Non entra in «%1$@»: lì una finestra non può raggiungere questa dimensione.",
   "layout_defaults.min_size.floating_height": "Altezza (Floating)",
   "layout_defaults.min_size.floating_width": "Larghezza (Floating)",
   "layout_defaults.min_size.grid_height": "Altezza (Grid)",

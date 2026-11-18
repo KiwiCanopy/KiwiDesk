@@ -1479,6 +1479,8 @@
   "layout_defaults.min_size.bsp_height": "BSPの高さ",
   "layout_defaults.min_size.bsp_width": "BSPの幅",
   "layout_defaults.min_size.caption": "ウインドウがこれより小さくタイル表示されることはありません。レイアウトを個別に設定するには「%1$@」を使います。",
+  "layout_defaults.min_size.fits": "「%1$@」に収まる数 — 横: %2$d · 縦: %3$d",
+  "layout_defaults.min_size.fits_none": "「%1$@」には収まりません。そこではウインドウをこのサイズにできません。",
   "layout_defaults.min_size.floating_height": "フローティングの高さ",
   "layout_defaults.min_size.floating_width": "フローティングの幅",
   "layout_defaults.min_size.grid_height": "グリッドの高さ",

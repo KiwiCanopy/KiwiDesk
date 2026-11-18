@@ -12,22 +12,16 @@ struct MinWindowSizeRows: View {
     /// Bumped on a screen change, so the fit lines count again.
     @State private var screens = 0
 
-    /// The layouts whose rows carry the fit line while the master
-    /// reads Mixed (#3461): Scrolling keeps its axis hint, and
-    /// Floating places nothing side by side.
-    static let fitLayouts: Set<MinWindowSizes.Layout> = [
-        .stack, .grid, .track, .bsp,
-    ]
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        let counted = fits()
+        return VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 master
                 if !model.minSizesDiffer {
-                    MinSizeFitLine(fit: fit(model.minSizeMostUsed))
+                    MinSizeFitLine(fit: counted[model.minSizeFitMaster])
                 }
             }
-            drawer
+            drawer(counted)
         }
         .onReceive(
             NotificationCenter.default.publisher(
@@ -36,10 +30,10 @@ struct MinWindowSizeRows: View {
         ) { _ in screens &+= 1 }
     }
 
-    /// `layout`'s fit, read again whenever a screen changes.
-    private func fit(_ layout: MinWindowSizes.Layout) -> MinSizeFit? {
+    /// Every counted layout's fit, read again on a screen change.
+    private func fits() -> [MinWindowSizes.Layout: MinSizeFit] {
         _ = screens
-        return model.minSizeFit(layout)
+        return model.minSizeFits()
     }
 
     /// The drawer's title, which the section caption names.
@@ -86,7 +80,9 @@ struct MinWindowSizeRows: View {
 
     /// A catalog drawer, so a search hit on a layout's axis opens
     /// it (#1250); held open while any axis is mixed.
-    private var drawer: some View {
+    private func drawer(
+        _ fits: [MinWindowSizes.Layout: MinSizeFit]
+    ) -> some View {
         SettingsDisclosure(
             SettingsCatalog.layoutDefaults.minSizePerLayout,
             chrome: .attached,
@@ -101,13 +97,16 @@ struct MinWindowSizeRows: View {
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(MinWindowSizes.Layout.allCases, id: \.self) {
-                    layoutRow($0)
+                    layoutRow($0, fit: fits[$0])
                 }
             }
         }
     }
 
-    private func layoutRow(_ layout: MinWindowSizes.Layout) -> some View {
+    private func layoutRow(
+        _ layout: MinWindowSizes.Layout,
+        fit: MinSizeFit?
+    ) -> some View {
         let mode = layout.mode
         let apart = model.minSizeStandsApart(layout)
         return VStack(alignment: .leading, spacing: 2) {
@@ -130,8 +129,8 @@ struct MinWindowSizeRows: View {
                     anchor: { MinSizeText.control(layout, $0) }
                 )
             }
-            if model.minSizesDiffer, Self.fitLayouts.contains(layout) {
-                MinSizeFitLine(fit: fit(layout))
+            if model.minSizesDiffer {
+                MinSizeFitLine(fit: fit)
             }
             if layout == .scrolling {
                 Text(scrollingHint)

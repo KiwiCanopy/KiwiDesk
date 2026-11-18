@@ -16,21 +16,22 @@ struct MinSizeFitLine: View {
         }
     }
 
-    /// The readout for `fit`: the counts, or that a window there
+    /// The readout for `fit`: each count behind its label, so no
+    /// word agrees with a number (#796), or that a window there
     /// cannot reach the size on either axis.
     static func sentence(for fit: MinSizeFit) -> String {
         guard fit.across > 0, fit.down > 0 else {
             return L(
                 "layout_defaults.min_size.fits_none",
-                "Larger than %1$@, so a window there can't reach "
-                    + "this size.",
-                fit.screen
+                "Doesn't fit on %1$@: a window there can't reach this "
+                    + "size.",
+                fit.screen.displayName
             )
         }
         return L(
             "layout_defaults.min_size.fits",
-            "On %1$@, this fits %2$d across and %3$d down.",
-            fit.screen,
+            "Fits on %1$@ — Across: %2$d · Down: %3$d",
+            fit.screen.displayName,
             fit.across,
             fit.down
         )

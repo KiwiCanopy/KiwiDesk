@@ -1479,6 +1479,8 @@
   "layout_defaults.min_size.bsp_height": "BSP 高度",
   "layout_defaults.min_size.bsp_width": "BSP 寬度",
   "layout_defaults.min_size.caption": "視窗並排時不會小於這個尺寸。要單獨設定某個佈局，請使用「%1$@」。",
+  "layout_defaults.min_size.fits": "「%1$@」上可容納的數量 — 橫向：%2$d · 縱向：%3$d",
+  "layout_defaults.min_size.fits_none": "在「%1$@」上放不下：那裡的視窗無法達到這個尺寸。",
   "layout_defaults.min_size.floating_height": "浮動高度",
   "layout_defaults.min_size.floating_width": "浮動寬度",
   "layout_defaults.min_size.grid_height": "網格高度",
