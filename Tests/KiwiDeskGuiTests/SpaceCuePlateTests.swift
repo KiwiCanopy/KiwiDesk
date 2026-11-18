@@ -116,12 +116,13 @@ struct SpaceCuePlateTests {
         )
     }
 
-    /// The Reveal row sits under Each bar, at rest rather than in
-    /// the Style drawer (owner ruling, 2026-10-21).
+    /// The Reveal row sits in the Show group under Handle
+    /// thickness (#3451), at rest rather than in the Style drawer
+    /// (owner ruling, 2026-10-21).
     @Test("the Reveal row follows Each bar in the Show group")
     func revealFollowsEachBar() {
         let show = BarsRowOrder.kiwishelfShow
-        #expect(show.dropFirst().first == .kiwishelf(.revealStyle))
+        #expect(show.dropFirst(2).first == .kiwishelf(.revealStyle))
         #expect(
             !BarsRowOrder.kiwishelfStyle.contains(.kiwishelf(.revealStyle))
         )
