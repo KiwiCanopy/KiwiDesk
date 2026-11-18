@@ -4,7 +4,7 @@ import SwiftUI
 /// How an Auto or Hidden bar comes onto its empty edge (#2497):
 /// in the Show group under Handle thickness, greyed with its
 /// sentence while no bar ever hides, as `BarsGates` answers it
-/// (owner ruling, 2026-10-21).
+/// (owner ruling, 2026-10-21), and under KiwiDesk's Off (#3471).
 extension KiwiShelfCard {
     @ViewBuilder var revealStyleRow: some View {
         let gates = BarsGates(
@@ -35,7 +35,7 @@ extension KiwiShelfCard {
                 L("app_bar.background_style.boxed", "Boxed")
             )
         )
-        .modifier(GreyOut(active: reason != nil))
+        .modifier(GreyOut(active: reason != nil || animationsOff))
         .searchAnchored(SettingsCatalog.bars.kiwishelfRevealStyle)
         if reason == nil, gates.growPlaysAsUnfold {
             note(BarsGateHelp.growPlaysAsUnfold)
@@ -43,7 +43,8 @@ extension KiwiShelfCard {
         SettingsDisclosure(
             SettingsCatalog.bars.kiwishelfDurations,
             isExpanded: $durationsExpanded,
-            scrollHoisted: true
+            scrollHoisted: true,
+            summary: durationsSummary
         ) {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(BarsRowOrder.kiwishelfDurations, id: \.id) {
@@ -57,6 +58,38 @@ extension KiwiShelfCard {
         if let reason {
             caption(reason)
         }
+        // Under the picker and the drawer, which grey together
+        // under Off (#3471).
+        if animationsOff { animationsOffNote }
+    }
+
+    /// The shut drawer says Off while its rows play nothing
+    /// (#3471); otherwise it carries no summary.
+    private var durationsSummary: String? {
+        animationsOff
+            ? L("kiwishelf.durations.summary.off", "Off") : nil
+    }
+
+    /// KiwiDesk's own Off (#3238), which greys the Reveal picker
+    /// and both Durations rows, the stored values kept (#3471).
+    private var animationsOff: Bool { model.appWide.animationReduceMotion }
+
+    /// Why the picker and the Durations rows grey, outside the
+    /// grey, pointing at the speed preset that owns the fix (#3471).
+    private var animationsOffNote: some View {
+        let speed = SettingsCatalog.colors.animationSpeed
+        return CrossReferenceRow(
+            prose: BarsGateHelp.animationsOffProse,
+            linkTitle: L(
+                "kiwishelf.durations.animations_off.link",
+                "%1$@ ▸ %2$@",
+                SettingsDestination.looks.title,
+                speed.text
+            ),
+            destination: .looks,
+            row: speed
+        )
+        .font(.caption)
     }
 
     /// Whether no bar hides, so the reveal's switch takes no input.
@@ -82,7 +115,8 @@ extension KiwiShelfCard {
 
     /// The reveal's and the expand's switches (owner rulings
     /// 2026-10-21 and 2026-11-12, #3236), in the Durations drawer:
-    /// the reveal's greys with the picker. Both lengths are Lua-only.
+    /// the reveal's greys with the picker, and both grey under
+    /// KiwiDesk's Off (#3471). Both lengths are Lua-only.
     @ViewBuilder func durationRow(_ key: SettingKey) -> some View {
         let animations = $model.config.settings.animations
         let children = SettingsCatalog.bars.kiwishelfDurations.children
@@ -96,7 +130,7 @@ extension KiwiShelfCard {
                     "Off, a hidden bar appears and leaves at once."
                 )
             )
-            .modifier(GreyOut(active: revealInert))
+            .modifier(GreyOut(active: revealInert || animationsOff))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .onReveal
@@ -111,6 +145,7 @@ extension KiwiShelfCard {
                         + "switch Spaces."
                 )
             )
+            .modifier(GreyOut(active: animationsOff))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .onExpand

@@ -69,13 +69,36 @@ struct BarsGateWiringTests {
             // sentence.
             "Components/Bars/KiwiShelfCard+Reveal.swift": [
                 ".inertReason(for:.kiwishelf(.revealStyle))",
-                "GreyOut(active:reason!=nil)",
+                // The picker greys under Off too (#3471), on its own
+                // anchor.
+                ".modifier(GreyOut(active:reason!=nil||animationsOff))"
+                    + ".searchAnchored(SettingsCatalog.bars"
+                    + ".kiwishelfRevealStyle)",
                 "BarsGateHelp.sentence(for:reason)",
                 // Grow's Unfold note on a Boxed shelf (#2556).
                 "ifreason==nil,gates.growPlaysAsUnfold{"
                     + "note(BarsGateHelp.growPlaysAsUnfold)",
                 ".inertReason(for:.colours(.animationsOnReveal))",
-                "GreyOut(active:revealInert)",
+                // Both Durations rows grey under KiwiDesk's Off,
+                // their reason outside the grey (#3471). Each grey is
+                // spelled with its own row's anchor, so a swap reds,
+                // and the flag read with its polarity.
+                ".modifier(GreyOut(active:revealInert||animationsOff))"
+                    + ".searchAnchored(SettingsCatalog.bars"
+                    + ".kiwishelfDurations.children.onReveal)",
+                ".modifier(GreyOut(active:animationsOff))"
+                    + ".searchAnchored(SettingsCatalog.bars"
+                    + ".kiwishelfDurations.children.onExpand)",
+                "privatevaranimationsOff:Bool{"
+                    + "model.appWide.animationReduceMotion}",
+                // The note sits after the drawer, outside every grey,
+                // and the shut drawer says Off (#3471).
+                "caption(reason)}ifanimationsOff{animationsOffNote}}",
+                "summary:durationsSummary",
+                "durationsSummary:String?{"
+                    + "animationsOff?L(\"kiwishelf.durations.summary.off\","
+                    + "\"Off\"):nil",
+                "prose:BarsGateHelp.animationsOffProse",
             ],
         ]
         for (path, needles) in consults {
@@ -180,6 +203,18 @@ struct BarsGateWiringTests {
         #expect(
             BarsGates.resolved
                 .isDisjoint(with: BarsGates.resolvedElsewhere)
+        )
+    }
+
+    /// The Durations rows' Off reason places the speed link
+    /// (#3471; `CrossReferenceRowSlotTests` lists the row).
+    @MainActor
+    @Test("the Durations Off reason places its link")
+    func animationsOffProsePlacesItsLink() {
+        #expect(
+            BarsGateHelp.animationsOffProse.contains(
+                CrossReferenceRow.linkSlot
+            )
         )
     }
 

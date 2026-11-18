@@ -327,7 +327,8 @@ twice, was a question the user answered twice. The argument is
   `ShelfHandleSpec.hoverBand` that hurries it — and run by the view
   for its `length`, never against a clock read at draw time; a bar's
   runs through the one `BarMotion.playHandleFill`, which plays under
-  Reduce Motion and drops under Off. The handle peeks nothing and carries no
+  Reduce Motion and steps to full under a zero reveal length —
+  Off or the Reveal off (#3471). The handle peeks nothing and carries no
   label or count (#3349, amending #2567), and draws no glass
   (`ShelfRevealApproachTests`, `ShelfHandleFillTests`). **The
   pocket's handle is the revealer's one other member**
