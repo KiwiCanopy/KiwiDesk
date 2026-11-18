@@ -14,7 +14,7 @@ public final class GestureInputs {
     public private(set) var resolved = GestureSeeds.resolved(
         base: GestureMap(),
         profile: nil,
-        shortcutBase: .standard
+        shortcutBase: ShortcutBase.standard
     )
 
     public init() {}
@@ -40,7 +40,7 @@ public final class GestureInputs {
         adopt(
             base: GestureMap(),
             profileOverride: nil,
-            shortcutBase: .standard
+            shortcutBase: ShortcutBase.standard
         )
     }
 }
