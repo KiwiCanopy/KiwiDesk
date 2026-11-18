@@ -1684,11 +1684,14 @@ section {
   text-underline-offset: 3px;
   width: fit-content;
 }
-.voice__name:hover {
+span.voice__name {
+  text-decoration: none;
+}
+a.voice__name:hover {
   color: var(--accent);
   text-decoration-color: var(--accent);
 }
-.voice__name::after {
+a.voice__name::after {
   content: " \2197" / "";
   font-size: 0.8em;
   color: var(--text-faint);
@@ -1707,6 +1710,15 @@ section {
   margin-top: auto;
   padding-top: 0.2rem;
   overflow-wrap: anywhere;
+}
+a.voice__src {
+  text-decoration: none;
+  width: fit-content;
+}
+a.voice__src:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .voice__src svg {
   flex: none;
