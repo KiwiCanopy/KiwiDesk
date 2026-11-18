@@ -7452,6 +7452,18 @@ too (#2923): listed apart, under a *Pocket Keys* header with its
 key, since mixed into the general groups it would break the put-in
 order ⌃⌥P steps.
 
+:::unreleased
+KiwiHub's Shortcuts side lists an app's Pocket key the same way
+(#3449, owner on ui-designer's recommendation, 2026-11-18): under
+the Pocket's own rows, wherever those are filed — Size & float
+unless a binding's group moves them — not in Apps, where its
+"Pocket <app>" title sorted out of order among the launch keys. A
+row belongs with its verb's other keys, as on the Pocket card in
+Settings. A "Pocket" subheader inside Apps was refused, since it is
+chrome that keeps a verb inside a noun group, and so was renaming
+the rows "<app> (Pocket)", which fixes the order but not the topic.
+:::
+
 **A key opens the Pocket's list, the same peek a click grows**
 (owner, 2026-11-04, #2974): the list was mouse-only, and a per-app
 key is one more chord per window. `pocket.toggle_list` on `⌃⌥⌘P`, the
