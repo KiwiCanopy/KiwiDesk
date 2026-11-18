@@ -207,6 +207,7 @@ final class PocketPlateOverlay {
                 whole: spec.whole,
                 rise: spec.rise,
                 fast: spec.riseFast,
+                holds: spec.holds,
                 before: Self.before(old)
             )
             if sink > 0 {

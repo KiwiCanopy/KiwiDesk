@@ -78,7 +78,8 @@ struct PocketBareMarkTests {
                 markHex: "",
                 faded: true,
                 dropHovered: false,
-                name: ""
+                name: "",
+                holds: false
             )
         ])
         let holder = try #require(overlay.sectionMount(on: display))

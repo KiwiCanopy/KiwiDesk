@@ -87,6 +87,7 @@ extension KiwiShelfCard {
                     SettingsCatalog.bars.kiwishelfEdges.children
                         .kiwishelfPocketScreenEdges
                 )
+                pocketPositionRows
             }
             .padding(.top, 8)
         }

@@ -72,11 +72,11 @@ extension KiwiShelfKey {
             // A master acknowledges divergence through its `?`
             // and carries no gate (`GapsBordersGates.acknowledged`).
             return .row(.bars, .kiwishelf, .atRest)
-        case .thickness, .alignment, .pocketPosition:
+        case .thickness, .alignment:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
             .appBarScreenEdge, .pocketEdge, .pocketScreenEdge,
-            .pocketVisibility:
+            .pocketPosition, .pocketVisibility:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,

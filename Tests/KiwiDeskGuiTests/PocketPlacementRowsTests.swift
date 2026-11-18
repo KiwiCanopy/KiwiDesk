@@ -3,9 +3,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Pocket's rows on KiwiShelf's card (#3401): its edge and
-/// its screens sit in Position's drawer on the doors a bar's take,
-/// and the Pocket position row shows its rule under itself while
+/// The Pocket's rows on KiwiShelf's card (#3401): its edge, its
+/// screens and its position sit in Position's drawer, the edge on
+/// the doors a bar's take and the position under them (#3445), and
+/// the Pocket position row shows its rule under itself while
 /// the pocket shares a bar's edge, in its `?` otherwise. Source
 /// needles, whitespace stripped; off the main actor, two file
 /// reads.
@@ -33,13 +34,17 @@ struct PocketPlacementRowsTests {
         return String(text[open.lowerBound..<close.upperBound])
     }
 
-    @Test("the drawer draws the Pocket's edge and its screens")
+    @Test("the drawer draws the Pocket's edge, screens and position")
     func drawerHoldsThePocket() throws {
         let edge = try source("KiwiShelfCard+Edge.swift")
         let drawer = span(edge, from: "varedgeRows", to: "varspaceBarEdgeRow")
         #expect(drawer.contains("pocketEdgeRow"))
         #expect(drawer.contains("bar:\\.kiwishelf.pocketEdges,"))
-        #expect(drawer.contains(".kiwishelfPocketScreenEdges"))
+        #expect(
+            drawer.contains(
+                ".kiwishelfPocketScreenEdges)pocketPositionRows}"
+            )
+        )
         let row = span(
             edge,
             from: "varpocketEdgeRow",
@@ -75,7 +80,7 @@ struct PocketPlacementRowsTests {
             )
         )
         let rows = try source("KiwiShelfCard+Rows.swift")
-        #expect(rows.contains("case.pocketPosition:pocketPositionRows"))
+        #expect(!rows.contains("pocketPositionRows"))
     }
 
     @Test("the position slider marks no middle")

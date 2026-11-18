@@ -108,7 +108,9 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     /// rise taken back, or a risen pocket going to rest, sinks from
     /// where it is drawn (#3383); `before` is how it stood. Returns
     /// how long that sink runs, 0 where none does: the panel keeps
-    /// the risen room until `endSink(_:)` with `sink`.
+    /// the risen room until `endSink(_:)` with `sink`. Every motion
+    /// travels to the kiwis' look-out while it `holds` something or
+    /// not, the spec's verdict (#3446).
     @discardableResult
     func stand(
         handle edge: AppBarEdge?,
@@ -118,6 +120,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         whole: Bool = false,
         rise: ShelfHandleSpec.Fill? = nil,
         fast: Bool = false,
+        holds: Bool,
         before: Before = Before()
     ) -> TimeInterval {
         let rising = risen && !before.risen && edge != nil
@@ -138,11 +141,13 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         needsLayout = true
         guard let edge else { return 0 }
         layoutSubtreeIfNeeded()
+        let travel = BarMotion.pocketRiseTravel(holds: holds)
         if rising {
             BarMotion.playPocketRise(
                 pocket,
                 edge: edge,
                 side: side,
+                travel: travel,
                 up: was != nil
             )
         } else if let next = self.rise, next != was {
@@ -150,6 +155,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
                 pocket,
                 edge: edge,
                 side: side,
+                travel: travel,
                 rise: next,
                 pace: PocketRiseTimeline.pace(onTab: fast)
             )
@@ -158,6 +164,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
                 pocket,
                 edge: edge,
                 side: side,
+                travel: travel,
                 risen: before.risen
             )
             sink = span > 0 ? UUID() : nil

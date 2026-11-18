@@ -125,6 +125,10 @@ extension KiwiCore {
         pocketWindows(keyed: pocketRests)
     }
 
+    /// Whether the pocket holds something it counts: the one verdict
+    /// the handle's resting frame and its spec read (#3446).
+    var pocketHolds: Bool { !pocketPlateWindows.isEmpty }
+
     /// What the list shows: under Hidden too, it lists the apps'
     /// own pocket windows, since a key can open it there (#2974).
     var pocketListWindows: [WindowID] { pocketWindows(keyed: true) }
@@ -141,6 +145,7 @@ extension KiwiCore {
     /// screen.
     func pocketPlateSpecs() -> [PocketPlateOverlay.Spec] {
         let inside = pocketPlateWindows
+        let holds = pocketHolds
         let dragging = pocketPlate.dragging != nil
         guard pocketStands else { return [] }
         let name = L(
@@ -216,7 +221,8 @@ extension KiwiCore {
                 // Inside the strip the mark stands at its frame's edge.
                 outer: Self.pocketOuter(place, shelf: shelf),
                 whole: !place.isSection && place != .handle,
-                slides: place.slides
+                slides: place.slides,
+                holds: holds
             )
         }
     }

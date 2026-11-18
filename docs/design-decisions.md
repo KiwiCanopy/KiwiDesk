@@ -7255,6 +7255,23 @@ clicks passing through. The whole mark under Always keeps the
 shelf's strip.
 :::
 
+:::unreleased
+*Amended* (owner, 2026-11-18, #3446): **while the pocket holds
+something its kiwis look out 8 points, not 5.** A full pocket rests
+its tab at the fill strength (#3384), but that colour shows only in
+the few points the kiwis look out past it, so it was easy to miss.
+The tab stays flush and handle-deep, so a row of handles still
+reads as one, and the kiwis alone move; only the handle changes,
+never the whole mark under Always or the section on a bar. It is a
+resting state, not
+a hover lift, so #3366 does not apply, and it reserves nothing. The
+handle's frame and the rise's travel read the held depth, so a
+put-in or take-out sinks the pocket back to where the kiwis then
+stand rather than popping 3 points. Refused: a tab standing off the
+edge, which breaks the one-row rule, and more than about 3 points
+extra, which reads as the pocket rising.
+:::
+
 **The handle answers the pointer in two steps, as the bars'
 handles do** (#2807). On the approach the kiwis look 3 pt further
 out over the hover growth's 0.15 s, and the pocket rises only
@@ -21530,10 +21547,17 @@ order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
 
 :::unreleased
-*Amended (#3401, owner 2026-11-17):* Pocket position sits directly
-under Alignment, above Thickness's rule: it is where the pocket sits
-along the edge Position gives it, so it belongs with the placement
-rows rather than after the strip's depth.
+*Amended (#3445, owner 2026-11-18), overturning #3401's placement
+of 2026-11-17 under Alignment:* Pocket position sits in Position's
+"Each bar and Pocket" drawer, directly under the Pocket's edge row
+and its Per screen drawer. The slider depends on the edge it sits
+on, and under Alignment it stood apart from that edge. It is one
+row, not one per bar: bars have no position of their own, and the
+Pocket's position is one value for every screen. On a bar's edge
+the row stays live with its note under it, never a `?` in its
+place: the value still picks the end of the shelf the Pocket takes,
+places it in the strip under Hidden, and governs every screen that
+does not share an edge — so hiding it would hide a working control.
 :::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,

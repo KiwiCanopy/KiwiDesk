@@ -17,11 +17,15 @@ final class PocketHandleView: NSView {
     /// The kiwis are drawn at the mark's grid at this side, their
     /// lower part behind the tab.
     static let markSide: CGFloat = 20
-    /// How far the kiwis' image reaches past the tab at rest.
-    static let lookOut: CGFloat = 5
+    /// How far the kiwis' image reaches past the tab at rest: 3 pt
+    /// further while the pocket `holds` something, the tab staying
+    /// flush (#3446).
+    static func lookOut(holds: Bool) -> CGFloat { holds ? 8 : 5 }
     /// The handle's whole depth at rest: the tab and the kiwis past
     /// it.
-    static var restDepth: CGFloat { tabDepth + lookOut }
+    static func restDepth(holds: Bool) -> CGFloat {
+        tabDepth + lookOut(holds: holds)
+    }
 
     private(set) var edge = AppBarEdge.bottom
     private(set) var shelf = KiwiShelf()
@@ -118,7 +122,7 @@ final class PocketHandleView: NSView {
         )
         let markRect = CGRect(
             x: (along - Self.markSide) / 2,
-            y: across - Self.restDepth,
+            y: across - Self.restDepth(holds: holds),
             width: Self.markSide,
             height: Self.markSide
         )

@@ -11,13 +11,17 @@ import QuartzCore
 /// animation and adds one lasting the distance left times its pace
 /// (#3383). Under
 /// Reduce Motion it stands out at once. The One-window pocket, which
-/// has no handle, slides out of its edge instead (#2793).
+/// has no handle, slides out of its edge instead (#2793,
+/// `BarMotion+PocketEntrance`).
 extension BarMotion {
     /// How far below its risen place the pocket starts, past the
-    /// tab, so the kiwis are what first shows.
-    @MainActor static func pocketRiseTravel() -> CGFloat {
+    /// tab, so the kiwis are what first shows — as far as they look
+    /// out while the pocket `holds` something or not (#3446). The
+    /// motion members take this distance as `travel`.
+    @MainActor static func pocketRiseTravel(holds: Bool) -> CGFloat {
         PocketHandleView.tabDepth + PocketPlateView.lift
-            + PocketHandleView.markSide - PocketHandleView.lookOut
+            + PocketHandleView.markSide
+            - PocketHandleView.lookOut(holds: holds)
     }
 
     /// The key the rise, its countdown and its sink run under, so
@@ -43,6 +47,7 @@ extension BarMotion {
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
         side: CGFloat,
+        travel: CGFloat,
         up: Bool = false
     ) {
         guard let layer = pocket.layer else { return }
@@ -54,6 +59,7 @@ extension BarMotion {
             let rise = pocketRise(
                 edge: edge,
                 side: side,
+                travel: travel,
                 from: from,
                 reduceMotion: isReduced
             )
@@ -67,13 +73,15 @@ extension BarMotion {
     static func pocketRise(
         edge: AppBarEdge,
         side: CGFloat,
+        travel: CGFloat,
         from: CATransform3D? = nil,
         reduceMotion: Bool
     ) -> CASpringAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
         let animation = CASpringAnimation(keyPath: "transform")
         animation.fromValue = NSValue(
-            caTransform3D: from ?? pocketRiseStart(edge: edge, side: side)
+            caTransform3D: from
+                ?? pocketRiseStart(edge: edge, side: side, travel: travel)
         )
         animation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
         // Critically damped: no overshoot to read as a throb.
@@ -98,6 +106,7 @@ extension BarMotion {
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
         side: CGFloat,
+        travel: CGFloat,
         rise: ShelfHandleSpec.Fill,
         pace: TimeInterval
     ) {
@@ -107,6 +116,7 @@ extension BarMotion {
             let scrub = pocketScrub(
                 edge: edge,
                 side: side,
+                travel: travel,
                 rise: rise,
                 pace: pace,
                 from: from,
@@ -137,13 +147,18 @@ extension BarMotion {
     static func pocketScrub(
         edge: AppBarEdge,
         side: CGFloat,
+        travel: CGFloat,
         rise: ShelfHandleSpec.Fill,
         pace: TimeInterval,
         from: CATransform3D?,
         reduceMotion: Bool
     ) -> CABasicAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
-        let start = pocketRiseStart(edge: edge, side: side)
+        let start = pocketRiseStart(
+            edge: edge,
+            side: side,
+            travel: travel
+        )
         let shown = from ?? start
         let done = PocketRiseTimeline.progress(shown: shown, start: start)
         let delay = done > 0 ? 0 : PocketRiseTimeline.delay(of: rise)
@@ -172,6 +187,7 @@ extension BarMotion {
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
         side: CGFloat,
+        travel: CGFloat,
         risen: Bool = false
     ) -> TimeInterval {
         guard let layer = pocket.layer,
@@ -183,6 +199,7 @@ extension BarMotion {
             let sink = pocketSink(
                 edge: edge,
                 side: side,
+                travel: travel,
                 from: from,
                 reduceMotion: isReduced
             )
@@ -199,11 +216,16 @@ extension BarMotion {
     static func pocketSink(
         edge: AppBarEdge,
         side: CGFloat,
+        travel: CGFloat,
         from: CATransform3D,
         reduceMotion: Bool
     ) -> CABasicAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
-        let start = pocketRiseStart(edge: edge, side: side)
+        let start = pocketRiseStart(
+            edge: edge,
+            side: side,
+            travel: travel
+        )
         let up = PocketRiseTimeline.progress(shown: from, start: start)
         guard up > 0.001 else { return nil }
         let sink = CABasicAnimation(keyPath: "transform")
@@ -222,9 +244,9 @@ extension BarMotion {
     @MainActor
     static func pocketRiseStart(
         edge: AppBarEdge,
-        side: CGFloat
+        side: CGFloat,
+        travel: CGFloat
     ) -> CATransform3D {
-        let travel = pocketRiseTravel()
         let pivot: CGPoint
         let drop: CGPoint
         switch edge {
@@ -250,77 +272,5 @@ extension BarMotion {
         t = CATransform3DRotate(t, PocketHandleView.turn(for: edge), 0, 0, 1)
         t = CATransform3DScale(t, scale, scale, 1)
         return CATransform3DTranslate(t, -pivot.x, -pivot.y, 0)
-    }
-
-    /// The One-window pocket's leave out of its edge (#2793), a little
-    /// faster than its entrance, the shelf's `revealSlide`.
-    static let pocketLeave: TimeInterval = 0.2
-
-    /// Slides the One-window pocket's `view` out of `edge` by
-    /// `travel` points, or back into it; returns how long that takes.
-    /// Under Reduce Motion it stands or leaves at once.
-    @MainActor
-    @discardableResult
-    static func playPocketEntrance(
-        _ view: NSView,
-        edge: AppBarEdge,
-        travel: CGFloat,
-        entering: Bool
-    ) -> TimeInterval {
-        guard
-            let slide = pocketEntrance(
-                edge: edge,
-                travel: travel,
-                // The slide runs in the superview's space, not the
-                // view's own.
-                flipped: view.superview?.isFlipped ?? false,
-                entering: entering,
-                reduceMotion: isReduced
-            ),
-            let layer = view.layer
-        else { return 0 }
-        layer.add(slide, forKey: "pocketEntrance")
-        return slide.duration
-    }
-
-    /// The entrance's additive slide, nil under `reduceMotion` or with
-    /// no travel: from `travel` points toward `edge` in, or back out,
-    /// on the shelf's reveal curve. `flipped` is whether the space the
-    /// position moves in, the superview's, runs y down.
-    @MainActor
-    static func pocketEntrance(
-        edge: AppBarEdge,
-        travel: CGFloat,
-        flipped: Bool,
-        entering: Bool,
-        reduceMotion: Bool
-    ) -> CABasicAnimation? {
-        guard !reduceMotion, travel > 0 else { return nil }
-        let up: CGFloat = flipped ? -travel : travel
-        let away: CGPoint
-        switch edge {
-        case .top: away = CGPoint(x: 0, y: up)
-        case .bottom: away = CGPoint(x: 0, y: -up)
-        case .left: away = CGPoint(x: -travel, y: 0)
-        case .right: away = CGPoint(x: travel, y: 0)
-        }
-        let slide = CABasicAnimation(keyPath: "position")
-        slide.isAdditive = true
-        slide.fromValue = NSValue(point: entering ? away : .zero)
-        slide.toValue = NSValue(point: entering ? .zero : away)
-        slide.duration = entering ? revealSlide : pocketLeave
-        let (a, b, c, d) = revealCurve
-        slide.timingFunction =
-            entering
-            ? CAMediaTimingFunction(controlPoints: a, b, c, d)
-            : CAMediaTimingFunction(
-                controlPoints: 1 - c,
-                1 - d,
-                1 - a,
-                1 - b
-            )
-        slide.fillMode = .both
-        slide.isRemovedOnCompletion = entering
-        return slide
     }
 }

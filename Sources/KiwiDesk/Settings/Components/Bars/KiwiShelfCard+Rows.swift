@@ -119,8 +119,6 @@ extension KiwiShelfCard {
             iconSourceRow
         case .revealStyle:
             revealStyleRow
-        case .pocketPosition:
-            pocketPositionRows
         // Drawn in the Show drawer (`showRow`).
         case .pocketVisibility:
             EmptyView()
@@ -130,7 +128,7 @@ extension KiwiShelfCard {
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
             .fillFade, .tintHubAndPlates, .readingContrast,
             .spaceBarScreenEdge, .appBarScreenEdge, .pocketEdge,
-            .pocketScreenEdge,
+            .pocketScreenEdge, .pocketPosition,
             .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,

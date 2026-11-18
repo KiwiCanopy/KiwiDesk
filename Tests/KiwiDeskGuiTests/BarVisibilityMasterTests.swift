@@ -91,16 +91,21 @@ struct BarVisibilityMasterTests {
         )
     }
 
-    /// Where the bars sit runs coarse to fine, the pocket's place
-    /// along its edge directly under Alignment (owner, 2026-11-17,
-    /// #3401), and the strip's depth follows after a rule, in the
-    /// card body (#761); order and minimum close the Style drawer
-    /// (#2507).
+    /// Where the bars sit runs coarse to fine, and the strip's
+    /// depth follows after a rule, in the card body (#761); the
+    /// pocket's place along its edge closes Position's drawer,
+    /// under the Pocket's edge rows (owner, 2026-11-18, #3445);
+    /// order and minimum close the Style drawer (#2507).
     @Test("placement rows run coarse to fine, depth after them")
     func placementOrder() {
         #expect(
             BarsRowOrder.kiwishelfPlacement == [
                 .kiwishelf(.edge), .kiwishelf(.alignment),
+            ]
+        )
+        #expect(
+            BarsRowOrder.kiwishelfEdges.suffix(3) == [
+                .kiwishelf(.pocketEdge), .kiwishelf(.pocketScreenEdge),
                 .kiwishelf(.pocketPosition),
             ]
         )
