@@ -174,6 +174,18 @@ because two real clients now remove drift — see
   seed runs the Shortcuts catalogue's own Lua, judged against the
   GUI's catalogue since a gesture-only verb has no keyboard default
   (`TrackpadSeedCatalogueTests` ▸ `seedsAreCatalogueRows`).
+  **A reader of the seeds takes them on the stored shortcut base
+  (#3444)**: `GestureSeeds.seeds(on:)`, the base a required
+  argument down every resolve, never the `⌃⌥` table read bare, so
+  a seed lands on `✦` for a Hyper user as a keyboard default does.
+  The switch renames the stored gesture keys through the one
+  `GestureBaseSwitch.move` — the draft's map in
+  `ShortcutBaseSwitch.apply`, the shared map and every profile's
+  override (`GestureMap.following`) in
+  `RuleReachSnapshot.moveGestureBase`, which the layer pass lays
+  beside `moveShortcutBase` — and the rows it leaves on `⌃⌥` are
+  `GestureBaseSwitch.kept`'s, never a GUI rule beside it
+  (`GestureBaseSwitchTests`, `ShortcutBaseGestureTests`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

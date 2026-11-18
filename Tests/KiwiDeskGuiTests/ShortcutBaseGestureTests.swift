@@ -61,6 +61,26 @@ struct ShortcutBaseGestureTests {
         #expect(model.gestureRowsLeftOnStandard.isEmpty)
     }
 
+    @Test("a stored row the switch moved reads as the switch's row")
+    func movedRowIsTheSwitchs() throws {
+        LocalizationManager.shared.select("en")
+        let mine = GestureKey(.wheel, pan.union(.shift))
+        var base = GestureMap()
+        base[mine] = .bound(.family(.space))
+        let (model, _) = try model(base: base)
+        model.setShortcutBase(.hyper)
+        // Vacuity: the switch moved the stored row.
+        #expect(
+            model.config.gesture[GestureKey(.wheel, hyper.union(.shift))]
+                == .bound(.family(.space))
+        )
+        let rows = SettingsDiffRowSource.rows(for: model)
+        #expect(!rows.contains { $0.key == .shortcuts(.gestureBindings) })
+        #expect(
+            rows.filter { $0.key == .shortcuts(.shortcutBase) }.count == 1
+        )
+    }
+
     @Test("a profile's tombstone moves with the shared map on Save")
     func profileFollowsOnSave() throws {
         var home = GestureMap()
@@ -96,6 +116,44 @@ struct ShortcutBaseGestureTests {
                 .taken(target: GestureKey(.drag, hyper), by: .grab(.resize))
             ]
         )
+    }
+
+    @Test("a pinned seed lands in gui.json and every profile on Save")
+    func pinnedSeedSaves() throws {
+        var base = GestureMap()
+        base[GestureKey(.drag, hyper)] = .bound(.grab(.resize))
+        let (model, core) = try model(base: base)
+        model.setShortcutBase(.hyper)
+        model.updateActiveProfile()
+        let stored = try #require(core.guiConfigStore.load())
+        #expect(stored.shortcutBase == .hyper)
+        #expect(stored.gesture[GestureKey(.drag, pan)] == .bound(.grab(.move)))
+        let home = try core.profiles.read(name: "Home")
+        let resolved = GestureSeeds.resolved(
+            base: stored.gesture,
+            profile: home.gesture,
+            shortcutBase: .hyper
+        )
+        #expect(resolved[GestureKey(.drag, pan)] == .grab(.move))
+        #expect(resolved[GestureKey(.drag, hyper)] == .grab(.resize))
+    }
+
+    /// The switch's gesture pass reads the draft's map, so an edit
+    /// after the switch re-runs it.
+    @Test("a gesture edit after the switch re-runs the layer pass")
+    func passFollowsTheDraft() throws {
+        let (model, _) = try model()
+        model.setShortcutBase(.hyper)
+        let before = model.layeredReach?.storedGestureBase
+        GestureListEdits.set(
+            .grab(.resize),
+            at: GestureKey(.drag, pan),
+            in: &model.config.gesture,
+            shortcutBase: model.config.shortcutBase
+        )
+        let after = model.layeredReach?.storedGestureBase
+        #expect(before != after)
+        #expect(after?[GestureKey(.drag, pan)] == .bound(.grab(.move)))
     }
 
     @Test("another profile's own ⌃⌥ row is listed")

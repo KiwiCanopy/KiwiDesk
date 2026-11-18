@@ -21,8 +21,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public internal(set) var storedGestureBase: GestureMap
     public internal(set) var gestureShortcutBase: ShortcutBase
     public let fileGestureBase: GestureMap
-    /// Whether the switch's pass moved any profile's override, so
-    /// a save writes each one it moved.
+    /// The profiles whose override the switch's pass moved; a save
+    /// writes each.
     public internal(set) var movedGestureProfiles: Set<String> = []
     /// The Space history setting, one key (#1655).
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
@@ -77,7 +77,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedScrollBase: ScrollGestureBase,
         gestures: RuleReachTable<GestureAction>,
         storedGestureBase: GestureMap,
-        gestureShortcutBase: ShortcutBase = .standard,
+        gestureShortcutBase: ShortcutBase,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
         focusWrap: RuleReachTable<FocusWrap>,

@@ -12,20 +12,21 @@ extension SettingsModel {
             profile: nil,
             shortcutBase: .hyper
         )
-        let seeds = GestureSeeds.seeds(on: .standard)
+        let kept = GestureBaseSwitch.kept(in: resolved, onto: .hyper)
         var rows: [GestureBaseLeftRow] = []
         for (key, action) in resolved.sorted(by: { $0.key < $1.key }) {
-            guard let target = ShortcutBase.moved(key, to: .hyper) else {
+            guard ShortcutBase.moved(key, to: .hyper) != nil else {
                 continue
             }
-            let reason: GestureBaseLeftRow.Reason
-            if let holder = resolved[target] {
-                reason = .taken(target: target, by: holder)
-            } else if seeds[key] == action {
-                reason = .predates
-            } else {
-                reason = .ownChoice
-            }
+            // No seed lies on ⌃⌥ under ✦, so a row there is the
+            // user's, or one another row's ✦ key held back.
+            let reason: GestureBaseLeftRow.Reason =
+                kept.first { $0.key == key }
+                .flatMap { hold in
+                    resolved[hold.holder].map {
+                        .taken(target: hold.target, by: $0)
+                    }
+                } ?? .ownChoice
             rows.append(GestureBaseLeftRow(key, action, reason))
         }
         guard let stored = layeredReach ?? ruleReachStored else {
@@ -53,7 +54,6 @@ extension SettingsModel {
 /// `ShortcutBaseWords.line` names it.
 struct GestureBaseLeftRow: Identifiable, Equatable {
     enum Reason: Equatable {
-        case predates
         /// The `✦` key it would take holds another row.
         case taken(target: GestureKey, by: GestureAction)
         case ownChoice

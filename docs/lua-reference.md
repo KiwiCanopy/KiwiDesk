@@ -5589,12 +5589,15 @@ Out of the box these are bound:
 | `pinch_together` | ⌃⌥ | The Desktop overview |
 | `pinch_together4` | ⌃⌥ | The window switcher |
 
-`hover_move`, the clicks and the side buttons are unbound. With
-Settings ▸ Shortcuts ▸ **Shortcuts use** on ✦, every default above
-on ⌃⌥ sits on ✦ instead, keeping ⇧ and ⌘ (✦⇧ drag resizes, ✦⌘
-swipes step the Spaces), and the switch moves a gesture you bound on
-⌃⌥ with it, as it moves the keyboard shortcuts
-([#3444](https://github.com/KiwiCanopy/KiwiDesk/issues/3444)).
+`hover_move`, the clicks and the side buttons are unbound. In a
+setup the Settings app manages, with Settings ▸ Shortcuts ▸
+**Shortcuts use** on ✦, every default above on ⌃⌥ sits on ✦
+instead, keeping ⇧ and ⌘ (✦⇧ drag resizes, ✦⌘ swipes step the
+Spaces), and the switch moves a gesture set on ⌃⌥ in Settings with
+it, as it moves the keyboard shortcuts
+([#3444](https://github.com/KiwiCanopy/KiwiDesk/issues/3444)). A
+`gesture.bind` in `init.lua` binds over the ⌃⌥ defaults and stays as
+written.
 :::
 
 ### Scroll focus and Space step

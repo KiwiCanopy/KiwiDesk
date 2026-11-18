@@ -49,6 +49,7 @@ struct GestureBaseSwitchTests {
         #expect(ShortcutBase.moved([.control, .command], to: .hyper) == nil)
         #expect(ShortcutBase.moved(pan, to: .standard) == nil)
         #expect(ShortcutBase.moved([], to: .hyper) == nil)
+        #expect(ShortcutBase.moved([.hyper, .control], to: .standard) == nil)
     }
 
     @Test("a stored row and a tombstone move with the switch")
@@ -123,6 +124,54 @@ struct GestureBaseSwitchTests {
         )
         #expect(resolved[GestureKey(.drag, hyper)] == .grab(.resize))
         #expect(resolved[old] == .grab(.move))
+    }
+
+    @Test("a pin goes back to its seed on the way back, sparse")
+    func pinRoundTrips() {
+        var map = GestureMap()
+        map[GestureKey(.drag, hyper)] = .bound(.grab(.resize))
+        let there = GestureBaseSwitch.move(map, from: .standard, onto: .hyper)
+        #expect(there.map[GestureKey(.drag, pan)] != nil)
+        let back = GestureBaseSwitch.move(
+            there.map,
+            from: .hyper,
+            onto: .standard
+        )
+        #expect(back.map == map)
+    }
+
+    /// A key the draft kept on ⌃⌥ keeps what it resolved to, a seed
+    /// it only inherited included.
+    @Test("a staying key keeps its inherited seed")
+    func stayingKeepsTheSeed() {
+        let old = GestureKey(.drag, pan)
+        let moved = GestureBaseSwitch.move(
+            GestureMap(),
+            from: .standard,
+            onto: .hyper,
+            staying: { $0 == old }
+        )
+        #expect(moved.map[old] == .bound(.grab(.move)))
+        #expect(moved.moves[old] == nil)
+        #expect(moved.moves[GestureKey(.wheel, pan)] != nil)
+    }
+
+    @Test("the rows the switch would keep are Core's one rule")
+    func keptReadsTheHolder() {
+        let resolved: [GestureKey: GestureAction] = [
+            GestureKey(.drag, pan): .grab(.move),
+            GestureKey(.drag, hyper): .grab(.resize),
+            GestureKey(.wheel, pan): .family(.walk),
+        ]
+        #expect(
+            GestureBaseSwitch.kept(in: resolved, onto: .hyper) == [
+                GestureBaseSwitch.Kept(
+                    key: GestureKey(.drag, pan),
+                    target: GestureKey(.drag, hyper),
+                    holder: GestureKey(.drag, hyper)
+                )
+            ]
+        )
     }
 
     @Test("a profile's override resolves as it did after the move")

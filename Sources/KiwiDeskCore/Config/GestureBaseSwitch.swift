@@ -50,32 +50,53 @@ public enum GestureBaseSwitch {
         func target(_ key: GestureKey) -> GestureKey? {
             staying(key) ? nil : ShortcutBase.moved(key, to: new)
         }
+        // Every entry is written sparse over the seeds on `new`, so
+        // a key a seed no longer holds keeps what it resolved to.
+        func entry(_ action: GestureAction?, at key: GestureKey)
+            -> GestureEntry?
+        {
+            if action == newSeeds[key] { return nil }
+            if let action { return .bound(action) }
+            return newSeeds[key] == nil ? nil : .unbound
+        }
         var out = GestureMap()
         for key in keys where target(key) == nil {
-            out[key] = map[key]
+            out[key] = entry(resolved(key), at: key)
         }
         var moves: [GestureKey: Move] = [:]
         var kept: [Kept] = []
         for key in keys.sorted() {
             guard let to = target(key) else { continue }
             let action = resolved(key)
-            if keys.contains(to), target(to) == nil, resolved(to) != nil {
+            // A key the mapping produces is never moved itself.
+            if map.resolved(to, oldSeeds) != nil {
                 guard let action else { continue }
-                // The seed's old key is no seed on `new`: pin it.
-                out[key] = .bound(action)
+                out[key] = entry(action, at: key)
                 kept.append(Kept(key: key, target: to, holder: to))
                 continue
             }
             moves[key] = Move(to: to, action: action)
-            if action == newSeeds[to] {
-                out[to] = nil
-            } else if let action {
-                out[to] = .bound(action)
-            } else {
-                out[to] = newSeeds[to] == nil ? nil : .unbound
-            }
+            out[to] = entry(action, at: to)
         }
         return Moved(map: out, moves: moves, kept: kept)
+    }
+}
+
+extension GestureBaseSwitch {
+    /// The rows of `resolved` the switch onto `base` would leave
+    /// where they are: a key the mapping covers whose target another
+    /// row binds — the rows `move` pins, which the Settings list
+    /// names.
+    public static func kept(
+        in resolved: [GestureKey: GestureAction],
+        onto base: ShortcutBase
+    ) -> [Kept] {
+        resolved.keys.sorted().compactMap { key in
+            guard let to = ShortcutBase.moved(key, to: base),
+                resolved[to] != nil
+            else { return nil }
+            return Kept(key: key, target: to, holder: to)
+        }
     }
 }
 

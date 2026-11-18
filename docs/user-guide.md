@@ -1286,10 +1286,6 @@ Settings ▸ Shortcuts ▸ Mouse & Trackpad lists every gesture, and
 works only with its keys held; with no keys held, macOS and your
 apps keep the gesture.
 
-⌃⌥ drag moves a window and ⌃⌥⇧ drag resizes it. With **Shortcuts
-use** set to `✦`, the gestures on `⌃⌥` move to `✦` with your
-shortcuts: `✦` drag moves, `✦⇧` drag resizes.
-
 - **Two-finger swipes** step after a short travel. A swipe that
   moves focus keeps stepping while your fingers move, with
   **Long two-finger swipes move focus further** on; each step

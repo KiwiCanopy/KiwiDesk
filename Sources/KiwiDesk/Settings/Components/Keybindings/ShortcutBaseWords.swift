@@ -110,22 +110,16 @@ enum ShortcutBaseWords {
         }
     }
 
-    /// One left-behind gesture row (#3444), in the keyboard rows'
-    /// sentences: the action, then the gesture and its keys.
+    /// One left-behind gesture row (#3444): the keyboard rows'
+    /// sentences under keys of their own, since a catalog's frame
+    /// agrees with its subject, a gesture here.
     static func line(_ left: GestureBaseLeftRow) -> String {
         let name = GestureListWords.value(left.action, on: left.key.input)
         let gesture = GestureListWords.rowName(left.key)
         switch left.reason {
-        case .predates:
-            return L(
-                "shortcuts.base.left.predates",
-                "%1$@ (%2$@): from before this update",
-                name,
-                gesture
-            )
         case .taken(let target, let holder):
             return L(
-                "shortcuts.base.left.taken",
+                "shortcuts.base.left.gesture.taken",
                 "%1$@ (%2$@): %3$@ is taken by %4$@",
                 name,
                 gesture,
@@ -134,14 +128,14 @@ enum ShortcutBaseWords {
             )
         case .ownChoice:
             return L(
-                "shortcuts.base.left.own",
+                "shortcuts.base.left.gesture.own",
                 "%1$@ (%2$@): you set this one yourself",
                 name,
                 gesture
             )
         case .profile(let profile):
             return L(
-                "shortcuts.base.left.profile",
+                "shortcuts.base.left.gesture.profile",
                 "%1$@ (%2$@): “%3$@” sets its own",
                 name,
                 gesture,

@@ -11,7 +11,11 @@ extension SettingsModel {
         cleanConfig.titledAppRules = config.titledAppRules
         cleanConfig.floatRules = config.floatRules
         cleanConfig.scrollGesture = config.scrollGesture
-        cleanConfig.gesture = config.gesture
+        // A gesture map a staged base switch moved is read against
+        // that base (#3444): kept with it, as the layers are.
+        if config.shortcutBase == cleanConfig.shortcutBase {
+            cleanConfig.gesture = config.gesture
+        }
         cleanConfig.spaceHistory = config.spaceHistory
         cleanConfig.modeCycle = config.modeCycle
         cleanConfig.focusWrap = config.focusWrap

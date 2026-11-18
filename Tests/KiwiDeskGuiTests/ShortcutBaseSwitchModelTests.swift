@@ -137,6 +137,7 @@ struct ShortcutBaseSwitchModelTests {
         )
         #expect(row.contains("model.rowsLeftOnStandard"))
         #expect(row.contains("model.gestureRowsLeftOnStandard"))
+        #expect(row.contains("ForEach(gesturesLeft)"))
         #expect(row.contains("return ShortcutBaseWords.storedPage"))
         #expect(
             row.contains(
