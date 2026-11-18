@@ -46,7 +46,17 @@ extension EventLoop {
         let server = FloatDetection.serverSnapshot(
             of: window.id
         )
-        let layer = server.layer
+        let level = readLevel(window.id)
+        // AX lists a window being ordered in before the public list
+        // does: a raised one is judged at the retrack, with its
+        // alpha and bounds read (#3443, #309).
+        guard
+            !FloatDetection.isOrderingIn(level: level, listed: server)
+        else {
+            markTransientDrop(pid: pid, id: window.id)
+            return
+        }
+        let layer = level ?? server.layer
         let detection: FloatDetectionSource
         let subrole: String
         // Detection judged a layer: where the server now reports
@@ -157,6 +167,8 @@ extension EventLoop {
         detectedFullscreen[window.id] = window.isFullscreen
         detectedSubroles[window.id] = subrole
         elements[pid, default: [:]][window.id] = element
+        // A reused id's next order-in is owed its own retry (#3443).
+        transientRetried[pid]?.remove(window.id)
         observers[pid]?.observe(window: element)
         // Remember every window's frame, and which windows carry a
         // native tab group, so a later switch (this window vanishing

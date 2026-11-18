@@ -157,44 +157,30 @@ extension ShortcutsReferenceBuilder {
                 let action = KeybindingCatalog.appShortcutAction(
                     from: binding.lua
                 )
-                let badge = Self.actionBadge(action)
                 return ShortcutRow(
                     id: binding.id.uuidString,
-                    label: name,
+                    label: Self.appRowTitle(name, action),
                     combo: glyphs(binding.combo),
                     bundleID: bundleID,
-                    accessoryIcon: badge?.icon,
-                    accessoryHelp: badge?.help ?? ""
+                    appName: name
                 )
             }
     }
 
-    /// The row badge for a action other than Open or Focus: its
-    /// symbol and the help naming what the key does.
-    static func actionBadge(
+    /// An Apps row's title: the app's name, or the action in words
+    /// where it is not Open or Focus (#3448 ▸ Ruling), so search and
+    /// VoiceOver read it with no badge to hover.
+    static func appRowTitle(
+        _ name: String,
         _ action: AppShortcutAction?
-    ) -> (icon: String, help: String)? {
+    ) -> String {
         switch action {
-        case .openNew:
-            return (
-                "macwindow.badge.plus",
-                L(
-                    "shortcuts.app_behavior.open_new.badge",
-                    "Opens a new instance"
-                )
-            )
-        // Not the floating mark's symbol, which the Shortcuts side
-        // shows beside it for a different meaning (#2246).
         case .gather:
-            return (
-                gatherBadge,
-                L(
-                    "shortcuts.app_behavior.gather.badge",
-                    "Gathers its windows here"
-                )
-            )
+            return L("shortcuts.app_row.gather", "Gather %1$@ Windows", name)
+        case .openNew:
+            return L("shortcuts.app_row.open_new", "New %1$@ Window", name)
         case .openOrFocus, nil:
-            return nil
+            return name
         }
     }
 

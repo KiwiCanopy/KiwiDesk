@@ -143,6 +143,7 @@ struct ShelfLookApplyTests {
         source.kiwishelf.border = true
         source.kiwishelf.borderWidth = 3
         source.kiwishelf.highlightWidth = 4
+        source.kiwishelf.handleThickness = 5
         source.kiwishelf.itemGap = 9
         source.kiwishelf.glyphSize = 30
         source.kiwishelf.fontSize = 13

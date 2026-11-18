@@ -140,15 +140,23 @@ extension JumpPanelController {
         // image source would just write nils.
         guard source == .appFont else { return reference }
         var out = reference
-        out.apps = reference.apps.map { row in
-            var row = row
-            row.glyph = core.appFont.glyph(
-                forAppName: row.label,
-                source: source
-            )
-            return row
+        out.apps = glyphed(reference.apps) {
+            core.appFont.glyph(forAppName: $0, source: source)
         }
         return out
+    }
+
+    /// Each Apps row with the glyph `glyph` resolves for its app's
+    /// name, never for a title naming the action (#3448).
+    static func glyphed(
+        _ rows: [ShortcutRow],
+        glyph: (String) -> String?
+    ) -> [ShortcutRow] {
+        rows.map { row in
+            var row = row
+            row.glyph = glyph(row.appName ?? row.label)
+            return row
+        }
     }
 }
 

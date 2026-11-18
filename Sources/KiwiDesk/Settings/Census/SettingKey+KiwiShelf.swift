@@ -27,6 +27,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case border = "settings.kiwishelf.border"
     case borderWidth = "settings.kiwishelf.borderWidth"
     case highlightWidth = "settings.kiwishelf.highlightWidth"
+    /// An Auto bar's handle and the Pocket's tab, deep (#3451).
+    case handleThickness = "settings.kiwishelf.handleThickness"
     case itemGap = "settings.kiwishelf.itemGap"
     case glyphSizeAuto = "settings.kiwishelf.glyphSize (auto)"
     case glyphSize = "settings.kiwishelf.glyphSize"
@@ -90,9 +92,18 @@ extension KiwiShelfKey {
                 .atRest,
                 gate: .runtime(.nothingRevealsMaximized)
             )
+        case .handleThickness:
+            // In the Show group under Each bar, greyed while nothing
+            // rests as a handle (#3451).
+            return .row(
+                .bars,
+                .kiwishelf,
+                .atRest,
+                gate: .runtime(.noHandleRests)
+            )
         case .revealStyle:
-            // In the Show group under Each bar, greyed while no bar
-            // hides (owner ruling, 2026-10-21).
+            // In the Show group under Handle thickness, greyed while
+            // no bar hides (owner ruling, 2026-10-21).
             return .row(
                 .bars,
                 .kiwishelf,

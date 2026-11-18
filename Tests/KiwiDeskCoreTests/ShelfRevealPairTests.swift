@@ -80,7 +80,7 @@ struct ShelfRevealPairTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let space = try #require(spec(core, shelf, .space))
         let app = try #require(spec(core, shelf, .app))
-        #expect(space.frame.height == ShelfHandleSpec.depth)
+        #expect(space.frame.height == ShelfHandleSpec.depth(of: KiwiShelf()))
         #expect(!space.frame.intersects(app.frame))
         let spaceIn = try #require(target(core, shelf, .space)?.approach)
         let appIn = try #require(target(core, shelf, .app)?.approach)

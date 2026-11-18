@@ -80,8 +80,8 @@ extension SettingRuntimeGate {
             .loginItemServiceStatus, .autoStartServiceLoaded,
             .runningCopyTranslocated,
             .automaticInstallUnavailable, .luaOwnsConfig,
-            .noBarHides, .noBarShows, .nothingRevealsMaximized,
-            .focusBorderOff,
+            .noBarHides, .noHandleRests, .noBarShows,
+            .nothingRevealsMaximized, .focusBorderOff,
             .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
@@ -112,6 +112,10 @@ extension SettingRuntimeGate {
         case .noBarHides:
             // The bars' values sit above it, but not that a reveal
             // needs a hiding bar (owner ruling, 2026-10-21).
+            return false
+        case .noHandleRests:
+            // Show sits above it, but not the Pocket's handle or the
+            // maximized reveal (#3451).
             return false
         case .noBarShows, .focusBorderOff, .nothingRevealsMaximized:
             // Their causes are on other pages (#3089, #3346).
