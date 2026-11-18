@@ -16493,6 +16493,22 @@ them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
 :::
 
+:::unreleased
+**An Apps row says its action in its title** (#3448, owner on
+ui-designer's recommendation, 2026-11-18). A key set to gather or
+to open new reads "Gather Safari Windows" or "New Safari Window";
+an Open or Focus key keeps the app's name alone. This retires the
+row's action badges — #334's `macwindow.badge.plus` on an Open New
+key, and the `square.and.arrow.down.on.square` #3284 gave a gather
+key — whose meaning lived only in a tooltip: the owner read the
+gather one as save or import, and a tooltip is no help affordance
+(#94). Words are found by the field and read by
+VoiceOver with no wiring of their own, as the Pocket rows' titles
+already are. The rows still sort by the app's name, so an app's
+keys stay together. A different symbol or a reworded tooltip was
+refused, since either still asks the user to hover.
+:::
+
 **The shortcuts sheet folds what reads as one, and nothing the
 user changed (#2312, owner ruling 2026-10-16).** A digit ladder
 — Go to Space 1, 2, 3 — and a mirrored set — the four focus

@@ -205,19 +205,13 @@ extension ShortcutsReferenceBuilder {
     }
 
     /// The symbols the Shortcuts side draws on no command row —
-    /// Custom's Lua mark, the gather badge and a sequence's branch
-    /// mark — for the resolve
-    /// guard; a command row's symbol is resolved from the rows
-    /// themselves (`ShortcutRowSymbolTests`).
+    /// Custom's Lua mark and a sequence's branch mark — for the
+    /// resolve guard; a command row's symbol is resolved from the
+    /// rows themselves (`ShortcutRowSymbolTests`).
     static let verbSymbols = [
         LuaMark.symbol,
-        gatherBadge,
         BranchMark.symbol,
     ]
-
-    /// An app row's gather badge, off Desktops' `rectangle.stack`
-    /// (#3284, ui-designer 2026-11-13).
-    static let gatherBadge = "square.and.arrow.down.on.square"
 
     /// The symbol a KiwiHub side wears on every surface naming it:
     /// its Shortcuts row, Simple's keys and the menu bar rows (#3284).
