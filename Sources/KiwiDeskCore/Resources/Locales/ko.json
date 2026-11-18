@@ -1148,7 +1148,7 @@
   "kiwishelf.count.after.ax": "뒤쪽에 더 있음: %1$d",
   "kiwishelf.count.before.ax": "앞쪽에 더 있음: %1$d",
   "kiwishelf.durations": "지속 시간",
-  "kiwishelf.durations.animations_off": "모든 프로필에서 애니메이션이 꺼져 있습니다. 속도는 %1$@에서 선택하십시오.",
+  "kiwishelf.durations.animations_off": "모든 프로필에서 애니메이션이 꺼져 있습니다. %1$@에서 속도를 선택하십시오.",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "지금 바와 Pocket, 또는 그 화면별 가장자리가 서로 다릅니다. 여기서 고르면 모든 화면에서 바와 Pocket이 같은 가장자리에 놓입니다.",

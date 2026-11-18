@@ -75,12 +75,19 @@ struct BarsGateWiringTests {
                 "ifreason==nil,gates.growPlaysAsUnfold{"
                     + "note(BarsGateHelp.growPlaysAsUnfold)",
                 ".inertReason(for:.colours(.animationsOnReveal))",
-                "GreyOut(active:revealInert||animationsOff)",
                 // Both Durations rows grey under KiwiDesk's Off,
-                // their reason outside the grey (#3471).
-                "GreyOut(active:animationsOff)",
+                // their reason outside the grey (#3471). Each grey is
+                // spelled with its own row's anchor, so a swap reds,
+                // and the flag read with its polarity.
+                ".modifier(GreyOut(active:revealInert||animationsOff))"
+                    + ".searchAnchored(SettingsCatalog.bars"
+                    + ".kiwishelfDurations.children.onReveal)",
+                ".modifier(GreyOut(active:animationsOff))"
+                    + ".searchAnchored(SettingsCatalog.bars"
+                    + ".kiwishelfDurations.children.onExpand)",
+                "privatevaranimationsOff:Bool{"
+                    + "model.appWide.animationReduceMotion}",
                 "ifanimationsOff{animationsOffNote}",
-                "model.appWide.animationReduceMotion",
                 "prose:BarsGateHelp.animationsOffProse",
             ],
         ]
