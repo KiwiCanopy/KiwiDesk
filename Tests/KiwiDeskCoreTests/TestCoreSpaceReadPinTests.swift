@@ -21,7 +21,10 @@ struct TestCoreSpaceReadPinTests {
     @Test("a stated display-UUID override answers through the pin")
     func displayUUIDTakesTheOverride() {
         let core = makeTestCore()
-        let display = DisplayID(900_001)
+        // A display no host holds, read once first so the memo holds
+        // it: the override must still beat the memoized answer.
+        let display = DisplayID(903_442)
+        #expect(core.desktopMemory.readDisplayUUID(display) == nil)
         NativeSpaces.displayUUIDOverride = { _ in "UUID-PIN" }
         defer { NativeSpaces.displayUUIDOverride = nil }
         #expect(core.desktopMemory.readDisplayUUID(display) == "UUID-PIN")
