@@ -10,6 +10,9 @@ import Testing
 @Suite("Pocket rise timeline (#3368)")
 @MainActor
 struct PocketRiseTimelineTests {
+    /// An empty pocket's rise travel.
+    static var travel: CGFloat { BarMotion.pocketRiseTravel(holds: false) }
+
     private let t0 = Date(timeIntervalSince1970: 1_000)
 
     private func fill(_ length: TimeInterval) -> ShelfHandleSpec.Fill {
@@ -57,6 +60,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketScrub(
                 edge: .bottom,
                 side: 40,
+                travel: Self.travel,
                 rise: entry,
                 pace: PocketRiseTimeline.span,
                 from: nil,
@@ -72,6 +76,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketScrub(
                 edge: .bottom,
                 side: 40,
+                travel: Self.travel,
                 rise: entry,
                 pace: PocketRiseTimeline.span,
                 from: Self.drawn(0.25, edge: .bottom),
@@ -85,6 +90,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketScrub(
                 edge: .bottom,
                 side: 40,
+                travel: Self.travel,
                 rise: entry,
                 pace: PocketRiseTimeline.span,
                 from: CATransform3DIdentity,
@@ -95,7 +101,11 @@ struct PocketRiseTimelineTests {
 
     /// A pocket drawn `done` of the way up on `edge`, side 40.
     static func drawn(_ done: CGFloat, edge: AppBarEdge) -> CATransform3D {
-        let start = BarMotion.pocketRiseStart(edge: edge, side: 40)
+        let start = BarMotion.pocketRiseStart(
+            edge: edge,
+            side: 40,
+            travel: Self.travel
+        )
         var shown = CATransform3DIdentity
         shown.m41 = start.m41 * (1 - done)
         shown.m42 = start.m42 * (1 - done)
@@ -105,7 +115,11 @@ struct PocketRiseTimelineTests {
     @Test("progress reads the drawn rise on every edge")
     func progressPerEdge() {
         for edge in AppBarEdge.allCases {
-            let start = BarMotion.pocketRiseStart(edge: edge, side: 40)
+            let start = BarMotion.pocketRiseStart(
+                edge: edge,
+                side: 40,
+                travel: Self.travel
+            )
             #expect(
                 PocketRiseTimeline.progress(shown: start, start: start) == 0
             )
@@ -146,6 +160,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketScrub(
                 edge: .left,
                 side: 40,
+                travel: Self.travel,
                 rise: hurry,
                 pace: PocketRiseTimeline.fastSpan,
                 from: Self.drawn(0.6, edge: .left),
@@ -162,6 +177,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketScrub(
                 edge: .bottom,
                 side: 40,
+                travel: Self.travel,
                 rise: fill(ShelfReveal.dwellDelay),
                 pace: PocketRiseTimeline.span,
                 from: nil,
@@ -172,6 +188,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketSink(
                 edge: .bottom,
                 side: 40,
+                travel: Self.travel,
                 from: CATransform3DIdentity,
                 reduceMotion: true
             ) == nil
@@ -184,6 +201,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketSink(
                 edge: .left,
                 side: 40,
+                travel: Self.travel,
                 from: CATransform3DIdentity,
                 reduceMotion: false
             )
@@ -194,6 +212,7 @@ struct PocketRiseTimelineTests {
             BarMotion.pocketSink(
                 edge: .left,
                 side: 40,
+                travel: Self.travel,
                 from: Self.drawn(0.3, edge: .left),
                 reduceMotion: false
             )
@@ -204,7 +223,11 @@ struct PocketRiseTimelineTests {
         #expect(
             CATransform3DEqualToTransform(
                 to,
-                BarMotion.pocketRiseStart(edge: .left, side: 40)
+                BarMotion.pocketRiseStart(
+                    edge: .left,
+                    side: 40,
+                    travel: Self.travel
+                )
             )
         )
     }

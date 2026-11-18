@@ -99,7 +99,10 @@ struct ShelfHandleDrawTests {
 
     @Test("the pocket's tab brightens in place on hover")
     func tabBrightens() throws {
-        let size = CGSize(width: 40, height: PocketHandleView.restDepth)
+        let size = CGSize(
+            width: 40,
+            height: PocketHandleView.restDepth(holds: false)
+        )
         // The tab's core row, mid-tab, in a draw `hovered` or not, of
         // an empty pocket unless `holds` (#3384).
         let core = {
@@ -167,7 +170,7 @@ struct ShelfHandleDrawTests {
     func tabFillLandsOnTheCore(edge: AppBarEdge) throws {
         pinRevealLength()
         let along: CGFloat = 40
-        let across = PocketHandleView.restDepth
+        let across = PocketHandleView.restDepth(holds: false)
         let size =
             edge.isHorizontal
             ? CGSize(width: along, height: across)

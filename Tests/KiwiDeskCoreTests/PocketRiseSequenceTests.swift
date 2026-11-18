@@ -42,7 +42,11 @@ struct PocketRiseSequenceTests {
     ) throws {
         let spec = try #require(rig.spec)
         let edge = try #require(spec.handle)
-        let start = BarMotion.pocketRiseStart(edge: edge, side: spec.risenSide)
+        let start = BarMotion.pocketRiseStart(
+            edge: edge,
+            side: spec.risenSide,
+            travel: BarMotion.pocketRiseTravel(holds: spec.holds)
+        )
         var shown = CATransform3DIdentity
         shown.m41 = start.m41 * (1 - done)
         shown.m42 = start.m42 * (1 - done)
@@ -223,11 +227,18 @@ struct PocketRiseSequenceTests {
             handle: .bottom,
             risen: false,
             side: 40,
+            holds: false,
             before: up
         )
         #expect(first > 0)
         let older = try #require(view.sink)
-        view.stand(handle: .bottom, risen: false, side: 40, before: up)
+        view.stand(
+            handle: .bottom,
+            risen: false,
+            side: 40,
+            holds: false,
+            before: up
+        )
         let newer = try #require(view.sink)
         #expect(older != newer)
         view.endSink(older)

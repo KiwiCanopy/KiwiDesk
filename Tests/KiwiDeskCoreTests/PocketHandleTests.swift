@@ -94,7 +94,7 @@ struct PocketHandleTests {
             ? shown.frame.width : shown.frame.height
         // It reaches the edge across the outer margin and draws
         // past it, as the bars' handles sit.
-        #expect(depth == PocketHandleView.restDepth + 8)
+        #expect(depth == PocketHandleView.restDepth(holds: false) + 8)
     }
 
     @Test("its approach opening raises the pocket, and closing sinks it")

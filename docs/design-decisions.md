@@ -7255,6 +7255,23 @@ clicks passing through. The whole mark under Always keeps the
 shelf's strip.
 :::
 
+:::unreleased
+*Amended* (owner, 2026-11-18, #3446): **while the pocket holds
+something its kiwis look out 8 points, not 5.** A full pocket rests
+its tab at the fill strength (#3384), but that colour shows only in
+the few points the kiwis look out past it, so it was easy to miss.
+The tab stays flush and handle-deep, so a row of handles still
+reads as one, and the kiwis alone move; only the handle changes,
+never the whole mark under Always or the section on a bar. It is a
+resting state, not
+a hover lift, so #3366 does not apply, and it reserves nothing. The
+handle's frame and the rise's travel read the held depth, so a
+put-in or take-out sinks the pocket back to where the kiwis then
+stand rather than popping 3 points. Refused: a tab standing off the
+edge, which breaks the one-row rule, and more than about 3 points
+extra, which reads as the pocket rising.
+:::
+
 **The handle answers the pointer in two steps, as the bars'
 handles do** (#2807). On the approach the kiwis look 3 pt further
 out over the hover growth's 0.15 s, and the pocket rises only
