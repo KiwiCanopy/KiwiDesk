@@ -9,10 +9,6 @@ struct BarsControls: Sendable {
         "bars.switch.kiwishelf",
         "KiwiShelf"
     )
-    let kiwishelfPocketPosition = SettingsControl(
-        "kiwishelf.pocket_position",
-        "Pocket position"
-    )
     let kiwishelfEdges = SettingsDrawer(
         "kiwishelf.edge.each",
         "Each bar and Pocket",
@@ -216,6 +212,10 @@ struct KiwiShelfEdgeControls: Sendable {
     let kiwishelfPocketScreenEdges = SettingsControl(
         "kiwishelf.edge.per_screen.pocket",
         "Per screen"
+    )
+    let kiwishelfPocketPosition = SettingsControl(
+        "kiwishelf.pocket_position",
+        "Pocket position"
     )
 }
 

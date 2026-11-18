@@ -85,8 +85,8 @@ extension SettingsValueReadout {
             return [
                 .change(
                     census,
-                    label: SettingsCatalog.bars.kiwishelfPocketPosition
-                        .text,
+                    label: SettingsCatalog.bars.kiwishelfEdges.children
+                        .kiwishelfPocketPosition.text,
                     old: percent(Double(o.pocketPosition) / 100),
                     new: percent(Double(n.pocketPosition) / 100)
                 )

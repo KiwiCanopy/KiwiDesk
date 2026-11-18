@@ -21530,10 +21530,17 @@ order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
 
 :::unreleased
-*Amended (#3401, owner 2026-11-17):* Pocket position sits directly
-under Alignment, above Thickness's rule: it is where the pocket sits
-along the edge Position gives it, so it belongs with the placement
-rows rather than after the strip's depth.
+*Amended (#3445, owner 2026-11-18), overturning #3401's placement
+of 2026-11-17 under Alignment:* Pocket position sits in Position's
+"Each bar and Pocket" drawer, directly under the Pocket's edge row
+and its Per screen drawer. The slider depends on the edge it sits
+on, and under Alignment it stood apart from that edge. It is one
+row, not one per bar: bars have no position of their own, and the
+Pocket's position is one value for every screen. On a bar's edge
+the row stays live with its note under it, never a `?` in its
+place: the value still picks the end of the shelf the Pocket takes,
+places it in the strip under Hidden, and governs every screen that
+does not share an edge — so hiding it would hide a working control.
 :::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
