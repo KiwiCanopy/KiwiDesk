@@ -46,8 +46,7 @@ export type Channel = keyof typeof CHANNELS;
 
 /** Our own place on a channel with no public profile to link a
  * person to: the source label links here when the voice has no
- * `sourceLink`, and its `link` is optional. The app's copy is
- * `SupportLinks`. */
+ * `sourceLink`. The app's copy is `SupportLinks`. */
 const COMMUNITY: Partial<Record<Channel, string>> = {
   discord: "https://discord.gg/bYeTrJyZyS",
   kofi: "https://ko-fi.com/kiwicanopy",
@@ -58,9 +57,10 @@ const COMMUNITY: Partial<Record<Channel, string>> = {
  * testimonial puts words in someone's mouth — so the page marks it
  * `lang="en"`. `avatar` is a cdn.sanity.io URL the build downloads,
  * or `null` (a monogram is drawn). `link` points at the person, not
- * necessarily where they said it, and is `null` only on a
- * `COMMUNITY` channel. `sourceLink` is where they said it, or our
- * own page on a `COMMUNITY` channel.
+ * necessarily where they said it. `sourceLink` is where they said
+ * it, or our own page on a `COMMUNITY` channel. A voice carries at
+ * least one of the two; `link` is `null` when only the source is
+ * linked.
  */
 export interface Voice {
   name: string;
@@ -102,9 +102,7 @@ function toVoice(row: any): Voice | null {
   const sourceLink = said?.startsWith("https://")
     ? said
     : ((channel && COMMUNITY[channel]) ?? null);
-  const linkOk = link
-    ? link.startsWith("https://")
-    : !!(channel && COMMUNITY[channel]);
+  const linkOk = link ? link.startsWith("https://") : !!sourceLink;
   if (!name || !quote || !linkOk || !source) return null;
   let avatar: string | null = null;
   if (row.photo?.asset?._ref) {
