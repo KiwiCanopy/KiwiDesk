@@ -129,6 +129,9 @@ struct LayoutBoundsRoutingTests {
         // strip `layoutBounds(on:)` reserves draws nothing there.
         // It lays out one window and divides no span.
         "Tiling/TilingEngine+Maximized.swift": 1,
+        // Settings' Maximize lengths (#3460) read the frame that
+        // `maximizedBounds` fills, on the same grounds as above.
+        "App/KiwiCore+MaximizeRegion.swift": 1,
     ]
 
     @Test("Only the allowlisted files read raw display bounds")
