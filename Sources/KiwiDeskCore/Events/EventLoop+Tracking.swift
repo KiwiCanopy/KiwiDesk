@@ -42,13 +42,21 @@ extension EventLoop {
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
         // One WindowServer round trip feeds every
-        // classification below (alpha, bounds). The layer is the
-        // list read's: the public list omits a window just ordered
-        // in, and its nil tiled a raised launcher (#3443).
+        // classification below (layer, alpha, bounds).
         let server = FloatDetection.serverSnapshot(
             of: window.id
         )
-        let layer = offMain.readLayers(pid)(window.id) ?? server.layer
+        let level = readLevel(window.id)
+        // AX lists a window being ordered in before the public list
+        // does: a raised one is judged at the retrack, with its
+        // alpha and bounds read (#3443, #309).
+        guard
+            !FloatDetection.isOrderingIn(level: level, listed: server)
+        else {
+            markTransientDrop(pid: pid, id: window.id)
+            return
+        }
+        let layer = level ?? server.layer
         let detection: FloatDetectionSource
         let subrole: String
         // Detection judged a layer: where the server now reports

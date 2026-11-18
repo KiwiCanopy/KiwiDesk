@@ -142,7 +142,14 @@ editing AX code:
   takes each listed window's layer through
   `FloatDetection.layerReader`, never a public window-list read** —
   the instance of os-private-apis.md's WindowServer-read rule
-  (#2531, `ListLayerReadSeamTests`).
+  (#2531, `ListLayerReadSeamTests`). **`track` asks the window's
+  level, `EventLoop.readLevel`, before the public snapshot, and
+  takes no verdict on a raised window that snapshot does not list
+  yet** — AX lists a window being ordered in first, and its nil
+  layer, read as 0, tiled a raised launcher (#3443); the retrack
+  judges it with its alpha and bounds read (`ArrivalAdoptionTests`
+  ▸ `raisedArrivalWaits`, `ListLayerReadSeamTests` ▸
+  `trackPrefersTheLevel`).
 - **Float detection reads one plain input, `WindowFacts`, and
   every live producer builds it through `WindowFacts.read`
   (#1883)** — `track`, the float recheck and the list read, held

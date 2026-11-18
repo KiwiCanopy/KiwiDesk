@@ -2,24 +2,34 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **A raised window the public list does not show yet is judged on
-/// its level** (#3443). Zephium re-shows one reused launcher at
-/// layer 5; for a moment AX lists it while the public window list
-/// answers nothing for it, and SkyLight's level already reads 5
-/// (device, 2026-11-18). The fixture's server snapshot finds no
-/// window for these ids, so it is that moment.
+/// **A window AX lists before the public window list does is judged
+/// on its level** (#3443). Zephium re-shows one reused launcher at
+/// layer 5, and for a moment AX lists it while the public list
+/// holds no entry and SkyLight's level already reads 5 (device,
+/// 2026-11-18). The fixture's server snapshot lists none of its
+/// ids, so every arrival here is in that moment.
 extension ArrivalAdoptionTests {
-    @Test("a raised arrival floats on its level, not the list's nil")
-    func raisedArrivalFloats() {
+    /// Raised and unlisted: its alpha and bounds are unread, so the
+    /// #309 helper rule cannot judge it yet, and it tiled on the
+    /// nil read as layer 0.
+    @Test("a raised arrival the public list omits waits for a retrack")
+    func raisedArrivalWaits() {
         let (loop, box, _, listing) = makeLoop()
         listing.layers = [arrivals[0]: 5]
         loop.reconcileOffMain(pid: pid, app: ref)
-        let raised = box.created.first { $0.id == arrivals[0] }
-        let standard = box.created.first { $0.id == arrivals[1] }
-        #expect(raised?.isRaisedLayer == true)
-        #expect(raised?.isFloating == true)
-        #expect(loop.detectedFloating[arrivals[0]] == .floats(.raisedLayer))
-        // The normal-layer sibling still tiles.
-        #expect(standard?.isFloating == false)
+        #expect(box.created.map(\.id) == [arrivals[1]])
+        #expect(loop.elements[pid]?[arrivals[0]] == nil)
+        #expect(loop.transientRetried[pid]?.contains(arrivals[0]) == true)
+    }
+
+    /// Normal and unlisted: the level agrees with the reading, so
+    /// the read's verdict stands and the main actor asks nothing.
+    @Test("an unlisted normal-layer arrival keeps the read's verdict")
+    func unlistedNormalArrivalKeepsTheRead() {
+        let (loop, box, _, listing) = makeLoop()
+        for id in arrivals { listing.layers[id] = 0 }
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(box.created.map(\.id) == arrivals)
+        #expect(box.applyCalls == 0, "\(box.applyCalls) main-actor AX calls")
     }
 }

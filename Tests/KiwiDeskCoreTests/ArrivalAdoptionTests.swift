@@ -94,6 +94,7 @@ struct ArrivalAdoptionTests {
         }
         let listing = Listing()
         loop.offMain.readLayers = { _ in { listing.layers[$0] } }
+        loop.readLevel = { listing.layers[$0] }
         loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }
@@ -279,7 +280,7 @@ struct ArrivalAdoptionTests {
     }
 
     /// Detection judged the layer the list read saw; where the
-    /// server reports another at `track`, the window is judged live,
+    /// level reads another at `track`, the window is judged live,
     /// which asks the app on the main actor.
     @Test("a changed layer judges the arrival live")
     func changedLayerReadsLive() throws {
@@ -288,8 +289,8 @@ struct ArrivalAdoptionTests {
         loop.reconcileOffMain(pid: pid, app: ref)
         let delivery = box.held ?? []
         try #require(delivery.count == 1)
-        // Raised between the read and its delivery.
-        for id in arrivals { listing.layers[id] = 3 }
+        // Read with no level, delivered with one.
+        for id in arrivals { listing.layers[id] = 0 }
         box.held = nil
         let before = Self.mainCalls
         for work in delivery { work() }
