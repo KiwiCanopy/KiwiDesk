@@ -73,8 +73,9 @@ export interface Voice {
   sourceLink: string | null;
   /** The channel whose icon the page draws; `null` for `other`. */
   channel: Channel | null;
-  /** Where they said it, as shown ("Reddit · r/MacOS"). */
-  source: string;
+  /** Where they said it, as shown ("Reddit · r/MacOS"), or `null`
+   * when the voice names no platform: the card draws no source line. */
+  source: string | null;
 }
 
 /** Edge length, in pixels, of the photo the build downloads: 2x
@@ -97,13 +98,14 @@ function toVoice(row: any): Voice | null {
   const channel: Channel | null = Object.hasOwn(CHANNELS, row?.channel)
     ? row.channel
     : null;
-  const source = text(row?.source) ?? (channel && CHANNELS[channel]);
+  const source = text(row?.source) ?? (channel && CHANNELS[channel]) ?? null;
   const said = text(row?.sourceLink);
   const sourceLink = said?.startsWith("https://")
     ? said
     : ((channel && COMMUNITY[channel]) ?? null);
-  const linkOk = link ? link.startsWith("https://") : !!sourceLink;
-  if (!name || !quote || !linkOk || !source) return null;
+  // A voice links its name or its source line, never neither.
+  const linkOk = link ? link.startsWith("https://") : !!(source && sourceLink);
+  if (!name || !quote || !linkOk) return null;
   let avatar: string | null = null;
   if (row.photo?.asset?._ref) {
     try {
