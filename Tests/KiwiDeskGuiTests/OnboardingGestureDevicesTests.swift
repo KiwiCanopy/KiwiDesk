@@ -96,7 +96,7 @@ struct OnboardingGestureDevicesTests {
         #expect(focus?.spoken?.contains("left/right") == true)
     }
 
-    @Test("the seeded mouse rows, in order, each on the mouse cap")
+    @Test("the seeded mouse rows, in order, each on KiwiHub's glyph")
     func seededMouseRows() {
         LocalizationManager.shared.select("en")
         let rows = mouseRows(GestureSeeds.seeds(on: .standard))
@@ -105,10 +105,11 @@ struct OnboardingGestureDevicesTests {
             rows.compactMap { cap($0)?.caption }
                 == ["scroll", "scroll sideways", "drag", "drag"]
         )
+        // #3447: each cap is the glyph KiwiHub draws for its input.
+        let inputs: [GestureInput] = [.wheel, .wheelX, .drag, .drag]
         #expect(
-            rows.allSatisfy {
-                cap($0)?.glyph == OnboardingGestures.mouseGlyph
-            }
+            rows.compactMap { cap($0)?.glyph }
+                == inputs.map(GestureListWords.symbol)
         )
         guard case .gesture(let move, _, _) = rows[2].chord else {
             Issue.record("the move row draws no gesture cap")
@@ -129,6 +130,9 @@ struct OnboardingGestureDevicesTests {
         bound[GestureKey(.sideButtons)] = .family(.space)
         let buttons = mouseRows(bound).first { $0.id == "buttons" }
         #expect(buttons?.label == "Switch Spaces")
+        #expect(
+            cap(buttons)?.glyph == GestureListWords.symbol(.sideButtons)
+        )
         #expect(mouseRows([:]).isEmpty)
         // A family the row cannot name is not taught as focus.
         var swap = base

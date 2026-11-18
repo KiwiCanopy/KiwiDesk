@@ -261,6 +261,8 @@ struct KeyboardActionParityTests {
                     + "? app : neighbour",
                 "and so does the Float list"
             ),
+            // An add's reveal into these destinations, and the Tile
+            // list's, is `AppRuleAddRevealTests`' (#3450).
             Wiring(
                 "LayerStripEditor.swift",
                 ".focused($focusedChip, equals: name)",
