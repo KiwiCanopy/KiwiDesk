@@ -1712,8 +1712,13 @@ a.voice__src::after {
   padding-top: 0.2rem;
   overflow-wrap: anywhere;
 }
+/* A linked source wears the name's resting underline, so every
+   link in the byline reads alike, and touch, which never hovers,
+   tells it from a plain label. */
 a.voice__src {
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
   width: fit-content;
 }
 /* The flex gap already spaces the arrow, so drop the name's space. */
@@ -1722,8 +1727,7 @@ a.voice__src::after {
 }
 a.voice__src:hover {
   color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--accent);
 }
 .voice__src svg {
   flex: none;
