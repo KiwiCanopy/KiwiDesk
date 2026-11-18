@@ -1691,7 +1691,8 @@ a.voice__name:hover {
   color: var(--accent);
   text-decoration-color: var(--accent);
 }
-a.voice__name::after {
+a.voice__name::after,
+a.voice__src::after {
   content: " \2197" / "";
   font-size: 0.8em;
   color: var(--text-faint);
@@ -1714,6 +1715,10 @@ a.voice__name::after {
 a.voice__src {
   text-decoration: none;
   width: fit-content;
+}
+/* The flex gap already spaces the arrow, so drop the name's space. */
+a.voice__src::after {
+  content: "\2197" / "";
 }
 a.voice__src:hover {
   color: var(--accent);
