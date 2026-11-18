@@ -6752,16 +6752,21 @@ the row says where a connected screen is too small for it.
 
 The defaults move with it. Maximize Height's width is ¾ on Laptop
 and Portrait and 1280 pt on Widescreen, Ultrawide and Super
-Ultrawide, one constant: 1280 pt is the old value at the top of
-each wide range (½ of 2560, ⅓ of 3840, ¼ of 5120), so the largest
-screens see no change and narrower ones a wider column. A fixed
+Ultrawide, one constant: 1280 pt is what the old fractions gave on
+the common 2560, 3840 and 5120 pt screens (½, ⅓, ¼), so those see
+no change and narrower ones of each shape a wider column. A wider
+screen of a shape — a 5120 pt Ultrawide, whose ⅓ was 1707 pt —
+gets a narrower one, which the owner accepted for one column on
+every wide screen. A fixed
 length on a laptop would nearly fill it, so Laptop and Portrait
 keep a fraction, and Maximize Width keeps its fractions on every
 shape. A stored file keeps its fractions: a stored ¼ cannot be told
 from a chosen ¼, so there is no migration and no reset control,
 only a release note. A bare number keeps its meaning on the wire,
-so no `ConfigMigration` is owed; the cost is that a build before
-this one cannot read a points cell and loses the file.
+so no `ConfigMigration` is owed. The cost is that a build before
+this one cannot read a points cell and loses the file, and since a
+new profile stores the 1280 pt default unasked, that reaches an
+older Mac sharing the sync folder, not only a downgrade.
 
 The scrolling ultrawide slot stays at 0.3 (ui-designer): a slot
 sets how many windows show and keeps the peek, while a Maximize

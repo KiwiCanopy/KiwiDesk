@@ -209,6 +209,11 @@ restated `20...80` satisfies on the day it is written.
   its own. A new bound of this shape takes a Core door beside
   it, pinned like `ScrollingColumnCapTests` and
   `ScrollingColumnCapDoorTests`; the row names only the space.
+- **A Maximize share's length on a screen is Core's the same way
+  (#3460)**: a pop-up length, an overflow line and the Custom unit
+  flip read `KiwiCore.maximizeRegion(on:)`, never a `Display`
+  frame; state-and-layout.md ▸ *A Maximize length resolves* owns
+  the rule (`MaximizeLengthResolutionSeamTests`).
 - **A schematic draws ONE frame, and a fact about motion goes in
   the caption.** Never add a second mini-screen, an arrow between
   panes, or a sub-caption under one: a pair denotes two *states*

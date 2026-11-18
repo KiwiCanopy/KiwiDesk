@@ -36,24 +36,6 @@ enum MaximizeCustomShare {
     nonisolated static func percent(of share: Double) -> Int {
         Int((share * 100).rounded())
     }
-
-    /// The length `share` fills along the other axis of `axis` on a
-    /// screen of `screen`'s visible frame: the fill's own
-    /// resolution, so a readout never multiplies a share itself
-    /// (state-and-layout.md ▸ Maximize length). Nil with no screen.
-    static func points(
-        of share: MaximizeLength,
-        axis: MaximizeAxis,
-        screen: CGRect?
-    ) -> CGFloat? {
-        guard let screen else { return nil }
-        let rect = TilingEngine.maximizedBounds(
-            MaximizeShape(axis: axis, share: share),
-            screen: CGRect(origin: .zero, size: screen.size),
-            slot: .zero
-        )
-        return axis == .height ? rect.width : rect.height
-    }
 }
 
 /// The unit a Custom popover types in (#3460).
@@ -73,17 +55,21 @@ struct MaximizeCustomRequest: Identifiable, Equatable {
     let seed: MaximizeLength
     /// The axis the share sizes the other of.
     let axis: MaximizeAxis
-    /// The visible frame of this row's screen, which a unit flip
-    /// converts on; nil with no screen of that shape.
-    let screen: CGRect?
+    /// This row's screen, which a unit flip converts on; nil with
+    /// no screen of that shape.
+    let region: MaximizeRegion?
     var unit: MaximizeCustomUnit
     var number: Int
     var cancelled = false
 
-    init(stored: MaximizeLength, axis: MaximizeAxis, screen: CGRect?) {
+    init(
+        stored: MaximizeLength,
+        axis: MaximizeAxis,
+        region: MaximizeRegion?
+    ) {
         seed = stored
         self.axis = axis
-        self.screen = screen
+        self.region = region
         switch stored {
         case .fraction(let fraction):
             unit = .percent
@@ -122,41 +108,42 @@ struct MaximizeCustomRequest: Identifiable, Equatable {
     }
 
     /// Switches the field to `next`, converting the number on this
-    /// row's screen through the fill's own resolution; with no
-    /// screen the field clears.
+    /// row's screen through Core's resolution; with no screen the
+    /// field clears.
     @MainActor mutating func flip(to next: MaximizeCustomUnit) {
         guard next != unit else { return }
         defer { unit = next }
-        let fraction = MaximizeLength.fraction(Double(number) / 100)
-        guard number > 0,
-            let whole = MaximizeCustomShare.points(
-                of: .fraction(1),
-                axis: axis,
-                screen: screen
-            ),
-            whole > 0
-        else {
+        guard number > 0, let region else {
             number = 0
             return
         }
         switch next {
         case .points:
-            let points =
-                MaximizeCustomShare.points(
-                    of: fraction,
-                    axis: axis,
-                    screen: screen
-                ) ?? 0
+            // The percent as the menu stores it, so 33 is ⅓.
+            let points = region.points(
+                of: .fraction(MaximizeCustomShare.share(forPercent: number)),
+                axis: axis
+            )
             let range = MaximizeCustomShare.pointsRange
             number = min(
                 max(Int(points), range.lowerBound),
                 range.upperBound
             )
         case .percent:
-            // The inverse: what share of the screen a length is.
-            let percent = (CGFloat(number) / whole * 100).rounded()
+            guard
+                let share = region.fraction(
+                    ofPoints: CGFloat(number),
+                    axis: axis
+                )
+            else {
+                number = 0
+                return
+            }
             let range = MaximizeCustomShare.range
-            number = min(max(Int(percent), range.lowerBound), range.upperBound)
+            number = min(
+                max(MaximizeCustomShare.percent(of: share), range.lowerBound),
+                range.upperBound
+            )
         }
     }
 }
@@ -184,7 +171,7 @@ struct MaximizeCustomPopover: View {
                 ]
             )
             HStack(spacing: 8) {
-                Text(L("layout_defaults.maximize.custom.share", "Share"))
+                Text(L("layout_defaults.maximize.custom.share", "Size"))
                     .accessibilityHidden(true)
                 // Live commit: a click outside closes the popover
                 // without blurring the field first, so `number` must
@@ -203,7 +190,8 @@ struct MaximizeCustomPopover: View {
                         ? L("layout_defaults.maximize.custom.percent", "%")
                         : L("layout_defaults.maximize.custom.points", "pt"),
                     labelHidden: true,
-                    liveCommit: true
+                    liveCommit: true,
+                    emptyOutsideRange: true
                 )
                 .id(request.unit)
             }

@@ -19,6 +19,11 @@ struct MaximizeLengthArgumentTests {
         #expect(MaximizeLength.argument(.string("1100pt")) == .points(1100))
         #expect(MaximizeLength.argument(.string("800 PT")) == .points(800))
         #expect(MaximizeLength.argument(.string("100pt")) == .points(100))
+        // The table `get_settings` hands back reads as written.
+        #expect(
+            MaximizeLength.argument(.object(["points": .number(1280)]))
+                == .points(1280)
+        )
     }
 
     @Test("an out-of-range or unspelled share is refused")
@@ -26,7 +31,8 @@ struct MaximizeLengthArgumentTests {
         for value: JSONValue in [
             .number(1100), .number(2), .number(0.05), .string("99pt"),
             .string("800"), .string("pt"), .string("80%"), .bool(true),
-            .string("infpt"),
+            .string("infpt"), .object(["points": .number(50)]),
+            .object(["points": .number(800), "x": .number(1)]),
         ] {
             #expect(MaximizeLength.argument(value) == nil)
         }

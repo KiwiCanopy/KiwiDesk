@@ -5,7 +5,7 @@ import Foundation
 /// a fraction of the screen's length, or a length in points that is
 /// the same on every screen. Only
 /// `TilingEngine.maximizedBounds(_:screen:slot:)` turns it into
-/// points (state-and-layout.md ▸ Maximize length).
+/// points (state-and-layout.md ▸ A Maximize length resolves).
 ///
 /// Stored as a bare number for a fraction, the spelling every
 /// earlier build wrote, and `{"points": N}` for a length; anything
@@ -20,12 +20,12 @@ public enum MaximizeLength: Equatable, Hashable, Sendable {
     public static let fractionRange: ClosedRange<Double> = 0.1...1
 
     /// The shortest length a binding, Lua or a stored cell may name
-    /// (#3460). Settings stores 200 pt or more.
+    /// (#3460).
     public static let minPoints: CGFloat = 100
 
     /// Maximize Height's width on the wide shapes (owner,
-    /// 2026-11-18): today's value at the top of each wide range
-    /// (½ of 2560, ⅓ of 3840, ¼ of 5120).
+    /// 2026-11-18): the old fractions' width on the common 2560,
+    /// 3840 and 5120 pt screens (½, ⅓, ¼).
     public static let wideColumn = MaximizeLength.points(1280)
 
     /// The fraction, nil for a length.
@@ -51,24 +51,30 @@ public enum MaximizeLength: Equatable, Hashable, Sendable {
     }
 
     /// A binding's, Lua's or the CLI's argument (#3460): a number is
-    /// a fraction in `fractionRange`, a string ending in `pt` a
-    /// length of `minPoints` or more. Nothing guesses that a number
-    /// above 1 means points.
+    /// a fraction in `fractionRange`, a string ending in `pt` or the
+    /// `{points = N}` table `get_settings` returns a length of
+    /// `minPoints` or more. Nothing guesses that a number above 1
+    /// means points.
     public static func argument(_ value: JSONValue) -> MaximizeLength? {
         if let number = value.numberValue {
             return fractionRange.contains(number) ? .fraction(number) : nil
+        }
+        if case .object(let table) = value {
+            guard table.count == 1, let points = table["points"]?.numberValue
+            else { return nil }
+            return length(points)
         }
         guard var text = value.stringValue?.lowercased(),
             text.hasSuffix("pt")
         else { return nil }
         text.removeLast(2)
-        guard
-            let number = Double(
-                text.trimmingCharacters(in: .whitespaces)
-            ),
-            number.isFinite, CGFloat(number) >= minPoints
-        else { return nil }
-        return .points(CGFloat(number))
+        return Double(text.trimmingCharacters(in: .whitespaces))
+            .flatMap(length)
+    }
+
+    private static func length(_ number: Double) -> MaximizeLength? {
+        number.isFinite && CGFloat(number) >= minPoints
+            ? .points(CGFloat(number)) : nil
     }
 
     /// The refusal every setter of a share answers a bad argument

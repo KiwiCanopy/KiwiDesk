@@ -11,9 +11,9 @@ struct MaximizeSharePopUp: View {
     /// The axis this share sizes the other of: a Maximize Height's
     /// share is a width.
     let axis: MaximizeAxis
-    /// The visible frame of a screen of this row's shape, which the
-    /// menu's lengths and the unit flip read; nil with none.
-    let screen: CGRect?
+    /// A screen of this row's shape, which the menu's lengths and
+    /// the unit flip read; nil with none.
+    let region: MaximizeRegion?
     /// The pop-up's spoken name.
     let label: String
     /// The Custom popover's column name.
@@ -37,7 +37,7 @@ struct MaximizeSharePopUp: View {
                     custom = MaximizeCustomRequest(
                         stored: value,
                         axis: axis,
-                        screen: screen
+                        region: region
                     )
                 case .share(let share):
                     value = share
@@ -81,13 +81,8 @@ struct MaximizeSharePopUp: View {
     /// A fraction's item: its glyph and, with a screen, the length
     /// it fills there, through the fill's own resolution.
     private func presetTitle(_ glyph: String, _ fraction: Double) -> String {
-        guard
-            let length = MaximizeCustomShare.points(
-                of: .fraction(fraction),
-                axis: axis,
-                screen: screen
-            )
-        else { return glyph }
+        guard let region else { return glyph }
+        let length = region.points(of: .fraction(fraction), axis: axis)
         return "\(glyph)    \(SettingsValueReadout.points(length))"
     }
 

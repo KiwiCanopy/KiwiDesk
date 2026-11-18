@@ -875,8 +875,7 @@ clears it
 :::
 
 :::unreleased
-Every share argument also takes a length in points, `1100pt`,
-from 100 pt; a number above 1 is refused
+Every share argument also takes a length in points, `1100pt`
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)).
 :::
 

@@ -44,7 +44,7 @@ extension SpaceOverrideRows {
                 MaximizeSharePopUp(
                     value: overrideValue(value, global: followed),
                     axis: axis,
-                    screen: spaceScreen?.visibleFrame,
+                    region: model.core.maximizeRegion(on: spaceScreen?.id),
                     label: label,
                     column: label
                 )

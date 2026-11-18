@@ -77,15 +77,18 @@ struct MaximizeShareMenuTests {
     /// row's screen, or clears with none (#3460).
     @Test("Custom's unit flip converts on the screen, or clears")
     func customUnitFlip() {
-        let screen = CGRect(x: 0, y: 0, width: 3200, height: 900)
+        let region = MaximizeRegion(
+            bounds: CGRect(x: 0, y: 25, width: 3200, height: 900)
+        )
         var request = MaximizeCustomRequest(
             stored: .fraction(1.0 / 3),
             axis: .height,
-            screen: screen
+            region: region
         )
+        // 33 % is the ⅓ the menu shows as 1067 pt.
         request.flip(to: .points)
-        #expect(request.number == 1056)
-        #expect(request.committed == .points(1056))
+        #expect(request.number == 1067)
+        #expect(request.committed == .points(1067))
         request.flip(to: .percent)
         #expect(request.number == 33)
         // 33 % is ⅓, which is what was stored: nothing to write.
@@ -94,7 +97,7 @@ struct MaximizeShareMenuTests {
         var blind = MaximizeCustomRequest(
             stored: .fraction(0.5),
             axis: .height,
-            screen: nil
+            region: nil
         )
         blind.flip(to: .points)
         #expect(blind.number == 0)
@@ -116,6 +119,8 @@ struct MaximizeShareMenuTests {
             )
         )
         #expect(source.contains("case.custom:custom=MaximizeCustomRequest("))
+        // The lengths are Core's: the pop-up asks the region.
+        #expect(source.contains("region.points(of:.fraction(fraction)"))
         #expect(
             source.contains(".popover(item:customBinding)")
         )

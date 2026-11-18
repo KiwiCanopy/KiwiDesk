@@ -7000,20 +7000,20 @@ given.
 | Shape | Screen | `"height"` | `"width"` |
 |---|---|---|---|
 | `"laptop"` | under 1900 pt wide | 0.75 | 0.667 |
-| `"widescreen"` | every other screen | 0.5 | 0.5 |
-| `"ultrawide"` | 3000 pt wide or more, or 2.1:1 | 0.333 | 0.5 |
-| `"super_ultrawide"` | 3:1 or wider | 0.25 | 0.5 |
+| `"widescreen"` | every other screen | `"1280pt"` | 0.5 |
+| `"ultrawide"` | 3000 pt wide or more, or 2.1:1 | `"1280pt"` | 0.5 |
+| `"super_ultrawide"` | 3:1 or wider | `"1280pt"` | 0.5 |
 | `"portrait"` | taller than wide | 0.75 | 0.5 |
 
 The defaults are the two right-hand columns.
 
 :::unreleased
 The share may also be a length, `"1280pt"`, as
-[`toggle_maximized`](#toggle_maximized) takes. A new profile's
-`"height"` column is 0.75 on `"laptop"` and `"portrait"` and
-`"1280pt"` on `"widescreen"`, `"ultrawide"` and
-`"super_ultrawide"`; a profile already saved keeps the values it
-stored.
+[`toggle_maximized`](#toggle_maximized) takes;
+[`get_settings`](#get_settings) returns one as `{points = 1280}`,
+which every share setter also takes. The `"1280pt"` cells are new:
+an earlier release stored 0.5, 0.333 and 0.25 there, and a profile
+it saved keeps them.
 :::
 
 **Example:**

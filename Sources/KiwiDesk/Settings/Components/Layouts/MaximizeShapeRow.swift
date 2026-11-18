@@ -26,8 +26,9 @@ struct MaximizeShapeRow: View {
                     // The size Displays calls "Looks like", which a
                     // length is measured against (#3460).
                     Text(
-                        screens.map(MaximizeShapeText.screenLine)
-                            .joined(separator: ", ")
+                        LocalizedList.join(
+                            screens.map(MaximizeShapeText.screenLine)
+                        )
                     )
                     .font(.callout)
                     .foregroundStyle(SettingsTheme.ink3)
@@ -82,7 +83,7 @@ struct MaximizeShapeRow: View {
         MaximizeSharePopUp(
             value: value,
             axis: axis,
-            screen: screens.first?.visibleFrame,
+            region: model.core.maximizeRegion(on: screens.first?.id),
             label: label(key),
             column: MaximizeCard.control(key)?.text ?? ""
         )
@@ -94,12 +95,15 @@ struct MaximizeShapeRow: View {
     private var overflowLines: [String] {
         let settings = model.config.settings.maximize
         return MaximizeAxis.allCases.flatMap { axis in
-            screens.compactMap {
-                MaximizeShapeText.overflow(
-                    settings.share(for: axis, on: shape),
-                    axis: axis,
-                    on: $0
-                )
+            screens.compactMap { display in
+                model.core.maximizeRegion(on: display.id).flatMap {
+                    MaximizeShapeText.overflow(
+                        settings.share(for: axis, on: shape),
+                        axis: axis,
+                        on: display,
+                        region: $0
+                    )
+                }
             }
         }
     }
@@ -142,13 +146,13 @@ enum MaximizeShapeText {
     /// A connected screen as the row lists it: its name and the size
     /// Displays shows as "Looks like" (#3460).
     static func screenLine(_ display: Display) -> String {
-        "\(display.name) · "
-            + L(
-                "diff.value.min_size",
-                "%1$@ × %2$@ pt",
-                SettingsValueReadout.trimmed(display.frame.width),
-                SettingsValueReadout.trimmed(display.frame.height)
-            )
+        L(
+            "layout_defaults.maximize.screen_line",
+            "%1$@ · %2$@ × %3$@ pt",
+            display.name,
+            SettingsValueReadout.trimmed(display.frame.width),
+            SettingsValueReadout.trimmed(display.frame.height)
+        )
     }
 
     /// The line saying a stored length is longer than `display`'s
@@ -157,16 +161,12 @@ enum MaximizeShapeText {
     static func overflow(
         _ share: MaximizeLength,
         axis: MaximizeAxis,
-        on display: Display
+        on display: Display,
+        region: MaximizeRegion
     ) -> String? {
-        guard let points = share.points,
-            let drawn = MaximizeCustomShare.points(
-                of: share,
-                axis: axis,
-                screen: display.visibleFrame
-            ),
-            drawn < points.rounded()
-        else { return nil }
+        guard let points = share.points else { return nil }
+        let drawn = region.points(of: share, axis: axis)
+        guard drawn < points.rounded() else { return nil }
         let length = SettingsValueReadout.points(points)
         switch axis {
         case .height:
