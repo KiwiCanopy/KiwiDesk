@@ -117,6 +117,8 @@ extension KiwiShelfCard {
             )
         case .iconSource:
             iconSourceRow
+        case .handleThickness:
+            handleThicknessRow
         case .revealStyle:
             revealStyleRow
         // Drawn in the Show drawer (`showRow`).

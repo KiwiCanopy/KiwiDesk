@@ -80,7 +80,7 @@ struct ShelfHandleWiringTests {
         )
         let spec = { core.shelves.handles.handleForTesting(key)?.view.spec }
         #expect(spec()?.fill == nil)
-        #expect(spec()?.frame.height == ShelfHandleSpec.depth)
+        #expect(spec()?.frame.height == ShelfHandleSpec.depth(of: KiwiShelf()))
         // The revealer's fill reaches the handle it runs along.
         let start = Date(timeIntervalSince1970: 1_000)
         let fill = ShelfHandleSpec.Fill(

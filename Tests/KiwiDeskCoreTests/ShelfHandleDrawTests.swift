@@ -48,7 +48,12 @@ struct ShelfHandleDrawTests {
             ? CGRect(x: 100, y: 0, width: 400, height: 30)
             : CGRect(x: 0, y: 100, width: 30, height: 400)
         let spec = ShelfHandleSpec(
-            frame: ShelfHandleSpec.frame(along: run, edge: edge, side: 0),
+            frame: ShelfHandleSpec.frame(
+                along: run,
+                edge: edge,
+                side: 0,
+                depth: 3
+            ),
             edge: edge,
             shown: false,
             reveal: .slide
@@ -101,7 +106,7 @@ struct ShelfHandleDrawTests {
     func tabBrightens() throws {
         let size = CGSize(
             width: 40,
-            height: PocketHandleView.restDepth(holds: false)
+            height: PocketHandleView.restDepth(holds: false, of: KiwiShelf())
         )
         // The tab's core row, mid-tab, in a draw `hovered` or not, of
         // an empty pocket unless `holds` (#3384).
@@ -170,7 +175,7 @@ struct ShelfHandleDrawTests {
     func tabFillLandsOnTheCore(edge: AppBarEdge) throws {
         pinRevealLength()
         let along: CGFloat = 40
-        let across = PocketHandleView.restDepth(holds: false)
+        let across = PocketHandleView.restDepth(holds: false, of: KiwiShelf())
         let size =
             edge.isHorizontal
             ? CGSize(width: along, height: across)

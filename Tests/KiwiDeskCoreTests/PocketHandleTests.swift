@@ -94,7 +94,11 @@ struct PocketHandleTests {
             ? shown.frame.width : shown.frame.height
         // It reaches the edge across the outer margin and draws
         // past it, as the bars' handles sit.
-        #expect(depth == PocketHandleView.restDepth(holds: false) + 8)
+        #expect(
+            depth
+                == PocketHandleView.restDepth(holds: false, of: KiwiShelf())
+                + 8
+        )
     }
 
     @Test("its approach opening raises the pocket, and closing sinks it")
@@ -127,7 +131,8 @@ struct PocketHandleTests {
             ? shown.frame.width : shown.frame.height
         #expect(
             depth
-                == 8 + PocketHandleView.tabDepth + PocketPlateView.lift
+                == 8 + PocketHandleView.tabDepth(of: KiwiShelf())
+                + PocketPlateView.lift
                 + KiwiCore.pocketRiseSide(thickness: shelf.thickness)
         )
         // A level above the shelf, and so above the drag's ghost.

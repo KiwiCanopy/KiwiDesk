@@ -20,6 +20,8 @@ extension SettingsRevertRegister {
         .kiwishelf(.borderWidth): .leaf(\.settings.kiwishelf.borderWidth),
         .kiwishelf(.highlightWidth):
             .leaf(\.settings.kiwishelf.highlightWidth),
+        .kiwishelf(.handleThickness):
+            .leaf(\.settings.kiwishelf.handleThickness),
         .kiwishelf(.itemGap): .leaf(\.settings.kiwishelf.itemGap),
         .kiwishelf(.glyphSizeAuto): .leaf(\.settings.kiwishelf.glyphSize),
         .kiwishelf(.glyphSize): .leaf(\.settings.kiwishelf.glyphSize),
