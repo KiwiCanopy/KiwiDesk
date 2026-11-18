@@ -57,6 +57,29 @@ extension KiwiShelfCard {
         if let reason {
             caption(reason)
         }
+        if animationsOff { animationsOffNote }
+    }
+
+    /// KiwiDesk's own Off (#3238), which greys both Durations rows,
+    /// the stored ticks kept (#3471).
+    private var animationsOff: Bool { model.appWide.animationReduceMotion }
+
+    /// Why the Durations rows grey, outside the grey, pointing at
+    /// the speed preset that owns the fix (#3471).
+    private var animationsOffNote: some View {
+        let speed = SettingsCatalog.colors.animationSpeed
+        return CrossReferenceRow(
+            prose: BarsGateHelp.animationsOffProse,
+            linkTitle: L(
+                "kiwishelf.durations.animations_off.link",
+                "%1$@ ▸ %2$@",
+                SettingsDestination.looks.title,
+                speed.text
+            ),
+            destination: .looks,
+            row: speed
+        )
+        .font(.caption)
     }
 
     /// Whether no bar hides, so the reveal's switch takes no input.
@@ -82,7 +105,8 @@ extension KiwiShelfCard {
 
     /// The reveal's and the expand's switches (owner rulings
     /// 2026-10-21 and 2026-11-12, #3236), in the Durations drawer:
-    /// the reveal's greys with the picker. Both lengths are Lua-only.
+    /// the reveal's greys with the picker, and both grey under
+    /// KiwiDesk's Off (#3471). Both lengths are Lua-only.
     @ViewBuilder func durationRow(_ key: SettingKey) -> some View {
         let animations = $model.config.settings.animations
         let children = SettingsCatalog.bars.kiwishelfDurations.children
@@ -96,7 +120,7 @@ extension KiwiShelfCard {
                     "Off, a hidden bar appears and leaves at once."
                 )
             )
-            .modifier(GreyOut(active: revealInert))
+            .modifier(GreyOut(active: revealInert || animationsOff))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .onReveal
@@ -111,6 +135,7 @@ extension KiwiShelfCard {
                         + "switch Spaces."
                 )
             )
+            .modifier(GreyOut(active: animationsOff))
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfDurations.children
                     .onExpand

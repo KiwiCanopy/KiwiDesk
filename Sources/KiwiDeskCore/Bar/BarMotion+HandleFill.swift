@@ -4,8 +4,9 @@ import AppKit
 /// from the point nearest the pointer to both ends, which reach
 /// the core's ends together as the bar opens. It is a change of
 /// lightness in place, so it plays under Reduce Motion as the
-/// reveal does (ruling 5); KiwiDesk's Off drops it with the reveal
-/// (#3238), read through `revealLength`.
+/// reveal does (ruling 5). With no reveal to play — KiwiDesk's Off
+/// or the Reveal off, read through `revealLength` — it steps to
+/// full on approach instead of sweeping (#3471).
 extension BarMotion {
     /// The fill's start in `bounds`, a layer's unflipped space: no
     /// length, at `origin`'s share of the core from its leading end
@@ -36,8 +37,8 @@ extension BarMotion {
 
     /// Runs `fill` on `layer` inside `bounds`, from where a running
     /// fill stands — a rest on the handle hurries it on (ruling 2) —
-    /// to the whole core over its `length`; nil drops it, and so
-    /// does a reveal length of 0.
+    /// to the whole core over its `length`; nil drops it, and a
+    /// reveal length of 0 shows it whole at once (#3471).
     @MainActor static func playHandleFill(
         _ layer: CALayer,
         in bounds: CGRect,
@@ -50,12 +51,16 @@ extension BarMotion {
         CATransaction.setDisableActions(true)
         defer { CATransaction.commit() }
         layer.removeAnimation(forKey: handleFillKey)
-        guard let fill, revealLength > 0 else {
+        guard let fill else {
             layer.isHidden = true
             layer.frame = bounds
             return
         }
         layer.isHidden = false
+        guard revealLength > 0 else {
+            layer.frame = bounds
+            return
+        }
         let start =
             from
             ?? handleFillStart(

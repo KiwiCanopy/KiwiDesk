@@ -1148,6 +1148,8 @@
   "kiwishelf.count.after.ax": "More after: %1$d",
   "kiwishelf.count.before.ax": "More before: %1$d",
   "kiwishelf.durations": "Durations",
+  "kiwishelf.durations.animations_off": "Animations are off, so a hidden bar appears at once and the bars land in place. Set the speed in %1$@.",
+  "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "The bars and the Pocket, or their screens, sit on different edges right now; choosing here puts them all on one edge on every screen.",
   "kiwishelf.edge.each": "Each bar and Pocket",

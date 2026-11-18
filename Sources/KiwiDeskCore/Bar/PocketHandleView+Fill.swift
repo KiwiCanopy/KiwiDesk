@@ -3,7 +3,7 @@ import AppKit
 /// The tab's progress fill (#3368 amended): where the pocket's rise
 /// does not play — Reduce Motion — the approach's countdown runs on
 /// the tab's core as a bar handle's does, through the one
-/// `BarMotion.playHandleFill`, which KiwiDesk's Off drops.
+/// `BarMotion.playHandleFill`, which steps to full under Off.
 extension PocketHandleView {
     /// The turn that takes the bottom-edge layout onto `edge` in the
     /// view's own space: what `draw` concatenates and the fill's clip

@@ -1148,6 +1148,8 @@
   "kiwishelf.count.after.ax": "后面还有：%1$d",
   "kiwishelf.count.before.ax": "前面还有：%1$d",
   "kiwishelf.durations": "时长",
+  "kiwishelf.durations.animations_off": "动画已关闭，因此隐藏的栏会立即出现，各栏会立即就位。请在 %1$@ 中设置速度。",
+  "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "目前各栏和 Pocket，或它们在不同显示器上，位于不同边缘；在此处选择会让它们在每台显示器上都位于同一边缘。",
   "kiwishelf.edge.each": "每个栏和 Pocket",

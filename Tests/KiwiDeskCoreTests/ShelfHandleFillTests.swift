@@ -160,18 +160,22 @@ struct ShelfHandleFillTests {
         )
     }
 
-    @Test("KiwiDesk's Off drops the fill with the reveal")
-    func offDropsTheFill() {
+    @Test("With no reveal to play the fill steps to full (#3471)")
+    func offStepsToFull() {
         let before = BarMotion.revealLength
         BarMotion.revealLength = 0
         defer { BarMotion.revealLength = before }
         let spec = spec(running)
         let view = view(spec)
         view.render(spec, animated: true)
-        #expect(view.fillLayer.isHidden)
+        #expect(!view.fillLayer.isHidden)
+        #expect(view.fillLayer.frame == view.core.layer?.bounds)
         #expect(
             view.fillLayer.animation(forKey: BarMotion.handleFillKey) == nil
         )
+        // Leaving still drops it.
+        view.render(self.spec(), animated: true)
+        #expect(view.fillLayer.isHidden)
     }
 
     @Test("A repeated spec leaves a running fill alone")

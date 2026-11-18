@@ -1148,6 +1148,8 @@
   "kiwishelf.count.after.ax": "Altri dopo: %1$d",
   "kiwishelf.count.before.ax": "Altri prima: %1$d",
   "kiwishelf.durations": "Durate",
+  "kiwishelf.durations.animations_off": "Le animazioni sono disattivate: una barra nascosta compare all'istante e le barre vanno al loro posto. Imposta la velocità in %1$@.",
+  "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "Le barre e la Pocket, o i loro schermi, sono ora su bordi diversi; scegliere qui le mette tutte sullo stesso bordo su ogni schermo.",
   "kiwishelf.edge.each": "Ogni barra e la Pocket",

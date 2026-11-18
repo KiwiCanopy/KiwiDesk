@@ -75,7 +75,13 @@ struct BarsGateWiringTests {
                 "ifreason==nil,gates.growPlaysAsUnfold{"
                     + "note(BarsGateHelp.growPlaysAsUnfold)",
                 ".inertReason(for:.colours(.animationsOnReveal))",
-                "GreyOut(active:revealInert)",
+                "GreyOut(active:revealInert||animationsOff)",
+                // Both Durations rows grey under KiwiDesk's Off,
+                // their reason outside the grey (#3471).
+                "GreyOut(active:animationsOff)",
+                "ifanimationsOff{animationsOffNote}",
+                "model.appWide.animationReduceMotion",
+                "prose:BarsGateHelp.animationsOffProse",
             ],
         ]
         for (path, needles) in consults {
@@ -180,6 +186,18 @@ struct BarsGateWiringTests {
         #expect(
             BarsGates.resolved
                 .isDisjoint(with: BarsGates.resolvedElsewhere)
+        )
+    }
+
+    /// The Durations rows' Off reason places the speed link
+    /// (#3471; `CrossReferenceRowSlotTests` lists the row).
+    @MainActor
+    @Test("the Durations Off reason places its link")
+    func animationsOffProsePlacesItsLink() {
+        #expect(
+            BarsGateHelp.animationsOffProse.contains(
+                CrossReferenceRow.linkSlot
+            )
         )
     }
 
