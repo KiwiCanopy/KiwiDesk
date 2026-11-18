@@ -16,9 +16,15 @@ struct ShortcutRow: Identifiable {
     /// Draws the pocket mark — the Pocket rows (#2446, #2675).
     var pocketMark = false
     var monospaced: Bool = false
-    /// Trailing accessory glyph for non-default actions (#334).
+    /// Trailing disclosure mark for a row that opens more keys — a
+    /// key sequence's branch (#3162). Not a badge for an action: a
+    /// row says its action in its title (#3448, #94).
     var accessoryIcon: String? = nil
     var accessoryHelp: String = ""
+    /// The app's name on every row built from an app binding — a
+    /// launch key or a Pocket key — which it sorts and finds its App
+    /// Font glyph by (#3448); nil on other rows, which use `label`.
+    var appName: String? = nil
     /// Whether the action cannot run for a reason the user's
     /// HARDWARE owns (a Desktop whose screen is detached). The
     /// panel DIMS such a row rather than dropping it — the combo
