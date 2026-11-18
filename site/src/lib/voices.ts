@@ -30,7 +30,7 @@ const API_VERSION = "2025-02-19";
 
 const QUERY = `*[_type == "kiwideskVoice"]
   | order(order asc, _createdAt asc)
-  { name, role, quote, link, channel, source, photo }`;
+  { name, role, quote, link, sourceLink, channel, source, photo }`;
 
 /** Where a voice was said: the Studio's `channel` dropdown, and
  * the label the page shows when the document carries no `source`
@@ -39,15 +39,28 @@ const CHANNELS = {
   github: "GitHub",
   linkedin: "LinkedIn",
   reddit: "Reddit",
+  discord: "Discord",
+  kofi: "Ko-fi",
 } as const;
 export type Channel = keyof typeof CHANNELS;
+
+/** Our own place on a channel with no public profile to link a
+ * person to: the source label links here when the voice has no
+ * `sourceLink`, and its `link` is optional. The app's copy is
+ * `SupportLinks`. */
+const COMMUNITY: Partial<Record<Channel, string>> = {
+  discord: "https://discord.gg/bYeTrJyZyS",
+  kofi: "https://ko-fi.com/kiwicanopy",
+};
 
 /**
  * One voice. `quote` stays English on every locale — a translated
  * testimonial puts words in someone's mouth — so the page marks it
  * `lang="en"`. `avatar` is a cdn.sanity.io URL the build downloads,
  * or `null` (a monogram is drawn). `link` points at the person, not
- * necessarily where they said it.
+ * necessarily where they said it, and is `null` only on a
+ * `COMMUNITY` channel. `sourceLink` is where they said it, or our
+ * own page on a `COMMUNITY` channel.
  */
 export interface Voice {
   name: string;
@@ -55,7 +68,9 @@ export interface Voice {
   role: string | null;
   quote: string;
   avatar: string | null;
-  link: string;
+  link: string | null;
+  /** Where the source label links, or `null` (plain text). */
+  sourceLink: string | null;
   /** The channel whose icon the page draws; `null` for `other`. */
   channel: Channel | null;
   /** Where they said it, as shown ("Reddit · r/MacOS"). */
@@ -83,9 +98,14 @@ function toVoice(row: any): Voice | null {
     ? row.channel
     : null;
   const source = text(row?.source) ?? (channel && CHANNELS[channel]);
-  if (!name || !quote || !link?.startsWith("https://") || !source) {
-    return null;
-  }
+  const said = text(row?.sourceLink);
+  const sourceLink = said?.startsWith("https://")
+    ? said
+    : ((channel && COMMUNITY[channel]) ?? null);
+  const linkOk = link
+    ? link.startsWith("https://")
+    : !!(channel && COMMUNITY[channel]);
+  if (!name || !quote || !linkOk || !source) return null;
   let avatar: string | null = null;
   if (row.photo?.asset?._ref) {
     try {
@@ -105,6 +125,7 @@ function toVoice(row: any): Voice | null {
     quote,
     avatar,
     link,
+    sourceLink,
     channel,
     source,
   };

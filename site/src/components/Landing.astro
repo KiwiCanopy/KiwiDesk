@@ -944,18 +944,33 @@ const jsonLd = [
                     </span>
                   )}
                   <span class="voice__meta">
-                    <a class="voice__name" href={v.link}
-                      target="_blank" rel="noopener">{v.name}</a>
+                    {v.link ? (
+                      <a class="voice__name" href={v.link}
+                        target="_blank" rel="noopener">{v.name}</a>
+                    ) : (
+                      <span class="voice__name">{v.name}</span>
+                    )}
                     {v.role && (
                       <span class="voice__role" lang="en">{v.role}</span>
                     )}
-                    <span class="voice__src">
-                      {v.channel && (
-                        <Icon name={`simple-icons:${v.channel}`}
-                          width={12} height={12} aria-hidden="true" />
-                      )}
-                      {v.source}
-                    </span>
+                    {v.sourceLink ? (
+                      <a class="voice__src" href={v.sourceLink}
+                        target="_blank" rel="noopener">
+                        {v.channel && (
+                          <Icon name={`simple-icons:${v.channel}`}
+                            width={12} height={12} aria-hidden="true" />
+                        )}
+                        {v.source}
+                      </a>
+                    ) : (
+                      <span class="voice__src">
+                        {v.channel && (
+                          <Icon name={`simple-icons:${v.channel}`}
+                            width={12} height={12} aria-hidden="true" />
+                        )}
+                        {v.source}
+                      </span>
+                    )}
                   </span>
                 </figcaption>
               </figure>
