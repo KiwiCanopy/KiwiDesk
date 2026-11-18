@@ -209,6 +209,6 @@ extension KiwiCore {
             ? state.pocketHomeDisplay
             : state.stickyRenderSpace(of: window)
                 .flatMap { state.workspaces.display(of: $0) }
-        return display.flatMap { NativeSpaces.displayUUID(for: $0) }
+        return display.flatMap { desktopMemory.readDisplayUUID($0) }
     }
 }

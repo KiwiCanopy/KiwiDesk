@@ -24,7 +24,7 @@ extension KiwiCore {
         guard !desktopMemory.shownSpaces.isEmpty else { return .shown(nil) }
         let uuid =
             state.workspaces.display(of: space)
-            .flatMap { NativeSpaces.displayUUID(for: $0) } ?? ""
+            .flatMap { desktopMemory.readDisplayUUID($0) } ?? ""
         guard let native = shownDesktop(onScreen: uuid) else {
             return .none
         }

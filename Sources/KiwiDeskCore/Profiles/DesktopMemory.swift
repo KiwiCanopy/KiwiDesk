@@ -191,6 +191,18 @@ final class DesktopMemory {
     /// to true by `makeTestCore`.
     var liveSpaceIsUser: (String) -> Bool = NativeSpaces.liveSpaceIsUser
 
+    /// A display's SkyLight UUID — Core's one read of the live
+    /// CoreGraphics lookup, which `makeTestCore` memoizes per
+    /// process (#3442).
+    var readDisplayUUID: @MainActor (DisplayID) -> String? =
+        NativeSpaces.displayUUID(for:)
+
+    /// Whether the active Space is a user Desktop — a full
+    /// WindowServer Space list per read, so `makeTestCore` answers
+    /// true unless a suite states a topology override (#3442).
+    var readActiveSpaceIsUser: @MainActor () -> Bool =
+        NativeSpaces.activeSpaceIsUser
+
     /// Core's one Desktop reading — `stampedDesktopSnapshot`'s, whose
     /// filed verdicts hang on it, and every query's. `makeTestCore`
     /// pins it to no reading unless a suite states a topology

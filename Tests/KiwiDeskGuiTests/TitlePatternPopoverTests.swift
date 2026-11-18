@@ -11,7 +11,8 @@ import Testing
 /// dismissing it would otherwise read as Add.
 ///
 /// Main-actor spend: one hosted popover body in an offscreen window
-/// per test and a few short run-loop spins.
+/// per test, run-loop spins until each awaited state, and a fixed
+/// 0.15 s drain under each negative.
 @Suite("Title popover (#3373)", .serialized)
 @MainActor
 struct TitlePatternPopoverTests {
@@ -42,10 +43,12 @@ struct TitlePatternPopoverTests {
         )
         window.contentView = NSHostingView(rootView: root)
         window.contentView?.layoutSubtreeIfNeeded()
-        spin()
+        spin { Self.textField(in: window.contentView) != nil }
         let field = try #require(Self.textField(in: window.contentView))
         #expect(window.makeFirstResponder(field))
-        spin()
+        spin {
+            (window.firstResponder as? NSTextView)?.isFieldEditor == true
+        }
         return window
     }
 
@@ -60,7 +63,22 @@ struct TitlePatternPopoverTests {
         return nil
     }
 
-    private func spin() {
+    /// The one hang guard: a spin exits the moment its state holds,
+    /// so only a genuine hang reaches it (tests.md ▸ Async tests).
+    private static let hangGuard: TimeInterval = 30
+
+    /// Runs the main run loop until `done` holds; the deadline
+    /// only bounds a hang (tests.md ▸ await the handle, #3442).
+    private func spin(until done: () -> Bool) {
+        let deadline = Date().addingTimeInterval(Self.hangGuard)
+        while !done(), Date() < deadline {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.01))
+        }
+    }
+
+    /// A negative's gap: nothing is awaited, so the run loop runs a
+    /// fixed beat for a late effect to land in.
+    private func drain() {
         RunLoop.main.run(until: Date().addingTimeInterval(0.15))
     }
 
@@ -89,7 +107,7 @@ struct TitlePatternPopoverTests {
         )
         defer { window.orderOut(nil) }
         (window.firstResponder as? NSTextView)?.insertNewline(nil)
-        spin()
+        spin { !added.patterns.isEmpty }
         #expect(added.patterns == ["Work"])
     }
 
@@ -104,7 +122,7 @@ struct TitlePatternPopoverTests {
         )
         defer { window.orderOut(nil) }
         (window.firstResponder as? NSTextView)?.insertNewline(nil)
-        spin()
+        drain()
         #expect(added.patterns.isEmpty)
     }
 
@@ -115,7 +133,7 @@ struct TitlePatternPopoverTests {
         let window = try hosted(model, seed: "Work", into: added)
         defer { window.orderOut(nil) }
         model.commitFocusedField()
-        spin()
+        drain()
         #expect(added.patterns.isEmpty)
     }
 
@@ -126,7 +144,7 @@ struct TitlePatternPopoverTests {
         defer { window.orderOut(nil) }
         #expect(window.firstResponder is NSTextView)
         window.makeFirstResponder(nil)
-        spin()
+        drain()
         #expect(!(window.firstResponder is NSTextView))
         #expect(added.patterns.isEmpty)
     }

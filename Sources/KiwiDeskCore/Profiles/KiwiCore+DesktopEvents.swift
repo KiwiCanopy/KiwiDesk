@@ -108,7 +108,7 @@ extension KiwiCore {
             PositionalDisplays
             .ordered(displays, mainID: mainID)
             .firstIndex {
-                NativeSpaces.displayUUID(for: $0.id) == uuid
+                desktopMemory.readDisplayUUID($0.id) == uuid
             }
             .map { $0 + 1 }
     }

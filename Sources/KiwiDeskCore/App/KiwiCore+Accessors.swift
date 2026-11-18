@@ -131,13 +131,13 @@ extension KiwiCore {
     }
 
     /// Every attached display by the SkyLight UUID a topology
-    /// reading names it with, through `NativeSpaces
-    /// .displayUUID(for:)` — the seam a topology fixture pins.
+    /// reading names it with, through
+    /// `DesktopMemory.readDisplayUUID` (#3442).
     /// A display the UUID symbol cannot name is absent.
     func displaysByUUID() -> [String: Display] {
         var out: [String: Display] = [:]
         for display in state.workspaces.allDisplays {
-            guard let uuid = NativeSpaces.displayUUID(for: display.id)
+            guard let uuid = desktopMemory.readDisplayUUID(display.id)
             else { continue }
             out[uuid] = display
         }

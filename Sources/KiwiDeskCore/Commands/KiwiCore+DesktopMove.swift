@@ -237,7 +237,7 @@ extension KiwiCore {
     ///
     /// The display is resolved by matching KiwiDesk's own
     /// displays against the target's UUID through
-    /// `NativeSpaces.displayUUID(for:)` — the same seam the
+    /// `DesktopMemory.readDisplayUUID` — the same seam the
     /// Desktop verbs already name a screen by — so an
     /// unresolvable display simply stands the re-home down.
     private func rehomeAcrossScreens(
