@@ -10,10 +10,12 @@ extension KiwiCore {
     /// reads the scroll's Natural scrolling. A config load passes
     /// the bases it read; a profile apply passes nil and keeps the
     /// bases in hand, which under a Lua-owned config is what
-    /// `init.lua`'s verbs declared. A scroll setting alone, which
+    /// `init.lua`'s verbs declared; `shortcutBase` likewise, nil
+    /// keeping the one in hand. A scroll setting alone, which
     /// moves no binding, takes `applyScrollGestures`.
     func applyGestures(
         base: GestureMap? = nil,
+        shortcutBase: ShortcutBase? = nil,
         profile: GestureMap?,
         scrollBase: ScrollGestureBase? = nil,
         scrollProfile: ScrollGestureOverride?
@@ -21,7 +23,8 @@ extension KiwiCore {
         let gestures = mouse.gestures
         gestures.adopt(
             base: base ?? gestures.base,
-            profileOverride: profile
+            profileOverride: profile,
+            shortcutBase: shortcutBase ?? gestures.shortcutBase
         )
         mouse.pointer.configure(grab: Self.grabSettings(gestures.resolved))
         mouse.pointer.configure(

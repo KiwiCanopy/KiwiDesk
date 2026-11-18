@@ -15298,6 +15298,28 @@ card (gui.md ▸ Grey, don't hide). Clearing the key while rows are
 on `✦` moves nothing back silently: the rows dim in place, and
 while the base is `✦` the switch stays live as the way back.
 
+:::unreleased
+*Amended (#3444, owner 2026-11-18):* the switch moves the mouse and
+trackpad gestures with the same mapping, `⌃⌥` drag → `✦` drag,
+`⌃⌥⇧` drag → `✦⇧` drag, the `⌃⌥` wheel and swipe rows likewise, and
+`⌃⌥⇧⌘` takes no exception since no gesture is a Desktop digit. The
+drags first moved onto one base for it: `⌃⌥` drag moves and `⌃⌥⇧`
+drag resizes, where `⌃⌘` had moved and `⌃⌥` resized, so the plain
+chord takes the frequent act and `⇧` the variant, as on the keyboard
+ladder. The gesture map is sparse over seeds in code, so the seeds
+read the stored base themselves rather than being rewritten into the
+file: a seed a later release adds lands on `✦` for a Hyper user, as
+a later keyboard default does. The switch renames only the keys the
+file stores, a profile's override following the shared map's moves
+as a keyboard override does; a seed whose `✦` key the user's own
+gesture holds is written into the file on `⌃⌥` and listed under the
+switch with that reason. No crossing pins the old drags: no release
+carried them, so 5.0.0 is where every user first meets the drags,
+on the new chords. The unreleased fold from `modifier_drag` keeps a
+pair that left the old defaults whole and turns the drag seeds off
+beneath it, so it never gains a second grab on keys it uses.
+:::
+
 The stored Desktop base this replaces covered one tier and the
 new base covers every one, so the crossing is a change of meaning
 under a renamed key and reads the file's format to end (#1354).

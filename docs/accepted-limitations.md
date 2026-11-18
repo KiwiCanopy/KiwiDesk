@@ -218,7 +218,7 @@ before the move, as it does for a drag or a `resize`
 again if a burst comes up short. No fix is planned.
 
 :::unreleased
-A ⌃⌘ or ⌃⌥ press of a
+A ⌃⌥ or ⌃⌥⇧ press of a
 [`move` or `resize` grab](lua-reference.md#gesture-actions) over anything
 KiwiDesk cannot move there — the desktop, the Dock, the menu bar, a
 bar, a window in full screen or on a Space nobody shows — does

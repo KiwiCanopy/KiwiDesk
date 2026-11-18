@@ -12,10 +12,18 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// The scroll gestures, one field per key (#1656).
     public var scrollGestures: RuleReachTable<ScrollGestureValue>
     public let storedScrollBase: ScrollGestureBase
-    /// The gesture bindings, one `GestureKey` per key (#3225), and
-    /// the base map as `gui.json` holds it.
+    /// The gesture bindings, one `GestureKey` per key (#3225), the
+    /// base map as `gui.json` holds it and the shortcut base its
+    /// seeds sit on (#3444) — the files' until the switch's pass
+    /// moves them (`moveGestureBase`); `fileGestureBase` stays the
+    /// file's, which a save compares against.
     public var gestures: RuleReachTable<GestureAction>
-    public let storedGestureBase: GestureMap
+    public internal(set) var storedGestureBase: GestureMap
+    public internal(set) var gestureShortcutBase: ShortcutBase
+    public let fileGestureBase: GestureMap
+    /// Whether the switch's pass moved any profile's override, so
+    /// a save writes each one it moved.
+    public internal(set) var movedGestureProfiles: Set<String> = []
     /// The Space history setting, one key (#1655).
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
     /// The layout cycle, one key (#453).
@@ -69,6 +77,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedScrollBase: ScrollGestureBase,
         gestures: RuleReachTable<GestureAction>,
         storedGestureBase: GestureMap,
+        gestureShortcutBase: ShortcutBase = .standard,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
         focusWrap: RuleReachTable<FocusWrap>,
@@ -105,6 +114,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.storedScrollBase = storedScrollBase
         self.gestures = gestures
         self.storedGestureBase = storedGestureBase
+        self.gestureShortcutBase = gestureShortcutBase
+        self.fileGestureBase = storedGestureBase
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
         self.focusWrap = focusWrap
@@ -144,6 +155,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || !floatAutomatically.baseTouched.isEmpty
             || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
             || storedKeyOverrides != fileKeyOverrides
+            || storedGestureBase != fileGestureBase
+            || !movedGestureProfiles.isEmpty
             || appRules.touched.values.contains { !$0.isEmpty }
             || titledAppRules.touched.values.contains { !$0.isEmpty }
             || floatRules.touched.values.contains { !$0.isEmpty }
@@ -239,9 +252,11 @@ extension KiwiCore {
             storedScrollBase: sidecar.scrollGesture,
             gestures: .gestures(
                 base: sidecar.gesture,
-                overrides: stored.map { ($0.name, $0.gesture) }
+                overrides: stored.map { ($0.name, $0.gesture) },
+                shortcutBase: sidecar.shortcutBase
             ),
             storedGestureBase: sidecar.gesture,
+            gestureShortcutBase: sidecar.shortcutBase,
             spaceHistory: .spaceHistory(
                 base: sidecar.spaceHistory,
                 overrides: stored.map { ($0.name, $0.spaceHistory) }

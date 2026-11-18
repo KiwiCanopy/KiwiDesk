@@ -19,7 +19,11 @@ struct GestureAxisRow: View {
     @State private var id = UUID()
 
     private var action: GestureAction? {
-        GestureListEdits.action(of: key, in: model.config.gesture)
+        GestureListEdits.action(
+            of: key,
+            in: model.config.gesture,
+            shortcutBase: model.config.shortcutBase
+        )
     }
 
     private var family: GestureFamily? {
@@ -115,6 +119,11 @@ struct GestureAxisRow: View {
                 on: key.input
             )
         else { return }
-        GestureListEdits.set(saved, at: key, in: &model.config.gesture)
+        GestureListEdits.set(
+            saved,
+            at: key,
+            in: &model.config.gesture,
+            shortcutBase: model.config.shortcutBase
+        )
     }
 }

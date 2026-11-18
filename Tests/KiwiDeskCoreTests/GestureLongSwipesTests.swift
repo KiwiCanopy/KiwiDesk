@@ -12,7 +12,13 @@ struct GestureLongSwipesTests {
     /// The seeds bind ⌃⌥ two-finger swipe to focus.
     @Test("the seeds reach it")
     func seedsReach() {
-        #expect(GestureSeeds.longSwipesApply(base: GestureMap(), profile: nil))
+        #expect(
+            GestureSeeds.longSwipesApply(
+                base: GestureMap(),
+                profile: nil,
+                shortcutBase: .standard
+            )
+        )
     }
 
     /// Unbinding the seeded focus swipe leaves the Space step and
@@ -21,7 +27,13 @@ struct GestureLongSwipesTests {
     func noPanSwipe() {
         var base = GestureMap()
         base[GestureKey(.swipe2, pan)] = .unbound
-        #expect(!GestureSeeds.longSwipesApply(base: base, profile: nil))
+        #expect(
+            !GestureSeeds.longSwipesApply(
+                base: base,
+                profile: nil,
+                shortcutBase: .standard
+            )
+        )
     }
 
     /// The walk reaches it, on any keys, whole or on one axis.
@@ -30,15 +42,33 @@ struct GestureLongSwipesTests {
         var base = GestureMap()
         base[GestureKey(.swipe2, pan)] = .unbound
         base[GestureKey(.swipe2, step)] = .bound(.family(.walk))
-        #expect(GestureSeeds.longSwipesApply(base: base, profile: nil))
+        #expect(
+            GestureSeeds.longSwipesApply(
+                base: base,
+                profile: nil,
+                shortcutBase: .standard
+            )
+        )
         base[GestureKey(.swipe2, step)] = .bound(
             .split(GestureSplit(axes: [.upDown: .focus]))
         )
-        #expect(GestureSeeds.longSwipesApply(base: base, profile: nil))
+        #expect(
+            GestureSeeds.longSwipesApply(
+                base: base,
+                profile: nil,
+                shortcutBase: .standard
+            )
+        )
         base[GestureKey(.swipe2, step)] = .bound(
             .split(GestureSplit(axes: [.upDown: .space]))
         )
-        #expect(!GestureSeeds.longSwipesApply(base: base, profile: nil))
+        #expect(
+            !GestureSeeds.longSwipesApply(
+                base: base,
+                profile: nil,
+                shortcutBase: .standard
+            )
+        )
     }
 
     /// A profile's own map lies over the base.
@@ -47,7 +77,11 @@ struct GestureLongSwipesTests {
         var profile = GestureMap()
         profile[GestureKey(.swipe2, pan)] = .unbound
         #expect(
-            !GestureSeeds.longSwipesApply(base: GestureMap(), profile: profile)
+            !GestureSeeds.longSwipesApply(
+                base: GestureMap(),
+                profile: profile,
+                shortcutBase: .standard
+            )
         )
     }
 

@@ -92,7 +92,10 @@ extension SettingsModel {
 
     /// The switch over the files, after the layer edits so it reads
     /// the page's layer names: every shared row moves but one the
-    /// page kept on its old chord, and the tombstones follow.
+    /// page kept on its old chord, and the tombstones follow — the
+    /// gesture map's keys likewise (#3444); no seed lies on a key
+    /// the switch moves away from, so a key the page still binds is
+    /// one it kept.
     private func basePass(
         _ snapshot: inout RuleReachSnapshot,
         onto base: ShortcutBase
@@ -108,6 +111,10 @@ extension SettingsModel {
                         $0.lua == row.lua && $0.combo == row.combo
                     }
             }
+        }
+        let gestures = config.gesture
+        try snapshot.moveGestureBase(onto: base) {
+            gestures[$0]?.action != nil
         }
     }
 

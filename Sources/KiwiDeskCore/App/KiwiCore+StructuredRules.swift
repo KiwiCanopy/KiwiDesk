@@ -96,6 +96,7 @@ extension KiwiCore {
         setResolvedWindowRules(WindowRuleOverrides(profile))
         applyGestures(
             base: base?.gesture,
+            shortcutBase: base?.shortcutBase,
             profile: profile?.gesture,
             scrollBase: base?.scrollGesture,
             scrollProfile: profile?.scrollGesture

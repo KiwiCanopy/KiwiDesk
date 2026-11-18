@@ -122,7 +122,8 @@ extension SettingsModel {
         snapshot.gestures = RuleReachDraft.encode(
             snapshot.gestures,
             current: RuleReachTable<GestureAction>.gestureSeedsUnder(
-                config.gesture
+                config.gesture,
+                shortcutBase: config.shortcutBase
             ),
             editing: editing,
             isLoaded: reachIsLoaded,
@@ -236,7 +237,8 @@ extension SettingsModel {
             stored.scrollGestures.resolved(for: loaded)
         )
         config.gesture = RuleReachTable<GestureAction>.gestureMap(
-            over: stored.gestures.resolved(for: loaded)
+            over: stored.gestures.resolved(for: loaded),
+            shortcutBase: stored.gestureShortcutBase
         )
         config.spaceHistory =
             stored.spaceHistory.resolved(
@@ -293,7 +295,8 @@ extension SettingsModel {
             original: reach.storedScrollBase
         )
         sidecar.gesture = reach.gestures.gestureBase(
-            original: reach.storedGestureBase
+            original: reach.storedGestureBase,
+            shortcutBase: reach.gestureShortcutBase
         )
         sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
         sidecar.modeCycle = reach.modeCycle.modeCycleBase

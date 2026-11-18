@@ -132,8 +132,11 @@ struct ShortcutBaseSwitchModelTests {
         let row = try source("Components/Keybindings/ShortcutBaseRow.swift")
         #expect(row.contains("set: { model.setShortcutBase($0) }"))
         #expect(row.contains("picker.modifier(GreyOut(active: greyed"))
-        #expect(row.contains("if !left.isEmpty { leftList }"))
+        #expect(
+            row.contains("if !left.isEmpty || !gesturesLeft.isEmpty")
+        )
         #expect(row.contains("model.rowsLeftOnStandard"))
+        #expect(row.contains("model.gestureRowsLeftOnStandard"))
         #expect(row.contains("return ShortcutBaseWords.storedPage"))
         #expect(
             row.contains(

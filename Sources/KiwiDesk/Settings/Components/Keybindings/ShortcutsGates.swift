@@ -92,7 +92,8 @@ struct ShortcutsGates {
             // (#3225), so no profile layer goes over it.
             return GestureSeeds.longSwipesApply(
                 base: config.gesture,
-                profile: nil
+                profile: nil,
+                shortcutBase: config.shortcutBase
             ) ? nil : .noPanSwipe
         default:
             assertionFailure(

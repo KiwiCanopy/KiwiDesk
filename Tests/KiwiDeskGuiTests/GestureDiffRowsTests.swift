@@ -15,7 +15,14 @@ struct GestureDiffRowsTests {
 
     private func moved() -> GestureMap {
         var base = GestureMap()
-        #expect(GestureListEdits.rekey(from, to: to, in: &base))
+        #expect(
+            GestureListEdits.rekey(
+                from,
+                to: to,
+                in: &base,
+                shortcutBase: .standard
+            )
+        )
         return base
     }
 
@@ -24,7 +31,8 @@ struct GestureDiffRowsTests {
         LocalizationManager.shared.select("en")
         let rows = SettingsValueReadout.gestureRows(
             old: GestureMap(),
-            new: moved()
+            new: moved(),
+            shortcutBase: .standard
         )
         #expect(rows.count == 1)
         let row = try #require(rows.first)
@@ -51,11 +59,16 @@ struct GestureDiffRowsTests {
     @Test("a stored change that keeps the action still gets a row")
     func rawChangeIsNarrated() {
         var old = GestureMap()
-        let seed = GestureListEdits.action(of: from, in: old)!
+        let seed = GestureListEdits.action(
+            of: from,
+            in: old,
+            shortcutBase: .standard
+        )!
         old[from] = .bound(seed)
         let rows = SettingsValueReadout.gestureRows(
             old: old,
-            new: GestureMap()
+            new: GestureMap(),
+            shortcutBase: .standard
         )
         #expect(rows.count == 1)
     }

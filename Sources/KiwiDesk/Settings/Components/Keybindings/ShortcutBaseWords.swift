@@ -15,7 +15,8 @@ enum ShortcutBaseWords {
         L(
             "shortcuts.base.help",
             "Pick ✦ to put KiwiDesk's shortcuts on the Hyper key: "
-                + "every ⌃⌥ shortcut moves to ✦, keeping ⇧ and ⌘. "
+                + "every ⌃⌥ shortcut and gesture moves to ✦, "
+                + "keeping ⇧ and ⌘. "
                 + "%1$@ takes ✦⌥, since ⇧⌘3–5 are macOS's "
                 + "screenshots, and resize shortcuts stay on ⌥⌘. A "
                 + "shortcut you set on another key stays where you put "
@@ -104,6 +105,46 @@ enum ShortcutBaseWords {
                 "%1$@ (%2$@): “%3$@” sets its own",
                 name,
                 chord,
+                profile
+            )
+        }
+    }
+
+    /// One left-behind gesture row (#3444), in the keyboard rows'
+    /// sentences: the action, then the gesture and its keys.
+    static func line(_ left: GestureBaseLeftRow) -> String {
+        let name = GestureListWords.value(left.action, on: left.key.input)
+        let gesture = GestureListWords.rowName(left.key)
+        switch left.reason {
+        case .predates:
+            return L(
+                "shortcuts.base.left.predates",
+                "%1$@ (%2$@): from before this update",
+                name,
+                gesture
+            )
+        case .taken(let target, let holder):
+            return L(
+                "shortcuts.base.left.taken",
+                "%1$@ (%2$@): %3$@ is taken by %4$@",
+                name,
+                gesture,
+                GestureListWords.rowName(target),
+                GestureListWords.value(holder, on: target.input)
+            )
+        case .ownChoice:
+            return L(
+                "shortcuts.base.left.own",
+                "%1$@ (%2$@): you set this one yourself",
+                name,
+                gesture
+            )
+        case .profile(let profile):
+            return L(
+                "shortcuts.base.left.profile",
+                "%1$@ (%2$@): “%3$@” sets its own",
+                name,
+                gesture,
                 profile
             )
         }

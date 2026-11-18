@@ -2233,7 +2233,7 @@
   "shortcuts.apps.recorder_name": "%1$@, %2$@",
   "shortcuts.base": "Scorciatoie su",
   "shortcuts.base.caption": "Anche le scorciatoie che KiwiDesk aggiungerà in seguito, come quelle di una nuova Scrivania, partono da lì. Vale per tutti i profili quando salvi.",
-  "shortcuts.base.help": "Scegli ✦ per mettere le scorciatoie di KiwiDesk sul tasto Hyper: ogni scorciatoia ⌃⌥ passa su ✦, mantenendo ⇧ e ⌘. «%1$@» usa ✦⌥, perché ⇧⌘3–5 sono le istantanee dello schermo di macOS, e le scorciatoie di dimensione restano su ⌥⌘. Una scorciatoia che hai messo tu su un altro tasto resta dove l'hai messa, e una il cui tasto ✦ è già occupato da un'altra scorciatoia resta su ⌃⌥.",
+  "shortcuts.base.help": "Scegli ✦ per mettere le scorciatoie di KiwiDesk sul tasto Hyper: ogni scorciatoia e ogni gesto ⌃⌥ passano su ✦, mantenendo ⇧ e ⌘. «%1$@» usa ✦⌥, perché ⇧⌘3–5 sono le istantanee dello schermo di macOS, e le scorciatoie di dimensione restano su ⌥⌘. Una scorciatoia che hai messo tu su un altro tasto resta dove l'hai messa, e una il cui tasto ✦ è già occupato da un'altra scorciatoia resta su ⌃⌥.",
   "shortcuts.base.key_off": "Hyper è disattivato, quindi le scorciatoie con ✦ sono attenuate e non funzionano. Registra di nuovo un tasto Hyper o scegli ⌃⌥.",
   "shortcuts.base.left": "Ancora su ⌃⌥: %1$d",
   "shortcuts.base.left.own": "%1$@ (%2$@): l'hai impostata tu",

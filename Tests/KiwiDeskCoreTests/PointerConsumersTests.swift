@@ -88,7 +88,7 @@ struct PointerConsumersTests {
         rig.front.start()
         var settings = ModifierDragSettings.defaults
         settings.grabs.append(
-            ModifierDragBinding(.resize, chord: [.control, .command])
+            ModifierDragBinding(.resize, chord: [.control, .option])
         )
         rig.front.configure(grab: settings)
         #expect(rig.taps.last?.snapshots.last?.grab == .defaults)
