@@ -24247,6 +24247,20 @@ key that might not be the row's. The column is display only: the
 row drops AppKit's matching keyDown, since Carbon's hotkey has
 already acted, or Float would toggle twice.
 
+:::unreleased
+*Amended (#3470, owner on ui-designer's recommendation,
+2026-11-18): a ✦ chord shows nothing too, in the status menu as in
+the bar menus.* AppKit's column draws only ⌃⌥⇧⌘, so `✦L` came out
+as a bare `L`, a key that is not the shortcut; the one
+`applyMenuEquivalent` declines it as it declines a sided chord,
+and its press is never taken for Carbon's twin. Dimmed `✦L` text
+in the row's title was refused: it cannot right-align with the
+column, stays grey on the highlight and is read aloud as a star.
+The Settings row keeps the app menu's `⌘,` there, which is true
+while the menu is open. The Desktop overview row takes its live
+chord as the KiwiHub row does.
+:::
+
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain
 PNG/TIFF copies regenerated with macOS built-ins

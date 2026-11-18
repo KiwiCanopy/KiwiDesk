@@ -19,6 +19,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// The combo bound to open the View side, read fresh on each
     /// menu open so AppKit renders the live binding.
     var kiwiHubComboProvider: () -> KeyCombo? = { nil }
+    /// The combo bound to the Desktop overview (#3470), read the
+    /// same way.
+    var overviewComboProvider: () -> KeyCombo? = { nil }
     /// The combo bound to Open Settings (#1381), read the same way;
     /// nil keeps the app menu's `⌘,`.
     var settingsComboProvider: () -> KeyCombo? = { nil }
