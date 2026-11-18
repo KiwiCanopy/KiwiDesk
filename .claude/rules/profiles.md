@@ -673,7 +673,13 @@ and `liveSpaceIsUser` (#2937), [os-private-apis.md](os-private-apis.md)'s
 — which `makeTestCore` pins to "no compositor"
 (`DesktopCensusSeamTests` ▸ `testCorePinsBothDoors`,
 `HealStandDownSeamTests` ▸ `batchReadIsPinned`,
-`ShownUserSpaceSeamTests`); a suite wanting a verdict states it on the instance. It also files each
+`ShownUserSpaceSeamTests`); a suite wanting a verdict states it on the instance.
+Every Core read of a display's UUID and of whether the active Space
+is a user Desktop goes through `readDisplayUUID` and
+`readActiveSpaceIsUser`, which both twins pin — the UUID memoized
+per process, the active Space a user Desktop unless a suite states
+a topology (#3442, `SpaceReadSeamGuardTests` ▸
+`displayUUIDHasOneHome`, `activeSpaceIsUserHasOneHome`). It also files each
 screen's user-Space verdict for the shelf's stand-down, whose
 filing obligations are [bars.md](bars.md)'s (#2667).
 

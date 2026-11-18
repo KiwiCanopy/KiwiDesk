@@ -195,7 +195,8 @@ public enum NativeSpaces {
 
     /// Whether space on display is a user desktop; a screen no
     /// Desktop reading filed is answered by `live` (#2937). `uuid`
-    /// is the display's, read through the caller's seam (#3442).
+    /// is the display's, read through the caller's seam (#3442);
+    /// `display` keys only the DEBUG override.
     public static func currentSpaceIsUser(
         display: DisplayID,
         uuid: String?,

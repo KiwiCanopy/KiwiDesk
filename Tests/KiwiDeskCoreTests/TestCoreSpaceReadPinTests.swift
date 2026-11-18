@@ -4,12 +4,15 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The two `DesktopMemory` reads both `makeTestCore` twins pin
-/// (#3442) answer the bridge-absent host, and still answer a
-/// suite's stated override rather than the memo.
+/// (#3442) still answer a suite's stated override: the display UUID
+/// over its per-process memo, the active Space over its pinned true.
+/// That the active pin answers true with no topology cannot red on a
+/// host sitting on a user Desktop, which answers true live;
+/// `SpaceReadSeamGuardTests` holds that pin's text instead.
 @Suite("Test-core display-UUID and active-Space pins")
 @MainActor
 struct TestCoreSpaceReadPinTests {
-    @Test("the active Space reads as a user Desktop unless stated")
+    @Test("a stated active-Space override answers through the pin")
     func activeSpaceDefaultsToUser() {
         let core = makeTestCore()
         #expect(core.desktopMemory.readActiveSpaceIsUser())

@@ -63,10 +63,14 @@ struct TitlePatternPopoverTests {
         return nil
     }
 
+    /// The one hang guard: a spin exits the moment its state holds,
+    /// so only a genuine hang reaches it (tests.md ▸ Async tests).
+    private static let hangGuard: TimeInterval = 30
+
     /// Runs the main run loop until `done` holds; the deadline
     /// only bounds a hang (tests.md ▸ await the handle, #3442).
     private func spin(until done: () -> Bool) {
-        let deadline = Date().addingTimeInterval(10)
+        let deadline = Date().addingTimeInterval(Self.hangGuard)
         while !done(), Date() < deadline {
             RunLoop.main.run(until: Date().addingTimeInterval(0.01))
         }

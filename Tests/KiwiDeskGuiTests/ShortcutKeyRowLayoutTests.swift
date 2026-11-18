@@ -10,8 +10,9 @@ import Testing
 /// ▸ owner ruling). The row is seeded: a menu tracked in a test ends
 /// the test process, so the Sides pick itself is a device check.
 ///
-/// Main-actor spend: two hosted rows in an offscreen window and
-/// run-loop spins until each row's awaited layout.
+/// Main-actor spend: two hosted rows in an offscreen window, run-loop
+/// spins until each row's awaited layout, and a 0.15 s drain where a
+/// test reads a negative or the title's settled frame.
 @Suite("Shortcut key row conflict line (#3258)", .serialized)
 @MainActor
 struct ShortcutKeyRowLayoutTests {
@@ -24,13 +25,24 @@ struct ShortcutKeyRowLayoutTests {
         window.orderOut(nil)
     }
 
+    /// The one hang guard: a spin exits the moment its state holds,
+    /// so only a genuine hang reaches it (tests.md ▸ Async tests).
+    private static let hangGuard: TimeInterval = 30
+
     /// Runs the main run loop until `done` holds; the deadline
     /// only bounds a hang (tests.md ▸ await the handle, #3442).
     private func spin(until done: () -> Bool) {
-        let deadline = Date().addingTimeInterval(10)
+        let deadline = Date().addingTimeInterval(Self.hangGuard)
         while !done(), Date() < deadline {
             RunLoop.main.run(until: Date().addingTimeInterval(0.01))
         }
+    }
+
+    /// A fixed beat after the awaited layout, for what no predicate
+    /// can await: a line that should not land, a title frame that
+    /// must have settled against the taller stack.
+    private func drain() {
+        RunLoop.main.run(until: Date().addingTimeInterval(0.15))
     }
 
     /// Row B at Left ⌘H; its preflight refuses Right ⌘H, row A's.
@@ -172,6 +184,7 @@ struct ShortcutKeyRowLayoutTests {
             }
         ) { drawn(3, in: $0) && probe.title != .zero }
         defer { Self.close(window) }
+        drain()
         let line = try wellLine(in: host)
         let buttons = lineButtons(below: line, in: host)
         // Steal, Go to and the dismissal, once: the field draws no
@@ -199,6 +212,7 @@ struct ShortcutKeyRowLayoutTests {
             }
         ) { drawn(0, in: $0) && probe.title != .zero }
         defer { Self.close(window) }
+        drain()
         let line = try wellLine(in: host)
         #expect(lineButtons(below: line, in: host).isEmpty)
         #expect(abs(probe.title.midY - line.midY) < 2)

@@ -9,7 +9,7 @@ import Testing
 /// end is reachable headlessly: the move itself runs through
 /// `WMBridge` (a live WindowServer), and the target screen is
 /// resolved by matching display UUIDs through
-/// `NativeSpaces.displayUUID(for:)`, which answers only on a
+/// `DesktopMemory.readDisplayUUID`, which answers only on a
 /// machine with those displays attached.
 ///
 /// Two placements are load-bearing, and both are pinned:

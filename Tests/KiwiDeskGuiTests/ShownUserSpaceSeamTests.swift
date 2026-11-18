@@ -84,6 +84,10 @@ struct ShownUserSpaceSeamTests {
             )
         )
         #expect(body.occurrences(of: "filed: filed") == 1)
+        // The screen's UUID is the caller's seam read, never a
+        // live one here (#3442).
+        #expect(body.occurrences(of: "on: uuid,") == 1)
+        #expect(body.occurrences(of: "displayUUID(") == 0)
     }
 
     @Test("the stand-down and the shown-Desktop resolver read the verdict")
@@ -120,6 +124,11 @@ struct ShownUserSpaceSeamTests {
         #expect(
             verdict.occurrences(of: "live: desktopMemory.liveSpaceIsUser")
                 == 1
+        )
+        #expect(
+            verdict.occurrences(
+                of: "uuid: desktopMemory.readDisplayUUID(display)"
+            ) == 1
         )
         let standDown = try #require(
             SourceScan.declarationBody(

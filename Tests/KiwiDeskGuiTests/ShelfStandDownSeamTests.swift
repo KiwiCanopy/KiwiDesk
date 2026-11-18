@@ -53,6 +53,10 @@ struct ShelfStandDownSeamTests {
                 + squeezed.components(
                     separatedBy: "activeSpaceIsUser("
                 ).count - 1
+                // The active-Space read's seam (#3442).
+                + squeezed.components(
+                    separatedBy: "readActiveSpaceIsUser("
+                ).count - 1
             if count > 0 { homes[file] = count }
         }
         #expect(homes == Self.allowed)
