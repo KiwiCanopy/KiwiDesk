@@ -51,12 +51,12 @@ struct ArrivalAdoptionTests {
         var created: [ManagedWindow] = []
     }
 
-    private let pid: pid_t = 900_828
+    let pid: pid_t = 900_828
     /// Far above any live WindowServer id, so the server snapshot
     /// `track` takes finds no window of the host's.
     private let tracked = WindowID(90_000_001)
-    private let arrivals = [WindowID(90_000_002), WindowID(90_000_003)]
-    private var ref: AppRef {
+    let arrivals = [WindowID(90_000_002), WindowID(90_000_003)]
+    var ref: AppRef {
         AppRef(bundleID: "test.kiwi.arrival", name: "Arrival")
     }
 
@@ -66,7 +66,7 @@ struct ArrivalAdoptionTests {
 
     /// A loop tracking one window of `pid` and listing two more,
     /// which the facts seam answers as standard windows.
-    private func makeLoop() -> (
+    func makeLoop() -> (
         loop: EventLoop,
         box: Box,
         elements: [AXUIElement],
@@ -282,12 +282,18 @@ struct ArrivalAdoptionTests {
     /// server reports another at `track`, the window is judged live,
     /// which asks the app on the main actor.
     @Test("a changed layer judges the arrival live")
-    func changedLayerReadsLive() {
+    func changedLayerReadsLive() throws {
         let (loop, box, _, listing) = makeLoop()
-        // The server snapshot reports no layer for these ids.
-        for id in arrivals { listing.layers[id] = 0 }
+        box.held = []
         loop.reconcileOffMain(pid: pid, app: ref)
-        #expect(box.applyCalls >= arrivals.count)
+        let delivery = box.held ?? []
+        try #require(delivery.count == 1)
+        // Raised between the read and its delivery.
+        for id in arrivals { listing.layers[id] = 3 }
+        box.held = nil
+        let before = Self.mainCalls
+        for work in delivery { work() }
+        #expect(Self.mainCalls - before >= arrivals.count)
     }
 
     /// The shadow rule judges an arrival too, on the traits the

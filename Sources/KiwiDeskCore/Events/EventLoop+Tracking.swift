@@ -42,11 +42,13 @@ extension EventLoop {
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
         // One WindowServer round trip feeds every
-        // classification below (layer, alpha, bounds).
+        // classification below (alpha, bounds). The layer is the
+        // list read's: the public list omits a window just ordered
+        // in, and its nil tiled a raised launcher (#3443).
         let server = FloatDetection.serverSnapshot(
             of: window.id
         )
-        let layer = server.layer
+        let layer = offMain.readLayers(pid)(window.id) ?? server.layer
         let detection: FloatDetectionSource
         let subrole: String
         // Detection judged a layer: where the server now reports

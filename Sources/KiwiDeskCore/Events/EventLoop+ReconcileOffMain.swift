@@ -92,8 +92,8 @@ struct OffMainReconcile {
     /// A Desktop switch's batch read (#2347).
     var switchBatch = SwitchReconcile()
     var departures = FlightDepartures()
-    /// The list read's WindowServer layer per window; a test pins
-    /// them.
+    /// The WindowServer layer per window, for the list read and
+    /// `track` alike (#3443); a test pins them.
     var readLayers: (pid_t) -> (WindowID) -> Int? =
         FloatDetection.layerReader
     /// The list reader's `WindowFacts` door (#1883) — `track` and
