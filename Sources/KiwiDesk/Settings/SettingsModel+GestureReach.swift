@@ -32,20 +32,27 @@ extension SettingsModel {
     func gestureRestore(
         on device: GestureInput.Device
     ) -> RestoreSeeds<GestureAction> {
+        let shortcutBase = config.shortcutBase
         var restored = config.gesture
-        GestureListEdits.restoreDefaults(on: device, in: &restored)
+        GestureListEdits.restoreDefaults(
+            on: device,
+            in: &restored,
+            shortcutBase: shortcutBase
+        )
         var seeds: [String: GestureAction] = [:]
-        for (key, action) in GestureSeeds.seeds
+        for (key, action) in GestureSeeds.seeds(on: shortcutBase)
         where key.input.device == device {
             seeds[key.spelling] = action
         }
         return RestoreSeeds(
             seeds: seeds,
             before: RuleReachTable<GestureAction>.gestureSeedsUnder(
-                config.gesture
+                config.gesture,
+                shortcutBase: shortcutBase
             ),
             after: RuleReachTable<GestureAction>.gestureSeedsUnder(
-                restored
+                restored,
+                shortcutBase: shortcutBase
             )
         )
     }
@@ -71,7 +78,11 @@ extension SettingsModel {
     ) {
         let restore = gestureRestore(on: device)
         let stored = layeredReach?.gestures
-        GestureListEdits.restoreDefaults(on: device, in: &config.gesture)
+        GestureListEdits.restoreDefaults(
+            on: device,
+            in: &config.gesture,
+            shortcutBase: config.shortcutBase
+        )
         stageRestore(.gesture, restore, stored: stored, reach: reach)
     }
 }

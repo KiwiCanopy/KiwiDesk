@@ -14313,8 +14313,8 @@ list of other apps' taps would be stale the day it shipped.
 **Every pointer event KiwiDesk must swallow goes through one
 active tap, and only while a consumer needs it (#2447, #2764).**
 An `NSEvent` monitor hears a press but cannot drop it, so a
-gesture that takes the press — ⌃⌘ + drag moving the window under
-the pointer, ⌃⌥ + drag resizing it — needs an active `CGEventTap`.
+gesture that takes the press — ⌃⌥ + drag moving the window under
+the pointer, ⌃⌥⇧ + drag resizing it — needs an active `CGEventTap`.
 Measured with a probe at the shipped tap location
 (`.cgSessionEventTap`, active, 2026-11-08, macOS 27.2): a mask of
 the left-button trio, and that mask with the moves and the
@@ -14348,10 +14348,10 @@ START a drag, never a second drop path to keep in step.
 
 The trade: a swallowed press is one the app under the pointer
 never hears, and with no tracked window there the click is lost
-(⌃⌘-click on the desktop does nothing). The swallow also deafens
-KiwiDesk's own press listeners, so each consumer re-delivers to
-them through their own doors. The defaults are on, ⌃⌘ and ⌃⌥ with
-the button held, since a press is a clear start and its release a
+(a grab's click on the desktop does nothing). The swallow also
+deafens KiwiDesk's own press listeners, so each consumer re-delivers
+to them through their own doors. The defaults are on, ⌃⌥ and ⌃⌥⇧
+with the button held, since a press is a clear start and its release a
 clear end; "+ move (no click)" is an opt-in per action, and shows
 no warning when its chord also starts a shortcut, since pressing a
 key is deliberate (owner, 2026-11-08). One modifier alone is the
@@ -15325,6 +15325,28 @@ keeps the larger mark, so no Mac lowers it, and discarding
 carries its own mark. A Lua-owned setup leaves the mark alone, so
 moving to Settings later still offers every Desktop. Restore Defaults restores the
 tier for the Desktops the Mac has.
+
+:::unreleased
+*Amended (#3444, owner 2026-11-18):* the switch moves the mouse and
+trackpad gestures with the same mapping: every `⌃⌥` gesture row,
+`⌃⌥` drag → `✦` drag and `⌃⌥⇧` drag → `✦⇧` drag among them, and
+`⌃⌥⇧⌘` takes no exception since no gesture is a Desktop digit. The
+drags first moved onto one base for it: `⌃⌥` drag moves and `⌃⌥⇧`
+drag resizes, where `⌃⌘` had moved and `⌃⌥` resized, so the plain
+chord takes the frequent act and `⇧` the variant, as on the keyboard
+ladder. The gesture map is sparse over seeds in code, so the seeds
+read the stored base themselves rather than being rewritten into the
+file: a seed a later release adds lands on `✦` for a Hyper user, as
+a later keyboard default does. The switch renames only the keys the
+files store, a profile's override following the shared map's moves
+as a keyboard override does; a seed whose `✦` key the user's own
+gesture holds is written into the file on `⌃⌥` and listed under the
+switch with that reason. A Lua-owned setup keeps the seeds on `⌃⌥`,
+since `init.lua` declares its own bindings over them. No crossing
+pins the old drags: no release carried them, so every user first
+meets the drags on the new chords, and a pre-release `modifier_drag`
+file gains no second grab on keys its pair uses.
+:::
 
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never

@@ -64,7 +64,11 @@ struct GestureBindingTests {
     @Test("the seeds are the default rows")
     func seeds() {
         let step: ScrollChord = [.control, .option, .command]
-        let resolved = GestureSeeds.resolved(base: GestureMap(), profile: nil)
+        let resolved = GestureSeeds.resolved(
+            base: GestureMap(),
+            profile: nil,
+            shortcutBase: .standard
+        )
         // The trackpad ladder (#1873 ▸ Ruling 2026-11-15): two
         // fingers windows, three Spaces and their overview, four
         // screens.
@@ -126,13 +130,13 @@ struct GestureBindingTests {
                     .contains($0.input)
             }
         )
+        // ⌃⌥ drag moves, ⌃⌥⇧ drag resizes (#3444).
+        #expect(resolved[GestureKey(.drag, hyper)] == .grab(.move))
         #expect(
-            resolved[GestureKey(.drag, [.control, .command])]
-                == .grab(.move)
+            resolved[GestureKey(.drag, hyper.union(.shift))]
+                == .grab(.resize)
         )
-        #expect(
-            resolved[GestureKey(.drag, hyper)] == .grab(.resize)
-        )
+        #expect(resolved[GestureKey(.drag, [.control, .command])] == nil)
         #expect(!resolved.keys.contains { $0.input == .hoverMove })
     }
 
@@ -153,10 +157,10 @@ struct GestureBindingTests {
     /// keyboard default binds.
     @Test("every seed passes its own key's refusals")
     func seedsPassTheirRefusals() {
-        for (key, action) in GestureSeeds.seeds {
+        for (key, action) in GestureSeeds.seeds(on: .standard) {
             #expect(action.refusal(on: key) == nil, "\(key.spelling)")
         }
-        let tap3 = GestureSeeds.seeds[GestureKey(.tap3)]
+        let tap3 = GestureSeeds.seeds(on: .standard)[GestureKey(.tap3)]
         #expect(
             tap3
                 == .run(
@@ -190,11 +194,19 @@ struct GestureBindingTests {
             GestureKey(.tap3): .bound(.run(LuaAction(lua: "p()"))),
             GestureKey(.tap4): .unbound,
         ])
-        let resolved = GestureSeeds.resolved(base: base, profile: profile)
+        let resolved = GestureSeeds.resolved(
+            base: base,
+            profile: profile,
+            shortcutBase: .standard
+        )
         #expect(resolved[GestureKey(.tap3)] == .run(LuaAction(lua: "p()")))
         #expect(resolved[GestureKey(.tap4)] == nil)
         #expect(
-            GestureSeeds.resolved(base: base, profile: nil)[
+            GestureSeeds.resolved(
+                base: base,
+                profile: nil,
+                shortcutBase: .standard
+            )[
                 GestureKey(.tap3)
             ] == nil
         )
@@ -249,38 +261,6 @@ struct GestureBindingTests {
         refusal: GestureRefusal
     ) {
         #expect(action.refusal(on: key) == refusal)
-    }
-
-    @Test("a drag's keys keep a click on them silent")
-    func dragHoldsItsKeys() {
-        let keys: ScrollChord = [.control, .command]
-        let base = GestureMap([
-            GestureKey(.click, keys): .bound(.run(LuaAction(lua: "x()"))),
-            GestureKey(.click, [.shift, .command]): .bound(
-                .run(LuaAction(lua: "y()"))
-            ),
-        ])
-        let resolved = GestureSeeds.resolved(base: base, profile: nil)
-        #expect(resolved[GestureKey(.click, keys)] == nil)
-        #expect(resolved[GestureKey(.click, [.shift, .command])] != nil)
-    }
-
-    @Test("a hover_move on a drag's keys is dropped, both ways")
-    func hoverYieldsToADrag() {
-        let resolved = GestureSeeds.resolved(
-            base: GestureMap([
-                GestureKey(.hoverMove, hyper): .bound(.grab(.move))
-            ]),
-            profile: nil
-        )
-        #expect(resolved[GestureKey(.hoverMove, hyper)] == nil)
-        let settings = ModifierDragSettings([
-            ModifierDragBinding(.resize, chord: hyper),
-            ModifierDragBinding(.move, chord: hyper, start: .hover),
-        ]).sanitized
-        #expect(
-            settings.grabs == [ModifierDragBinding(.resize, chord: hyper)]
-        )
     }
 
     @Test("an empty split binds nothing")

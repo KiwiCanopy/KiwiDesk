@@ -113,14 +113,23 @@ struct GestureMigrationTests {
             gestures[GestureKey(.wheel, [.control, .option, .command])]
                 == nil
         )
-        #expect(gestures[GestureKey(.drag, [.control, .command])] == nil)
-        // The resize was off: its seed is tombstoned, no row added.
+        // The pair left the old defaults (the resize was off), so it
+        // is kept whole and both drag seeds are turned off (#3444).
+        #expect(
+            gestures[GestureKey(.drag, [.control, .command])]
+                == .bound(.grab(.move))
+        )
         #expect(gestures[GestureKey(.drag, seed)] == .unbound)
+        #expect(gestures[GestureKey(.drag, seed.union(.shift))] == .unbound)
         #expect(gestures[GestureKey(.tap3)] == .unbound)
         #expect(
             gestures[GestureKey(.swipe3, seed)] == .bound(.family(.swap))
         )
-        let resolved = GestureSeeds.resolved(base: gestures, profile: nil)
+        let resolved = GestureSeeds.resolved(
+            base: gestures,
+            profile: nil,
+            shortcutBase: .standard
+        )
         #expect(resolved[GestureKey(.swipe2, seed)] == nil)
         #expect(
             resolved[GestureKey(.drag, [.control, .command])]
@@ -167,34 +176,22 @@ struct GestureMigrationTests {
                 == .bound(.grab(.move))
         )
         #expect(gestures[GestureKey(.drag, [.option, .command])] == nil)
-        #expect(gestures[GestureKey(.drag, [.control, .command])] == .unbound)
+        // The resize kept the old default, which the pair keeps too.
+        #expect(
+            gestures[GestureKey(.drag, [.control, .option])]
+                == .bound(.grab(.resize))
+        )
+        #expect(
+            gestures[GestureKey(.drag, [.control, .option, .shift])]
+                == .unbound
+        )
+        #expect(gestures[GestureKey(.drag, [.control, .command])] == nil)
         let profiles = try #require(root["profiles"] as? [[String: Any]])
         let step: ScrollChord = [.control, .option, .command]
         let own = try map(profiles.first)
         #expect(own[GestureKey(.wheel, step)] == .unbound)
         #expect(own[GestureKey(.wheelX, step)] == .unbound)
         #expect(own[GestureKey(.swipe2, step)] == .unbound)
-    }
-
-    @Test("a move onto the resize seed keeps its row")
-    func moveOntoResizeSeed() throws {
-        let root = try migrated(
-            gui: #"""
-                {"modifier_drag": {
-                   "move": {"modifiers": "control+option", "start": "drag"},
-                   "resize": {"modifiers": "shift+command", "start": "hover"}}}
-                """#
-        )
-        let gestures = try map(root)
-        #expect(
-            gestures[GestureKey(.drag, [.control, .option])]
-                == .bound(.grab(.move))
-        )
-        #expect(
-            gestures[GestureKey(.hoverMove, [.shift, .command])]
-                == .bound(.grab(.resize))
-        )
-        #expect(gestures[GestureKey(.drag, [.control, .command])] == .unbound)
     }
 
     @Test("where the pan and the Space step share a chord, the pan wins")
@@ -275,24 +272,6 @@ struct GestureMigrationTests {
         #expect(
             gestures[GestureKey(.swipe3, [.control, .command])]
                 == .bound(.family(.swap))
-        )
-    }
-
-    @Test("a resize on the move's chord stays the move's")
-    func sharedDragChordIsTheMoves() throws {
-        let root = try migrated(
-            gui: #"""
-                {"modifier_drag": {
-                   "resize": {"modifiers": "control+command",
-                     "start": "drag"}}}
-                """#
-        )
-        let gestures = try map(root)
-        #expect(gestures[GestureKey(.drag, [.control, .command])] == nil)
-        #expect(gestures[GestureKey(.drag, [.control, .option])] == .unbound)
-        let resolved = GestureSeeds.resolved(base: gestures, profile: nil)
-        #expect(
-            resolved[GestureKey(.drag, [.control, .command])] == .grab(.move)
         )
     }
 

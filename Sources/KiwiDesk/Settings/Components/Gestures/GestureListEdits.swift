@@ -5,7 +5,9 @@ import KiwiDeskCore
 /// ▸ Ruling): a card lists the bound rows of one device, the seeds
 /// included as real rows, and every edit writes the sparse map —
 /// a seeded key a row leaves is tombstoned, any other key is
-/// dropped. Pure, so the card and its tests share one copy.
+/// dropped. The seeds are those on the draft's shortcut base
+/// (#3444), a required argument as every default row's writer takes
+/// it (profiles.md). Pure, so the card and its tests share one copy.
 enum GestureListEdits {
     /// The inputs a card offers: the device's, and only those a front
     /// fires, since an affordance for a channel that does not exist
@@ -21,12 +23,15 @@ enum GestureListEdits {
     /// editing.
     static func rows(
         in base: GestureMap,
-        on device: GestureInput.Device
+        on device: GestureInput.Device,
+        shortcutBase: ShortcutBase
     ) -> [GestureKey] {
         let offered = Set(inputs(on: device))
-        let keys = Set(GestureSeeds.seeds.keys).union(base.entries.keys)
+        let seeds = GestureSeeds.seeds(on: shortcutBase)
+        let keys = Set(seeds.keys).union(base.entries.keys)
         return keys.filter {
-            offered.contains($0.input) && action(of: $0, in: base) != nil
+            offered.contains($0.input)
+                && action(of: $0, in: base, shortcutBase: shortcutBase) != nil
         }
         .sorted()
     }
@@ -40,9 +45,10 @@ enum GestureListEdits {
         _ entries: [GestureListEntry],
         pending: Set<UUID>,
         in base: GestureMap,
-        on device: GestureInput.Device
+        on device: GestureInput.Device,
+        shortcutBase: ShortcutBase
     ) -> [GestureListEntry] {
-        let bound = rows(in: base, on: device)
+        let bound = rows(in: base, on: device, shortcutBase: shortcutBase)
         let kept = entries.filter {
             bound.contains($0.key) || pending.contains($0.id)
         }
@@ -66,7 +72,8 @@ enum GestureListEdits {
     /// so no profile layer goes over it.
     static func heldByDrag(
         _ key: GestureKey,
-        in base: GestureMap
+        in base: GestureMap,
+        shortcutBase: ShortcutBase
     ) -> GestureRefusal? {
         guard key.input == .hoverMove || key.input == .click else {
             return nil
@@ -74,32 +81,41 @@ enum GestureListEdits {
         return GestureSeeds.shadowRefusal(
             of: key,
             base: base,
-            profile: nil
+            profile: nil,
+            shortcutBase: shortcutBase
         )
     }
 
     /// What `key` binds once the base lies over the seeds.
     static func action(
         of key: GestureKey,
-        in base: GestureMap
+        in base: GestureMap,
+        shortcutBase: ShortcutBase
     ) -> GestureAction? {
         if let entry = base[key] { return entry.action }
-        return GestureSeeds.seeds[key]
+        return GestureSeeds.seeds(on: shortcutBase)[key]
     }
 
     /// Binds `action` at `key`.
     static func set(
         _ action: GestureAction,
         at key: GestureKey,
-        in base: inout GestureMap
+        in base: inout GestureMap,
+        shortcutBase: ShortcutBase
     ) {
-        base[key] = GestureSeeds.seeds[key] == action ? nil : .bound(action)
+        let seed = GestureSeeds.seeds(on: shortcutBase)[key]
+        base[key] = seed == action ? nil : .bound(action)
     }
 
     /// Removes the row at `key`: a seed's key is tombstoned so the
     /// seed stays off, any other key leaves the map.
-    static func remove(_ key: GestureKey, in base: inout GestureMap) {
-        base[key] = GestureSeeds.seeds[key] == nil ? nil : .unbound
+    static func remove(
+        _ key: GestureKey,
+        in base: inout GestureMap,
+        shortcutBase: ShortcutBase
+    ) {
+        let seed = GestureSeeds.seeds(on: shortcutBase)[key]
+        base[key] = seed == nil ? nil : .unbound
     }
 
     /// Moves the row at `from` to `to` (a new gesture or new keys),
@@ -108,14 +124,15 @@ enum GestureListEdits {
     static func rekey(
         _ from: GestureKey,
         to: GestureKey,
-        in base: inout GestureMap
+        in base: inout GestureMap,
+        shortcutBase: ShortcutBase
     ) -> Bool {
         guard from != to else { return true }
-        guard action(of: to, in: base) == nil,
-            let moving = action(of: from, in: base)
+        guard action(of: to, in: base, shortcutBase: shortcutBase) == nil,
+            let moving = action(of: from, in: base, shortcutBase: shortcutBase)
         else { return false }
-        remove(from, in: &base)
-        set(moving, at: to, in: &base)
+        remove(from, in: &base, shortcutBase: shortcutBase)
+        set(moving, at: to, in: &base, shortcutBase: shortcutBase)
         return true
     }
 
@@ -123,9 +140,11 @@ enum GestureListEdits {
     /// returns to its seed, and the user's other rows stay.
     static func restoreDefaults(
         on device: GestureInput.Device,
-        in base: inout GestureMap
+        in base: inout GestureMap,
+        shortcutBase: ShortcutBase
     ) {
-        for key in GestureSeeds.seeds.keys where key.input.device == device {
+        for key in GestureSeeds.seeds(on: shortcutBase).keys
+        where key.input.device == device {
             base[key] = nil
         }
     }
@@ -265,9 +284,10 @@ enum GestureListEdits {
     /// Whether `device`'s seeded rows differ from the seeds.
     static func differsFromDefaults(
         on device: GestureInput.Device,
-        in base: GestureMap
+        in base: GestureMap,
+        shortcutBase: ShortcutBase
     ) -> Bool {
-        GestureSeeds.seeds.keys.contains {
+        GestureSeeds.seeds(on: shortcutBase).keys.contains {
             $0.input.device == device && base[$0] != nil
         }
     }

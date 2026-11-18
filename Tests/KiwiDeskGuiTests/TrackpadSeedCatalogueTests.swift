@@ -27,7 +27,7 @@ struct TrackpadSeedCatalogueTests {
         let catalogue = catalogue
         #expect(!catalogue.isEmpty)
         var checked = 0
-        for (key, action) in GestureSeeds.seeds {
+        for (key, action) in GestureSeeds.seeds(on: .standard) {
             guard case .run(let lua) = action else { continue }
             checked += 1
             #expect(catalogue.contains(lua.lua), "\(key.spelling)")
@@ -40,7 +40,7 @@ struct TrackpadSeedCatalogueTests {
         let catalogue = catalogue
         var arms = 0
         var axes = 0
-        for (key, action) in GestureSeeds.seeds {
+        for (key, action) in GestureSeeds.seeds(on: .standard) {
             guard case .split(let split) = action else { continue }
             for (direction, arm) in split.arms {
                 arms += 1
@@ -70,7 +70,7 @@ struct TrackpadSeedCatalogueTests {
     func familyStepsAreCatalogueRows() {
         let catalogue = catalogue
         var checked = 0
-        for (key, action) in GestureSeeds.seeds {
+        for (key, action) in GestureSeeds.seeds(on: .standard) {
             // Focus and the walk run the pan, and a screen step by
             // direction has no keyboard row: the panel lists it
             // under Gestures.

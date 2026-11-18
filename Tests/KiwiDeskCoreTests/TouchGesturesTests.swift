@@ -72,7 +72,11 @@ struct TouchGesturesTests {
     func seedsStartTheReader() {
         let (gestures, box) = front()
         gestures.resolve(
-            GestureSeeds.resolved(base: GestureMap(), profile: nil),
+            GestureSeeds.resolved(
+                base: GestureMap(),
+                profile: nil,
+                shortcutBase: .standard
+            ),
             natural: true
         )
         #expect(box.readers.isEmpty, "not before the start")

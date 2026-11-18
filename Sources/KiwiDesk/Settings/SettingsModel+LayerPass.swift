@@ -22,6 +22,8 @@ extension SettingsModel {
             page: config.layers,
             profile: reachProfile,
             switchedBase: switchedShortcutBase,
+            // The switch's gesture pass reads the draft's map (#3444).
+            gesture: switchedShortcutBase == nil ? nil : config.gesture,
             spaces: config.spaces
         )
     }
@@ -92,7 +94,10 @@ extension SettingsModel {
 
     /// The switch over the files, after the layer edits so it reads
     /// the page's layer names: every shared row moves but one the
-    /// page kept on its old chord, and the tombstones follow.
+    /// page kept on its old chord, and the tombstones follow — the
+    /// gesture map's keys likewise (#3444): a key the draft still
+    /// binds after the switch is one it kept, a pinned seed
+    /// included, and keeps what it resolved to.
     private func basePass(
         _ snapshot: inout RuleReachSnapshot,
         onto base: ShortcutBase
@@ -108,6 +113,10 @@ extension SettingsModel {
                         $0.lua == row.lua && $0.combo == row.combo
                     }
             }
+        }
+        let gestures = config.gesture
+        try snapshot.moveGestureBase(onto: base) {
+            gestures[$0]?.action != nil
         }
     }
 
@@ -228,6 +237,7 @@ struct LayeredReachCache {
         let page: [KeyLayer]
         let profile: String?
         let switchedBase: ShortcutBase?
+        let gesture: GestureMap?
         let spaces: [SpaceID]
     }
 

@@ -99,7 +99,7 @@ struct OnboardingGestureDevicesTests {
     @Test("the seeded mouse rows, in order, each on the mouse cap")
     func seededMouseRows() {
         LocalizationManager.shared.select("en")
-        let rows = mouseRows(GestureSeeds.seeds)
+        let rows = mouseRows(GestureSeeds.seeds(on: .standard))
         #expect(rows.map(\.id) == ["focus", "space", "move", "resize"])
         #expect(
             rows.compactMap { cap($0)?.caption }
@@ -114,7 +114,7 @@ struct OnboardingGestureDevicesTests {
             Issue.record("the move row draws no gesture cap")
             return
         }
-        #expect(move == [.control, .command])
+        #expect(move == [.control, .option])
         #expect(rows[0].spoken?.hasSuffix(", scroll") == true)
     }
 
@@ -149,7 +149,7 @@ struct OnboardingGestureDevicesTests {
     @Test("the mouse footnote names what its rows scroll")
     func mouseFootnote() {
         LocalizationManager.shared.select("en")
-        let all = mouseRows(GestureSeeds.seeds)
+        let all = mouseRows(GestureSeeds.seeds(on: .standard))
         #expect(
             OnboardingGestures.mouseFootnote(all)
                 == "Focus and Spaces step as far as you scroll."

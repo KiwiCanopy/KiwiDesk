@@ -28,6 +28,11 @@ extension ConfigMigration {
     static let seededStep = "control+option+command"
     static let seededMove = "control+command"
     static let seededResize = "control+option"
+    /// The gesture map's drag seeds (#3444): the keys a folded pair
+    /// that left the old defaults tombstones.
+    static let gestureDragSeeds = [
+        "drag:control+option", "drag:control+option+shift",
+    ]
 
     /// Idempotent by construction: it ends the old keys, so a file
     /// already crossed has nothing left to fold.
@@ -109,8 +114,7 @@ extension ConfigMigration {
             {
                 resize?["modifiers"] = ""
             }
-            foldDrag(drags["move"], "move", seededMove, &map)
-            foldDrag(resize, "resize", seededResize, &map)
+            foldDrags(move: drags["move"], resize: resize, &map)
             changed = true
         }
         if var scroll = object[retiredScrollKey] as? [String: Any] {
@@ -175,24 +179,38 @@ extension ConfigMigration {
         { canonicalChord($0["modifiers"] as? String ?? seed) }
     }
 
-    /// A move or resize's row: `drag` where it started on a press,
-    /// `hover_move` where it started on the keys alone. Either seed
-    /// is a `drag` row, tombstoned where the value left it.
-    static func foldDrag(
-        _ value: Any?,
-        _ grab: String,
-        _ seed: String,
+    /// The move and the resize: a pair on the old defaults takes the
+    /// map's drag seeds (#3444 ▸ Ruling: no crossing). A pair that
+    /// left them is kept whole — both rows written, `drag` where a
+    /// grab started on a press and `hover_move` where it started on
+    /// the keys alone — and the drag seeds tombstoned beneath, so the
+    /// seeds give it no second grab on keys it uses.
+    static func foldDrags(
+        move: Any?,
+        resize: Any?,
         _ map: inout [String: Any]
     ) {
-        guard let binding = value as? [String: Any] else { return }
-        let chord = dragChord(seed)(binding)
-        let hover = binding["start"] as? String == "hover"
-        guard chord != seed || hover else { return }
-        // The other grab may already have moved onto this seed.
-        if map["drag:\(seed)"] == nil { map["drag:\(seed)"] = NSNull() }
-        guard !chord.isEmpty else { return }
-        let input = hover ? "hover_move" : "drag"
-        map["\(input):\(chord)"] = ["grab": grab]
+        let grabs = [
+            ("move", move, seededMove), ("resize", resize, seededResize),
+        ]
+        .map { grab, value, seed in
+            let binding = value as? [String: Any] ?? [:]
+            return (
+                grab: grab,
+                chord: dragChord(seed)(binding),
+                hover: binding["start"] as? String == "hover",
+                seed: seed
+            )
+        }
+        guard grabs.contains(where: { $0.chord != $0.seed || $0.hover })
+        else { return }
+        for key in gestureDragSeeds where map[key] == nil {
+            map[key] = NSNull()
+        }
+        for grab in grabs where !grab.chord.isEmpty {
+            let input = grab.hover ? "hover_move" : "drag"
+            map["\(input):\(grab.chord)"] = ["grab": grab.grab]
+        }
     }
 
     /// The pan or the Space step: a swipe row and a wheel row for

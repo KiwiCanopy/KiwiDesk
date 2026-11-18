@@ -49,7 +49,7 @@ public struct ModifierDragSettings: Equatable, Sendable {
 
     /// The seeds' grabs, which hold until the first apply.
     public static let defaults = ModifierDragSettings(
-        resolved: GestureSeeds.seeds
+        resolved: GestureSeeds.seeds(on: .standard)
     )
 
     /// Every `drag` and `hover_move` row of a resolved list, in its

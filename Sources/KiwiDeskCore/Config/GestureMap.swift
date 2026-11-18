@@ -34,26 +34,30 @@ public struct GestureMap: Hashable, Sendable {
     }
 
     /// The sparse override that turns `base` into `edited`, both
-    /// laid over the seeds; nil where they resolve alike.
+    /// laid over the seeds on `shortcutBase`; nil where they
+    /// resolve alike.
     public static func diff(
         base: GestureMap,
-        edited: GestureMap
+        edited: GestureMap,
+        shortcutBase: ShortcutBase
     ) -> GestureMap? {
         var out = GestureMap()
+        let seeds = GestureSeeds.seeds(on: shortcutBase)
         let keys = Set(base.entries.keys).union(edited.entries.keys)
         for key in keys {
-            let new = edited.resolved(key)
-            guard base.resolved(key) != new else { continue }
+            let new = edited.resolved(key, seeds)
+            guard base.resolved(key, seeds) != new else { continue }
             out[key] = new.map(GestureEntry.bound) ?? .unbound
         }
         return out.isEmpty ? nil : out
     }
 
-    /// What `key` resolves to with this map over the seeds.
-    func resolved(_ key: GestureKey) -> GestureAction? {
-        guard let entry = entries[key] else {
-            return GestureSeeds.seeds[key]
-        }
+    /// What `key` resolves to with this map over `seeds`.
+    func resolved(
+        _ key: GestureKey,
+        _ seeds: [GestureKey: GestureAction]
+    ) -> GestureAction? {
+        guard let entry = entries[key] else { return seeds[key] }
         return entry.action
     }
 
@@ -74,17 +78,20 @@ public enum GestureSeeds {
     static var pan: ScrollChord { panKeys }
     static var step: ScrollChord { stepKeys }
 
-    /// The seeds (#1873 ▸ Ruling 2026-11-15). The trackpad ladder:
-    /// two fingers move between windows, three between Spaces and
-    /// their overview, four between screens; every consumed slot
-    /// holds ⌃⌥, so a bare macOS gesture stays macOS's.
-    public static let seeds: [GestureKey: GestureAction] = [
+    /// The seeds on `⌃⌥` (#1873 ▸ Ruling 2026-11-15); a reader
+    /// takes `seeds(on:)`, which moves them onto the stored base
+    /// (#3444). The trackpad ladder: two fingers move between
+    /// windows, three between Spaces and their overview, four
+    /// between screens; every consumed slot holds ⌃⌥, so a bare
+    /// macOS gesture stays macOS's. ⌃⌥ drag moves and ⌃⌥⇧ drag
+    /// resizes, ⇧ being the variant as on the keyboard ladder.
+    static let standardSeeds: [GestureKey: GestureAction] = [
         // A stray four-finger tap dims or clears the screen, and the
         // same tap undoes it; KiwiHub keeps ⌃⌥K.
         GestureKey(.tap4): navigation("kiwivision.toggle()"),
         GestureKey(.tap3): navigation("KiwiDesk.focus_space_last()"),
-        GestureKey(.drag, [.control, .command]): .grab(.move),
-        GestureKey(.drag, pan): .grab(.resize),
+        GestureKey(.drag, pan): .grab(.move),
+        GestureKey(.drag, pan.union(.shift)): .grab(.resize),
         GestureKey(.swipe2, pan): .family(.focus),
         GestureKey(.swipe3, pan): .split(
             GestureSplit(
@@ -117,16 +124,18 @@ public enum GestureSeeds {
         .run(navigationStep(lua))
     }
 
-    /// The bound keys once `base` lies over the seeds and `profile`
-    /// over that. A refused binding is dropped, since a hand-edited
-    /// file reaches what the verb refuses, and so is a click or a
-    /// hover_move whose keys a drag holds: one press starts one
-    /// thing, and a hover grab on those keys would end at the press.
+    /// The bound keys once `base` lies over the seeds on
+    /// `shortcutBase` and `profile` over that. A refused binding is
+    /// dropped, since a hand-edited file reaches what the verb
+    /// refuses, and so is a click or a hover_move whose keys a drag
+    /// holds: one press starts one thing, and a hover grab on those
+    /// keys would end at the press.
     public static func resolved(
         base: GestureMap,
-        profile: GestureMap?
+        profile: GestureMap?,
+        shortcutBase: ShortcutBase
     ) -> [GestureKey: GestureAction] {
-        var out = seeds
+        var out = seeds(on: shortcutBase)
         for layer in [base, profile ?? GestureMap()] {
             for (key, entry) in layer.entries {
                 out[key] = entry.action
@@ -159,9 +168,14 @@ public enum GestureSeeds {
     public static func shadowRefusal(
         of key: GestureKey,
         base: GestureMap,
-        profile: GestureMap?
+        profile: GestureMap?,
+        shortcutBase: ShortcutBase
     ) -> GestureRefusal? {
-        let resolved = Self.resolved(base: base, profile: profile)
+        let resolved = Self.resolved(
+            base: base,
+            profile: profile,
+            shortcutBase: shortcutBase
+        )
         if key.input == .drag {
             let shadowed = resolved.keys.contains {
                 $0.chord == key.chord

@@ -22,7 +22,7 @@ struct RestoreReachTests {
     private var seeded: GestureKey {
         get throws {
             try #require(
-                GestureSeeds.seeds.keys.sorted().first {
+                GestureSeeds.seeds(on: .standard).keys.sorted().first {
                     $0.input.device == .mouse
                 }
             )
@@ -34,7 +34,7 @@ struct RestoreReachTests {
     private var second: GestureKey {
         get throws {
             try #require(
-                GestureSeeds.seeds.keys.sorted().filter {
+                GestureSeeds.seeds(on: .standard).keys.sorted().filter {
                     $0.input.device == .mouse
                 }.dropFirst().first
             )

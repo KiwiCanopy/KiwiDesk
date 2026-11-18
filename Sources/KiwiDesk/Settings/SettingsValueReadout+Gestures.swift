@@ -12,13 +12,26 @@ import KiwiDeskCore
 extension SettingsValueReadout {
     static func gestureRows(
         old: GestureMap,
-        new: GestureMap
+        new: GestureMap,
+        shortcutBase: ShortcutBase
     ) -> [SettingsDiffRow] {
         let changed = Set(old.entries.keys).union(new.entries.keys)
             .filter { old[$0] != new[$0] }
             .sorted()
-        let before = { GestureListEdits.action(of: $0, in: old) }
-        let after = { GestureListEdits.action(of: $0, in: new) }
+        let before = {
+            GestureListEdits.action(
+                of: $0,
+                in: old,
+                shortcutBase: shortcutBase
+            )
+        }
+        let after = {
+            GestureListEdits.action(
+                of: $0,
+                in: new,
+                shortcutBase: shortcutBase
+            )
+        }
         var left = changed.filter { before($0) != nil && after($0) == nil }
         var rows: [SettingsDiffRow] = []
         var moved: Set<GestureKey> = []

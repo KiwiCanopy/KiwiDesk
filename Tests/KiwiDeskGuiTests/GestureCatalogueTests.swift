@@ -43,11 +43,17 @@ struct GestureCatalogueTests {
             let action = GestureListEdits.action(picking: command)
             var base = GestureMap()
             let key = GestureKey(.tap5)
-            GestureListEdits.set(action, at: key, in: &base)
+            GestureListEdits.set(
+                action,
+                at: key,
+                in: &base,
+                shortcutBase: .standard
+            )
             guard
                 case .run(let stored) = GestureListEdits.action(
                     of: key,
-                    in: base
+                    in: base,
+                    shortcutBase: .standard
                 )
             else {
                 Issue.record("\(command.lua) did not store as Lua")

@@ -47,7 +47,11 @@ struct GestureListRow: View {
     var key: GestureKey { entry.key }
 
     var action: GestureAction? {
-        GestureListEdits.action(of: key, in: model.config.gesture)
+        GestureListEdits.action(
+            of: key,
+            in: model.config.gesture,
+            shortcutBase: model.config.shortcutBase
+        )
     }
 
     var isOpen: Bool { open.contains(entry.id) }
@@ -168,7 +172,8 @@ struct GestureListRow: View {
         }
         if let held = GestureListEdits.heldByDrag(
             key,
-            in: model.config.gesture
+            in: model.config.gesture,
+            shortcutBase: model.config.shortcutBase
         ) {
             return GestureRefusalWords.sentence(held, hyperOff: hyperOff)
         }
@@ -225,11 +230,16 @@ struct GestureListRow: View {
             return GestureRefusalWords.sentence(refusal, hyperOff: hyperOff)
         }
         var base = model.config.gesture
-        GestureListEdits.remove(key, in: &base)
+        GestureListEdits.remove(
+            key,
+            in: &base,
+            shortcutBase: model.config.shortcutBase
+        )
         return GestureSeeds.shadowRefusal(
             of: target,
             base: base,
-            profile: nil
+            profile: nil,
+            shortcutBase: model.config.shortcutBase
         ).map { GestureRefusalWords.sentence($0, hyperOff: hyperOff) }
     }
 
@@ -238,7 +248,13 @@ struct GestureListRow: View {
         guard target != key, !others.contains(target) else { return }
         if action != nil {
             var map = model.config.gesture
-            guard GestureListEdits.rekey(key, to: target, in: &map)
+            guard
+                GestureListEdits.rekey(
+                    key,
+                    to: target,
+                    in: &map,
+                    shortcutBase: model.config.shortcutBase
+                )
             else { return }
             // The pick moves while the old key still reads (#3225).
             model.carryPick(.gesture, from: key.spelling, to: target.spelling)
@@ -264,7 +280,11 @@ struct GestureListRow: View {
         }
         if action != nil {
             model.dropGesturePick(key.spelling, shared: sharedReach != nil)
-            GestureListEdits.remove(key, in: &model.config.gesture)
+            GestureListEdits.remove(
+                key,
+                in: &model.config.gesture,
+                shortcutBase: model.config.shortcutBase
+            )
         }
         onUnbound()
         entry.key = target
