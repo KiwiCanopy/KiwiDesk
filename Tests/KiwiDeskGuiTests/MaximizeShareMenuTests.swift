@@ -119,6 +119,14 @@ struct MaximizeShareMenuTests {
             )
         )
         #expect(source.contains("case.custom:custom=MaximizeCustomRequest("))
+        // Custom… is last: nothing follows it inside the menu.
+        let tail = try #require(
+            source.components(separatedBy: ".tag(Tag.custom)").last?
+                .components(separatedBy: ".labelsHidden()").first
+        )
+        #expect(source.contains(".tag(Tag.custom)"))
+        #expect(!tail.contains("Text("))
+        #expect(!tail.contains("Divider()"))
         // The lengths are Core's: the pop-up asks the region.
         #expect(source.contains("region.points(of:.fraction(fraction)"))
         #expect(

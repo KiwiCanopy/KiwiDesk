@@ -11,10 +11,10 @@ import Testing
 /// press on. Scans both trees, comments and literals blanked.
 ///
 /// What it cannot see: a length named another way (`whole`,
-/// `extent`, `rect.maxX`); a file that reads a share without naming
-/// one of `subject`'s tokens; and which region a resolution is
-/// handed. The allowed file is exempt whole, not only its
-/// resolution.
+/// `extent`, `rect.maxX`) in Core; a `min` clamp over a frame other
+/// than `visibleFrame`; a file that reads a share without naming
+/// one of `subject`'s tokens; and a resolution split across files.
+/// The allowed file is exempt whole, not only its resolution.
 @Suite("Maximize length resolution seam")
 struct MaximizeLengthResolutionSeamTests {
     /// What makes a file a reader of a Maximize share.
@@ -26,7 +26,7 @@ struct MaximizeLengthResolutionSeamTests {
     /// A product with a length: `width *`, `* screen.height`,
     /// `length * share`.
     private static let product = try! NSRegularExpression(
-        pattern: #"(?i)(width|height|length)\b\s*[*/]"#
+        pattern: #"(?i)(width|height|length)\b\)*\s*[*/]"#
             + #"|[*/]\s*[\w.]*(width|height|length)\b"#
     )
 
@@ -66,6 +66,30 @@ struct MaximizeLengthResolutionSeamTests {
                     + "maximizedBounds: \(strays.sorted())"
             )
         )
+    }
+
+    /// Settings never reads a screen's visible frame beside a share:
+    /// that region is the fill's, which the door reads, so a `min`
+    /// clamp or a product over it is a second resolution the
+    /// product needle cannot see. Trades: a GUI file that reads a
+    /// share may not name `visibleFrame` for any other reason.
+    @Test("a GUI share reader names no visible frame")
+    func guiReadsNoVisibleFrame() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var readers: [String] = []
+        for file in try SourceScan.swiftSources(under: dir) {
+            let text = SourceScan.blankingCommentsAndLiterals(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let range = NSRange(text.startIndex..., in: text)
+            guard Self.subject.firstMatch(in: text, range: range) != nil
+            else { continue }
+            if text.contains("visibleFrame") {
+                readers.append(file.lastPathComponent)
+            }
+        }
+        #expect(readers.isEmpty, Comment(rawValue: "\(readers)"))
     }
 
     /// Settings takes the region door, never the engine's function.
