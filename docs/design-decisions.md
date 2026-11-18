@@ -7320,9 +7320,9 @@ ui-designer consult). With the rise gone the fill is the one clock,
 so ruling 3's objection to a fill on the tab does not reach it. A
 cross-fade of the risen pocket was set aside: it puts two marks on
 screen at once, and a dissolve stand-in is what Reduce Motion here
-never takes. Under KiwiDesk's Off the tab's fill steps to full
-for the wait, as the bars' does (#3471), and the pocket stands
-when the dwell ends. While the rise runs its panel holds the risen pocket's room
+never takes. Under KiwiDesk's Off, or with the Reveal off, the
+tab's fill steps to full for the wait, as the bars' does (owner,
+2026-11-18, #3471), and the pocket stands when the dwell ends. While the rise runs its panel holds the risen pocket's room
 and takes its clicks as the risen pocket does (owner, 2026-11-16):
 one panel carries the tab and the room, and passing clicks through
 the room cost the tab its own click and hover; a click there in
@@ -7969,8 +7969,9 @@ window hands it macOS's, live.
 The Settings window keeps macOS's setting: its motion is where the
 user watches Off take effect (the box arrives, the rows grey), and
 it is ordinary window chrome. Settings reads the flag only to
-narrate it: the Animations card's box and greys, and the Switching
-Spaces captions, which say what the desk draws (*Reduce Motion
+narrate it: the Animations card's box and greys, the KiwiShelf
+card's Durations switches and their reason line (#3471), and the
+Switching Spaces captions, which say what the desk draws (*Reduce Motion
 shows the Space*, above). `ReduceMotionHomeTests` holds the GUI tree
 to the one read outside `Sources/KiwiDesk/Settings`.
 
@@ -21510,7 +21511,7 @@ three, and the handle's progress fill takes its place. It is a
 change of lightness in place rather than travel, and standing it
 down would leave the dwell with no sign of its end, which is the
 fill's whole job. KiwiDesk's Off steps it to full rather than
-dropping it (#3471).
+dropping it (owner, 2026-11-18, #3471).
 The pocket's tab joins it under Reduce Motion (#3368): with its
 rise stood down, the tab counts the wait down with the same fill.
 :::
@@ -21691,6 +21692,10 @@ plays with Reduce Motion on and the
 crossing turns a stored 0 into it, so a choice made in Settings
 keeps a way back there. Rejected: dropping a switch, which strands a
 migrated 0; one central Durations group.
+Under KiwiDesk's Off both switches grey, their stored ticks kept,
+with one line in the drawer pointing at Looks & Animations ▸
+Animation speed (owner, 2026-11-18, #3471): neither motion plays
+there.
 :::
 
 **The bars ship one thickness, 40 pt, on every screen, and the

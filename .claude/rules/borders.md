@@ -516,8 +516,8 @@ where it stands, and sunk back on a leave through
 `BarMotion.playPocketScrub` and `playPocketSink`, never a clock the
 view reads. Where the one `BarMotion.pocketScrubs` stands the rise
 down, the same fill runs on the tab's core instead, through the one
-`BarMotion.playHandleFill`, which Reduce Motion keeps and Off steps
-to full (#3471),
+`BarMotion.playHandleFill`, which Reduce Motion keeps and which
+steps to full under Off or the Reveal off (#3471),
 the pocket holding its resting room (#3368 amended;
 `PocketApproachTests` ▸ `reducedFillsTheTab`,
 `PocketRiseTimelineTests`). A sink keeps the risen room until its

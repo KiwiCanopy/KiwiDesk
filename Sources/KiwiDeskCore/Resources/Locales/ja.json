@@ -1148,7 +1148,7 @@
   "kiwishelf.count.after.ax": "後方の残り: %1$d",
   "kiwishelf.count.before.ax": "前方の残り: %1$d",
   "kiwishelf.durations": "継続時間",
-  "kiwishelf.durations.animations_off": "アニメーションがオフのため、非表示のバーはすぐに現れ、バーはすぐに定位置に収まります。速度は%1$@で設定します。",
+  "kiwishelf.durations.animations_off": "すべてのプロファイルでアニメーションがオフです。速度は%1$@で選べます。",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "現在、バーと Pocket の端、またはそれらの画面ごとの端がそろっていません。ここで選ぶと、どの画面でもすべてが同じ端に置かれます。",

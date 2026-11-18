@@ -49,6 +49,9 @@ extension KiwiShelfCard {
                 ForEach(BarsRowOrder.kiwishelfDurations, id: \.id) {
                     durationRow($0)
                 }
+                // Outside each row's grey, inside the drawer: only
+                // its two rows grey under Off (#3471).
+                if animationsOff { animationsOffNote }
             }
             .padding(.top, 8)
         }
@@ -57,7 +60,6 @@ extension KiwiShelfCard {
         if let reason {
             caption(reason)
         }
-        if animationsOff { animationsOffNote }
     }
 
     /// KiwiDesk's own Off (#3238), which greys both Durations rows,

@@ -1148,7 +1148,7 @@
   "kiwishelf.count.after.ax": "Autres après : %1$d",
   "kiwishelf.count.before.ax": "Autres avant : %1$d",
   "kiwishelf.durations": "Durées",
-  "kiwishelf.durations.animations_off": "Les animations sont désactivées : une barre masquée apparaît instantanément et les barres se mettent en place. Réglez la vitesse dans %1$@.",
+  "kiwishelf.durations.animations_off": "Les animations sont désactivées dans tous les profils. Choisissez une vitesse dans %1$@.",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "Les barres et la Pocket, ou leurs écrans, sont actuellement sur des bords différents ; choisir ici les place toutes sur un même bord sur chaque écran.",

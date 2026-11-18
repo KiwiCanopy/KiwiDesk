@@ -1148,7 +1148,7 @@
   "kiwishelf.count.after.ax": "Ещё в конце: %1$d",
   "kiwishelf.count.before.ax": "Ещё в начале: %1$d",
   "kiwishelf.durations": "Длительности",
-  "kiwishelf.durations.animations_off": "Анимации выключены, поэтому скрытая панель появляется мгновенно, а панели сразу встают на место. Скорость задаётся в разделе %1$@.",
+  "kiwishelf.durations.animations_off": "Анимации выключены во всех профилях. Скорость выбирается в разделе %1$@.",
   "kiwishelf.durations.animations_off.link": "%1$@ ▸ %2$@",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "Сейчас панели и Pocket или их экраны стоят у разных краёв; выбор здесь ставит их все у одного края на каждом экране.",

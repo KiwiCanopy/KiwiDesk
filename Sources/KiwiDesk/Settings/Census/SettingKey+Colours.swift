@@ -122,8 +122,14 @@ extension ColoursKey {
             )
         case .animationsOnExpand:
             // KiwiShelf ▸ Show ▸ Durations; its length is Lua-only
-            // (#3236).
-            return .row(.bars, .kiwishelf, .showMore)
+            // (#3236). Greyed under KiwiDesk's Off, whose owner is
+            // the speed preset on Looks & Animations (#3471).
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: .setting(.colours(.animationSpeed))
+            )
         case .animationsOnPeek:
             // The peeks' motion off, Lua-only (#2563).
             return .luaOnly
@@ -134,6 +140,9 @@ extension ColoursKey {
         case .animationsOnReveal:
             // KiwiShelf ▸ Show ▸ Durations, greyed with the Reveal
             // row while no bar hides (owner ruling, 2026-10-21, #3236).
+            // Also greyed under KiwiDesk's Off (#3471), a second owner
+            // no `SettingGate` case joins to a runtime one; its
+            // pointer is the Expand row's, under both rows.
             return .row(
                 .bars,
                 .kiwishelf,

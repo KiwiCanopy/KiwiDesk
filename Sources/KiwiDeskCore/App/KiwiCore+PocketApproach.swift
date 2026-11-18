@@ -97,7 +97,8 @@ extension KiwiCore {
     /// Where the pocket on `display` stands in its approach: risen
     /// once the approach opened it, else its countdown — the scrubbed
     /// rise where the bars' motion plays, else the tab's progress
-    /// fill, which Reduce Motion keeps and Off steps to full (#3471).
+    /// fill, which Reduce Motion keeps and which steps to full under
+    /// Off or the Reveal off (#3471).
     func pocketApproach(
         on display: DisplayID
     ) -> (

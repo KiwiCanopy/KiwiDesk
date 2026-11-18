@@ -3640,8 +3640,9 @@ other screen continues past it. On the edge the Dock auto-hides on,
 and on the top edge while the menu bar hides, the outermost row is
 macOS's. Under Reduce Motion the pocket does not rise part way: the
 tab fills over the wait as a bar's handle does, and the pocket
-comes up when it is full. With KiwiDesk's animations off nothing
-shows during the wait.
+comes up when it is full. With KiwiDesk's animations off, or the
+reveal off, the tab shows full at once for the wait, as a bar's
+handle does, and the pocket comes up when the wait ends.
 An empty pocket fades its kiwis and rests its tab like a bar's
 handle; a pocket holding something rests its tab at full strength.
 A risen pocket sinks back into its handle when it goes to rest.
@@ -4140,7 +4141,8 @@ the fill completes: 0.4 s after the pointer came near, or 0.15 s
 after it reaches the handle itself, within about 9 points of the
 edge. The fill keeps its start while the pointer moves, restarts for
 the other bar when the pointer crosses into that bar's part of the
-edge, plays with Reduce Motion on, and is dropped, with the bar
+edge, plays with Reduce Motion on, shows full at once while
+KiwiDesk's animations or the reveal are off, and is dropped, with the bar
 staying away, when the pointer leaves before it completes. Where
 nothing stands between the bar and the screen's edge, and no other
 screen continues past it, a push against that edge along the bar

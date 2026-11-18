@@ -130,14 +130,13 @@ enum BarsGateHelp {
     }
 
     /// Why the Durations rows grey under KiwiDesk's Off (#3471),
-    /// with `CrossReferenceRow.linkSlot` where the speed link goes.
-    /// A wiring predicate, not an `InertReason`: the fix is the
-    /// speed preset's own row, which no census gate draws.
+    /// with `CrossReferenceRow.linkSlot` where the speed link goes:
+    /// the remote pointer their census `.setting` owner on Looks &
+    /// Animations asks for, the grey itself a wiring predicate.
     static var animationsOffProse: String {
         L(
             "kiwishelf.durations.animations_off",
-            "Animations are off, so a hidden bar appears at once "
-                + "and the bars land in place. Set the speed in %1$@.",
+            "Animations are off in every profile. Pick a speed in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }
