@@ -16755,6 +16755,23 @@ change, and the selected item draws none, since a durable marking
 and a pointer state never share a property (#1173). VoiceOver
 follows the selection only. `JumpHoverTests` holds the rule.
 
+:::unreleased
+One owner exception (2026-11-19, #3484): a pointer on a Desktop's
+title in the Desktop overview rings that Desktop's whole column —
+the title and every Space line — with a thin line in the
+selection's colour, and the title itself stays plain. A click on
+the title acts on the whole Desktop, so the hover outlines what
+the click will reach; the ground #3209 put on the title alone
+read as one more line, and under the tint toggle as the selection
+beside it. The ring never takes a selection's property (#1173):
+a selected line is a fill, and a selected window icon's ring is
+heavier and rings the one tile, where the hover rings the whole
+column. The ring shows only under the pointer, never on the
+selected Desktop's column otherwise. Every other KiwiHub hover keeps the grey lift, a
+hovered window icon's ground included, and the ✓ beside the shown
+Desktop stays in its own ink (#3210).
+:::
+
 Under *Tint KiwiHub and plates* (#2569) the panel wears the bars'
 look (▸ the shortcuts panel entry), so its marks take the look's
 colours. The selection takes KiwiShelf's highlight, and the lift
@@ -16956,13 +16973,17 @@ dimmed tile is never landed on. The field gives up its in-text
 cursor movement for it, which costs little because a query is a
 few letters typed and corrected from the end.
 
-The strip shows only while it is in use (owner amendment on #3168):
-off All, or while a query is typed. ⌃⌥J opens on the list alone,
+The strip shows only once it is in use (owner amendment on #3168):
+from the first step off All, or the first query, until the panel
+closes. ⌃⌥J opens on the list alone,
 because a switcher opened for the window used before is read top
 down and a row of tiles above that window is a second thing to read
 past on every press. Nothing about the strip's reach changes: → from
-an empty field brings it in on the next app, and ← back to All hides
-it again, so no app is a step further away than before. Typing
+an empty field brings it in on the next app, so no app is a step
+further away than before. Once shown it stays, All included, until
+the panel closes (owner, 2026-11-19): ⌥⇥, its ⇧ step and ← → all
+pass through All, and a strip that left on reaching it made the panel
+jump while the user was still stepping. Typing
 shows it on All because the dimmed tiles are then the answer to
 "which apps hold a match". The strip appears under the field, which
 never moves (#2246), and the panel grows downward rather than
@@ -24281,15 +24302,23 @@ badge for a transient slip would mislead. (#39)
 **The quick menu is the pointer's way into the daily switches,
 and KiwiHub holds them (#2309).** The layout, the profile and
 KiwiVision are what a user changes through the day, and they live
-in one place, KiwiHub's view picker, reached by ⌃⌥L from the
-keyboard and by **Open KiwiHub…** from the menu bar. The row
-opens that side and shows its live chord the way a menu item
-shows a key equivalent, so every pointer trip teaches the faster
-path. The menu holds no switch of its own: a Layout submenu, a
-Switch Profile submenu and a KiwiVision row beside the panel were
-two ways to do one thing, learned twice, and the menu's copy was
-the poorer one — no pictures of the layouts, no search, and
-submenus that are slow to steer with a pointer.
+in one place, KiwiHub's view picker, reached by ⌃⌥L. The menu
+holds no switch of its own: a Layout submenu, a Switch Profile
+submenu and a KiwiVision row beside the panel were two ways to do
+one thing, learned twice, and the menu's copy was the poorer one —
+no pictures of the layouts, no search, and submenus that are slow
+to steer with a pointer.
+
+:::unreleased
+The menu bar's way into KiwiHub is **Show Desktop overview**, which
+shows its live chord the way a menu item shows a key equivalent, so
+every pointer trip teaches the faster path. The menu keeps only
+rows that can show their key (owner, 2026-11-19, #3485), so the
+**Open KiwiHub…** row that stood here left: one row into KiwiHub is
+enough to teach the chord, and wherever a side's key is a tap, a
+one-side chord or on ✦, which no menu key equivalent can draw
+(#3470), a second row adds a way in and no key.
+:::
 
 What else the menu holds is either a warning or app chrome.
 **Settings…** sits low, next to Quit, where every native
@@ -24392,13 +24421,11 @@ returning to full strength IS the ready signal
 ([#802](https://github.com/KiwiCanopy/KiwiDesk/issues/802)).
 
 The grey sits on the switches, not on the row that leads to them
-(#2309). **Open KiwiHub…** stays enabled while KiwiDesk starts,
-waits for Start Tiling or lacks the Accessibility permission, and
-the view picker greys its own items
-with the reason as text. A greyed row leaves its reason to a
-neighbouring row; the panel puts it on the item itself, and since
-the row and the chord open the same side, the pointer and the
-keyboard meet the same explanation.
+(#2309). The menu row that opens KiwiHub stays enabled while
+KiwiDesk starts, waits for Start Tiling or lacks the Accessibility
+permission, and the view picker greys its own items with the
+reason as text. A greyed row leaves its reason to a neighbouring
+row; the panel puts it on the item itself.
 
 **[Trade-off]**
 

@@ -6,10 +6,10 @@ import Testing
 @testable import KiwiDesk
 
 /// When KiwiHub's app strip and the current window show (#3168):
-/// the strip off All or under a query; the current window greyed
-/// atop All and its own app's tile with nothing typed; a strip
-/// that appears or leaves slides the panel. The footer names ← →
-/// and the last-app opener on Windows (#3159).
+/// the strip from its first step off All or query until the panel
+/// closes; the current window greyed atop All and its own app's
+/// tile with nothing typed; a strip that appears slides the panel.
+/// The footer names ← → and the last-app opener on Windows (#3159).
 @Suite("KiwiHub strip visibility (#3168)")
 @MainActor
 struct JumpStripShownTests {
@@ -82,8 +82,30 @@ struct JumpStripShownTests {
         list.pickTile(2)
         #expect(list.yours == nil)
         list.pickTile(0)
-        #expect(!list.stripShown)
         #expect(list.yours == Self.yours)
+    }
+
+    @Test("once shown, the strip stays on All until the panel closes")
+    func stripLatches() {
+        var stepped = JumpList(snapshot: Self.snapshot())
+        stepped.pickTile(2)
+        stepped.pickTile(0)
+        #expect(stepped.tile == 0)
+        #expect(stepped.stripShown)
+        var typed = JumpList(snapshot: Self.snapshot())
+        typed.setQuery("i")
+        typed.setQuery("")
+        #expect(typed.stripShown)
+        // A side switch lands on All and keeps it too.
+        let model = model()
+        model.handle(.side(1), repeated: false)
+        model.setScope(.shortcuts)
+        model.setScope(.windows)
+        #expect(model.list.tile == 0)
+        #expect(model.list.stripShown)
+        // A fresh model starts strip-less, and every opening builds
+        // one (`controllerWiring` holds the build).
+        #expect(!self.model().list.stripShown)
     }
 
     @Test("its app's tile counts it among the app's windows")
@@ -111,7 +133,7 @@ struct JumpStripShownTests {
         #expect(snapshot.apps.first?.pid == 90)
     }
 
-    @Test("the strip appearing or leaving slides; a move inside snaps")
+    @Test("the strip appearing slides once; reaching All snaps")
     func stripToggleSlides() {
         let model = model()
         var slides = 0
@@ -124,9 +146,17 @@ struct JumpStripShownTests {
         #expect(slides == 1 && snaps == 1)
         model.handle(.side(-1), repeated: false)
         model.handle(.side(-1), repeated: false)
-        #expect(slides == 2)
+        #expect(model.list.tile == 0)
+        #expect(slides == 1 && snaps == 3)
         model.query = "i"
-        #expect(slides == 3)
+        #expect(slides == 1)
+        // A query is the first showing in its own opening.
+        let typed = self.model()
+        var typedSlides = 0
+        typed.onStripToggle = { typedSlides += 1 }
+        typed.query = "i"
+        typed.query = ""
+        #expect(typedSlides == 1 && typed.list.stripShown)
     }
 
     @Test("the row reads as a list row, named on the right")
@@ -205,6 +235,14 @@ struct JumpStripShownTests {
             ).split(whereSeparator: \.isWhitespace).joined()
         }
         let controller = try squash("JumpPanelController.swift")
+        // Each opening builds a fresh model, which resets the
+        // strip's latch (#3483).
+        #expect(
+            controller.contains(
+                "letsnapshot=core.jumpSnapshot(on:hubDisplay)"
+            )
+        )
+        #expect(controller.contains("letmodel=JumpModel(snapshot:snapshot,"))
         #expect(
             controller.contains(
                 "model.onStripToggle={[weakself]inDispatchQueue.main"

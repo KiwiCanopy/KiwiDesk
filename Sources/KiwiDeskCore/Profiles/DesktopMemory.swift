@@ -59,6 +59,8 @@ final class DesktopMemory {
     var tilingToggles: [SkyLight.SpaceID?: [SpaceID: Bool]] = [:]
     /// The Desktop each Space's state toggle belongs to: the last
     /// one a reading showed it on, kept through a full-screen Space.
+    /// KiwiHub's overview reads it as the Desktop the live Spaces
+    /// hold, through `KiwiCore.heldDesktop(on:)` (#3486).
     var tilingToggleDesktop: [SpaceID: SkyLight.SpaceID?] = [:]
 
     /// The sizes a resize wrote for each Space on each Desktop

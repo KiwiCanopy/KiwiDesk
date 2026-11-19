@@ -203,7 +203,7 @@ struct MenuBarRevealPaymentTests {
         #expect(!lines.contain("menu bar hidden"))
     }
 
-    /// A quick-menu row that fronts an own panel (Open KiwiHub)
+    /// A quick-menu row that fronts an own panel (the overview)
     /// keys it without a commanded focus; the payment leaves it.
     @Test("An own window keyed since stands the payment down")
     func ownKeyWindowDrops() {

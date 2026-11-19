@@ -196,9 +196,8 @@ struct StartTilingGateTests {
             _ = (start.target as? NSObject)?.perform(action, with: start)
         }
         #expect(presses == 1)
-        // KiwiHub stays reachable; its View side greys its own
-        // chips until tiling runs (#2309 ruling 9).
-        let hub = items.first { $0.title == "Open KiwiHub…" }
+        // KiwiHub stays reachable from the menu (#2309 ruling 9).
+        let hub = items.first { $0.title == "Show Desktop overview" }
         #expect(hub?.isEnabled == true)
     }
 
@@ -207,7 +206,9 @@ struct StartTilingGateTests {
         let items = menu(controller(idle: false)).items
         #expect(!items.contains { $0.title == "Start Tiling" })
         #expect(
-            items.first { $0.title == "Open KiwiHub…" }?.isEnabled == true
+            items.first {
+                $0.title == "Show Desktop overview"
+            }?.isEnabled == true
         )
     }
 

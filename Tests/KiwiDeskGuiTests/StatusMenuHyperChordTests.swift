@@ -15,8 +15,8 @@ private final class FakeStatusItem: StatusItemHandle {
 /// owner, ui-designer's option a): AppKit's key-equivalent column
 /// has no ✦, so a Hyper chord leaves it empty rather than drawing a
 /// bare key, and its press is never taken for Carbon's twin. The
-/// Desktop overview row carries its live chord as the KiwiHub row
-/// does. `.serialized`: titles are matched in English.
+/// Desktop overview row carries its live chord, and its seeded one
+/// draws (#3485). `.serialized`: titles are matched in English.
 @Suite("Status menu ▸ Hyper chords and the overview row", .serialized)
 @MainActor
 struct StatusMenuHyperChordTests {
@@ -68,6 +68,19 @@ struct StatusMenuHyperChordTests {
                 press(UInt16(chord.keyCode), [.command])
             )
             #expect(!chord.isPressed(by: command))
+        }
+    }
+
+    /// The menu keeps only rows that show their key (#3485): a row's
+    /// seeded chord is one the column can draw.
+    @Test("each chord row's seeded chord draws in the menu")
+    func seededChordsDraw() throws {
+        for row in [
+            DefaultKeybindings.desktopOverviewRow(),
+            DefaultKeybindings.openSettingsRow(),
+        ] {
+            let combo = try #require(KeyCombo.parse(row.combo))
+            #expect(combo.drawsInMenu, "\(row.lua)")
         }
     }
 

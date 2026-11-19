@@ -45,6 +45,7 @@ struct DesktopCardView: View {
         }
         .padding(.horizontal, DesktopsGeometry.columnInset)
         .frame(width: width, alignment: .top)
+        .overlay { ring }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(DesktopsText.desktop(desktop.label))
     }
@@ -79,17 +80,31 @@ struct DesktopCardView: View {
         .desktop(screen: screen, index: index)
     }
 
-    /// The title, a button to its Desktop (#3209): the grey hover
-    /// ground under the pointer, and `.help` as a second cue.
+    /// The column's hover (#3484, ruling C2): a thin selection ring
+    /// round the whole column while the pointer is on its title,
+    /// the title itself staying plain; the fill stays the
+    /// selection's alone (#1173).
+    @ViewBuilder private var ring: some View {
+        if pointer.lifts(titleTarget, selected: false) {
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(paint.selection, lineWidth: 1.5)
+                .allowsHitTesting(false)
+        }
+    }
+
+    /// The title, a button to its Desktop (#3209): the column's
+    /// ring under the pointer, and `.help` as a second cue.
     private var title: some View {
-        let lifted = pointer.lifts(titleTarget, selected: false)
-        return HStack(spacing: 4) {
+        HStack(spacing: 4) {
             Text(DesktopsText.desktop(desktop.label))
                 .font(.callout.weight(.semibold))
             if desktop.isShown {
                 // KiwiHub's one "in use" mark, as a current chip's.
+                // Own ink at full strength, never the accent
+                // (#3210, #3484).
                 Image(systemName: "checkmark.circle.fill")
                     .font(.callout)
+                    .foregroundStyle(.primary)
                     .accessibilityLabel(DesktopsText.shown)
             }
             Spacer(minLength: 4)
@@ -103,13 +118,6 @@ struct DesktopCardView: View {
         .lineLimit(1)
         .padding(.horizontal, 4)
         .frame(height: DesktopsGeometry.titleHeight)
-        .kiwiHubRowInk(paint, selected: false, lifted: lifted)
-        .background {
-            if lifted {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(paint.fill(paint.rowHover))
-            }
-        }
         .contentShape(Rectangle())
         .onTapGesture { click() }
         .desktopsHover(titleTarget, pointer)

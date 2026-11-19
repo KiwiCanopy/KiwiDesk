@@ -998,7 +998,15 @@ editing here:
   no screen shows lists the ledger's up windows through
   `awayMembers(of:)`, a shown one its members alone, and a new
   reader there states which half it is
-  (`DesktopOverviewTests`).
+  (`DesktopOverviewTests`). Two halves are ruled beside them
+  (#3486): a window away on a full-screen Space lists on its
+  remembered Space's line on its host screen's shown Desktop, and
+  while that screen shows a full-screen Space the Desktop
+  `heldDesktop(on:in:)` names — `tilingToggleDesktop`'s record,
+  never a store of its own — lists its members, then its ledger
+  windows by rank, then the full-screen ones; the overview's move
+  door reads that Desktop as shown through the same resolver
+  (`DesktopOverviewFullScreenTests`).
   Second, the bar is kept clean at TWO independent points — the
   member list (`state.effectiveMembers`, which never yields an
   away id) and the resolution (`state.windows[id]`, which drops

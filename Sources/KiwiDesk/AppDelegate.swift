@@ -112,9 +112,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         jumpPanel.onEditShortcuts = { [weak self] in
             self?.openSettingsFromTour(at: .shortcuts)
         }
-        statusItem.onOpenKiwiHub = { [weak jumpPanel] in
-            jumpPanel?.toggle(.view)
-        }
         statusItem.onOpenDesktopOverview = { [weak jumpPanel] in
             jumpPanel?.toggle(.desktops)
         }
@@ -143,13 +140,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             NSApp.forceFront(window)
         }
         // Reads bound open-combo live for quick menu.
-        statusItem.kiwiHubComboProvider = { [weak self] in
-            guard let self else { return nil }
-            return ShortcutsOpenBinding.combo(
-                core: self.core,
-                lua: KiwiHubSide.view.lua
-            )
-        }
         statusItem.overviewComboProvider = { [weak self] in
             guard let self else { return nil }
             return ShortcutsOpenBinding.combo(
