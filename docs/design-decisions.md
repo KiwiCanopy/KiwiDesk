@@ -20409,6 +20409,17 @@ over the merged run opening in place with a hover swap: a short
 Space Bar and a long App Bar put the handles at unequal distances
 from the middle, where they read as unrelated.
 
+:::unreleased
+*Amended* (owner, 2026-11-19, #3512): the stand-aside is the
+mouse's rule alone. A bar its key reveals lands under its own
+handle, and every other handle on the edge, the Pocket's included,
+stays in its place and stays live, so a hover on one opens that
+bar beside the pinned one. A second press hides only the named
+bar. Hiding the sibling for a key pin made the key read as a
+hover the user had not made, and took away the handles the user
+could still reach for.
+:::
+
 The dots cap at six, so a handle at rest never outgrows its band — a
 growing band gives up the one target size — following the current
 Space with small end dots, as iOS page dots do; the open bar shows

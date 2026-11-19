@@ -106,7 +106,8 @@ struct ShelfRevealPinCarryTests {
         revealer.start()
         defer { revealer.stop() }
         #expect(revealer.toggle(app, duration: 0))
-        #expect(revealer.yields(space))
+        // A key pin stands no sibling aside on screen either (#3512).
+        #expect(!revealer.yields(space))
         revealer.sync([space: target])
         #expect(revealer.reveal(of: app) == .pinned(until: nil))
         #expect(!revealer.yields(space))

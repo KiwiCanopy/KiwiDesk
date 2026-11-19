@@ -95,13 +95,15 @@ struct ShelfRevealPairTests {
     }
 
     @Test(
-        "a shown bar's sibling stands aside, and its shortcut merges it",
+        "a hovered bar's sibling stands aside, and its shortcut merges it",
         .enabled(if: NSScreen.main != nil)
     )
     func oneBarPerMouseKeyboardMerges() throws {
         let (core, shelf) = try #require(makeCore())
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(core.execute("space_bar.toggle_reveal", args: []).isSuccess)
+        // A hover reveal; a key pin keeps the sibling live (#3512).
+        core.shelves.reveal.onChange = { [weak core] in core?.updateBars() }
+        core.shelves.reveal.set(.hover, for: .init(shelf: shelf, bar: .space))
         // The App Bar's mark stands aside and its band goes.
         let app = try #require(spec(core, shelf, .app))
         #expect(app.yields)

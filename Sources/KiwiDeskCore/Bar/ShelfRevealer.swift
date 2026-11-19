@@ -116,15 +116,15 @@ final class ShelfRevealer {
     }
 
     /// Whether `key`'s bar stands aside: hidden while a sibling on
-    /// its shelf shows, so the mouse opens one bar at a time (owner,
-    /// 2026-10-19) — its approach opens nothing and its handle
-    /// gives way.
-    /// Only a shortcut shows it, beside the sibling.
+    /// its shelf shows by hover, so the mouse opens one bar at a
+    /// time (owner, 2026-10-19; a key pin leaves it live, #3512) —
+    /// its approach opens nothing and its handle gives way.
     func yields(_ key: Key) -> Bool {
         !key.isPocket && reveal(of: key) == .hidden
-            && phases.keys.contains {
-                $0.shelf == key.shelf && $0 != key && !$0.isPocket
-                    && targets[$0] != nil
+            && phases.contains {
+                $0.key.shelf == key.shelf && $0.key != key
+                    && !$0.key.isPocket && $0.value == .hover
+                    && targets[$0.key] != nil
             }
     }
 

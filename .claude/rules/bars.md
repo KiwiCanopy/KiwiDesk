@@ -287,8 +287,10 @@ twice, was a question the user answered twice. The argument is
   bars' runs meet so a point opens one bar, and over a maximized
   window reaching in only to the handle's hover band (#3346); a
   `hidden` bar has no approach, and a hidden bar whose edge sibling
-  shows yields, its handle standing aside
-  (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
+  shows by HOVER yields, its handle standing aside, while a sibling
+  its key pinned leaves it live, the Pocket's handle included
+  (#3512, `ShelfKeyRevealHandlesTests`; `ShelfHandleStripTests`,
+  `ShelfRevealPairTests`; the argument is
   `docs/design-decisions.md` ▸ A shelf can hide). **Place a revealed
   bar in its slot of the one arrangement of the bars resting on
   the edge** (`ShelfEdge.resting`, cut by
