@@ -145,16 +145,33 @@ struct ScrollStepMeterFingerTests {
         #expect(meter.feed(event(.changed, dx: 5), reading: on(length)) == 1)
     }
 
-    /// A reading that never moved by the floor — a Magic Mouse
-    /// beside a pad, whose reading is the pad's — steps there and
-    /// counts points (#3482).
-    @Test("a frozen reading steps at the floor")
-    func frozenReadingIsTheFloor() {
+    /// A reading that never moves — a Magic Mouse beside a pad,
+    /// whose reading is the pad's — steps after one points stride
+    /// and counts points (#3482).
+    @Test("a frozen reading steps at one points stride")
+    func frozenReadingStepsInPoints() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
-        _ = meter.feed(event(.began), reading: on(7))
-        #expect(meter.feed(event(.changed, dx: 30), reading: on(7)) == 1)
         let stride = length * ScrollStepMeter.pointsPerMM
+        _ = meter.feed(event(.began), reading: on(7))
+        #expect(meter.feed(event(.changed, dx: 30), reading: on(7)) == 0)
+        #expect(
+            meter.feed(event(.changed, dx: stride - 30), reading: on(7)) == 1
+        )
         #expect(meter.feed(event(.changed, dx: stride), reading: on(7)) == 1)
+    }
+
+    /// A fast flick past the floor before the reading has moved
+    /// waits for it, and then counts mm.
+    @Test("a reading behind a flick still counts mm")
+    func laggingReadingCountsMM() {
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(0))
+        #expect(meter.feed(event(.changed, dx: 40), reading: on(0)) == 0)
+        #expect(meter.feed(event(.changed, dx: 5), reading: on(length)) == 1)
+        #expect(
+            meter.feed(event(.changed, dx: 500), reading: on(2 * length - 1))
+                == 0
+        )
     }
 
     /// A reading lost between the floor and the first step waits:
@@ -183,10 +200,14 @@ struct ScrollStepMeterFingerTests {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         _ = meter.feed(event(.began), reading: on(0))
         #expect(meter.feed(event(.changed, dx: 5), reading: on(4)) == 0)
-        let fresh = TouchTravel.Reading(sum: .zero, source: 2)
+        // A jump of several lengths between the two sums.
+        let fresh = TouchTravel.Reading(
+            sum: CGVector(dx: 40, dy: 0),
+            source: 2
+        )
         #expect(meter.feed(event(.changed, dx: 25), reading: fresh) == 0)
         let moved = TouchTravel.Reading(
-            sum: CGVector(dx: length - 4, dy: 0),
+            sum: CGVector(dx: 40 + length - 4, dy: 0),
             source: 2
         )
         #expect(meter.feed(event(.changed, dx: 1), reading: moved) == 1)

@@ -36,8 +36,8 @@ public struct ScrollStepMeter: Sendable {
     /// The finger reading last fed where the touch counts in mm,
     /// from its first reading; nil where it counts points.
     private var finger: TouchTravel.Reading?
-    /// The touch's unit, fixed at the latch's floor: mm where the
-    /// finger reading moved before it, points otherwise; nil before.
+    /// The touch's unit, fixed from the latch's floor (`first`);
+    /// nil before.
     private var countsMM: Bool?
     /// The axis the last step took.
     private var horizontal: Bool?
@@ -112,12 +112,13 @@ public struct ScrollStepMeter: Sendable {
     }
 
     /// The touch's first step, never before the latch's point floor
-    /// (#3482). There the unit is fixed: a long swipe whose finger
-    /// reading moved since the begin counts mm and steps once the
-    /// finger has moved one `length`, a reading lost meanwhile
-    /// stepping nothing; any other touch — no reading, a reading
-    /// that never moved (a Magic Mouse beside a pad), no long
-    /// swipes — steps at the floor and counts points.
+    /// (#3482). From there the unit is fixed: a long swipe whose
+    /// finger reading moved since the begin counts mm and steps once
+    /// the finger has moved one `length`, a reading lost meanwhile
+    /// stepping nothing; no reading or no long swipes steps at the
+    /// floor and counts points; a reading that has not moved yet
+    /// waits for it up to one points stride, then counts points (a
+    /// Magic Mouse beside a pad, whose reading is the pad's).
     private mutating func first(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading?
@@ -141,7 +142,18 @@ public struct ScrollStepMeter: Sendable {
             return 0
         }
         if countsMM == nil {
-            countsMM = counts && reading != nil && budget != .zero
+            if !counts || reading == nil {
+                countsMM = false
+            } else if budget != .zero {
+                countsMM = true
+            } else if max(abs(travel.dx), abs(travel.dy))
+                < length * Self.pointsPerMM
+            {
+                // A reading a frame behind a fast flick: wait for it.
+                return 0
+            } else {
+                countsMM = false
+            }
         }
         if countsMM == true {
             guard reading != nil else { return 0 }

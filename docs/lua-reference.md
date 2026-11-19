@@ -5679,11 +5679,11 @@ per input.
 :::unreleased
 With long swipes on, each window on a trackpad, the first
 included, costs a [step length](#scroll_gestureset_step_length)
-of finger travel on the pad, in mm, whatever the swipe's speed; macOS's Scrolling
-speed does not change it. Where KiwiDesk reads no finger travel —
-no three- to five-finger tap or swipe is bound, or the trackpad
-reports no size — the first window comes after 24 pt of scroll
-and every 6 pt after it counts as 1 mm.
+of finger travel on the pad, in mm, whatever the swipe's speed;
+macOS's Scrolling speed does not change it. Where KiwiDesk reads
+no finger travel — no three- to five-finger tap or swipe is
+bound, or the trackpad reports no size — the first window comes
+after 24 pt of scroll and every 6 pt after it counts as 1 mm.
 :::
 
 Hold **⌃⌥⌘** (the default;

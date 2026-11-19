@@ -119,11 +119,11 @@ editing here:
     scrolling's one flip and the pad's axes do not. A long swipe's
     first step costs a step length too, never fewer points than
     the latch's floor (#3482). Fix a touch's unit at that floor:
-    mm only where the reading moved since the begin, so a reading
-    lost after the floor steps nothing rather than switching to
-    points, and a touch with no reading there, or one that never
-    moved (a Magic Mouse beside a pad), steps at the floor and
-    then counts points at
+    mm once the reading has moved since the begin, so a reading
+    lost after that steps nothing rather than switching to points;
+    a touch with no reading at the floor steps there, and one whose
+    reading has not moved waits up to one points stride (a Magic
+    Mouse beside a pad), each then counting points at
     `ScrollStepMeter.pointsPerMM` (`ScrollStepMeterFingerTests`;
     a second meeting place is review's). The argument is
     `docs/design-decisions.md` ▸ *Amended (#1873, owner

@@ -17891,11 +17891,14 @@ sooner than the rest: points grow with finger speed, so a fast
 swipe crossed 24 pt in a few millimetres. The latch stays as a
 floor under the first step, so a resting hand's drift never
 steps, and it is still the whole rule where no finger reading
-exists or Long swipes are off. The unit is fixed at the floor:
-mm only where the reading moved since the touch began, so a
-Magic Mouse beside a pad, whose reading is the pad's and never
-moves, steps at the floor and counts points. Refused: a 16 pt latch, which is still
-points and still speeds up with the hand.
+exists or Long swipes are off. From the floor the unit is fixed:
+mm once the reading has moved since the touch began. A reading
+that has not moved yet may be a frame behind a fast flick, so the
+first step waits for it up to one points stride (6 pt per mm of
+`step_length`); a Magic Mouse beside a pad, whose reading is the
+pad's and never moves, steps there and counts points. Refused: a
+16 pt latch, which is still points and still speeds up with the
+hand.
 :::
 
 :::unreleased
