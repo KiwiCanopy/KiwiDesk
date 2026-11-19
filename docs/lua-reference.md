@@ -5803,7 +5803,9 @@ sparse `scroll_gesture` object overrides field by field, save
 outside 3–60 is clamped to the range. In the
 Settings app the first two are under **Shortcuts ▸ Mouse &
 Trackpad**, where each row's **Applies to** checklist writes the
-base or chosen profiles' overrides; `step_length` has no row. A
+base or chosen profiles' overrides; `step_length` is the
+**Step length** slider below Long swipes, which spans 3–20 mm
+and writes `gui.json` alone. A
 stored `step_distance` is removed when the file loads.
 
 The verbs below change the running base only: a profile's own
@@ -6004,7 +6006,8 @@ fails.
 **Does:** sets the finger travel on the trackpad per window of a
 [long swipe](#scroll_gestureset_long_swipes), the first included,
 the same at every swipe speed. It applies in every profile,
-since no profile overrides it. It is kept, and does nothing,
+since no profile overrides it. Settings' **Step length** slider
+sets the same value, within 3–20 mm. It is kept, and does nothing,
 while long swipes are off.
 
 **Example:**

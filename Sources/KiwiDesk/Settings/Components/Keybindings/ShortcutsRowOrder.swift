@@ -26,6 +26,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.gestureBindings),
         .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.scrollLongSwipes),
+        .shortcuts(.scrollStepLength),
         .behaviour(.mouseHoverFocus),
         .behaviour(.mouseHoverFocusDelay),
         .behaviour(.mouseFollowsFocus),

@@ -23,6 +23,12 @@ struct SettingsSlider: View {
     /// scale runs (a position along an edge); decorative, the
     /// spoken value says which way. `lightness` draws its own.
     var ends: (leading: String, trailing: String)? = nil
+    /// A value marked on the track without an origin's signed fill
+    /// (a default); nil marks nothing.
+    var tick: Double? = nil
+    /// What an arrow key or a VoiceOver adjust moves by where the
+    /// drag is continuous (`step` 0); nil takes `step`.
+    var keyStep: Double? = nil
 
     private var endSymbols: (leading: String, trailing: String)? {
         lightness ? ("moon.fill", "sun.max.fill") : ends
@@ -76,7 +82,12 @@ struct SettingsSlider: View {
         .onKeyPress(.rightArrow) { nudge(1) }
         .onKeyPress(.upArrow) { nudge(1) }
         .accessibilityRepresentation {
-            Slider(value: $value, in: range, step: step)
+            let adjust = keyStep ?? step
+            if adjust > 0 {
+                Slider(value: $value, in: range, step: adjust)
+            } else {
+                Slider(value: $value, in: range)
+            }
         }
         .accessibilityLabel(label)
         .accessibilityValue(spokenValue)
@@ -86,7 +97,7 @@ struct SettingsSlider: View {
     private func nudge(_ direction: Double) -> KeyPress.Result {
         guard isEnabled else { return .ignored }
         let span = range.upperBound - range.lowerBound
-        let increment = step > 0 ? step : span / 100
+        let increment = keyStep ?? (step > 0 ? step : span / 100)
         value = snapped(value + direction * increment)
         return .handled
     }
@@ -129,7 +140,7 @@ struct SettingsSlider: View {
                 .fill(fill)
                 .frame(width: span.width, height: Self.trackHeight)
                 .offset(x: span.x)
-            if let origin {
+            if let origin = origin ?? tick {
                 Rectangle()
                     .fill(Color.primary.opacity(0.35))
                     .frame(

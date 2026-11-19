@@ -199,6 +199,11 @@ struct GesturesControls: Sendable {
         "shortcuts.gestures.scroll.long_swipes",
         "Long two-finger swipes move focus further"
     )
+    /// Long swipes' Step length slider (#3505).
+    let stepLength = SettingsControl(
+        "shortcuts.gestures.scroll.step_length",
+        "Step length"
+    )
     let naturalTrackpad = SettingsControl(
         "shortcuts.gestures.scroll.trackpad",
         "Trackpad"

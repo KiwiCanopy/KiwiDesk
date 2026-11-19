@@ -51,9 +51,33 @@ enum ScrollGestureWords {
         )
     }
 
-    /// The Lua-only `step_length`'s name, for its diff row.
+    /// The `step_length` row's name, and its diff row's.
     static var stepLength: String {
-        L("shortcuts.gestures.scroll.step_length", "Long swipe step")
+        L("shortcuts.gestures.scroll.step_length", "Step length")
+    }
+
+    /// The Step length slider's two ends.
+    static var stepShort: String {
+        L("shortcuts.gestures.scroll.step_length.short", "Short")
+    }
+
+    static var stepLong: String {
+        L("shortcuts.gestures.scroll.step_length.long", "Long")
+    }
+
+    /// What VoiceOver reads for a step length: its place against
+    /// the default, the slider carrying no number.
+    static func stepSpoken(_ mm: Double) -> String {
+        let base = ScrollGestureBase.defaults.stepLength
+        if abs(mm - base) < 0.05 {
+            return L(
+                "shortcuts.gestures.scroll.step_length.default",
+                "Default"
+            )
+        }
+        return mm < base
+            ? L("shortcuts.gestures.scroll.step_length.shorter", "Shorter")
+            : L("shortcuts.gestures.scroll.step_length.longer", "Longer")
     }
 
     static var trackpad: String {

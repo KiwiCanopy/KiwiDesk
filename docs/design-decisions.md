@@ -18075,6 +18075,28 @@ this release, so no stored 10 records an older default.
 :::
 
 :::unreleased
+*Amended* (owner, 2026-11-19, #3505, with ui-designer and
+architect): **the step length has a Settings row, and is no longer
+Lua-only** — this retires "It is Lua-only" in the 2026-11-16
+amendment and "Its step length is Lua-only" in the #3369 one.
+Under a Settings-owned config `gui.json` is the store and loads
+over the Lua line (the O7 split; a per-field ledger of who set
+what was refused), so Lua-only was unreachable for the very users
+who use Settings. Nor is it the retired *Travel per window* field:
+that existed because macOS's Scrolling speed scaled point travel
+per Mac, while finger travel needs no per-Mac scaling, so this is
+a feel knob. **Step length** sits directly below the Long swipes
+checkbox as its dependent, global with no **Applies to** column,
+and greys with it, drawing no caption of its own since its cause
+is the row above. It is a log-scaled slider between Short and Long
+with no number, since a millimetre value is not what a hand
+judges, and a tick at the default with a light snap onto it. Its
+low edge is Core's clamp (3 mm); its high edge, 20 mm, is the
+GUI's curation, Lua open to 60, and a stored value past it pins
+the knob to that end.
+:::
+
+:::unreleased
 **Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
 no "Holding a modifier" group, and Long swipes is one setting at
 the Trackpad card's foot, never per binding.** A scroll with keys

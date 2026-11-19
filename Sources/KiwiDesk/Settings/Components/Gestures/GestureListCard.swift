@@ -38,6 +38,7 @@ struct GestureListCard: View {
                 if device == .trackpad {
                     GestureRule()
                     GestureLongSwipesRow(model: model)
+                    GestureStepLengthRow(model: model)
                 }
             }
         }

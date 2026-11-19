@@ -211,9 +211,14 @@ extension ShortcutsKey {
                 gate: .runtime(.luaImportAvailable)
             )
         case .scrollStepLength:
-            // Lua-only: a long swipe's step in mm (#1873 ▸ Ruling
-            // 2026-11-16).
-            return .luaOnly
+            // Long swipes' dependent slider (#3505): greyed while
+            // Long swipes is off or greyed.
+            return .row(
+                .shortcuts,
+                .gestures,
+                .showMore,
+                gate: .setting(.shortcuts(.scrollLongSwipes))
+            )
         case .scrollLongSwipes:
             // The Trackpad card's foot (#3369): greyed while no
             // two-finger swipe runs the pan.
