@@ -180,7 +180,7 @@ extension KiwiCore {
         let returning = rememberedVirtualSpace(of: native.id, in: snapshot)
         let active = state.workspaces.activeSpace(on: display)
         let spaces = state.workspaces.spaces(on: display)
-        var lines = spaces.map { id in
+        let lines = spaces.map { id in
             overviewLine(
                 id,
                 isShown: id == (live == nil ? returning : active),
