@@ -1478,6 +1478,7 @@
   "layout_defaults.maximize.points.ax": "%1$@ points",
   "layout_defaults.maximize.screen_line": "%1$@ · %2$@ × %3$@ pt",
   "layout_defaults.maximize.screen_shape": "Screen shape",
+  "layout_defaults.maximize.share.ax": "%1$@, %2$@",
   "layout_defaults.maximize.show_bars": "Show bars at the screen edge",
   "layout_defaults.maximize.show_bars.help": "While a window is maximized, the bars and the Pocket do not cover it. With this on, moving the pointer to a bar's screen edge brings that bar in over the window. It also applies to “%1$@” in %2$@. A bar's shortcut shows it either way. Anything set to “%3$@” stays out of sight.",
   "layout_defaults.maximize.show_bars.nothing_shows": "Works when the Space Bar or an App Bar is set to “%1$@” or “%2$@” in %3$@.",

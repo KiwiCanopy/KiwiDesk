@@ -1478,6 +1478,7 @@
   "layout_defaults.maximize.points.ax": "%1$@ points",
   "layout_defaults.maximize.screen_line": "%1$@ · %2$@ × %3$@ pt",
   "layout_defaults.maximize.screen_shape": "Forme d'écran",
+  "layout_defaults.maximize.share.ax": "%1$@, %2$@",
   "layout_defaults.maximize.show_bars": "Afficher les barres au bord de l'écran",
   "layout_defaults.maximize.show_bars.help": "Tant qu'une fenêtre est maximisée, les barres et la Pocket ne la recouvrent pas. Avec cette option activée, amener le pointeur au bord de l'écran d'une barre fait apparaître cette barre par-dessus la fenêtre. Cela s'applique aussi à « %1$@ » en %2$@. Le raccourci d'une barre l'affiche dans tous les cas. Tout élément réglé sur « %3$@ » reste invisible.",
   "layout_defaults.maximize.show_bars.nothing_shows": "Fonctionne quand la Space Bar ou une App Bar est réglée sur « %1$@ » ou « %2$@ » dans %3$@.",

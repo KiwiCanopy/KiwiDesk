@@ -1478,6 +1478,7 @@
   "layout_defaults.maximize.points.ax": "%1$@ 點",
   "layout_defaults.maximize.screen_line": "%1$@ · %2$@ × %3$@ pt",
   "layout_defaults.maximize.screen_shape": "螢幕形狀",
+  "layout_defaults.maximize.share.ax": "%1$@，%2$@",
   "layout_defaults.maximize.show_bars": "在螢幕邊緣顯示列",
   "layout_defaults.maximize.show_bars.help": "視窗最大化時，列與 Pocket 不會遮擋它。開啟後，將指標移到列所在的螢幕邊緣，該列就會出現在視窗之上。這也適用於%2$@的「%1$@」。無論是否開啟，列的快速鍵都能顯示它。設為「%3$@」的項目始終不可見。",
   "layout_defaults.maximize.show_bars.nothing_shows": "在 %3$@ 中將 Space Bar 或任一 App Bar 設為「%1$@」或「%2$@」時有效。",

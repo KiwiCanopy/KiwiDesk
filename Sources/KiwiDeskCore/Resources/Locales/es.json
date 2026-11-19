@@ -1478,6 +1478,7 @@
   "layout_defaults.maximize.points.ax": "%1$@ puntos",
   "layout_defaults.maximize.screen_line": "%1$@ · %2$@ × %3$@ pt",
   "layout_defaults.maximize.screen_shape": "Forma de pantalla",
+  "layout_defaults.maximize.share.ax": "%1$@, %2$@",
   "layout_defaults.maximize.show_bars": "Mostrar barras en el borde de la pantalla",
   "layout_defaults.maximize.show_bars.help": "Mientras una ventana está maximizada, las barras y el Pocket no la cubren. Con esta opción activada, llevar el puntero al borde de la pantalla de una barra muestra esa barra sobre la ventana. También se aplica a «%1$@» en %2$@. El atajo de una barra la muestra en cualquier caso. Lo que esté en «%3$@» no se ve.",
   "layout_defaults.maximize.show_bars.nothing_shows": "Funciona cuando, en %3$@, la Space Bar o una App Bar está en «%1$@» o «%2$@».",

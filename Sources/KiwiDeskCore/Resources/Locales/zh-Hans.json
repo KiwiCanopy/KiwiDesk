@@ -1478,6 +1478,7 @@
   "layout_defaults.maximize.points.ax": "%1$@ 点",
   "layout_defaults.maximize.screen_line": "%1$@ · %2$@ × %3$@ pt",
   "layout_defaults.maximize.screen_shape": "屏幕形状",
+  "layout_defaults.maximize.share.ax": "%1$@，%2$@",
   "layout_defaults.maximize.show_bars": "在屏幕边缘显示栏",
   "layout_defaults.maximize.show_bars.help": "窗口最大化时，栏和 Pocket 不会遮挡它。开启后，将指针移到栏所在的屏幕边缘，该栏就会出现在窗口之上。这也适用于%2$@的“%1$@”。无论是否开启，栏的快捷键都能显示它。设为“%3$@”的项目始终不可见。",
   "layout_defaults.maximize.show_bars.nothing_shows": "在 %3$@ 中将 Space Bar 或任一 App Bar 设为“%1$@”或“%2$@”时有效。",

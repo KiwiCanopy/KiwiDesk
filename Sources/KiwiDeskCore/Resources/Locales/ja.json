@@ -1478,6 +1478,7 @@
   "layout_defaults.maximize.points.ax": "%1$@ ポイント",
   "layout_defaults.maximize.screen_line": "%1$@ · %2$@ × %3$@ pt",
   "layout_defaults.maximize.screen_shape": "画面の形",
+  "layout_defaults.maximize.share.ax": "%1$@、%2$@",
   "layout_defaults.maximize.show_bars": "画面の端でバーを表示",
   "layout_defaults.maximize.show_bars.help": "ウインドウが最大化されている間、バーと Pocket はウインドウを覆いません。これをオンにすると、バーのある画面の端にポインタを移動したときに、そのバーがウインドウの上に表示されます。%2$@の「%1$@」にも適用されます。バーのショートカットではどちらの場合も表示されます。「%3$@」に設定したものは表示されません。",
   "layout_defaults.maximize.show_bars.nothing_shows": "%3$@でSpace BarまたはいずれかのApp Barが「%1$@」または「%2$@」のときに機能します。",

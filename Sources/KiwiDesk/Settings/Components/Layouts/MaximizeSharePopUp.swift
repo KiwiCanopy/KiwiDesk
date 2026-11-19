@@ -4,8 +4,10 @@ import SwiftUI
 /// A Maximize share's pop-up (#3062, #3460): the five fractions,
 /// each with its length on this row's screen, then a stored value
 /// outside them as a checked item, then "Custom…", which opens an
-/// anchored percent-or-points popover. Layout Defaults' shape rows
-/// and a Space's own rows (#3090) both draw it.
+/// anchored percent-or-points popover. Closed and open it shows the
+/// fraction first and the length greyed after it (#3488 ▸ option
+/// E). Layout Defaults' shape rows and a Space's own rows (#3090)
+/// both draw it.
 struct MaximizeSharePopUp: View {
     @Binding var value: MaximizeLength
     /// The axis this share sizes the other of: a Maximize Height's
@@ -20,52 +22,37 @@ struct MaximizeSharePopUp: View {
     let column: String
     /// The open Custom popover (#3062).
     @State private var custom: MaximizeCustomRequest?
-
-    /// What the menu's items carry.
-    enum Tag: Hashable {
-        case share(MaximizeLength)
-        case custom
-    }
+    @State private var anchor = PullDownAnchor()
 
     var body: some View {
-        let offMenu = Self.offMenuShare(value)
-        let selection = Binding<Tag>(
-            get: { .share(Self.selection(value)) },
-            set: { picked in
-                switch picked {
-                case .custom:
-                    custom = MaximizeCustomRequest(
-                        stored: value,
-                        axis: axis,
-                        region: region
-                    )
-                case .share(let share):
-                    value = share
+        Button(action: open) {
+            HStack(spacing: 6) {
+                Text(Self.glyph(value))
+                let detail = Self.detail(
+                    value,
+                    axis: axis,
+                    region: region
+                )
+                if !detail.isEmpty {
+                    Text(detail).foregroundStyle(.secondary)
                 }
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
             }
-        )
-        return Picker(label, selection: selection) {
-            ForEach(FractionChips.shares, id: \.glyph) { share in
-                Text(presetTitle(share.glyph, share.value))
-                    .tag(Tag.share(.fraction(share.value)))
-            }
-            if let offMenu {
-                Divider()
-                Text(Self.glyph(offMenu)).tag(Tag.share(offMenu))
-            }
-            Divider()
-            Text(L("layout_defaults.maximize.custom", "Custom…"))
-                .tag(Tag.custom)
+            .monospacedDigit()
         }
-        .labelsHidden()
-        .pickerStyle(.menu)
-        .neutralMenuLabel()
+        .settingsPopUpTrigger()
         .controlSize(.large)
-        // A menu pop-up draws at its own width whatever frame it
-        // gets; natural width on the cell's leading edge aligns it.
         .fixedSize()
+        // The button's own view, so the menu opens in ITS window.
+        .background(PullDownAnchorView(anchor: anchor))
         .accessibilityLabel(label)
-        .accessibilityValue(Self.spoken(value))
+        .accessibilityValue(
+            Self.spoken(value, axis: axis, region: region)
+        )
+        .accessibilityHint(L("pull_down.ax_hint", "Opens a menu."))
         .popover(item: customBinding) { request in
             MaximizeCustomPopover(
                 request: Binding(
@@ -78,12 +65,28 @@ struct MaximizeSharePopUp: View {
         }
     }
 
-    /// A fraction's item: its glyph and, with a screen, the length
-    /// it fills there, through the fill's own resolution.
-    private func presetTitle(_ glyph: String, _ fraction: Double) -> String {
-        guard let region else { return glyph }
-        let length = region.points(of: .fraction(fraction), axis: axis)
-        return "\(glyph)    \(SettingsValueReadout.points(length))"
+    /// Opens the menu over the button; a share writes, Custom…
+    /// opens its popover.
+    private func open() {
+        guard let view = anchor.view, view.window != nil else { return }
+        MaximizeShareMenu.present(
+            MaximizeShareMenu.entries(value, axis: axis, region: region),
+            checked: Self.selection(value),
+            from: view
+        ) { entry in
+            switch entry {
+            case .share(let share, _, _):
+                value = share
+            case .custom:
+                custom = MaximizeCustomRequest(
+                    stored: value,
+                    axis: axis,
+                    region: region
+                )
+            case .divider:
+                break
+            }
+        }
     }
 
     /// The popover's request. Its dismissal — Return, a click
@@ -137,6 +140,38 @@ struct MaximizeSharePopUp: View {
                 FractionChips.matches(fraction, $0.value)
             }?.glyph ?? SettingsValueReadout.percent(fraction)
         }
+    }
+
+    /// The greyed length `share` fills on `region`, empty with no
+    /// screen or for a length, which its title already states.
+    static func detail(
+        _ share: MaximizeLength,
+        axis: MaximizeAxis,
+        region: MaximizeRegion?
+    ) -> String {
+        guard let region, share.fraction != nil else { return "" }
+        return SettingsValueReadout.points(
+            region.points(of: share, axis: axis)
+        )
+    }
+
+    /// What VoiceOver reads for the closed button: `stored`, then
+    /// the length it fills on `region` where the button draws one,
+    /// so what is drawn is what is spoken (#3488).
+    static func spoken(
+        _ stored: MaximizeLength,
+        axis: MaximizeAxis,
+        region: MaximizeRegion?
+    ) -> String {
+        guard let region, stored.fraction != nil else {
+            return spoken(stored)
+        }
+        return L(
+            "layout_defaults.maximize.share.ax",
+            "%1$@, %2$@",
+            spoken(stored),
+            spoken(.points(region.points(of: stored, axis: axis)))
+        )
     }
 
     /// What VoiceOver reads for `stored`: a percent, or a length in

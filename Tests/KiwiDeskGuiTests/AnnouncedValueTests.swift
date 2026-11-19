@@ -72,10 +72,9 @@ struct AnnouncedValueTests {
         // row.
         "ShortcutGroupField.swift": 1,
         // #3062: a Maximize table cell's From pop-up, named for its
-        // column and screen shape; the share pop-up it shares with a
-        // Space's own rows (#3090), named by its host.
+        // column and screen shape. Its share pop-up is a button
+        // opening its own menu since #3488, out of this census.
         "MaximizeShapeRow.swift": 1,
-        "MaximizeSharePopUp.swift": 1,
         // #2614: a recorder's Sides menu, named for its row.
         "KeyRecorderField+Sides.swift": 1,
         // #3281: Natural scrolling's pop-up, named for its card, and

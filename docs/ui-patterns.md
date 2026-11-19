@@ -260,10 +260,12 @@ fraction stores that fraction, so the menu checks it.
 :::unreleased
 A cell may also hold a length in points (#3460). Each fraction in
 the pop-up shows the length it fills on a connected screen of that
-shape, and a stored length shows as stored, never as a screen
-clamps it. *Custom…* gains a `% | pt` switch: % snaps as above, pt
-takes whole points from 200 in steps of 10 and never snaps, and a
-flip converts on the row's screen or clears the field with none
+shape, greyed and right-aligned after it, and the closed cell
+shows the fraction first and its length greyed after it (#3488); a
+stored length shows as stored, never as a screen clamps it.
+*Custom…* gains a `% | pt` switch: % snaps as above, pt takes
+whole points from 200 in steps of 10 and never snaps, and a flip
+converts on the row's screen or clears the field with none
 connected. Under the row, a line names each connected screen a
 stored length is too long for, which a press fills on that axis.
 :::

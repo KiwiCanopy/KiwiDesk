@@ -36,6 +36,10 @@ enum QuickMenuBuilders {
         "Sources/KiwiDesk/StatusItemController+TilingRow.swift",
         // The Sync Paused… row (#3088) states its own enablement.
         "Sources/KiwiDesk/StatusItemController+Mark.swift",
+        // A Maximize share's menu (#3488) turns auto-enabling off and
+        // states every row's `isEnabled`.
+        "Sources/KiwiDesk/Settings/Components/Layouts/"
+            + "MaximizeShareMenu.swift",
     ]
 
     /// Files that construct rows and are NOT checked per row,
