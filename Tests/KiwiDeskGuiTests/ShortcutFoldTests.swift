@@ -64,7 +64,7 @@ struct ShortcutFoldTests {
         LocalizationManager.shared.select("en")
         let left = (1...3).map { goTo($0, "lctrl+lalt+\($0)") }
         let row = try #require(rows(build(left)).first)
-        #expect(row.combo == "Left ⌃⌥ 1–3")
+        #expect(row.combo == "Left⌃⌥1–3")
         let mixed = [
             goTo(1, "lctrl+lalt+1"), goTo(2, "rctrl+ralt+2"),
             goTo(3, "lctrl+lalt+3"),

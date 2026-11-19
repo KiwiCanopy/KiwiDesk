@@ -93,26 +93,18 @@ enum ModifierSidesWords {
                 + "shortcuts. For a tap it also reads modifier changes "
                 + "and clicks; it records and stores none of them.",
             HyperKeyWords.name(.rightCommand),
-            drawn(.right) + space + "H",
-            drawn(.left) + space + "H",
+            drawn(.right) + "H",
+            drawn(.left) + "H",
             "cmd+h",
             KeyRecorderField.eitherSide
         )
     }
 
     /// A sided ⌘ as every surface draws it (`ChordGlyphs`),
-    /// `Right ⌘`.
+    /// `Right⌘`.
     static func drawn(_ side: ModifierSide) -> String {
         ChordGlyphs.modifiers(
             HotkeyModifiers.command.union(.side(side, of: .command))
-        )
-    }
-
-    /// What stands between a sided ⌘ and its key; the example's key
-    /// stays the frame's own H, whatever the keyboard layout draws.
-    private static var space: String {
-        ChordGlyphs.separator(
-            HotkeyModifiers.command.union(.side(.right, of: .command))
         )
     }
 

@@ -47,7 +47,7 @@ struct SidedChordWordsTests {
         #expect(SidedChordWords.label("✦⌘K") == name + " ⌘K")
         #expect(SidedChordWords.label("✦ ← →") == name + " ← →")
         #expect(
-            SidedChordWords.label("✦ Right ⌘ K") == name + " Right ⌘ K"
+            SidedChordWords.label("✦ Right⌘K") == name + " Right ⌘ K"
         )
         #expect(SidedChordWords.label("✦") == name)
     }
@@ -66,9 +66,7 @@ struct SidedChordWordsTests {
                     .union(.option)
                     .union(.side(side, of: .control))
                     .union(.side(side, of: .option))
-                let glyphs =
-                    ChordGlyphs.modifiers(modifiers)
-                    + ChordGlyphs.separator(modifiers) + "J"
+                let glyphs = ChordGlyphs.modifiers(modifiers) + "J"
                 let names = [ModifierKind.control, .option].map {
                     HyperKeyWords.name(.key(side, of: $0))
                 }

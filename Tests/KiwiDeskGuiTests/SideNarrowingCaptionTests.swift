@@ -39,13 +39,13 @@ struct SideNarrowingCaptionTests {
         )
         #expect(
             words.drawn
-                == "Only Right ⌘⌘ runs this. Left ⌘⌘ runs "
+                == "Only Right⌘⌘ runs this. Left⌘⌘ runs "
                 + "\u{201C}Show KiwiHub\u{201D}."
         )
         #expect(
             words.spoken
-                == "Runs from: Right Command, press twice. "
-                + "\u{201C}Show KiwiHub\u{201D} takes: Left Command, "
+                == "Runs from: Right ⌘, press twice. "
+                + "\u{201C}Show KiwiHub\u{201D} takes: Left ⌘, "
                 + "press twice."
         )
         // The sided row, and a row no side is taken from, draw none.

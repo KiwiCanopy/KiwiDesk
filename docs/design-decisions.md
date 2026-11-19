@@ -14180,7 +14180,7 @@ Accepted.
 recording.* While the switch is on, a **Sides** pull-down sits
 before each row's recorder well, its slot held on every row so the
 wells line up. It lists each sided modifier of the shortcut with
-Left, Right and Either side, so `Right ⌘ ⌥ H` can keep Right ⌘ and
+Left, Right and Either side, so `Right⌥⌘H` can keep Right ⌘ and
 make ⌥ either-side; a single modifier tap offers Either side too,
 though it records the side pressed (#3259), and the modifier one
 of whose keys is the Hyper key offers no side at all (Ruling 4

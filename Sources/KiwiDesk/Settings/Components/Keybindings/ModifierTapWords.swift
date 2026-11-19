@@ -2,9 +2,11 @@ import Foundation
 import KiwiDeskCore
 
 /// A modifier tap in words (#1872): "Command, press twice",
-/// "Right Option, press twice", "Right Command, press once" — what
-/// VoiceOver and the hover say for a drawn `⌘⌘`, `Right ⌥⌥`,
-/// `Right ⌘`. The side word is the catalog's chord frame.
+/// "Right ⌥, press twice", "Right ⌘, press once" — what VoiceOver
+/// and the hover say for a drawn `⌘⌘`, `Right⌥⌥`, `Right⌘`. A sided
+/// key takes `HyperKeyWords`' name, whose side word agrees with its
+/// key in every catalog, as a sided chord is spoken; never the
+/// drawn chord's frame, which stands before glyphs (#3487).
 @MainActor
 enum ModifierTapWords {
     /// `combo` in words, nil for a chord.
@@ -16,11 +18,12 @@ enum ModifierTapWords {
             : L("chord.tap.twice", "%1$@, press twice", name)
     }
 
-    /// The tapped key in words, its side named: "Right Command".
+    /// The tapped key in words, a sided one by the Hyper card's key
+    /// name, which agrees with its key: "Right ⌘".
     static func keyName(_ combo: KeyCombo) -> String? {
         guard let kind = combo.tapKind else { return nil }
         return combo.modifiers.side(of: kind).map {
-            ChordGlyphs.word($0, Self.name(kind))
+            HyperKeyWords.name(.key($0, of: kind))
         } ?? Self.name(kind)
     }
 

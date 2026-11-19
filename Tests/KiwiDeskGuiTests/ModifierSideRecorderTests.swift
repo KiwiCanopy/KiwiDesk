@@ -84,7 +84,7 @@ struct ModifierSideRecorderTests {
                 rightCommand,
                 hyper: false,
                 sides: RecorderSides()
-            ) == "Right ⌘"
+            ) == "Right⌘"
         )
         #expect(
             ChordRecorder.preview(rightCommand, hyper: false, sides: nil)
