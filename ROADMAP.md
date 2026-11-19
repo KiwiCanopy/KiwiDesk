@@ -26,7 +26,6 @@ that section is free.
 
 ## Next on my list
 
-_As of 2026-10-28_
+_As of 2026-11-19_
 
-- A bigger pocket: more windows, each with its own key, and a pocket the mouse can use like the bars
-
+- A look picker: one shortcut opens your looks, step through them with a preview, and apply one
