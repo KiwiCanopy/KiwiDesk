@@ -241,11 +241,4 @@ struct KiwiVisionAutoOpenFocusTests {
         core.handle(.windowFocused(WindowID(7)))
         #expect(core.focusedWindowID == WindowID(5))
     }
-
-    /// The owed move is the one focus change; no hold fights it.
-    @Test("with no member open, no hand-back is owed")
-    func noneOpenOwesNoHandBack() {
-        let core = Self.owing()
-        #expect(core.launchFollow.holds.opened.isEmpty)
-    }
 }

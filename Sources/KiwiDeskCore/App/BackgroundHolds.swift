@@ -1,12 +1,13 @@
 import Foundation
 
-/// `open_in_background`'s holds (#3141), a slot of the launch
-/// follow's ledger: per app, when it was opened behind the focus,
-/// owed ONE hand-back of the focus it takes within `grace`, and when
-/// an activation of it was handed back, whose own reports echo it.
-/// Stamped per app, so a run of opens grants each its own grace;
-/// lifted by
-/// the user naming the app (`LaunchFollowIntent.record`), and never
+/// The background opens' holds (#3141), a slot of the launch
+/// follow's ledger, armed by `open_in_background` and by a lens's
+/// Auto-open where a member already had a window (#3495): per app,
+/// when it was opened behind the focus, owed ONE hand-back of the
+/// focus it takes within `grace`, and when an activation of it was
+/// handed back, whose own reports echo it. Stamped per app, so a run
+/// of opens grants each its own grace; lifted by the user naming the
+/// app (`LaunchFollowIntent.record`), and never
 /// by an activation, since the user working on is the case it is for.
 struct BackgroundHolds {
     /// An Electron app activated itself 1.4–1.5 s after `open -g`
