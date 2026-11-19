@@ -71,13 +71,15 @@ struct ScrollPanFingerWiringTests {
             session: session,
             directional: true
         )
-        // The latch: 1 → 2.
+        // Past the 24 pt floor with no finger travel: no step yet,
+        // where the points fallback would step (#3482).
         core.handleScrollPan(
             event(.changed, 30),
             session: session,
             directional: true
         )
-        // 10 mm of finger on 5 pt of points: 2 → 1, wrapping.
+        #expect(core.state.workspaces[space]?.focused == WindowID(1))
+        // 10 mm of finger on 5 pt of points: 1 → 2.
         reader.travel = TouchTravel.Reading(
             sum: CGVector(dx: 10, dy: 0),
             source: 7
@@ -92,6 +94,6 @@ struct ScrollPanFingerWiringTests {
             session: session,
             directional: true
         )
-        #expect(core.state.workspaces[space]?.focused == WindowID(1))
+        #expect(core.state.workspaces[space]?.focused == WindowID(2))
     }
 }

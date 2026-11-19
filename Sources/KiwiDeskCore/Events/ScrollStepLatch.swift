@@ -4,8 +4,8 @@ import CoreGraphics
 /// Space): the gesture's travel accumulates until it passes a
 /// threshold, fires once, and the latch then holds until the
 /// gesture ENDS — so one fling never streams steps. Trackpad
-/// travel alone: `ScrollStepMeter` counts a wheel's notches itself
-/// and hands the latch only a gesture's begin and end. Pure.
+/// travel alone. `ScrollStepMeter` reads only its threshold, the
+/// floor under a swipe's first step (`named`). Pure.
 public struct ScrollStepLatch: Sendable {
     /// Travel a trackpad gesture owes before it steps, in points.
     /// A deliberate flick clears it in its first frames; a resting

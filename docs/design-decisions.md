@@ -17882,6 +17882,20 @@ default.
 :::
 
 :::unreleased
+*Amended* (owner, 2026-11-19, #3482): **a long swipe's first
+step costs a step length of finger travel too, so every step is
+even.** Firing the first at the 24 pt latch made it come far
+sooner than the rest: points grow with finger speed, so a fast
+swipe crossed 24 pt in a few millimetres. The latch stays as a
+floor under the first step, so a resting hand's drift never
+steps, and it is still the whole rule where no finger reading
+exists or Long swipes are off. A touch's unit is fixed at its
+first step: with no reading at the floor it steps there and
+counts points after. Refused: a 16 pt latch, which is still
+points and still speeds up with the hand.
+:::
+
+:::unreleased
 **Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
 no "Holding a modifier" group, and Long swipes is one setting at
 the Trackpad card's foot, never per binding.** A scroll with keys
