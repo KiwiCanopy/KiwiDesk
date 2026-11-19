@@ -80,7 +80,12 @@ struct DesktopsSideView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(row.name)
+        .accessibilityLabel(Self.title(row))
+    }
+
+    /// The screen's name, its position added where a twin shares it.
+    static func title(_ row: DesktopOverview.Screen) -> String {
+        ScreenShiftText.named(row.name, at: row.position)  // #3496
     }
 
     private func header(_ row: DesktopOverview.Screen) -> some View {
@@ -88,7 +93,7 @@ struct DesktopsSideView: View {
             Image(systemName: "display")
                 .font(.caption2)
                 .accessibilityHidden(true)
-            Text(row.name)
+            Text(Self.title(row))
                 .font(.caption.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
             if let caption = caption(row) {

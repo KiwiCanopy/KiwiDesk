@@ -185,9 +185,11 @@ struct LaunchFollowSeamTests {
             "launchFollow.noteQuietApps([bundleID], at: now, place: place)",
             "KiwiCore+OpenInBackground.swift", 1
         ),
-        // `open_in_background` (#3141): marked quiet, a hold owed
-        // per app, lifted by naming the app, claimed at both doors.
-        ("launchFollow.holds.note(", "KiwiCore+OpenInBackground.swift", 1),
+        // `open_in_background` (#3141), and a lens opening beside a
+        // member's window (#3495): marked quiet, a hold owed per
+        // app, lifted by naming the app, claimed at both doors.
+        ("holds.note(bundleID", "KiwiCore+OpenInBackground.swift", 1),
+        ("holds.note(app", "KiwiCore+VisionAutoOpen.swift", 1),
         ("holds.lift(", "LaunchFollowIntent.swift", 1),
         ("launchFollow.holds.claim(", "KiwiCore+BackgroundHold.swift", 2),
         (

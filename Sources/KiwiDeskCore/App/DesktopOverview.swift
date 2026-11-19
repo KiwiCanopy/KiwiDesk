@@ -19,6 +19,8 @@ public struct DesktopOverview: Sendable, Equatable {
         public let display: DisplayID
         /// The screen's own name, shown even with one screen.
         public let name: String
+        /// Its place among screens sharing its name (#3496).
+        public let position: ScreenNamePosition?
         /// The screen with the menu bar.
         public let isMain: Bool
         /// The screen KiwiHub opened on.
@@ -30,10 +32,12 @@ public struct DesktopOverview: Sendable, Equatable {
             name: String,
             isMain: Bool,
             isHere: Bool,
-            desktops: [Desktop]
+            desktops: [Desktop],
+            position: ScreenNamePosition? = nil
         ) {
             self.display = display
             self.name = name
+            self.position = position
             self.isMain = isMain
             self.isHere = isHere
             self.desktops = desktops
