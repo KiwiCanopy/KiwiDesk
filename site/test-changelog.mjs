@@ -10,6 +10,8 @@
 // built page's.
 
 import { releaseInline, sectionView } from "./src/lib/changelog-view.ts";
+import { readdirSync } from "node:fs";
+import { pngSize, releaseImage } from "./src/lib/release-image.ts";
 
 const failures = [];
 let ran = 0;
@@ -79,6 +81,58 @@ check("raw HTML is shown as text, as in the feed", () => {
   assert(html.includes("&lt;kbd&gt;x&lt;/kbd&gt;"), html);
   assert(!html.includes("<kbd>"), html);
   assert(html.includes("<strong>now</strong>"), html);
+});
+
+check("a release image is sized from its PNG header", () => {
+  const ihdr = Uint8Array.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52,
+    0, 0, 0x04, 0x38, 0, 0, 0x02, 0x1c,
+  ]);
+  const size = pngSize(ihdr);
+  assert(size.width === 1080 && size.height === 540, JSON.stringify(size));
+});
+
+check("a release image that is no PNG fails the build", () => {
+  const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  const ihdr = [0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52];
+  const size = [0, 0, 4, 56, 0, 0, 4, 56];
+  // Each half of the header check alone, so neither rescues the other.
+  for (const bytes of [
+    new TextEncoder().encode("GIF89a, not a png at all...."),
+    Uint8Array.from([...signature, 0, 0, 0, 13, 0x49, 0x44, 0x41, 0x54,
+      ...size]),
+    Uint8Array.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0, 0, ...ihdr,
+      ...size]),
+  ]) {
+    let threw = false;
+    try {
+      pngSize(bytes);
+    } catch {
+      threw = true;
+    }
+    assert(threw, `a non-PNG was sized: ${bytes.slice(0, 16)}`);
+  }
+});
+
+check("a shipped release image is sized from public/", () => {
+  const dir = new URL("./public/releases/", import.meta.url);
+  const names = readdirSync(dir).filter((name) => name.endsWith(".png"));
+  assert(names.length > 0, "public/releases/ holds no image to size");
+  for (const name of names) {
+    const picture = releaseImage(`/releases/${name}`);
+    assert(picture.width > 0 && picture.height > 0, name);
+  }
+});
+
+check("an image the tree lacks fails the build", () => {
+  let threw = false;
+  try {
+    releaseImage("/releases/0.0.0-absent.png");
+  } catch (error) {
+    threw = error.message.includes("/releases/0.0.0-absent.png");
+  }
+  assert(threw, "a missing image did not name its route");
 });
 
 if (failures.length) {

@@ -11,14 +11,15 @@ linking the release, the summary and the Before you update
 paragraph, then the Spotlight rows where the block has them and
 each section with its count and bullets where it does not, then a
 sentence counting what changed with a link to the notes, and how
-to get the update. No download link: the channel's readers know
-the site, and installed copies update themselves. A section list
-past Discord's embed limit is cut at a section boundary and closes
-on a line naming what was cut, with its counts, never
-mid-sentence.
+to get the update. The release's image, where it has one, is the
+embed's image, served from the site. No download link: the
+channel's readers know the site, and installed copies update
+themselves. A section list past Discord's embed limit is cut at a
+section boundary and closes on a line naming what was cut, with
+its counts, never mid-sentence.
 
     scripts/discord-announce --release <tag> [--releases FILE]
-        [--dry-run]
+        [--images DIR] [--dry-run]
 
 `--dry-run` prints the webhook payload and posts nothing — the
 mode the guard suite drives, and how to preview a post. Without
@@ -240,16 +241,19 @@ def description(entry: dict, nix: bool = False) -> str:
 
 
 def payload(entry: dict, nix: bool = False) -> dict:
+    embed = {
+        "title": f"KiwiDesk {entry['version']}",
+        "url": entry["url"],
+        "description": description(entry, nix),
+    }
+    # The site serves it before this runs: the workflow waits for
+    # the feed that same deploy carries.
+    if entry.get("image"):
+        embed["image"] = {"url": _sync.image_url(entry["image"])}
     return {
         "username": USERNAME,
         "allowed_mentions": {"parse": []},
-        "embeds": [
-            {
-                "title": f"KiwiDesk {entry['version']}",
-                "url": entry["url"],
-                "description": description(entry, nix),
-            }
-        ],
+        "embeds": [embed],
     }
 
 
@@ -288,6 +292,11 @@ def main(argv: list[str]) -> int:
         help="read the flake's source.json from a file, not GitHub",
     )
     parser.add_argument(
+        "--images",
+        metavar="DIR",
+        help="read release images from DIR, not site/public/releases",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="print the payload and post nothing",
@@ -298,6 +307,7 @@ def main(argv: list[str]) -> int:
         entry, _ = _sync.build_entry(
             _sync.fetch_release(args.release, args.releases),
             strict=True,
+            images=Path(args.images) if args.images else None,
         )
     except _sync.NotesError as error:
         return _sync._report(error)

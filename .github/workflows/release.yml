@@ -909,9 +909,20 @@ jobs:
             # the vetted artifact attached under it. Pinned, a
             # minted tag lands on the vetted commit; with the
             # tag intact the flag is ignored.
+            #
+            # The release's image line opens the body, above the
+            # generated list (design-decisions ▸ A release carries
+            # at most one image). `+` form: safe under `set -u`.
+            OPENING=()
+            PICTURE="$(python3 scripts/changelog-sync \
+              --image-line "$VERSION")"
+            if [ -n "$PICTURE" ]; then
+              OPENING=(--notes "$PICTURE")
+            fi
             gh release create "$TAG" "${UPLOADS[@]}" \
               --draft \
               --title "KiwiDesk $VERSION" \
               --target "$(git rev-parse HEAD)" \
+              ${OPENING[@]+"${OPENING[@]}"} \
               --generate-notes
           fi

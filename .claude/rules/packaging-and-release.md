@@ -288,8 +288,10 @@ webhook URL is the secret, so nothing prints it. A block with
 Spotlight rows posts the rows and not its sections; an uncut post
 closes on its changes counted in a sentence, a cut one on the line
 naming what was cut, both on how to get the update; no post
-carries a download link
-(`DiscordAnnounceSpotlightTests`, `DiscordAnnounceTests`).
+carries a download link, and a release with an image posts it as
+the embed's image
+(`DiscordAnnounceSpotlightTests`, `DiscordAnnounceTests`,
+`ReleaseImageTests`).
 
 **Three clauses decide whether a release enters the feed, and
 `scripts/appcast-sync` names the one that failed:** it is
@@ -561,8 +563,19 @@ step output first; a future gate on a new credential extends that
 step rather than reaching for `secrets` in a condition that
 silently reads empty.
 
+**A release's image goes in before the cut**: put the square
+image at `site/public/releases/<version>.png` on `main` before
+`release.sh` phase B. `release.yml` then opens the draft with
+`changelog-sync --image-line`'s line, the sync writes the entry's
+`image` from the tree it checks out, and `discord-announce` posts
+it; the feed never carries it (`ReleaseImageTests`,
+`scripts/check-site-tokens.py` ▸ `check_release_images`). The
+ruling is `docs/design-decisions.md` ▸ *A release carries at most
+one image*.
+
 **The release body has a form, and a parser enforces it (#873).**
-The body OPENS with the sponsor paragraph — copied verbatim from
+The body OPENS with the image line, when the release has one,
+then the sponsor paragraph — copied verbatim from
 the previous release's body; it is a mechanism with no design
 entry behind it, since it rules nothing about content beyond
 what the license copy already does (copy states the license,

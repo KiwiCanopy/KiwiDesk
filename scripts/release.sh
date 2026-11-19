@@ -460,7 +460,9 @@ cat <<SKELETON
 
 --------------------------------------------------------------
 Curate the draft, THEN publish. Paste above the generated
-"What's Changed" list, leaving a blank line between the two:
+"What's Changed" list, leaving a blank line between the two. Keep
+the draft's first line when it is the release's image
+(site/public/releases/<version>.png):
 
 ## Highlights
 
