@@ -57,4 +57,25 @@ extension ScreenShiftPlan {
         }
         return found
     }
+
+    /// `namePositions` over connected displays, whose AppKit frames
+    /// grow up, keyed by display (#3496).
+    public static func namePositions(
+        of displays: [Display]
+    ) -> [DisplayID: ScreenNamePosition] {
+        namePositions(
+            displays.map {
+                (
+                    key: $0.id,
+                    name: $0.name,
+                    frame: CGRect(
+                        x: $0.frame.minX,
+                        y: -$0.frame.maxY,
+                        width: $0.frame.width,
+                        height: $0.frame.height
+                    )
+                )
+            }
+        )
+    }
 }

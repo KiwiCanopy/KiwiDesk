@@ -13,7 +13,9 @@ extension KiwiCore {
         let snapshot = desktopMemory.readDesktops()
         let byUUID = displaysByUUID()
         let main = PositionalDisplays.liveMainID
-        let screens = Self.physicalOrder(state.workspaces.allDisplays)
+        let displays = state.workspaces.allDisplays
+        let positions = ScreenShiftPlan.namePositions(of: displays)
+        let screens = Self.physicalOrder(displays)
             .map { screen in
                 let uuid = byUUID.first { $0.value.id == screen.id }?.key
                 return DesktopOverview.Screen(
@@ -28,7 +30,8 @@ extension KiwiCore {
                         shared: snapshot.soleDisplayKey.map {
                             byUUID[$0] == nil
                         } ?? false
-                    )
+                    ),
+                    position: positions[screen.id]
                 )
             }
         return DesktopOverview(screens: screens, yours: jumpFocusedWindow())

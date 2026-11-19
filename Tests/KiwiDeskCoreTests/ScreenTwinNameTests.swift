@@ -50,6 +50,22 @@ struct ScreenTwinNameTests {
         #expect(found == [1: .below, 2: .above])
     }
 
+    /// AppKit frames grow up: the screen above has the larger minY.
+    @Test("connected displays read y-up, keyed by display")
+    func displaysReadUp() {
+        func display(_ id: UInt32, _ name: String, y: CGFloat) -> Display {
+            Display(
+                id: DisplayID(id),
+                name: name,
+                frame: CGRect(x: 0, y: y, width: 100, height: 100)
+            )
+        }
+        let found = ScreenShiftPlan.namePositions(
+            of: [display(1, "Twin (1)", y: 0), display(2, "Twin (2)", y: 100)]
+        )
+        #expect(found == [DisplayID(1): .below, DisplayID(2): .above])
+    }
+
     @Test("a lone screen named with a number takes no position")
     func loneNumberedName() {
         let found = ScreenShiftPlan.namePositions([

@@ -175,21 +175,7 @@ extension SettingsModel {
         _ display: Display,
         among displays: [Display]
     ) -> String {
-        let positions = ScreenShiftPlan.namePositions(
-            displays.map {
-                // AppKit frames grow up; the positions read y-down.
-                (
-                    key: $0.id,
-                    name: $0.name,
-                    frame: CGRect(
-                        x: $0.frame.minX,
-                        y: -$0.frame.maxY,
-                        width: $0.frame.width,
-                        height: $0.frame.height
-                    )
-                )
-            }
-        )
+        let positions = ScreenShiftPlan.namePositions(of: displays)
         return ScreenShiftText.named(
             display.name,
             at: positions[display.id]
