@@ -26,7 +26,7 @@ extension ScreenShiftPlan {
 
     /// The position of each screen whose name another screen
     /// shares, macOS's " (n)" numbering dropped
-    /// (`ScreenLabel.baseName`); a uniquely named screen has none.
+    /// (`Display.twinName`); a uniquely named screen has none.
     /// Side by side reads left to right, stacked reads above and
     /// below. Frames are y-down, as `ArrangedScreen`'s are.
     public static func namePositions<Key: Hashable>(
@@ -34,7 +34,7 @@ extension ScreenShiftPlan {
     ) -> [Key: ScreenNamePosition] {
         var found: [Key: ScreenNamePosition] = [:]
         let groups = Dictionary(grouping: screens) {
-            ScreenLabel.baseName($0.name)
+            Display.twinName($0.name)
         }
         for group in groups.values where group.count > 1 {
             let xs = group.map(\.frame.midX)

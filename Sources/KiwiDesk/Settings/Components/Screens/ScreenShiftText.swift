@@ -13,7 +13,7 @@ enum ScreenShiftText {
         at position: ScreenNamePosition?
     ) -> String {
         guard let position else { return name }
-        let name = ScreenLabel.baseName(name)  // #3351
+        let name = Display.twinName(name)  // #3496
         switch position {
         case .left: return L("screens.shift.name.left", "%1$@ (left)", name)
         case .right:

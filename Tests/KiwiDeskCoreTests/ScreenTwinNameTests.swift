@@ -3,23 +3,23 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Identical screens as macOS names them (#3351): `localizedName`
+/// Identical screens as macOS names them (#3496): `localizedName`
 /// already reads "Twin (1)" / "Twin (2)", so twins are grouped by
 /// the name without that numbering, and a lone screen whose name
 /// ends in "(n)" keeps it.
-@Suite("Identical screens are grouped by their bare name (#3351)")
+@Suite("Identical screens are grouped by their bare name (#3496)")
 struct ScreenTwinNameTests {
     @Test("the macOS numbering is dropped, nothing else")
-    func baseName() {
-        #expect(ScreenLabel.baseName("Twin (2)") == "Twin")
-        #expect(ScreenLabel.baseName("DELL U2720Q (12)") == "DELL U2720Q")
-        #expect(ScreenLabel.baseName("Twin") == "Twin")
-        #expect(ScreenLabel.baseName("Twin (left)") == "Twin (left)")
-        #expect(ScreenLabel.baseName("Twin()") == "Twin()")
-        #expect(ScreenLabel.baseName("Twin(2)") == "Twin(2)")
-        #expect(ScreenLabel.baseName(" (2)") == "")
-        #expect(ScreenLabel.baseName("Twin (2) x") == "Twin (2) x")
-        #expect(ScreenLabel.baseName("Twin (٢)") == "Twin (٢)")
+    func twinName() {
+        #expect(Display.twinName("Twin (2)") == "Twin")
+        #expect(Display.twinName("DELL U2720Q (12)") == "DELL U2720Q")
+        #expect(Display.twinName("Twin") == "Twin")
+        #expect(Display.twinName("Twin (left)") == "Twin (left)")
+        #expect(Display.twinName("Twin()") == "Twin()")
+        #expect(Display.twinName("Twin(2)") == "Twin(2)")
+        #expect(Display.twinName(" (2)") == "")
+        #expect(Display.twinName("Twin (2) x") == "Twin (2) x")
+        #expect(Display.twinName("Twin (٢)") == "Twin (٢)")
     }
 
     private static func place(

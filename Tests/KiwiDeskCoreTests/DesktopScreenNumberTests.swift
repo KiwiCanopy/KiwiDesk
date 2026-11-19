@@ -162,7 +162,7 @@ struct DesktopScreenNumberTests {
         #expect(core.screenLabel(of: DisplayID(1)) == nil)
     }
 
-    /// macOS numbers identical screens' names itself (#3351).
+    /// macOS numbers identical screens' names itself (#3496).
     @Test("twins macOS numbered still take their place")
     func numberedTwins() {
         let core = makeCore()

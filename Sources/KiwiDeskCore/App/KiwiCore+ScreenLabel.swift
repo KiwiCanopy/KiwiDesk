@@ -17,9 +17,9 @@ extension KiwiCore {
         let displays = state.workspaces.allDisplays
         guard let named = displays.first(where: { $0.id == display })
         else { return nil }
-        let base = ScreenLabel.baseName(named.name)
+        let base = Display.twinName(named.name)
         guard
-            displays.filter({ ScreenLabel.baseName($0.name) == base })
+            displays.filter({ Display.twinName($0.name) == base })
                 .count > 1
         else {
             return ScreenLabel(name: named.name)

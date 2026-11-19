@@ -138,7 +138,7 @@ struct ScreenShiftOfferTests {
         #expect(state.name(of: "c") == "Mac")
     }
 
-    /// macOS numbers identical screens' names itself (#3351).
+    /// macOS numbers identical screens' names itself (#3496).
     @Test("numbered twins read by position, from the bare name")
     func numberedTwins() {
         pinEnglish()

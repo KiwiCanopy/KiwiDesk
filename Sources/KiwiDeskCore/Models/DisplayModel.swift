@@ -64,4 +64,19 @@ public struct Display: Sendable, Equatable {
             String(fingerprint[fingerprint.index(after: colon)...])
         )
     }
+
+    /// `name` without the " (n)" macOS appends to identical
+    /// screens' `localizedName`: the name twins are grouped and
+    /// labelled by (#3496). A lone screen keeps its whole name,
+    /// since callers strip only within a group of two or more.
+    public static func twinName(_ name: String) -> String {
+        guard name.hasSuffix(")"),
+            let open = name.range(of: " (", options: .backwards)
+        else { return name }
+        let digits = name[open.upperBound...].dropLast()
+        guard !digits.isEmpty,
+            digits.allSatisfy({ $0.isASCII && $0.isNumber })
+        else { return name }
+        return String(name[..<open.lowerBound])
+    }
 }
