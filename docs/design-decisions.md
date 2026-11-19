@@ -20568,7 +20568,8 @@ Dock stays shown for as long as the pointer stays there. So:
   covers more of the windows, since a handle reserves nothing. A
   look carries it, so every bundled look names it: Glass, Pill and
   Sakura 3, Classic and Tiler 2, Taskbar 4. It is edited with a
-  stepper in the KiwiShelf card's Show group, between Show and
+  pt slider in whole points (#3513), as every drawn line width is,
+  in the KiwiShelf card's Show group, between Show and
   Reveal, greyed while nothing rests as a handle anywhere. The
   handle stays flush whatever the outer margin; a thicker handle
   narrows the room to the windows by what it adds. It amends every

@@ -206,6 +206,12 @@ by which pane the setting lives in:
   proportion tuned by eye: split ratios, master ratio, gaps.
 - **Segmented / toggle** for a non-numeric choice.
 
+:::unreleased
+A drawn stroke width is a slider, a `PtSlider` in whole points: a
+border, a highlight, the focus ring, a handle (#3513). A stepper's
+pt values are thresholds.
+:::
+
 Minimum window size takes the same idiom on each axis (#204,
 #2237): a precise pt threshold, not a feel knob, drawn as Width
 × Height on one line, each a typeable field with its own

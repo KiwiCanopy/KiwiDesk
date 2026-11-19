@@ -44,6 +44,15 @@ enum BarSliderBands {
             KiwiShelf.highlightWidthRange.upperBound
         )
 
+    /// The shelf's Handle thickness row (#3513): both edges are
+    /// Core's, which clamps the stored value to them.
+    static let handleThickness: ClosedRange<Double> =
+        Double(
+            KiwiShelf.handleThicknessRange.lowerBound
+        )...Double(
+            KiwiShelf.handleThicknessRange.upperBound
+        )
+
     /// The shelf's Border width row (#1679): both edges are
     /// Core's, which clamps the stored value to them.
     static let borderWidth: ClosedRange<Double> =

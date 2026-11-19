@@ -197,6 +197,7 @@ struct BarSliderBandTests {
         ("kiwishelf.itemGap", "itemGap"),
         ("spaceBarStyle.glyphGap", "glyphGap"),
         ("kiwishelf.highlightWidth", "highlightWidth"),
+        ("kiwishelf.handleThickness", "handleThickness"),
         ("kiwishelf.glyphSize (auto)", "glyphSize"),
     ]
 
