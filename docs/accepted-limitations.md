@@ -156,13 +156,19 @@ Click the window you are typing in to bring the ring back.
 
 :::unreleased
 Within **10 seconds of an
-[`open_in_background`](lua-reference.md#open_in_background)**, one
-switch to that app by keyboard (⌘Tab, Spotlight) is handed back to
-the window you were in, because macOS reports an app that brings
+[`open_in_background`](lua-reference.md#open_in_background)**, or
+of a lens opening an app through its
+[`open_apps`](lua-reference.md#kiwivisiondefine_lens), one switch
+to that app by keyboard (⌘Tab, Spotlight) is handed back to the
+window you were in, because macOS reports an app that brings
 itself forward the same way it reports a switch you made
 ([#3141](https://github.com/KiwiCanopy/KiwiDesk/issues/3141)). A
 click on the app or its Dock icon always wins, and the hand-back
-happens once per app. Press the switch again, or click.
+happens once per app. Press the switch again, or click. The app
+whose window a lens moved the focus to is not handed back. An app
+a lens opens that comes forward before its window appears is
+handed back first, and its window then takes the focus
+([#3497](https://github.com/KiwiCanopy/KiwiDesk/issues/3497)).
 :::
 
 :::unreleased
