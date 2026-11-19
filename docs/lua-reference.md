@@ -5670,11 +5670,9 @@ counts again once the wheel pauses between notches; the glide
 after the fingers lift never counts. Where there is no window to
 move to, the focused window's border bumps toward the step. With
 [long swipes](#scroll_gestureset_long_swipes) on, a swipe moves
-its first window as it starts and one more every
-[step distance](#scroll_gestureset_step_distance) of further
-travel, which macOS's own Scrolling speed scales. The direction
-follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
-per input.
+more than one window as it travels. The direction follows
+[Natural scrolling](#scroll_gestureset_natural_scrolling), per
+input.
 
 :::unreleased
 With long swipes on, each window on a trackpad, the first
@@ -5959,14 +5957,13 @@ scroll_gesture.set_natural_scrolling("system")
 
 ### scroll_gesture.set_long_swipes
 
-**Expects:** a boolean (default `false`).
+**Expects:** a boolean.
 
-**Does:** on, a swipe moves one more window every
-[step distance](#scroll_gestureset_step_distance) of travel
-after its first, on every layout; off, a swipe moves one window
-however long it is. A mouse wheel moves one window per notch
-either way, as the section above qualifies. The Space step
-always steps one Space per swipe.
+**Does:** on, a swipe moves one window per stretch of travel, on
+every layout; off, a swipe moves one window however long it is.
+A mouse wheel moves one window per notch either way, as the
+section above qualifies. The Space step always steps one Space
+per swipe.
 
 :::unreleased
 Long swipes are on by default, and each window, the first
@@ -5984,22 +5981,12 @@ scroll_gesture.set_long_swipes(true)
 
 ### scroll_gesture.set_step_distance
 
-**Expects:** points, 10–1000 (default `60`); a value outside the
-range fails.
-
-**Does:** sets the finger travel per extra window of a
-[long swipe](#scroll_gestureset_long_swipes). It is kept, and
-does nothing, while long swipes are off.
-
-**Example:**
-
-```lua
-scroll_gesture.set_step_distance(120)
-```
-
 :::unreleased
 `scroll_gesture.set_step_distance` is retired and fails, naming
 [`scroll_gesture.set_step_length`](#scroll_gestureset_step_length).
+It took points of scroll travel per extra window of a long swipe
+(10–1000, default `60`), which macOS's Scrolling speed scaled; a
+stored value is dropped and not carried over.
 :::
 
 ### scroll_gesture.set_step_length
