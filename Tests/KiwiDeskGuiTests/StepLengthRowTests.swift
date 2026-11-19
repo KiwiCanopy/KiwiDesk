@@ -102,7 +102,8 @@ struct StepLengthRowTests {
         )
         #expect(
             row.contains(
-                "model.config.scrollGesture.stepLength="
+                "guard!StepLengthScale.keeps(stored,at:$0)else{return}"
+                    + "model.config.scrollGesture.stepLength="
                     + "StepLengthScale.length(at:$0)"
             )
         )
