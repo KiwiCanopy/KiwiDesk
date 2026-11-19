@@ -208,6 +208,18 @@ struct ConflictAccessorRoutingTests {
                 "funcsystemShortcutState()->SystemShortcutState{"
                     + "varstate=SystemShortcutState.live("
                     + "reading:readSymbolicHotkey)"
+                    + "state.sides=appWide.modifierSides"
+            )
+        )
+        // A switched-off shared chord offers no fix either (#3504).
+        let recorder = try Self.stripped(
+            "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                + "Recorder/KeyRecorderField+Conflict.swift"
+        )
+        #expect(
+            recorder.contains(
+                "privatevarreadsDormant:Bool{"
+                    + "reading?.severity.macOSHasItOff==true}"
             )
         )
         var stateHits = 0
