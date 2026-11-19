@@ -90,7 +90,9 @@ struct ReleaseImageTests {
     }
 
     /// The deployed site, read off the bundle's `SUFeedURL` — the
-    /// origin `release-announce.yml` waits on.
+    /// origin `release-announce.yml` waits on. `site/` is CI-ignored,
+    /// so the site gate holds that host to `astro.config.mjs`
+    /// (`scripts/check-site-tokens.py` ▸ `check_appcast`).
     private func siteOrigin() throws -> String {
         let source = try String(
             contentsOf: script("build-app.sh"),
@@ -101,15 +103,7 @@ struct ReleaseImageTests {
                 of: /<string>(https:\/\/[^\/<]+)\/appcast\.xml</
             )
         )
-        let origin = String(match.1)
-        // The origin the site builds for must be the same one.
-        let astro = try String(
-            contentsOf: scriptFixtureRepoRoot()
-                .appendingPathComponent("site/astro.config.mjs"),
-            encoding: .utf8
-        )
-        #expect(astro.contains("SITE_URL ?? \"\(origin)\""))
-        return origin
+        return String(match.1)
     }
 
     private func imageLine(carrying: Bool) throws -> String {
