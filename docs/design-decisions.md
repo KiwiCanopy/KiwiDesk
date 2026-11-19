@@ -14924,8 +14924,8 @@ still reads that way, not dormant: dormant's words promise the row
 dies when the hotkey comes back on, which here it does not, while the
 aggregate count still leaves a switched-off chord out. Read as dead,
 the row told the user a shortcut that works would not. Every other
-chord macOS answers first, save ⌃Space (#3331 below), stays a dead
-row for a Carbon hotkey
+chord macOS answers first stays a dead row for a Carbon hotkey, save
+⌃Space, where the row and macOS both answer (#3504 below)
 (`SystemShortcut.losesToKiwiDesk(on:)`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`).
 :::
@@ -14952,7 +14952,8 @@ cannot decide it (#1275 measured it dead for Carbon), and Zoom,
 Invert colours, contrast and the Desktop switches ship off and were
 not turned on to measure. A Carbon hotkey
 still loses every other chord macOS answers save the two input-source
-chords (#1126; #3239, #3331); posted presses
+chords: it wins ⌃⌥Space and shares ⌃Space (#1126; #3239, #3504);
+posted presses
 never fire Carbon, so this measurement says nothing about that path
 (`PressPathSeverityTests`, `PressPathConflictTests`).
 :::
@@ -14992,16 +14993,41 @@ its caption mirrors the next-source one: the plain meaning, the same
 Keyboard ▸ Keyboard Shortcuts ▸ Input Sources place, and hotkey 61's
 live chord as still switching while macOS answers it and no row holds
 it. Posted presses never fire Carbon, so a Carbon row was measured
-by hand (2026-11-15): a plain `KiwiDesk.bind("ctrl+space", …)` fired
-on each of two presses and the keyboard language did not switch. So
-a Carbon row wins ⌃Space too, with hotkey 60 on or off, as it wins
-⌃⌥Space. An open sequence
+by hand; that reading is the #3504 amendment below. An open sequence
 now passes ⌃Space and closes, as it does ⌃⌥Space. No seed binds
 ⌃Space, so an existing install gains no conflict on Home; a user's own
 row on the chord gains its caption, and the keyboard board marks
 Space as macOS's under a ⌃ layer (`InputSourcePreviousTextTests`,
 `InputSourcePreviousInstallTests`, `PressPathConflictTests`,
 `ConflictSeverityTests`).
+:::
+
+:::unreleased
+*Amended (#3504, measured by hand 2026-11-19): a Carbon row on
+⌃Space fires and macOS still switches.* On macOS 27.2, with hotkeys
+60 and 61 on and two input sources, the owner pressed each case
+while a poller logged every input-source change and every fire on
+one timeline. Unbound, ⌃Space and ⌃⌥Space switched the source on
+every press. A plain `KiwiDesk.bind` on ⌃Space fired AND switched
+the source on each of three presses; on ⌃⌥Space it fired nine times
+with no switch. A leader, a step key and a sided row on ⌃Space each
+fired with no switch. So the press verdict has a third answer,
+`.both`, beside macOS's and KiwiDesk's, and a Carbon row on ⌃Space
+is the one case that gives it (`SystemShortcut.answer(on:)`). Such a
+row is not dead, since it fires, and it takes nothing from macOS, so
+both earlier readings were false: it reads as a conflict that says
+each press also runs macOS's shortcut and that macOS's shortcut must
+be turned off first, at Keyboard ▸ Keyboard Shortcuts ▸ Input
+Sources. KiwiDesk never pauses or turns off macOS's shortcut itself
+(owner, 2026-11-19): the user who wants ⌃Space alone turns macOS's
+off. With hotkey 60 off, only the row fires, and the caption says
+turning it back on brings both back; the conflict count leaves it
+out, as it does every switched-off chord. The 2026-11-15 hand reading
+that a Carbon row wins ⌃Space was taken without a source poller, so
+a hand measurement of an input-source switch now logs the source
+(`FiresWithMacOSTextTests`, `ConflictSeverityTests` ▸
+`rowsTakeTheInputSourceChord`, `InputSourcePreviousTextTests` ▸
+`carbonRowFiresBoth`, `PressPathConflictTests` ▸ `verdicts`).
 :::
 
 **One recorder at a time.** Starting a recording snaps any
