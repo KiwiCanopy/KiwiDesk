@@ -112,7 +112,6 @@ class — see
 | A screen whose **bottom corners both have another screen beside, below or past them** — a landscape screen between two taller portrait ones, or one above a wider screen — shows the windows KiwiDesk parks there on a neighbour. | A parked window must stay on its own screen: parked on another screen's free corner, macOS moves it onto that screen's Desktop (measured 2026-10-29), which would break [Parking is not a Desktop move](spaces-and-desktops.md#parking-is-not-a-desktop-move). And macOS keeps a parked window's title bar about 48 pt on screen, so its body hangs off the corner into whatever lies beside and below it. | With no clear corner on its own screen, every corner `TilingEngine.optimalHideCorner` can pick lands part of a parked window on a neighbour ([#410](https://github.com/KiwiCanopy/KiwiDesk/issues/410), [#2547](https://github.com/KiwiCanopy/KiwiDesk/issues/2547)). | Rearrange the screens in System Settings ▸ Displays so one bottom corner of each screen is clear ([With more than one screen](spaces-and-desktops.md#with-more-than-one-screen)). |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
-:::unreleased
 For a screen with **no free bottom corner**, Settings ▸ Screens and
 the Mac Checklist offer to move one or more screens in your macOS
 screen arrangement so every screen has one, after you say yes
@@ -121,9 +120,7 @@ screen arrangement so every screen has one, after you say yes
 pointer then crosses between a moved screen and its neighbours
 where the new arrangement puts them, not where they stand on the
 desk.
-:::
 
-:::unreleased
 In **Stack, BSP and Grid**, a gap stays beside a window at its
 app's **maximum size** when no neighbour can grow into it. A Stack
 column, a window in a column, a BSP side, or a Grid column or row
@@ -137,15 +134,11 @@ learned as described for minimums in the split-layout row above,
 so the first arrangement after a window arrives can show the gap.
 Give the app a `float_rules` entry to keep it out of the split
 ([#3217](https://github.com/KiwiCanopy/KiwiDesk/issues/3217)).
-:::
 
-:::unreleased
 A screen with one clear bottom corner parks its windows there
 ([With more than one screen](spaces-and-desktops.md#with-more-than-one-screen),
 [#3335](https://github.com/KiwiCanopy/KiwiDesk/issues/3335)).
-:::
 
-:::unreleased
 A window an app opens **in the background** (`open -g`, a login
 item, a helper) takes KiwiDesk's focus ring only when it lands in
 a Space with no focused window, so the ring and your keys can still
@@ -153,9 +146,7 @@ part there. A Space with no focus takes the first window to arrive
 so that switching to it has somewhere to land
 ([#3152](https://github.com/KiwiCanopy/KiwiDesk/issues/3152)).
 Click the window you are typing in to bring the ring back.
-:::
 
-:::unreleased
 Within **10 seconds of an
 [`open_in_background`](lua-reference.md#open_in_background)**, or
 of a lens opening an app through its
@@ -170,9 +161,7 @@ whose window a lens moved the focus to is not handed back. An app
 a lens opens that comes forward before its window appears is
 handed back first, and its window then takes the focus
 ([#3497](https://github.com/KiwiCanopy/KiwiDesk/issues/3497)).
-:::
 
-:::unreleased
 A [titled app rule](lua-reference.md#titled_app_rules) files a
 window when it opens, never later: a window whose title comes to
 match only after you click or press a key, after 30 seconds, or
@@ -184,26 +173,20 @@ Space of the browser window macOS brings forward, which is the one
 you used last and can be another profile's. Install it to open **in
 a window** to give it a Space of its own
 ([#3341](https://github.com/KiwiCanopy/KiwiDesk/issues/3341)).
-:::
 
-:::unreleased
 While **Secure Input** is on (a password field, Terminal's Secure
 Keyboard Entry), macOS hides key presses from KiwiDesk, so a key
 typed between two taps of a modifier cannot end the count: ⌘, a
 letter, then ⌘ again can fire a `cmd+cmd` shortcut. No fix is planned
 ([#1872](https://github.com/KiwiCanopy/KiwiDesk/issues/1872)).
-:::
 
-:::unreleased
 The same hiding reaches a
 [key sequence](lua-reference.md#define_sequence): a leader written
 as a combo does nothing, and keys typed while a sequence is open
 reach the front app, a sequence opened by a modifier-tap leader
 included. Leave the field first. No fix is planned
 ([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
-:::
 
-:::unreleased
 A menu row — the quick menu, the bars' menus — shows **no
 shortcut** for a chord on the ✦ (Hyper) base. A menu's shortcut
 column draws only ⌃⌥⇧⌘ and one key, and ✦ is KiwiDesk's own key,
@@ -214,7 +197,6 @@ nothing rather than a key that does not fire
 (`KeyCombo.drawsInMenu`, which `applyMenuEquivalent` and
 `isPressed(by:)` read; [#3470](https://github.com/KiwiCanopy/KiwiDesk/issues/3470)).
 KiwiHub's Shortcuts side and Settings ▸ Shortcuts show every chord.
-:::
 
 With **Displays have separate Spaces** off, a `move_to_desktop` that
 sends a window to another screen answers before the window moves,
@@ -237,7 +219,6 @@ before the move, as it does for a drag or a `resize`
 ([#2972](https://github.com/KiwiCanopy/KiwiDesk/issues/2972)). Press
 again if a burst comes up short. No fix is planned.
 
-:::unreleased
 A press of a
 [`move` or `resize` grab](lua-reference.md#gesture-actions) over anything
 KiwiDesk cannot move there — the desktop, the Dock, the menu bar, a
@@ -249,7 +230,6 @@ after the press is already swallowed
 ([#2447](https://github.com/KiwiCanopy/KiwiDesk/issues/2447)). Let a
 key go and click again. A fix would hand the tap the managed windows'
 frames, or post the press again where no window takes it.
-:::
 
 A Space switch while `center_floating` is still moving a window can
 lose the centring: the switch files the frame the window has reached,
@@ -448,7 +428,6 @@ WindowServer's create notification; where that route is
 unavailable, only opening the app takes you along. Use
 `focus_space` to reach the window when you are left behind.
 
-:::unreleased
 A popup an app opens while you are opening it moves to the app's
 space with you
 ([#3189](https://github.com/KiwiCanopy/KiwiDesk/issues/3189)).
@@ -457,7 +436,6 @@ stays in the space it opened in, and so does every popup of an
 open whose window showed before the app came forward. KiwiDesk
 ties a popup to an open through the app coming forward, which
 macOS reports after such a window.
-:::
 
 The [`window_created`](lua-reference.md#events) event reads the
 same notification to tell `new` from `existing`
@@ -503,13 +481,11 @@ The **Play a sound when an action is blocked** setting and the **windows per pil
 
 With a **Lua-owned** `init.lua`, neither value is read from a profile file any more: `init.lua` is where both are kept ([#1741](https://github.com/KiwiCanopy/KiwiDesk/issues/1741)), and General's two rows are greyed. A setup that relied on a profile's own copy runs at the defaults until `init.lua` calls `set_refusal_sound` and `quit.set_grid_target_depth`.
 
-:::unreleased
 The four **animation lengths** cross the same way ([#3237](https://github.com/KiwiCanopy/KiwiDesk/issues/3237)): on the update, the first saved profile loaded lends them and every other profile's are dropped, and no Settings row sets one of them alone — call `animations.set_duration`, `set_scroll_duration`, `set_expand_duration` or `set_reveal_duration` from `init.lua`. With a Lua-owned `init.lua` they run at the defaults until it sets them.
 
 Settings sets how fast KiwiDesk animates only through **Animation speed**, whose Very Slow, Slow, Medium and Fast each write one table of six lengths ([#3238](https://github.com/KiwiCanopy/KiwiDesk/issues/3238), [#3254](https://github.com/KiwiCanopy/KiwiDesk/issues/3254); the tables are in the [Lua reference](lua-reference.md#animation-cascade)): the four above, the Space slide's and the KiwiVision fade's. Settings cannot make one motion faster or slower alone; a length of your own is `init.lua`'s, and the preset then shows no speed picked. The KiwiVision **Fade curve** stays in Settings and shapes a fade whose length Settings does not show.
 
 A KiwiVision lens made in Settings fades at the plain KiwiVision length and curve ([#3246](https://github.com/KiwiCanopy/KiwiDesk/issues/3246); the ruling is in [design decisions](design-decisions.md#spaces-profiles--config-ownership)). On the update, and when restoring an older backup, every lens stored in `gui.json` loses its own fade length and curve, and no Settings row sets them again. A lens's own fade is `init.lua`'s, through a [`kiwivision.define_lens`](lua-reference.md#kiwivisiondefine_lens) table, and one already set there stays while `init.lua` owns the setup; moving the setup to Settings drops it, and a lens edited in Settings drops a fade the CLI gave it for the session.
-:::
 
 The **shared look** lives in `gui.json`, and a KiwiDesk from before profiles could share a look drops it when it saves that file — a second Mac syncing `~/.config/KiwiDesk` on an older version, say ([#1752](https://github.com/KiwiCanopy/KiwiDesk/issues/1752); the ruling is in [design decisions](design-decisions.md)). Back on this version, the first saved profile loaded lends the shared look again, and a profile that shared a different one keeps it as its own; nothing on screen changes. Set it to share again in **Looks & Animations ▸ Shared look** if it should.
 

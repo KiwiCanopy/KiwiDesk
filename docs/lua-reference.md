@@ -70,15 +70,11 @@ gets no `gui.json` seeded over it:
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_desktop`.
 
-:::unreleased
 `titled_app_rules` counts as a window-rule table too.
-:::
 
-:::unreleased
 `KiwiDesk.define_sequence` counts as a keybinding too, and so does a
 [`gesture.bind`](#gesturebind) or [`gesture.unbind`](#gestureunbind)
 call.
-:::
 
 ```lua
 -- Any one of these makes init.lua the config owner:
@@ -176,7 +172,6 @@ unknown to KiwiDesk is refused.
 KiwiDesk.focus_window(1234)
 ```
 
-:::unreleased
 ### focus_app_window
 
 **Expects:** a direction, `"next"` or `"prev"`.
@@ -210,9 +205,7 @@ KiwiDesk.bind("alt+shift+tab", function()
     KiwiDesk.focus_app_window("prev")
 end)
 ```
-:::
 
-:::unreleased
 ### focus_space_window
 
 **Expects:** a direction, `"next"` or `"prev"`.
@@ -234,7 +227,6 @@ gesture.bind("wheel", "control+option", {
   down = "KiwiDesk.focus_space_window(\"prev\")",
 })
 ```
-:::
 
 ### swap
 
@@ -337,10 +329,8 @@ Space included where the bar hides it. It never creates a Space.
 The ⌃⌥⌘ + scroll gesture takes the same step on the screen under
 the pointer.
 
-:::unreleased
 By default the [scroll Space step](#scroll-focus-and-space-step)
 takes it: a swipe with ⌃⌥⌘, a mouse's sideways wheel with ⌃⌥.
-:::
 
 Past the last Space it wraps to the first, and past the first to
 the last, on the same screen — never onto another one. With
@@ -388,7 +378,6 @@ Restore…**.
 KiwiDesk.focus_space_back()
 ```
 
-:::unreleased
 ### focus_space_last
 
 **Expects:** nothing.
@@ -412,7 +401,6 @@ by default; the trackpad's three-finger tap runs it
 ```lua
 KiwiDesk.focus_space_last()
 ```
-:::
 
 ### focus_display_last / focus_display
 
@@ -455,7 +443,6 @@ KiwiDesk.focus_display_last()
 KiwiDesk.focus_display("right")
 ```
 
-:::unreleased
 ### move_to_display_last / move_to_display
 
 **Expects:** nothing for `move_to_display_last`; a direction
@@ -502,7 +489,6 @@ pressed again sends the window back.
 ```lua
 KiwiDesk.move_to_display_last_and_follow()
 ```
-:::
 
 ### move_to_space
 
@@ -517,12 +503,10 @@ A window already in that space stays where it is: the call fails
 and a pill on the window says it is already there. The same holds
 for `move_to_space_and_follow`.
 
-:::unreleased
 A window in native full screen stays on its own Space: the call
 fails with `a full-screen window cannot change Space`, and a pill
 on the window says so. The same holds for
 `move_to_space_and_follow`.
-:::
 
 If the target space is shown on **another screen**, a floating
 window is re-anchored onto that screen: it keeps its
@@ -1260,9 +1244,7 @@ screen the focused window is on; `all_screens` keeps one history
 across every screen, so going back may move you to another
 screen. With one screen the two are the same.
 
-:::unreleased
 [`focus_space_last`](#focus_space_last) reads the same history.
-:::
 
 It is stored like the shortcuts: `space_history` in `gui.json` is
 the value every profile uses, and a profile may keep its own,
@@ -1380,11 +1362,9 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
-:::unreleased
 Save **⌃⌥Space**, which a KiwiDesk row wins; on **⌃Space** the row
 and macOS both answer
 ([Modifiers and Keys](#modifiers-and-keys)).
-:::
 
 When that mapping is exactly the one KiwiDesk would write for the
 chosen key, the Hyper key row's **Take Over** and
@@ -1393,10 +1373,8 @@ chosen key, the Hyper key row's **Take Over** and
 While no shortcut in the active layer uses `hyper`, pressing the
 key does nothing and draws a short note saying so.
 
-:::unreleased
 A gesture whose keys hold `hyper` counts as a use too, so the
 press draws no note ([Gestures](#gestures)).
-:::
 
 The GUI twin is the **Hyper key** row in **Shortcuts ▸ Built-in ▸
 Modifier keys**, a recorder that takes one key — left and right
@@ -1435,18 +1413,14 @@ only on the shortcuts on those keys. If macOS refuses that
 as with `false`. They fire once per press when held
 ([resize](#resize)).
 
-:::unreleased
 A [modifier tap](#modifiers-and-keys) is read the same way whatever
 this says: while one is bound, KiwiDesk also reads modifier changes
 and clicks, and acts only on the taps.
-:::
 
-:::unreleased
 A [key sequence](#define_sequence) is read the same way whatever
 this says: while one is defined, KiwiDesk reads key presses and
 clicks, takes its leader and, while a sequence is open, every key
 press but macOS's own shortcuts, and acts on nothing else.
-:::
 
 The GUI twin is **Tell left and right modifiers apart** in
 **Shortcuts ▸ Built-in ▸ Modifier keys**. Like
@@ -1549,10 +1523,8 @@ KiwiDesk.set_space_scroll_transition("slide")
 
 ### set_space_slide_duration
 
-:::unreleased
 **Expects:** a number (milliseconds, clamped 150–1000; default
 `400`).
-:::
 
 **Does:** sets the pace of the plate slide
 ([`set_space_transition`](#set_space_transition)): how long the
@@ -1569,12 +1541,10 @@ setting is app-wide, stored in `gui.json` as
 It replaces `animations.set_space_change_duration`, which is
 refused, naming it.
 
-:::unreleased
 The Slide duration row is gone, and no Settings row sets the length
 alone: the speed preset in **Looks &amp; Animations ▸ Animations ▸
 Animation speed** writes it with the other lengths
 ([Animation Cascade](#animation-cascade)).
-:::
 
 A slide plays where [`set_space_transition`](#set_space_transition),
 or for the scroll step
@@ -1630,12 +1600,10 @@ is off. On, its default, KiwiHub draws `.clear` glass wearing the
 shelf's fill (#2569). The Space, Desktop and layout plates read
 this leaf too, and draw `.regularMaterial` while it is off.
 
-:::unreleased
 While this is off, and below macOS 26, KiwiHub and those plates
 still wear the shelf's fill where
 [`kiwishelf.set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 is on, flat over that material.
-:::
 
 The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
 leaf sets the material of all of KiwiHub — the window switcher,
@@ -2585,7 +2553,6 @@ at the corner.
 monocle.set_hide_style("park")
 ```
 
-:::unreleased
 ### monocle.set_maximize_windows
 
 **Expects:** `true` or `false` (default `false`). Settings ▸
@@ -2608,7 +2575,6 @@ says.
 ```lua
 monocle.set_maximize_windows(true)
 ```
-:::
 
 ### monocle.set_new_window_placement
 
@@ -3070,12 +3036,10 @@ setting goes off (#1374).
 
 The Space switch's plates draw their material then too.
 
-:::unreleased
 While Reduce transparency is on, the panel and the plates wear
 the fill, opaque, where
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
 on.
-:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -3115,10 +3079,8 @@ the overflow marks and their list, the hover peek, and the panels
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 tints. A hovered overflow count's chip fades the same way.
 
-:::unreleased
 A hidden shelf's handle wears no fill now, so the fade no longer
 reaches it.
-:::
  On
 glass a hovered bar item's fill is held under the
 same ceiling as `fill_color`, and the stored value is unchanged.
@@ -3161,14 +3123,12 @@ keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
 They draw as with `false` while the fill has no color.
 
-:::unreleased
 While their glass is off, and below macOS 26, they wear the fill
 at its own alpha, as one even color over their blurred
 background, with the same text and row colors and no bright edge.
 Their background is light under a light fill and dark under a
 dark one. While macOS's Reduce transparency is on, the fill is
 opaque.
-:::
 
 `false` draws them in frosted, untinted glass that follows
 Settings' Appearance, with KiwiHub's kiwi-green selection. The
@@ -3180,10 +3140,8 @@ The GUI twin is **Tint KiwiHub and plates** under the **Liquid
 Glass** switch on Looks &amp; Animations; it greys while the
 fill has no color.
 
-:::unreleased
 The row shows on every macOS and stays live while glass is off
 or macOS's Reduce transparency is on.
-:::
 
 **Example:**
 
@@ -3301,7 +3259,6 @@ is the [`highlight_color`](#kiwishelf-colours).
 kiwishelf.set_highlight_width(3)
 ```
 
-:::unreleased
 ### kiwishelf.set_handle_thickness
 
 **Expects:** points, 2–6 (default `3`); a value is rounded to a
@@ -3316,7 +3273,6 @@ reserves no room. A look carries it.
 ```lua
 kiwishelf.set_handle_thickness(4)
 ```
-:::
 
 ### kiwishelf.set_item_gap
 
@@ -3476,10 +3432,8 @@ A bar shown beside an `"always"` bar joins it instead, whichever
 style. Each plays with Reduce Motion on too. On a `"boxed"` shelf
 `"unfold"` springs each box out of the handle to its place.
 
-:::unreleased
 An `"auto"` bar's handle already runs the bar's length, so
 `"unfold"` only deepens it.
-:::
 
 On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
 
@@ -3513,7 +3467,6 @@ places it. A look carries it.
 kiwishelf.set_pocket_edge("right")
 ```
 
-:::unreleased
 **Per screen:** a second argument names a screen, in the forms
 [`space_bar.set_edge`](#space_barset_edge) takes, and the pocket
 takes that edge on that screen alone. The screens are judged and
@@ -3529,7 +3482,6 @@ bars'.
 ```lua
 kiwishelf.set_pocket_edge("left", "LG HDR 4K:3840x2160")
 ```
-:::
 
 ### kiwishelf.set_pocket_position
 
@@ -3552,12 +3504,10 @@ stays put while they scroll; on
 any other edge no bar shows, the handle, or the pocket where it rests
 whole, stands at the position.
 
-:::unreleased
 On an edge where an `"auto"` bar rests hidden, the handle, or under
 `"always"` the whole mark, stands instead in its own slot beside the
 bar's handle, and stays there while the bar comes in and goes: a bar
 coming in never brings the pocket.
-:::
 
 **Example:**
 
@@ -3592,21 +3542,17 @@ full-screen window or a presentation, and on a Monocle Space while
 where it shows only during a window drag or while a window goes in or
 out.
 
-:::unreleased
 A maximized window keeps it off the screen at rest too; there it
 shows only for a window drag, a window going in or out, its keys or
 its list.
-:::
 
 Windows keep clear of the
 resting handle or pocket unless `reserve` is off for every bar on
 that edge, or on an edge no bar sits on, for both bars.
 
-:::unreleased
 The resting handle no longer keeps windows clear: it floats over
 them as a bar's handle does, and its tab takes a bar handle's ink
 and depth. Only the whole pocket under `"always"` keeps its strip.
-:::
 
 A click on
 the pocket lists the windows inside by app; a row takes its window
@@ -3629,7 +3575,6 @@ pocket comes up once the pointer rests there for 0.15 s, at once
 on a push against the edge or a window drag. Under Reduce Motion
 the kiwis do not peek.
 
-:::unreleased
 On a handle the hover moves nothing: an empty pocket's tab goes to
 full strength in place. Within about 24 points of the edge over the handle, the
 pocket waits 0.15 s, then rises over the next 0.25 s. On the tab it
@@ -3647,7 +3592,6 @@ handle does, and the pocket comes up when the wait ends.
 An empty pocket fades its kiwis and rests its tab like a bar's
 handle; a pocket holding something rests its tab at full strength.
 A risen pocket sinks back into its handle when it goes to rest.
-:::
 
 While you drag a window, under any value, the pocket comes up on
 every screen as a drop target, and a drop on it pockets that window
@@ -3666,7 +3610,6 @@ visibilities. A look never carries it.
 kiwishelf.set_pocket_visibility("auto")
 ```
 
-:::unreleased
 ### kiwishelf.set_maximized_visibility
 
 **Expects:** `"auto"` or `"hidden"` (default `"auto"`).
@@ -3699,7 +3642,6 @@ never carries it.
 ```lua
 kiwishelf.set_maximized_visibility("hidden")
 ```
-:::
 
 ### KiwiShelf colours
 
@@ -3762,7 +3704,6 @@ one draws them in the item colour, and the focused one in
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
 item colour at 35% opacity). Every bundled palette carries one.
-:::unreleased
 `kiwishelf.set_handle_color` sets the colour of the handle an
 [`"auto"`](#space_barset_visibility) bar leaves at its edge while it
 hides, and of its progress fill and the pocket's tab. A picked
@@ -3774,7 +3715,6 @@ follows light and dark mode. Every bundled palette, and a first run's
 config, sets it to the palette's own `active_item_color`, or a
 stronger shade of it where that colour fills too faintly (Glass's
 green paints `#7DBB2A`).
-:::
 
 **Example:**
 
@@ -3951,9 +3891,7 @@ App Bar has nothing to show.
 It fails with a pill first while a maximized, full-screen or
 presenting window fills the screen, as the Space Bar's call does.
 
-:::unreleased
 A maximized window no longer refuses it, as for the Space Bar.
-:::
 
 **Example:**
 
@@ -4055,10 +3993,8 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
 are retired: `false` is `"hidden"`.
 
-:::unreleased
 An `auto` App Bar hides to a handle and comes in as the Space Bar
 does ([`space_bar.set_visibility`](#space_barset_visibility)).
-:::
 
 ## Space Bar
 
@@ -4130,7 +4066,6 @@ App Bar in monocle and scrolling.
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
 
-:::unreleased
 An `"auto"` bar's handle is a thin line along the
 bar's whole length, flush on the edge: a capsule in the label ink,
 edged all round by a fine line of the opposite tone, as thick as
@@ -4156,17 +4091,14 @@ push belongs to macOS, and the bar stays away until the pointer
 leaves the area near the edge. The bar goes back 0.5 s after the
 pointer leaves it and the area near its edge, and stays while a bar
 menu or a peek it opened is up.
-:::
 
 On the pocket's edge, unless
 [`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)
 is `"hidden"`, an `"auto"` or `"hidden"` bar's edge also keeps clear
 of the pocket's resting handle or mark.
 
-:::unreleased
 Only the whole mark keeps that edge clear now
 ([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)).
-:::
 
 A window drag opens an `"auto"` Space Bar as the pointer does
 above, so the window can be dropped on a Space
@@ -4179,10 +4111,8 @@ most once. A bar set not to reserve
 ([`space_bar.set_reserve`](#space_barset_reserve)) reserves
 nothing in any mode.
 
-:::unreleased
 An `"auto"` edge keeps no strip of its own: its windows reach
 the edge.
-:::
 
 Each bar keeps its own value. On an edge the two bars share, the
 edge reserves for its more present bar: beside an `"always"` bar
@@ -4190,7 +4120,6 @@ an `"auto"` one stays shown, while a `"hidden"` one still shows
 only on its shortcut. A second bar's shortcut shows it beside the
 first. A look never carries the value.
 
-:::unreleased
 Two `"auto"` bars on one edge draw two handles, each along its own
 bar. The pointer opens one bar at a time: while a bar the pointer
 opened is shown, the other's handle goes away. A bar its shortcut
@@ -4205,7 +4134,6 @@ segment. Beside a `"hidden"` sibling an
 `"auto"` bar's handle runs alone; the hidden bar, shown by its
 shortcut, joins it side by side and the handle moves to its shared
 place.
-:::
 
 **Example:**
 
@@ -4225,21 +4153,17 @@ seconds where that is above 0. Fails, with a pill beside the bar,
 where the Space Bar is `"always"`. VoiceOver's press on the Space
 dots runs it too.
 
-:::unreleased
 The dots are retired: VoiceOver's press on the Space Bar's handle
 runs it.
-:::
 
 It fails with a pill first while a window fills the screen, whether
 maximized, full screen or a presentation, since the bars stay
 hidden there.
 
-:::unreleased
 A maximized window no longer refuses it: the bar comes in over the
 window, whichever value
 [`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
 holds. Only a full-screen window or a presentation refuses it.
-:::
 
 **Example:**
 
@@ -4425,10 +4349,8 @@ horizontal rule.
 
 The segment shows only while no App Bar is shown on that screen.
 
-:::unreleased
 It is also hidden while an App Bar on that screen is set to
 `"auto"`, on any edge; only a `"hidden"` App Bar leaves it room.
-:::
 
 **Example:**
 
@@ -4962,10 +4884,8 @@ With a lens name (any case), it turns that lens on — from off, or
 from another lens — and turns KiwiVision off when that lens is the
 one on. A lens with no apps, or a name no lens has, is refused.
 
-:::unreleased
 Turning a lens on opens the apps its
 [`open_apps`](#kiwivisiondefine_lens) lists that have no window.
-:::
 
 A saved profile can leave a lens out through its
 [`lens_reach`](#profile-json-format). While that profile is live,
@@ -5012,9 +4932,7 @@ without one), and optionally `titles`, `keep_focus`, `clear_delay`,
 `reminder` and any of `dim`, `blur`, `appearance`,
 `clear_wallpaper` and `clear_app`.
 
-:::unreleased
 A lens table also takes `maximize` and `open_apps`.
-:::
 
 **Does:** adds a lens, or replaces the one of its name. While the
 lens is on, every window of its apps stays clear beside the focused
@@ -5040,7 +4958,6 @@ VoiceOver reads it once. Never-dimmed apps, KiwiDesk's own windows,
 overlays such as a launcher palette, and a dialog of the window
 that was clear never wait.
 
-:::unreleased
 `open_apps` lists the apps, from `apps`, that KiwiDesk opens when
 you turn the lens on and they have no window open — one minimized
 or on another Desktop counts as open. They open in the background,
@@ -5054,7 +4971,6 @@ matched by `titles`, or named by its process name, never opens.
 When no app of the lens is open and none opens, a pill says
 so, or names the app KiwiDesk could not find. Turning a lens on
 from `init.lua` opens nothing.
-:::
 
 A setting the lens leaves out follows the
 plain KiwiVision one, and never-dimmed apps stay clear under every
@@ -5064,15 +4980,12 @@ until a config reload or restart and is not listed on Settings ▸
 KiwiVision; a lens made there is stored in `gui.json` and saved
 with Save, and `define_lens` never writes there.
 
-:::unreleased
 A `define_lens` or `delete_lens` line counts as a setting, as a
 `set_*` verb does: on first launch KiwiDesk writes no `gui.json`
 over an `init.lua` that has one, and moving the setup to Settings
 comments the line out and stores the lens in `gui.json`, without
 the fade keys below.
-:::
 
-:::unreleased
 A lens made in Settings sets no fade of its own: its **Dim and
 blur** card holds Dim and Blur alone, and the lens follows
 [`set_fade_duration`](#kiwivisionset_fade_duration) and
@@ -5084,7 +4997,6 @@ blur** card holds Dim and Blur alone, and the lens follows
 rewritten. Moving a Lua-owned setup to Settings stores its lenses
 without the two keys, and a lens Settings saves drops a fade a
 session `define_lens` gave it.
-:::
 
 **Example:**
 
@@ -5125,9 +5037,7 @@ dim stays.
 
 ### kiwivision.set_fade_duration
 
-:::unreleased
 **Expects:** milliseconds, 0–1000. Default 400.
-:::
 
 **Does:** sets how long the window focus leaves takes to dim and
 blur; the window you focus clears at once. 0 makes the change
@@ -5135,11 +5045,9 @@ instant, as Reduce Motion in macOS does. A Space switch is always
 instant. Stored as `fade_duration` in the `kiwivision` group, and a
 lens table takes it too.
 
-:::unreleased
 No Settings row sets it alone: the speed preset writes it with the
 other lengths ([Animation Cascade](#animation-cascade)), and
 **Fade curve** stays in Settings.
-:::
 
 ### kiwivision.set_fade_curve
 
@@ -5182,7 +5090,6 @@ focused one — the part of each you can see; where another app's
 window covers it, that window stays dimmed. Focus a window of
 another app and its windows become the clear ones.
 
-:::unreleased
 ### kiwivision.set_maximize
 
 **Expects:** `"off"`, `"full"`, `"height"` or `"width"`. Default
@@ -5206,7 +5113,6 @@ fill back; a press of the shape KiwiVision fills, and
 mouse resize snaps back. Stored as `maximize` in the
 `kiwivision` group, absent while `"off"`, and a lens table takes it
 too.
-:::
 
 ### kiwivision.set_never_dimmed
 
@@ -5391,10 +5297,8 @@ focused. A window on another screen makes that screen's Space
 the active one. The pointer is never warped by it, so it works
 beside [`mouse.set_follows_focus`](#mouseset_follows_focus).
 
-:::unreleased
 A click made before those 200 ms run out cancels the rest: the
 pointer has to move again before hover focus fires.
-:::
 
 Also togglable in the Settings app under **Shortcuts ▸
 Mouse & Trackpad**.
@@ -5426,7 +5330,6 @@ mouse.set_hover_focus_delay(80)
 
 ## Gestures
 
-:::unreleased
 A gesture binding is an input — what the hand does on the mouse
 or the trackpad — held with keys, bound to an action. One input
 may be bound several times with different keys, and the keys must
@@ -5440,11 +5343,9 @@ Each row's **Applies to** picks the profiles it reaches, as a
 [shortcut row's](user-guide.md#shortcut-layers) does; each pick is
 written to the base or a profile's own bindings
 ([Gesture storage](#gesture-storage)).
-:::
 
 ### Gesture inputs
 
-:::unreleased
 | Input | What the hand does | Binds |
 |---|---|---|
 | `drag` | Moves the pointer with the button held | `move` or `resize` |
@@ -5516,11 +5417,9 @@ needs at least one, so a plain click stays the app's. `wheel`,
 others; `wheel` and `wheel_x` refuse `shift`, which macOS turns
 into a sideways scroll. Keys holding `hyper` bind while no Hyper
 key is set, and do nothing until one is.
-:::
 
 ### Gesture actions
 
-:::unreleased
 A binding does one of four things:
 
 - **Lua**, on an input with no direction: a click, a tap, a pinch.
@@ -5628,7 +5527,6 @@ it, as it moves the keyboard shortcuts
 ([#3444](https://github.com/KiwiCanopy/KiwiDesk/issues/3444)). A
 `gesture.bind` in `init.lua` binds over the ⌃⌥ defaults and stays as
 written.
-:::
 
 ### Scroll focus and Space step
 
@@ -5646,7 +5544,6 @@ pointer does not move, even with `mouse.follows_focus` on.
 - **Monocle:** it steps through the windows, wrapping the same
   way: right or down to the next, left or up to the previous.
 
-:::unreleased
 On BSP, Stack, Grid, Track and Floating, a swipe — a scroll with
 a finger phase, on a trackpad or a Magic Mouse — moves focus the
 way the fingers go, through the same step as [`focus`](#focus):
@@ -5666,7 +5563,6 @@ binding's `walk`, which any other keys may hold too
 ([Gesture actions](#gesture-actions)). Under ⌃⌥ a sideways
 wheel scroll — a tilt or thumb wheel — steps Spaces instead: the
 default `wheel_x` binding is the `space` family.
-:::
 
 The gesture never leaves its screen: under
 [`set_focus_wrap("all_screens")`](#set_focus_wrap) it wraps there
@@ -5683,7 +5579,6 @@ more than one window as it travels. The direction follows
 [Natural scrolling](#scroll_gestureset_natural_scrolling), per
 input.
 
-:::unreleased
 With long swipes on, each window on a trackpad, the first
 included, costs a [step length](#scroll_gestureset_step_length)
 of finger travel on the pad, in mm, whatever the swipe's speed;
@@ -5694,7 +5589,6 @@ no finger travel — no three- to five-finger tap or swipe is
 bound, the trackpad reports no size, or the swipe is on a Magic
 Mouse — the first window comes
 after 24 pt of scroll and every 6 pt after it counts as 1 mm.
-:::
 
 Hold **⌃⌥⌘** (the default;
 [`set_space_step`](#scroll_gestureset_space_step) changes it) and
@@ -5705,14 +5599,12 @@ mouse wheel; a fast roll or a free-spinning wheel steps one for the
 whole burst, and each notch counts again once the wheel pauses
 between notches. The pointer does not move.
 
-:::unreleased
 By default ⌃⌥⌘ steps Spaces on a swipe, a trackpad's or a Magic
 Mouse's; a mouse steps them with ⌃⌥ and its sideways wheel, and
 ⌃⌥⌘ with a mouse wheel binds nothing. A mouse without a sideways
 wheel has no default way, since ⇧ held with the wheel stays a
 vertical scroll that no `wheel` binding takes; bind one in
 [Gesture actions](#gesture-actions).
-:::
 
 Past the first or last Space it wraps or stops as
 [`focus_space_next`](#focus_space_previous--focus_space_next)
@@ -5729,17 +5621,14 @@ scroll that began before the keys went down stays the window's.
 It needs only the Accessibility permission, never Input
 Monitoring.
 
-:::unreleased
 Under a set of keys, KiwiDesk takes only the scrolls a binding of
 those keys answers: a swipe where `swipe2` is bound, a wheel burst
 whose first notch runs up or down where `wheel` is, and one whose
 first notch runs sideways where `wheel_x` is. Any other scroll
 under those keys reaches the window under the pointer.
-:::
 
 ### Gesture storage
 
-:::unreleased
 The bindings are stored in `gui.json` as the `gesture` object, the
 base every profile starts with, laid over the defaults above. A
 profile file may carry a `gesture` object of the same shape, which
@@ -5820,11 +5709,9 @@ which a `gesture.bind` or `gesture.unbind` line makes
 ([What coexists](#what-coexists-with-the-settings-app-and-what-doesnt))
 — `init.lua` is where it is kept, and **Adopt into the GUI** keeps
 the base it set.
-:::
 
 ### gesture.bind
 
-:::unreleased
 **Expects:** an input; keys, spelled as in
 [Gesture inputs](#gesture-inputs), `""` for none; then an action:
 a family name, `"move"` or `"resize"`, a string of Lua, or a table
@@ -5858,11 +5745,9 @@ gesture.bind("wheel", "control+option+command", {
   down = "KiwiDesk.focus_space_forward()",
 })
 ```
-:::
 
 ### gesture.unbind
 
-:::unreleased
 **Expects:** an input and keys, as for
 [`gesture.bind`](#gesturebind).
 
@@ -5875,7 +5760,6 @@ included.
 gesture.unbind("tap3", "")
 gesture.unbind("drag", "control+option")
 ```
-:::
 
 ### scroll_gesture.set_pan
 
@@ -5896,7 +5780,6 @@ scroll_gesture.set_pan("control+option+shift")
 scroll_gesture.set_pan("")   -- off
 ```
 
-:::unreleased
 The pan under a set of keys is three bindings of those keys: the
 `swipe2` binding's `focus` and the `wheel` and `wheel_x` bindings'
 `walk`, written with [`gesture.bind`](#gesturebind) and turned off
@@ -5907,7 +5790,6 @@ gesture.bind("swipe2", "option+command", "focus")
 gesture.bind("wheel", "option+command", "walk")
 gesture.bind("wheel_x", "option+command", "walk")
 ```
-:::
 
 ### scroll_gesture.set_space_step
 
@@ -5927,7 +5809,6 @@ scroll_gesture.set_space_step("control+option+shift")
 scroll_gesture.set_space_step("")   -- off
 ```
 
-:::unreleased
 The Space step under a set of keys is the `space` family on the
 `swipe2`, `wheel` and `wheel_x` bindings of those keys, written with
 [`gesture.bind`](#gesturebind):
@@ -5937,7 +5818,6 @@ gesture.bind("swipe2", "control+command", "space")
 gesture.bind("wheel", "control+command", "space")
 gesture.bind("wheel_x", "control+command", "space")
 ```
-:::
 
 ### scroll_gesture.set_natural_scrolling
 
@@ -5957,7 +5837,6 @@ to.
 scroll_gesture.set_natural_scrolling(false, "mouse")
 ```
 
-:::unreleased
 It also takes `"system"`, the default for both inputs, which
 follows macOS's own Natural scrolling and follows it again when it
 changes there; `true` and `false` pin the input whatever macOS's
@@ -5966,7 +5845,6 @@ is set to.
 ```lua
 scroll_gesture.set_natural_scrolling("system")
 ```
-:::
 
 ### scroll_gesture.set_long_swipes
 
@@ -5978,13 +5856,11 @@ A mouse wheel moves one window per notch either way, as the
 section above qualifies. The Space step always steps one Space
 per swipe.
 
-:::unreleased
 Long swipes are on by default, and each window, the first
 included, costs a [step length](#scroll_gestureset_step_length)
 of finger travel. Only `focus` and `walk` step more than once in
 a touch, whole or on one axis of a table; every other family, and
 every three- to five-finger swipe, takes one step per touch.
-:::
 
 **Example:**
 
@@ -5994,17 +5870,14 @@ scroll_gesture.set_long_swipes(true)
 
 ### scroll_gesture.set_step_distance
 
-:::unreleased
 `scroll_gesture.set_step_distance` is retired and fails, naming
 [`scroll_gesture.set_step_length`](#scroll_gestureset_step_length).
 It took points of scroll travel per extra window of a long swipe
 (10–1000, default `60`), which macOS's Scrolling speed scaled; a
 stored value is dropped and not carried over.
-:::
 
 ### scroll_gesture.set_step_length
 
-:::unreleased
 **Expects:** mm, 3–60 (default `8`); a value outside the range
 fails.
 
@@ -6020,7 +5893,6 @@ while long swipes are off.
 ```lua
 scroll_gesture.set_step_length(14)
 ```
-:::
 
 ## When Windows No Longer Fit
 
@@ -6329,13 +6201,11 @@ A popup with no title-bar button, such as a browser extension's
 popup, is not filed by the rule either
 ([#2475](https://github.com/KiwiCanopy/KiwiDesk/issues/2475)).
 
-:::unreleased
 When opening the app takes you to its space, a popup it opened
 after it came forward, such as a toolbar strip, moves there with
 you ([#3189](https://github.com/KiwiCanopy/KiwiDesk/issues/3189)).
 Any other popup stays in the space it opened in; see
 [accepted limitations](accepted-limitations.md).
-:::
 
 **Example:**
 
@@ -6357,7 +6227,6 @@ Profile overrides resolve the same way over a Lua-owned base.
 
 ### titled_app_rules
 
-:::unreleased
 **Expects:** a Lua table mapping `"bundle-id:title"` matchers to
 space identifiers.
 
@@ -6394,7 +6263,6 @@ titled_app_rules = {
 
 A stored profile may carry a sparse `titled_app_rules` override,
 read like the `app_rules` one.
-:::
 
 ### App rule verbs
 
@@ -6414,27 +6282,21 @@ Space), `float_rules`, `tile_rules`, `ignore_rules`,
 `float_automatically`, the `owner` of the rules (`gui` or `lua`)
 and the live `profile`.
 
-:::unreleased
 It also returns the titled Space rules as `titled_app_rules`
 (rule → Space).
-:::
 
 #### app_rule.set_space / app_rule.remove_space
 
 **Expects:** a bundle identifier, and for `set_space` a Space that
 exists.
 
-:::unreleased
 Both take an optional title fragment last, which sets or removes
 the app's [`titled_app_rules`](#titled_app_rules) entry for it.
 Without one they touch only the app's `app_rules` entry.
-:::
 
-:::unreleased
 An app with no bundle identifier is named by its process name, here
 and in `app_rule.set_float`, `explain_app` and the `app_rules`,
 `float_rules` and `ignore_rules` lists.
-:::
 
 **Does:** the app's NEXT windows open in that Space, or stop
 doing so; windows already open stay where they are.
@@ -6608,10 +6470,8 @@ A full-screen window is refused with `the focused window is
 fullscreen`, and a tiled one with `the focused window is not
 floating`, which never floats it. Each shows a pill on the window.
 
-:::unreleased
 A maximized floating window goes back to the frame it had first, and
 that frame is centred.
-:::
 
 No shortcut comes with it. Bind it in init.lua or in Settings' Lua
 bindings drawer.
@@ -6639,11 +6499,9 @@ there shows a pill. A window you dragged past that edge stays where it
 is if you move it further out, and comes back freely. A window larger
 than the area reaches its top or left edge and goes no further.
 
-:::unreleased
 The edge is the screen's visible edge, as a drag reaches it: a bar on
 the top edge stops the window going up, and a bar on the bottom or a
 side does not stop it (#3163).
-:::
 
 Two calls closer together than the app reports the first move can
 land as one, as a fast run of `resize` presses can
@@ -6659,10 +6517,8 @@ maximized window beneath a floating one stays maximized. A full-screen
 window is refused with `the focused window is fullscreen`, and a tiled
 one with `the focused window is not floating`, each with a pill.
 
-:::unreleased
 A maximized floating window goes back to the frame it had first, and
 moves from there.
-:::
 
 No shortcut comes with it. Bind it in init.lua or in Settings' Lua
 bindings drawer.
@@ -6885,7 +6741,6 @@ floating window, a switch to another Space or Desktop and back,
 or KiwiDesk's own restart leaves it filling the screen. Bound to
 `⌃⌥M` by default.
 
-:::unreleased
 The bars are not stood down: both bars and the pocket read as
 `"hidden"` on that screen, so a bar's shortcut shows it over the
 window and the menu-bar item names the Space. By default, moving the
@@ -6893,9 +6748,7 @@ pointer to a bar's screen edge brings it in too
 ([`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)).
 A Height or Width maximize does the same only where the window
 reaches into a bar's strip.
-:::
 
-:::unreleased
 A floating window fills its screen the same way, on any layout,
 and a second call puts it back at the frame it had. Moving focus
 to a tiled window of the Space puts it back too, as does tiling it
@@ -6907,9 +6760,7 @@ mouse drag put it back first; a mouse resize of its edge keeps the
 new size instead. Fails with a pill on a dialog, a panel or a
 full-screen window. A floating window takes an axis too,
 and `"in_place"` centres it on the frame it had.
-:::
 
-:::unreleased
 A pocket window out of the Pocket maximizes as any floating window
 does, and marking a maximized floating window with
 [`toggle_pocket_window`](#toggle_pocket_window) keeps it maximized.
@@ -6918,7 +6769,6 @@ in the shape it had, on the Space it comes out on, and a second press
 returns it to the frame it comes out at. Where that Space already
 holds a maximized window, or would refuse a Maximize, it comes out at
 that frame instead, with no pill.
-:::
 
 A sticky window fills the screen of the Space it is drawn on. Its
 maximize ends when you leave that Space, and it does not come back
@@ -6928,11 +6778,9 @@ window is away from its home Space. With
 maximized on its home Space leaves with its Desktop and comes back
 maximized, as any window does.
 
-:::unreleased
 With [`maximize.set_follow_focus`](#maximizeset_follow_focus) on
 when it is made, moving focus to another tiled window moves the
 maximize there instead of ending it.
-:::
 
 
 With an axis, the window fills that axis of the same area and
@@ -6949,7 +6797,6 @@ ring stays. A call with the same shape puts the window back; a
 call with another shape changes it in place. Bound to `⌃⌥⇧M`
 (height) and `⌃⌥⌘M` (width) by default.
 
-:::unreleased
 A Space's own value, set with
 [`maximize.set_share_override`](#maximizeset_share_override) or
 [`maximize.set_anchor_override`](#maximizeset_anchor_override),
@@ -6957,7 +6804,6 @@ outranks its screen shape's row. On a Monocle Space a tiled window
 refuses an axis with "On Monocle, a tiled window already fills the
 screen"; a floating
 window there may still take one, and a full Maximize is unchanged.
-:::
 
 **Example:**
 
@@ -6974,7 +6820,6 @@ KiwiDesk.bind("ctrl+alt+e", function()
 end)
 ```
 
-:::unreleased
 A share is a number from 0.1 to 1, a fraction of the screen, or a
 string ending in `pt`, a length that is the same on every screen,
 `"1100pt"`, from 100 pt. A length longer than the screen's axis
@@ -6989,7 +6834,6 @@ KiwiDesk.bind("ctrl+alt+r", function()
     KiwiDesk.toggle_maximized("height", "1100pt")
 end)
 ```
-:::
 
 ### maximize.set_share
 
@@ -7014,14 +6858,12 @@ given.
 
 The defaults are the two right-hand columns.
 
-:::unreleased
 The share may also be a length, `"1280pt"`, as
 [`toggle_maximized`](#toggle_maximized) takes;
 [`get_settings`](#get_settings) returns one as `{points = 1280}`,
 which every share setter also takes. The `"1280pt"` cells are new:
 an earlier release stored 0.5, 0.333 and 0.25 there, and a profile
 it saved keeps them.
-:::
 
 **Example:**
 
@@ -7050,7 +6892,6 @@ maximize.set_anchor("center", "ultrawide")
 
 ### maximize.set_share_override
 
-:::unreleased
 **Expects:** a Space id, an axis, `"height"` or `"width"`, and a
 share from 0.1 to 1, or `nil` to clear that axis.
 
@@ -7070,11 +6911,9 @@ maximize.set_share_override("editor", "height", 2 / 3)
 
 The share may also be a length, `"1100pt"`, as
 [`toggle_maximized`](#toggle_maximized) takes.
-:::
 
 ### maximize.set_anchor_override
 
-:::unreleased
 **Expects:** a Space id and `"center"` or `"in_place"`, or `nil` to
 clear it.
 
@@ -7089,11 +6928,9 @@ shape it was pressed with. The **Customize…** editor's row is
 ```lua
 maximize.set_anchor_override("editor", "center")
 ```
-:::
 
 ### maximize.set_follow_focus
 
-:::unreleased
 **Expects:** `true` or `false` (default `false`). Settings ▸ Layout
 Defaults ▸ Maximize ▸ Maximize follows focus.
 
@@ -7113,11 +6950,9 @@ swap, a resize or a layout change behave as for any Maximize.
 ```lua
 maximize.set_follow_focus(true)
 ```
-:::
 
 ### toggle_tiling
 
-:::unreleased
 **Expects:** nothing, or a Space id.
 
 **Does:** turns tiling off for the active Space, or the Space
@@ -7142,11 +6977,9 @@ KiwiDesk.bind("ctrl+alt+t", function()
     KiwiDesk.toggle_tiling()
 end)
 ```
-:::
 
 ### set_tiling
 
-:::unreleased
 **Expects:** a boolean, then optionally a Space id.
 
 **Does:** turns tiling on (`true`) or off (`false`) for the
@@ -7160,11 +6993,9 @@ first.
 -- Space 3 holds a screen share: leave its windows alone.
 KiwiDesk.set_tiling(false, 3)
 ```
-:::
 
 ### set_tiling_start_global
 
-:::unreleased
 **Expects:** a boolean.
 
 **Does:** sets whether a Space starts with tiling on where neither
@@ -7180,11 +7011,9 @@ profiles value, under Shortcuts ▸ Built-in ▸ Size & float.
 ```lua
 KiwiDesk.set_tiling_start_global(false)
 ```
-:::
 
 ### tiling.set_start
 
-:::unreleased
 **Expects:** a boolean or `nil`, then optionally a Space id.
 
 **Does:** sets whether this profile's Spaces start with tiling
@@ -7202,11 +7031,9 @@ new value at once.
 ```lua
 tiling.set_start(false, "Share")
 ```
-:::
 
 ### tiling.set_off_hides_borders
 
-:::unreleased
 **Expects:** a boolean.
 
 **Does:** sets whether a Space with tiling off hides its focus
@@ -7221,11 +7048,9 @@ floating marks stay.
 ```lua
 tiling.set_off_hides_borders(true)
 ```
-:::
 
 ### tiling.set_off_hides_bars
 
-:::unreleased
 **Expects:** a boolean.
 
 **Does:** sets whether a Space with tiling off hides the bars on
@@ -7242,7 +7067,6 @@ pause symbol.
 ```lua
 tiling.set_off_hides_bars(true)
 ```
-:::
 
 ### pocket
 
@@ -7269,11 +7093,9 @@ with [`toggle_pocket_window`](#toggle_pocket_window); each
   where that is still on the Space, else to the Space's focused
   window.
 
-:::unreleased
 A window put back while maximized comes out maximized again, as
 [`toggle_maximized`](#toggle_maximized) says, so that take-out does
 resize it.
-:::
 
 While the window's app is hidden, taking it out or putting it back
 fails with `the pocket window's app is hidden or relaunching` until
@@ -7595,10 +7417,8 @@ pocket shows how a window goes in. It refuses with a pill while
 KiwiShelf stands down for a window filling the screen. Bound to `⌃⌥⌘P`
 by default.
 
-:::unreleased
 A maximized window does not refuse it: the list opens over the
 window. Only a full-screen window or a presentation does.
-:::
 
 **Example:**
 
@@ -7715,7 +7535,6 @@ Both launch verbs are also reachable from the Settings app, from
 the per-row menu of an Open applications shortcut: *Open or Focus*
 (`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
 
-:::unreleased
 ### open_in_background
 
 **Expects:** an app bundle identifier (e.g. `com.apple.Notes`)
@@ -7774,7 +7593,6 @@ KiwiDesk.open_in_background("com.apple.mail", "3")
 -- Music opens on Desktop 2, which you are not looking at.
 KiwiDesk.open_in_background("com.apple.Music", nil, 2)
 ```
-:::
 
 
 ### gather
@@ -7851,9 +7669,7 @@ end)
 
 **Expects:** a side: `"windows"`, `"shortcuts"` or `"view"`.
 
-:::unreleased
 `"desktops"` opens the Desktop overview.
-:::
 
 **Does:** opens **KiwiHub** on that side, switches to it from
 another side, or closes KiwiHub when it already shows that side.
@@ -7868,7 +7684,6 @@ live glance at the active layer's bindings.
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
 
-:::unreleased
 The panel also lists every bound [gesture](#gesture-actions), once
 each. A gesture whose action has a row is a badge on that row: the
 most specific first — a trackpad gesture before a mouse one, then
@@ -7876,7 +7691,6 @@ the fewest keys, then a swipe before other gestures, then the
 fewest fingers — and the rest behind **+N**, which names them on
 hover. Every other gesture is a row under **Gestures**. Typing a
 gesture's name finds its row and brings that badge to the front.
-:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every
@@ -7922,7 +7736,6 @@ selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
-:::unreleased
 Under the field sits the **app strip**, shown from the first step
 off **All** or the first letter typed until KiwiHub closes, **All**
 included; KiwiHub opens on the list alone. It holds
@@ -7944,7 +7757,6 @@ never a row you pick: the arrows, the digits and search skip it.
 A modifier still held from the shortcut that opened KiwiHub, or
 from a step of `kiwihub.show_last_app`, counts for nothing until
 you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
-:::
 
 The `"view"` side is the **view picker**, three lines in one
 panel, the current item on each marked ✓.
@@ -7989,7 +7801,6 @@ Past the end of a line, **←** and **→** go round to its other end,
 and past the last line **↓** comes back to the first, **↑** the
 other way. Holding the key down stops at the end instead.
 
-:::unreleased
 The `"desktops"` side is the **Desktop overview**, the fourth side,
 after View: one row per screen, left to right, each screen's
 Desktops as columns, and in each column the screen's Spaces with
@@ -8032,7 +7843,6 @@ panel has the keyboard.
   typing, then KiwiHub.
 
 **Tab** reaches it from View, and **⇧Tab** from Windows.
-:::
 
 On every side:
 
@@ -8044,10 +7854,8 @@ On every side:
 The switch at the end of the field shows each side's own key,
 read from your shortcuts.
 
-:::unreleased
 Each key shows in place of its side's title: every side's while
 you hold **⌘**, one side's while you point at it.
-:::
 
 Seeded on **⌃⌥J** (windows), **⌃⌥K** (shortcuts, in every layer
 you create too) and **⌃⌥L** (view), and offered under
@@ -8063,7 +7871,6 @@ KiwiDesk.bind("alt+space", function()
 end)
 ```
 
-:::unreleased
 ### kiwihub.show_last_app
 
 **Expects:** nothing.
@@ -8085,7 +7892,6 @@ KiwiDesk.bind("ctrl+alt+y", function()
     kiwihub.show_last_app()
 end)
 ```
-:::
 
 ### kiwihub.set_key
 
@@ -8109,24 +7915,18 @@ Refused, naming the reason: a combo it cannot read; one without
 **cmd** with a digit or with **S**, **,**, **W**, **A**, **C**,
 **V**, **X** or **Z**; and a combo already set for another key.
 
-:::unreleased
 The combos for `"up"`, `"down"`, `"page_up"` and `"page_down"`
 also scroll an open [key sequence](#define_sequence)'s panel, as
 the arrows and page keys do, unless a step key takes the combo.
-:::
 
-:::unreleased
 The combos for `"up"` and `"down"` also walk the Pocket's list
 that [`pocket.toggle_list`](#pockettoggle_list) opens, as **↑**
 and **↓** do.
-:::
 
-:::unreleased
 Four more keys name the Desktop overview's own presses:
 `"open_space"` (**⌘↓**), `"leave_space"` (**⌘↑**), `"pick_up"`
 (**⌘Return**) and `"follow"` (**⌃Return**); their combos act on
 that side alone.
-:::
 
 The keys are the Mac's, not a profile's. Lua-only: no Settings
 row shows them.
@@ -8195,7 +7995,6 @@ any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
 its chord without `hyper`, so an enabled macOS shortcut on that
 chord (`hyper+cmd+space` is Spotlight's) still wins.
 
-:::unreleased
 The input-source shortcuts are the exception. A KiwiDesk row on
 **⌃⌥Space**, a Hyper combo held to it included, fires, and macOS
 does not switch the input source while it is bound. On **⌃Space**
@@ -8203,7 +8002,6 @@ only a leader, a step key or a sided row does the same: a plain
 row or a Hyper combo fires and macOS still switches the input
 source, so turn macOS's shortcut off first (System Settings ▸
 Keyboard ▸ Keyboard Shortcuts ▸ Input Sources).
-:::
 
 A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
 `lopt` / `ropt`, `lalt` / `ralt`, `lshift` / `rshift`, `lctrl` /
@@ -8212,7 +8010,6 @@ A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
 of one modifier (`"lcmd+rcmd+h"`, `"cmd+rcmd+h"`) and a side with
 `hyper` are unrecognized.
 
-:::unreleased
 **A modifier tapped alone** binds like a chord. The modifier twice
 is a double tap: `"cmd+cmd"` taps either ⌘ twice (the same key both
 times), `"ropt+ropt"` the right ⌥ twice. One modifier alone is a
@@ -8225,7 +8022,6 @@ tap keeps its side with `set_modifier_sides` off. A single tap on a
 key that also has a double tap waits 300 ms before it fires. A tap
 needs Accessibility; if macOS refuses it, a tap does not fire and
 its row is flagged.
-:::
 
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
@@ -8339,11 +8135,9 @@ strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
 
-:::unreleased
 The boundary is the screen's visible bounds, less a bar on the top
 edge and the focus ring's reach: a float grows under a bottom or side
 bar to the screen's edge, as a drag can take it (#3163).
-:::
 
 A window whose app refuses the size stays where it is and `resize`
 still reports success; one that takes part of the size moves only as
@@ -8624,12 +8418,10 @@ icon shows the first two characters of its name there,
 uppercased. The default layer (`KiwiDesk.bind`) never takes an
 icon — the status item shows the standard KiwiDesk glyph.
 
-:::unreleased
 The icon also leads the layer's chip in Settings ▸ Shortcuts ▸
 Layers and its Switch to row there and on KiwiHub's Shortcuts
 side; a layer without one keeps the plain chip and the generic
 layers symbol on its row.
-:::
 
 Where a screen's Space Bar draws nothing at rest
 ([`space_bar.set_visibility`](#space_barset_visibility)), the
@@ -8691,7 +8483,6 @@ KiwiDesk.define_layer("resize", {
 })
 ```
 
-:::unreleased
 ### Key Sequences
 
 #### define_sequence
@@ -8780,7 +8571,6 @@ KiwiDesk.define_sequence("ctrl+alt+space", {
         desc = "Float or tile" },
 }, { name = "Leader" })
 ```
-:::
 
 ### Config Cascade (Per-Profile Keybindings)
 
@@ -8847,12 +8637,10 @@ reads the saved files, where
 [`shortcut.list_groups`](#shortcutlist_groups) reads the shortcuts
 in effect.
 
-:::unreleased
 A [key sequence](#define_sequence) is listed by its leader's
 `chord`, with an empty `lua`, its `label` and its `steps`: each
 step key an entry of its own, a key that opens more keys carrying
 its `label` and `steps` again.
-:::
 
 #### shortcut.set
 
@@ -8873,10 +8661,8 @@ chord, is refused; remove the old binding first.
 **Does:** unbinds it, from every profile holding it when it is a
 shared shortcut. A chord with no shortcut is refused.
 
-:::unreleased
 A chord that opens a key sequence is refused: remove it with
 `shortcut.remove_sequence`.
-:::
 
 **Example:**
 
@@ -8885,7 +8671,6 @@ shortcut.set("ctrl+alt+h", "focus", "left")
 shortcut.remove("ctrl+alt+h")
 ```
 
-:::unreleased
 #### shortcut.remove_sequence
 
 **Expects:** the chord that opens a key sequence.
@@ -8940,7 +8725,6 @@ shortcut.set_sequence_key("ctrl+alt+space", "w,h", "focus", "left")
 shortcut.name_sequence_key("ctrl+alt+space", "w", "Windows", "macwindow")
 shortcut.remove_sequence_key("ctrl+alt+space", "w,h")
 ```
-:::
 
 #### shortcut.list_groups
 
@@ -9490,11 +9274,9 @@ goes there, even out of a held space; a held space keeps only
 the windows that profile has never seen, and is dropped once
 empty.
 
-:::unreleased
 If that move takes the focused window out of the active space and
 leaves the space empty, KiwiDesk switches to the space the window
 went to and focuses it ([#3191](https://github.com/KiwiCanopy/KiwiDesk/issues/3191)).
-:::
 
 A held space is dropped once no window is left in it on any
 Desktop, and by `delete_space`, which forwards its windows to the
@@ -9579,7 +9361,6 @@ still loads by name, and it takes a set back on its next load. A
 dormant profile loses its default flag; the profile that took its
 set becomes the default unless the count already has another.
 
-:::unreleased
 #### list_monitor_sets, forget_monitor_set
 
 **Expects:**
@@ -9616,7 +9397,6 @@ set becomes the default unless the count already has another.
 KiwiDesk.forget_monitor_set("Built-in Retina Display:1512x982",
     "BenQ GW2480:1920x1080")
 ```
-:::
 
 ### Profile JSON Format
 
@@ -9950,16 +9730,12 @@ next write.
   default `1000`). A value above `0` outside the band is
   clamped to it.
 
-:::unreleased
 The default is the Medium speed's
 ([Animation Cascade](#animation-cascade)).
-:::
 
-:::unreleased
 `set_expand_duration(0)` and below are refused; turn the expand off with
 `set_on_expand(false)`. A saved profile, look or backup storing `0`
 or below is read as the expand off at its default length.
-:::
 
 **Does:** the KiwiShelf expand when you switch Spaces: a bar
 sharing a shelf grows out of the other bar and shrinks back into
@@ -9968,16 +9744,12 @@ dissolves to the new Space's, and the bars glide to their new
 places. Off, they move at once. It is not under the
 window-animation switches, and it plays with Reduce Motion on too.
 
-:::unreleased
 KiwiDesk's own Off
 ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
 stops it.
-:::
 
-:::unreleased
 The switch is KiwiShelf ▸ Show ▸ Durations ▸ Animate the expand in
 Settings; the length is Lua-only.
-:::
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired → these two; a saved profile, look or backup carrying the
@@ -9991,28 +9763,22 @@ animations.set_expand_duration(1500)
 
 ### animations.set_reveal_duration
 
-:::unreleased
 **Expects:** milliseconds: 150–800 (default `400`). A value above
 `0` outside the band is clamped to it.
-:::
 
 **Does:** how long a hidden bar takes to come in, whichever
 [`kiwishelf.set_reveal_style`](#kiwishelfset_reveal_style) it plays;
 it goes back out in a little less. It plays with Reduce Motion on
 too.
 
-:::unreleased
 KiwiDesk's own Off
 ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
 stops it.
-:::
 
-:::unreleased
 `set_reveal_duration(0)` and below are refused; turn the reveal off with
 [`animations.set_on_reveal(false)`](#animationsset_on_reveal). A
 saved profile, look or backup storing `0` or below is read as the
 reveal off at its default length.
-:::
 
 **Example:**
 
@@ -10022,7 +9788,6 @@ animations.set_reveal_duration(600)
 
 ### animations.set_on_reveal
 
-:::unreleased
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** a hidden bar's reveal. Off, the bar shows and hides at
@@ -10037,7 +9802,6 @@ KiwiShelf ▸ Show ▸ Durations ▸ Animate the reveal; the length,
 ```lua
 animations.set_on_reveal(false)
 ```
-:::
 
 ### animations.set_on_peek
 
@@ -10060,7 +9824,6 @@ animations.set_on_peek(false)
 
 ### animations.set_reduce_motion
 
-:::unreleased
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** KiwiDesk's own Reduce Motion, in every profile: while it
@@ -10087,7 +9850,6 @@ the running value only. Each profile's own switches, such as
 ```lua
 animations.set_reduce_motion(true)
 ```
-:::
 
 ### enable_wake_restore, set_wake_restore_delay
 
@@ -10131,7 +9893,6 @@ switches, and a profile with its own look keeps its own. A saved
 look carries them; a bundled look carries none, so applying one
 leaves them unchanged.
 
-:::unreleased
 **The four lengths are app-wide**, in no profile and no look:
 `animations.set_duration`, `set_scroll_duration`,
 `set_expand_duration` and `set_reveal_duration`, none of which has
@@ -10170,7 +9931,6 @@ as custom.
 Its **Off** is
 [`animations.set_reduce_motion`](#animationsset_reduce_motion), which
 leaves the six lengths alone; picking a speed turns it off.
-:::
 
 ### Quit & Restart
 
@@ -10433,10 +10193,8 @@ holds the app's Space rule (`space`), its float rules
 where the window has none. Any other id is refused, an away
 window's included; ask `explain_app` instead.
 
-:::unreleased
 `app_rule` also holds the app's titled Space rules
 (`titled_app_rules`, rule → Space).
-:::
 
 The answer also carries `title`, the window's title as `get_state`
 has it.
@@ -10466,12 +10224,10 @@ Each entry of `windows`, `minimized` and `away` is the window's
 had when it left, and a window found away at start has none
 (`""`).
 
-:::unreleased
 `explain_app` also takes a process name, and both commands return
 `rule_key`, the name app rules know the app by: its bundle
 identifier, or its process name where it has none, when
 `bundle_id` is `null`.
-:::
 
 ### get_config_status
 

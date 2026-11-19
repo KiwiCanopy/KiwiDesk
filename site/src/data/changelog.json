@@ -2,6 +2,107 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "5.0.0",
+      "tag": "v5.0.0",
+      "date": "2026-11-19",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v5.0.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.0.0/KiwiDesk-5.0.0.dmg",
+      "image": "/releases/5.0.0.png",
+      "summary": "One of KiwiDesk's biggest updates: far more it can do, and just as easy to use.",
+      "spotlight": [
+        {
+          "title": "Every Desktop at a glance",
+          "line": "Replaces Mission Control: every Desktop with all its Spaces; drag windows.",
+          "symbol": "rectangle.stack"
+        },
+        {
+          "title": "Gestures on trackpad and mouse",
+          "line": "Swipe, tap, pinch and drag to move focus, Spaces and windows.",
+          "setting": "config.gesture",
+          "symbol": "hand.draw"
+        },
+        {
+          "title": "Keys that lead to more keys",
+          "line": "Press a chord, then pick the next key from the panel it opens.",
+          "symbol": "keyboard"
+        },
+        {
+          "title": "Bars, reworked",
+          "line": "A handle as thin as 2 pt, in reach even over a maximized window.",
+          "setting": "settings.spaceBarStyle.visibility",
+          "symbol": "menubar.rectangle"
+        },
+        {
+          "title": "Place windows your way",
+          "line": "Leave a Space untiled with ⌃⌥T; let a Maximize follow focus.",
+          "setting": "keybinding.toggle_tiling",
+          "symbol": "square.grid.2x2"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**New: KiwiHub's Desktop overview (⌃⌥O) shows every screen's Desktops and the Spaces on each.** Jump to a Space, or pick windows up and drop them on another Desktop, by key or by dragging their icons.",
+            "**New: trackpad and mouse gestures, set under Shortcuts ▸ Mouse & Trackpad.** With ⌃⌥ held, two fingers move focus, three switch Spaces, four move to the next screen and rotating cycles the layout; drag anywhere inside a window to move it, or add ⇧ to resize it from the nearest corner or edge; and the mouse wheel, sideways wheel and side buttons take gestures too. A three-finger tap now goes back to your last Space and a four-finger tap turns KiwiVision on or off, and either can be turned off on the Trackpad card.",
+            "**New: key sequences, under Shortcuts ▸ Personal.** A chord opens a panel of keys, and each key runs an action or opens more keys; any shortcut can now also be a modifier tapped once or twice, such as ⌘⌘, and with Tell left and right modifiers apart on, a Sides menu picks which key a shortcut takes.",
+            "**New: ⌃⌥T turns tiling off for the Space you're on, and back on.** Windows stay where you put them and return to their places afterwards; Shortcuts ▸ Built-in ▸ Size & float sets whether the bars and the focus border hide meanwhile.",
+            "**New: a Maximize can now follow focus**, moving to the window you focus instead of ending (Layout Defaults ▸ Maximize ▸ Maximize follows focus), and Monocle can maximize every window (Layout Defaults ▸ Monocle ▸ Maximize windows).",
+            "**New: KiwiVision can maximize the window you focus while it is on, and a lens can open its apps when you turn it on.**",
+            "**New: App Rules ▸ Open in a Space can match part of a window's title**, so one browser profile's windows open in their own Space, and an app with no bundle ID can now have rules too.",
+            "**New: Animation speed, from Off to Fast, at the top of Looks & Animations ▸ Animations and on Simple.** It sets one pace for every profile, while each profile keeps its own on/off switches; the separate window, scroll, Space slide and KiwiVision fade lengths have left Settings for it.",
+            "**New: Settings ▸ Profiles ▸ Known screen setups lists the screen combinations KiwiDesk remembers and lets you forget one**, and Settings ▸ Screens now offers to shift a screen whose hidden windows would show on its neighbour.",
+            "**New: Report a problem in Settings' footer opens a bug report with your versions filled in.**"
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**An Auto bar now rests as a thin handle along its edge, leaving that room to your windows, and opens as a fill runs along it.** The Space dots are gone; set the handle's colour under Looks & Animations ▸ Colors & glass and its thickness, from 2 to 6 pt, beside the bars' Show. The Pocket's tab takes the same thickness.",
+            "**The bars no longer vanish while a window is maximized:** they stay off the window, and pointing at a bar's screen edge brings it in. To keep them away, untick Layout Defaults ▸ Maximize ▸ Show bars at the screen edge.",
+            "**Maximize Height now fills 1280 pt across by default on Widescreen, Ultrawide and Super Ultrawide screens**, and a share can be a fraction or a length in points, set per screen shape or for one Space. Floating windows and a pocket window that is out can now be maximized as well.",
+            "**A few gesture defaults changed:** with a mouse, ⌃⌥ and the sideways wheel now switch Spaces in place of ⌃⌥⌘ and the wheel; on BSP, Stack, Grid and Track a ⌃⌥ swipe now moves focus the way your fingers go; and long two-finger swipes are on for everyone, with their checkbox and a new Step length slider at the foot of the Trackpad card; every window costs the same finger travel, however fast you swipe.",
+            "**Shortcuts & Gestures is now one Home tile, Shortcuts, in three parts: Built-in, Personal and Mouse & Trackpad.** The Layers card is a strip of chips, and a layer's icon now shows on its chip and its switch rows.",
+            "**The welcome tour is easier to follow.** Its Spaces step lets you start from Suggested, Developer, Focus, Dashboard or Studio and shows the result before anything is saved; its gestures step shows your trackpad and mouse gestures as the glyphs KiwiHub uses; and a Back button returns to the step before. Settings ▸ Profiles no longer has a Presets section.",
+            "**The Pocket's edge can now differ per screen, and Bars ▸ Position places it with the bars**; revealing a bar no longer brings the Pocket along.",
+            "**KiwiHub's window switcher now has a strip of apps to narrow the list to one app**, and its footer spells out Swap here.",
+            "**An open Settings window now shows changes made from Lua, the CLI or a bar menu, marks the rows that apply at once in every profile, and asks before Restore Defaults changes another profile.**",
+            "**A floating window now keeps its size**: a bar at the top only moves it down.",
+            "**KiwiDesk is now in Homebrew's own cask list**, so `brew install --cask kiwidesk` installs it without a tap."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**Update Available… now offers the newest update rather than one found earlier, and the update windows no longer show a black bar at the bottom in dark mode.**",
+            "**A window an app opens behind you no longer takes the focus border, and clicking a window's minimize button just after pointing at it no longer brings the window straight back.**",
+            "**Unplugging a screen no longer leaves you on an empty Space while your window sits in another.**",
+            "**A launching app's popups now follow it to its App Rule's Space, and a launcher or switcher window, such as Zephium's, is no longer tiled now and then.**",
+            "**A window at its largest size no longer leaves an empty gap beside it in Stack, BSP or Grid, and fast focus steps in a Scrolling row no longer show the wrong window.**",
+            "**The hidden windows of a screen stacked above another no longer show on the screen below.**",
+            "**Hovering a bar on the left or right edge now picks the item under the pointer**, and a growing Space Bar chip's glass no longer trails behind it.",
+            "**The app picker now lists apps open on every Space and Desktop.**",
+            "**Moving a window that is in macOS full screen to another Space or screen is now refused with a message on the window.**",
+            "**A shortcut on ⌃⌥Space or ⌃Space now says what really happens:** most take the keyboard-language switch from macOS; a plain ⌃Space shortcut runs alongside macOS's, so Settings asks you to turn macOS's off first."
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** `scroll_gesture.set_pan` and `scroll_gesture.set_space_step` are retired for `gesture.bind`, and `scroll_gesture.set_step_distance` for `set_step_length`, in mm; each fails, naming its replacement. The animation lengths (`animations.set_duration` and its siblings) now set one value for every profile, and `set_reveal_duration` and `set_expand_duration` no longer take 0: use `animations.set_on_reveal` and `set_on_expand`.",
+            "**New verbs:** `gesture.bind` and `gesture.unbind`; `toggle_tiling` and `set_tiling`; `move_to_display` and `move_to_display_last`, each with `_and_follow`; `focus_space_last`; `focus_app_window`; `open_in_background`, which opens an app behind you, optionally into a Space or a macOS Desktop; `shortcut.set_sequence_key` and its siblings; `titled_app_rules`; `forget_monitor_set`; `maximize.set_follow_focus`; `kiwishelf.set_pocket_edge` for one screen; and `kiwishelf.set_handle_thickness`.",
+            "**`kiwidesk mcp` now serves the docs the app ships**, through `docs_search` and `docs_get`, and `help` and `list_commands` link each command to its section.",
+            "**An `init.lua` that only defines a KiwiVision lens is no longer overwritten by Settings on first launch.**"
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "4.2.1",
       "tag": "v4.2.1",
       "date": "2026-11-08",

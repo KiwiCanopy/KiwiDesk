@@ -249,7 +249,6 @@ not offered.
 The `list_commands` tool also takes `kind` (`action`, `setting` or
 `query`), and each row it returns carries its `kind`.
 
-:::unreleased
 Two more tools read the documentation the running copy of KiwiDesk
 ships, without the network:
 
@@ -271,13 +270,10 @@ is returned as its description.
 reference section for `docs_get`. A command Lua cannot call has no
 `lua`, and one no Lua reference heading names has no `docs`.
 `kiwidesk help <name> --json` carries `lua` too.
-:::
 
-:::unreleased
 An AI app opens the apps it needs with `run` and
 `open_in_background`, which leaves your focus where it is
 ([`open_in_background`](lua-reference.md#open_in_background)).
-:::
 
 An AI app reads Config Issues and the sync folder's status by
 sending `get_config_status` through `run`. When `keep` cannot write
@@ -436,11 +432,9 @@ Reach back to just before the problem happened — `--last 15m`,
 window — and attach the whole file to the issue. Spell out
 `/usr/bin/log`: a shell alias named `log` is common.
 
-:::unreleased
 The file Settings exports also opens with the version, the
 screen count and the settings changed from the defaults; this
 command writes the log lines only.
-:::
 
 To watch live while reproducing:
 
@@ -513,12 +507,9 @@ Spaces by their order and by the ones you visited
 that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
 
-:::unreleased
 `focus_space_last` toggles between the last two Spaces you visited
 ([`focus_space_last`](lua-reference.md#focus_space_last)).
-:::
 
-:::unreleased
 `open_in_background` takes an app bundle id, and optionally a
 Space id to put its windows in and a Desktop number to send them
 to (`kiwidesk open_in_background com.apple.Music "" 2`), and opens
@@ -528,23 +519,17 @@ with no window for one, and does nothing when the app has a
 window anywhere. When the app brings itself forward anyway,
 KiwiDesk hands the focus back once
 ([`open_in_background`](lua-reference.md#open_in_background)).
-:::
 
-:::unreleased
 `focus_app_window` takes `next|prev` and focuses the focused app's
 next or previous window, on any Space, screen or Desktop, in the
 order a repeat `focus_or_spawn` press walks; unlike macOS's own
 **Move focus to next window**, it reaches past the current Space
 ([`focus_app_window`](lua-reference.md#focus_app_window)).
-:::
 
-:::unreleased
 `focus_space_window` takes `next|prev` and focuses the Space's
 next or previous window, along the row on Scrolling and Monocle
 ([`focus_space_window`](lua-reference.md#focus_space_window)).
-:::
 
-:::unreleased
 `move_to_display_last` and `move_to_display` move the focused
 window into the Space another screen shows, the screen
 `focus_display_last` or `focus_display` would go to; their
@@ -552,7 +537,6 @@ window into the Space another screen shows, the screen
 `move_to_display_and_follow` take `left|right|up|down`; none of
 the four takes a window id
 ([`move_to_display_last`](lua-reference.md#move_to_display_last--move_to_display)).
-:::
 
 `set_space_transition` picks how an explicit Space switch shows itself, and
 `set_space_slide_duration` paces the slide
@@ -632,7 +616,6 @@ without writing it.
 `shortcut.remove <chord>` read and write the saved shortcuts; a
 write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 
-:::unreleased
 `shortcut.remove_sequence <leader>` removes a whole key sequence
 ([`shortcut.remove_sequence`](lua-reference.md#shortcutremove_sequence)).
 
@@ -647,7 +630,6 @@ kiwidesk shortcut.set_sequence_key ctrl+alt+space w,h focus left
 kiwidesk shortcut.name_sequence_key ctrl+alt+space w Windows macwindow
 kiwidesk shortcut.remove_sequence_key ctrl+alt+space w,h
 ```
-:::
 
 `shortcut.list_groups` lists the shortcut groups a binding's `group`
 can name: the built-in tokens and the groups your shortcuts make
@@ -658,11 +640,9 @@ can name: the built-in tokens and the groups your shortcuts make
 and `app_rule.remove_float <app> [title]` change the app rules live
 ([App rule verbs](lua-reference.md#app-rule-verbs)).
 
-:::unreleased
 `app_rule.set_space` and `app_rule.remove_space` take an optional
 `[title]` last
 ([`titled_app_rules`](lua-reference.md#titled_app_rules)).
-:::
 
 `explain_window [window]` says why a window floats or tiles and
 what would change it; `explain_app <bundle_id>` says what KiwiDesk
@@ -829,28 +809,20 @@ every lens with why it cannot turn on.
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `scroll_gesture.set_long_swipes` defaults to `true`.
-:::
 
-:::unreleased
 `scroll_gesture.set_step_distance` is retired and fails, naming
 its replacement: `scroll_gesture.set_step_length` takes mm (3–60,
 default 8), the finger travel per extra window of a long swipe
 ([`scroll_gesture.set_step_length`](lua-reference.md#scroll_gestureset_step_length)).
-:::
 
-:::unreleased
 The defaults of `set_space_slide_duration`,
 `animations.set_expand_duration` and `animations.set_reveal_duration`
 are the Medium speed's
 ([Animation Cascade](lua-reference.md#animation-cascade)).
-:::
 
-:::unreleased
 `animations.set_on_reveal` is new; see
 [animations.set_on_reveal](lua-reference.md#animationsset_on_reveal).
-:::
 
 `toggle_maximized` also takes `height|width`, then an optional share
 from 0.1 to 1 and `center|in_place`: the window fills that axis at a
@@ -860,39 +832,28 @@ a press without them takes on a screen of that shape, or on every
 shape (`laptop|widescreen|ultrawide|super_ultrawide|portrait`;
 [`toggle_maximized`](lua-reference.md#toggle_maximized)).
 
-:::unreleased
 `maximize.set_follow_focus true|false` (default `false`) makes a new
 Maximize move with focus instead of ending
 ([`maximize.set_follow_focus`](lua-reference.md#maximizeset_follow_focus)).
-:::
 
-:::unreleased
 `maximize.set_share_override <space> <height|width> [share]` and
 `maximize.set_anchor_override <space> [center|in_place]` set one
 Space's own values over its screen shape's; leaving the value out
 clears it
 ([`maximize.set_share_override`](lua-reference.md#maximizeset_share_override)).
-:::
 
-:::unreleased
 Every share argument also takes a length in points, `1100pt`
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)).
-:::
 
-:::unreleased
 `toggle_maximized` takes a floating window too, whole or along one
 axis, and puts it back at the frame it had
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)).
-:::
 
-:::unreleased
 `monocle.set_maximize_windows true|false` (default `false`) makes
 every Monocle window fill the screen with no gaps while the bars read
 Hidden
 ([`monocle.set_maximize_windows`](lua-reference.md#monocleset_maximize_windows)).
-:::
 
-:::unreleased
 `toggle_tiling [space]` turns a Space's tiling off and back on, and
 `set_tiling <true|false> [space]` sets it; the windows stay where
 they are while it is off. `set_tiling_start_global <true|false>`,
@@ -901,7 +862,6 @@ they are while it is off. `set_tiling_start_global <true|false>`,
 `tiling.set_off_hides_bars <true|false>` set where Spaces start and
 what a Space with tiling off hides
 ([`toggle_tiling`](lua-reference.md#toggle_tiling)).
-:::
 
 `center_floating` moves the focused floating window to the middle of
 its screen at its size
@@ -922,7 +882,6 @@ given. The flip lasts for the session and is no setting; what ends
 it, and the `stack_position` that `get_state` reports, are in the
 [Lua reference](lua-reference.md#stacktoggle_stack_position).
 
-:::unreleased
 `gesture.bind <input> <keys> <action>` binds a mouse or trackpad
 input held with keys — `drag`, `hover_move`, `wheel`, `swipe2`,
 `tap4` and the rest of the
@@ -936,7 +895,6 @@ alone. `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
 `modifier_drag.set_move`, `modifier_drag.set_resize` and
 `trackpad_gesture.bind` are retired and fail naming
 `gesture.bind`.
-:::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
@@ -1000,25 +958,19 @@ KiwiHub on that side, so a launcher reaches it without a shortcut;
 any other side is refused, naming the sides it takes. See
 [kiwihub.show](lua-reference.md#kiwihubshow).
 
-:::unreleased
 It also takes `desktops`, the Desktop overview.
-:::
 
-:::unreleased
 `kiwihub.show_last_app` opens the window switcher on the app of
 the window you used last. See
 [kiwihub.show_last_app](lua-reference.md#kiwihubshow_last_app).
-:::
 
 `kiwihub.set_key` takes a built-in KiwiHub key (`up`, `down`,
 `page_up`, `page_down`, `left`, `right`) and a combo, and makes the
 combo a second key for it while KiwiHub is open; no combo clears it.
 See [kiwihub.set_key](lua-reference.md#kiwihubset_key).
 
-:::unreleased
 It also takes `open_space`, `leave_space`, `pick_up` and
 `follow`, the Desktop overview's own keys.
-:::
 
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
@@ -1056,11 +1008,9 @@ see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Gestures](lua-reference.md#gestures).
 
-:::unreleased
 `scroll_gesture.set_natural_scrolling` takes `system`, the default,
 which follows macOS's own Natural scrolling
 ([`scroll_gesture.set_natural_scrolling`](lua-reference.md#scroll_gestureset_natural_scrolling)).
-:::
 
 `animations.set_on_expand` and `animations.set_expand_duration` set
 the KiwiShelf expand on a Space switch, and
@@ -1068,20 +1018,16 @@ the KiwiShelf expand on a Space switch, and
 hidden bar's reveal; see
 [animations.set_on_expand](lua-reference.md#animationsset_on_expand).
 
-:::unreleased
 Both durations refuse `0` and below with `a duration must be above
 0; …`, naming the `set_on_*` verb that turns the motion off.
-:::
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired and fail naming their replacements.
 
-:::unreleased
 `animations.set_reduce_motion` (true|false) is the Off of Settings'
 speed preset: motion drops in every profile and the lengths are
 kept; it changes the running value only
 ([animations.set_reduce_motion](lua-reference.md#animationsset_reduce_motion)).
-:::
 
 `animations.set_on_peek` (true|false, default true) turns the bars'
 peeks instant; see
@@ -1116,7 +1062,6 @@ Screen fingerprints after the profile, as `list_monitors` prints
 them, scope the binding to that one screen setup ([Lua
 reference](lua-reference.md#bind_profile_to_desktop)).
 
-:::unreleased
 `list_monitor_sets` prints the stored screen setups in the order
 Settings lists them: the connected one first, then by screen count,
 then by the screens' names. `forget_monitor_set` takes every screen
@@ -1126,7 +1071,6 @@ prints them
 "BenQ GW2480:1920x1080"`). A refusal prints its `reason` code,
 writes the reason to stderr and exits 1
 ([Lua reference](lua-reference.md#list_monitor_sets-forget_monitor_set)).
-:::
 
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
@@ -1158,11 +1102,9 @@ in a floating-layout space, which places nothing.
 That floor is Floating's `min_window_size` on the axis
 resized, whatever layout the window's space uses.
 
-:::unreleased
 A floating window's `resize` and `move_floating` run to the screen's
 visible edge; a bar on the top edge stops them, a bottom or side bar
 does not (#3163).
-:::
 
 A focused window in native full screen is refused ahead of every layout,
 whatever its float state, with `the focused window is
