@@ -9846,6 +9846,16 @@ open. The move is owed through the launch follow's door (#1599)
 and bounded by the slowest cold start, since a background launch
 has no activation to time from.
 
+:::unreleased
+An opened app that brings itself to the front anyway hands the
+focus back once, through `open_in_background`'s hold (#3141), which
+every app the lens opens owes (#3495, #3497). The app whose window
+takes the owed move is released from it, so its own focus report
+keeps the move. The owner accepted the cost (2026-11-19): an app
+that comes forward before its window is adopted is handed back
+first, a brief flicker, and its window then takes the move.
+:::
+
 It fires only where the user turned the lens on: in the doors a
 chord, the menu, the CLI and the GUI take, never in the one writer
 of what KiwiDesk draws, which also carries renames and turn-offs,

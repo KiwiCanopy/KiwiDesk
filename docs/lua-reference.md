@@ -5041,7 +5041,8 @@ and none of their windows takes the focus or switches Space, save
 one: where none of the lens's apps had a window, the first of
 their windows to arrive takes the focus, if a screen shows it and
 you have not moved the focus, clicked or turned the lens off since.
-A member matched by `titles`, or named by its process name, never
+An app that brings itself to the front anyway hands the focus back
+once, as with `open_in_background`. A member matched by `titles`, or named by its process name, never
 opens. When no app of the lens is open and none opens, a pill says
 so, or names the app KiwiDesk could not find. Turning a lens on
 from `init.lua` opens nothing.

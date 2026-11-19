@@ -2,9 +2,9 @@ import Foundation
 
 /// A lens turning on opens its Auto-open apps that have no window
 /// (#3122 ▸ Ruling amendment): each judged on its own, all opened
-/// in the background, and one focus move owed to the first member
-/// window to arrive where none of the lens's apps had one; where
-/// one had, each opened app owes the focus's hand-back instead.
+/// in the background, each owing the focus's hand-back (#3497), and
+/// one focus move owed to the first member window to arrive where
+/// none of the lens's apps had one; that window's app is lifted.
 extension KiwiCore {
     /// Called by the user doors alone, after the lens went on:
     /// `toggleCommand` and `setKiwiVision`, never `setVision`, and
@@ -27,12 +27,10 @@ extension KiwiCore {
             onLog("kiwivision: \(lens.name) opened \(queued.sorted())")
             launchFollow.noteQuietApps(queued, at: now)
         }
-        guard open.isEmpty else {
-            // The focus stays: a self-activating app hands it back
-            // as `open_in_background`'s does (#3141).
-            for app in queued { launchFollow.holds.note(app, at: now) }
-            return
-        }
+        // A self-activating app hands the focus back as
+        // `open_in_background`'s does (#3141, #3497).
+        for app in queued { launchFollow.holds.note(app, at: now) }
+        guard open.isEmpty else { return }
         if !queued.isEmpty {
             oweQuietOpenFocus(queued, lens: lens.name)
             return
@@ -91,6 +89,9 @@ extension KiwiCore {
             onLog("kiwivision: w\(window.id.raw) arrived — focus stays")
             return true
         }
+        // The owed move is ours: its own focus report and the echo
+        // of an early activation's hand-back must not undo it (#3497).
+        launchFollow.holds.lift(key)
         onLog("kiwivision: focus handed to w\(window.id.raw)")
         focusWindow(window.id, refocusRetile: false, warp: true)
         return true
