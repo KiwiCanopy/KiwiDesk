@@ -37,8 +37,7 @@ extension SettingsValueReadout {
         // rows carry them (`layerDiffRows`, #2022).
         case .layersReach:
             return []
-        // Lua-only (#1873 ▸ Ruling 2026-11-16), narrated where a
-        // restore or a reload moves the draft's value.
+        // The Step length slider's value (#3505), narrated in mm.
         case .scrollStepLength:
             return [
                 .change(

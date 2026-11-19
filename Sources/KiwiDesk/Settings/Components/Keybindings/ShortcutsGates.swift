@@ -56,6 +56,9 @@ struct ShortcutsGates {
         /// No two-finger swipe moves focus or walks the windows, so
         /// Long swipes reach nothing (#3369).
         case noPanSwipe
+        /// Long swipes is off, so its step length steps nothing
+        /// (#3505).
+        case longSwipesOff
     }
 
     /// Evaluates inert reason for setting key.
@@ -95,6 +98,11 @@ struct ShortcutsGates {
                 profile: nil,
                 shortcutBase: config.shortcutBase
             ) ? nil : .noPanSwipe
+        case .shortcuts(.scrollStepLength):
+            if let reason = inertReason(for: .shortcuts(.scrollLongSwipes)) {
+                return reason
+            }
+            return config.scrollGesture.longSwipes ? nil : .longSwipesOff
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -181,6 +189,7 @@ struct ShortcutsGates {
         .shortcuts(.shortcutBase),
         .shortcuts(.restoreDefaults),
         .shortcuts(.scrollLongSwipes),
+        .shortcuts(.scrollStepLength),
         .behaviour(.tilingOffHidesBars),
         .behaviour(.tilingOffHidesBorders),
     ]

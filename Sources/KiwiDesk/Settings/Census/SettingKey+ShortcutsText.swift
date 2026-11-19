@@ -92,7 +92,7 @@ extension ShortcutsKey {
         case .scrollLongSwipes:
             return .text("shortcuts.gestures.scroll.long_swipes")
         case .scrollStepLength:
-            return .none
+            return .text("shortcuts.gestures.scroll.step_length")
         case .scrollNaturalTrackpad:
             return .text("shortcuts.gestures.scroll.trackpad")
         case .scrollNaturalMouse:

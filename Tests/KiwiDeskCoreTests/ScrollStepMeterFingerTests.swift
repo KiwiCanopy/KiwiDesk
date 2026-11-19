@@ -5,9 +5,9 @@ import Testing
 
 /// A long swipe's steps count finger travel in mm, the first one
 /// included (#1873 ▸ Ruling 2026-11-16, #3482): the finger reading
-/// sets the budget only, the point deltas keep the axis and sign and
-/// the latch's floor, and a touch counts in the one unit its first
-/// step fixed.
+/// sets the budget only, the point deltas keep the axis and each
+/// pad axis's way, the latch is the floor only where points count,
+/// and a touch counts in the one unit it fixed.
 @Suite("Scroll step meter, finger travel")
 struct ScrollStepMeterFingerTests {
     private let length = 10.0
@@ -63,17 +63,16 @@ struct ScrollStepMeterFingerTests {
         #expect(fastSteps == 2)
     }
 
-    /// The pad's own axes are never flipped: the sign is the point
-    /// delta's, which has had Natural scrolling's one flip.
-    @Test("the sign is the point delta's")
-    func signFollowsThePoints() {
-        var meter = latched(at: on(0))
+    /// The pad's own axes are never flipped: the sign follows
+    /// Natural scrolling's one flip, carried on the event (#3505).
+    @Test("the sign follows Natural scrolling")
+    func signFollowsNatural() {
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(0))
         // Fingers right on the pad, content reversed by Natural off.
-        let steps = meter.feed(
-            event(.changed, dx: -40),
-            reading: on(12)
-        )
-        #expect(steps == -1)
+        var right = event(.changed, dx: -40)
+        right.reversed = true
+        #expect(meter.feed(right, reading: on(12)) == -1)
     }
 
     /// The axis is the point travel's: a vertical finger reading
@@ -135,38 +134,46 @@ struct ScrollStepMeterFingerTests {
         )
     }
 
-    /// The latch is the first step's floor: a length of finger
-    /// travel short of 24 pt of point travel waits for it.
-    @Test("the latch is the first step's floor")
-    func latchIsTheFloor() {
+    /// No point floor in mm: a length of finger travel steps however
+    /// few points it took, since a point threshold makes a fast
+    /// swipe step sooner (#3482, owner 2026-11-19).
+    @Test("a first step in mm owes no point floor")
+    func noPointFloor() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         _ = meter.feed(event(.began), reading: on(0))
-        #expect(meter.feed(event(.changed, dx: 20), reading: on(length)) == 0)
-        #expect(meter.feed(event(.changed, dx: 5), reading: on(length)) == 1)
+        #expect(meter.feed(event(.changed, dx: 4), reading: on(length)) == 1)
     }
 
-    /// A reading that never moves — a Magic Mouse beside a pad,
-    /// whose reading is the pad's — steps after one points stride
-    /// and counts points (#3482).
-    @Test("a frozen reading steps at one points stride")
-    func frozenReadingStepsInPoints() {
+    /// A reading whose pad carries no two fingers — a Magic Mouse
+    /// beside a pad, whose reading is the pad's — steps at the
+    /// latch and counts points.
+    @Test("a scroll the pad did not make counts points")
+    func untouchedPadCountsPoints() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         let stride = length * ScrollStepMeter.pointsPerMM
-        _ = meter.feed(event(.began), reading: on(7))
-        #expect(meter.feed(event(.changed, dx: 30), reading: on(7)) == 0)
-        #expect(
-            meter.feed(event(.changed, dx: stride - 30), reading: on(7)) == 1
+        let still = TouchTravel.Reading(
+            sum: CGVector(dx: 7, dy: 0),
+            source: 1,
+            touching: false
         )
-        #expect(meter.feed(event(.changed, dx: stride), reading: on(7)) == 1)
+        _ = meter.feed(event(.began), reading: still)
+        #expect(meter.feed(event(.changed, dx: 20), reading: still) == 0)
+        #expect(meter.feed(event(.changed, dx: 5), reading: still) == 1)
+        #expect(
+            meter.feed(event(.changed, dx: stride - 1), reading: still) == 0
+        )
+        #expect(meter.feed(event(.changed, dx: 1), reading: still) == 1)
     }
 
-    /// A fast flick past the floor before the reading has moved
-    /// waits for it, and then counts mm.
-    @Test("a reading behind a flick still counts mm")
-    func laggingReadingCountsMM() {
+    /// A fast flick whose points outrun the reading by far more than
+    /// a points stride waits for the reading and counts mm, never
+    /// switching to points.
+    @Test("a fast flick ahead of its reading stays in mm")
+    func flickStaysInMM() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         _ = meter.feed(event(.began), reading: on(0))
-        #expect(meter.feed(event(.changed, dx: 40), reading: on(0)) == 0)
+        #expect(meter.feed(event(.changed, dx: 400), reading: on(0)) == 0)
+        #expect(meter.feed(event(.changed, dx: 400), reading: on(0)) == 0)
         #expect(meter.feed(event(.changed, dx: 5), reading: on(length)) == 1)
         #expect(
             meter.feed(event(.changed, dx: 500), reading: on(2 * length - 1))
@@ -174,10 +181,10 @@ struct ScrollStepMeterFingerTests {
         )
     }
 
-    /// A reading lost between the floor and the first step waits:
-    /// the touch counts mm from the floor, never points after it.
-    @Test("a reading lost after the floor waits")
-    func lostAfterTheFloorWaits() {
+    /// A reading lost before the first step waits: a touch that
+    /// fixed mm never counts points after it.
+    @Test("a reading lost before the first step waits")
+    func lostBeforeTheFirstWaits() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         _ = meter.feed(event(.began), reading: on(0))
         #expect(meter.feed(event(.changed, dx: 30), reading: on(4)) == 0)
@@ -185,9 +192,9 @@ struct ScrollStepMeterFingerTests {
         #expect(meter.feed(event(.changed, dx: 1), reading: on(length)) == 1)
     }
 
-    /// A reading at the begin and none at the floor: the touch
-    /// steps there and counts points.
-    @Test("no reading at the floor steps there")
+    /// A reading at the begin and none after: the touch steps at
+    /// the latch's floor and counts points.
+    @Test("no reading after the begin steps at the floor")
     func noReadingAtTheFloor() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         _ = meter.feed(event(.began), reading: on(0))

@@ -158,8 +158,9 @@ struct ShortcutsGateTests {
                     .otherLayerPicked, .matchesDefaults,
                     // The Tiling off hide rows' greys (#3089).
                     .noBarShows, .focusBorderOff,
-                    // Long swipes' grey (#3369).
-                    .noPanSwipe,
+                    // Long swipes' grey (#3369), and its step
+                    // length's (#3505).
+                    .noPanSwipe, .longSwipesOff,
                 ]
         )
     }

@@ -212,7 +212,7 @@ extension TilingOffWords {
             )
         case .onlyDefaultLayer, .trackUnused, .appWideLuaOwned,
             .storedProfilePage, .otherLayerPicked, .matchesDefaults,
-            .noPanSwipe:
+            .noPanSwipe, .longSwipesOff:
             nil
         }
     }

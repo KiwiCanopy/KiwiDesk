@@ -40,7 +40,10 @@ extension SettingsModel {
         // Drafted beside the layers it moves (#1870): never kept
         // without them.
         config.shortcutBase = cleanConfig.shortcutBase
+        // `step_length` is no rule: it rides the globals write.
+        let stepLength = config.scrollGesture.stepLength
         config.scrollGesture = cleanConfig.scrollGesture
+        config.scrollGesture.stepLength = stepLength
         config.gesture = cleanConfig.gesture
         config.spaceHistory = cleanConfig.spaceHistory
         config.modeCycle = cleanConfig.modeCycle

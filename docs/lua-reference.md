@@ -5681,9 +5681,12 @@ input.
 With long swipes on, each window on a trackpad, the first
 included, costs a [step length](#scroll_gestureset_step_length)
 of finger travel on the pad, in mm, whatever the swipe's speed;
-macOS's Scrolling speed does not change it. Where KiwiDesk reads
+macOS's Scrolling speed does not change it. The travel is net:
+fingers moving back take it off again, so rocking or rolling
+them on the spot moves nothing. Where KiwiDesk reads
 no finger travel — no three- to five-finger tap or swipe is
-bound, or the trackpad reports no size — the first window comes
+bound, the trackpad reports no size, or the swipe is on a Magic
+Mouse — the first window comes
 after 24 pt of scroll and every 6 pt after it counts as 1 mm.
 :::
 
@@ -5800,7 +5803,8 @@ sparse `scroll_gesture` object overrides field by field, save
 outside 3–60 is clamped to the range. In the
 Settings app the first two are under **Shortcuts ▸ Mouse &
 Trackpad**, where each row's **Applies to** checklist writes the
-base or chosen profiles' overrides; `step_length` has no row. A
+base or chosen profiles' overrides; `step_length` is the
+**Step length** slider below Long swipes, which spans 3–20 mm. A
 stored `step_distance` is removed when the file loads.
 
 The verbs below change the running base only: a profile's own
@@ -5995,13 +5999,14 @@ stored value is dropped and not carried over.
 ### scroll_gesture.set_step_length
 
 :::unreleased
-**Expects:** mm, 3–60 (default `10`); a value outside the range
+**Expects:** mm, 3–60 (default `8`); a value outside the range
 fails.
 
 **Does:** sets the finger travel on the trackpad per window of a
 [long swipe](#scroll_gestureset_long_swipes), the first included,
 the same at every swipe speed. It applies in every profile,
-since no profile overrides it. It is kept, and does nothing,
+since no profile overrides it. Settings' **Step length** slider
+sets the same value, within 3–20 mm. It is kept, and does nothing,
 while long swipes are off.
 
 **Example:**

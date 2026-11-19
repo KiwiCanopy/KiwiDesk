@@ -18014,6 +18014,89 @@ hand.
 :::
 
 :::unreleased
+*Amended* (#3505, 2026-11-19): **a step counts net finger travel
+along its axis.** Each frame's finger move was counted by its size
+and given the sign of that frame's point delta, so any move whose
+point delta ran forward counted forward: fingers rolling back,
+drifting out of step or rocking while macOS's smoothed deltas
+still ran on added path walked, not ground covered, and steps
+came early — most on a vertical swipe with the fingers placed
+diagonally (owner, at 6 and 8 mm). Now a move back subtracts.
+The direction rule of the 2026-11-16 amendment stands in a
+different form: a step's sign is still the one Natural scrolling
+named, now taken from the convention the point deltas arrive in —
+the hand's own motion, y growing down, reversed whole where
+KiwiDesk's Natural scrolling is off (`ScrollStepMeter.pointWay`,
+the convention `GestureMotionLatch` reads directions in) — and
+never from a frame's point delta, whose sign a lag or a rock can
+flip. Learning the way from the deltas was refused: an early
+rock or a drift on the minor axis could teach it backwards for
+the whole touch. A reversal still steps back once the net travel
+back covers the remainder and a length.
+:::
+
+:::unreleased
+*Amended* (owner, 2026-11-19, #3482, #3505): **in mm, the first
+step owes no point floor, and a touch with a live reading never
+falls back to points** — retiring the #3482 amendment's latch
+floor under the first step and its wait of up to one points
+stride. "It sucks if a quick swipe suddenly reacts
+quicker; especially with long swipes all steps should feel the
+same" (owner). Point travel grows with finger speed, so any point
+threshold — the 24 pt latch under the first step, or the points
+stride after which a reading that had not moved yet switched the
+touch to points — makes a fast swipe step sooner or count in the
+other unit. So a long swipe whose reading's pad carries the two
+fingers counts mm from its first event: every step, the first
+included, costs exactly one step length of net finger travel, and
+the touch waits for a reading a frame behind a fast flick rather
+than switching units. The 24 pt latch stays the whole rule where
+the steps count points: no reading, Long swipes off, or a reading
+whose pad carries no two fingers, which is how a Magic Mouse swipe
+beside a pad is told apart — explicitly, from the pad's own frame,
+not by waiting to see whether the reading moves. The first step's
+axis is the one the touch's net point travel leads at that moment.
+
+One finger held still while the other moves steps at half the
+rate: the frame's move is the two contacts' mean, the centroid's
+travel, so a step costs two lengths of the moving finger (owner,
+with ui-designer). That is accepted. Taking the smaller finger's
+move instead was refused: macOS scrolls with one finger still, so
+such a swipe would stall in mm while its points ran on.
+
+The default step length is 8 mm, down from 10 (owner, 2026-11-19,
+after feeling 6, 8 and 10 on the net-travel build). Ten millimetres
+per window was tuned while wobble still padded every step; counted
+net, 10 mm asked for a long reach per window, and 6 mm stepped
+before the hand meant it. Where no reading exists the default now
+counts 48 pt per window at the same 6 pt per mm, no longer 4.2's
+60 pt; the fallback keeps its rate, not its old spacing. A stored value is kept: `step_length` is a new key in
+this release, so no stored 10 records an older default.
+:::
+
+:::unreleased
+*Amended* (owner, 2026-11-19, #3505, with ui-designer and
+architect): **the step length has a Settings row, and is no longer
+Lua-only** — this retires "It is Lua-only" in the 2026-11-16
+amendment and "Its step length is Lua-only" in the #3369 one.
+Under a Settings-owned config `gui.json` is the store and loads
+over the Lua line (the O7 split; a per-field ledger of who set
+what was refused), so Lua-only was unreachable for the very users
+who use Settings. Nor is it the retired *Travel per window* field:
+that existed because macOS's Scrolling speed scaled point travel
+per Mac, while finger travel needs no per-Mac scaling, so this is
+a feel knob. **Step length** sits directly below the Long swipes
+checkbox as its dependent, global with no **Applies to** column,
+and greys with it, drawing no caption of its own since its cause
+is the row above. It is a log-scaled slider between Short and Long
+with no number, since a millimetre value is not what a hand
+judges, and a tick at the default with a light snap onto it. Its
+low edge is Core's clamp (3 mm); its high edge, 20 mm, is the
+GUI's curation, Lua open to 60, and a stored value past it pins
+the knob to that end.
+:::
+
+:::unreleased
 **Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
 no "Holding a modifier" group, and Long swipes is one setting at
 the Trackpad card's foot, never per binding.** A scroll with keys
@@ -18135,8 +18218,9 @@ finger count changes, so a lifting finger's jump of the centre is
 no flick, and the flick
 distance stays above the tap's 4%, so a tap rolling one way still
 taps. The values are fixed: no macOS preference scales touch
-travel, the same reason a long swipe's step length has no row
-(*Amended (#1873, owner 2026-11-16)*, above).
+travel, the same reason a long swipe's step length is a feel
+knob rather than a per-Mac scale (the #3505 Step length
+amendment, above).
 The Dock's own stream is not read for the verdict: it exists for
 the Dock's axes alone, never for five fingers. And no gauge shows
 a swipe's progress, since the step it fires is its own feedback.

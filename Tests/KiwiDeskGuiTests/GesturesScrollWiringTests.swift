@@ -38,7 +38,8 @@ struct GesturesScrollWiringTests {
         #expect(
             Self.squash(body).contains(
                 "revealed(boundRows)ifdevice==.trackpad{GestureRule()"
-                    + "GestureLongSwipesRow(model:model)}"
+                    + "GestureLongSwipesRow(model:model)"
+                    + "GestureStepLengthRow(model:model)}"
             )
         )
         let users = try SourceScan.swiftSources(

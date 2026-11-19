@@ -15,10 +15,15 @@ public struct TouchTravel: Sendable {
     public struct Reading: Equatable, Sendable {
         public var sum: CGVector
         public var source: Int
+        /// True while the source's pad carries exactly two fingers:
+        /// false for a scroll the pad did not make (a Magic Mouse
+        /// beside it), whose steps count points.
+        public var touching: Bool
 
-        public init(sum: CGVector, source: Int) {
+        public init(sum: CGVector, source: Int, touching: Bool = true) {
             self.sum = sum
             self.source = source
+            self.touching = touching
         }
     }
 
@@ -43,7 +48,11 @@ public struct TouchTravel: Sendable {
         var hasher = Hasher()
         hasher.combine(generation)
         hasher.combine(active.device)
-        return Reading(sum: sum, source: hasher.finalize())
+        return Reading(
+            sum: sum,
+            source: hasher.finalize(),
+            touching: last[active.device]?.count == 2
+        )
     }
 
     /// Feeds one device's frame. `size` is that pad in mm; a pad

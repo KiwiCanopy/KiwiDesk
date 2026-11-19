@@ -3,14 +3,14 @@ import CoreGraphics
 /// How many steps a scroll makes (#1656, #1519, rulings
 /// 2026-09-29): a trackpad swipe one, as soon as its travel passes
 /// the latch's threshold — and with `longSwipes`, one every
-/// `length` mm of finger travel, the first included, the latch
-/// its floor, each on the axis the point travel leads, so right,
-/// right, down is one movement (#1873 ▸ Rulings 2026-11-15,
-/// 2026-11-16; #3482); a mouse wheel one per notch,
-/// except that a notch closer than `wheelQuiet` to the previous one
-/// in the same direction steps nothing, so notches clicked one at
-/// a time each step while a fast roll or a free spin steps once.
-/// The glide after a lift never counts. Pure.
+/// `length` mm of net finger travel, the first included, each on
+/// the axis the point travel leads, so right, right, down is one
+/// movement and a wobble steps nothing (#1873 ▸ Rulings 2026-11-15,
+/// 2026-11-16; #3482, #3505); a mouse wheel one per notch, except
+/// that a notch closer than `wheelQuiet` to the previous one in the
+/// same direction steps nothing, so notches clicked one at a time
+/// each step while a fast roll or a free spin steps once. The glide
+/// after a lift never counts. Pure.
 public struct ScrollStepMeter: Sendable {
     /// The notch quiet that re-arms a wheel, in seconds; a
     /// provisional number until a device logs notch intervals.
@@ -19,8 +19,7 @@ public struct ScrollStepMeter: Sendable {
     static let wheelQuiet = 0.12
 
     /// The fallback's rate: point travel per mm of `length` where
-    /// no finger reading exists (#1873 ▸ Ruling 2026-11-16), so 10 mm
-    /// counts 60 pt, the old default.
+    /// no finger reading exists (#1873 ▸ Ruling 2026-11-16).
     public static let pointsPerMM = 6.0
 
     private let longSwipes: Bool
@@ -30,14 +29,14 @@ public struct ScrollStepMeter: Sendable {
     /// Point travel since the last step, both axes: the axis of
     /// every step, in either unit.
     private var travel = CGVector.zero
-    /// The step budget, both axes, the step's remainder kept: finger
-    /// mm signed by each event's point delta, or the point delta.
+    /// The step budget, both axes, the step's remainder kept: net
+    /// finger mm turned the point deltas' way (`pointWay`), or the
+    /// point delta.
     private var budget = CGVector.zero
     /// The finger reading last fed where the touch counts in mm,
     /// from its first reading; nil where it counts points.
     private var finger: TouchTravel.Reading?
-    /// The touch's unit, fixed from the latch's floor (`first`);
-    /// nil before.
+    /// The touch's unit, fixed once `first` settles it; nil before.
     private var countsMM: Bool?
     /// The axis the last step took.
     private var horizontal: Bool?
@@ -57,7 +56,7 @@ public struct ScrollStepMeter: Sendable {
     /// makes — positive where the delta's larger axis is positive.
     /// `reading` is the touch reader's running finger travel in mm
     /// (`TouchGestures.travel`), nil where none runs; the unit is
-    /// fixed at the latch's floor, so a touch never counts in two.
+    /// fixed once per touch, so a touch never counts in two.
     public mutating func feed(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading? = nil
@@ -86,7 +85,6 @@ public struct ScrollStepMeter: Sendable {
         travel.dy += event.delta.dy
         guard fired else { return first(event, reading: reading) }
         guard longSwipes else { return 0 }
-        let distance: Double
         if let last = finger {
             // A reading gone mid-touch adds nothing: no steps, never
             // a switch to points; one from another source (a rebuilt
@@ -94,31 +92,25 @@ public struct ScrollStepMeter: Sendable {
             guard let now = reading else { return 0 }
             finger = now
             if now.source == last.source {
-                let move = CGVector(
-                    dx: now.sum.dx - last.sum.dx,
-                    dy: now.sum.dy - last.sum.dy
-                )
-                budget.dx += Self.signed(move.dx, by: event.delta.dx)
-                budget.dy += Self.signed(move.dy, by: event.delta.dy)
+                add(from: last, to: now, reversed: event.reversed)
             }
-            distance = length
-        } else {
-            budget.dx += event.delta.dx
-            budget.dy += event.delta.dy
-            distance = length * Self.pointsPerMM
+            let leads = abs(travel.dx) > abs(travel.dy)
+            return step(along: leads, distance: length)
         }
+        budget.dx += event.delta.dx
+        budget.dy += event.delta.dy
         let leads = abs(travel.dx) > abs(travel.dy)
-        return step(along: leads, distance: distance)
+        return step(along: leads, distance: length * Self.pointsPerMM)
     }
 
-    /// The touch's first step, never before the latch's point floor
-    /// (#3482). From there the unit is fixed: a long swipe whose
-    /// finger reading moved since the begin counts mm and steps once
-    /// the finger has moved one `length`, a reading lost meanwhile
-    /// stepping nothing; no reading or no long swipes steps at the
-    /// floor and counts points; a reading that has not moved yet
-    /// waits for it up to one points stride, then counts points (a
-    /// Magic Mouse beside a pad, whose reading is the pad's).
+    /// The touch's first step, and the touch's unit, fixed for the
+    /// touch once settled. A long swipe whose reading's pad carries
+    /// the two fingers counts mm, its first step one `length` of net
+    /// finger travel with no point floor, however fast the points
+    /// ran (#3482, owner 2026-11-19), a reading lost meanwhile
+    /// stepping nothing. Any other touch steps at the latch's floor
+    /// and counts points: no reading, no long swipes, or a reading
+    /// whose pad carries no two fingers (a Magic Mouse beside a pad).
     private mutating func first(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading?
@@ -127,46 +119,62 @@ public struct ScrollStepMeter: Sendable {
         if counts, let now = reading {
             // The origin is the touch's first reading.
             if let last = finger, now.source == last.source {
-                budget.dx += Self.signed(
-                    now.sum.dx - last.sum.dx,
-                    by: event.delta.dx
-                )
-                budget.dy += Self.signed(
-                    now.sum.dy - last.sum.dy,
-                    by: event.delta.dy
-                )
+                add(from: last, to: now, reversed: event.reversed)
             }
             finger = now
+        }
+        if countsMM == nil, counts, reading?.touching == true {
+            countsMM = true
+        }
+        if countsMM == true {
+            guard reading != nil else { return 0 }
+            let steps = step(
+                along: abs(travel.dx) > abs(travel.dy),
+                distance: length
+            )
+            fired = steps != 0
+            return steps
         }
         guard let (leads, sign) = ScrollStepLatch.named(travel) else {
             return 0
         }
-        if countsMM == nil {
-            if !counts || reading == nil {
-                countsMM = false
-            } else if budget != .zero {
-                countsMM = true
-            } else if max(abs(travel.dx), abs(travel.dy))
-                < length * Self.pointsPerMM
-            {
-                // A reading a frame behind a fast flick: wait for it.
-                return 0
-            } else {
-                countsMM = false
-            }
-        }
-        if countsMM == true {
-            guard reading != nil else { return 0 }
-            let steps = step(along: leads, distance: length)
-            fired = steps != 0
-            return steps
-        }
+        countsMM = false
         fired = true
         horizontal = leads
         finger = nil
         budget = .zero
         travel = .zero
         return sign
+    }
+
+    /// Adds the finger move between two readings of one source to
+    /// the budget, net and signed as the pad moved, so a move back
+    /// subtracts (#3505).
+    private mutating func add(
+        from last: TouchTravel.Reading,
+        to now: TouchTravel.Reading,
+        reversed: Bool
+    ) {
+        let move = Self.pointWay(
+            CGVector(
+                dx: now.sum.dx - last.sum.dx,
+                dy: now.sum.dy - last.sum.dy
+            ),
+            reversed: reversed
+        )
+        budget.dx += move.dx
+        budget.dy += move.dy
+    }
+
+    /// A pad move (x right, y up) the way the point deltas run: they
+    /// reach the meter in Natural scrolling's convention, the hand's
+    /// own motion with y growing down (`ScrollGestureEvent.hand`,
+    /// read so by `GestureMotionLatch`), reversed whole where Natural
+    /// scrolling is off. So a step's sign is the direction Natural
+    /// scrolling named, never a frame's point delta (#3505).
+    static func pointWay(_ move: CGVector, reversed: Bool) -> CGVector {
+        let way: Double = reversed ? -1 : 1
+        return CGVector(dx: move.dx * way, dy: -move.dy * way)
     }
 
     /// The steps `budget` holds along the leading axis at
@@ -182,14 +190,6 @@ public struct ScrollStepMeter: Sendable {
         budget = leads ? CGVector(dx: rest, dy: 0) : CGVector(dx: 0, dy: rest)
         travel = .zero
         return steps
-    }
-
-    /// A finger move's size, taking the sign of the point delta on
-    /// the same axis: the point delta has had Natural scrolling's
-    /// one flip, and the pad's own axes have not.
-    private static func signed(_ move: Double, by delta: Double) -> Double {
-        guard delta != 0 else { return 0 }
-        return delta > 0 ? abs(move) : -abs(move)
     }
 
     private mutating func notch(_ along: Double, at time: Double) -> Int {

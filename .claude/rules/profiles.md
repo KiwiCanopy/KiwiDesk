@@ -833,7 +833,11 @@ holds the secondary-switch decision including its nil case.
   precedent this one sets. A `ScrollGestureBase` field no
   profile overrides, as `step_length` is, joins
   `ScrollGestureConfigParityTests`' `globalOnly`; it is never
-  simply left out of `ScrollGestureOverride`.
+  simply left out of `ScrollGestureOverride`. A path that rebuilds
+  or drops the scroll base the reach table carries — the sidecar,
+  the rule save, a failed rule half's drop — carries such a field
+  over it, since the table holds none (#3505,
+  `StepLengthSaveTests`).
 - **A default flip on a leaf the encoder writes WHOLE owes no
   step (#1359) — re-defaulting the stored old value is a ruling,
   bounded.** A step may turn a stored old default into the new
