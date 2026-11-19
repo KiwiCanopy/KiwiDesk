@@ -3,10 +3,11 @@ import CoreGraphics
 /// How many steps a scroll makes (#1656, #1519, rulings
 /// 2026-09-29): a trackpad swipe one, as soon as its travel passes
 /// the latch's threshold — and with `longSwipes`, one every
-/// `length` mm of finger travel, the first included, the latch
+/// `length` mm of net finger travel, the first included, the latch
 /// its floor, each on the axis the point travel leads, so right,
-/// right, down is one movement (#1873 ▸ Rulings 2026-11-15,
-/// 2026-11-16; #3482); a mouse wheel one per notch,
+/// right, down is one movement and a wobble steps nothing (#1873 ▸
+/// Rulings 2026-11-15, 2026-11-16; #3482, #3505); a mouse wheel one
+/// per notch,
 /// except that a notch closer than `wheelQuiet` to the previous one
 /// in the same direction steps nothing, so notches clicked one at
 /// a time each step while a fast roll or a free spin steps once.
@@ -30,9 +31,11 @@ public struct ScrollStepMeter: Sendable {
     /// Point travel since the last step, both axes: the axis of
     /// every step, in either unit.
     private var travel = CGVector.zero
-    /// The step budget, both axes, the step's remainder kept: finger
-    /// mm signed by each event's point delta, or the point delta.
+    /// The step budget, both axes, the step's remainder kept: net
+    /// finger mm on the pad's axes, or the point delta.
     private var budget = CGVector.zero
+    /// How the pad's axes map onto the point deltas, this touch.
+    private var facing = PadFacing()
     /// The finger reading last fed where the touch counts in mm,
     /// from its first reading; nil where it counts points.
     private var finger: TouchTravel.Reading?
@@ -73,6 +76,7 @@ public struct ScrollStepMeter: Sendable {
             fired = false
             travel = .zero
             budget = .zero
+            facing = PadFacing()
             countsMM = nil
             // A long swipe's mm origin is the reading at its begin.
             finger =
@@ -84,31 +88,23 @@ public struct ScrollStepMeter: Sendable {
         }
         travel.dx += event.delta.dx
         travel.dy += event.delta.dy
+        facing.add(points: event.delta)
         guard fired else { return first(event, reading: reading) }
         guard longSwipes else { return 0 }
-        let distance: Double
         if let last = finger {
             // A reading gone mid-touch adds nothing: no steps, never
             // a switch to points; one from another source (a rebuilt
             // reader, another pad) re-bases without a move.
             guard let now = reading else { return 0 }
             finger = now
-            if now.source == last.source {
-                let move = CGVector(
-                    dx: now.sum.dx - last.sum.dx,
-                    dy: now.sum.dy - last.sum.dy
-                )
-                budget.dx += Self.signed(move.dx, by: event.delta.dx)
-                budget.dy += Self.signed(move.dy, by: event.delta.dy)
-            }
-            distance = length
-        } else {
-            budget.dx += event.delta.dx
-            budget.dy += event.delta.dy
-            distance = length * Self.pointsPerMM
+            if now.source == last.source { add(from: last, to: now) }
+            let leads = abs(travel.dx) > abs(travel.dy)
+            return mm(along: leads)
         }
+        budget.dx += event.delta.dx
+        budget.dy += event.delta.dy
         let leads = abs(travel.dx) > abs(travel.dy)
-        return step(along: leads, distance: distance)
+        return step(along: leads, distance: length * Self.pointsPerMM)
     }
 
     /// The touch's first step, never before the latch's point floor
@@ -127,14 +123,7 @@ public struct ScrollStepMeter: Sendable {
         if counts, let now = reading {
             // The origin is the touch's first reading.
             if let last = finger, now.source == last.source {
-                budget.dx += Self.signed(
-                    now.sum.dx - last.sum.dx,
-                    by: event.delta.dx
-                )
-                budget.dy += Self.signed(
-                    now.sum.dy - last.sum.dy,
-                    by: event.delta.dy
-                )
+                add(from: last, to: now)
             }
             finger = now
         }
@@ -157,7 +146,7 @@ public struct ScrollStepMeter: Sendable {
         }
         if countsMM == true {
             guard reading != nil else { return 0 }
-            let steps = step(along: leads, distance: length)
+            let steps = mm(along: leads)
             fired = steps != 0
             return steps
         }
@@ -169,27 +158,47 @@ public struct ScrollStepMeter: Sendable {
         return sign
     }
 
+    /// Adds the finger move between two readings of one source to
+    /// the budget, signed as the pad moved, so a move back subtracts.
+    private mutating func add(
+        from last: TouchTravel.Reading,
+        to now: TouchTravel.Reading
+    ) {
+        let move = CGVector(
+            dx: now.sum.dx - last.sum.dx,
+            dy: now.sum.dy - last.sum.dy
+        )
+        budget.dx += move.dx
+        budget.dy += move.dy
+        facing.add(finger: move)
+    }
+
+    /// The steps the mm budget holds along the leading axis, turned
+    /// the point deltas' way by `facing`, so the step's sign is the
+    /// direction Natural scrolling named; none while the axis's way
+    /// is unread.
+    private mutating func mm(along leads: Bool) -> Int {
+        guard let way = facing.way(horizontal: leads) else { return 0 }
+        return step(along: leads, distance: length, way: way)
+    }
+
     /// The steps `budget` holds along the leading axis at
-    /// `distance` apiece. The step's axis keeps its remainder; the
-    /// other starts over, and the axis is decided afresh by the
-    /// travel after it.
-    private mutating func step(along leads: Bool, distance: Double) -> Int {
-        let run = leads ? budget.dx : budget.dy
+    /// `distance` apiece, the budget's sign multiplied by `way`. The
+    /// step's axis keeps its remainder; the other starts over, and
+    /// the axis is decided afresh by the travel after it.
+    private mutating func step(
+        along leads: Bool,
+        distance: Double,
+        way: Double = 1
+    ) -> Int {
+        let run = (leads ? budget.dx : budget.dy) * way
         let steps = Int(run / distance)
         guard steps != 0 else { return 0 }
         horizontal = leads
-        let rest = run - Double(steps) * distance
+        let rest = (run - Double(steps) * distance) * way
         budget = leads ? CGVector(dx: rest, dy: 0) : CGVector(dx: 0, dy: rest)
         travel = .zero
         return steps
-    }
-
-    /// A finger move's size, taking the sign of the point delta on
-    /// the same axis: the point delta has had Natural scrolling's
-    /// one flip, and the pad's own axes have not.
-    private static func signed(_ move: Double, by delta: Double) -> Double {
-        guard delta != 0 else { return 0 }
-        return delta > 0 ? abs(move) : -abs(move)
     }
 
     private mutating func notch(_ along: Double, at time: Double) -> Int {

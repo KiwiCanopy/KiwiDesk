@@ -5,9 +5,9 @@ import Testing
 
 /// A long swipe's steps count finger travel in mm, the first one
 /// included (#1873 ▸ Ruling 2026-11-16, #3482): the finger reading
-/// sets the budget only, the point deltas keep the axis and sign and
-/// the latch's floor, and a touch counts in the one unit its first
-/// step fixed.
+/// sets the budget only, the point deltas keep the axis, each pad
+/// axis's way and the latch's floor, and a touch counts in the one
+/// unit its first step fixed.
 @Suite("Scroll step meter, finger travel")
 struct ScrollStepMeterFingerTests {
     private let length = 10.0
@@ -64,16 +64,14 @@ struct ScrollStepMeterFingerTests {
     }
 
     /// The pad's own axes are never flipped: the sign is the point
-    /// delta's, which has had Natural scrolling's one flip.
-    @Test("the sign is the point delta's")
+    /// deltas' way, which has had Natural scrolling's one flip
+    /// (#3505 reads it once per touch).
+    @Test("the sign is the point deltas' way")
     func signFollowsThePoints() {
-        var meter = latched(at: on(0))
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(0))
         // Fingers right on the pad, content reversed by Natural off.
-        let steps = meter.feed(
-            event(.changed, dx: -40),
-            reading: on(12)
-        )
-        #expect(steps == -1)
+        #expect(meter.feed(event(.changed, dx: -40), reading: on(12)) == -1)
     }
 
     /// The axis is the point travel's: a vertical finger reading

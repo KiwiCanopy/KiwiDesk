@@ -114,9 +114,12 @@ editing here:
     and nowhere else** (#1873 ▸ Ruling 2026-11-16). A consumer
     hands the meter the touch reading beside the event and does
     no unit arithmetic of its own. Finger mm sets only a long
-    swipe's step budget: never take a step's axis or sign from
-    the reading, since the point delta carries Natural
-    scrolling's one flip and the pad's axes do not. A long swipe's
+    swipe's step budget, NET as the pad moved, so a move back
+    subtracts (#3505): never take a step's axis from the reading,
+    and turn each pad axis the point deltas' way through one
+    reading per touch (`PadFacing`), never per frame, since the
+    point delta carries Natural scrolling's one flip and the
+    pad's axes do not (`ScrollStepMeterNetTravelTests`). A long swipe's
     first step costs a step length too, never fewer points than
     the latch's floor (#3482). Fix a touch's unit at that floor:
     mm once the reading has moved since the begin, so a reading

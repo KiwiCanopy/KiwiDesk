@@ -18014,6 +18014,30 @@ hand.
 :::
 
 :::unreleased
+*Amended* (#3505, 2026-11-19): **a step counts net finger travel
+along its axis.** Each frame's finger move was counted by its size
+and given the sign of that frame's point delta, so any move whose
+point delta ran forward counted forward: fingers rolling back,
+drifting out of step or rocking while macOS's smoothed deltas
+still ran on added path walked, not ground covered, and steps
+came early — most on a vertical swipe with the fingers placed
+diagonally (owner, at 6 and 8 mm). Now a move back subtracts.
+The direction rule of the 2026-11-16 amendment stands in a
+different form: the point deltas still name each step's sign,
+through one reading per pad axis per touch (`PadFacing`), taken
+once that axis's net point travel passes the latch's 24 pt beside
+at least 1 mm of net finger travel. Natural scrolling, macOS's
+and KiwiDesk's, flips the point deltas and never the pad, and
+within a touch it cannot change, so one reading carries it for
+the whole touch; a net that far is a movement, never a wobble.
+An axis not yet read steps nothing. A reversal still steps back
+once the net travel back covers the remainder and a length. The
+two fingers' mean move stays the frame's move: it already counts
+two fingers moving together once, and one finger moving alone
+half.
+:::
+
+:::unreleased
 **Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
 no "Holding a modifier" group, and Long swipes is one setting at
 the Trackpad card's foot, never per binding.** A scroll with keys
