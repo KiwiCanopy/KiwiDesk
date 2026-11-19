@@ -17,7 +17,11 @@ extension KiwiCore {
         let displays = state.workspaces.allDisplays
         guard let named = displays.first(where: { $0.id == display })
         else { return nil }
-        guard displays.filter({ $0.name == named.name }).count > 1 else {
+        let base = ScreenLabel.baseName(named.name)
+        guard
+            displays.filter({ ScreenLabel.baseName($0.name) == base })
+                .count > 1
+        else {
             return ScreenLabel(name: named.name)
         }
         // The order the presets' "Main screen" / "Screen 2" number.

@@ -138,6 +138,26 @@ struct ScreenShiftOfferTests {
         #expect(state.name(of: "c") == "Mac")
     }
 
+    /// macOS numbers identical screens' names itself (#3351).
+    @Test("numbered twins read by position, from the bare name")
+    func numberedTwins() {
+        pinEnglish()
+        defer { reset() }
+        var state = ScreenShiftState()
+        state.screens = [
+            screen("a", "Twin (2)", CGRect(x: 0, y: 0, width: 90, height: 90)),
+            screen(
+                "b",
+                "Twin (1)",
+                CGRect(x: 90, y: 0, width: 90, height: 90)
+            ),
+            screen("c", "Mac (2)", CGRect(x: 0, y: 90, width: 90, height: 80)),
+        ]
+        #expect(state.name(of: "a") == "Twin (left)")
+        #expect(state.name(of: "b") == "Twin (right)")
+        #expect(state.name(of: "c") == "Mac (2)")
+    }
+
     @Test("a no is remembered for this arrangement only")
     func keptPerArrangement() {
         let model = makeTestModel()

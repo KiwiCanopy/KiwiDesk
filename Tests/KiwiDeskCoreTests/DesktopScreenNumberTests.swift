@@ -161,4 +161,21 @@ struct DesktopScreenNumberTests {
         _ = core.state.workspaces.removeDisplay(DisplayID(2))
         #expect(core.screenLabel(of: DisplayID(1)) == nil)
     }
+
+    /// macOS numbers identical screens' names itself (#3351).
+    @Test("twins macOS numbered still take their place")
+    func numberedTwins() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        core.state.workspaces.upsertDisplay(authorityDisplay(1, "Twin (1)"))
+        core.state.workspaces.upsertDisplay(
+            authorityDisplay(2, "Twin (2)", x: 100)
+        )
+        #expect(core.screenLabel(of: DisplayID(1))?.twinPlace == 0)
+        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == 1)
+        core.state.workspaces.upsertDisplay(
+            authorityDisplay(2, "Studio (2)", x: 100)
+        )
+        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == nil)
+    }
 }
