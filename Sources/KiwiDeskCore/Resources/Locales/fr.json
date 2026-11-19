@@ -1703,7 +1703,6 @@
   "menu.layout.keep": "Conserver la disposition dans le profil « %1$@ »",
   "menu.layout.save_failed.title": "Impossible d'enregistrer la disposition",
   "menu.layout.unsaved": "non enregistrée dans le profil",
-  "menu.open_kiwihub": "Ouvrir %1$@…",
   "menu.quit": "Quitter KiwiDesk",
   "menu.settings": "Réglages…",
   "menu.status.a11y": "KiwiDesk",

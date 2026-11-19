@@ -14,9 +14,10 @@ private final class FakeStatusItem: StatusItemHandle {
     var menu: NSMenu?
 }
 
-/// The quick menu's chord rows (#2309 ruling 8): one "Open
-/// KiwiHub…" row opening the View side in place of the Layout,
-/// Switch Profile, KiwiVision and View Shortcuts rows, and the
+/// The quick menu's chord rows (#2309 ruling 8, #3485): KiwiHub's
+/// one row is "Show Desktop overview" — the Layout, Switch Profile,
+/// KiwiVision, View Shortcuts and Open KiwiHub rows are gone, since
+/// the menu keeps only rows that can show their key — and the
 /// Settings row, each showing its live chord. `.serialized`
 /// because `LocalizationManager` is a process-wide singleton
 /// (titles are matched in English).
@@ -57,40 +58,40 @@ struct QuickMenuHubRowTests {
 
     /// Ruling 8: the switches move to KiwiHub's View side; the menu
     /// keeps its warnings, Settings, What's New, Updates and Quit.
+    /// Open KiwiHub… left too: its key is a tap no menu draws.
     @Test("one KiwiHub row stands in for the switch rows")
     func hubRowReplacesSwitches() {
         reset()
         let rows = titles(controller())
-        #expect(rows.contains("Open KiwiHub…"))
         for gone in [
             "Layout", "Switch Profile", "KiwiVision", "View Shortcuts…",
+            "Open KiwiHub…",
         ] {
             #expect(!rows.contains(gone), "\(gone) is back")
         }
         #expect(!rows.contains { $0.hasPrefix("Profile: ") })
         #expect(
             rows.filter { !$0.isEmpty } == [
-                "Open KiwiHub…", "Show Desktop overview", "Settings…",
-                "Quit KiwiDesk",
+                "Show Desktop overview", "Settings…", "Quit KiwiDesk",
             ]
         )
     }
 
     /// Only the bound chord's own keyDown is Carbon's twin; Return
     /// on an arrow-picked row is the row's one firing (#2869).
-    @Test("a click or Return opens KiwiHub; the chord's twin does not")
+    @Test("a click or Return opens the overview; the twin does not")
     func hubRowOpens() {
         reset()
         let controller = controller()
-        controller.kiwiHubComboProvider = {
+        controller.overviewComboProvider = {
             KeyCombo(keyCode: 37, modifiers: [.control, .option])
         }
         var opened = 0
-        controller.onOpenKiwiHub = { opened += 1 }
+        controller.onOpenDesktopOverview = { opened += 1 }
         func fire() {
             let menu = NSMenu()
             controller.menuNeedsUpdate(menu)
-            let item = menu.items.first { $0.title == "Open KiwiHub…" }
+            let item = menu.items.first { $0.title == "Show Desktop overview" }
             _ = item?.target?.perform(item?.action, with: item)
         }
         controller.menuKeyDown = { [self] in press(37, [.control, .option]) }
@@ -108,11 +109,11 @@ struct QuickMenuHubRowTests {
         #expect(opened == 3)
     }
 
-    @Test("the KiwiHub chord uses the native menu column")
+    @Test("the overview chord uses the native menu column")
     func hubNativeEquivalent() {
         reset()
         let controller = controller()
-        controller.kiwiHubComboProvider = {
+        controller.overviewComboProvider = {
             KeyCombo(
                 keyCode: 37,
                 modifiers: [.control, .option]
@@ -122,7 +123,7 @@ struct QuickMenuHubRowTests {
 
         controller.menuNeedsUpdate(menu)
 
-        let item = menu.items.first { $0.title == "Open KiwiHub…" }
+        let item = menu.items.first { $0.title == "Show Desktop overview" }
         #expect(item?.keyEquivalent == "l")
         #expect(item?.keyEquivalentModifierMask == [.control, .option])
         #expect(item?.attributedTitle == nil)
@@ -212,7 +213,7 @@ struct QuickMenuHubRowTests {
         #expect(!specialCodes.isEmpty)
         for code in specialCodes {
             let controller = controller()
-            controller.kiwiHubComboProvider = {
+            controller.overviewComboProvider = {
                 KeyCombo(keyCode: code, modifiers: [.control])
             }
             let menu = NSMenu()
@@ -220,7 +221,7 @@ struct QuickMenuHubRowTests {
             controller.menuNeedsUpdate(menu)
 
             let item = menu.items.first {
-                $0.title == "Open KiwiHub…"
+                $0.title == "Show Desktop overview"
             }
             #expect(
                 item?.keyEquivalent.count == 1,

@@ -1703,7 +1703,6 @@
   "menu.layout.keep": "레이아웃을 프로필 ‘%1$@’에 유지",
   "menu.layout.save_failed.title": "레이아웃을 저장하지 못했습니다",
   "menu.layout.unsaved": "프로필에 저장되지 않음",
-  "menu.open_kiwihub": "%1$@ 열기…",
   "menu.quit": "KiwiDesk 종료",
   "menu.settings": "설정…",
   "menu.status.a11y": "KiwiDesk",

@@ -1703,7 +1703,6 @@
   "menu.layout.keep": "將佈局保留在描述檔「%1$@」中",
   "menu.layout.save_failed.title": "無法儲存佈局",
   "menu.layout.unsaved": "未儲存到描述檔",
-  "menu.open_kiwihub": "打開 %1$@…",
   "menu.quit": "結束 KiwiDesk",
   "menu.settings": "設定…",
   "menu.status.a11y": "KiwiDesk",

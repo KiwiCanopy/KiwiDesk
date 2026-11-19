@@ -2482,7 +2482,11 @@ equivalent never carries a sided chord**, since it has no side to
 draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`), **nor a ✦
 chord**, which AppKit's column cannot draw: both refusals are
 `KeyCombo.drawsInMenu`'s, which the twin check reads too (#3470,
-`StatusMenuHyperChordTests` ▸ `hyperDrawsNothing`).
+`StatusMenuHyperChordTests` ▸ `hyperDrawsNothing`). **The status
+menu ships a chord row only for a verb whose seeded chord
+`drawsInMenu`**, since a row that cannot show its key teaches
+nothing (#3485, `StatusMenuHyperChordTests` ▸ `seededChordsDraw`,
+whose list a new chord row joins).
 
 ## SwiftUI traps
 

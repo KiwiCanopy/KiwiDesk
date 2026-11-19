@@ -1703,7 +1703,6 @@
   "menu.layout.keep": "Оставить раскладку в профиле «%1$@»",
   "menu.layout.save_failed.title": "Не удалось сохранить раскладку",
   "menu.layout.unsaved": "не сохранено в профиль",
-  "menu.open_kiwihub": "Открыть %1$@…",
   "menu.quit": "Завершить KiwiDesk",
   "menu.settings": "Настройки…",
   "menu.status.a11y": "KiwiDesk",

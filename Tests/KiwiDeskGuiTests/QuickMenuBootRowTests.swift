@@ -143,16 +143,21 @@ struct QuickMenuBootRowTests {
         #expect(!menu.autoenablesItems)
     }
 
-    /// Ruling 9 of #2309: the row stays enabled while KiwiDesk
-    /// boots; KiwiHub's View side greys its own chips.
-    @Test("Open KiwiHub stays enabled while starting")
+    /// Ruling 9 of #2309: KiwiHub's row stays enabled while
+    /// KiwiDesk boots.
+    @Test("Show Desktop overview stays enabled while starting")
     func hubRowEnabledWhileStarting() {
         let starting = menu(
             controller(phase: .scanning(scanned: 2, total: 9))
         )
-        #expect(row(starting, titled: "Open KiwiHub…")?.isEnabled == true)
+        #expect(
+            row(starting, titled: "Show Desktop overview")?.isEnabled
+                == true
+        )
         let ready = menu(controller(phase: .ready))
-        #expect(row(ready, titled: "Open KiwiHub…")?.isEnabled == true)
+        #expect(
+            row(ready, titled: "Show Desktop overview")?.isEnabled == true
+        )
     }
 
     @Test("a missing permission still outranks a boot in flight")

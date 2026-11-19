@@ -7846,6 +7846,10 @@ end)
 
 **Expects:** a side: `"windows"`, `"shortcuts"` or `"view"`.
 
+:::unreleased
+`"desktops"` opens the Desktop overview.
+:::
+
 **Does:** opens **KiwiHub** on that side, switches to it from
 another side, or closes KiwiHub when it already shows that side.
 Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
@@ -7938,9 +7942,7 @@ you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 :::
 
 The `"view"` side is the **view picker**, three lines in one
-panel, the current item on each marked ✓. The menu bar's **Open
-KiwiHub…** row opens it too, its bound combo shown beside that
-row.
+panel, the current item on each marked ✓.
 
 - **Layout** — a tile per layout for the Space shown on the screen
   under the pointer, greyed where there is none; Return applies it

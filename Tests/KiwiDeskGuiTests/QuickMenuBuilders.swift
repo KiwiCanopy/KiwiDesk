@@ -54,7 +54,7 @@ enum QuickMenuBuilders {
         "StatusItemController+Menu.swift":
             "builds the quick menu's rows and states enablement only "
             + "where a row greys (the starting count) or must stay "
-            + "live (Start Tiling, Open KiwiHub, #2309); the rest "
+            + "live (Start Tiling, Show Desktop overview, #2309); the rest "
             + "SHOULD be enabled and unstated means enabled. Its "
             + "menu is created in StatusItemController.swift, so "
             + "the per-menu flag count cannot pair it here",

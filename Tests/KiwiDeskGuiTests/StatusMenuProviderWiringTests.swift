@@ -23,15 +23,9 @@ struct StatusMenuProviderWiringTests {
             .joined()
         #expect(
             squashed.contains(
-                "statusItem.kiwiHubComboProvider={"
-            )
-        )
-        #expect(
-            squashed.contains(
                 "statusItem.settingsComboProvider={"
             )
         )
-        #expect(squashed.contains("lua:KiwiHubSide.view.lua"))
         #expect(
             squashed.contains("lua:KeybindingCatalog.openSettings.lua")
         )
@@ -47,9 +41,10 @@ struct StatusMenuProviderWiringTests {
         )
     }
 
-    /// The Open KiwiHub row and the View side's hold read both
-    /// default inert, so a lost wire leaves the row dead and the
-    /// chips live before tiling with no test red (#2309).
+    /// The overview row and the View side's hold read both default
+    /// inert, so a lost wire leaves the row dead and the View
+    /// side's chips live before tiling with no test red (#2309,
+    /// #3485).
     @Test("AppDelegate wires the KiwiHub row and the hold")
     func kiwiHubRowIsWired() throws {
         let squashed = try SourceScan.strippedSource(
@@ -60,8 +55,8 @@ struct StatusMenuProviderWiringTests {
         ).split(whereSeparator: \.isWhitespace).joined()
         #expect(
             squashed.contains(
-                "statusItem.onOpenKiwiHub={[weakjumpPanel]in"
-                    + "jumpPanel?.toggle(.view)}"
+                "statusItem.onOpenDesktopOverview={[weakjumpPanel]in"
+                    + "jumpPanel?.toggle(.desktops)}"
             )
         )
         #expect(

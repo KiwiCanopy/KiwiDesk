@@ -1703,7 +1703,6 @@
   "menu.layout.keep": "Keep Layout in Profile “%1$@”",
   "menu.layout.save_failed.title": "Couldn't Save Layout",
   "menu.layout.unsaved": "not saved to profile",
-  "menu.open_kiwihub": "Open %1$@…",
   "menu.quit": "Quit KiwiDesk",
   "menu.settings": "Settings…",
   "menu.status.a11y": "KiwiDesk",

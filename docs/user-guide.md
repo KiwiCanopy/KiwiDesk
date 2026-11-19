@@ -52,12 +52,14 @@ and every card and panel title is a heading for its rotor.
 
 ## The Status Bar Quick Menu
 
-**Open KiwiHub…** opens KiwiHub on its view picker
-([`kiwihub.show`](lua-reference.md#kiwihubshow)), the side `⌃⌥L`
-opens, and shows that side's shortcut beside it. While KiwiDesk
-is starting, or until you press **Start Tiling**, the row still
-opens it, with the view picker's items greyed and the reason
-shown.
+:::unreleased
+**Show Desktop overview** opens KiwiHub on its Desktop overview
+([`kiwihub.show`](lua-reference.md#kiwihubshow)) and shows that
+side's shortcut beside it, unless that shortcut is a modifier tap,
+a one-side chord or on ✦, which a menu cannot draw. The row stays
+enabled while KiwiDesk is starting or until you press **Start
+Tiling**.
+:::
 
 A layout switched from the view picker, or from a Space's
 right-click **Layout** menu, is **session-only**: it does not

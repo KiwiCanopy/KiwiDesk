@@ -24288,15 +24288,23 @@ badge for a transient slip would mislead. (#39)
 **The quick menu is the pointer's way into the daily switches,
 and KiwiHub holds them (#2309).** The layout, the profile and
 KiwiVision are what a user changes through the day, and they live
-in one place, KiwiHub's view picker, reached by ⌃⌥L from the
-keyboard and by **Open KiwiHub…** from the menu bar. The row
-opens that side and shows its live chord the way a menu item
-shows a key equivalent, so every pointer trip teaches the faster
-path. The menu holds no switch of its own: a Layout submenu, a
-Switch Profile submenu and a KiwiVision row beside the panel were
-two ways to do one thing, learned twice, and the menu's copy was
-the poorer one — no pictures of the layouts, no search, and
-submenus that are slow to steer with a pointer.
+in one place, KiwiHub's view picker, reached by ⌃⌥L. The menu
+holds no switch of its own: a Layout submenu, a Switch Profile
+submenu and a KiwiVision row beside the panel were two ways to do
+one thing, learned twice, and the menu's copy was the poorer one —
+no pictures of the layouts, no search, and submenus that are slow
+to steer with a pointer.
+
+:::unreleased
+The menu bar's way into KiwiHub is **Show Desktop overview**, which
+shows its live chord the way a menu item shows a key equivalent, so
+every pointer trip teaches the faster path. The menu keeps only
+rows that can show their key (owner, 2026-11-19, #3485), so the
+**Open KiwiHub…** row that stood here left: one row into KiwiHub is
+enough to teach the chord, and wherever a side's key is a tap, a
+one-side chord or on ✦, which no menu key equivalent can draw
+(#3470), a second row adds a way in and no key.
+:::
 
 What else the menu holds is either a warning or app chrome.
 **Settings…** sits low, next to Quit, where every native
@@ -24399,13 +24407,11 @@ returning to full strength IS the ready signal
 ([#802](https://github.com/KiwiCanopy/KiwiDesk/issues/802)).
 
 The grey sits on the switches, not on the row that leads to them
-(#2309). **Open KiwiHub…** stays enabled while KiwiDesk starts,
-waits for Start Tiling or lacks the Accessibility permission, and
-the view picker greys its own items
-with the reason as text. A greyed row leaves its reason to a
-neighbouring row; the panel puts it on the item itself, and since
-the row and the chord open the same side, the pointer and the
-keyboard meet the same explanation.
+(#2309). The menu row that opens KiwiHub stays enabled while
+KiwiDesk starts, waits for Start Tiling or lacks the Accessibility
+permission, and the view picker greys its own items with the
+reason as text. A greyed row leaves its reason to a neighbouring
+row; the panel puts it on the item itself.
 
 **[Trade-off]**
 

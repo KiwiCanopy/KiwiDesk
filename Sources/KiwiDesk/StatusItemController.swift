@@ -11,16 +11,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// waits while it is open (#2224).
     var onMenuOpen: () -> Void = {}
     var onMenuClose: () -> Void = {}
-    /// Opens KiwiHub on its View side (#2309 ruling 8).
-    var onOpenKiwiHub: () -> Void = {}
     /// Opens KiwiHub on its Desktops side (#1229).
     var onOpenDesktopOverview: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
-    /// The combo bound to open the View side, read fresh on each
-    /// menu open so AppKit renders the live binding.
-    var kiwiHubComboProvider: () -> KeyCombo? = { nil }
-    /// The combo bound to the Desktop overview (#3470), read the
-    /// same way.
+    /// The combo bound to the Desktop overview (#3470), read fresh
+    /// on each menu open so AppKit renders the live binding.
     var overviewComboProvider: () -> KeyCombo? = { nil }
     /// The combo bound to Open Settings (#1381), read the same way;
     /// nil keeps the app menu's `⌘,`.

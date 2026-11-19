@@ -77,35 +77,9 @@ extension StatusItemController {
             menu.addItem(.separator())
         }
 
-        // KiwiHub's View side switches the layout, the profile and
-        // KiwiVision (#2309 ruling 8). Enabled while KiwiDesk boots
-        // or waits for Start Tiling: the side greys its own chips.
-        let hub = NSMenuItem(
-            title: L(
-                "menu.open_kiwihub",
-                "Open %1$@…",
-                L("kiwihub.name", "KiwiHub")
-            ),
-            action: #selector(openKiwiHub(_:)),
-            keyEquivalent: ""
-        )
-        hub.target = self
-        hub.image = symbol(ShortcutsReferenceBuilder.sideSymbol(.view))
-        hub.isEnabled = true
-        // The status menu is not the app's MainMenu, so its key
-        // equivalent is active only while this menu is tracking.
-        // Using the native column gives the combo AppKit's dimmed,
-        // right-aligned treatment; its duplicate keyboard action
-        // is ignored in `openKiwiHub` below.
-        if let combo = kiwiHubComboProvider() {
-            combo.applyMenuEquivalent(
-                to: hub,
-                layoutChar: LayoutKeyGlyph.char
-            )
-        }
-        menu.addItem(hub)
-        // The Desktops side's own row, with its live chord as the
-        // KiwiHub row's (#3470).
+        // KiwiHub's one row is its Desktops side (#3470, #3485): the
+        // menu keeps only rows that can show their key. Enabled
+        // while KiwiDesk boots or waits for Start Tiling (#2309).
         let overview = NSMenuItem(
             // The Shortcuts row's own words, one key for one act.
             title: KeybindingCatalog.showDesktopOverview.resolvedLabel,
@@ -113,9 +87,13 @@ extension StatusItemController {
             keyEquivalent: ""
         )
         overview.target = self
+        overview.isEnabled = true
         overview.image = symbol(
             ShortcutsReferenceBuilder.sideSymbol(.desktops)
         )
+        // The status menu is not the app's MainMenu, so its key
+        // equivalent is active only while this menu is tracking;
+        // its duplicate keyboard action is ignored below.
         if let combo = overviewComboProvider() {
             combo.applyMenuEquivalent(
                 to: overview,
@@ -181,16 +159,6 @@ extension StatusItemController {
             return
         }
         onOpenDashboard()
-    }
-
-    @objc private func openKiwiHub(_ sender: NSMenuItem) {
-        if KeyCombo.isCarbonTwin(
-            of: kiwiHubComboProvider(),
-            event: menuKeyDown()
-        ) {
-            return
-        }
-        onOpenKiwiHub()
     }
 
     @objc private func openDesktopOverview(_ sender: NSMenuItem) {

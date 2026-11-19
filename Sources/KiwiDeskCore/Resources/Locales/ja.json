@@ -1703,7 +1703,6 @@
   "menu.layout.keep": "レイアウトをプロファイル「%1$@」に保持",
   "menu.layout.save_failed.title": "レイアウトを保存できませんでした",
   "menu.layout.unsaved": "プロファイルに未保存",
-  "menu.open_kiwihub": "%1$@を開く…",
   "menu.quit": "KiwiDeskを終了",
   "menu.settings": "設定…",
   "menu.status.a11y": "KiwiDesk",
