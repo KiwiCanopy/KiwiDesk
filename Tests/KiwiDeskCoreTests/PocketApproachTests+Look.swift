@@ -115,8 +115,8 @@ extension PocketApproachTests {
         #expect(rig.target == nil)
     }
 
-    @Test("the hovered tab takes the fill strength, the kiwis stay")
-    func tabStrength() {
+    @Test("the hovered tab takes the fill ink, the kiwis stay")
+    func tabInk() {
         let light = NSAppearance(named: .aqua)
         var rest = NSColor.clear
         var full = NSColor.clear

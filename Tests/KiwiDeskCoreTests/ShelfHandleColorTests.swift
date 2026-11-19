@@ -5,9 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The handle's colour (#3357, #3360): `kiwishelf.handle_color`,
-/// empty for Automatic — the label ink at the rest and fill
-/// strengths — taken by the verb, the decoder and a palette, and
-/// painted by every bundled palette in its accent (#3377).
+/// empty for Automatic — the label ink, filling in itself and
+/// resting a shade toward its hairline (#3514) — taken by the verb,
+/// the decoder and a palette, and painted by every bundled palette
+/// from its accent (#3377).
 @Suite("Shelf handle colour (#3357, #3360)")
 struct ShelfHandleColorTests {
     @Test("Automatic is the default, and absent decodes to it")
@@ -92,10 +93,23 @@ struct ShelfHandleColorTests {
                 let name = Comment(rawValue: "\(palette.name) \(path)")
                 #expect(paint != nil, name)
                 let accent = palette.colors[source] ?? ""
-                let shade = ColorPaletteKeys.handleShades[accent.uppercased()]
-                #expect(paint == (shade ?? accent), name)
+                #expect(paint == ColorPaletteKeys.painted(accent), name)
             }
         }
+    }
+
+    /// A duty shade answers any spelling of its source and keeps
+    /// the source's alpha; another colour passes through (#3514).
+    @Test("A duty shade matches its source as a parsed colour")
+    func dutyShadeMatchesAnySpelling() throws {
+        let (source, shade) = try #require(
+            ColorPaletteKeys.handleShades.first
+        )
+        #expect(ColorPaletteKeys.painted(source.lowercased()) == shade)
+        #expect(ColorPaletteKeys.painted(source + "FF") == shade)
+        #expect(ColorPaletteKeys.painted(source + "80") == shade + "80")
+        #expect(ColorPaletteKeys.painted("#D9A521") == "#D9A521")
+        #expect(ColorPaletteKeys.painted("") == "")
     }
 
     /// The core-vs-hairline lightness gate (#3377 ruling 3). The
@@ -143,7 +157,7 @@ struct ShelfHandleColorTests {
         let accent = fresh.kiwishelf.activeItemColor
         #expect(
             starter.kiwishelf.handleColor
-                == ColorPaletteKeys.handleShades[accent.uppercased()]
+                == ColorPaletteKeys.painted(accent)
         )
         #expect(!PaletteCatalog.defaultPalette().isApplied(to: fresh))
         let gold = try #require(

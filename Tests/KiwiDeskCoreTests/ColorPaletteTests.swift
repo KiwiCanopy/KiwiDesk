@@ -142,7 +142,7 @@ struct ColorPaletteTests {
             #expect(shipped[path]?.isEmpty == true, "\(path)")
             let accent = shipped[source] ?? ""
             shipped[path] =
-                ColorPaletteKeys.handleShades[accent.uppercased()] ?? accent
+                ColorPaletteKeys.painted(accent)
         }
         #expect(def.colors == shipped)
         #expect(def.colors.count == ColorPaletteKeys.all.count)

@@ -54,9 +54,9 @@ struct ShelfHandleSpec: Equatable {
     /// The approach's fill running along the handle, nil at rest.
     var fill: Fill?
     /// Its bar is hidden while a sibling on its edge shows by hover
-    /// (#3512): the
-    /// mouse opens one bar at a time, so the handle gives way as
-    /// under its own bar, VoiceOver still reading it hidden.
+    /// (#3512): the mouse opens one bar at a time, so the handle
+    /// gives way as under its own bar, VoiceOver still reading it
+    /// hidden.
     var yields = false
     var position: Position?
     /// The resting handle's colour (`kiwishelf.handle_color`,

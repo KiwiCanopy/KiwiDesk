@@ -21,7 +21,8 @@ public enum PaletteCatalog {
 
     /// The default palette: the current shipped color defaults,
     /// extracted from a fresh `TilingSettings`, with the handle
-    /// painted in its accent as every bundled palette's is (#3377).
+    /// painted from its accent as every bundled palette's is
+    /// (#3377, #3514).
     public static func defaultPalette() -> ColorPalette {
         ColorPalette(
             name: defaultName,
@@ -49,14 +50,14 @@ public enum PaletteCatalog {
 
 extension ColorPalette {
     /// This palette with each `ColorPaletteKeys.bundledPaint` path
-    /// painted from its source colour — the one door every bundled
-    /// palette and the starter take (#3377).
+    /// painted from its source colour, through its duty shade where
+    /// one is named — the one door every bundled palette and the
+    /// starter take (#3377, #3514).
     var bundledPainted: ColorPalette {
         var out = self
         for (path, source) in ColorPaletteKeys.bundledPaint {
             guard let colour = colors[source] else { continue }
-            out.colors[path] =
-                ColorPaletteKeys.handleShades[colour.uppercased()] ?? colour
+            out.colors[path] = ColorPaletteKeys.painted(colour)
         }
         return out
     }

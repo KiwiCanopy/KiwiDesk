@@ -56,18 +56,29 @@ public enum ColorPaletteKeys {
 
     /// The colour each bundled palette paints an adaptive path in,
     /// keyed to that path (#3377): the handle wears the palette's
-    /// accent. An authoring rule applied at load, never a runtime
-    /// reading of Automatic, which is `followers`' kind.
+    /// accent, or its `handleShades` duty shade. An authoring rule
+    /// applied at load, never a runtime reading of Automatic, which
+    /// is `followers`' kind.
     public static let bundledPaint: [String: String] = [
         "kiwishelf.handle_color": "kiwishelf.active_item_color"
     ]
 
-    /// A source colour too light to read as a filled handle, and the
-    /// same-hue duty shade the handle wears instead (#3514), as the
-    /// focus ring wears a darkened green: Glass's accent.
+    /// A source colour that reads weak as a filled handle, keyed by
+    /// its `#RRGGBB`, and the same-hue duty shade every
+    /// `bundledPaint` path takes instead (#3514): Glass's accent, more
+    /// saturated at the same lightness, its alpha kept.
     public static let handleShades: [String: String] = [
         "#8DB354": "#7DBB2A"
     ]
+
+    /// `colour`, or its `handleShades` duty shade, matched as a
+    /// parsed colour so any spelling of it is one answer.
+    public static func painted(_ colour: String) -> String {
+        guard let rgb = ColorPalette.rgbHex(colour),
+            let shade = handleShades[rgb]
+        else { return colour }
+        return shade + ColorPalette.alphaSuffix(colour)
+    }
 
     /// Colours whose Automatic is ANOTHER colour of the palette
     /// rather than an adaptive tint, keyed to the path they follow

@@ -94,10 +94,10 @@ struct ShelfHandleFillTests {
     }
 
     @Test(
-        "The core rests and the fill fills at their strengths",
+        "The core rests a shade off the ink the fill draws",
         arguments: ["", "#FF000080"]
     )
-    func inkStrengths(hex: String) throws {
+    func restAndFillInks(hex: String) throws {
         pinRevealLength()
         var spec = spec(running)
         spec.restHex = hex

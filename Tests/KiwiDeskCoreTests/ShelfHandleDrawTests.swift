@@ -22,8 +22,8 @@ struct ShelfHandleDrawTests {
         return rep
     }
 
-    /// The dark appearance's label ink alpha, which every strength
-    /// scales (#3514).
+    /// The dark appearance's label ink alpha, which the rest and the
+    /// fill both keep (#3514).
     private var own: CGFloat {
         ShelfHandleSpec.labelInk(
             in: NSAppearance(named: .darkAqua)!

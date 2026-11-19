@@ -4,9 +4,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `kiwishelf.handle_color` reaching an Auto bar's handle through
-/// the real `updateBars()` (#3357, #3360): the core wears it at rest
-/// and the progress fill at the fill strength, the hairline staying
-/// neutral.
+/// the real `updateBars()` (#3357, #3360): the core wears its resting
+/// shade and the progress fill the ink itself (#3514), the hairline
+/// staying neutral.
 @Suite("Shelf handle colour wiring (#3357)", .serialized)
 @MainActor
 struct ShelfHandleColorWiringTests {

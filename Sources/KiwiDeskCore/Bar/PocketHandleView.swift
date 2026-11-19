@@ -36,15 +36,15 @@ final class PocketHandleView: NSView {
     private var hex = ""
     /// The kiwis are out with the risen pocket: the tab alone stays.
     private var kiwisOut = false
-    /// The pointer rests on the handle: the tab draws at full
-    /// strength, in place (#3366 ruling 2).
+    /// The pointer rests on the handle: the tab draws in the fill
+    /// ink, in place (#3366 ruling 2).
     private(set) var hovered = false
     /// The pocket is empty and unlit: the kiwis draw faded, the tab
     /// as ever (#3368 ruling 1).
     var faded = false {
         didSet { if faded != oldValue { needsDisplay = true } }
     }
-    /// The pocket holds something: the tab rests at the fill strength
+    /// The pocket holds something: the tab rests in the fill ink
     /// (#3384).
     var holds = false {
         didSet { if holds != oldValue { needsDisplay = true } }
@@ -78,7 +78,7 @@ final class PocketHandleView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// Wears `shelf`, the tab at full strength while `hovered`,
+    /// Wears `shelf`, the tab in the fill ink while `hovered`,
     /// which Core hands false while the pocket is risen, and running
     /// `fill` as its countdown.
     func wear(
@@ -100,7 +100,7 @@ final class PocketHandleView: NSView {
         needsLayout = true
     }
 
-    /// The tab's core: the handle's ink at rest, at the fill strength
+    /// The tab's core: the handle's resting ink, the fill ink
     /// while `lit` — hovered, or the pocket holding something (#3384)
     /// — never lifting (#3366 ruling 2).
     static func tabCore(hex: String, lit: Bool) -> NSColor {

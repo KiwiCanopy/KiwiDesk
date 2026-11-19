@@ -93,9 +93,14 @@ struct GlassCard: View {
         for key: SettingKey
     ) -> some View {
         if key == .colours(.liquidGlassMaster) {
-            Text(reduceTransparency ? reduceTransparencyHelp : caption)
+            Text(caption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            if reduceTransparency {
+                Text(reduceTransparencyHelp)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
