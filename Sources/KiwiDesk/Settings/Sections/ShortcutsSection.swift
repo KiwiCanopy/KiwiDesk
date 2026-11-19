@@ -187,6 +187,10 @@ struct ShortcutsSection: View {
             .shortcutsJumpSlot(.content)
             .environment(\.keybindingLayerName, selected)
             .environment(\.shortcutsSegment, segment)
+            // Every key well on the page stands left of the trash
+            // column, a row with no trash holding its slot, so the
+            // segments share one key column (#3491).
+            .environment(\.keybindingReservesTrashSlot, true)
             // One live read per section render (#1105), so
             // every row narrates the same verdict (#1126).
             .environment(
