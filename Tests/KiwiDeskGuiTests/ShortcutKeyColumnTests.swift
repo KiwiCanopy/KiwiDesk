@@ -8,10 +8,11 @@ import Testing
 /// Shortcuts ▸ Built-in and Mouse & Trackpad draw their key wells in
 /// one column (#3491): a gesture row ends in a trash, so a
 /// trash-less keyboard row holds the slot, and the wells end at one
-/// x. Measured on the hosted page at the narrowest Settings width,
-/// each well found by its focus ring at the well's own width.
+/// x, under a legacy scroller too, whose gutter a page that fits
+/// holds. Measured on the hosted page at the narrowest Settings
+/// width, each well found by its focus ring at the well's own width.
 ///
-/// Main-actor spend: two hosted Shortcuts pages in an offscreen
+/// Main-actor spend: four hosted Shortcuts pages in an offscreen
 /// window, each polled by awaited 50 ms sleeps until its wells have
 /// settled.
 @Suite("Shortcuts key column (#3491)", .serialized)
@@ -30,11 +31,13 @@ struct ShortcutKeyColumnTests {
     /// once they stop moving.
     private func wellEnds(
         _ segment: ShortcutsSegment,
-        least: Int
+        least: Int,
+        legacy: Bool = false
     ) async -> [CGFloat] {
         let model = makeTestModel()
         model.nav.shortcutsSegment = segment
         let width = SettingsWidthClass.minimum
+        // Tall enough that Mouse & Trackpad fits and Built-in scrolls.
         let height: CGFloat = 2400
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: width, height: height),
@@ -45,6 +48,7 @@ struct ShortcutKeyColumnTests {
         defer { window.orderOut(nil) }
         let host = NSHostingView(
             rootView: ShortcutsSection(model: model)
+                .environment(\.legacyScrollerForced, legacy)
                 .frame(width: width, height: height, alignment: .top)
         )
         window.contentView = host
@@ -85,6 +89,10 @@ struct ShortcutKeyColumnTests {
         return out.filter { abs($0.width - well) < 0.5 }
     }
 
+    /// In a window tall enough that Mouse & Trackpad fits while
+    /// Built-in scrolls, the wells share one x under the scroller
+    /// this Mac shows: CI's, with no trackpad, is legacy, and a
+    /// legacy scroller's gutter is held on the page that fits.
     @Test("Built-in and Mouse & Trackpad wells end at one x")
     func oneKeyColumn() async {
         LocalizationManager.shared.select("en")
@@ -99,6 +107,24 @@ struct ShortcutKeyColumnTests {
                 rawValue: "Built-in wells end at \(Set(keys).sorted()), "
                     + "Mouse wells at \(Set(gestures).sorted())"
             )
+        )
+    }
+
+    /// A page that fits under a legacy scroller holds the scroller's
+    /// width, so its wells stand where a scrolling page's do. The
+    /// override makes this Mac's overlay scroller read as legacy; on
+    /// a Mac that already shows legacy ones it changes nothing.
+    @Test("a fitting page holds a legacy scroller's gutter")
+    func fittingPageHoldsTheGutter() async {
+        LocalizationManager.shared.select("en")
+        let plain = Set(await wellEnds(.mouse, least: 5))
+        let forced = Set(await wellEnds(.mouse, least: 5, legacy: true))
+        let already = NSScroller.preferredScrollerStyle == .legacy
+        let shift = already ? 0 : LegacyScrollerGutter.width
+        #expect(plain.count == 1 && forced.count == 1)
+        #expect(
+            forced.map { $0 + shift } == Array(plain),
+            "fitting page's wells at \(forced.sorted()), plain \(plain)"
         )
     }
 }
