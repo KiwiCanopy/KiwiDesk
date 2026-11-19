@@ -5,11 +5,12 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// Settings words a connected twin by its position wherever it
-/// names a screen (#3502): the Desktops card's screen line, a
-/// screen setup's label and the Maximize card's screen lines, as
-/// the Screens page does. macOS numbers twins in its own order,
-/// so the left one here is "Twin (2)", as on the owner's desk.
+/// Settings and the tour word a connected twin by its position
+/// wherever they name a screen (#3502): the Desktops card's screen
+/// line, a screen setup's label, the Maximize card's screen lines
+/// and the tour's screen columns, as the Screens page does. macOS
+/// numbers twins in its own order, so the left one here is
+/// "Twin (2)", as on the owner's desk.
 @Suite("Twin screens read by position in Settings (#3502)", .serialized)
 @MainActor
 struct TwinScreenWordsTests {
@@ -115,5 +116,19 @@ struct TwinScreenWordsTests {
         )
         #expect(row.contains("Text(model.screenWords(named:screen))"))
         #expect(!row.contains("Text(screen)"))
+    }
+
+    @Test("the tour's screen columns name a twin by position")
+    func tourColumns() throws {
+        let tour = try Self.squashed(
+            "Sources/KiwiDesk/AppDelegate+OnboardingStart.swift"
+        )
+        #expect(
+            tour.contains(
+                "screen:SettingsModel.displaysLabel(column.display,"
+                    + "among:displays)"
+            )
+        )
+        #expect(!tour.contains("screen:column.display.name"))
     }
 }
