@@ -18063,6 +18063,15 @@ travel, so a step costs two lengths of the moving finger (owner,
 with ui-designer). That is accepted. Taking the smaller finger's
 move instead was refused: macOS scrolls with one finger still, so
 such a swipe would stall in mm while its points ran on.
+
+The default step length is 6 mm, down from 10 (owner, 2026-11-19,
+after feeling 6 and 8 on the net-travel build). Ten millimetres
+per window was tuned while wobble still padded every step; counted
+net, 10 mm asked for a long reach per window. Where no reading
+exists the default now counts 36 pt per window at the same 6 pt per
+mm, no longer 4.2's 60 pt; the fallback keeps its rate, not its
+old spacing. A stored value is kept: `step_length` is a new key in
+this release, so no stored 10 records an older default.
 :::
 
 :::unreleased

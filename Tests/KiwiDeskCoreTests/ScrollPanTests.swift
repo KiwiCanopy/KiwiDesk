@@ -81,6 +81,10 @@ struct ScrollPanTests {
     @Test("a swipe moves one window, against the fingers")
     func oneWindowPerSwipe() {
         let (core, _, session) = makeCore("scrolling")
+        // Long swipes off: the default steps on, and wraps the row.
+        var base = ScrollGestureBase.defaults
+        base.longSwipes = false
+        core.applyScrollGestures(base: base, profile: nil)
         core.handleScrollPan(
             event(.began),
             session: session,
