@@ -7,9 +7,11 @@ import Testing
 /// Ruling): the live sort moves a picked app from the picker at the
 /// list's foot to its alphabetical slot, so the add scrolls to that
 /// row and hands it focus through the returning-row destination a
-/// deletion uses (`KeyboardActionParityTests`). Each needle names a
-/// use site, comments stripped and whitespace squashed so a reflow
-/// owes nothing. Off the main actor: three file reads.
+/// deletion uses (`KeyboardActionParityTests`), then lights it with
+/// search's landing flash (#3490). Each needle names a use site,
+/// comments stripped and whitespace squashed so a reflow owes
+/// nothing. Off the main actor: five file reads and one walk of
+/// `Sources/KiwiDesk`.
 @Suite("App Rules ▸ an add reveals its row (#3450)")
 struct AppRuleAddRevealTests {
     private var sections: URL {
@@ -57,17 +59,17 @@ struct AppRuleAddRevealTests {
             (
                 lists,
                 "returningRow:$returningSpaceRow)"
-                    + ".id(Self.anchor(.space,row.key))"
+                    + ".rowAnchored(Self.anchor(.space,row.key))"
             ),
             (
                 lists,
                 "returningRow:$returningFloatRow)"
-                    + ".id(Self.anchor(.float,app))"
+                    + ".rowAnchored(Self.anchor(.float,app))"
             ),
             (
                 auto,
                 "returningRow:$returningTileRow)"
-                    + ".id(Self.anchor(.tile,app))"
+                    + ".rowAnchored(Self.anchor(.tile,app))"
             ),
         ]
         for (file, needle) in needles {
@@ -93,8 +95,62 @@ struct AppRuleAddRevealTests {
             + "case.space:returningSpaceRow=row.key"
             + "case.float:returningFloatRow=row.key"
             + "case.tile:returningTileRow=row.key}"
-        for needle in [task, settles, focuses] {
+        // Then the row lights with search's own landing flash, and
+        // a task a later add cancelled leaves `revealedRow` to that
+        // add (#3490).
+        let flashes: String =
+            "awaitmodel.flashReveal(anchor,reduceMotion:reduceMotion)"
+            + "guard!Task.isCancelledelse{return}revealedRow=nil}"
+        for needle in [task, settles, focuses, flashes] {
             #expect(page.contains(needle), "lost `\(needle)`")
+        }
+        // Search's landing takes the same helper: one flash.
+        let detail = squashed(
+            SourceScan.stripComments(
+                try String(
+                    contentsOf: sections.deletingLastPathComponent()
+                        .appendingPathComponent("SettingsView+Detail.swift"),
+                    encoding: .utf8
+                )
+            )
+        )
+        #expect(
+            detail.contains(
+                "awaitmodel.flashReveal(anchor,reduceMotion:reduceMotion)"
+            )
+        )
+        // One flash: nothing outside its home starts or ends one.
+        var callers: [String] = []
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        for file in try SourceScan.swiftSources(under: root) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            if text.contains(".startFlash(") || text.contains(".endFlash(") {
+                callers.append(file.lastPathComponent)
+            }
+        }
+        #expect(callers == ["SettingsReveal.swift"])
+    }
+
+    @Test("Add Rule… reveals the titled rule it made (#3490)")
+    func titledAddReveals() throws {
+        let scope = try source("AppRuleSpaceRow+Scope.swift")
+        let lists = try source("AppRulesSection+Lists.swift")
+        let needles: [(String, String)] = [
+            (
+                scope,
+                "config:&model.config)else{return}onAdd(made.key)}}"
+            ),
+            (
+                lists,
+                "onAdd:{revealedRow=RowReveal(list:.space,key:$0)},"
+                    + "returningRow:$returningSpaceRow)"
+            ),
+        ]
+        for (file, needle) in needles {
+            #expect(file.contains(needle), "lost `\(needle)`")
         }
     }
 

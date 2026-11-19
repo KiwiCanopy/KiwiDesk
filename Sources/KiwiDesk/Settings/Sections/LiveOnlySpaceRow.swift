@@ -57,7 +57,7 @@ struct LiveOnlySpaceRow: View {
                 .strokeBorder(SettingsTheme.hairline)
         )
         .modifier(RowActionsIfTemporary(row: self))
-        .liveSpaceAnchored(Self.anchor(space.id))
+        .rowAnchored(Self.anchor(space.id))
     }
 
     private var lockedHelp: String {

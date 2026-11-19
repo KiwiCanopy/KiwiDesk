@@ -141,11 +141,6 @@ struct SettingsAnchorIdentityTests {
         // Scroll identity: the layer chips' follow, as the layout
         // strip's (#3263).
         "LayerStripEditor.swift": 1,
-        // Scroll identity: an App Rules add scrolls to the row it
-        // made (#3450). Not a reveal target — search lands on the
-        // list's card, which anchors through `.searchAnchored`.
-        "AppRulesSection+Lists.swift": 2,
-        "AppRulesSection+Automatic.swift": 1,
         // Unit identity: Maximize's Custom… field rebuilds on a
         // % | pt flip so its text shows the converted value
         // (#3460). A popover, so nothing there is a reveal target.

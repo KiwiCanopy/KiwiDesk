@@ -36,7 +36,7 @@ extension AppRulesSection {
                     onDelete: { deleteTile(app, $0) },
                     returningRow: $returningTileRow
                 )
-                .id(Self.anchor(.tile, app))
+                .rowAnchored(Self.anchor(.tile, app))
                 Divider()
             }
             AppSelector(

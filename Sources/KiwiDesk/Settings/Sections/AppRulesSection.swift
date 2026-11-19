@@ -30,6 +30,21 @@ struct AppRulesSection: View {
     /// drawn, since the live sort moves it away from the picker
     /// (#3450).
     @State var revealedRow: RowReveal?
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
+
+    init(model: SettingsModel) {
+        self.model = model
+    }
+
+    #if DEBUG
+        /// A section an add has just asked to reveal `row`, for a
+        /// test that cannot drive the picker's menu: a tracked menu
+        /// ends the test process.
+        init(model: SettingsModel, revealing row: RowReveal) {
+            self.model = model
+            _revealedRow = State(initialValue: row)
+        }
+    #endif
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -127,7 +142,8 @@ struct AppRulesSection: View {
     /// Scrolls to the added row, again once layout settles (a yield
     /// does not promise it, `SettingsView.reveal`), then hands it
     /// focus through the destination a deletion uses (#816), now
-    /// that the row is drawn.
+    /// that the row is drawn, and lights it with search's landing
+    /// flash (#3490).
     private func reveal(_ row: RowReveal, _ proxy: ScrollViewProxy) async {
         let anchor = Self.anchor(row.list, row.key)
         proxy.scrollTo(anchor, anchor: .center)
@@ -141,6 +157,9 @@ struct AppRulesSection: View {
         case .float: returningFloatRow = row.key
         case .tile: returningTileRow = row.key
         }
+        await model.flashReveal(anchor, reduceMotion: reduceMotion)
+        // A later add cancelled this task and now owns `revealedRow`.
+        guard !Task.isCancelled else { return }
         revealedRow = nil
     }
 

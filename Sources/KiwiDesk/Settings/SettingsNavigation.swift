@@ -13,7 +13,8 @@ struct SettingsNavigation {
     /// Target anchor ID for scrolling phase of reveal.
     var pendingScroll: String?
     /// Standing target ID from `apply` until the flash ends. One
-    /// writer (`SettingsView.apply`), one clearer (`endFlash`) —
+    /// writer (`SettingsView.apply`), one clearer (`endFlash`, which
+    /// `SettingsModel.flashReveal` alone calls) —
     /// the part-1 #326 bug was two observers of one field clearing
     /// in unspecified `onAppear` order.
     private(set) var revealTarget: String?

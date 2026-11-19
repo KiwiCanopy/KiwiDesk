@@ -15,6 +15,23 @@ enum SettingsReveal {
     }
 }
 
+extension SettingsModel {
+    /// Lights `anchor` with the reveal wash for the hold, then ends
+    /// it: search's landing and an App Rules add (#277, #3490). The
+    /// flash ends however the hold ends, a cancel included; under
+    /// Reduce Motion the hold absorbs the fade.
+    func flashReveal(_ anchor: String, reduceMotion: Bool) async {
+        let token = nav.startFlash(anchor)
+        try? await Task.sleep(
+            nanoseconds: SettingsReveal.nanoseconds(
+                SettingsReveal.hold
+                    + (reduceMotion ? SettingsReveal.fade : 0)
+            )
+        )
+        nav.endFlash(token: token)
+    }
+}
+
 /// Active flash target: anchor id plus token to re-fire identical anchors.
 struct SettingsFlash: Equatable {
     let anchor: String
@@ -135,9 +152,10 @@ extension View {
         searchFlash(control.id)
     }
 
-    /// Anchors and flashes a row no catalog control names — a live
-    /// Space's view-only row (#1790), which App Rules lands on.
-    func liveSpaceAnchored(_ anchor: String) -> some View {
+    /// Anchors and flashes a row no catalog control names: a live
+    /// Space's view-only row (#1790), which App Rules lands on, and
+    /// an App Rules row an add just made (#3490).
+    func rowAnchored(_ anchor: String) -> some View {
         self.searchFlash(anchor).searchAnchor(anchor)
     }
 

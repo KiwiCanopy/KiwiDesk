@@ -21,6 +21,8 @@ struct AppRuleSpaceRow: View {
     /// The section's one open title popover (#3373).
     @Binding var composing: SpaceComposer?
     let onDelete: (RuleRemoval) -> Void
+    /// Reveals a titled rule Add Rule… made, by its key (#3490).
+    let onAdd: (String) -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
 
