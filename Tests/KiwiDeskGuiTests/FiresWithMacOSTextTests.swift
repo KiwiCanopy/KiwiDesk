@@ -122,4 +122,37 @@ struct FiresWithMacOSTextTests {
         #expect(found.severity == .winsFromMacOS(.inputSourcePrevious))
         #expect(found.sentence.hasPrefix("Takes"))
     }
+
+    @Test("the banner says the row also runs macOS's shortcut")
+    func bannerSaysBoth() {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        let row = KeyBinding(
+            combo: "control+space",
+            lua: "KiwiDesk.focus(\"left\")",
+            kind: .navigation,
+            label: "Focus window left"
+        )
+        model.config.layers = [
+            KeyLayer(name: KeyLayer.defaultName, bindings: [row])
+        ]
+        model.warnIfAnyConflict()
+        let name = SystemShortcut.inputSourcePrevious.localizedName
+        #expect(
+            model.keybindingWarning
+                == "Shortcut for \"Focus window left\" also runs "
+                + "macOS's \"\(name)\" on each press."
+        )
+        let other = KeyBinding(combo: "command+space", lua: "b")
+        model.config.layers = [
+            KeyLayer(name: KeyLayer.defaultName, bindings: [row, other])
+        ]
+        model.warnIfAnyConflict()
+        #expect(
+            model.keybindingWarning?.contains(
+                "– \"Focus window left\" also runs macOS's "
+                    + "\"\(name)\" on each press"
+            ) == true
+        )
+    }
 }
