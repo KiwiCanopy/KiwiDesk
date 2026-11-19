@@ -245,7 +245,8 @@ struct ShelfHandleStripTests {
         let (revealer, box, app) = pair()
         move(revealer, box, 400, 795)
         #expect(revealer.fills[Self.key] != nil)
-        #expect(revealer.toggle(app, duration: 0))
+        // A hover reveal; a key pin stands nothing aside (#3512).
+        revealer.set(.hover, for: app)
         #expect(revealer.yields(Self.key))
         move(revealer, box, 401, 795)
         #expect(revealer.fills[Self.key] == nil)

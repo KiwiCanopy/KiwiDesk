@@ -42,11 +42,18 @@ struct GlassSettingsRowsTests {
         #expect(
             rows == [.kiwishelf(.tintHubAndPlates), .kiwishelf(.fillFade)]
         )
-        // The Fill sits right above the rows it greys (#2593), so
-        // their grey needs no sentence of its own.
+        // Each switch sits directly above what it greys (#3518): the
+        // Fill above the tint, the Liquid Glass master above the fade,
+        // both after the Fill in the one group, so no grey needs a
+        // sentence of its own (#2593).
         let order = ColorsRowOrder.glassRows
         let fill = try #require(order.firstIndex(of: .kiwishelf(.fillColor)))
-        #expect(Array(order[(fill + 1)...].prefix(2)) == rows)
+        let master = try #require(
+            order.firstIndex(of: .colours(.liquidGlassMaster))
+        )
+        #expect(order[fill + 1] == .kiwishelf(.tintHubAndPlates))
+        #expect(order[master + 1] == .kiwishelf(.fillFade))
+        #expect(fill < master)
     }
 
     /// The card draws the label search shows for the row: the

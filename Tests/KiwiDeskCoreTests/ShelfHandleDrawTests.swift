@@ -22,10 +22,27 @@ struct ShelfHandleDrawTests {
         return rep
     }
 
-    /// A core of `strength` drawn over the hairline capsule.
-    private func over(_ strength: CGFloat) -> CGFloat {
-        strength + ShelfHandleSpec.hairlineStrength * (1 - strength)
+    /// The dark appearance's label ink alpha, which the rest and the
+    /// fill both keep (#3514).
+    private var own: CGFloat {
+        ShelfHandleSpec.labelInk(
+            in: NSAppearance(named: .darkAqua)!
+        ).alphaComponent
     }
+
+    /// A pixel's light, premultiplied: the white label ink's share
+    /// in dark mode, where the hairline is black and adds none. Rest
+    /// and fill differ in lightness, not alpha (#3514).
+    private func light(_ color: NSColor?) -> CGFloat {
+        guard let c = color?.usingColorSpace(.sRGB) else { return 0 }
+        return c.redComponent * c.alphaComponent
+    }
+
+    /// The resting core's light: the white ink mixed `restMix`
+    /// toward black, at its own alpha.
+    private var restLight: CGFloat { (1 - ShelfHandleSpec.restMix) * own }
+    /// The filled core's light: the ink itself.
+    private var fullLight: CGFloat { own }
 
     /// The most opaque pixel across the middle of `rep`.
     private func peak(_ rep: NSBitmapImageRep, horizontal: Bool) -> CGFloat {
@@ -33,7 +50,7 @@ struct ShelfHandleDrawTests {
         return (0..<count).map { step in
             let x = horizontal ? rep.pixelsWide / 2 : step
             let y = horizontal ? step : rep.pixelsHigh / 2
-            return rep.colorAt(x: x, y: y)?.alphaComponent ?? 0
+            return light(rep.colorAt(x: x, y: y))
         }.max() ?? 0
     }
 
@@ -65,13 +82,12 @@ struct ShelfHandleDrawTests {
         view.appearance = NSAppearance(named: .darkAqua)
         view.render(spec, animated: false)
         let rep = try pixels(of: view)
-        // The core's label ink at its rest strength, over the
-        // hairline capsule, reaches the pixels.
+        // The core's resting ink, over the hairline capsule, reaches
+        // the pixels; within 0.1, still far from the fill's light.
         #expect(
             abs(
-                peak(rep, horizontal: edge.isHorizontal)
-                    - over(ShelfHandleSpec.restStrength)
-            ) < 0.05,
+                peak(rep, horizontal: edge.isHorizontal) - restLight
+            ) < 0.1,
             "\(edge)"
         )
         // A capsule: its end rounds away from the corner, where a
@@ -84,13 +100,19 @@ struct ShelfHandleDrawTests {
             edge.isHorizontal
             ? alpha(0, rep.pixelsHigh / 2) : alpha(rep.pixelsWide / 2, 0)
         let corner = alpha(0, 0)
-        #expect(endMiddle > 0.3, "\(edge): end \(endMiddle)")
+        // The end's middle shows at least the hairline (#3514).
+        #expect(
+            endMiddle > 0.8 * ShelfHandleSpec.hairlineStrength,
+            "\(edge): end \(endMiddle)"
+        )
         #expect(corner < 0.8 * endMiddle, "\(edge): corner \(corner)")
         // The hairline rings the core: the outermost row at mid-length
         // shows less ink than the middle.
-        let rim =
+        let rim = light(
             edge.isHorizontal
-            ? alpha(rep.pixelsWide / 2, 0) : alpha(0, rep.pixelsHigh / 2)
+                ? rep.colorAt(x: rep.pixelsWide / 2, y: 0)
+                : rep.colorAt(x: 0, y: rep.pixelsHigh / 2)
+        )
         let middle = peak(rep, horizontal: edge.isHorizontal)
         #expect(rim < middle - 0.08, "\(edge): rim \(rim)")
         // The core is a capsule too, and clips the progress fill.
@@ -131,8 +153,7 @@ struct ShelfHandleDrawTests {
             let scale = CGFloat(rep.pixelsHigh) / size.height
             // The core's middle row, whole at 1x and 2x alike.
             let row = Int((size.height - 1.5) * scale)
-            return rep.colorAt(x: rep.pixelsWide / 2, y: row)?
-                .alphaComponent ?? 0
+            return self.light(rep.colorAt(x: rep.pixelsWide / 2, y: row))
         }
         // The tab is a capsule: its end's corner is emptier than its
         // end's middle, which a square end draws alike.
@@ -155,10 +176,13 @@ struct ShelfHandleDrawTests {
         }
         let endMiddle = alpha(Int((size.height - 1.5) * scale))
         let corner = alpha(rep.pixelsHigh - 1)
-        #expect(endMiddle > 0.3, "tab end \(endMiddle)")
+        #expect(
+            endMiddle > 0.8 * ShelfHandleSpec.hairlineStrength,
+            "tab end \(endMiddle)"
+        )
         #expect(corner < 0.8 * endMiddle, "tab corner \(corner)")
-        let rest = over(ShelfHandleSpec.restStrength)
-        let full = over(ShelfHandleSpec.fillStrength)
+        let rest = restLight
+        let full = fullLight
         #expect(abs(try core(false, false, false) - rest) < 0.05)
         #expect(abs(try core(true, false, false) - full) < 0.05)
         // Holding something, the tab rests at full strength (#3384).
@@ -198,17 +222,12 @@ struct ShelfHandleDrawTests {
         let rep = try pixels(of: view)
         let scale = CGFloat(rep.pixelsWide) / size.width
         let core = view.tabCoreFrame()
-        let alpha =
-            rep.colorAt(
-                x: Int(core.midX * scale),
-                y: Int(core.midY * scale)
-            )?.alphaComponent ?? 0
-        // The fill over the resting core and the hairline, never the
-        // core alone, which a fill on the wrong side would leave.
-        let filled =
-            1 - (1 - ShelfHandleSpec.hairlineStrength)
-            * (1 - ShelfHandleSpec.restStrength)
-            * (1 - ShelfHandleSpec.fillStrength)
-        #expect(abs(alpha - filled) < 0.05, "\(edge): \(alpha)")
+        let lit = light(
+            rep.colorAt(x: Int(core.midX * scale), y: Int(core.midY * scale))
+        )
+        // The fill over the resting core, never the core alone, which
+        // a fill on the wrong side would leave.
+        let filled = fullLight + (1 - own) * restLight
+        #expect(abs(lit - filled) < 0.05, "\(edge): \(lit)")
     }
 }

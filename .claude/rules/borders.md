@@ -526,7 +526,7 @@ landing, through the overlay's `afterLeave`, whatever shows meanwhile
 pocket's clicks as the risen pocket does (owner, 2026-11-16), and
 while the rise runs only the pointer on the tab lights it (`PocketApproachTests` ▸
 `riseLightsOnlyTheTab`). Its hover lifts nothing: the tab goes to
-the fill strength in place, through the one
+the fill ink in place, through the one
 `PocketHandleView.tabCore` (#3366, `PocketApproachTests` ▸
 `hoverLightsInPlace`, `ShelfHandleDrawTests` ▸ `tabBrightens`),
 and while the pocket holds something it rests there too (#3384,

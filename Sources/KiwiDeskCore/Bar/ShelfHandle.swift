@@ -53,9 +53,10 @@ struct ShelfHandleSpec: Equatable {
     let reveal: BarMotion.RevealKind
     /// The approach's fill running along the handle, nil at rest.
     var fill: Fill?
-    /// Its bar is hidden while a sibling on its edge shows: the
-    /// mouse opens one bar at a time, so the handle gives way as
-    /// under its own bar, VoiceOver still reading it hidden.
+    /// Its bar is hidden while a sibling on its edge shows by hover
+    /// (#3512): the mouse opens one bar at a time, so the handle
+    /// gives way as under its own bar, VoiceOver still reading it
+    /// hidden.
     var yields = false
     var position: Position?
     /// The resting handle's colour (`kiwishelf.handle_color`,
@@ -64,7 +65,8 @@ struct ShelfHandleSpec: Equatable {
 
     var horizontal: Bool { edge.isHorizontal }
 
-    /// Whether the handle draws nothing: its bar or a sibling shows.
+    /// Whether the handle draws nothing: its bar shows, or it
+    /// yields.
     var standsAside: Bool { shown || yields }
 
     /// The handle's depth on `shelf` (pt), `kiwishelf.handle_thickness`
@@ -74,8 +76,8 @@ struct ShelfHandleSpec: Equatable {
         shelf.resolvedHandleThickness
     }
     static let hairline: CGFloat = 0.5
-    /// The hairline's strength, constant through a fill.
-    static let hairlineStrength: CGFloat = 0.35
+    /// The hairline's strength, constant through a fill (#3514).
+    static let hairlineStrength: CGFloat = 0.2
     /// How far a grow reveal's origin grows past the handle on each
     /// side (`BarMotion.hoverPlate`).
     static let hoverGrowth: CGFloat = 3
@@ -85,42 +87,69 @@ struct ShelfHandleSpec: Equatable {
     /// Its distance from the screen side of the shelf's area: flush
     /// (#3361 ruling 2, kept by #3366).
     static let inset: CGFloat = 0
-    /// The handle's strength at rest (#3360 ruling 3).
-    static let restStrength: CGFloat = 0.38
-    /// The strength its progress fill takes (#3360 ruling 3).
-    static let fillStrength: CGFloat = 0.9
-    /// The handle's ink at `strength` (#3357, #3360): Automatic the
-    /// label ink at that alpha, a picked colour at its own alpha
-    /// times it, with no floor; resolved in the current drawing
-    /// appearance.
-    static func ink(hex: String, strength: CGFloat) -> NSColor {
+    /// How far the resting core mixes toward its hairline's tone
+    /// (#3514): the fill is the ink itself, so the step from rest
+    /// to fill is one of lightness and reads alike on any ground.
+    static let restMix: CGFloat = 0.45
+    /// The handle's ink (#3357): Automatic the label ink, else the
+    /// picked colour, at its own alpha — never forced opaque, with
+    /// no floor (#1857); resolved in the drawing appearance.
+    static func ink(hex: String) -> NSColor {
         guard !hex.isEmpty else {
-            return .labelColor.withAlphaComponent(strength)
+            return NSColor(name: nil) { labelInk(in: $0) }
         }
-        let picked = NSColor(kiwiHex: hex)
-        return picked.withAlphaComponent(picked.alphaComponent * strength)
+        return NSColor(kiwiHex: hex)
     }
-    /// The ink at rest.
+    /// The label ink as `appearance` draws it, its own alpha kept.
+    static func labelInk(in appearance: NSAppearance) -> NSColor {
+        resolved(.labelColor, in: appearance)
+    }
+    /// `color` as `appearance` draws it, in sRGB.
+    static func resolved(
+        _ color: NSColor,
+        in appearance: NSAppearance
+    ) -> NSColor {
+        var out = color
+        appearance.performAsCurrentDrawingAppearance {
+            out = color.usingColorSpace(.sRGB) ?? color
+        }
+        return out
+    }
+    /// Whether `color` reads light: the one pivot the hairline's
+    /// tone and the resting mix take (#3361, #3514).
+    static func isLight(_ color: NSColor) -> Bool {
+        0.2126 * color.redComponent + 0.7152 * color.greenComponent
+            + 0.0722 * color.blueComponent > 0.5
+    }
+    /// The ink at rest (#3514): the ink mixed `restMix` toward its
+    /// hairline's tone — darker beside a light ink, lighter beside
+    /// a dark one — at the ink's own alpha.
     static func restColor(hex: String) -> NSColor {
-        ink(hex: hex, strength: restStrength)
+        let full = ink(hex: hex)
+        return NSColor(name: nil) { appearance in
+            let base = resolved(full, in: appearance)
+            let tone: CGFloat = isLight(base) ? 0 : 1
+            let mix = { (c: CGFloat) in c + (tone - c) * restMix }
+            return NSColor(
+                srgbRed: mix(base.redComponent),
+                green: mix(base.greenComponent),
+                blue: mix(base.blueComponent),
+                alpha: base.alphaComponent
+            )
+        }
     }
-    /// The ink the progress fill takes.
+    /// The ink the progress fill takes: the ink itself (#3514).
     static func fillColor(hex: String) -> NSColor {
-        ink(hex: hex, strength: fillStrength)
+        ink(hex: hex)
     }
     /// The hairline (#3361 ruling 1): neutral, the opposite tone of
     /// the core's ink — white beside a dark ink, black beside a
     /// light one — never the user's colour; resolved in the current
     /// drawing appearance.
     static func hairlineColor(hex: String) -> NSColor {
-        let ink = NSColor(cgColor: ink(hex: hex, strength: 1).cgColor)?
+        let ink = NSColor(cgColor: ink(hex: hex).cgColor)?
             .usingColorSpace(.sRGB)
-        let luma =
-            ink.map {
-                0.2126 * $0.redComponent + 0.7152 * $0.greenComponent
-                    + 0.0722 * $0.blueComponent
-            } ?? 0
-        return (luma > 0.5 ? NSColor.black : NSColor.white)
+        return (ink.map(isLight) == true ? NSColor.black : NSColor.white)
             .withAlphaComponent(hairlineStrength)
     }
 

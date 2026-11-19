@@ -328,6 +328,7 @@
   "colors.colors_drawer.summary": "%1$@ · %2$@ · %3$@ · %4$@",
   "colors.colors_drawer.title": "顏色",
   "colors.dimmed.xref": "這裡變暗的顏色目前不會繪製，請在%1$@中開啟它們著色的對象。",
+  "colors.finish": "質感",
   "colors.focused_item_inert.xref": "「%2$@」為「%3$@」時，「%1$@」不會為任何內容上色，請在%5$@中將它設為「%4$@」。",
   "colors.front_app_off.help": "不會繪製前景 App 區段，因此不會繪製它的指示器。請在「%2$@」中開啟「%1$@」。",
   "colors.glass.caption": "覆蓋在兩個列、%1$@、放置區、Sticky 標記，以及空間切換時滑動的薄板上的半透明材質。",

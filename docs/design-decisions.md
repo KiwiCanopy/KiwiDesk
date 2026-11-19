@@ -7353,7 +7353,7 @@ stands, a delay not being motion.
 :::unreleased
 *Amended* (owner, 2026-11-16, #3366): **the hover lifts nothing.**
 The kiwis stay where they rest and the tab goes to full strength,
-the progress fill's 90%, in place; the rise is the pocket's own
+the progress fill's, in place; the rise is the pocket's own
 (the #3368 amendment below). A lift followed a moment later by the rise read as a
 stutter on the device, two motions where the pointer asked for one,
 and the brighter tab answers the hover without moving anything.
@@ -7427,14 +7427,14 @@ alone fade.** The tab keeps a bar handle's two-tone line at its
 ink and depth, empty or not, and the empty fade moves off the
 handle's panel onto the kiwis, in the tab and risen out of it. A
 faded panel thinned the tab to about 15% beside the bar handles'
-38%, so it read as a thinner, lighter line than its neighbours,
+38% of that day, so it read as a thinner, lighter line than its neighbours,
 and the kiwis already say what the pocket holds. The whole mark
 under Always keeps its fade.
 
 *Amended* (owner, 2026-11-17, #3384, reversing #3368's rule that a
 tab holding something keeps the rest strength): **a tab whose
 pocket holds something rests at full strength,** the progress
-fill's 90%, and an empty one at the bar handles' rest strength. The
+fill's, and an empty one at the bar handles' rest strength. The
 ui-designer's concern stands — a bright tab can read as a bar about
 to open — and the owner weighed it against being able to tell at a
 glance that something is inside, which the kiwis alone, at a
@@ -19014,7 +19014,10 @@ Unlike a mark tint, every bundled palette paints it, the derived
 default included, in its own `active_item_color`
 ([#3377](https://github.com/KiwiCanopy/KiwiDesk/issues/3377),
 amending #3357's ruling 3), through `ColorPaletteKeys.bundledPaint`
-at load. The handle is the bar's own edge, so under a chosen
+at load — or in the same-hue duty shade `ColorPaletteKeys.handleShades`
+names where that accent fills too weakly to read: Glass's
+`#8DB354` paints `#7DBB2A`, as the focus ring wears a darker green
+(#3514). The handle is the bar's own edge, so under a chosen
 palette a grey line opening a gold bar reads as someone else's;
 the two-tone hairline (#3361) keeps any accent legible over light
 and dark content. The base value stays Automatic, and Automatic
@@ -19516,6 +19519,17 @@ the colours remain the one "on demand" step, and search stays one
 hop, since a hit on a colour opens the drawer (#1250). What moved
 out of hiding is the finish alone, for everyone. Its rows are `.atRest`, so by #277 they take no search
 anchor: a hit lands on the page, where they are already shown.
+
+:::unreleased
+*Amended* (owner, 2026-11-19, #3514): the group is titled
+**Finish**, and the Fill and *Tint KiwiHub and plates* lead it,
+above the Liquid Glass switch and the *Fill fade* it greys, with
+the sheen last. The Fill and the tint draw without glass, so under
+a Liquid Glass header they read as glass's; each switch now sits
+directly above what it greys, and below macOS 26 the group reads
+Fill, tint, sheen. The switch keeps the name Liquid Glass, with
+what the glass covers in a caption under it.
+:::
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
@@ -20409,6 +20423,17 @@ over the merged run opening in place with a hover swap: a short
 Space Bar and a long App Bar put the handles at unequal distances
 from the middle, where they read as unrelated.
 
+:::unreleased
+*Amended* (owner, 2026-11-19, #3512): the stand-aside is the
+mouse's rule alone. A bar its key reveals lands under its own
+handle, and every other handle on the edge, the Pocket's included,
+stays in its place and stays live, so a hover on one opens that
+bar beside the pinned one. A second press hides only the named
+bar. Hiding the sibling for a key pin made the key read as a
+hover the user had not made, and took away the handles the user
+could still reach for.
+:::
+
 The dots cap at six, so a handle at rest never outgrows its band — a
 growing band gives up the one target size — following the current
 Space with small end dots, as iOS page dots do; the open bar shows
@@ -20504,9 +20529,10 @@ Dock stays shown for as long as the pointer stays there. So:
   run. The fill starts at the pointer's entry and keeps that start,
   so it never chases a moving pointer, and both ends reach the
   handle's ends together, the longer side running faster. It is
-  one colour at two strengths, 38% at rest and about 90% filled:
-  Automatic is the label ink at those alphas, and a colour picked
-  in #3357 takes them times its own alpha, with no floor for a weak
+  one colour in two shades (#3514): filled it is the ink itself,
+  at rest the ink mixed 45% toward its hairline's tone, both at
+  the ink's own alpha. Automatic is the label ink, and a colour
+  picked in #3357 keeps its own alpha, with no floor for a weak
   pick (#1857). Nothing blinks or pulses: three pulses in 0.4 s
   is about 7 Hz (WCAG 2.3.1), and on macOS a pulse means attention
   or an error. The fill is a change of lightness in place, so it
@@ -20542,8 +20568,8 @@ Dock stays shown for as long as the pointer stays there. So:
   of the opposite tone, and a rounded end reads as a deliberate
   object rather than a cut. No taper, fade or one-sided rounding.
   The core is drawn over the hairline capsule rather than inside a
-  ring, so its strengths show composited over the hairline's 35%:
-  about 60% at rest, which one draw path for both drawers buys.
+  ring, so its inks show composited over the hairline, which one
+  draw path for both drawers buys (#3514 below sets the inks).
   The handle stays flush, as the two-tone bullet argues.
 - *A thickness of its own* (owner, 2026-11-18, #3451), amending
   the capsules bullet above: **the handle's thickness
@@ -20557,7 +20583,8 @@ Dock stays shown for as long as the pointer stays there. So:
   covers more of the windows, since a handle reserves nothing. A
   look carries it, so every bundled look names it: Glass, Pill and
   Sakura 3, Classic and Tiler 2, Taskbar 4. It is edited with a
-  stepper in the KiwiShelf card's Show group, between Show and
+  pt slider in whole points (#3513), as every drawn line width is,
+  in the KiwiShelf card's Show group, between Show and
   Reveal, greyed while nothing rests as a handle anywhere. The
   handle stays flush whatever the outer margin; a thicker handle
   narrows the room to the windows by what it adds. It amends every
@@ -20565,6 +20592,30 @@ Dock stays shown for as long as the pointer stays there. So:
   grow origin's included. Refused: a Lua-only knob, since the
   owner wants it to travel with a look, and a palette key, since
   palettes carry colour alone.
+- *Easier to see at rest* (owner, 2026-11-19, #3514, after rounds
+  with native prototypes on their own wallpapers), amending the
+  strengths above: **the fill is the ink itself, the rest is the
+  ink mixed 45% toward its hairline's tone — darker beside a light
+  ink, lighter beside a dark one — and the hairline is 20%.** Both
+  keep the ink's own alpha, so nothing is forced opaque. At 38%
+  opacity over a 35% hairline the resting handle read faintly on
+  busy and mid-tone wallpapers, and raising the opacity left the
+  fill too little to add: an opacity step shrinks wherever the
+  ground is near the ink, while a lightness step reads alike on
+  any ground and survives colour-vision loss. The ui-designer
+  proposed a 35% mix; the owner chose 45% for a step that clearly
+  shows, accepting that the resting colour drifts further from its
+  hue (Glass rests a dark olive) and that on white the darker rest
+  stands out more than the fill, which then reads as the line
+  lighting up. A fill brighter or more vivid than the colour was
+  refused: white, the label ink and a saturated blue have nowhere
+  to go, and it would part the handle from the bar's active item.
+  Glass's handle takes the duty shade `#7DBB2A`, more saturated at
+  the same lightness, since its accent read weak even filled
+  (#3377 above). The thinner hairline separates the handle less
+  from a window or wallpaper of its own tone, the reason #3361
+  drew it at 35%; the owner chose it so it does not distract from
+  the colour, letting the handle's own ink carry the look.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one

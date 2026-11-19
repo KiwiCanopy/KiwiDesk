@@ -72,8 +72,8 @@ final class ShelfHandleView: NSView {
     }
 
     /// Never the bar's own ink, which vanishes on a light window
-    /// (#3349, #3357): the core's ink at rest, its fill at the fill
-    /// strength, a neutral hairline around it (#3361, #3366).
+    /// (#3349, #3357): the core's resting ink, its fill the ink
+    /// itself, a neutral hairline around it (#3361, #3366, #3514).
     private func paint(_ spec: ShelfHandleSpec) {
         var rest: CGColor?
         var filled: CGColor?

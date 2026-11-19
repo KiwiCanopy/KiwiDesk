@@ -15,6 +15,10 @@ import Testing
 /// `ConfigMigrationRoutingTests` guards the census itself.
 @Suite("Config migration wiring")
 struct ConfigMigrationWiringTests {
+    /// The handle the default palette paints (#3409, #3514).
+    static let defaultHandle = ColorPaletteKeys.painted(
+        TilingSettings().kiwishelf.activeItemColor
+    )
 
     /// The `format` line the CURRENT writer emits, derived rather
     /// than spelled.
@@ -282,9 +286,9 @@ struct ConfigMigrationWiringTests {
         )
         #expect(
             changed.contains {
+                // The default accent's duty shade (#3514).
                 $0.1.contains(
-                    "\"handle_color\" : "
-                        + "\"\(TilingSettings().kiwishelf.activeItemColor)\""
+                    "\"handle_color\" : \"\(Self.defaultHandle)\""
                 )
             }
         )

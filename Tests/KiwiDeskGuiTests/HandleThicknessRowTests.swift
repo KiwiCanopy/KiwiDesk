@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The KiwiShelf card's Handle thickness stepper (#3451): in the
+/// The KiwiShelf card's Handle thickness slider (#3451, #3513): in the
 /// Show group between Show and Reveal, greyed with its own reason
 /// only while nothing rests as a handle anywhere — no Auto bar, no
 /// Pocket handle, no handle over a maximized window.

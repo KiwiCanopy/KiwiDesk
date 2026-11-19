@@ -287,8 +287,11 @@ twice, was a question the user answered twice. The argument is
   bars' runs meet so a point opens one bar, and over a maximized
   window reaching in only to the handle's hover band (#3346); a
   `hidden` bar has no approach, and a hidden bar whose edge sibling
-  shows yields, its handle standing aside
-  (`ShelfHandleStripTests`, `ShelfRevealPairTests`; the argument is
+  shows by HOVER yields, its handle standing aside, while a sibling
+  its key pinned leaves it live (#3512, `ShelfKeyRevealHandlesTests`;
+  the Pocket's tab keeps its slot through its own band, ▸ A reveal
+  never brings the pocket; `ShelfHandleStripTests`,
+  `ShelfRevealPairTests`; the argument is
   `docs/design-decisions.md` ▸ A shelf can hide). **Place a revealed
   bar in its slot of the one arrangement of the bars resting on
   the edge** (`ShelfEdge.resting`, cut by
@@ -358,8 +361,10 @@ twice, was a question the user answered twice. The argument is
   pocket's handle. **Ink a
   handle and the pocket's tab through `ShelfHandleSpec`'s one
   `restColor`, `fillColor` and `hairlineColor`** — over the one
-  `ShelfHandleSpec.ink(hex:strength:)` (#3357, #3360): Automatic the
-  label ink and a picked colour its own alpha times the strength — a
+  `ShelfHandleSpec.ink(hex:)` (#3357, #3514): the fill the ink
+  itself, Automatic the label ink, at its own alpha; the rest the
+  ink mixed `restMix` toward the tone the one `isLight` pivot gives
+  the hairline, alpha kept — a
   core capsule inset `ShelfHandleSpec.hairline` in a neutral hairline
   capsule, the one `ShelfHandleSpec.depth(of:)` deep, which is
   `kiwishelf.handle_thickness` (#3451, `HandleThicknessWiringTests`),
@@ -377,7 +382,8 @@ twice, was a question the user answered twice. The argument is
 - **A `ColorPaletteKeys.adaptive` path takes a
   `ColorPaletteKeys.bundledPaint` entry, and every bundled palette
   paints it from that source through `ColorPalette.bundledPainted`,
-  never a hand-spelled JSON value** (#3377,
+  or from the duty shade `ColorPaletteKeys.handleShades` names for
+  that source (#3514), never a hand-spelled JSON value** (#3377,
   `ShelfHandleColorTests` ▸ `bundledPalettesPaintTheAccent`). A
   source it paints the handle from clears the core-vs-hairline
   lightness floor measured through `ColorVision`

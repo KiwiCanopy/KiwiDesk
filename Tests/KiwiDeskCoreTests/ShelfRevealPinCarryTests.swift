@@ -106,9 +106,14 @@ struct ShelfRevealPinCarryTests {
         revealer.start()
         defer { revealer.stop() }
         #expect(revealer.toggle(app, duration: 0))
-        #expect(revealer.yields(space))
+        // A key pin stands no sibling aside on screen either (#3512).
+        #expect(!revealer.yields(space))
         revealer.sync([space: target])
         #expect(revealer.reveal(of: app) == .pinned(until: nil))
+        #expect(!revealer.yields(space))
+        // A hover phase with no target this pass stands nothing
+        // aside either: `yields` filters on `targets` (#3481).
+        revealer.set(.hover, for: app)
         #expect(!revealer.yields(space))
     }
 
