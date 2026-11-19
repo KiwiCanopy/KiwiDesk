@@ -124,6 +124,7 @@ final class ShelfRevealer {
         !key.isPocket && reveal(of: key) == .hidden
             && phases.keys.contains {
                 $0.shelf == key.shelf && $0 != key && !$0.isPocket
+                    && targets[$0] != nil
             }
     }
 
@@ -154,10 +155,19 @@ final class ShelfRevealer {
     }
 
     /// The hiding bars of this pass; a bar that stopped hiding
-    /// forgets its state.
+    /// forgets its state, save a shortcut's pin: kept until the next
+    /// toggle or its timeout across a pass filing no such bar, and
+    /// dropped once one files the bar on another edge (#3481).
     func sync(_ next: [Key: Target]) {
         for key in targets.keys where next[key] == nil {
+            if case .pinned? = phases[key] { continue }
             forget(key)
+        }
+        for key in phases.keys where next[key] == nil {
+            let moved = next.keys.contains {
+                $0.bar == key.bar && $0.shelf.display == key.shelf.display
+            }
+            if moved { forget(key) }
         }
         targets = next
         syncMonitor()
@@ -248,9 +258,12 @@ final class ShelfRevealer {
     /// A timed pin ran out: the pointer on the shelf keeps it as
     /// a hover reveal, which retracts once the pointer leaves.
     private func pinEnded(_ key: Key) {
-        guard let target = targets[key],
-            case .pinned = reveal(of: key)
-        else { return }
+        guard case .pinned = reveal(of: key) else { return }
+        // Kept while its bar is not drawn (#3481): it ends unseen.
+        guard let target = targets[key] else {
+            forget(key)
+            return
+        }
         if target.hovers, target.zone.contains(location()) {
             set(.hover, for: key)
         } else if holds(key.shelf) {

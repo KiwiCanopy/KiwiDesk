@@ -10,10 +10,9 @@ import Testing
 @Suite("Pocket rise timeline (#3368)")
 @MainActor
 struct PocketRiseTimelineTests {
-    /// An empty pocket's rise travel.
+    /// The pocket's rise travel.
     static var travel: CGFloat {
         BarMotion.pocketRiseTravel(
-            holds: false,
             tabDepth: PocketHandleView.tabDepth(of: KiwiShelf())
         )
     }
