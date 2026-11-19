@@ -1511,17 +1511,27 @@ def check_release_images(dist: pathlib.Path) -> None:
         for entry in data.get("releases", [])
         if entry.get("image")
     ]
-    pages = [
-        dist / "changelog" / "index.html",
-        dist / "de" / "changelog" / "index.html",
-        dist / "ja" / "changelog" / "index.html",
-    ]
+    # Every locale's page, so a new locale is held without an edit.
+    pages = sorted(dist.glob("**/changelog/index.html"))
+    if imaged and not pages:
+        fail("release images: no changelog page was built")
     for entry in imaged:
         route = entry["image"]
-        if not (dist / route.lstrip("/")).is_file():
+        file = dist / route.lstrip("/")
+        if not file.is_file():
             fail(f"release images: {route} is not in the build")
+        head = file.read_bytes()[:24]
+        if head[:8] != b"\x89PNG\r\n\x1a\n" or head[12:16] != b"IHDR":
+            fail(f"release images: {route} is not a PNG")
+        width = int.from_bytes(head[16:20], "big")
+        height = int.from_bytes(head[20:24], "big")
         for page in pages:
             html = page.read_text(encoding="utf-8")
+            if f'href="{route}"' not in html:
+                fail(
+                    f"release images: {entry['tag']} on {page} does "
+                    "not link its full image"
+                )
             tags = [
                 tag
                 for tag in re.findall(r"<img\b[^>]*>", html)
@@ -1530,8 +1540,8 @@ def check_release_images(dist: pathlib.Path) -> None:
             want = (
                 f'alt="KiwiDesk {entry["version"]}"',
                 'loading="lazy"',
-                "width=",
-                "height=",
+                f'width="{width}"',
+                f'height="{height}"',
             )
             if len(tags) != 1 or not all(w in tags[0] for w in want):
                 fail(

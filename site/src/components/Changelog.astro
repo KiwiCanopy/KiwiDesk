@@ -165,16 +165,18 @@ const og = ogCard("banner", lang, Astro.site);
           )}
         </header>
 
-        {/* The release's one image, sized from its own header so
-            the box is reserved; alt names the release, the notes
-            below carry what it shows. */}
+        {/* A thumbnail beside the notes, opening the full image;
+            sized from its header so the box is reserved. */}
         {release.image && (() => {
           const picture = releaseImage(release.image);
           return (
-            <img class="rel__image" src={picture.src}
-              width={picture.width} height={picture.height}
-              alt={`KiwiDesk ${release.version}`}
-              loading="lazy" decoding="async" />
+            <a class="rel__thumb" href={picture.src} target="_blank"
+              rel="noopener">
+              <img src={picture.src}
+                width={picture.width} height={picture.height}
+                alt={`KiwiDesk ${release.version}`}
+                loading="lazy" decoding="async" />
+            </a>
           );
         })()}
 
@@ -285,6 +287,7 @@ const og = ogCard("banner", lang, Astro.site);
      resets the same trap. Spacing here comes from the rule
      plus the margin. */
   .rel {
+    display: flow-root;
     padding-block: 0;
     padding-top: 2.2rem;
     border-top: 1px solid var(--border);
@@ -313,14 +316,28 @@ const og = ogCard("banner", lang, Astro.site);
     color: var(--text-dim);
     font-size: 0.9rem;
   }
-  .rel__image {
+  .rel__thumb {
+    float: right;
+    width: 140px;
+    margin: 0 0 0.8rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .rel__thumb:hover,
+  .rel__thumb:focus-visible {
+    border-color: var(--accent);
+  }
+  .rel__thumb img {
     display: block;
     width: 100%;
-    max-width: 28rem;
     height: auto;
-    margin: 0 0 1.1rem;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+  }
+  @media (max-width: 560px) {
+    .rel__thumb {
+      width: 96px;
+      margin-left: 0.9rem;
+    }
   }
   /* A status chip, not the footer's tagline paragraph — hence
      the footer's own class is `tag-line` on this page. */

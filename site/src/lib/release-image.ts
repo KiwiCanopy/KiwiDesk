@@ -1,8 +1,5 @@
-// A release's one image (owner ruling 2026-11-19): the changelog
-// entry's `image` is a route under public/, written by
-// scripts/changelog-sync only when the file is in the tree. Its
-// size is read off the PNG header so the page reserves the box
-// before the bytes arrive.
+// A release's one image (design-decisions ▸ A release carries at
+// most one image), sized off its PNG header.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 

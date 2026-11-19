@@ -5,9 +5,9 @@ import Testing
 /// (owner ruling 2026-11-19): `changelog-sync` records its route
 /// as `image` only when the file is in the tree, `discord-announce`
 /// makes it the embed's image, and `release.yml` opens the draft's
-/// body with it. The feed never carries it, which
-/// `check-site-tokens.py` ▸ `check_release_images` holds on the
-/// built `appcast.xml`.
+/// body with it. The feed never carries it: `appcast-sync` over an
+/// imaged entry here, the built `appcast.xml` in
+/// `scripts/check-site-tokens.py` ▸ `check_release_images`.
 ///
 /// Every run names `--images` at a temporary directory: the real
 /// tree carries images, and a plausible tag would read them.
@@ -101,7 +101,15 @@ struct ReleaseImageTests {
                 of: /<string>(https:\/\/[^\/<]+)\/appcast\.xml</
             )
         )
-        return String(match.1)
+        let origin = String(match.1)
+        // The origin the site builds for must be the same one.
+        let astro = try String(
+            contentsOf: scriptFixtureRepoRoot()
+                .appendingPathComponent("site/astro.config.mjs"),
+            encoding: .utf8
+        )
+        #expect(astro.contains("SITE_URL ?? \"\(origin)\""))
+        return origin
     }
 
     private func imageLine(carrying: Bool) throws -> String {
@@ -141,6 +149,7 @@ struct ReleaseImageTests {
         for (body, warns) in [
             ("\(line)\n\n\(Self.highlights)", false),
             (Self.highlights, true),
+            ("\(line)\n\(line)\n\n\(Self.highlights)", true),
         ] {
             let run = try runPythonScript(
                 at: script("changelog-sync"),
@@ -177,6 +186,33 @@ struct ReleaseImageTests {
             image?["url"] as? String == "\(try siteOrigin())\(Self.route)"
         )
         #expect(try embed(carrying: false)["image"] == nil)
+    }
+
+    /// The update window stays text-only: an entry carrying
+    /// `image` reaches the feed with its notes and without it.
+    @Test("the feed never carries the image")
+    func feedOmitsTheImage() throws {
+        let entry: [String: Any] = [
+            "tag": Self.tag,
+            "version": Self.version,
+            "image": Self.route,
+            "summary": "A summary only the feed shows.",
+            "sections": [
+                ["title": "New", "type": "new", "items": ["**A**."]]
+            ],
+        ]
+        let notes = try AppcastFixture.write(
+            ["generated_by": "ReleaseImageTests", "releases": [entry]],
+            label: "notes"
+        )
+        let run = try AppcastFixture.render(
+            [AppcastFixture.release(tag: Self.tag)],
+            arguments: ["--all", "--notes", notes.path]
+        )
+        #expect(run.status == 0, "\(run.stderr)")
+        #expect(run.stdout.contains("A summary only the feed shows."))
+        #expect(!run.stdout.contains(Self.route))
+        #expect(!run.stdout.contains("\"image\""))
     }
 
     /// The draft is the one place every release body starts, so

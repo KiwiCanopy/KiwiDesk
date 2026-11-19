@@ -249,7 +249,7 @@ def payload(entry: dict, nix: bool = False) -> dict:
     # The site serves it before this runs: the workflow waits for
     # the feed that same deploy carries.
     if entry.get("image"):
-        embed["image"] = {"url": f"{_sync.SITE_ORIGIN}{entry['image']}"}
+        embed["image"] = {"url": _sync.image_url(entry["image"])}
     return {
         "username": USERNAME,
         "allowed_mentions": {"parse": []},

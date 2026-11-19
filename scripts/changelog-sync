@@ -62,6 +62,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -70,9 +71,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "site" / "src" / "data" / "changelog.json"
 
-# A release's one image (owner ruling 2026-11-19): read from the
-# working tree, which is the `main` the sync checks out and the
-# site deploys, so the file must land before the sync runs.
+# A release's one image (owner ruling 2026-11-19), read from the
+# working tree: `main` for the sync and the post, the tag for the
+# draft's line, so the file lands on `main` before the cut.
 IMAGES_DIR = ROOT / "site" / "public" / "releases"
 IMAGE_ROUTE = "/releases/"
 # The deployed site, as `release-announce.yml`'s feed wait and
@@ -1011,12 +1012,17 @@ def release_image(version: str, images: Path | None = None) -> str | None:
     return None
 
 
+def image_url(route: str) -> str:
+    """A release image's route as the deployed site serves it."""
+    return f"{SITE_ORIGIN}{route}"
+
+
 def image_line(version: str, images: Path | None = None) -> str | None:
     """The markdown line a release page opens with, or None."""
     route = release_image(version, images)
     if route is None:
         return None
-    return f"![KiwiDesk {version}]({SITE_ORIGIN}{route})"
+    return f"![KiwiDesk {version}]({image_url(route)})"
 
 
 def build_entry(
@@ -1178,11 +1184,13 @@ def read_existing() -> list[dict]:
 
 
 def image_opens(body: str, line: str) -> bool:
-    """Whether the body's first non-blank line is `line`."""
-    for text in body.replace("\r\n", "\n").split("\n"):
-        if text.strip():
-            return text.strip() == line
-    return False
+    """Whether the body opens with `line` and carries it once."""
+    rows = [
+        text.strip()
+        for text in body.replace("\r\n", "\n").split("\n")
+        if text.strip()
+    ]
+    return bool(rows) and rows[0] == line and rows.count(line) == 1
 
 
 def _report(error: NotesError) -> int:
@@ -1315,12 +1323,13 @@ def run_release(
         return _report(error)
     line = image_line(entry["version"], images)
     if line and not image_opens(release.get("body") or "", line):
-        print(
-            f"changelog-sync: WARNING — {tag} has an image, and its "
-            f"body does not open with it. Make the first line:\n"
-            f"    {line}",
-            file=sys.stderr,
+        message = (
+            f"{tag}'s body must open with its image line, once: {line}"
         )
+        print(f"changelog-sync: WARNING — {message}", file=sys.stderr)
+        # Shown on the run's summary, which a green run is read by.
+        if os.environ.get("GITHUB_ACTIONS"):
+            print(f"::warning::{message}")
     if check:
         print(f"changelog-sync --check: OK — {tag} parses.")
         return 0

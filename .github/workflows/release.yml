@@ -910,11 +910,9 @@ jobs:
             # minted tag lands on the vetted commit; with the
             # tag intact the flag is ignored.
             #
-            # A release's picture (site/public/releases/, owner
-            # ruling 2026-11-19) opens the page; gh puts --notes
-            # above the generated list. The parser reads from
-            # `## Highlights`, so the line is never notes text.
-            # The `+` form: bash 3.2 calls an empty array unbound.
+            # The release's image line opens the body, above the
+            # generated list (design-decisions ▸ A release carries
+            # at most one image). `+` form: safe under `set -u`.
             OPENING=()
             PICTURE="$(python3 scripts/changelog-sync \
               --image-line "$VERSION")"

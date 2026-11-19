@@ -10,6 +10,7 @@
 // built page's.
 
 import { releaseInline, sectionView } from "./src/lib/changelog-view.ts";
+import { readdirSync } from "node:fs";
 import { pngSize, releaseImage } from "./src/lib/release-image.ts";
 
 const failures = [];
@@ -100,6 +101,14 @@ check("a release image that is no PNG fails the build", () => {
     threw = true;
   }
   assert(threw, "a non-PNG was sized");
+});
+
+check("a shipped release image is sized from public/", () => {
+  const dir = new URL("./public/releases/", import.meta.url);
+  for (const name of readdirSync(dir)) {
+    const picture = releaseImage(`/releases/${name}`);
+    assert(picture.width > 0 && picture.height > 0, name);
+  }
 });
 
 check("an image the tree lacks fails the build", () => {
