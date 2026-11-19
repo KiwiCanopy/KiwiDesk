@@ -16962,13 +16962,17 @@ dimmed tile is never landed on. The field gives up its in-text
 cursor movement for it, which costs little because a query is a
 few letters typed and corrected from the end.
 
-The strip shows only while it is in use (owner amendment on #3168):
-off All, or while a query is typed. ⌃⌥J opens on the list alone,
+The strip shows only once it is in use (owner amendment on #3168):
+from the first step off All, or the first query, until the panel
+closes. ⌃⌥J opens on the list alone,
 because a switcher opened for the window used before is read top
 down and a row of tiles above that window is a second thing to read
 past on every press. Nothing about the strip's reach changes: → from
-an empty field brings it in on the next app, and ← back to All hides
-it again, so no app is a step further away than before. Typing
+an empty field brings it in on the next app, so no app is a step
+further away than before. Once shown it stays, All included, until
+the panel closes (owner, 2026-11-19): ⌥⇥, its ⇧ step and ← → all
+pass through All, and a strip that left on reaching it made the panel
+jump while the user was still stepping. Typing
 shows it on All because the dimmed tiles are then the answer to
 "which apps hold a match". The strip appears under the field, which
 never moves (#2246), and the panel grows downward rather than

@@ -7914,8 +7914,9 @@ so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
 :::unreleased
-Under the field sits the **app strip**, shown while you type or
-while it is off **All**; KiwiHub opens on the list alone. It holds
+Under the field sits the **app strip**, shown from the first step
+off **All** or the first letter typed until KiwiHub closes, **All**
+included; KiwiHub opens on the list alone. It holds
 **All** first, then one tile per app with a window in the list, the
 app you are in first, then most recently used, with a count on an
 app with two windows or more. **←** and **→** move along it and a
