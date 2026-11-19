@@ -2615,7 +2615,6 @@
   "shortcuts.sequence.search": "Buscar ações",
   "shortcuts.sequence.summary": "Pressione uma tecla e depois outras",
   "shortcuts.sequence.unnamed": "Teclas sem nome",
-  "shortcuts.size_float.layouts_caption": "Os atalhos de largura e altura só valem nos layouts bsp, stack, scrolling e track; não têm efeito em monocle e grid. A exceção é uma janela fora do lado a lado: uma janela flutuante, assim como toda janela do layout floating, muda o próprio tamanho em qualquer layout. Largura e altura são redimensionadas de forma independente; scrolling redimensiona seu slot ao longo do eixo de rolagem para ambas, e em track um eixo redimensiona o Track da janela e o outro a sua parcela dentro dele.",
   "shortcuts.space_history": "Histórico de espaços",
   "shortcuts.space_history.all_screens": "Todas as telas",
   "shortcuts.space_history.choice_help": "%1$@: cada tela lembra seus próprios espaços, e voltar ou avançar muda o espaço da tela em que você está trabalhando. %2$@: um único histórico para todas as telas, então voltar pode levar você a outra tela. Com uma só tela, as duas opções funcionam igual.",

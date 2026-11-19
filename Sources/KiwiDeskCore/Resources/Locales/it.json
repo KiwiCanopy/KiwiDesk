@@ -2615,7 +2615,6 @@
   "shortcuts.sequence.search": "Cerca azioni",
   "shortcuts.sequence.summary": "Premi un tasto, poi altri tasti",
   "shortcuts.sequence.unnamed": "Tasti senza nome",
-  "shortcuts.size_float.layouts_caption": "Le scorciatoie per larghezza e altezza valgono solo nei layout bsp, stack, scrolling e track; non hanno effetto in monocle e grid. L'eccezione è una finestra fuori dall'affiancamento: una finestra fluttuante, come ogni finestra del layout floating, ridimensiona se stessa in qualsiasi layout. Larghezza e altezza si ridimensionano in modo indipendente; scrolling ridimensiona il proprio slot lungo l'asse di scorrimento per entrambe, e in track un asse ridimensiona il Track della finestra e l'altro la sua porzione al suo interno.",
   "shortcuts.space_history": "Cronologia degli spazi",
   "shortcuts.space_history.all_screens": "Tutti gli schermi",
   "shortcuts.space_history.choice_help": "%1$@: ogni schermo ricorda i propri spazi, e tornare indietro o andare avanti cambia lo spazio dello schermo su cui stai lavorando. %2$@: un'unica cronologia per tutti gli schermi, quindi tornare indietro può portarti su un altro schermo. Con un solo schermo, le due opzioni funzionano allo stesso modo.",

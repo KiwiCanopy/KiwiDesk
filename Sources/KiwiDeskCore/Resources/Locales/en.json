@@ -2615,7 +2615,6 @@
   "shortcuts.sequence.search": "Search actions",
   "shortcuts.sequence.summary": "Press a key, then more keys",
   "shortcuts.sequence.unnamed": "Unnamed keys",
-  "shortcuts.size_float.layouts_caption": "Width and height shortcuts only apply in the bsp, stack, scrolling, and track layouts; they are a no-op in monocle and grid. A window outside tiling is the exception: a floated window, and every window in the floating layout, resizes its own frame in any layout. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
   "shortcuts.space_history": "Space history",
   "shortcuts.space_history.all_screens": "All screens",
   "shortcuts.space_history.choice_help": "%1$@: each screen remembers its own Spaces, and going back or forward changes the Space on the screen you are working on. %2$@: one history across every screen, so going back may take you to another screen. With one screen, both work the same.",

@@ -2615,7 +2615,6 @@
   "shortcuts.sequence.search": "Buscar acciones",
   "shortcuts.sequence.summary": "Pulsa una tecla y luego más teclas",
   "shortcuts.sequence.unnamed": "Teclas sin nombre",
-  "shortcuts.size_float.layouts_caption": "Los atajos de anchura y altura solo se aplican en los diseños bsp, stack, scrolling y track; no tienen efecto en monocle ni en grid. La excepción es una ventana fuera del mosaico: una ventana flotante, como toda ventana del diseño floating, cambia su propio tamaño en cualquier diseño. La anchura y la altura se redimensionan de forma independiente; scrolling redimensiona su hueco a lo largo del eje de desplazamiento para ambas, y en track un eje redimensiona el Track de la ventana y el otro su parte dentro de él.",
   "shortcuts.space_history": "Historial de espacios",
   "shortcuts.space_history.all_screens": "Todas las pantallas",
   "shortcuts.space_history.choice_help": "%1$@: cada pantalla recuerda sus propios espacios, y retroceder o avanzar cambia el espacio de la pantalla en la que trabajas. %2$@: un único historial para todas las pantallas, así que retroceder puede llevarte a otra pantalla. Con una sola pantalla, ambas opciones funcionan igual.",

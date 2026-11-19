@@ -4356,8 +4356,9 @@ container tree, which the flat-`[WindowID]`-array model forbids
 fits the architecture. The Size & float catalog has 5 rows
 (Grow/Shrink × width/height + Make floating), all authored from
 the one shared `resize.step`; scrolling still resizes its slot
-along its own scroll axis whichever axis is passed, and
-monocle/grid stay explicit no-ops (floating did too until
+along its own scroll axis whichever axis is passed, grid sizes its
+columns and rows ([#763](https://github.com/KiwiCanopy/KiwiDesk/issues/763)),
+and monocle stays an explicit no-op (floating was one too until
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)). No
 back-compat alias for the old `bsp.set_ratio` /
 `layout.bsp.ratio` name (pre-release, single user). (#56)

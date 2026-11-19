@@ -242,42 +242,9 @@ struct SizeFloatGroup: View {
                 MaximizeShareCaption(axis: .width)
             }
             .searchAnchored(SettingsCatalog.shortcuts.maximizeWidthBinding)
-            // The resize rows' caption closes them, above the
-            // toggles (#3160).
-            Text(sizeFloatCaption)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         default:
             family
         }
-    }
-
-    /// Caption describing resize scope across layouts. It names no
-    /// verb (owner ruling 2026-08-29) — quoting the rows' labels is
-    /// the #818 drift — and scopes by the dimension, plus, since
-    /// #1184, by the one per-window state that overrides the
-    /// layout: it renders under the resize and Maximize rows, above
-    /// the toggles (#3160).
-    ///
-    /// The exception clause distinguishes the window's state
-    /// from the layout's name by CLAUSE, not by word: three
-    /// catalogs have only one word for both (#1184).
-    private var sizeFloatCaption: String {
-        L(
-            "shortcuts.size_float.layouts_caption",
-            "Width and height shortcuts only apply in the "
-                + "bsp, stack, "
-                + "scrolling, and track layouts; they are a "
-                + "no-op in monocle and grid. A window outside "
-                + "tiling is the exception: a floated window, "
-                + "and every window in the floating layout, "
-                + "resizes its own frame in any layout. "
-                + "Width and height resize independently; "
-                + "scrolling resizes its slot along the "
-                + "scroll axis for both, and in track one "
-                + "axis resizes the window's track, the "
-                + "other its share within it."
-        )
     }
 }
 

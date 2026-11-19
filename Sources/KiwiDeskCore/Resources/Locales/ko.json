@@ -2615,7 +2615,6 @@
   "shortcuts.sequence.search": "동작 검색",
   "shortcuts.sequence.summary": "키를 누른 다음 다른 키 누르기",
   "shortcuts.sequence.unnamed": "이름 없는 키",
-  "shortcuts.size_float.layouts_caption": "너비와 높이 단축키는 bsp, 스택, 스크롤, 트랙 레이아웃에서만 동작하며 모노클과 격자에서는 아무 일도 하지 않습니다. 예외는 타일 배치에서 벗어난 윈도우입니다. 플로팅으로 전환한 윈도우와 플로팅 레이아웃의 모든 윈도우는 어떤 레이아웃에서든 자기 자신의 크기가 바뀝니다. 너비와 높이는 독립적으로 조절됩니다. 스크롤에서는 둘 다 스크롤 축을 따라 슬롯 크기를 바꾸고, 트랙에서는 한 축이 윈도우의 트랙을, 다른 축이 그 안에서의 몫을 조절합니다.",
   "shortcuts.space_history": "공간 기록",
   "shortcuts.space_history.all_screens": "모든 화면",
   "shortcuts.space_history.choice_help": "%1$@: 각 화면이 자체 공간을 기억하며, 뒤로 또는 앞으로 이동하면 작업 중인 화면의 공간이 바뀝니다. %2$@: 모든 화면에서 하나의 기록을 사용하므로 뒤로 이동하면 다른 화면으로 옮겨질 수 있습니다. 화면이 하나이면 두 옵션이 동일하게 작동합니다.",
