@@ -22,9 +22,18 @@ struct ShelfHandleDrawTests {
         return rep
     }
 
+    /// The dark appearance's label ink alpha, which every strength
+    /// scales (#3514).
+    private var own: CGFloat {
+        ShelfHandleSpec.labelInk(
+            in: NSAppearance(named: .darkAqua)!
+        ).alphaComponent
+    }
+
     /// A core of `strength` drawn over the hairline capsule.
     private func over(_ strength: CGFloat) -> CGFloat {
-        strength + ShelfHandleSpec.hairlineStrength * (1 - strength)
+        let core = own * strength
+        return core + ShelfHandleSpec.hairlineStrength * (1 - core)
     }
 
     /// The most opaque pixel across the middle of `rep`.
@@ -84,7 +93,11 @@ struct ShelfHandleDrawTests {
             edge.isHorizontal
             ? alpha(0, rep.pixelsHigh / 2) : alpha(rep.pixelsWide / 2, 0)
         let corner = alpha(0, 0)
-        #expect(endMiddle > 0.3, "\(edge): end \(endMiddle)")
+        // The end's middle shows at least the hairline (#3514).
+        #expect(
+            endMiddle > 0.8 * ShelfHandleSpec.hairlineStrength,
+            "\(edge): end \(endMiddle)"
+        )
         #expect(corner < 0.8 * endMiddle, "\(edge): corner \(corner)")
         // The hairline rings the core: the outermost row at mid-length
         // shows less ink than the middle.
@@ -155,7 +168,10 @@ struct ShelfHandleDrawTests {
         }
         let endMiddle = alpha(Int((size.height - 1.5) * scale))
         let corner = alpha(rep.pixelsHigh - 1)
-        #expect(endMiddle > 0.3, "tab end \(endMiddle)")
+        #expect(
+            endMiddle > 0.8 * ShelfHandleSpec.hairlineStrength,
+            "tab end \(endMiddle)"
+        )
         #expect(corner < 0.8 * endMiddle, "tab corner \(corner)")
         let rest = over(ShelfHandleSpec.restStrength)
         let full = over(ShelfHandleSpec.fillStrength)
@@ -207,8 +223,8 @@ struct ShelfHandleDrawTests {
         // core alone, which a fill on the wrong side would leave.
         let filled =
             1 - (1 - ShelfHandleSpec.hairlineStrength)
-            * (1 - ShelfHandleSpec.restStrength)
-            * (1 - ShelfHandleSpec.fillStrength)
+            * (1 - own * ShelfHandleSpec.restStrength)
+            * (1 - own * ShelfHandleSpec.fillStrength)
         #expect(abs(alpha - filled) < 0.05, "\(edge): \(alpha)")
     }
 }

@@ -7353,7 +7353,7 @@ stands, a delay not being motion.
 :::unreleased
 *Amended* (owner, 2026-11-16, #3366): **the hover lifts nothing.**
 The kiwis stay where they rest and the tab goes to full strength,
-the progress fill's 90%, in place; the rise is the pocket's own
+the progress fill's, in place; the rise is the pocket's own
 (the #3368 amendment below). A lift followed a moment later by the rise read as a
 stutter on the device, two motions where the pointer asked for one,
 and the brighter tab answers the hover without moving anything.
@@ -7434,7 +7434,7 @@ under Always keeps its fade.
 *Amended* (owner, 2026-11-17, #3384, reversing #3368's rule that a
 tab holding something keeps the rest strength): **a tab whose
 pocket holds something rests at full strength,** the progress
-fill's 90%, and an empty one at the bar handles' rest strength. The
+fill's, and an empty one at the bar handles' rest strength. The
 ui-designer's concern stands — a bright tab can read as a bar about
 to open — and the owner weighed it against being able to tell at a
 glance that something is inside, which the kiwis alone, at a
@@ -20515,8 +20515,9 @@ Dock stays shown for as long as the pointer stays there. So:
   run. The fill starts at the pointer's entry and keeps that start,
   so it never chases a moving pointer, and both ends reach the
   handle's ends together, the longer side running faster. It is
-  one colour at two strengths, 38% at rest and about 90% filled:
-  Automatic is the label ink at those alphas, and a colour picked
+  one colour at two strengths, 65% at rest and 100% filled
+  (#3514): Automatic is the label ink, at its own alpha times
+  those strengths, and a colour picked
   in #3357 takes them times its own alpha, with no floor for a weak
   pick (#1857). Nothing blinks or pulses: three pulses in 0.4 s
   is about 7 Hz (WCAG 2.3.1), and on macOS a pulse means attention
@@ -20533,7 +20534,7 @@ Dock stays shown for as long as the pointer stays there. So:
   amending the resting ink, a single tone of label ink at 38%
   (#3349 ruling, as the lane shipped it). The handle is a
   2-point core with a hairline of the opposite tone along each
-  long side at 35%, so one handle reads over a light and a dark
+  long side at 20% (35% until #3514), so one handle reads over a light and a dark
   window at once, where a single tone vanished over one of them.
   The core carries the ink and runs the fill; the hairline stays
   constant, and beside a colour picked in #3357, or the accent a
@@ -20553,8 +20554,9 @@ Dock stays shown for as long as the pointer stays there. So:
   of the opposite tone, and a rounded end reads as a deliberate
   object rather than a cut. No taper, fade or one-sided rounding.
   The core is drawn over the hairline capsule rather than inside a
-  ring, so its strengths show composited over the hairline's 35%:
-  about 60% at rest, which one draw path for both drawers buys.
+  ring, so its strengths show composited over the hairline's 20%:
+  about 72% at rest (#3514), which one draw path for both drawers
+  buys.
   The handle stays flush, as the two-tone bullet argues.
 - *A thickness of its own* (owner, 2026-11-18, #3451), amending
   the capsules bullet above: **the handle's thickness
@@ -20577,6 +20579,20 @@ Dock stays shown for as long as the pointer stays there. So:
   grow origin's included. Refused: a Lua-only knob, since the
   owner wants it to travel with a look, and a palette key, since
   palettes carry colour alone.
+- *Easier to see at rest* (owner, 2026-11-19, #3514, after three
+  rounds with a native prototype on their own wallpapers), amending
+  the strengths above: **the core rests at 65% and fills to 100%,
+  and the hairline is 20%.** Full strength is the ink at its own
+  alpha, the label ink's or the picked colour's, never forced
+  opaque. At 38% over 35% the resting handle read faintly on busy
+  and mid-tone wallpapers. The ui-designer advised 38–50% at rest;
+  the owner chose 65% and took the trade: the resting core reads
+  at about 72% over its hairline, so the fill's step to full is
+  about 28 points. The thinner hairline
+  separates the handle less from a window or wallpaper of its own
+  tone, the reason #3361 drew it at 35%; the owner chose it so it
+  does not distract from the colour, letting the handle's own ink,
+  Automatic or picked, carry the look.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one

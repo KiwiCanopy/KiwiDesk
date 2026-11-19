@@ -75,14 +75,18 @@ struct ShelfHandleColorWiringTests {
     func automaticPaintsTheLabelInk() throws {
         let view = try #require(try handle(color: ""))
         #expect(view.spec?.restHex == "")
-        let fill = try #require(view.core.layer?.backgroundColor)
-        var label: CGColor?
-        view.effectiveAppearance.performAsCurrentDrawingAppearance {
-            label =
-                NSColor.labelColor
-                .withAlphaComponent(ShelfHandleSpec.restStrength).cgColor
-        }
-        #expect(fill == label)
+        let fill = try #require(
+            view.core.layer?.backgroundColor
+                .flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }
+        )
+        let label = ShelfHandleSpec.labelInk(in: view.effectiveAppearance)
+        #expect(abs(fill.redComponent - label.redComponent) < 0.01)
+        #expect(
+            abs(
+                fill.alphaComponent
+                    - label.alphaComponent * ShelfHandleSpec.restStrength
+            ) < 0.01
+        )
     }
 
     @Test(

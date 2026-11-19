@@ -179,8 +179,13 @@ struct ShelfHandleColorTests {
         for (strength, ink) in inks {
             let light = resolved("", aqua, ink)
             let dark = resolved("", darkAqua, ink)
-            #expect(abs(light.alphaComponent - strength) < 0.02)
-            #expect(abs(dark.alphaComponent - strength) < 0.02)
+            // The label ink's own alpha times the strength, never
+            // forced opaque at full strength (#3514).
+            let ownLight = Spec.labelInk(in: aqua).alphaComponent
+            let ownDark = Spec.labelInk(in: darkAqua).alphaComponent
+            #expect(ownLight < 1 && ownDark < 1)
+            #expect(abs(light.alphaComponent - ownLight * strength) < 0.02)
+            #expect(abs(dark.alphaComponent - ownDark * strength) < 0.02)
             // Dark ink on light, light ink on dark.
             #expect(light.redComponent < 0.5)
             #expect(dark.redComponent > 0.5)

@@ -128,7 +128,8 @@ extension PocketApproachTests {
                 PocketHandleView.tabCore(hex: "", lit: true)
                 .alphaComponent
         }
-        #expect(abs(rest - ShelfHandleSpec.restStrength) < 0.001)
-        #expect(abs(full - ShelfHandleSpec.fillStrength) < 0.001)
+        let own = ShelfHandleSpec.labelInk(in: light!).alphaComponent
+        #expect(abs(rest - own * ShelfHandleSpec.restStrength) < 0.001)
+        #expect(abs(full - own * ShelfHandleSpec.fillStrength) < 0.001)
     }
 }

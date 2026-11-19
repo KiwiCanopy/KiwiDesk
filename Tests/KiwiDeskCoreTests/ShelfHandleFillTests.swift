@@ -104,7 +104,10 @@ struct ShelfHandleFillTests {
         let view = view(spec)
         view.appearance = NSAppearance(named: .aqua)
         view.render(spec, animated: true)
-        let own: CGFloat = hex.isEmpty ? 1 : 128 / 255
+        let label = ShelfHandleSpec.labelInk(
+            in: NSAppearance(named: .aqua)!
+        )
+        let own: CGFloat = hex.isEmpty ? label.alphaComponent : 128 / 255
         let rest = try #require(view.core.layer?.backgroundColor?.alpha)
         let fill = try #require(view.fillLayer.backgroundColor?.alpha)
         #expect(abs(rest - own * ShelfHandleSpec.restStrength) < 0.01)

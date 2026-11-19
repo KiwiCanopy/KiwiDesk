@@ -74,8 +74,8 @@ struct ShelfHandleSpec: Equatable {
         shelf.resolvedHandleThickness
     }
     static let hairline: CGFloat = 0.5
-    /// The hairline's strength, constant through a fill.
-    static let hairlineStrength: CGFloat = 0.35
+    /// The hairline's strength, constant through a fill (#3514).
+    static let hairlineStrength: CGFloat = 0.2
     /// How far a grow reveal's origin grows past the handle on each
     /// side (`BarMotion.hoverPlate`).
     static let hoverGrowth: CGFloat = 3
@@ -85,20 +85,34 @@ struct ShelfHandleSpec: Equatable {
     /// Its distance from the screen side of the shelf's area: flush
     /// (#3361 ruling 2, kept by #3366).
     static let inset: CGFloat = 0
-    /// The handle's strength at rest (#3360 ruling 3).
-    static let restStrength: CGFloat = 0.38
-    /// The strength its progress fill takes (#3360 ruling 3).
-    static let fillStrength: CGFloat = 0.9
-    /// The handle's ink at `strength` (#3357, #3360): Automatic the
-    /// label ink at that alpha, a picked colour at its own alpha
-    /// times it, with no floor; resolved in the current drawing
+    /// The handle's strength at rest (#3360 ruling 3, #3514).
+    static let restStrength: CGFloat = 0.65
+    /// The strength its progress fill takes (#3360 ruling 3, #3514).
+    static let fillStrength: CGFloat = 1
+    /// The handle's ink at `strength` (#3357, #3360): its colour —
+    /// Automatic the label ink, else the picked one — at its own
+    /// alpha times `strength`, with no floor, so full strength is
+    /// never forced opaque (#3514); resolved in the drawing
     /// appearance.
     static func ink(hex: String, strength: CGFloat) -> NSColor {
         guard !hex.isEmpty else {
-            return .labelColor.withAlphaComponent(strength)
+            return NSColor(name: nil) { appearance in
+                let label = labelInk(in: appearance)
+                return label.withAlphaComponent(
+                    label.alphaComponent * strength
+                )
+            }
         }
         let picked = NSColor(kiwiHex: hex)
         return picked.withAlphaComponent(picked.alphaComponent * strength)
+    }
+    /// The label ink as `appearance` draws it, its own alpha kept.
+    static func labelInk(in appearance: NSAppearance) -> NSColor {
+        var label = NSColor.labelColor
+        appearance.performAsCurrentDrawingAppearance {
+            label = NSColor.labelColor.usingColorSpace(.sRGB) ?? label
+        }
+        return label
     }
     /// The ink at rest.
     static func restColor(hex: String) -> NSColor {
