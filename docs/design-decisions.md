@@ -9382,7 +9382,8 @@ row's title.
 **Amended with #3502: a twin is named by its position** (owner,
 2026-11-19). Where two connected screens share a name, every
 label names each by where it sits — "Twin (left)" and "Twin
-(right)", or above and below when stacked — in the words the
+(right)", "(middle)" between, above and below when stacked — in the
+words the
 Screens page and KiwiHub's Desktop headings use (#2756, #3496).
 The #2792 labels named twins "Main screen" / "Screen 2" by
 arrangement order, so one KiwiHub panel gave one screen two
@@ -20928,7 +20929,8 @@ follows its bar, so leaving it out loses nothing. The rows list the
 profile's screens, not the connected ones, since a profile names
 its own screens and an absent one is still part of it; connected
 screens come first and an absent one carries "not connected".
-Identical models share a fingerprint, and so share one row. A
+Identical models share a fingerprint, and so one row, unless macOS
+numbers their names (#3496). A
 bar row whose screens differ selects nothing and says so through
 its `?`, as Position does when the bars differ, and a drawer held
 open by what it shows greys its chevron. Readers that ask

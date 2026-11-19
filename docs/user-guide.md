@@ -471,9 +471,9 @@ chip is yours. Every chip is also a menu, which is the keyboard
 route ([Using Settings from the
 Keyboard](#using-settings-from-the-keyboard)).
 
-KiwiDesk recognises a screen by name and resolution, so two of
-the same model at the same resolution are one identity and a
-space pinned to one may open on either. A space pinned to an
+KiwiDesk recognises a screen by name and resolution; two of the
+same model are told apart as [Accepted
+limitations](accepted-limitations.md) describes. A space pinned to an
 absent screen gets its own card below the picture with **Back
 to automatic placement**.
 
