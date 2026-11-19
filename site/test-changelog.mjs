@@ -117,7 +117,9 @@ check("a release image that is no PNG fails the build", () => {
 
 check("a shipped release image is sized from public/", () => {
   const dir = new URL("./public/releases/", import.meta.url);
-  for (const name of readdirSync(dir)) {
+  const names = readdirSync(dir).filter((name) => name.endsWith(".png"));
+  assert(names.length > 0, "public/releases/ holds no image to size");
+  for (const name of names) {
     const picture = releaseImage(`/releases/${name}`);
     assert(picture.width > 0 && picture.height > 0, name);
   }
