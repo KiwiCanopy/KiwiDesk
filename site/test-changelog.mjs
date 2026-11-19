@@ -94,13 +94,25 @@ check("a release image is sized from its PNG header", () => {
 });
 
 check("a release image that is no PNG fails the build", () => {
-  let threw = false;
-  try {
-    pngSize(new TextEncoder().encode("GIF89a, not a png at all...."));
-  } catch {
-    threw = true;
+  const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  const ihdr = [0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52];
+  const size = [0, 0, 4, 56, 0, 0, 4, 56];
+  // Each half of the header check alone, so neither rescues the other.
+  for (const bytes of [
+    new TextEncoder().encode("GIF89a, not a png at all...."),
+    Uint8Array.from([...signature, 0, 0, 0, 13, 0x49, 0x44, 0x41, 0x54,
+      ...size]),
+    Uint8Array.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0, 0, ...ihdr,
+      ...size]),
+  ]) {
+    let threw = false;
+    try {
+      pngSize(bytes);
+    } catch {
+      threw = true;
+    }
+    assert(threw, `a non-PNG was sized: ${bytes.slice(0, 16)}`);
   }
-  assert(threw, "a non-PNG was sized");
 });
 
 check("a shipped release image is sized from public/", () => {

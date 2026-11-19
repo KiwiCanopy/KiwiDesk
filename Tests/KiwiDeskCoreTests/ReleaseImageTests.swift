@@ -219,6 +219,7 @@ struct ReleaseImageTests {
         )
         #expect(step.contains("scripts/changelog-sync"))
         #expect(step.contains("--image-line \"$VERSION\""))
+        #expect(step.contains("if [ -n \"$PICTURE\" ]; then"))
         #expect(step.contains("OPENING=(--notes \"$PICTURE\")"))
         let opening = try #require(step.range(of: "${OPENING[@]"))
         let generated = try #require(
