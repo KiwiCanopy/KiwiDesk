@@ -58,7 +58,13 @@ struct BarSliderBandTests {
         #expect(band.lowerBound == Double(core.lowerBound))
         #expect(band.upperBound == Double(core.upperBound))
         let declared = try declaration(of: "handleThickness")
-        #expect(declared.contains("KiwiShelf.handleThicknessRange"))
+        // Per edge: one derived edge must not stand in for both.
+        #expect(
+            declared.contains("KiwiShelf.handleThicknessRange.lowerBound")
+        )
+        #expect(
+            declared.contains("KiwiShelf.handleThicknessRange.upperBound")
+        )
     }
 
     @Test("the spring delay band is Core's range, by derivation")

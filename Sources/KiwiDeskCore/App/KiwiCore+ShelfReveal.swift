@@ -66,8 +66,8 @@ extension KiwiCore {
 
         /// Files one plan's hiding bars: an Auto bar's handle along
         /// its run and its approach, a `hidden` bar's target with no
-        /// approach. A hidden bar whose sibling on the edge shows
-        /// yields — its approach opens nothing, its handle standing
+        /// approach. A hidden bar whose sibling on the edge shows by
+        /// hover yields — its approach opens nothing, its handle standing
         /// aside — so the mouse opens one bar at a time (owner,
         /// 2026-10-19).
         @MainActor private mutating func fileEdge(
