@@ -3,15 +3,14 @@ import CoreGraphics
 /// How many steps a scroll makes (#1656, #1519, rulings
 /// 2026-09-29): a trackpad swipe one, as soon as its travel passes
 /// the latch's threshold — and with `longSwipes`, one every
-/// `length` mm of net finger travel, the first included, the latch
-/// its floor, each on the axis the point travel leads, so right,
-/// right, down is one movement and a wobble steps nothing (#1873 ▸
-/// Rulings 2026-11-15, 2026-11-16; #3482, #3505); a mouse wheel one
-/// per notch,
-/// except that a notch closer than `wheelQuiet` to the previous one
-/// in the same direction steps nothing, so notches clicked one at
-/// a time each step while a fast roll or a free spin steps once.
-/// The glide after a lift never counts. Pure.
+/// `length` mm of net finger travel, the first included, each on
+/// the axis the point travel leads, so right, right, down is one
+/// movement and a wobble steps nothing (#1873 ▸ Rulings 2026-11-15,
+/// 2026-11-16; #3482, #3505); a mouse wheel one per notch, except
+/// that a notch closer than `wheelQuiet` to the previous one in the
+/// same direction steps nothing, so notches clicked one at a time
+/// each step while a fast roll or a free spin steps once. The glide
+/// after a lift never counts. Pure.
 public struct ScrollStepMeter: Sendable {
     /// The notch quiet that re-arms a wheel, in seconds; a
     /// provisional number until a device logs notch intervals.
@@ -39,8 +38,7 @@ public struct ScrollStepMeter: Sendable {
     /// The finger reading last fed where the touch counts in mm,
     /// from its first reading; nil where it counts points.
     private var finger: TouchTravel.Reading?
-    /// The touch's unit, fixed from the latch's floor (`first`);
-    /// nil before.
+    /// The touch's unit, fixed once `first` settles it; nil before.
     private var countsMM: Bool?
     /// The axis the last step took.
     private var horizontal: Bool?
@@ -60,7 +58,7 @@ public struct ScrollStepMeter: Sendable {
     /// makes — positive where the delta's larger axis is positive.
     /// `reading` is the touch reader's running finger travel in mm
     /// (`TouchGestures.travel`), nil where none runs; the unit is
-    /// fixed at the latch's floor, so a touch never counts in two.
+    /// fixed once per touch, so a touch never counts in two.
     public mutating func feed(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading? = nil
@@ -107,14 +105,14 @@ public struct ScrollStepMeter: Sendable {
         return step(along: leads, distance: length * Self.pointsPerMM)
     }
 
-    /// The touch's first step, never before the latch's point floor
-    /// (#3482). From there the unit is fixed: a long swipe whose
-    /// finger reading moved since the begin counts mm and steps once
-    /// the finger has moved one `length`, a reading lost meanwhile
-    /// stepping nothing; no reading or no long swipes steps at the
-    /// floor and counts points; a reading that has not moved yet
-    /// waits for it up to one points stride, then counts points (a
-    /// Magic Mouse beside a pad, whose reading is the pad's).
+    /// The touch's first step, and the touch's unit, fixed for the
+    /// touch once settled. A long swipe whose reading's pad carries
+    /// the two fingers counts mm, its first step one `length` of net
+    /// finger travel with no point floor, however fast the points
+    /// ran (#3482, owner 2026-11-19), a reading lost meanwhile
+    /// stepping nothing. Any other touch steps at the latch's floor
+    /// and counts points: no reading, no long swipes, or a reading
+    /// whose pad carries no two fingers (a Magic Mouse beside a pad).
     private mutating func first(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading?
@@ -127,29 +125,19 @@ public struct ScrollStepMeter: Sendable {
             }
             finger = now
         }
-        guard let (leads, sign) = ScrollStepLatch.named(travel) else {
-            return 0
-        }
-        if countsMM == nil {
-            if !counts || reading == nil {
-                countsMM = false
-            } else if budget != .zero {
-                countsMM = true
-            } else if max(abs(travel.dx), abs(travel.dy))
-                < length * Self.pointsPerMM
-            {
-                // A reading a frame behind a fast flick: wait for it.
-                return 0
-            } else {
-                countsMM = false
-            }
+        if countsMM == nil, counts, reading?.touching == true {
+            countsMM = true
         }
         if countsMM == true {
             guard reading != nil else { return 0 }
-            let steps = mm(along: leads)
+            let steps = mm(along: abs(travel.dx) > abs(travel.dy))
             fired = steps != 0
             return steps
         }
+        guard let (leads, sign) = ScrollStepLatch.named(travel) else {
+            return 0
+        }
+        countsMM = false
         fired = true
         horizontal = leads
         finger = nil

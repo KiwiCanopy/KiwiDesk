@@ -18038,6 +18038,34 @@ half.
 :::
 
 :::unreleased
+*Amended* (owner, 2026-11-19, #3482, #3505): **in mm, the first
+step owes no point floor, and a touch with a live reading never
+falls back to points.** "It sucks if a quick swipe suddenly reacts
+quicker; especially with long swipes all steps should feel the
+same" (owner). Point travel grows with finger speed, so any point
+threshold — the 24 pt latch under the first step, or the points
+stride after which a reading that had not moved yet switched the
+touch to points — makes a fast swipe step sooner or count in the
+other unit. So a long swipe whose reading's pad carries the two
+fingers counts mm from its first event: every step, the first
+included, costs exactly one step length of net finger travel, and
+the touch waits for a reading a frame behind a fast flick rather
+than switching units. The 24 pt latch stays the whole rule where
+the steps count points: no reading, Long swipes off, or a reading
+whose pad carries no two fingers, which is how a Magic Mouse swipe
+beside a pad is told apart — explicitly, from the pad's own frame,
+not by waiting to see whether the reading moves. The first step's
+axis is the one the touch's net point travel leads at that moment.
+
+One finger held still while the other moves steps at half the
+rate: the frame's move is the two contacts' mean, the centroid's
+travel, so a step costs two lengths of the moving finger (owner,
+with ui-designer). That is accepted. Taking the smaller finger's
+move instead was refused: macOS scrolls with one finger still, so
+such a swipe would stall in mm while its points ran on.
+:::
+
+:::unreleased
 **Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
 no "Holding a modifier" group, and Long swipes is one setting at
 the Trackpad card's foot, never per binding.** A scroll with keys

@@ -119,6 +119,18 @@ struct TouchTravelTests {
         #expect(travel.reading?.source == sized?.source)
     }
 
+    /// A reading is touching only while its pad carries two
+    /// fingers: once they lift, a scroll is not the pad's (#3505).
+    @Test("touching follows the pad's own frame")
+    func touchingFollowsTheFrame() {
+        var travel = TouchTravel(generation: 1)
+        travel.feed(device: 1, contacts: two(0.2, 0.5), size: pad)
+        #expect(travel.reading?.touching == true)
+        travel.feed(device: 1, contacts: [], size: pad)
+        #expect(travel.reading?.touching == false)
+        #expect(travel.reading != nil)
+    }
+
     /// Two readers never share a source, so a rebuilt one's sum is
     /// never differenced against the last.
     @Test("each reader is its own source")

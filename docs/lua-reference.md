@@ -5685,7 +5685,8 @@ macOS's Scrolling speed does not change it. The travel is net:
 fingers moving back take it off again, so rocking or rolling
 them on the spot moves nothing. Where KiwiDesk reads
 no finger travel — no three- to five-finger tap or swipe is
-bound, or the trackpad reports no size — the first window comes
+bound, the trackpad reports no size, or the swipe is on a Magic
+Mouse — the first window comes
 after 24 pt of scroll and every 6 pt after it counts as 1 mm.
 :::
 
