@@ -16,7 +16,9 @@ import Testing
 struct TwinScreenWordsTests {
     private let size = "100x100"
 
-    private func model() -> SettingsModel {
+    private func model(
+        _ names: [String] = ["Twin (2)", "Twin (1)"]
+    ) -> SettingsModel {
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -25,7 +27,7 @@ struct TwinScreenWordsTests {
         for display in core.state.workspaces.allDisplays {
             core.state.workspaces.removeDisplay(display.id)
         }
-        for (index, name) in ["Twin (2)", "Twin (1)"].enumerated() {
+        for (index, name) in names.enumerated() {
             core.state.workspaces.upsertDisplay(
                 Display(
                     id: DisplayID(UInt32(index + 1)),
@@ -79,6 +81,21 @@ struct TwinScreenWordsTests {
         )
         // A disconnected screen keeps its fingerprint's name.
         #expect(model.setupLabel(["Twin:\(size)"]) == "Twin")
+    }
+
+    /// A pair macOS left unnumbered shares a name and a fingerprint,
+    /// so neither lookup can tell which twin is meant: both read
+    /// the shared name, never one twin's position for the other.
+    @Test("an unnumbered pair reads its name, no position")
+    func unnumberedPair() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let model = model(["DELL", "DELL"])
+        #expect(model.screenWords(named: "DELL") == "DELL")
+        #expect(
+            model.setupLabel(["DELL:\(size)", "DELL:\(size)"])
+                == "DELL and DELL"
+        )
     }
 
     @Test("the Maximize card's lines name the screen as Settings does")

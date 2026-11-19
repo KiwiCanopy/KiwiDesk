@@ -41,7 +41,7 @@ struct ScreenShiftState: Equatable {
         let positions = ScreenShiftPlan.namePositions(
             screens.map { (key: $0.id, name: $0.name, frame: $0.frame) }
         )
-        return ScreenShiftText.named(screen.name, at: positions[id])
+        return ScreenLabel.named(screen.name, at: positions[id])
     }
 }
 
@@ -176,9 +176,9 @@ extension SettingsModel {
         among displays: [Display]
     ) -> String {
         let positions = ScreenShiftPlan.namePositions(of: displays)
-        return ScreenShiftText.named(
-            display.name,
-            at: positions[display.id]
-        )
+        return ScreenLabel(
+            name: display.name,
+            twinPosition: positions[display.id]
+        ).displayName
     }
 }

@@ -79,7 +79,8 @@ struct LayoutStripGutterTests {
     }
 
     /// Under this Mac's scroller: a short window scrolls the page,
-    /// a tall one fits it, and the strip is as wide in both.
+    /// a tall one fits it, and the strip is as wide in both. Only a
+    /// legacy host can red it; the forced pair below reds anywhere.
     @Test("the strip is as wide whether the page scrolls or fits")
     func oneViewport() async {
         LocalizationManager.shared.select("en")

@@ -60,8 +60,8 @@ extension SettingsModel {
                 guard !sized else {
                     return "\(parts.name) (\(parts.size))"
                 }
-                return displays.first { $0.fingerprint == fingerprint }
-                    .map(screenLabel) ?? parts.name
+                return screenWords { $0.fingerprint == fingerprint }
+                    ?? parts.name
             }
         )
     }

@@ -50,8 +50,8 @@ extension SpaceScreenChoice {
             L("monitor_card.follows_main", "Follows main screen")
         case .screen(let fingerprint):
             // A connected twin reads by position (#3496).
-            model.displays.first { $0.fingerprint == fingerprint }
-                .map(model.screenLabel) ?? model.screenName(fingerprint)
+            model.screenWords { $0.fingerprint == fingerprint }
+                ?? model.screenName(fingerprint)
         }
     }
 
