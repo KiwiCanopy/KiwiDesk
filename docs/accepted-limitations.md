@@ -202,6 +202,23 @@ included. Leave the field first. No fix is planned
 ([#1871](https://github.com/KiwiCanopy/KiwiDesk/issues/1871)).
 :::
 
+:::unreleased
+A menu row — the quick menu, the bars' menus — shows **no
+shortcut** for a chord on the ✦ (Hyper) base or for a sided chord
+such as `Left⌘K`, and on ✦ the quick menu's overview and tiling
+rows stay without one. A menu's shortcut column draws
+only ⌃⌥⇧⌘ and one key, and a menu has no side: ✦ is KiwiDesk's own
+key, remapped to F18 ([#1870](https://github.com/KiwiCanopy/KiwiDesk/issues/1870)),
+so `⌃⌥⇧⌘O` would show a chord that does not fire, and `⌘K` would
+promise the right ⌘ too ([#2601](https://github.com/KiwiCanopy/KiwiDesk/issues/2601)).
+Text drawn after the row's title cannot line up with that column,
+so the menu shows nothing rather than a key that does not fire
+(`KeyCombo.drawsInMenu`, which `applyMenuEquivalent` and
+`isPressed(by:)` read; [#3470](https://github.com/KiwiCanopy/KiwiDesk/issues/3470)).
+KiwiHub's Shortcuts side and Settings ▸ Shortcuts show every chord,
+✦ and sides included.
+:::
+
 With **Displays have separate Spaces** off, a `move_to_desktop` that
 sends a window to another screen answers before the window moves,
 since the move waits for its frame to be written first. If the app
