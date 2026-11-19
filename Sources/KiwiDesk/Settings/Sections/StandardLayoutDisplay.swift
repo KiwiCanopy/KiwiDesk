@@ -31,14 +31,3 @@ extension StandardLayout {
     return StandardProfiles.workflows.first { $0.name == name }?
         .displayName ?? name
 }
-
-/// Positional screen name: 0 is main screen, rest are numbered (#789, #859).
-@MainActor func presetScreenName(_ screen: Int) -> String {
-    screen == 0
-        ? L("presets.screen_name.main", "Main screen")
-        : L(
-            "presets.screen_name.numbered",
-            "Screen %1$d",
-            screen + 1
-        )
-}

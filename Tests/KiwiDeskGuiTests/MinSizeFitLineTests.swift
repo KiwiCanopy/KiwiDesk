@@ -30,8 +30,8 @@ struct MinSizeFitLineTests {
     func sentences() {
         LocalizationManager.shared.select("en")
         let studio = ScreenLabel(name: "Studio")
-        // A twin is named by its place, never by the shared name.
-        let twin = ScreenLabel(name: "Studio", twinPlace: 1)
+        // A twin is named by its position, never by the shared name.
+        let twin = ScreenLabel(name: "Studio", twinPosition: .right)
         let twinName = twin.displayName
         #expect(twinName != "Studio")
         #expect(

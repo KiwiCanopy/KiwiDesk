@@ -1988,8 +1988,6 @@
   "presets.focus.name": "Fokus",
   "presets.for_your.many": "Für deine %1$d Bildschirme",
   "presets.for_your.one": "Für deinen 1 Bildschirm",
-  "presets.screen_name.main": "Hauptbildschirm",
-  "presets.screen_name.numbered": "Bildschirm %1$d",
   "presets.starter.shape.laptop": "Laptop",
   "presets.starter.shape.portrait": "Hochformat",
   "presets.starter.shape.super_ultrawide": "Super-Ultrawide",

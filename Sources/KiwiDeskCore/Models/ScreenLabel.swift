@@ -1,16 +1,17 @@
 import Foundation
 
 /// A screen as a label names it (#2792): its own name, and its
-/// place where another connected screen shares that name — its
-/// index in `PositionalDisplays.ordered` — which the GUI narrates
-/// as "Main screen" / "Screen 2" (#96).
+/// position where another connected screen shares that name
+/// (`ScreenShiftPlan.namePositions`), which the GUI words as
+/// "Twin (left)" — twins are named by position everywhere
+/// (#3502).
 public struct ScreenLabel: Sendable, Equatable {
     public let name: String
     /// Nil while the name is unique among the connected screens.
-    public let twinPlace: Int?
+    public let twinPosition: ScreenNamePosition?
 
-    public init(name: String, twinPlace: Int? = nil) {
+    public init(name: String, twinPosition: ScreenNamePosition? = nil) {
         self.name = name
-        self.twinPlace = twinPlace
+        self.twinPosition = twinPosition
     }
 }

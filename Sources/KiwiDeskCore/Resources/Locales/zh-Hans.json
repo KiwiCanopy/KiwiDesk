@@ -1988,8 +1988,6 @@
   "presets.focus.name": "焦点",
   "presets.for_your.many": "适合你的 %1$d 台显示器",
   "presets.for_your.one": "适合你的 1 台显示器",
-  "presets.screen_name.main": "主显示器",
-  "presets.screen_name.numbered": "显示器 %1$d",
   "presets.starter.shape.laptop": "笔记本电脑",
   "presets.starter.shape.portrait": "竖屏",
   "presets.starter.shape.super_ultrawide": "超级超宽屏",
