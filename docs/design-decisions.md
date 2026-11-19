@@ -18023,24 +18023,24 @@ still ran on added path walked, not ground covered, and steps
 came early — most on a vertical swipe with the fingers placed
 diagonally (owner, at 6 and 8 mm). Now a move back subtracts.
 The direction rule of the 2026-11-16 amendment stands in a
-different form: the point deltas still name each step's sign,
-through one reading per pad axis per touch (`PadFacing`), taken
-once that axis's net point travel passes the latch's 24 pt beside
-at least 1 mm of net finger travel. Natural scrolling, macOS's
-and KiwiDesk's, flips the point deltas and never the pad, and
-within a touch it cannot change, so one reading carries it for
-the whole touch; a net that far is a movement, never a wobble.
-An axis not yet read steps nothing. A reversal still steps back
-once the net travel back covers the remainder and a length. The
-two fingers' mean move stays the frame's move: it already counts
-two fingers moving together once, and one finger moving alone
-half.
+different form: a step's sign is still the one Natural scrolling
+named, now taken from the convention the point deltas arrive in —
+the hand's own motion, y growing down, reversed whole where
+KiwiDesk's Natural scrolling is off (`ScrollStepMeter.pointWay`,
+the convention `GestureMotionLatch` reads directions in) — and
+never from a frame's point delta, whose sign a lag or a rock can
+flip. Learning the way from the deltas was refused: an early
+rock or a drift on the minor axis could teach it backwards for
+the whole touch. A reversal still steps back once the net travel
+back covers the remainder and a length.
 :::
 
 :::unreleased
 *Amended* (owner, 2026-11-19, #3482, #3505): **in mm, the first
 step owes no point floor, and a touch with a live reading never
-falls back to points.** "It sucks if a quick swipe suddenly reacts
+falls back to points** — retiring the #3482 amendment's latch
+floor under the first step and its wait of up to one points
+stride. "It sucks if a quick swipe suddenly reacts
 quicker; especially with long swipes all steps should feel the
 same" (owner). Point travel grows with finger speed, so any point
 threshold — the 24 pt latch under the first step, or the points
@@ -18218,8 +18218,9 @@ finger count changes, so a lifting finger's jump of the centre is
 no flick, and the flick
 distance stays above the tap's 4%, so a tap rolling one way still
 taps. The values are fixed: no macOS preference scales touch
-travel, the same reason a long swipe's step length has no row
-(*Amended (#1873, owner 2026-11-16)*, above).
+travel, the same reason a long swipe's step length is a feel
+knob rather than a per-Mac scale (the #3505 Step length
+amendment, above).
 The Dock's own stream is not read for the verdict: it exists for
 the Dock's axes alone, never for five fingers. And no gauge shows
 a swipe's progress, since the step it fires is its own feedback.

@@ -19,8 +19,7 @@ public struct ScrollStepMeter: Sendable {
     static let wheelQuiet = 0.12
 
     /// The fallback's rate: point travel per mm of `length` where
-    /// no finger reading exists (#1873 ▸ Ruling 2026-11-16), so 10 mm
-    /// counts 60 pt, the old default.
+    /// no finger reading exists (#1873 ▸ Ruling 2026-11-16).
     public static let pointsPerMM = 6.0
 
     private let longSwipes: Bool
@@ -31,10 +30,9 @@ public struct ScrollStepMeter: Sendable {
     /// every step, in either unit.
     private var travel = CGVector.zero
     /// The step budget, both axes, the step's remainder kept: net
-    /// finger mm on the pad's axes, or the point delta.
+    /// finger mm turned the point deltas' way (`pointWay`), or the
+    /// point delta.
     private var budget = CGVector.zero
-    /// How the pad's axes map onto the point deltas, this touch.
-    private var facing = PadFacing()
     /// The finger reading last fed where the touch counts in mm,
     /// from its first reading; nil where it counts points.
     private var finger: TouchTravel.Reading?
@@ -74,7 +72,6 @@ public struct ScrollStepMeter: Sendable {
             fired = false
             travel = .zero
             budget = .zero
-            facing = PadFacing()
             countsMM = nil
             // A long swipe's mm origin is the reading at its begin.
             finger =
@@ -86,7 +83,6 @@ public struct ScrollStepMeter: Sendable {
         }
         travel.dx += event.delta.dx
         travel.dy += event.delta.dy
-        facing.add(points: event.delta)
         guard fired else { return first(event, reading: reading) }
         guard longSwipes else { return 0 }
         if let last = finger {
@@ -95,9 +91,11 @@ public struct ScrollStepMeter: Sendable {
             // reader, another pad) re-bases without a move.
             guard let now = reading else { return 0 }
             finger = now
-            if now.source == last.source { add(from: last, to: now) }
+            if now.source == last.source {
+                add(from: last, to: now, reversed: event.reversed)
+            }
             let leads = abs(travel.dx) > abs(travel.dy)
-            return mm(along: leads)
+            return step(along: leads, distance: length)
         }
         budget.dx += event.delta.dx
         budget.dy += event.delta.dy
@@ -121,7 +119,7 @@ public struct ScrollStepMeter: Sendable {
         if counts, let now = reading {
             // The origin is the touch's first reading.
             if let last = finger, now.source == last.source {
-                add(from: last, to: now)
+                add(from: last, to: now, reversed: event.reversed)
             }
             finger = now
         }
@@ -130,7 +128,10 @@ public struct ScrollStepMeter: Sendable {
         }
         if countsMM == true {
             guard reading != nil else { return 0 }
-            let steps = mm(along: abs(travel.dx) > abs(travel.dy))
+            let steps = step(
+                along: abs(travel.dx) > abs(travel.dy),
+                distance: length
+            )
             fired = steps != 0
             return steps
         }
@@ -147,43 +148,45 @@ public struct ScrollStepMeter: Sendable {
     }
 
     /// Adds the finger move between two readings of one source to
-    /// the budget, signed as the pad moved, so a move back subtracts.
+    /// the budget, net and signed as the pad moved, so a move back
+    /// subtracts (#3505).
     private mutating func add(
         from last: TouchTravel.Reading,
-        to now: TouchTravel.Reading
+        to now: TouchTravel.Reading,
+        reversed: Bool
     ) {
-        let move = CGVector(
-            dx: now.sum.dx - last.sum.dx,
-            dy: now.sum.dy - last.sum.dy
+        let move = Self.pointWay(
+            CGVector(
+                dx: now.sum.dx - last.sum.dx,
+                dy: now.sum.dy - last.sum.dy
+            ),
+            reversed: reversed
         )
         budget.dx += move.dx
         budget.dy += move.dy
-        facing.add(finger: move)
     }
 
-    /// The steps the mm budget holds along the leading axis, turned
-    /// the point deltas' way by `facing`, so the step's sign is the
-    /// direction Natural scrolling named; none while the axis's way
-    /// is unread.
-    private mutating func mm(along leads: Bool) -> Int {
-        guard let way = facing.way(horizontal: leads) else { return 0 }
-        return step(along: leads, distance: length, way: way)
+    /// A pad move (x right, y up) the way the point deltas run: they
+    /// reach the meter in Natural scrolling's convention, the hand's
+    /// own motion with y growing down (`ScrollGestureEvent.hand`,
+    /// read so by `GestureMotionLatch`), reversed whole where Natural
+    /// scrolling is off. So a step's sign is the direction Natural
+    /// scrolling named, never a frame's point delta (#3505).
+    static func pointWay(_ move: CGVector, reversed: Bool) -> CGVector {
+        let way: Double = reversed ? -1 : 1
+        return CGVector(dx: move.dx * way, dy: -move.dy * way)
     }
 
     /// The steps `budget` holds along the leading axis at
-    /// `distance` apiece, the budget's sign multiplied by `way`. The
-    /// step's axis keeps its remainder; the other starts over, and
-    /// the axis is decided afresh by the travel after it.
-    private mutating func step(
-        along leads: Bool,
-        distance: Double,
-        way: Double = 1
-    ) -> Int {
-        let run = (leads ? budget.dx : budget.dy) * way
+    /// `distance` apiece. The step's axis keeps its remainder; the
+    /// other starts over, and the axis is decided afresh by the
+    /// travel after it.
+    private mutating func step(along leads: Bool, distance: Double) -> Int {
+        let run = leads ? budget.dx : budget.dy
         let steps = Int(run / distance)
         guard steps != 0 else { return 0 }
         horizontal = leads
-        let rest = (run - Double(steps) * distance) * way
+        let rest = run - Double(steps) * distance
         budget = leads ? CGVector(dx: rest, dy: 0) : CGVector(dx: 0, dy: rest)
         travel = .zero
         return steps

@@ -836,7 +836,7 @@ every lens with why it cannot turn on.
 :::unreleased
 `scroll_gesture.set_step_distance` is retired and fails, naming
 its replacement: `scroll_gesture.set_step_length` takes mm (3–60,
-default 10), the finger travel per extra window of a long swipe
+default 6), the finger travel per extra window of a long swipe
 ([`scroll_gesture.set_step_length`](lua-reference.md#scroll_gestureset_step_length)).
 :::
 

@@ -2409,7 +2409,7 @@
   "shortcuts.gestures.scroll.natural_spoken": "%1$@、%2$@",
   "shortcuts.gestures.scroll.natural_system": "システム",
   "shortcuts.gestures.scroll.pan": "ウインドウ間をスクロール",
-  "shortcuts.gestures.scroll.step_length": "刻み幅",
+  "shortcuts.gestures.scroll.step_length": "ステップの長さ",
   "shortcuts.gestures.scroll.step_length.default": "デフォルト",
   "shortcuts.gestures.scroll.step_length.long": "長い",
   "shortcuts.gestures.scroll.step_length.longer": "より長い",

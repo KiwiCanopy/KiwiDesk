@@ -24,7 +24,7 @@ struct SettingsSlider: View {
     /// spoken value says which way. `lightness` draws its own.
     var ends: (leading: String, trailing: String)? = nil
     /// A value marked on the track without an origin's signed fill
-    /// (a default); nil marks nothing.
+    /// (a default); nil marks nothing. An `origin` takes its place.
     var tick: Double? = nil
     /// What an arrow key or a VoiceOver adjust moves by where the
     /// drag is continuous (`step` 0); nil takes `step`.

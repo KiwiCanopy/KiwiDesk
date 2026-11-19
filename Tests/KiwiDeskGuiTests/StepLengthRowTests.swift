@@ -47,6 +47,15 @@ struct StepLengthRowTests {
         }
     }
 
+    /// A value Lua set past the span stays while the knob rests at
+    /// that end: "Longer" never shortens 40 mm to 20.
+    @Test("a value past the span survives a press at its end")
+    func pastTheSpanIsKept() {
+        #expect(StepLengthScale.keeps(40, at: 1))
+        #expect(!StepLengthScale.keeps(40, at: 0.9))
+        #expect(!StepLengthScale.keeps(12, at: 1))
+    }
+
     /// Near the default's tick a drag lands on the default exactly;
     /// past the snap it does not.
     @Test("a drag near the tick snaps onto the default")
@@ -88,7 +97,9 @@ struct StepLengthRowTests {
         #expect(
             row.contains(".inertReason(for:.shortcuts(.scrollStepLength))")
         )
-        #expect(row.contains(".modifier(GreyOut(active:reason!=nil"))
+        #expect(
+            row.contains(".modifier(GreyOut(active:reason!=nil,help:help))")
+        )
         #expect(
             row.contains(
                 "model.config.scrollGesture.stepLength="

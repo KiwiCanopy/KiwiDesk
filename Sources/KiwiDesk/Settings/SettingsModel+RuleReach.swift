@@ -294,6 +294,8 @@ extension SettingsModel {
         sidecar.scrollGesture = reach.scrollGestures.scrollGestureBase(
             original: reach.storedScrollBase
         )
+        // Global only, outside the reach table: the draft's (#3505).
+        sidecar.scrollGesture.stepLength = config.scrollGesture.stepLength
         sidecar.gesture = reach.gestures.gestureBase(
             original: reach.storedGestureBase,
             shortcutBase: reach.gestureShortcutBase

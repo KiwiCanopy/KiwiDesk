@@ -5804,8 +5804,7 @@ outside 3–60 is clamped to the range. In the
 Settings app the first two are under **Shortcuts ▸ Mouse &
 Trackpad**, where each row's **Applies to** checklist writes the
 base or chosen profiles' overrides; `step_length` is the
-**Step length** slider below Long swipes, which spans 3–20 mm
-and writes `gui.json` alone. A
+**Step length** slider below Long swipes, which spans 3–20 mm. A
 stored `step_distance` is removed when the file loads.
 
 The verbs below change the running base only: a profile's own

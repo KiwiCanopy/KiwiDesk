@@ -63,15 +63,16 @@ struct ScrollStepMeterFingerTests {
         #expect(fastSteps == 2)
     }
 
-    /// The pad's own axes are never flipped: the sign is the point
-    /// deltas' way, which has had Natural scrolling's one flip
-    /// (#3505 reads it once per touch).
-    @Test("the sign is the point deltas' way")
-    func signFollowsThePoints() {
+    /// The pad's own axes are never flipped: the sign follows
+    /// Natural scrolling's one flip, carried on the event (#3505).
+    @Test("the sign follows Natural scrolling")
+    func signFollowsNatural() {
         var meter = ScrollStepMeter(longSwipes: true, length: length)
         _ = meter.feed(event(.began), reading: on(0))
         // Fingers right on the pad, content reversed by Natural off.
-        #expect(meter.feed(event(.changed, dx: -40), reading: on(12)) == -1)
+        var right = event(.changed, dx: -40)
+        right.reversed = true
+        #expect(meter.feed(right, reading: on(12)) == -1)
     }
 
     /// The axis is the point travel's: a vertical finger reading

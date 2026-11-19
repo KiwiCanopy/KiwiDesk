@@ -116,23 +116,26 @@ editing here:
     no unit arithmetic of its own. Finger mm sets only a long
     swipe's step budget, NET as the pad moved, so a move back
     subtracts (#3505): never take a step's axis from the reading,
-    and turn each pad axis the point deltas' way through one
-    reading per touch (`PadFacing`), never per frame, since the
-    point delta carries Natural scrolling's one flip and the
-    pad's axes do not (`ScrollStepMeterNetTravelTests`). A long
-    swipe's first step costs exactly a step length too, with no
-    point floor: a point threshold makes a fast swipe step sooner
+    and turn a pad move the point deltas' way through the one
+    `ScrollStepMeter.pointWay`, read off the event's `reversed`,
+    never off a frame's point delta, since the point delta
+    carries Natural scrolling's one flip and the pad's axes do not
+    (`ScrollStepMeterNetTravelTests` ▸ `wayMatchesTheLatch` holds
+    it to `GestureMotionLatch`'s convention). A long swipe's first
+    step costs exactly a step length too, with no point floor
     (#3482, owner 2026-11-19). Fix a touch's unit once: mm while
     the reading's pad carries the two fingers
     (`TouchTravel.Reading.touching`), never switching to points
     however fast the points outrun the reading, and a reading lost
     after that steps nothing; points at the latch's floor for a
     touch with no reading, with Long swipes off, or whose reading's
-    pad is not touched (a Magic Mouse beside a pad), counting at
+    pad carries no two fingers (a Magic Mouse beside a pad),
+    counting at
     `ScrollStepMeter.pointsPerMM` (`ScrollStepMeterFingerTests`;
     a second meeting place is review's). The argument is
     `docs/design-decisions.md` ▸ *Amended (#1873, owner
-    2026-11-16)* and its #3482 amendment.
+    2026-11-16)*, its #3482 amendment and the #3505 amendments
+    after it.
   - **On the two-finger path a split's axis family runs through
     the whole family's runner** — the pan or the Space step — for
     that gesture, chosen once the travel names its axis, never a

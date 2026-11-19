@@ -62,6 +62,8 @@ struct GestureStepLengthRow: View {
                 )
             },
             set: {
+                let stored = model.config.scrollGesture.stepLength
+                guard !StepLengthScale.keeps(stored, at: $0) else { return }
                 model.config.scrollGesture.stepLength =
                     StepLengthScale.length(at: $0)
             }

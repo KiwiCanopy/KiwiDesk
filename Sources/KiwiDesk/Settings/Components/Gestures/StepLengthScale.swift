@@ -30,6 +30,14 @@ enum StepLengthScale {
             / log(range.upperBound / range.lowerBound)
     }
 
+    /// Whether a move to `position` leaves `stored` as it is: a value
+    /// Lua set past the span, pinned to its end, stays until the knob
+    /// leaves that end, so a press toward it never shortens it.
+    static func keeps(_ stored: Double, at position: Double) -> Bool {
+        (stored > range.upperBound && position >= 1)
+            || (stored < range.lowerBound && position <= 0)
+    }
+
     /// The mm a track position stores: snapped onto the default
     /// when near it, else rounded to 0.1 mm.
     static func length(at position: Double) -> Double {
