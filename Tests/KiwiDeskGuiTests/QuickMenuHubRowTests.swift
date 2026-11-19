@@ -58,7 +58,7 @@ struct QuickMenuHubRowTests {
 
     /// Ruling 8: the switches move to KiwiHub's View side; the menu
     /// keeps its warnings, Settings, What's New, Updates and Quit.
-    /// Open KiwiHub… left too: its key is a tap no menu draws.
+    /// Open KiwiHub… left too: the menu keeps only rows that show a key.
     @Test("one KiwiHub row stands in for the switch rows")
     func hubRowReplacesSwitches() {
         reset()
