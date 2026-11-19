@@ -1127,6 +1127,38 @@ release introduced, re-vendoring a font, wiring the release
 pipeline: real work, and none of it a change the reader
 experiences.
 
+### A release carries at most one image
+
+**[Rationale]**
+
+A release may carry ONE picture, the square social card, kept at
+`site/public/releases/<version>.png` and committed to `main`
+before the cut (owner ruling 2026-11-19). It shows in three
+places: at the top of the release's entry on the changelog page,
+as the image of the Discord post, and as the first line of the
+GitHub release page. The site serves the one file to all three,
+so a picture is never stored twice and never hot-linked from
+somewhere that can move.
+
+The update window stays text-only. A reader there has already
+decided to update, and the window is what they read while
+deciding whether to restart now; a marketing card in it is noise.
+That is why the picture never reaches the feed: `appcast-sync`
+copies named keys only, and the site gate fails a feed that names
+an image.
+
+One image and no more, because each surface has room for exactly
+one: Discord shows one embed image, and a gallery on a changelog
+entry would push the notes below the fold. The portrait cut for
+other networks stays outside this repository.
+
+On the GitHub release page the picture is a line ABOVE
+`## Highlights`, where the sponsor paragraph also sits, so the
+parser that holds the notes' grammar never reads it. A body that
+lost the line is warned about at sync time, never refused: a
+missing picture is a cosmetic gap, and refusing would hold back
+the update feed for it.
+
 ### The API describes itself, and its enums are read not typed
 
 **[Principle]**

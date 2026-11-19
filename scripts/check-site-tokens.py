@@ -82,6 +82,11 @@ count in this sentence for the next author to falsify.
    prefix is noindex and in no sitemap. Both paths are permanent,
    so they are pinned here by name.
 
+14. Every release image `changelog.json` names is served, and each
+   changelog page draws it with its size, alt and lazy load; the
+   update feed carries none, since Sparkle stays text-only
+   (owner ruling 2026-11-19).
+
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
 two role-mapping stylesheets by hand; add any future consumer there.
@@ -1489,6 +1494,53 @@ def check_typed_changelog(dist: pathlib.Path) -> None:
     )
 
 
+def check_release_images(dist: pathlib.Path) -> None:
+    """Item 14. Vacuous until a synced entry carries `image`."""
+    feed = dist / "appcast.xml"
+    # The GitHub asset URLs share the `/releases/` segment.
+    if feed.is_file() and re.search(
+        r"/releases/[^\s\"'<>/]+\.png", feed.read_text("utf-8")
+    ):
+        fail("release images: appcast.xml names a release image")
+    data = json.loads(
+        (REPO / "site" / "src" / "data" / "changelog.json")
+        .read_text(encoding="utf-8")
+    )
+    imaged = [
+        entry
+        for entry in data.get("releases", [])
+        if entry.get("image")
+    ]
+    pages = [
+        dist / "changelog" / "index.html",
+        dist / "de" / "changelog" / "index.html",
+        dist / "ja" / "changelog" / "index.html",
+    ]
+    for entry in imaged:
+        route = entry["image"]
+        if not (dist / route.lstrip("/")).is_file():
+            fail(f"release images: {route} is not in the build")
+        for page in pages:
+            html = page.read_text(encoding="utf-8")
+            tags = [
+                tag
+                for tag in re.findall(r"<img\b[^>]*>", html)
+                if f'src="{route}"' in tag
+            ]
+            want = (
+                f'alt="KiwiDesk {entry["version"]}"',
+                'loading="lazy"',
+                "width=",
+                "height=",
+            )
+            if len(tags) != 1 or not all(w in tags[0] for w in want):
+                fail(
+                    f"release images: {entry['tag']} on {page} does "
+                    "not draw its image once, sized, lazy, with alt"
+                )
+    print(f"release images: {len(imaged)} release(s) carry an image")
+
+
 def check_roadmap_feed(dist: pathlib.Path) -> None:
     """The What's new window's "Next on my list" is served beside
     the appcast, in a format the app reads (#1813).
@@ -2392,6 +2444,7 @@ def main() -> None:
     check_markdown_pipeline(dist)
     check_unreleased_markers(dist)
     check_typed_changelog(dist)
+    check_release_images(dist)
     check_roadmap_feed(dist)
     check_llms_txt(dist)
     check_raster_favicon(dist)

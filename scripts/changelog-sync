@@ -38,6 +38,16 @@ Three modes, and the difference between them is the guard:
         Print the setting ids a spotlight row may name (#2038),
         with no build.
 
+    scripts/changelog-sync --image-line <version>
+        Print the release page's image line when
+        `site/public/releases/<version>.png` exists, else nothing
+        — what `release.yml` puts first on the draft.
+
+A release MAY carry one image, `site/public/releases/<version>.png`,
+on `main` before the cut: the entry then gains `image`, the site
+route the page and `discord-announce` show it from. The feed never
+carries it (`appcast-sync` copies named keys only).
+
 Why a parser is the guard rather than a template: a template is a
 suggestion and drifts on the release someone is in a hurry for,
 while the page cannot render a body it cannot read.
@@ -59,6 +69,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "site" / "src" / "data" / "changelog.json"
+
+# A release's one image (owner ruling 2026-11-19): read from the
+# working tree, which is the `main` the sync checks out and the
+# site deploys, so the file must land before the sync runs.
+IMAGES_DIR = ROOT / "site" / "public" / "releases"
+IMAGE_ROUTE = "/releases/"
+# The deployed site, as `release-announce.yml`'s feed wait and
+# `build-app.sh`'s `SUFeedURL` name it (`ReleaseImageTests`).
+SITE_ORIGIN = "https://kiwidesk.kiwicanopy.com"
 
 # The level-2 heading that opens the curated block. Everything
 # from here to the NEXT level-2 heading (or the end) is the part a
@@ -983,8 +1002,28 @@ def download_url(release: dict) -> str | None:
     return found[0]
 
 
+def release_image(version: str, images: Path | None = None) -> str | None:
+    """The site route of `version`'s image, or None when the tree
+    carries none. `images` is the guard suite's seam."""
+    name = f"{version}.png"
+    if ((images or IMAGES_DIR) / name).is_file():
+        return f"{IMAGE_ROUTE}{name}"
+    return None
+
+
+def image_line(version: str, images: Path | None = None) -> str | None:
+    """The markdown line a release page opens with, or None."""
+    route = release_image(version, images)
+    if route is None:
+        return None
+    return f"![KiwiDesk {version}]({SITE_ORIGIN}{route})"
+
+
 def build_entry(
-    release: dict, strict: bool, census: Census | None = None
+    release: dict,
+    strict: bool,
+    census: Census | None = None,
+    images: Path | None = None,
 ) -> tuple[dict, str]:
     """Returns (entry, warning). In non-strict mode a body the
     parser refuses yields an entry WITHOUT a curated block plus a
@@ -1016,6 +1055,9 @@ def build_entry(
     download = download_url(release)
     if download:
         entry["download"] = download
+    image = release_image(entry["version"], images)
+    if image:
+        entry["image"] = image
     # `census` marks a publication check (`--release`), held to
     # the tag's own list; `--all` re-reads history, which a later
     # rename must not strip of its block — the window drops a link
@@ -1135,6 +1177,14 @@ def read_existing() -> list[dict]:
     return list(entries)
 
 
+def image_opens(body: str, line: str) -> bool:
+    """Whether the body's first non-blank line is `line`."""
+    for text in body.replace("\r\n", "\n").split("\n"):
+        if text.strip():
+            return text.strip() == line
+    return False
+
+
 def _report(error: NotesError) -> int:
     print(
         f"changelog-sync: FAILED — {error.tag}'s body does not "
@@ -1199,12 +1249,15 @@ def run_all(
     check: bool,
     releases: str | None = None,
     output: str | None = None,
+    images: Path | None = None,
 ) -> int:
     entries: list[dict] = []
     warnings: list[str] = []
     for release in fetch_releases(releases):
         try:
-            entry, warning = build_entry(release, strict=False)
+            entry, warning = build_entry(
+                release, strict=False, images=images
+            )
         except NotesError as error:
             return _report(error)
         if entry.get("summary") or entry.get("sections"):
@@ -1237,6 +1290,7 @@ def run_release(
     releases: str | None = None,
     output: str | None = None,
     census: str | None = None,
+    images: Path | None = None,
 ) -> int:
     """One published release, merged into the committed file.
 
@@ -1249,14 +1303,24 @@ def run_release(
     a `--notes`-style seam before writing a suite that drives
     this mode; asserting on its stdout today would be asserting
     on the repository's own release history."""
+    release = fetch_release(tag, releases)
     try:
         entry, _ = build_entry(
-            fetch_release(tag, releases),
+            release,
             strict=True,
             census=Census(path=census) if census else Census(ref=tag),
+            images=images,
         )
     except NotesError as error:
         return _report(error)
+    line = image_line(entry["version"], images)
+    if line and not image_opens(release.get("body") or "", line):
+        print(
+            f"changelog-sync: WARNING — {tag} has an image, and its "
+            f"body does not open with it. Make the first line:\n"
+            f"    {line}",
+            file=sys.stderr,
+        )
     if check:
         print(f"changelog-sync --check: OK — {tag} parses.")
         return 0
@@ -1295,6 +1359,13 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="print every setting id a spotlight row's "
         "`{setting:…}` may name, one per line — no build",
+    )
+    group.add_argument(
+        "--image-line",
+        metavar="VERSION",
+        help="print the release page's opening image line when "
+        "the tree carries site/public/releases/VERSION.png, else "
+        "nothing",
     )
     group.add_argument(
         "--release",
@@ -1338,7 +1409,14 @@ def main(argv: list[str]) -> int:
         "site/src/data/changelog.json; `-` is stdout, and then "
         "stdout carries the document and nothing else",
     )
+    parser.add_argument(
+        "--images",
+        metavar="DIR",
+        help="read release images from DIR instead of "
+        "site/public/releases",
+    )
     args = parser.parse_args(argv[1:])
+    images = Path(args.images) if args.images else None
 
     # `--release` merges into the committed file, and that read
     # has no seam of its own, so a fixture-driven run without an
@@ -1361,6 +1439,11 @@ def main(argv: list[str]) -> int:
             f"--tag {args.tag!r} carries no version; give the "
             "tag the release will have, e.g. v2.0.0"
         )
+    if args.image_line:
+        line = image_line(args.image_line, images)
+        if line:
+            print(line)
+        return 0
     if args.census_ids:
         for census_id in sorted(Census(path=args.census).ids()):
             print(census_id)
@@ -1368,9 +1451,14 @@ def main(argv: list[str]) -> int:
     if args.body:
         return run_body(args.body, args.tag, args.census)
     if args.all:
-        return run_all(args.check, args.releases, args.output)
+        return run_all(args.check, args.releases, args.output, images)
     return run_release(
-        args.release, args.check, args.releases, args.output, args.census
+        args.release,
+        args.check,
+        args.releases,
+        args.output,
+        args.census,
+        images,
     )
 
 

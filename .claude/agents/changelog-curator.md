@@ -113,6 +113,8 @@ reaches people who did not ask to read anything.
    spotlight*.
 6. **Carry the sponsor paragraph above the block**, verbatim
    from the previous release's body (`gh release view <tag>`),
+   and above it the line `scripts/changelog-sync --image-line
+   <version>` prints, when it prints one,
    so the whole draft pastes as the release body;
    `packaging-and-release.md` owns the body's shape and where
    the paragraph reaches.

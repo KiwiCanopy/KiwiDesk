@@ -579,6 +579,14 @@ decides which of the two names a finished image gets, and
 `UnnotarizedSuffixParityTests` is the one authority holding every
 reader to it.
 
+**A release's `image` is a route under `public/releases/`, read
+off the tree by `changelog-sync`, never typed into the data.**
+The page sizes it from the file's own PNG header
+(`src/lib/release-image.ts`), so the build fails on a route
+whose file is gone rather than shipping a broken picture, and
+`scripts/check-site-tokens.py` ▸ `check_release_images` holds the
+built pages to drawing it and the feed to carrying none.
+
 **A path joins `sitemap.xml.ts`'s `paths` only once its `/de/` and
 `/ja/` routes exist.** Every entry there is emitted for all three
 locales with `hreflang` alternates, so a single-locale route

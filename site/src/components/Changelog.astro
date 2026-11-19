@@ -40,6 +40,7 @@ import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import changelog from "../data/changelog.json";
 import { downloadHref, downloadVersion } from "../lib/download";
+import { releaseImage } from "../lib/release-image";
 import { ogCard } from "../lib/ogCard";
 
 interface Props {
@@ -64,6 +65,7 @@ interface Release {
   prerelease: boolean;
   url: string;
   download?: string;
+  image?: string;
   summary?: string;
   heads?: string;
   sections?: Section[];
@@ -162,6 +164,19 @@ const og = ogCard("banner", lang, Astro.site);
             <span class="tag" lang={lang}>{t("changelog_beta")}</span>
           )}
         </header>
+
+        {/* The release's one image, sized from its own header so
+            the box is reserved; alt names the release, the notes
+            below carry what it shows. */}
+        {release.image && (() => {
+          const picture = releaseImage(release.image);
+          return (
+            <img class="rel__image" src={picture.src}
+              width={picture.width} height={picture.height}
+              alt={`KiwiDesk ${release.version}`}
+              loading="lazy" decoding="async" />
+          );
+        })()}
 
         {release.summary && (
           <p class="rel__summary md" set:html={inline(release.summary)} />
@@ -297,6 +312,15 @@ const og = ogCard("banner", lang, Astro.site);
   .rel__head time {
     color: var(--text-dim);
     font-size: 0.9rem;
+  }
+  .rel__image {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: auto;
+    margin: 0 0 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
   }
   /* A status chip, not the footer's tagline paragraph — hence
      the footer's own class is `tag-line` on this page. */
