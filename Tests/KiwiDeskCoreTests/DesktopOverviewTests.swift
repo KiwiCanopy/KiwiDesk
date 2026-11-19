@@ -95,6 +95,28 @@ struct DesktopOverviewTests {
         #expect(overview.screens.map(\.isHere) == [false, true])
     }
 
+    /// macOS numbers twins by its own order, not position (#3496).
+    @Test("numbered twins carry their position; other screens none")
+    func twinPositions() {
+        let core = makeCore()
+        defer { reset() }
+        #expect(
+            core.desktopOverview(on: nil).screens.map(\.position)
+                == [nil, nil]
+        )
+        core.state.workspaces.upsertDisplay(authorityDisplay(1, "Twin (1)"))
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(2),
+                name: "Twin (2)",
+                frame: CGRect(x: -100, y: -50, width: 100, height: 100)
+            )
+        )
+        let screens = core.desktopOverview(on: nil).screens
+        #expect(screens.map(\.name) == ["Twin (2)", "Twin (1)"])
+        #expect(screens.map(\.position) == [.left, .right])
+    }
+
     @Test("each screen lists its own Desktops, numbered across screens")
     func desktopsPerScreen() {
         let core = makeCore()
