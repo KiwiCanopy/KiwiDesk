@@ -16761,6 +16761,23 @@ change, and the selected item draws none, since a durable marking
 and a pointer state never share a property (#1173). VoiceOver
 follows the selection only. `JumpHoverTests` holds the rule.
 
+:::unreleased
+One owner exception (2026-11-19, #3484): a pointer on a Desktop's
+title in the Desktop overview rings that Desktop's whole column —
+the title and every Space line — with a thin line in the
+selection's colour, and the title itself stays plain. A click on
+the title acts on the whole Desktop, so the hover outlines what
+the click will reach; the ground #3209 put on the title alone
+read as one more line, and under the tint toggle as the selection
+beside it. The ring never takes a selection's property (#1173):
+a selected line is a fill, and a selected window icon's ring is
+heavier and rings the one tile, where the hover rings the whole
+column. The ring shows only under the pointer, never on the
+selected Desktop's column otherwise. Every other KiwiHub hover keeps the grey lift, a
+hovered window icon's ground included, and the ✓ beside the shown
+Desktop stays in its own ink (#3210).
+:::
+
 Under *Tint KiwiHub and plates* (#2569) the panel wears the bars'
 look (▸ the shortcuts panel entry), so its marks take the look's
 colours. The selection takes KiwiShelf's highlight, and the lift
