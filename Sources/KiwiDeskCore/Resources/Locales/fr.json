@@ -402,6 +402,7 @@
   "desktop_cue.ax.screen": "Bureau %1$d sur %2$d, sur %3$@",
   "desktop_overview.ax.app_picked": "%1$@, prise",
   "desktop_overview.ax.edit_in_settings": "Modifier dans les Réglages",
+  "desktop_overview.ax.full_screen": "%1$@, %2$@",
   "desktop_overview.ax.place": "%1$@, %2$@, fenêtres : %3$d",
   "desktop_overview.ax.place_last_shown": "%1$@, affiché en dernier, %2$@, fenêtres : %3$d",
   "desktop_overview.ax.place_shown": "%1$@, affiché, %2$@, fenêtres : %3$d",

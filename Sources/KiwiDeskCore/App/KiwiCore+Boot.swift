@@ -167,6 +167,10 @@ extension KiwiCore {
         boot.scanDone = ContinuousClock.now
         defersEventRetiles = false
         arrangeBootDesk(session: crash.takeBootSnapshot())
+        // Files the Desktop each Space shows now, so a full-screen
+        // Space entered before any switch keeps it (#3486); with no
+        // owner filed yet it swaps no toggle.
+        refileTilingToggles()
         // The per-event #193 pile restore was suppressed with the
         // retiles, so re-arm it once here — it self-gates on
         // track + actual overflow.

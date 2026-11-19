@@ -402,6 +402,7 @@
   "desktop_cue.ax.screen": "Mesa %1$d de %2$d em %3$@",
   "desktop_overview.ax.app_picked": "%1$@, pegada",
   "desktop_overview.ax.edit_in_settings": "Editar nos Ajustes",
+  "desktop_overview.ax.full_screen": "%1$@, %2$@",
   "desktop_overview.ax.place": "%1$@, %2$@, janelas: %3$d",
   "desktop_overview.ax.place_last_shown": "%1$@, exibido por último, %2$@, janelas: %3$d",
   "desktop_overview.ax.place_shown": "%1$@, visível, %2$@, janelas: %3$d",

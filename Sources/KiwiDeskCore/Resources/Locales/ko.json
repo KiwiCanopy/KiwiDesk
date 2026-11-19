@@ -402,6 +402,7 @@
   "desktop_cue.ax.screen": "%3$@의 데스크탑 %1$d (전체 %2$d개)",
   "desktop_overview.ax.app_picked": "%1$@, 집음",
   "desktop_overview.ax.edit_in_settings": "설정에서 편집",
+  "desktop_overview.ax.full_screen": "%1$@, %2$@",
   "desktop_overview.ax.place": "%1$@, %2$@, 윈도우: %3$d",
   "desktop_overview.ax.place_last_shown": "%1$@, 마지막으로 표시됨, %2$@, 윈도우: %3$d",
   "desktop_overview.ax.place_shown": "%1$@, 표시됨, %2$@, 윈도우: %3$d",

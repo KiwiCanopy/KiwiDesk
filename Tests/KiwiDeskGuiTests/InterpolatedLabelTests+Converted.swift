@@ -69,6 +69,9 @@ extension InterpolatedLabelTests {
         // The state-change toggle names the reflow toggle its
         // neighbours follow (#2676).
         "behavior.animations.state_change.help": 1,
+        // A full-screen window's spoken status on the Desktops side
+        // reuses the Windows side's Full Screen label (#3486).
+        "desktop_overview.ax.full_screen": 1,
         // The key panel's Layout Defaults… button (#2229).
         "layout_picker.layout_defaults": 1,
         // The two per-space remote-gate pointers (#841). One

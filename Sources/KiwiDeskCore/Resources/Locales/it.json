@@ -402,6 +402,7 @@
   "desktop_cue.ax.screen": "Scrivania %1$d di %2$d su %3$@",
   "desktop_overview.ax.app_picked": "%1$@, presa",
   "desktop_overview.ax.edit_in_settings": "Modifica nelle Impostazioni",
+  "desktop_overview.ax.full_screen": "%1$@, %2$@",
   "desktop_overview.ax.place": "%1$@, %2$@, finestre: %3$d",
   "desktop_overview.ax.place_last_shown": "%1$@, mostrato per ultimo, %2$@, finestre: %3$d",
   "desktop_overview.ax.place_shown": "%1$@, visibile, %2$@, finestre: %3$d",

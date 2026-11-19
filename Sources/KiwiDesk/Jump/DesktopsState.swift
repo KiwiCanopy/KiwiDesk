@@ -46,7 +46,11 @@ struct DesktopsState: Equatable {
         let screen = screens.firstIndex(where: \.isHere) ?? 0
         let desktops = screens[screen].desktops
         guard !desktops.isEmpty else { return nil }
-        let desktop = desktops.firstIndex(where: \.isShown) ?? 0
+        // Behind a full-screen Space, the Desktop the live Spaces
+        // hold (#3486).
+        let desktop =
+            desktops.firstIndex(where: \.isShown)
+            ?? desktops.firstIndex(where: \.holdsLive) ?? 0
         let lines = desktops[desktop].spaces
         guard !lines.isEmpty else { return nil }
         let line = lines.firstIndex(where: \.isShown) ?? 0

@@ -1,7 +1,8 @@
 import KiwiDeskCore
 
 /// What VoiceOver hears on the Desktops side (#1229): counts
-/// without plurals, a hidden Desktop's Space "last shown".
+/// without plurals, a hidden Desktop's Space "last shown", a window
+/// in macOS full screen named so (#3486).
 extension DesktopsText {
     static func spoken(_ state: DesktopsState) -> String {
         guard let place = state.place, let line = state.line(place),
@@ -14,6 +15,20 @@ extension DesktopsText {
     }
 
     static func spoken(
+        _ window: DesktopOverview.Window,
+        picked: Bool
+    ) -> String {
+        let name = named(window, picked: picked)
+        guard window.block == .fullScreen else { return name }
+        return L(
+            "desktop_overview.ax.full_screen",
+            "%1$@, %2$@",
+            name,
+            L("jump.status.fullscreen", "Full Screen")
+        )
+    }
+
+    private static func named(
         _ window: DesktopOverview.Window,
         picked: Bool
     ) -> String {

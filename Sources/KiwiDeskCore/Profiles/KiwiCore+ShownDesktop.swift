@@ -35,4 +35,33 @@ extension KiwiCore {
         )
         return isUser ? .shown(native) : .none
     }
+
+    /// The Desktop the live Spaces of `display` hold while its
+    /// screen shows a full-screen Space in `snapshot` (#3486): the
+    /// one the tiling toggle's filing kept through it
+    /// (`DesktopMemory.tilingToggleDesktop`, filed at boot and at
+    /// each switch) where `snapshot` still lists it as a Desktop of
+    /// that screen, else the screen's first Desktop — a launch or a
+    /// replug with the full-screen Space already in front filed
+    /// none. Nil while the screen shows a user Desktop.
+    func heldDesktop(
+        on display: DisplayID,
+        in snapshot: DesktopSnapshot
+    ) -> SkyLight.SpaceID? {
+        let uuid = desktopMemory.readDisplayUUID(display)
+        guard
+            let front = uuid.flatMap({
+                NativeSpaces.shownEntry(snapshot.currentSpaces, screen: $0)
+            }),
+            !NativeSpaces.isUserSpace(front, in: snapshot.spaces)
+        else { return nil }
+        let shared = sharedDesktops(in: snapshot)
+        let natives = snapshot.spaces.filter {
+            $0.isUser && (shared || $0.displayUUID == uuid)
+        }.map(\.id)
+        let filed = state.workspaces.spaces(on: display).lazy
+            .compactMap { self.desktopMemory.tilingToggleDesktop[$0] ?? nil }
+            .first(where: natives.contains)
+        return filed ?? natives.first
+    }
 }
