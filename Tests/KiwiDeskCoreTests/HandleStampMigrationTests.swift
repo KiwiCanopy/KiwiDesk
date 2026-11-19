@@ -128,7 +128,7 @@ struct HandleStampMigrationTests {
         let data = try stamped(profile(glass), format: 34, absent: absent)
         let read = try settings(ConfigMigration.migrated(data))
         #expect(
-            read.kiwishelf.handleColor == glass.kiwishelf.activeItemColor
+            read.kiwishelf.handleColor == Self.glassHandle
         )
         #expect(PaletteCatalog.defaultPalette().isApplied(to: read))
 
@@ -184,7 +184,7 @@ struct HandleStampMigrationTests {
         let colors = try #require(read.look?.colors)
         #expect(
             colors[Self.handle]
-                == TilingSettings().kiwishelf.activeItemColor
+                == Self.glassHandle
         )
     }
 
@@ -248,7 +248,7 @@ struct HandleStampMigrationTests {
         let shared = try decode(GuiConfig.self, #require(root["config"]))
         #expect(
             shared.look?.colors[Self.handle]
-                == glass.kiwishelf.activeItemColor
+                == Self.glassHandle
         )
         let profiles = try #require(root["profiles"] as? [[String: Any]])
         let own = try profiles.map {
@@ -268,7 +268,7 @@ struct HandleStampMigrationTests {
         let looks = try decode([ShelfLook].self, #require(root["looks"]))
         #expect(
             looks.first?.colors[Self.handle]
-                == glass.kiwishelf.activeItemColor
+                == Self.glassHandle
         )
     }
 
@@ -282,7 +282,7 @@ struct HandleStampMigrationTests {
         let read = try JSONDecoder().decode(LookExport.self, from: out)
         #expect(
             read.look.colors[Self.handle]
-                == TilingSettings().kiwishelf.activeItemColor
+                == Self.glassHandle
         )
         // At the format it introduced the entry stands down.
         #expect(ConfigMigration.crossingLookExport(data, from: 6) == data)

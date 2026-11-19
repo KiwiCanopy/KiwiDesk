@@ -108,10 +108,22 @@ struct ShelfHandleFillTests {
             in: NSAppearance(named: .aqua)!
         )
         let own: CGFloat = hex.isEmpty ? label.alphaComponent : 128 / 255
-        let rest = try #require(view.core.layer?.backgroundColor?.alpha)
-        let fill = try #require(view.fillLayer.backgroundColor?.alpha)
-        #expect(abs(rest - own * ShelfHandleSpec.restStrength) < 0.01)
-        #expect(abs(fill - own * ShelfHandleSpec.fillStrength) < 0.01)
+        let srgb = { (cg: CGColor?) in
+            cg.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }
+        }
+        let rest = try #require(srgb(view.core.layer?.backgroundColor))
+        let fill = try #require(srgb(view.fillLayer.backgroundColor))
+        // Both at the ink's own alpha; the rest steps in lightness,
+        // `restMix` of the way to its tone, on every channel (#3514).
+        #expect(abs(rest.alphaComponent - own) < 0.01)
+        #expect(abs(fill.alphaComponent - own) < 0.01)
+        let step =
+            [
+                rest.redComponent - fill.redComponent,
+                rest.greenComponent - fill.greenComponent,
+                rest.blueComponent - fill.blueComponent,
+            ].map(abs).max() ?? 0
+        #expect(step > ShelfHandleSpec.restMix * 0.8)
     }
 
     @Test("A fill starts at its share of the core, with no length")

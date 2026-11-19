@@ -18,7 +18,7 @@ extension ConfigMigration {
                     "kiwishelf.fill_color": "#14201CB3",
                     "kiwishelf.group_badge_color": "#636366",
                     "kiwishelf.group_badge_text_color": "#FFFFFF",
-                    "kiwishelf.handle_color": "#8DB354",
+                    "kiwishelf.handle_color": "#7DBB2A",
                     "kiwishelf.highlight_color": "#8DB354",
                     "kiwishelf.hover_fill_color": "#AACB5D80",
                     "kiwishelf.hover_item_color": "#EAF3EE",

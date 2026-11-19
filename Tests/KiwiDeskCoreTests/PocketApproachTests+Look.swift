@@ -118,18 +118,25 @@ extension PocketApproachTests {
     @Test("the hovered tab takes the fill strength, the kiwis stay")
     func tabStrength() {
         let light = NSAppearance(named: .aqua)
-        var rest: CGFloat = 0
-        var full: CGFloat = 0
+        var rest = NSColor.clear
+        var full = NSColor.clear
         light?.performAsCurrentDrawingAppearance {
             rest =
                 PocketHandleView.tabCore(hex: "", lit: false)
-                .alphaComponent
+                .usingColorSpace(.sRGB) ?? .clear
             full =
                 PocketHandleView.tabCore(hex: "", lit: true)
-                .alphaComponent
+                .usingColorSpace(.sRGB) ?? .clear
         }
-        let own = ShelfHandleSpec.labelInk(in: light!).alphaComponent
-        #expect(abs(rest - own * ShelfHandleSpec.restStrength) < 0.001)
-        #expect(abs(full - own * ShelfHandleSpec.fillStrength) < 0.001)
+        // The bar handle's two inks: the label ink itself lit, mixed
+        // `restMix` toward white at rest, alpha kept (#3514).
+        let ink = ShelfHandleSpec.labelInk(in: light!)
+        #expect(abs(full.alphaComponent - ink.alphaComponent) < 0.001)
+        #expect(abs(full.redComponent - ink.redComponent) < 0.001)
+        #expect(abs(rest.alphaComponent - ink.alphaComponent) < 0.001)
+        let want =
+            ink.redComponent
+            + (1 - ink.redComponent) * ShelfHandleSpec.restMix
+        #expect(abs(rest.redComponent - want) < 0.001)
     }
 }

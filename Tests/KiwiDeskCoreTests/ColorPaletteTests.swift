@@ -140,7 +140,9 @@ struct ColorPaletteTests {
         var shipped = ColorPaletteKeys.extract(from: TilingSettings())
         for (path, source) in ColorPaletteKeys.bundledPaint {
             #expect(shipped[path]?.isEmpty == true, "\(path)")
-            shipped[path] = shipped[source]
+            let accent = shipped[source] ?? ""
+            shipped[path] =
+                ColorPaletteKeys.handleShades[accent.uppercased()] ?? accent
         }
         #expect(def.colors == shipped)
         #expect(def.colors.count == ColorPaletteKeys.all.count)

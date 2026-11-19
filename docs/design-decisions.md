@@ -19014,7 +19014,10 @@ Unlike a mark tint, every bundled palette paints it, the derived
 default included, in its own `active_item_color`
 ([#3377](https://github.com/KiwiCanopy/KiwiDesk/issues/3377),
 amending #3357's ruling 3), through `ColorPaletteKeys.bundledPaint`
-at load. The handle is the bar's own edge, so under a chosen
+at load — or in the same-hue duty shade `ColorPaletteKeys.handleShades`
+names where that accent fills too weakly to read: Glass's
+`#8DB354` paints `#7DBB2A`, as the focus ring wears a darker green
+(#3514). The handle is the bar's own edge, so under a chosen
 palette a grey line opening a gold bar reads as someone else's;
 the two-tone hairline (#3361) keeps any accent legible over light
 and dark content. The base value stays Automatic, and Automatic
@@ -20515,10 +20518,10 @@ Dock stays shown for as long as the pointer stays there. So:
   run. The fill starts at the pointer's entry and keeps that start,
   so it never chases a moving pointer, and both ends reach the
   handle's ends together, the longer side running faster. It is
-  one colour at two strengths, 65% at rest and 100% filled
-  (#3514): Automatic is the label ink, at its own alpha times
-  those strengths, and a colour picked
-  in #3357 takes them times its own alpha, with no floor for a weak
+  one colour in two shades (#3514): filled it is the ink itself,
+  at rest the ink mixed 45% toward its hairline's tone, both at
+  the ink's own alpha. Automatic is the label ink, and a colour
+  picked in #3357 keeps its own alpha, with no floor for a weak
   pick (#1857). Nothing blinks or pulses: three pulses in 0.4 s
   is about 7 Hz (WCAG 2.3.1), and on macOS a pulse means attention
   or an error. The fill is a change of lightness in place, so it
@@ -20554,9 +20557,8 @@ Dock stays shown for as long as the pointer stays there. So:
   of the opposite tone, and a rounded end reads as a deliberate
   object rather than a cut. No taper, fade or one-sided rounding.
   The core is drawn over the hairline capsule rather than inside a
-  ring, so its strengths show composited over the hairline: about
-  60% at rest, which one draw path for both drawers buys (#3514
-  below moves the numbers).
+  ring, so its inks show composited over the hairline, which one
+  draw path for both drawers buys (#3514 below sets the inks).
   The handle stays flush, as the two-tone bullet argues.
 - *A thickness of its own* (owner, 2026-11-18, #3451), amending
   the capsules bullet above: **the handle's thickness
@@ -20579,21 +20581,30 @@ Dock stays shown for as long as the pointer stays there. So:
   grow origin's included. Refused: a Lua-only knob, since the
   owner wants it to travel with a look, and a palette key, since
   palettes carry colour alone.
-- *Easier to see at rest* (owner, 2026-11-19, #3514, after three
-  rounds with a native prototype on their own wallpapers), amending
-  the strengths above: **the core rests at 65% and fills to 100%,
-  and the hairline is 20%.** Full strength is the ink at its own
-  alpha, the label ink's or the picked colour's, never forced
-  opaque. At 38% over 35% the resting handle read faintly on busy
-  and mid-tone wallpapers. The ui-designer advised 38–50% at rest;
-  the owner chose 65% and took the trade: an opaque colour's
-  resting core reads at about 72% over its hairline, so the fill's
-  step to full is about 28 points (Automatic, at the label ink's
-  own alpha, about 64% to 88%). The thinner hairline
-  separates the handle less from a window or wallpaper of its own
-  tone, the reason #3361 drew it at 35%; the owner chose it so it
-  does not distract from the colour, letting the handle's own ink,
-  Automatic or picked, carry the look.
+- *Easier to see at rest* (owner, 2026-11-19, #3514, after rounds
+  with native prototypes on their own wallpapers), amending the
+  strengths above: **the fill is the ink itself, the rest is the
+  ink mixed 45% toward its hairline's tone — darker beside a light
+  ink, lighter beside a dark one — and the hairline is 20%.** Both
+  keep the ink's own alpha, so nothing is forced opaque. At 38%
+  opacity over a 35% hairline the resting handle read faintly on
+  busy and mid-tone wallpapers, and raising the opacity left the
+  fill too little to add: an opacity step shrinks wherever the
+  ground is near the ink, while a lightness step reads alike on
+  any ground and survives colour-vision loss. The ui-designer
+  proposed a 35% mix; the owner chose 45% for a step that clearly
+  shows, accepting that the resting colour drifts further from its
+  hue (Glass rests a dark olive) and that on white the darker rest
+  stands out more than the fill, which then reads as the line
+  lighting up. A fill brighter or more vivid than the colour was
+  refused: white, the label ink and a saturated blue have nowhere
+  to go, and it would part the handle from the bar's active item.
+  Glass's handle takes the duty shade `#7DBB2A`, more saturated at
+  the same lightness, since its accent read weak even filled
+  (#3377 above). The thinner hairline separates the handle less
+  from a window or wallpaper of its own tone, the reason #3361
+  drew it at 35%; the owner chose it so it does not distract from
+  the colour, letting the handle's own ink carry the look.
 - *A revealed bar lands under its handle* (owner, 2026-11-16,
   #3359), amending "each opens at its lone place under the pair"
   above: each now opens in its share of the pair. The handle, the landing and the hold read one

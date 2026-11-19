@@ -91,7 +91,9 @@ struct ShelfHandleColorTests {
                 let paint = palette.colors[path]
                 let name = Comment(rawValue: "\(palette.name) \(path)")
                 #expect(paint != nil, name)
-                #expect(paint == palette.colors[source], name)
+                let accent = palette.colors[source] ?? ""
+                let shade = ColorPaletteKeys.handleShades[accent.uppercased()]
+                #expect(paint == (shade ?? accent), name)
             }
         }
     }
@@ -137,9 +139,11 @@ struct ShelfHandleColorTests {
             .settings(sizes: sizes)
         let fresh = TilingSettings()
         #expect(fresh.kiwishelf.handleColor.isEmpty)
+        // The default accent's duty shade (#3514).
+        let accent = fresh.kiwishelf.activeItemColor
         #expect(
             starter.kiwishelf.handleColor
-                == fresh.kiwishelf.activeItemColor
+                == ColorPaletteKeys.handleShades[accent.uppercased()]
         )
         #expect(!PaletteCatalog.defaultPalette().isApplied(to: fresh))
         let gold = try #require(
@@ -154,49 +158,79 @@ struct ShelfHandleColorTests {
         #expect(!gold.isApplied(to: settings))
     }
 
-    @Test("Automatic is the label ink at each strength in either mode")
+    @Test("The fill is the ink; the rest is it mixed toward its tone")
     @MainActor
-    func automaticFollowsTheAppearance() throws {
+    func restMixesTowardTheTone() throws {
         let aqua = try #require(NSAppearance(named: .aqua))
         let darkAqua = try #require(NSAppearance(named: .darkAqua))
-        func resolved(
-            _ hex: String,
-            _ appearance: NSAppearance,
-            _ ink: (String) -> NSColor
-        ) -> NSColor {
-            var color = NSColor.clear
-            appearance.performAsCurrentDrawingAppearance {
-                let cg = ink(hex).cgColor
-                color = NSColor(cgColor: cg) ?? .clear
-            }
-            return color.usingColorSpace(.sRGB) ?? color
-        }
         typealias Spec = ShelfHandleSpec
-        let inks: [(CGFloat, (String) -> NSColor)] = [
-            (Spec.restStrength, Spec.restColor(hex:)),
-            (Spec.fillStrength, Spec.fillColor(hex:)),
-        ]
-        for (strength, ink) in inks {
-            let light = resolved("", aqua, ink)
-            let dark = resolved("", darkAqua, ink)
-            // The label ink's own alpha times the strength, never
-            // forced opaque at full strength (#3514).
-            let ownLight = Spec.labelInk(in: aqua).alphaComponent
-            let ownDark = Spec.labelInk(in: darkAqua).alphaComponent
-            #expect(ownLight < 1 && ownDark < 1)
-            #expect(abs(light.alphaComponent - ownLight * strength) < 0.02)
-            #expect(abs(dark.alphaComponent - ownDark * strength) < 0.02)
-            // Dark ink on light, light ink on dark.
-            #expect(light.redComponent < 0.5)
-            #expect(dark.redComponent > 0.5)
-            // A picked colour: its own alpha times the strength.
-            let set = resolved("#FF000080", darkAqua, ink)
-            #expect(abs(set.redComponent - 1) < 0.01)
-            #expect(set.greenComponent < 0.01)
-            #expect(
-                abs(set.alphaComponent - 128.0 / 255 * strength) < 0.01
+        func resolved(
+            _ color: NSColor,
+            _ appearance: NSAppearance
+        ) -> NSColor {
+            var out = NSColor.clear
+            appearance.performAsCurrentDrawingAppearance {
+                out = NSColor(cgColor: color.cgColor) ?? .clear
+            }
+            return out.usingColorSpace(.sRGB) ?? out
+        }
+        // An independent statement of the rule (#3514): each channel
+        // `restMix` of the way to black beside a light ink, to white
+        // beside a dark one, the alpha kept.
+        func expectedRest(_ ink: NSColor) -> NSColor {
+            let luma =
+                0.2126 * ink.redComponent + 0.7152 * ink.greenComponent
+                + 0.0722 * ink.blueComponent
+            let tone: CGFloat = luma > 0.5 ? 0 : 1
+            let mix = { (c: CGFloat) in c + (tone - c) * Spec.restMix }
+            return NSColor(
+                srgbRed: mix(ink.redComponent),
+                green: mix(ink.greenComponent),
+                blue: mix(ink.blueComponent),
+                alpha: ink.alphaComponent
             )
         }
-        #expect(Spec.restStrength < Spec.fillStrength)
+        for appearance in [aqua, darkAqua] {
+            for hex in ["", "#FF000080", "#8DB354"] {
+                let fill = resolved(Spec.fillColor(hex: hex), appearance)
+                let rest = resolved(Spec.restColor(hex: hex), appearance)
+                let name = Comment(rawValue: "\(appearance.name) \(hex)")
+                // The fill is the ink at its own alpha, never forced
+                // opaque: Automatic keeps the label ink's own.
+                if hex.isEmpty {
+                    #expect(fill.alphaComponent < 1, name)
+                } else {
+                    let own = try #require(
+                        NSColor(kiwiHex: hex).usingColorSpace(.sRGB)
+                    )
+                    #expect(
+                        abs(fill.alphaComponent - own.alphaComponent)
+                            < 0.01,
+                        name
+                    )
+                    #expect(abs(fill.redComponent - own.redComponent) < 0.01)
+                }
+                let want = expectedRest(fill)
+                #expect(
+                    abs(rest.redComponent - want.redComponent) < 0.01,
+                    name
+                )
+                #expect(
+                    abs(rest.greenComponent - want.greenComponent) < 0.01,
+                    name
+                )
+                #expect(abs(rest.blueComponent - want.blueComponent) < 0.01)
+                #expect(
+                    abs(rest.alphaComponent - fill.alphaComponent) < 0.01,
+                    name
+                )
+            }
+        }
+        // The step is real: a light ink rests darker, a dark one
+        // lighter.
+        let lightInk = resolved(Spec.restColor(hex: ""), darkAqua)
+        #expect(lightInk.redComponent < 0.7)
+        let darkInk = resolved(Spec.restColor(hex: ""), aqua)
+        #expect(darkInk.redComponent > 0.3)
     }
 }

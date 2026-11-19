@@ -3766,11 +3766,14 @@ item colour at 35% opacity). Every bundled palette carries one.
 `kiwishelf.set_handle_color` sets the colour of the handle an
 [`"auto"`](#space_barset_visibility) bar leaves at its edge while it
 hides, and of its progress fill and the pocket's tab. A picked
-colour rests at 65% of its own opacity and fills at its full
-opacity, beside a neutral fine line of the opposite tone. `""` (the
-default) is Automatic: the system label colour, at its own opacity
-times those strengths, which follows light and dark mode. Every bundled palette, and a first run's
-config, sets it to the palette's own `active_item_color`.
+colour fills in itself and rests a shade toward the neutral fine
+line of the opposite tone beside it — darker for a light colour,
+lighter for a dark one — both at its own opacity.
+`""` (the default) is Automatic: the system label colour, which
+follows light and dark mode. Every bundled palette, and a first run's
+config, sets it to the palette's own `active_item_color`, or a
+stronger shade of it where that colour fills too faintly (Glass's
+green paints `#7DBB2A`).
 :::
 
 **Example:**

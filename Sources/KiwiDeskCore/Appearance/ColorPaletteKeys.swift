@@ -62,6 +62,13 @@ public enum ColorPaletteKeys {
         "kiwishelf.handle_color": "kiwishelf.active_item_color"
     ]
 
+    /// A source colour too light to read as a filled handle, and the
+    /// same-hue duty shade the handle wears instead (#3514), as the
+    /// focus ring wears a darkened green: Glass's accent.
+    public static let handleShades: [String: String] = [
+        "#8DB354": "#7DBB2A"
+    ]
+
     /// Colours whose Automatic is ANOTHER colour of the palette
     /// rather than an adaptive tint, keyed to the path they follow
     /// (#1856): the front chip's ring follows the front app's own

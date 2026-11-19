@@ -54,7 +54,9 @@ extension ColorPalette {
     var bundledPainted: ColorPalette {
         var out = self
         for (path, source) in ColorPaletteKeys.bundledPaint {
-            if let colour = colors[source] { out.colors[path] = colour }
+            guard let colour = colors[source] else { continue }
+            out.colors[path] =
+                ColorPaletteKeys.handleShades[colour.uppercased()] ?? colour
         }
         return out
     }

@@ -61,15 +61,16 @@ struct ShelfHandleColorWiringTests {
         let rgb = try #require(
             NSColor(cgColor: fill)?.usingColorSpace(.sRGB)
         )
+        // Red reads dark, so it rests mixed `restMix` toward white,
+        // at its own alpha (#3514).
+        let mix = ShelfHandleSpec.restMix
         #expect(abs(rgb.redComponent - 1) < 0.01)
-        #expect(rgb.greenComponent < 0.01)
-        // Its own alpha times the rest strength (#3360 ruling 3).
-        let rest = 128.0 / 255 * ShelfHandleSpec.restStrength
-        #expect(abs(rgb.alphaComponent - rest) < 0.01)
+        #expect(abs(rgb.greenComponent - mix) < 0.01)
+        #expect(abs(rgb.alphaComponent - 128.0 / 255) < 0.01)
     }
 
     @Test(
-        "Automatic paints the label ink at the rest strength",
+        "Automatic rests in the label ink mixed toward its tone",
         .enabled(if: NSScreen.main != nil)
     )
     func automaticPaintsTheLabelInk() throws {
@@ -80,12 +81,14 @@ struct ShelfHandleColorWiringTests {
                 .flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }
         )
         let label = ShelfHandleSpec.labelInk(in: view.effectiveAppearance)
-        #expect(abs(fill.redComponent - label.redComponent) < 0.01)
+        // The label ink `restMix` of the way to its hairline's tone.
+        let tone: CGFloat = ShelfHandleSpec.isLight(label) ? 0 : 1
+        let want =
+            label.redComponent
+            + (tone - label.redComponent) * ShelfHandleSpec.restMix
+        #expect(abs(fill.redComponent - want) < 0.01)
         #expect(
-            abs(
-                fill.alphaComponent
-                    - label.alphaComponent * ShelfHandleSpec.restStrength
-            ) < 0.01
+            abs(fill.alphaComponent - label.alphaComponent) < 0.01
         )
     }
 
@@ -102,8 +105,8 @@ struct ShelfHandleColorWiringTests {
             NSColor(cgColor: fill)?.usingColorSpace(.sRGB)
         )
         #expect(abs(rgb.redComponent - 1) < 0.01)
-        let full = 128.0 / 255 * ShelfHandleSpec.fillStrength
-        #expect(abs(rgb.alphaComponent - full) < 0.01)
+        #expect(rgb.greenComponent < 0.01)
+        #expect(abs(rgb.alphaComponent - 128.0 / 255) < 0.01)
         // Red reads dark, so a white hairline, never its own colour.
         var expected: CGColor?
         view.effectiveAppearance.performAsCurrentDrawingAppearance {
