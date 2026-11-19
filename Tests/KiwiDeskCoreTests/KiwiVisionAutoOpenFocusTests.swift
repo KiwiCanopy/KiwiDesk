@@ -208,4 +208,44 @@ struct KiwiVisionAutoOpenFocusTests {
         core.oweLaunchFollow(F.music, at: now)
         #expect(!core.launchFollow.opensQuietly(F.music, at: now))
     }
+
+    // MARK: A member already open (device 2026-11-19)
+
+    /// The lens on with `notes` open and focused: `music` opens.
+    static func memberFocused() -> KiwiCore {
+        let (core, _) = F.makeCore()
+        core.state.apply(.windowCreated(F.notesWindow()))
+        core.focusWindow(WindowID(5), warp: false)
+        F.toggle(core)
+        #expect(core.launchFollow.quietOpen == nil)
+        return core
+    }
+
+    @Test("an opened app that activates itself hands the focus back")
+    func selfActivationHandedBack() {
+        let core = Self.memberFocused()
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        core.noteAppActivation(
+            AppActivation(pid: 900_170, bundleID: F.music, launchedAt: nil),
+            now: core.wallClock()
+        )
+        #expect(core.launchFollow.holds.handedBack[F.music] != nil)
+        #expect(log.contains { $0.hasSuffix("handed back to w5") })
+    }
+
+    @Test("an opened app's window taking the focus is handed back")
+    func selfFocusHandedBack() {
+        let core = Self.memberFocused()
+        Self.arrive(7, bundleID: F.music, on: core)
+        core.handle(.windowFocused(WindowID(7)))
+        #expect(core.focusedWindowID == WindowID(5))
+    }
+
+    /// The owed move is the one focus change; no hold fights it.
+    @Test("with no member open, no hand-back is owed")
+    func noneOpenOwesNoHandBack() {
+        let core = Self.owing()
+        #expect(core.launchFollow.holds.opened.isEmpty)
+    }
 }

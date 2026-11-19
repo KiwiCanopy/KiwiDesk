@@ -3,7 +3,8 @@ import Foundation
 /// A lens turning on opens its Auto-open apps that have no window
 /// (#3122 ▸ Ruling amendment): each judged on its own, all opened
 /// in the background, and one focus move owed to the first member
-/// window to arrive where none of the lens's apps had one.
+/// window to arrive where none of the lens's apps had one; where
+/// one had, each opened app owes the focus's hand-back instead.
 extension KiwiCore {
     /// Called by the user doors alone, after the lens went on:
     /// `toggleCommand` and `setKiwiVision`, never `setVision`, and
@@ -21,11 +22,17 @@ extension KiwiCore {
                 missing.append(app)
             }
         }
+        let now = wallClock()
         if !queued.isEmpty {
             onLog("kiwivision: \(lens.name) opened \(queued.sorted())")
-            launchFollow.noteQuietApps(queued, at: wallClock())
+            launchFollow.noteQuietApps(queued, at: now)
         }
-        guard open.isEmpty else { return }
+        guard open.isEmpty else {
+            // The focus stays: a self-activating app hands it back
+            // as `open_in_background`'s does (#3141).
+            for app in queued { launchFollow.holds.note(app, at: now) }
+            return
+        }
         if !queued.isEmpty {
             oweQuietOpenFocus(queued, lens: lens.name)
             return
