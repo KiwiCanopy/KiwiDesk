@@ -1988,8 +1988,6 @@
   "presets.focus.name": "포커스",
   "presets.for_your.many": "%1$d개 화면용",
   "presets.for_your.one": "1개 화면용",
-  "presets.screen_name.main": "주 화면",
-  "presets.screen_name.numbered": "화면 %1$d",
   "presets.starter.shape.laptop": "노트북",
   "presets.starter.shape.portrait": "세로 화면",
   "presets.starter.shape.super_ultrawide": "슈퍼 울트라와이드",

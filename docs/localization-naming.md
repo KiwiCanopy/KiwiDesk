@@ -104,7 +104,7 @@ Pocket に入れる".
 
 **`zh-Hans` is the measured exception.** It splits the English
 "screen" by countability — 屏幕 where the sense is mass, 显示器
-for a countable one (`presets.screen_name.main` 主显示器,
+for a countable one (`monitor_card.follows_main` 跟随主显示器,
 `profiles.screens.many` %1$d 台显示器) — so 显示器 IS its screen
 word here, and rule 2 is satisfied by the split. Countable
 screens take 显示器 where a screen is counted with a measure word

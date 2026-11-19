@@ -85,7 +85,7 @@ struct DesktopsSideView: View {
 
     /// The screen's name, its position added where a twin shares it.
     static func title(_ row: DesktopOverview.Screen) -> String {
-        ScreenShiftText.named(row.name, at: row.position)  // #3496
+        ScreenLabel.named(row.name, at: row.position)  // #3496
     }
 
     private func header(_ row: DesktopOverview.Screen) -> some View {

@@ -158,6 +158,11 @@ struct DesktopRowScreenTests {
         // The picker's setter files through the one write (#1609
         // moved it into a closure that also states focus).
         #expect(write.contains("write(name,key:row.key,slot:slot)"))
-        #expect(row.contains("ifletscreen=row.screen{Text(screen)"))
+        // Drawn in copy's words, filed as macOS's name (#3502).
+        #expect(
+            row.contains(
+                "ifletscreen=row.screen{Text(model.screenWords(named:screen))"
+            )
+        )
     }
 }

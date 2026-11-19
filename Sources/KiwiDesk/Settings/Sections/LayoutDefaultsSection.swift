@@ -4,6 +4,8 @@ import SwiftUI
 /// Layout defaults configuration section (#678 Phase 3 turn 10).
 struct LayoutDefaultsSection: View {
     @ObservedObject var model: SettingsModel
+    /// The width a legacy scroller leaves (`LegacyScrollerGutter`).
+    @State private var scrollerBound: CGFloat?
 
     /// Selected layout mode binding stored on navigation model (#277).
     private var selected: Binding<LayoutMode> {
@@ -25,8 +27,13 @@ struct LayoutDefaultsSection: View {
                 )
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
+            .frame(maxWidth: scrollerBound ?? .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .settingsPageBottom()
         }
+        // One width whether a pick's card scrolls or fits, so the
+        // strip and the rows hold still across picks (#3503).
+        .legacyScrollerGutter($scrollerBound)
         // Land on the most-used layout, then leave the selection
         // alone — latched by writing the model once, or `selected`
         // would keep re-deriving `initialMode` and adding a space

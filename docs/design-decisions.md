@@ -9411,6 +9411,20 @@ number belongs to, rather than the dots'. A shortcut row's
 landing line names the screen alone, since its number is the
 row's title.
 
+**Amended with #3502: a twin is named by its position** (owner,
+2026-11-19). Where two connected screens share a name, every
+label names each by where it sits — "Twin (left)" and "Twin
+(right)", "(middle)" between, above and below when stacked — in the
+words the
+Screens page and KiwiHub's Desktop headings use (#2756, #3496).
+The #2792 labels named twins "Main screen" / "Screen 2" by
+arrangement order, so one KiwiHub panel gave one screen two
+names, and the ordinal matches nothing the user sees on the desk.
+macOS's own " (n)" is no position either: it numbers twins in
+its own order (the left twin read "Twin (2)" on the owner's
+desk), so every label drops it (`Display.twinName`). Stored
+values keep macOS's full name; only the words change.
+
 **The profile line shows only when the switch changed the live
 profile.** A Desktop with no binding loads nothing, and naming the
 profile that merely stayed would be noise on every press.
@@ -20947,7 +20961,8 @@ follows its bar, so leaving it out loses nothing. The rows list the
 profile's screens, not the connected ones, since a profile names
 its own screens and an absent one is still part of it; connected
 screens come first and an absent one carries "not connected".
-Identical models share a fingerprint, and so share one row. A
+Identical models share a fingerprint, and so one row, unless macOS
+numbers their names (#3496). A
 bar row whose screens differ selects nothing and says so through
 its `?`, as Position does when the bars differ, and a drawer held
 open by what it shows greys its chevron. Readers that ask

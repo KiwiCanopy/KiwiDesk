@@ -94,16 +94,33 @@ struct JumpRowScreenTests {
         )
     }
 
-    @Test("twin screens read by place")
+    /// The row's place and its VoiceOver name a twin as the
+    /// Desktop heading does, never by macOS's number (#3502).
+    @Test("a row on a twin names its position")
+    func twinRow() {
+        LocalizationManager.shared.select("en")
+        let twin = ScreenLabel(name: "Twin (2)", twinPosition: .left)
+        let row = entry(space: "work", status: .away(desktop: 1), screen: twin)
+        #expect(
+            JumpRowText.place(of: row)?.text
+                == "work · Twin (left) · Desktop 1"
+        )
+        #expect(
+            JumpRowText.spoken(row)
+                == "Mail, Inbox, work, Desktop 1 on Twin (left)"
+        )
+    }
+
+    @Test("twin screens read by position, as the Desktop heading does")
     func twins() {
         LocalizationManager.shared.select("en")
         #expect(
-            ScreenLabel(name: "DELL", twinPlace: 0).displayName
-                == "Main screen"
+            ScreenLabel(name: "DELL (2)", twinPosition: .left).displayName
+                == "DELL (left)"
         )
         #expect(
-            ScreenLabel(name: "DELL", twinPlace: 1).displayName
-                == "Screen 2"
+            ScreenLabel(name: "DELL (1)", twinPosition: .right).displayName
+                == "DELL (right)"
         )
         #expect(ScreenLabel(name: "DELL").displayName == "DELL")
     }

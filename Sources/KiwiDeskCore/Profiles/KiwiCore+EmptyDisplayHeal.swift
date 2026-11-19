@@ -19,8 +19,8 @@ extension KiwiCore {
     /// another. The re-dock is the one door where a `set_mode`
     /// on the seed is lost while a peer space keeps its own —
     /// accepted (#1175). Twins — two screens with one
-    /// fingerprint, which a pin cannot tell apart
-    /// (`docs/accepted-limitations.md`) — stand down once the
+    /// fingerprint, a pair macOS left unnumbered (#3496), which a
+    /// pin cannot tell apart — stand down once the
     /// seed is pinned to that fingerprint, or every resolve would
     /// mint for the twin the pin cannot reach.
     func healEmptyDisplays(mainID: DisplayID?) {

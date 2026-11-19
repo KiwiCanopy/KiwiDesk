@@ -2502,6 +2502,19 @@ menu ships a chord row only for a verb whose seeded chord
 nothing (#3485, `StatusMenuHyperChordTests` ▸ `seededChordsDraw`,
 whose list a new chord row joins).
 
+## A screen is named through one door (#3502)
+
+**Copy that names a connected screen takes
+`ScreenLabel.displayName`, `SettingsModel.screenLabel(_:)` or
+`ScreenLabel.named(_:at:)`, never a `Display`'s `name`**, so a twin
+reads by its position ("Twin (left)") wherever it is named. A stored
+value and an identity readout (Settings ▸ Screens' fingerprint row)
+keep macOS's name. A surface that holds only a stored name or
+fingerprint words it through `SettingsModel.screenWords(where:)`,
+which names a screen only where exactly one connected screen
+matches. `TwinScreenWordsTests` and `JumpRowScreenTests` hold the
+surfaces this was written over; a new surface is review's.
+
 ## SwiftUI traps
 
 - **Every child of a `ViewThatFits` carries an id distinct from its
