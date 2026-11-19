@@ -2439,9 +2439,11 @@ lays out at one width whether that content scrolls or fits**: its
 vertical `ScrollView` takes `legacyScrollerGutter` and its content
 the bound it writes, so a legacy scroller's width is held on a
 segment that fits and the columns hold still across segments
-(#3491, `ShortcutKeyColumnTests`). A page reached only by
-navigation takes none. The scroller style is read only through
-`ScrollerStyleWatch` (`StripScrollerTests` ▸ `clearanceHome`).
+(#3491, `ShortcutKeyColumnTests`); the bound follows a resize a
+layout pass late, which is accepted. A page reached only by
+navigation takes none. In Settings and the tour the scroller style
+is read only through `ScrollerStyleWatch` (`StripScrollerTests` ▸
+`clearanceHome`).
 
 **A strip's content in those two trees clears an overlay scroller
 through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
