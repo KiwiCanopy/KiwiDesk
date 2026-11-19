@@ -288,8 +288,9 @@ twice, was a question the user answered twice. The argument is
   window reaching in only to the handle's hover band (#3346); a
   `hidden` bar has no approach, and a hidden bar whose edge sibling
   shows by HOVER yields, its handle standing aside, while a sibling
-  its key pinned leaves it live, the Pocket's handle included
-  (#3512, `ShelfKeyRevealHandlesTests`; `ShelfHandleStripTests`,
+  its key pinned leaves it live (#3512, `ShelfKeyRevealHandlesTests`;
+  the Pocket's tab keeps its slot through its own band, ▸ A reveal
+  never brings the pocket; `ShelfHandleStripTests`,
   `ShelfRevealPairTests`; the argument is
   `docs/design-decisions.md` ▸ A shelf can hide). **Place a revealed
   bar in its slot of the one arrangement of the bars resting on

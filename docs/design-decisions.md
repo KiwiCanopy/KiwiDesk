@@ -7427,7 +7427,7 @@ alone fade.** The tab keeps a bar handle's two-tone line at its
 ink and depth, empty or not, and the empty fade moves off the
 handle's panel onto the kiwis, in the tab and risen out of it. A
 faded panel thinned the tab to about 15% beside the bar handles'
-38%, so it read as a thinner, lighter line than its neighbours,
+38% of that day, so it read as a thinner, lighter line than its neighbours,
 and the kiwis already say what the pocket holds. The whole mark
 under Always keeps its fade.
 
@@ -20534,7 +20534,7 @@ Dock stays shown for as long as the pointer stays there. So:
   amending the resting ink, a single tone of label ink at 38%
   (#3349 ruling, as the lane shipped it). The handle is a
   2-point core with a hairline of the opposite tone along each
-  long side at 20% (35% until #3514), so one handle reads over a light and a dark
+  long side at 35%, so one handle reads over a light and a dark
   window at once, where a single tone vanished over one of them.
   The core carries the ink and runs the fill; the hairline stays
   constant, and beside a colour picked in #3357, or the accent a
@@ -20554,9 +20554,9 @@ Dock stays shown for as long as the pointer stays there. So:
   of the opposite tone, and a rounded end reads as a deliberate
   object rather than a cut. No taper, fade or one-sided rounding.
   The core is drawn over the hairline capsule rather than inside a
-  ring, so its strengths show composited over the hairline's 20%:
-  about 72% at rest (#3514), which one draw path for both drawers
-  buys.
+  ring, so its strengths show composited over the hairline: about
+  60% at rest, which one draw path for both drawers buys (#3514
+  below moves the numbers).
   The handle stays flush, as the two-tone bullet argues.
 - *A thickness of its own* (owner, 2026-11-18, #3451), amending
   the capsules bullet above: **the handle's thickness
@@ -20586,9 +20586,10 @@ Dock stays shown for as long as the pointer stays there. So:
   alpha, the label ink's or the picked colour's, never forced
   opaque. At 38% over 35% the resting handle read faintly on busy
   and mid-tone wallpapers. The ui-designer advised 38–50% at rest;
-  the owner chose 65% and took the trade: the resting core reads
-  at about 72% over its hairline, so the fill's step to full is
-  about 28 points. The thinner hairline
+  the owner chose 65% and took the trade: an opaque colour's
+  resting core reads at about 72% over its hairline, so the fill's
+  step to full is about 28 points (Automatic, at the label ink's
+  own alpha, about 64% to 88%). The thinner hairline
   separates the handle less from a window or wallpaper of its own
   tone, the reason #3361 drew it at 35%; the owner chose it so it
   does not distract from the colour, letting the handle's own ink,

@@ -3766,10 +3766,10 @@ item colour at 35% opacity). Every bundled palette carries one.
 `kiwishelf.set_handle_color` sets the colour of the handle an
 [`"auto"`](#space_barset_visibility) bar leaves at its edge while it
 hides, and of its progress fill and the pocket's tab. A picked
-colour rests at 38% of its own opacity and fills at 90%, beside a
-neutral fine line of the opposite tone. `""` (the default) is
-Automatic: the system label colour at those strengths, which follows
-light and dark mode. Every bundled palette, and a first run's
+colour rests at 65% of its own opacity and fills at its full
+opacity, beside a neutral fine line of the opposite tone. `""` (the
+default) is Automatic: the system label colour, at its own opacity
+times those strengths, which follows light and dark mode. Every bundled palette, and a first run's
 config, sets it to the palette's own `active_item_color`.
 :::
 
@@ -4189,8 +4189,11 @@ first. A look never carries the value.
 
 :::unreleased
 Two `"auto"` bars on one edge draw two handles, each along its own
-bar. The pointer opens one bar at a time: while a bar is shown, the
-other's handle goes away.
+bar. The pointer opens one bar at a time: while a bar the pointer
+opened is shown, the other's handle goes away. A bar its shortcut
+shows leaves every other handle on the edge in place, the Pocket's
+included, so the pointer can open the other bar beside it, and a
+second press hides only that bar.
 
 A revealed bar lands under its handle, in its share of the edge
 beside its sibling's handle, where a long App Bar may scroll. A

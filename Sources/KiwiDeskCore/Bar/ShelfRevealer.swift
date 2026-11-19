@@ -121,10 +121,9 @@ final class ShelfRevealer {
     /// its approach opens nothing and its handle gives way.
     func yields(_ key: Key) -> Bool {
         !key.isPocket && reveal(of: key) == .hidden
-            && phases.contains {
-                $0.key.shelf == key.shelf && $0.key != key
-                    && !$0.key.isPocket && $0.value == .hover
-                    && targets[$0.key] != nil
+            && phases.keys.contains {
+                $0.shelf == key.shelf && $0 != key && !$0.isPocket
+                    && targets[$0] != nil && reveal(of: $0) == .hover
             }
     }
 
