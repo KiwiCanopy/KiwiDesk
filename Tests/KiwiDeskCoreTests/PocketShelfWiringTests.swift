@@ -200,8 +200,7 @@ struct PocketShelfWiringTests {
             name: "",
             handle: .bottom,
             risen: risen,
-            risenSide: 32,
-            holds: !windows.isEmpty
+            risenSide: 32
         )
     }
 

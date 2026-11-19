@@ -186,16 +186,26 @@ struct ShelfRevealerTests {
         #expect(timers.delays == [ShelfReveal.dwellDelay])
     }
 
+    /// A hover the pass drops is forgotten; a pin the shortcut set
+    /// is kept until its bar returns (#3481).
     @Test("A show reports a change; a shelf that stops hiding forgets")
     func changesAndForgetting() {
-        let (revealer, _, pointer) = Self.make()
+        let (revealer, timers, pointer) = Self.make(Self.flush)
         revealer.onChange = { pointer.changes += 1 }
         revealer.toggle(Self.key, duration: 0)
         #expect(pointer.changes == 1)
         revealer.sync([:])
-        #expect(revealer.reveal(of: Self.key) == .hidden)
+        #expect(revealer.reveal(of: Self.key) == .pinned(until: nil))
         #expect(revealer.targets.isEmpty)
         #expect(!revealer.toggle(Self.key, duration: 0))
+        revealer.sync([Self.key: Self.flush])
+        revealer.toggle(Self.key, duration: 0)
+        Self.move(revealer, pointer, to: CGPoint(x: 500, y: 300))
+        Self.move(revealer, pointer, to: CGPoint(x: 500, y: 800))
+        timers.fireAll()
+        #expect(revealer.reveal(of: Self.key) == .hover)
+        revealer.sync([:])
+        #expect(revealer.reveal(of: Self.key) == .hidden)
     }
 
     @Test("The monitor listens only while a shelf hides")

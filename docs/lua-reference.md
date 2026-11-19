@@ -5670,19 +5670,18 @@ counts again once the wheel pauses between notches; the glide
 after the fingers lift never counts. Where there is no window to
 move to, the focused window's border bumps toward the step. With
 [long swipes](#scroll_gestureset_long_swipes) on, a swipe moves
-its first window as it starts and one more every
-[step distance](#scroll_gestureset_step_distance) of further
-travel, which macOS's own Scrolling speed scales. The direction
-follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
-per input.
+more than one window as it travels. The direction follows
+[Natural scrolling](#scroll_gestureset_natural_scrolling), per
+input.
 
 :::unreleased
-On a trackpad, each window after the first costs a
-[step length](#scroll_gestureset_step_length) of finger travel on
-the pad, in mm, whatever the swipe's speed; macOS's Scrolling
-speed does not change it. Where KiwiDesk reads no finger travel —
-no three- to five-finger tap or swipe is bound, or the trackpad
-reports no size — every 6 pt of scroll counts as 1 mm.
+With long swipes on, each window on a trackpad, the first
+included, costs a [step length](#scroll_gestureset_step_length)
+of finger travel on the pad, in mm, whatever the swipe's speed;
+macOS's Scrolling speed does not change it. Where KiwiDesk reads
+no finger travel — no three- to five-finger tap or swipe is
+bound, or the trackpad reports no size — the first window comes
+after 24 pt of scroll and every 6 pt after it counts as 1 mm.
 :::
 
 Hold **⌃⌥⌘** (the default;
@@ -5958,21 +5957,20 @@ scroll_gesture.set_natural_scrolling("system")
 
 ### scroll_gesture.set_long_swipes
 
-**Expects:** a boolean (default `false`).
+**Expects:** a boolean.
 
-**Does:** on, a swipe moves one more window every
-[step distance](#scroll_gestureset_step_distance) of travel
-after its first, on every layout; off, a swipe moves one window
-however long it is. A mouse wheel moves one window per notch
-either way, as the section above qualifies. The Space step
-always steps one Space per swipe.
+**Does:** on, a swipe moves one window per stretch of travel, on
+every layout; off, a swipe moves one window however long it is.
+A mouse wheel moves one window per notch either way, as the
+section above qualifies. The Space step always steps one Space
+per swipe.
 
 :::unreleased
-Long swipes are on by default, and each window after the first
-costs a [step length](#scroll_gestureset_step_length) of finger
-travel. Only `focus` and `walk` step more than once in a touch,
-whole or on one axis of a table; every other family, and every
-three- to five-finger swipe, takes one step per touch.
+Long swipes are on by default, and each window, the first
+included, costs a [step length](#scroll_gestureset_step_length)
+of finger travel. Only `focus` and `walk` step more than once in
+a touch, whole or on one axis of a table; every other family, and
+every three- to five-finger swipe, takes one step per touch.
 :::
 
 **Example:**
@@ -5983,22 +5981,12 @@ scroll_gesture.set_long_swipes(true)
 
 ### scroll_gesture.set_step_distance
 
-**Expects:** points, 10–1000 (default `60`); a value outside the
-range fails.
-
-**Does:** sets the finger travel per extra window of a
-[long swipe](#scroll_gestureset_long_swipes). It is kept, and
-does nothing, while long swipes are off.
-
-**Example:**
-
-```lua
-scroll_gesture.set_step_distance(120)
-```
-
 :::unreleased
 `scroll_gesture.set_step_distance` is retired and fails, naming
 [`scroll_gesture.set_step_length`](#scroll_gestureset_step_length).
+It took points of scroll travel per extra window of a long swipe
+(10–1000, default `60`), which macOS's Scrolling speed scaled; a
+stored value is dropped and not carried over.
 :::
 
 ### scroll_gesture.set_step_length
@@ -6007,11 +5995,11 @@ scroll_gesture.set_step_distance(120)
 **Expects:** mm, 3–60 (default `10`); a value outside the range
 fails.
 
-**Does:** sets the finger travel on the trackpad per extra window
-of a [long swipe](#scroll_gestureset_long_swipes), the same at
-every swipe speed. It applies in every profile, since no profile
-overrides it. It is kept, and does nothing, while long swipes are
-off.
+**Does:** sets the finger travel on the trackpad per window of a
+[long swipe](#scroll_gestureset_long_swipes), the first included,
+the same at every swipe speed. It applies in every profile,
+since no profile overrides it. It is kept, and does nothing,
+while long swipes are off.
 
 **Example:**
 

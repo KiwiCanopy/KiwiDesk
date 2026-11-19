@@ -48,7 +48,7 @@ extension KiwiCore {
         if event.kind == .began {
             beginScrollPan(at: event.location, session: session)
         }
-        // The finger travel the meter counts in from the latch, read
+        // The finger travel the meter counts from the begin, read
         // through the one door; nil while no reader runs (#1873).
         let reading =
             event.input == .trackpad ? mouse.trackpad.travel : nil

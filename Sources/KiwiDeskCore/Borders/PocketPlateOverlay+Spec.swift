@@ -42,9 +42,5 @@ extension PocketPlateOverlay {
         /// The One-window pocket, which slides out of its edge as it
         /// comes and back as it goes (#2793).
         var slides = false
-        /// The pocket holds something, `KiwiCore.pocketHolds`: the
-        /// tab rests full (#3384) and the kiwis look out further
-        /// (#3446). No default, so every builder states it.
-        let holds: Bool
     }
 }
