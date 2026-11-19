@@ -51,6 +51,16 @@ struct BarSliderBandTests {
         #expect(declared.contains("KiwiShelf.minThickness"))
     }
 
+    @Test("the handle thickness band is Core's range, by derivation")
+    func handleThicknessIsDerived() throws {
+        let band = BarSliderBands.handleThickness
+        let core = KiwiShelf.handleThicknessRange
+        #expect(band.lowerBound == Double(core.lowerBound))
+        #expect(band.upperBound == Double(core.upperBound))
+        let declared = try declaration(of: "handleThickness")
+        #expect(declared.contains("KiwiShelf.handleThicknessRange"))
+    }
+
     @Test("the spring delay band is Core's range, by derivation")
     func springDelayIsDerived() throws {
         let band = BarSliderBands.springDelaySeconds
