@@ -71,8 +71,12 @@ struct ScrollPanFingerWiringTests {
             session: session,
             directional: true
         )
-        // Past the 24 pt floor with no finger travel: no step yet,
+        // Past the 24 pt floor on 4 mm of finger: no step yet,
         // where the points fallback would step (#3482).
+        reader.travel = TouchTravel.Reading(
+            sum: CGVector(dx: 4, dy: 0),
+            source: 7
+        )
         core.handleScrollPan(
             event(.changed, 30),
             session: session,

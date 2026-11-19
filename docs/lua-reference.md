@@ -5677,9 +5677,9 @@ follows [Natural scrolling](#scroll_gestureset_natural_scrolling),
 per input.
 
 :::unreleased
-On a trackpad, each window, the first included, costs a
-[step length](#scroll_gestureset_step_length) of finger travel on
-the pad, in mm, whatever the swipe's speed; macOS's Scrolling
+With long swipes on, each window on a trackpad, the first
+included, costs a [step length](#scroll_gestureset_step_length)
+of finger travel on the pad, in mm, whatever the swipe's speed; macOS's Scrolling
 speed does not change it. Where KiwiDesk reads no finger travel —
 no three- to five-finger tap or swipe is bound, or the trackpad
 reports no size — the first window comes after 24 pt of scroll
@@ -5971,9 +5971,9 @@ always steps one Space per swipe.
 :::unreleased
 Long swipes are on by default, and each window, the first
 included, costs a [step length](#scroll_gestureset_step_length)
-of finger travel. Only `focus` and `walk` step more than once in a touch,
-whole or on one axis of a table; every other family, and every
-three- to five-finger swipe, takes one step per touch.
+of finger travel. Only `focus` and `walk` step more than once in
+a touch, whole or on one axis of a table; every other family, and
+every three- to five-finger swipe, takes one step per touch.
 :::
 
 **Example:**
@@ -6010,9 +6010,9 @@ fails.
 
 **Does:** sets the finger travel on the trackpad per window of a
 [long swipe](#scroll_gestureset_long_swipes), the first included,
-the same at every swipe speed. It applies in every profile, since no profile
-overrides it. It is kept, and does nothing, while long swipes are
-off.
+the same at every swipe speed. It applies in every profile,
+since no profile overrides it. It is kept, and does nothing,
+while long swipes are off.
 
 **Example:**
 

@@ -145,6 +145,53 @@ struct ScrollStepMeterFingerTests {
         #expect(meter.feed(event(.changed, dx: 5), reading: on(length)) == 1)
     }
 
+    /// A reading that never moved by the floor — a Magic Mouse
+    /// beside a pad, whose reading is the pad's — steps there and
+    /// counts points (#3482).
+    @Test("a frozen reading steps at the floor")
+    func frozenReadingIsTheFloor() {
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(7))
+        #expect(meter.feed(event(.changed, dx: 30), reading: on(7)) == 1)
+        let stride = length * ScrollStepMeter.pointsPerMM
+        #expect(meter.feed(event(.changed, dx: stride), reading: on(7)) == 1)
+    }
+
+    /// A reading lost between the floor and the first step waits:
+    /// the touch counts mm from the floor, never points after it.
+    @Test("a reading lost after the floor waits")
+    func lostAfterTheFloorWaits() {
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(0))
+        #expect(meter.feed(event(.changed, dx: 30), reading: on(4)) == 0)
+        #expect(meter.feed(event(.changed, dx: 500), reading: nil) == 0)
+        #expect(meter.feed(event(.changed, dx: 1), reading: on(length)) == 1)
+    }
+
+    /// A reading at the begin and none at the floor: the touch
+    /// steps there and counts points.
+    @Test("no reading at the floor steps there")
+    func noReadingAtTheFloor() {
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(0))
+        #expect(meter.feed(event(.changed, dx: 30), reading: nil) == 1)
+    }
+
+    /// A new source before the first step re-bases with no move.
+    @Test("a new source before the first step re-bases")
+    func sourceChangeBeforeTheFirst() {
+        var meter = ScrollStepMeter(longSwipes: true, length: length)
+        _ = meter.feed(event(.began), reading: on(0))
+        #expect(meter.feed(event(.changed, dx: 5), reading: on(4)) == 0)
+        let fresh = TouchTravel.Reading(sum: .zero, source: 2)
+        #expect(meter.feed(event(.changed, dx: 25), reading: fresh) == 0)
+        let moved = TouchTravel.Reading(
+            sum: CGVector(dx: length - 4, dy: 0),
+            source: 2
+        )
+        #expect(meter.feed(event(.changed, dx: 1), reading: moved) == 1)
+    }
+
     /// With Long swipes off the one step fires at the latch, a
     /// reading or not.
     @Test("without long swipes the latch fires the one step")

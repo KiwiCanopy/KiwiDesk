@@ -17830,8 +17830,9 @@ owner ruling, at this one cost.
 
 :::unreleased
 **Amended (#1873, owner 2026-11-16): a long swipe's later steps
-count finger travel in mm.** The first step still fires at the
-24 pt latch. After it, each step costs `step_length` mm of
+count finger travel in mm.** The first step fired at the 24 pt
+latch (the #3482 amendment below moves it onto finger travel
+too). After it, each step costs `step_length` mm of
 finger travel on the pad (default 10, 3–60), read from the touch
 reader. A point count cannot give even spacing: the scroll deltas
 the meter counted are accelerated by finger speed. 80 pt was
@@ -17847,11 +17848,12 @@ The finger travel sets only the step budget. Each step still
 takes its axis and sign from the point deltas, because those
 have had Natural scrolling's one flip and the pad's own axes have
 not, and two sources of sign would let a step disagree with its
-direction. A touch counts in one unit, fixed at the latch. If it
+direction. A touch counts in one unit, fixed at the latch's
+floor. If it
 could switch, a reader starting or stopping mid-touch would make
 the spacing jump, so a reading lost mid-touch steps nothing while
 it is gone, and never falls back to points.
-With no reading at the latch, the steps count points at 6 pt per
+With no reading at the floor, the steps count points at 6 pt per
 mm (`ScrollStepMeter.pointsPerMM`). That happens when no reader
 runs, because no three- to five-finger tap or swipe is bound, or
 when no pad reports its size. At that rate the default 10 mm is
@@ -17889,9 +17891,10 @@ sooner than the rest: points grow with finger speed, so a fast
 swipe crossed 24 pt in a few millimetres. The latch stays as a
 floor under the first step, so a resting hand's drift never
 steps, and it is still the whole rule where no finger reading
-exists or Long swipes are off. A touch's unit is fixed at its
-first step: with no reading at the floor it steps there and
-counts points after. Refused: a 16 pt latch, which is still
+exists or Long swipes are off. The unit is fixed at the floor:
+mm only where the reading moved since the touch began, so a
+Magic Mouse beside a pad, whose reading is the pad's and never
+moves, steps at the floor and counts points. Refused: a 16 pt latch, which is still
 points and still speeds up with the hand.
 :::
 

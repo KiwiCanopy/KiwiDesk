@@ -36,6 +36,9 @@ public struct ScrollStepMeter: Sendable {
     /// The finger reading last fed where the touch counts in mm,
     /// from its first reading; nil where it counts points.
     private var finger: TouchTravel.Reading?
+    /// The touch's unit, fixed at the latch's floor: mm where the
+    /// finger reading moved before it, points otherwise; nil before.
+    private var countsMM: Bool?
     /// The axis the last step took.
     private var horizontal: Bool?
     private var lastNotch: (time: Double, sign: Int)?
@@ -54,7 +57,7 @@ public struct ScrollStepMeter: Sendable {
     /// makes — positive where the delta's larger axis is positive.
     /// `reading` is the touch reader's running finger travel in mm
     /// (`TouchGestures.travel`), nil where none runs; the unit is
-    /// fixed by the first step, so a touch never counts in two.
+    /// fixed at the latch's floor, so a touch never counts in two.
     public mutating func feed(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading? = nil
@@ -70,6 +73,7 @@ public struct ScrollStepMeter: Sendable {
             fired = false
             travel = .zero
             budget = .zero
+            countsMM = nil
             // A long swipe's mm origin is the reading at its begin.
             finger =
                 event.kind == .began && longSwipes
@@ -107,10 +111,13 @@ public struct ScrollStepMeter: Sendable {
         return step(along: leads, distance: distance)
     }
 
-    /// The touch's first step: at the latch's point floor, and with
-    /// a finger reading on a long swipe once the finger has also
-    /// moved one `length` (#3482); with no reading, or no long
-    /// swipes, at the floor alone, the touch then counting points.
+    /// The touch's first step, never before the latch's point floor
+    /// (#3482). There the unit is fixed: a long swipe whose finger
+    /// reading moved since the begin counts mm and steps once the
+    /// finger has moved one `length`, a reading lost meanwhile
+    /// stepping nothing; any other touch — no reading, a reading
+    /// that never moved (a Magic Mouse beside a pad), no long
+    /// swipes — steps at the floor and counts points.
     private mutating func first(
         _ event: ScrollGestureEvent,
         reading: TouchTravel.Reading?
@@ -133,7 +140,11 @@ public struct ScrollStepMeter: Sendable {
         guard let (leads, sign) = ScrollStepLatch.named(travel) else {
             return 0
         }
-        if counts, reading != nil, finger != nil {
+        if countsMM == nil {
+            countsMM = counts && reading != nil && budget != .zero
+        }
+        if countsMM == true {
+            guard reading != nil else { return 0 }
             let steps = step(along: leads, distance: length)
             fired = steps != 0
             return steps
