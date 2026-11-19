@@ -2434,6 +2434,15 @@ AppKit scroller while a mouse is connected (#3413,
 `ShortcutsPanelScrollTests` ▸ `hiddenIsHeld`, whose `allowed` map
 is the one copy of the `.hidden` sites left).
 
+**A page whose fixed control swaps the content below it in place
+lays out at one width whether that content scrolls or fits**: its
+vertical `ScrollView` takes `legacyScrollerGutter` and its content
+the bound it writes, so a legacy scroller's width is held on a
+segment that fits and the columns hold still across segments
+(#3491, `ShortcutKeyColumnTests`). A page reached only by
+navigation takes none. The scroller style is read only through
+`ScrollerStyleWatch` (`StripScrollerTests` ▸ `clearanceHome`).
+
 **A strip's content in those two trees clears an overlay scroller
 through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
 that strip's content width and viewport (`StripScrollerTests` ▸

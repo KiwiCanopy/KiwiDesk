@@ -26,8 +26,8 @@ struct ShortcutsSection: View {
     @State var buildsWholePage = false
     @State private var endScroll: Task<Void, Never>?
     @State var targetScroll: Task<Void, Never>?
-    /// The room a legacy scroller's gutter holds while the page fits.
-    @State var scrollerRoom: CGFloat = 0
+    /// The widest the page lays out under a legacy scroller (#3491).
+    @State var scrollerBound: CGFloat?
     @StateObject var coordinator =
         RecorderCoordinator(scrollsInPlace: true)
 
@@ -179,9 +179,9 @@ struct ShortcutsSection: View {
                 }
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
-            .padding(.trailing, scrollerRoom)
+            .frame(maxWidth: scrollerBound ?? .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .settingsPageBottom()
-            .reportsScrollContentHeight()
             .overlay(alignment: .bottom) {
                 Color.clear.frame(height: 1).id(Self.pageEnd)
             }
@@ -204,9 +204,9 @@ struct ShortcutsSection: View {
             .recorderKeys(model)
             .environmentObject(coordinator)
         }
-        // A segment that fits keeps a legacy scroller's gutter, so
-        // every segment's keys stand in one column (#3491).
-        .legacyScrollerGutter($scrollerRoom)
+        // One width whether a segment scrolls or fits, so every
+        // segment's keys stand in one column (#3491).
+        .legacyScrollerGutter($scrollerBound)
         .shortcutsJumpSlot(.viewport)
         // The chips' groups report under their anchor ids.
         .mapsSectionFrames()

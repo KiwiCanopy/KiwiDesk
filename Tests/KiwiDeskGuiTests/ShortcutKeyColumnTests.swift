@@ -32,7 +32,7 @@ struct ShortcutKeyColumnTests {
     private func wellEnds(
         _ segment: ShortcutsSegment,
         least: Int,
-        legacy: Bool = false
+        style: NSScroller.Style? = nil
     ) async -> [CGFloat] {
         let model = makeTestModel()
         model.nav.shortcutsSegment = segment
@@ -48,7 +48,7 @@ struct ShortcutKeyColumnTests {
         defer { window.orderOut(nil) }
         let host = NSHostingView(
             rootView: ShortcutsSection(model: model)
-                .environment(\.legacyScrollerForced, legacy)
+                .environment(\.scrollerStyleForced, style)
                 .frame(width: width, height: height, alignment: .top)
         )
         window.contentView = host
@@ -110,21 +110,20 @@ struct ShortcutKeyColumnTests {
         )
     }
 
-    /// A page that fits under a legacy scroller holds the scroller's
-    /// width, so its wells stand where a scrolling page's do. The
-    /// override makes this Mac's overlay scroller read as legacy; on
-    /// a Mac that already shows legacy ones it changes nothing.
-    @Test("a fitting page holds a legacy scroller's gutter")
-    func fittingPageHoldsTheGutter() async {
+    /// A page that fits under a legacy scroller lays out at the
+    /// width a showing scroller leaves, so its wells stand where a
+    /// scrolling page's do; under an overlay scroller, at the full
+    /// width. Both styles are forced, so either kind of host runs
+    /// both.
+    @Test("a fitting page keeps a legacy scroller's width")
+    func fittingPageKeepsTheGutter() async {
         LocalizationManager.shared.select("en")
-        let plain = Set(await wellEnds(.mouse, least: 5))
-        let forced = Set(await wellEnds(.mouse, least: 5, legacy: true))
-        let already = NSScroller.preferredScrollerStyle == .legacy
-        let shift = already ? 0 : LegacyScrollerGutter.width
-        #expect(plain.count == 1 && forced.count == 1)
+        let overlay = Set(await wellEnds(.mouse, least: 5, style: .overlay))
+        let legacy = Set(await wellEnds(.mouse, least: 5, style: .legacy))
+        #expect(overlay.count == 1 && legacy.count == 1)
         #expect(
-            forced.map { $0 + shift } == Array(plain),
-            "fitting page's wells at \(forced.sorted()), plain \(plain)"
+            legacy.map { $0 + LegacyScrollerGutter.width } == Array(overlay),
+            "legacy wells at \(legacy.sorted()), overlay \(overlay)"
         )
     }
 }

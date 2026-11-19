@@ -10,7 +10,7 @@ struct StripScrollerRoom: ViewModifier {
     /// The least room to keep, whether or not a scroller draws: a
     /// risen tile's shadow (#3042).
     var floor: CGFloat = 0
-    @State private var style = NSScroller.preferredScrollerStyle
+    @StateObject private var scroller = ScrollerStyleWatch()
 
     /// An overlay scroller's height over the content's bottom edge.
     /// Measured on macOS 27 in a SwiftUI `ScrollView`, 2026-11-05.
@@ -25,17 +25,10 @@ struct StripScrollerRoom: ViewModifier {
                     Self.room(
                         contentWidth: contentWidth,
                         viewport: viewport,
-                        style: style
+                        style: scroller.style
                     )
                 )
             )
-            .onReceive(
-                NotificationCenter.default.publisher(
-                    for: NSScroller.preferredScrollerStyleDidChangeNotification
-                )
-            ) { _ in
-                style = NSScroller.preferredScrollerStyle
-            }
     }
 
     /// No room where no scroller draws, or before the viewport is
