@@ -155,13 +155,19 @@ final class ShelfRevealer {
     }
 
     /// The hiding bars of this pass; a bar that stopped hiding
-    /// forgets its state, save a pin its shortcut set, which holds
-    /// until the next toggle or its timeout — across a Space whose
-    /// layout draws no such bar too (#3481).
+    /// forgets its state, save a shortcut's pin: kept until the next
+    /// toggle or its timeout across a pass filing no such bar, and
+    /// dropped once one files the bar on another edge (#3481).
     func sync(_ next: [Key: Target]) {
         for key in targets.keys where next[key] == nil {
             if case .pinned? = phases[key] { continue }
             forget(key)
+        }
+        for key in phases.keys where next[key] == nil {
+            let moved = next.keys.contains {
+                $0.bar == key.bar && $0.shelf.display == key.shelf.display
+            }
+            if moved { forget(key) }
         }
         targets = next
         syncMonitor()

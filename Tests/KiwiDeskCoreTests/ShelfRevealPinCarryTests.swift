@@ -142,4 +142,37 @@ struct ShelfRevealPinCarryTests {
         revealer.sync([key: target])
         #expect(revealer.reveal(of: key) == .hidden)
     }
+
+    /// A bar moved to another edge of its screen leaves no pin at
+    /// the edge it left.
+    @Test("a kept pin goes when its bar moves edge")
+    func movedBarDropsThePin() {
+        let display = DisplayID(1)
+        let top = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(display: display, edge: .top),
+            bar: .app
+        )
+        let bottom = ShelfRevealer.Key(
+            shelf: ShelfManager.Key(display: display, edge: .bottom),
+            bar: .app
+        )
+        let target = ShelfRevealer.Target.hidden(
+            edge: .top,
+            strip: CGRect(x: 0, y: 760, width: 1000, height: 40),
+            screen: CGRect(x: 0, y: 0, width: 1000, height: 800)
+        )
+        let revealer = ShelfRevealer()
+        revealer.macEdges = { .none }
+        revealer.makeMonitor = { _ in nil }
+        revealer.schedule = { _, _ in ShelfRevealTimer() }
+        revealer.sync([top: target])
+        revealer.start()
+        defer { revealer.stop() }
+        #expect(revealer.toggle(top, duration: 0))
+        revealer.sync([:])
+        #expect(revealer.reveal(of: top).isShown)
+        revealer.sync([bottom: target])
+        revealer.sync([top: target])
+        #expect(revealer.reveal(of: top) == .hidden)
+    }
 }
