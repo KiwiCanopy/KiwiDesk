@@ -7297,20 +7297,13 @@ shelf's strip.
 :::
 
 :::unreleased
-*Amended* (owner, 2026-11-18, #3446): **while the pocket holds
-something its kiwis look out 8 points, not 5.** A full pocket rests
-its tab at the fill strength (#3384), but that colour shows only in
-the few points the kiwis look out past it, so it was easy to miss.
-The tab stays flush and handle-deep, so a row of handles still
-reads as one, and the kiwis alone move; only the handle changes,
-never the whole mark under Always or the section on a bar. It is a
-resting state, not
-a hover lift, so #3366 does not apply, and it reserves nothing. The
-handle's frame and the rise's travel read the held depth, so a
-put-in or take-out sinks the pocket back to where the kiwis then
-stand rather than popping 3 points. Refused: a tab standing off the
-edge, which breaks the one-row rule, and more than about 3 points
-extra, which reads as the pocket rising.
+*Amended* (owner, 2026-11-19, #3480, ruling back #3446): **a
+full pocket's kiwis look out the same 5 points as an empty
+one's.** A held look-out of 8 points read too far on the device:
+the kiwis seemed to start rising. A full pocket says so through
+its tab's fill strength (#3384) alone. Refused: any held lift of
+the kiwis, and a tab standing off the edge, which breaks the
+one-row rule.
 :::
 
 **The handle answers the pointer in two steps, as the bars'
@@ -17858,8 +17851,9 @@ owner ruling, at this one cost.
 
 :::unreleased
 **Amended (#1873, owner 2026-11-16): a long swipe's later steps
-count finger travel in mm.** The first step still fires at the
-24 pt latch. After it, each step costs `step_length` mm of
+count finger travel in mm.** The first step fired at the 24 pt
+latch (the #3482 amendment below moves it onto finger travel
+too). After it, each step costs `step_length` mm of
 finger travel on the pad (default 10, 3–60), read from the touch
 reader. A point count cannot give even spacing: the scroll deltas
 the meter counted are accelerated by finger speed. 80 pt was
@@ -17875,11 +17869,12 @@ The finger travel sets only the step budget. Each step still
 takes its axis and sign from the point deltas, because those
 have had Natural scrolling's one flip and the pad's own axes have
 not, and two sources of sign would let a step disagree with its
-direction. A touch counts in one unit, fixed at the latch. If it
+direction. A touch counts in one unit, fixed at the latch's
+floor. If it
 could switch, a reader starting or stopping mid-touch would make
 the spacing jump, so a reading lost mid-touch steps nothing while
 it is gone, and never falls back to points.
-With no reading at the latch, the steps count points at 6 pt per
+With no reading at the floor, the steps count points at 6 pt per
 mm (`ScrollStepMeter.pointsPerMM`). That happens when no reader
 runs, because no three- to five-finger tap or swipe is bound, or
 when no pad reports its size. At that rate the default 10 mm is
@@ -17907,6 +17902,24 @@ raised whether a stored 60 should move with it, as the
 `long_swipes` re-default moved a stored false. The drop answers
 that: no stored value survives, so every user gets the new
 default.
+:::
+
+:::unreleased
+*Amended* (owner, 2026-11-19, #3482): **a long swipe's first
+step costs a step length of finger travel too, so every step is
+even.** Firing the first at the 24 pt latch made it come far
+sooner than the rest: points grow with finger speed, so a fast
+swipe crossed 24 pt in a few millimetres. The latch stays as a
+floor under the first step, so a resting hand's drift never
+steps, and it is still the whole rule where no finger reading
+exists or Long swipes are off. From the floor the unit is fixed:
+mm once the reading has moved since the touch began. A reading
+that has not moved yet may be a frame behind a fast flick, so the
+first step waits for it up to one points stride (6 pt per mm of
+`step_length`); a Magic Mouse beside a pad, whose reading is the
+pad's and never moves, steps there and counts points. Refused: a
+16 pt latch, which is still points and still speeds up with the
+hand.
 :::
 
 :::unreleased

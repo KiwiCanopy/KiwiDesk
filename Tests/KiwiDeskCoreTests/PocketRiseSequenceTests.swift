@@ -46,7 +46,6 @@ struct PocketRiseSequenceTests {
             edge: edge,
             side: spec.risenSide,
             travel: BarMotion.pocketRiseTravel(
-                holds: spec.holds,
                 tabDepth: PocketHandleView.tabDepth(of: spec.shelf)
             )
         )
@@ -230,7 +229,6 @@ struct PocketRiseSequenceTests {
             handle: .bottom,
             risen: false,
             side: 40,
-            holds: false,
             tabDepth: 3,
             before: up
         )
@@ -240,7 +238,6 @@ struct PocketRiseSequenceTests {
             handle: .bottom,
             risen: false,
             side: 40,
-            holds: false,
             tabDepth: 3,
             before: up
         )

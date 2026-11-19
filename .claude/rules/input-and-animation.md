@@ -104,11 +104,11 @@ editing here:
     floating focus the arrow keys would carry to the float tier
     (`ScrollGestureDeadEndTests` ▸ `floatFocusFollowsTheKeys`).
     A swipe step's axis is the meter's alone
-    (`ScrollStepMeter.firedHorizontal`): the latch's for the
-    first step, then the axis each long-swipe step's own travel
-    leads (#1873). A consumer reads it and never projects an event
-    onto an axis of its own, nor takes a second reading of the
-    travel (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel`,
+    (`ScrollStepMeter.firedHorizontal`): the axis each step's own
+    travel leads, the first's no earlier than the latch's floor
+    (#1873, #3482). A consumer reads it and never projects an
+    event onto an axis of its own, nor takes a second reading of
+    the travel (`ScrollPanSwipeTests` ▸ `lockReadsTheTravel`,
     `longSwipeTurns`; a projection returning is review's).
   - **Finger travel and point travel meet in `ScrollStepMeter`
     and nowhere else** (#1873 ▸ Ruling 2026-11-16). A consumer
@@ -116,14 +116,18 @@ editing here:
     no unit arithmetic of its own. Finger mm sets only a long
     swipe's step budget: never take a step's axis or sign from
     the reading, since the point delta carries Natural
-    scrolling's one flip and the pad's axes do not. Fix a
-    touch's unit at the latch: a reading lost mid-touch steps
-    nothing rather than switching to points, and a touch with no
-    reading at the latch counts points at
+    scrolling's one flip and the pad's axes do not. A long swipe's
+    first step costs a step length too, never fewer points than
+    the latch's floor (#3482). Fix a touch's unit at that floor:
+    mm once the reading has moved since the begin, so a reading
+    lost after that steps nothing rather than switching to points;
+    a touch with no reading at the floor steps there, and one whose
+    reading has not moved waits up to one points stride (a Magic
+    Mouse beside a pad), each then counting points at
     `ScrollStepMeter.pointsPerMM` (`ScrollStepMeterFingerTests`;
     a second meeting place is review's). The argument is
     `docs/design-decisions.md` ▸ *Amended (#1873, owner
-    2026-11-16)*.
+    2026-11-16)* and its #3482 amendment.
   - **On the two-finger path a split's axis family runs through
     the whole family's runner** — the pan or the Space step — for
     that gesture, chosen once the travel names its axis, never a

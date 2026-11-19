@@ -4,7 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// One step per scroll gesture (#1519): threshold, then a latch
-/// held until the gesture ends.
+/// held until the gesture ends — the meter's short swipe, the latch
+/// its floor (#3482).
 @Suite("Scroll step latch")
 struct ScrollStepLatchTests {
     private func event(
@@ -25,12 +26,12 @@ struct ScrollStepLatchTests {
 
     @Test("a fling steps once, however far it travels")
     func oneStepPerGesture() {
-        var latch = ScrollStepLatch()
+        var latch = ScrollStepMeter(longSwipes: false, length: 10)
         _ = latch.feed(event(.began))
-        let steps = (0..<40).compactMap {
+        let steps = (0..<40).map {
             _ in latch.feed(event(.changed, dx: 10))
         }
-        #expect(steps == [1])
+        #expect(steps.filter { $0 != 0 } == [1])
         _ = latch.feed(event(.ended))
         _ = latch.feed(event(.began))
         #expect(latch.feed(event(.changed, dx: -30)) == -1)
@@ -38,16 +39,16 @@ struct ScrollStepLatchTests {
 
     @Test("trackpad drift under the threshold does not step")
     func thresholdHolds() {
-        var latch = ScrollStepLatch()
+        var latch = ScrollStepMeter(longSwipes: false, length: 10)
         _ = latch.feed(event(.began))
         let under = ScrollStepLatch.trackpadThreshold - 1
-        #expect(latch.feed(event(.changed, dy: under)) == nil)
+        #expect(latch.feed(event(.changed, dy: under)) == 0)
         #expect(latch.feed(event(.changed, dy: 1)) == 1)
     }
 
     @Test("the axis with the larger travel picks the way")
     func dominantAxis() {
-        var latch = ScrollStepLatch()
+        var latch = ScrollStepMeter(longSwipes: false, length: 10)
         _ = latch.feed(event(.began))
         #expect(latch.feed(event(.changed, dx: -20, dy: 30)) == 1)
         _ = latch.feed(event(.ended))
@@ -59,7 +60,7 @@ struct ScrollStepLatchTests {
     @Test("it names the axis it fired on until the gesture ends")
     func firedAxis() {
         for end in [ScrollGestureEvent.Kind.ended, .began] {
-            var latch = ScrollStepLatch()
+            var latch = ScrollStepMeter(longSwipes: false, length: 10)
             _ = latch.feed(event(.began))
             #expect(latch.firedHorizontal == nil)
             _ = latch.feed(event(.changed, dx: 30, dy: 10))
