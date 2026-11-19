@@ -1785,7 +1785,7 @@
   "notification.permission_lost.title": "KiwiDesk stopped managing windows",
   "onboarding.back": "Back",
   "onboarding.bars.always": "Always on screen. Your windows fit beside them.",
-  "onboarding.bars.auto": "Hidden to a thin mark. Rest the pointer on it to show the bar.",
+  "onboarding.bars.auto": "A thin handle. Rest the pointer on it to show the bar.",
   "onboarding.bars.body": "Keep the Space Bar and App Bar on screen, or hide them and give your windows the whole screen.",
   "onboarding.bars.draft_pending": "Settings has changes you haven't saved. Choose %1$@ or %2$@ there to choose when the bars show here.",
   "onboarding.bars.hidden": "Nothing on screen. Show a bar with its shortcut below.",

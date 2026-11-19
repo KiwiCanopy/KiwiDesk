@@ -1785,7 +1785,7 @@
   "notification.permission_lost.title": "KiwiDesk 已停止管理窗口",
   "onboarding.back": "返回",
   "onboarding.bars.always": "始终在屏幕上。窗口排在它们旁边。",
-  "onboarding.bars.auto": "隐藏成一道细条。将指针停留在细条上即可显示栏。",
+  "onboarding.bars.auto": "一个细把手。将指针停留在把手上即可显示栏。",
   "onboarding.bars.body": "让 Space Bar 和 App Bar 留在屏幕上，或者隐藏它们，把整个屏幕留给窗口。",
   "onboarding.bars.draft_pending": "“设置”中有尚未存储的更改。请在那里选择“%1$@”或“%2$@”，才能在这里选择栏何时显示。",
   "onboarding.bars.hidden": "屏幕上不显示任何内容。用下方的快捷键显示栏。",

@@ -1785,7 +1785,7 @@
   "notification.permission_lost.title": "KiwiDeskがウインドウの管理を停止しました",
   "onboarding.back": "戻る",
   "onboarding.bars.always": "常に画面に表示。ウインドウはその横に収まります。",
-  "onboarding.bars.auto": "細い帯だけ残して隠れます。ポインタを帯に止めるとバーが表示されます。",
+  "onboarding.bars.auto": "細いハンドル。ハンドルにポインタを止めるとバーが表示されます。",
   "onboarding.bars.body": "Space BarとApp Barを画面に表示したままにするか、隠して画面全体をウインドウに使えるようにします。",
   "onboarding.bars.draft_pending": "設定に保存していない変更があります。ここでバーを表示するタイミングを選ぶには、設定で「%1$@」または「%2$@」を選んでください。",
   "onboarding.bars.hidden": "画面には何も表示しません。下のショートカットでバーを表示します。",

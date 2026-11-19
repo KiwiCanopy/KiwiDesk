@@ -60,8 +60,7 @@ struct OnboardingBarsTiles: View {
         case .auto:
             L(
                 "onboarding.bars.auto",
-                "Hidden to a thin mark. Rest the pointer on it to "
-                    + "show the bar."
+                "A thin handle. Rest the pointer on it to show the bar."
             )
         case .hidden:
             L(

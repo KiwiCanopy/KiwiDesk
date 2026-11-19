@@ -1785,7 +1785,7 @@
   "notification.permission_lost.title": "KiwiDesk ha smesso di gestire le finestre",
   "onboarding.back": "Indietro",
   "onboarding.bars.always": "Sempre sullo schermo. Le finestre si sistemano accanto.",
-  "onboarding.bars.auto": "Ridotta a una sottile striscia: fermaci il puntatore per mostrarla.",
+  "onboarding.bars.auto": "Una sottile maniglia. Fermaci il puntatore per mostrare la barra.",
   "onboarding.bars.body": "Tieni la Space Bar e la App Bar sullo schermo, oppure nascondile e lascia alle tue finestre tutto lo schermo.",
   "onboarding.bars.draft_pending": "In Impostazioni ci sono modifiche che non hai salvato. Fai clic lì su «%1$@» o «%2$@» per scegliere qui quando mostrare le barre.",
   "onboarding.bars.hidden": "Niente sullo schermo. Mostra una barra con la sua scorciatoia qui sotto.",
