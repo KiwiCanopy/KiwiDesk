@@ -1272,12 +1272,14 @@ must keep:
   `Conflict.target`, because the tier is not in the target alone:
   an enabled symbolic hotkey is DEAD for a Carbon row (macOS
   answers the press first — measured, `docs/design-decisions.md`
-  ▸ Shortcuts), save one KiwiDesk wins on the row's press path,
-  asked of the one `SystemShortcut.losesToKiwiDesk(on:)` with the
-  path the target carries, ahead of the plist bit — a step key
-  asks it through `ConflictSeverity.ofStep`, never a reading of
-  its own (#3239, #3311; `PressPathSeverityTests` ▸
-  `leaderAndStepAgree`), a
+  ▸ Shortcuts), save one KiwiDesk wins or shares on the row's
+  press path, asked of the one `SystemShortcut.answer(on:)` with
+  the path the target carries, ahead of the plist bit — a step
+  key asks it through `ConflictSeverity.ofStep`, never a reading
+  of its own (#3239, #3311, #3504; `PressPathSeverityTests` ▸
+  `leaderAndStepAgree`) — a shared chord reading
+  `.firesWithMacOS`, never dead and never a win
+  (`FiresWithMacOSTextTests`), a
   disabled one merely dormant, and a chord every app's menus
   carry is won by KiwiDesk with the apps paying. The tier and
   its sentence reach a row as ONE `ConflictReading`, a `let`

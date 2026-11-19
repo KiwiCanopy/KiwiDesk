@@ -178,6 +178,11 @@ enum ConflictText {
                 "Takes %1$@ away from macOS while it is bound here.",
                 shortcut.localizedName
             )
+        case .firesWithMacOS(let shortcut, let macOSOn):
+            return FiresWithMacOSText.sentence(
+                for: shortcut,
+                macOSOn: macOSOn
+            )
         case .dormant(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system_off",

@@ -20,7 +20,7 @@ extension KiwiCore {
     /// sequence is open (#3173): one the router would pass, read as
     /// the router reads it. Nil for none, and for an app's menu
     /// chord, which an open sequence swallows anyway. Whether the
-    /// step wins it is `losesToKiwiDesk(on: .keyboardTap)` (#3311).
+    /// step wins it is `answer(on: .keyboardTap)` (#3311).
     public func sequenceStepShortcut(_ combo: String) -> SystemShortcut? {
         guard let key = KeyCombo.parse(combo),
             let shortcut = KeySequenceRouter.systemShortcut(

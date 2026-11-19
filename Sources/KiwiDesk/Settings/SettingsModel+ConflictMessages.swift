@@ -28,7 +28,9 @@ extension SettingsModel {
     /// the switched-off set and the other input-source chord. A
     /// section wires it once into `\.systemShortcutState`.
     func systemShortcutState() -> SystemShortcutState {
-        SystemShortcutState.live(reading: readSymbolicHotkey)
+        var state = SystemShortcutState.live(reading: readSymbolicHotkey)
+        state.sides = appWide.modifierSides
+        return state
     }
 
     /// Live derived banner text reflecting active conflicts
@@ -174,7 +176,16 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .sidesTaken,
+            case .firesWithMacOS(_, macOSOn: true):
+                return L(
+                    "keybinding.conflict.system_both",
+                    "Shortcut for \"%1$@\" also runs macOS's "
+                        + "\"%2$@\" on each press.",
+                    name(conflict.binding),
+                    shortcut.localizedName
+                )
+            case .firesWithMacOS, .dormant, .duplicate, .sideCollapse,
+                .sidesTaken,
                 .unrecognized, .takesFromMacOS:
                 break
             }
@@ -258,7 +269,15 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .sidesTaken,
+            case .firesWithMacOS(_, macOSOn: true):
+                return L(
+                    "keybinding.conflict.bullet.system_both",
+                    "\"%1$@\" also runs macOS's \"%2$@\" on each press",
+                    name(conflict.binding),
+                    shortcut.localizedName
+                )
+            case .firesWithMacOS, .dormant, .duplicate, .sideCollapse,
+                .sidesTaken,
                 .unrecognized, .takesFromMacOS:
                 break
             }

@@ -75,11 +75,13 @@ struct ConflictSeverityTests {
     }
 
     /// Measured 2026-11-14 (#3239), macOS 27.2: a posted ⌃⌥Space
-    /// switched the input source with nothing bound; a leader's tap
-    /// swallowed it every time with no switch, and a Carbon hotkey
-    /// fired on six presses by hand with no switch. So a row on it
-    /// works, on or off, whichever way it is bound.
-    @Test("any row on the input-source chord takes it from macOS")
+    /// switched the input source with nothing bound, and a leader's
+    /// tap swallowed it every time with no switch. Measured by hand
+    /// with a source poller 2026-11-19 (#3504): a Carbon row on
+    /// ⌃⌥Space fired nine times with no switch, while one on ⌃Space
+    /// fired AND switched. So any row takes ⌃⌥Space, and a Carbon
+    /// row on ⌃Space is the one that fires beside macOS.
+    @Test("any row takes ⌃⌥Space; a Carbon ⌃Space row shares")
     func rowsTakeTheInputSourceChord() throws {
         let leader = KeyBinding(combo: "ctrl+alt+space", kind: .sequence)
         let onLeader = try #require(
@@ -99,8 +101,13 @@ struct ConflictSeverityTests {
         }
         #expect(
             SystemShortcut.allCases.filter {
-                $0.losesToKiwiDesk(on: .carbon)
-            } == [.inputSourceNext, .inputSourcePrevious]
+                $0.answer(on: .carbon) == .kiwiDesk
+            } == [.inputSourceNext]
+        )
+        #expect(
+            SystemShortcut.allCases.filter {
+                $0.answer(on: .carbon) == .both
+            } == [.inputSourcePrevious]
         )
     }
 
@@ -183,15 +190,15 @@ struct ConflictSeverityTests {
         // `of` reads as the apps' first.
         #expect(
             SystemShortcut.allCases
-                .filter { $0.losesToKiwiDesk(on: .carbon) }
+                .filter { $0.answer(on: .carbon) != .macOS }
                 .allSatisfy { $0.symbolicHotkey != nil }
         )
         #expect(
             SystemShortcut.allCases
                 .filter(\.isUniversalAccelerator)
                 .allSatisfy {
-                    !$0.losesToKiwiDesk(on: .carbon)
-                        && !$0.losesToKiwiDesk(on: .keyboardTap)
+                    $0.answer(on: .carbon) == .macOS
+                        && $0.answer(on: .keyboardTap) == .macOS
                 }
         )
     }

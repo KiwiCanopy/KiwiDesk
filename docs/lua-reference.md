@@ -1381,7 +1381,8 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 and leaves it alone.
 
 :::unreleased
-Save the two input-source shortcuts, which a KiwiDesk row wins
+Save **⌃⌥Space**, which a KiwiDesk row wins; on **⌃Space** the row
+and macOS both answer
 ([Modifiers and Keys](#modifiers-and-keys)).
 :::
 
@@ -8184,10 +8185,13 @@ its chord without `hyper`, so an enabled macOS shortcut on that
 chord (`hyper+cmd+space` is Spotlight's) still wins.
 
 :::unreleased
-The two input-source shortcuts are the exception: a KiwiDesk row
-on **⌃Space** or **⌃⌥Space**, a Hyper combo held to either
-included, fires, and macOS does not switch the input source while
-it is bound.
+The input-source shortcuts are the exception. A KiwiDesk row on
+**⌃⌥Space**, a Hyper combo held to it included, fires, and macOS
+does not switch the input source while it is bound. On **⌃Space**
+only a leader, a step key or a sided row does the same: a plain
+row or a Hyper combo fires and macOS still switches the input
+source, so turn macOS's shortcut off first (System Settings ▸
+Keyboard ▸ Keyboard Shortcuts ▸ Input Sources).
 :::
 
 A side is `l` or `r` before a short name: `lcmd` / `rcmd`,

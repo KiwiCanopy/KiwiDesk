@@ -10,6 +10,9 @@ struct SystemShortcutState: Equatable {
     /// The chord each of macOS's two input-source shortcuts answers
     /// now; absent while macOS has it off.
     var inputSources: [SystemShortcut: KeyCombo]
+    /// Whether this Mac tells modifier sides apart (#2601), which
+    /// decides whether a row's press is the keyboard tap's.
+    var sides = false
 
     /// macOS's two input-source shortcuts (#3319, #3331).
     static let inputSourceShortcuts: [SystemShortcut] = [
@@ -33,8 +36,9 @@ struct SystemShortcutState: Equatable {
 
     /// The chord of the input-source shortcut other than `taken`
     /// while macOS answers it and no row of any of `config`'s layers
-    /// is bound to it; nil otherwise, and for a `taken` that is no
-    /// input-source shortcut. A row in a layer not active, a Lua
+    /// takes it from macOS; nil otherwise, and for a `taken` that is
+    /// no input-source shortcut. A row macOS answers beside (#3504)
+    /// leaves the chord switching. A row in a layer not active, a Lua
     /// `bind` and a profile's own override row are not told apart:
     /// the first leaves the clause out, the other two are unseen.
     func inputSourceStillSwitching(
@@ -47,11 +51,30 @@ struct SystemShortcutState: Equatable {
             }),
             let chord = inputSources[other]
         else { return nil }
-        let bound = config.layers.contains { layer in
-            layer.bindings.contains {
-                KeyCombo.parse($0.combo)?.registered == chord.registered
+        let taken = config.layers.contains { layer in
+            layer.bindings.contains { row in
+                KeyCombo.parse(row.combo)?.registered == chord.registered
+                    && !sharesWithMacOS(other, row, in: layer.bindings)
             }
         }
-        return bound ? nil : chord
+        return taken ? nil : chord
+    }
+
+    /// Whether `row`, on `shortcut`'s chord, fires beside macOS's
+    /// shortcut rather than taking it (`SystemShortcut.answer(on:)`).
+    private func sharesWithMacOS(
+        _ shortcut: SystemShortcut,
+        _ row: KeyBinding,
+        in rows: [KeyBinding]
+    ) -> Bool {
+        guard
+            case .systemShortcut(shortcut, let path)? =
+                KeybindingConflicts.conflict(
+                    for: row,
+                    in: rows,
+                    distinguishingSides: sides
+                )?.target
+        else { return false }
+        return shortcut.answer(on: path) == .both
     }
 }

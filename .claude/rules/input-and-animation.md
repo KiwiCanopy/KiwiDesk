@@ -474,7 +474,7 @@ editing here:
   (`eventHotKeyExistsErr`) is intra-process only — and an
   enabled symbolic hotkey is then answered by macOS before the
   binding hears the press, with nothing said (#1126, measured
-  2026-09-03) — save what `SystemShortcut.losesToKiwiDesk(on:)`
+  2026-09-03) — save what `SystemShortcut.answer(on:)`
   answers for the row's press path, a leader, a step key and a
   sided row being the keyboard tap's ([gui.md](gui.md) ▸ the tier
   bullet, #3239, #3311). **Judge a row and a step key by that one
@@ -483,7 +483,12 @@ editing here:
   only from a measurement on its path: a posted press reaches the tap
   but never Carbon, so it proves nothing about a Carbon row, and a
   chord a posted press cannot fire is unmeasured on both
-  (`PressPathConflictTests`). The product ruling is
+  (`PressPathConflictTests`). **A hand measurement logs what macOS
+  did, never only what the row did**: run a poller of the macOS
+  effect (the input source through `TISCopyCurrentKeyboardInputSource`)
+  on one timeline with the row's fires, beside an unbound control
+  press — a "the row fired" reading without it shipped ⌃Space as
+  won when both fire (#3504). The product ruling is
   `docs/design-decisions.md` ▸ "Size is not a positional verb"
   (`SizeLayerSeedTests`).
 - **KiwiDesk's own windows are discriminated per WINDOW, never

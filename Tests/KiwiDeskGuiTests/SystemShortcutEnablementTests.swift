@@ -143,6 +143,9 @@ struct ConflictAccessorRoutingTests {
             "ConflictText.swift": [
                 "conflict", "rowConflicts", "rowReaches", "sideReach",
             ],
+            // Whether a row on the other input-source chord takes it
+            // from macOS, by the row's own press path (#3504).
+            "SystemShortcutState.swift": ["conflict"],
         ]
         var actionableHits = 0
         var familyHits = 0
@@ -203,8 +206,20 @@ struct ConflictAccessorRoutingTests {
         #expect(
             accessor.contains(
                 "funcsystemShortcutState()->SystemShortcutState{"
-                    + "SystemShortcutState.live("
-                    + "reading:readSymbolicHotkey)}"
+                    + "varstate=SystemShortcutState.live("
+                    + "reading:readSymbolicHotkey)"
+                    + "state.sides=appWide.modifierSides"
+            )
+        )
+        // A switched-off shared chord offers no fix either (#3504).
+        let recorder = try Self.stripped(
+            "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                + "Recorder/KeyRecorderField+Conflict.swift"
+        )
+        #expect(
+            recorder.contains(
+                "privatevarreadsDormant:Bool{"
+                    + "reading?.severity.macOSHasItOff==true}"
             )
         )
         var stateHits = 0

@@ -62,7 +62,7 @@ struct PressPathConflictTests {
     @Test("the tap takes exactly the chords measured on it")
     func verdicts() {
         let tap = SystemShortcut.allCases.filter {
-            $0.losesToKiwiDesk(on: .keyboardTap)
+            $0.answer(on: .keyboardTap) == .kiwiDesk
         }
         #expect(
             Set(tap) == [
@@ -72,6 +72,12 @@ struct PressPathConflictTests {
                 .appSwitcher, .dockHiding, .inputSourceNext,
                 .inputSourcePrevious,
             ]
+        )
+        // The tap shares no chord with macOS: a swallow is whole.
+        #expect(
+            SystemShortcut.allCases.allSatisfy {
+                $0.answer(on: .keyboardTap) != .both
+            }
         )
     }
 }

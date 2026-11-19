@@ -16,8 +16,9 @@ import SwiftUI
 /// the symbolic table, are macOS's too (#1275, 2026-10-10): dead,
 /// and no setting switches them off. A row the keyboard tap
 /// decides — a leader, a step key, a sided row — wins them, save
-/// ⌥⌘Esc, and `⌃⌥space` and `⌃space` are KiwiDesk's on either path
-/// (#3239, #3311, #3331; `SystemShortcut.losesToKiwiDesk(on:)`).
+/// ⌥⌘Esc; `⌃⌥space` is KiwiDesk's on either path, and a Carbon row
+/// on `⌃space` fires while macOS still switches the input source
+/// (#3239, #3311, #3331, #3504; `SystemShortcut.answer(on:)`).
 enum ConflictSeverity: Equatable {
     /// A chord macOS answers first — a symbolic hotkey it has
     /// switched on, or ⌘Tab / ⌥⌘Esc: the row never fires.
@@ -36,6 +37,10 @@ enum ConflictSeverity: Equatable {
     /// #3311): the row works and macOS loses the chord while it is
     /// bound.
     case winsFromMacOS(SystemShortcut)
+    /// A macOS shortcut that still answers beside the row (#3504):
+    /// the press fires both while macOS has it on; with it off only
+    /// the row fires, until it is turned back on.
+    case firesWithMacOS(SystemShortcut, macOSOn: Bool)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
     case duplicate(KeyBinding)
@@ -73,11 +78,12 @@ enum ConflictSeverity: Equatable {
             if shortcut.isUniversalAccelerator {
                 return .shadowsApps(shortcut)
             }
-            if shortcut.losesToKiwiDesk(on: path) {
-                return .winsFromMacOS(shortcut)
+            let off = disabled.contains(shortcut)
+            switch shortcut.answer(on: path) {
+            case .kiwiDesk: return .winsFromMacOS(shortcut)
+            case .both: return .firesWithMacOS(shortcut, macOSOn: !off)
+            case .macOS: return off ? .dormant(shortcut) : .dead(shortcut)
             }
-            return disabled.contains(shortcut)
-                ? .dormant(shortcut) : .dead(shortcut)
         case .otherBinding(let who):
             return .duplicate(who)
         case .sideCollapse(let who):
@@ -95,8 +101,20 @@ enum ConflictSeverity: Equatable {
     /// hands no app menu chord and no switched-off one, so neither
     /// `.shadowsApps` nor `.dormant` is asked here.
     static func ofStep(on shortcut: SystemShortcut) -> ConflictSeverity {
-        shortcut.losesToKiwiDesk(on: .keyboardTap)
-            ? .takesFromMacOS(shortcut) : .dead(shortcut)
+        switch shortcut.answer(on: .keyboardTap) {
+        case .kiwiDesk: return .takesFromMacOS(shortcut)
+        case .both: return .firesWithMacOS(shortcut, macOSOn: true)
+        case .macOS: return .dead(shortcut)
+        }
+    }
+
+    /// Whether macOS has the shortcut off, so the row works alone
+    /// until it is turned back on: an info line, nothing to fix.
+    var macOSHasItOff: Bool {
+        switch self {
+        case .dormant, .firesWithMacOS(_, macOSOn: false): return true
+        default: return false
+        }
     }
 
     /// Whether the row cannot fire as things stand — the reading

@@ -65,8 +65,11 @@ struct InputSourceTakenTextTests {
         #expect(step.hasSuffix(" \(drawn(ctrlSpace)) still switches."))
     }
 
-    @Test("a KiwiDesk row on the other chord leaves the clause out")
-    func boundOtherIsLeftOut() {
+    /// A Carbon row on ⌃Space fires while macOS still switches
+    /// (#3504), so ⌃Space is still in reach; a tap row (below) takes
+    /// it.
+    @Test("a Carbon row on the other chord keeps the clause")
+    func carbonOtherKeepsTheClause() {
         LocalizationManager.shared.select("en")
         var config = GuiConfig()
         config.layers = [
@@ -80,7 +83,7 @@ struct InputSourceTakenTextTests {
             other: ctrlSpace,
             config: config
         )
-        #expect(!text.contains("still switches"))
+        #expect(text.hasSuffix(" \(drawn(ctrlSpace)) still switches."))
         #expect(text.contains("Input Sources"))
     }
 
