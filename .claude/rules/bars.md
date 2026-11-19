@@ -1047,12 +1047,8 @@ Obligations:
   only through `shelfReservation(in:on:pocketAtRest:)`, an edge
   reserving the deepest strip it is asked for
   (`ShelfReservation.depth(of:)`).
-  The pocket's handle rests `PocketHandleView.restDepth(holds:of:)`
-  deep. Read whether it holds something through the one
-  `KiwiCore.pocketHolds`, carried to the view on the spec's `holds`
-  and handed to every rise as its `travel`; the frame, the kiwis and
-  the travel never derive it beside it (#3446,
-  `PocketHeldLookOutTests` ▸ `sinkTakesTheHeldTravel`). Its
+  The pocket's handle rests `PocketHandleView.restDepth(of:)`
+  deep, held or empty alike: give it no held depth (#3480). Its
   tab, its risen frame's gap and its rise travel take a bar handle's
   `ShelfHandleSpec.depth(of:)` on its screen's shelf, through
   `PocketHandleView.tabDepth(of:)`, never a depth of their own

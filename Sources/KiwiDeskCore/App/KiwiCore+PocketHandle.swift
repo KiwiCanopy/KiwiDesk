@@ -22,12 +22,9 @@ extension KiwiCore {
 
     /// The handle's frame on `display` (AX), risen or at rest; a
     /// hover keeps the resting depth, since the tab only brightens.
-    /// At rest it is deeper while the pocket `holds` something, by
-    /// default `pocketHolds`, the verdict its view draws (#3446).
     func pocketHandleFrame(
         on display: DisplayID,
-        risen: Bool,
-        holds: Bool? = nil
+        risen: Bool
     ) -> CGRect? {
         let shelf = self.shelf(on: display)
         // Reaching the edge across the outer margin, as the bars'
@@ -39,10 +36,7 @@ extension KiwiCore {
                     ? PocketHandleView.tabDepth(of: shelf)
                         + PocketPlateView.lift
                         + Self.pocketRiseSide(thickness: shelf.thickness)
-                    : PocketHandleView.restDepth(
-                        holds: holds ?? pocketHolds,
-                        of: shelf
-                    ))
+                    : PocketHandleView.restDepth(of: shelf))
         )
     }
 

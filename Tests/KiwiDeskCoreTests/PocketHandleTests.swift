@@ -96,7 +96,7 @@ struct PocketHandleTests {
         // past it, as the bars' handles sit.
         #expect(
             depth
-                == PocketHandleView.restDepth(holds: false, of: KiwiShelf())
+                == PocketHandleView.restDepth(of: KiwiShelf())
                 + 8
         )
     }

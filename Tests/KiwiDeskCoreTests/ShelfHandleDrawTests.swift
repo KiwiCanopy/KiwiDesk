@@ -106,7 +106,7 @@ struct ShelfHandleDrawTests {
     func tabBrightens() throws {
         let size = CGSize(
             width: 40,
-            height: PocketHandleView.restDepth(holds: false, of: KiwiShelf())
+            height: PocketHandleView.restDepth(of: KiwiShelf())
         )
         // The tab's core row, mid-tab, in a draw `hovered` or not, of
         // an empty pocket unless `holds` (#3384).
@@ -175,7 +175,7 @@ struct ShelfHandleDrawTests {
     func tabFillLandsOnTheCore(edge: AppBarEdge) throws {
         pinRevealLength()
         let along: CGFloat = 40
-        let across = PocketHandleView.restDepth(holds: false, of: KiwiShelf())
+        let across = PocketHandleView.restDepth(of: KiwiShelf())
         let size =
             edge.isHorizontal
             ? CGSize(width: along, height: across)

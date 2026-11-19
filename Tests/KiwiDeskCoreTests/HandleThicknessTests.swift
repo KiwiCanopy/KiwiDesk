@@ -56,8 +56,8 @@ struct HandleThicknessTests {
         #expect(PocketHandleView.tabDepth(of: shelf) == 6)
         shelf.handleThickness = 4
         #expect(
-            PocketHandleView.restDepth(holds: false, of: shelf)
-                == 4 + PocketHandleView.lookOut(holds: false)
+            PocketHandleView.restDepth(of: shelf)
+                == 4 + PocketHandleView.lookOut
         )
     }
 

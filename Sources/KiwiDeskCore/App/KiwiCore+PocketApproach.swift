@@ -29,14 +29,7 @@ extension KiwiCore {
         for display in state.workspaces.allDisplays {
             guard pocketStands(on: display.id),
                 pocketPlace(on: display.id) == .handle,
-                // The empty depth: only a bar pass files this, and an
-                // emptying verb runs none, so the held kiwis' extra
-                // reach is drawn, never approached (#3446).
-                let rest = pocketHandleFrame(
-                    on: display.id,
-                    risen: false,
-                    holds: false
-                ),
+                let rest = pocketHandleFrame(on: display.id, risen: false),
                 let risen = pocketHandleFrame(on: display.id, risen: true),
                 let screen = TilingEngine.screen(for: display.id)
             else { continue }

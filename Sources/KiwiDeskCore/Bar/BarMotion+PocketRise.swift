@@ -15,17 +15,14 @@ import QuartzCore
 /// `BarMotion+PocketEntrance`).
 extension BarMotion {
     /// How far below its risen place the pocket starts, past the
-    /// tab, so the kiwis are what first shows — as far as they look
-    /// out while the pocket `holds` something or not (#3446), past
-    /// a tab `tabDepth` deep (#3451). The motion members take this
+    /// tab, so the kiwis are what first shows, past a tab
+    /// `tabDepth` deep (#3451). The motion members take this
     /// distance as `travel`.
     @MainActor static func pocketRiseTravel(
-        holds: Bool,
         tabDepth: CGFloat
     ) -> CGFloat {
         tabDepth + PocketPlateView.lift
-            + PocketHandleView.markSide
-            - PocketHandleView.lookOut(holds: holds)
+            + PocketHandleView.markSide - PocketHandleView.lookOut
     }
 
     /// The key the rise, its countdown and its sink run under, so
