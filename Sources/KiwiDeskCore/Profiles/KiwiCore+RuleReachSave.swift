@@ -160,9 +160,12 @@ extension KiwiCore {
                 original: snapshot.storedFloatBase
             )
             stored.layers = snapshot.keyBase
+            let stepLength = stored.scrollGesture.stepLength
             stored.scrollGesture = scroll.scrollGestureBase(
                 original: snapshot.storedScrollBase
             )
+            // Global only, outside the table: the file's (#3505).
+            stored.scrollGesture.stepLength = stepLength
             stored.gesture = gesture.gestureBase(
                 original: snapshot.storedGestureBase,
                 shortcutBase: snapshot.gestureShortcutBase

@@ -196,7 +196,8 @@ struct ScrollStepMeterNetTravelTests {
 
     /// The meter's way is the hand convention `GestureMotionLatch`
     /// reads directions in: a pad move turned by `pointWay` names the
-    /// fingers' own direction there, on both axes.
+    /// fingers' own direction there, on both axes and both Natural
+    /// settings.
     @Test("the way is the direction latch's convention")
     func wayMatchesTheLatch() {
         let cases: [(CGVector, GestureDirection)] = [
@@ -206,17 +207,20 @@ struct ScrollStepMeterNetTravelTests {
             (CGVector(dx: 0, dy: -30), .down),
         ]
         for (pad, direction) in cases {
-            var latch = GestureMotionLatch()
-            let event = ScrollGestureEvent(
-                chord: [.control, .option],
-                kind: .changed,
-                input: .trackpad,
-                delta: ScrollStepMeter.pointWay(pad, reversed: false),
-                momentum: false,
-                location: .zero,
-                time: 0
-            )
-            #expect(latch.feed(event) == direction, "\(pad)")
+            for reversed in [false, true] {
+                var latch = GestureMotionLatch()
+                var event = ScrollGestureEvent(
+                    chord: [.control, .option],
+                    kind: .changed,
+                    input: .trackpad,
+                    delta: ScrollStepMeter.pointWay(pad, reversed: reversed),
+                    momentum: false,
+                    location: .zero,
+                    time: 0
+                )
+                event.reversed = reversed
+                #expect(latch.feed(event) == direction, "\(pad) \(reversed)")
+            }
         }
     }
 }

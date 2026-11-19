@@ -46,4 +46,16 @@ struct StepLengthSaveTests {
                 == 9.5
         )
     }
+
+    /// A rule half dropped after a failed rule write keeps the slider
+    /// edit, which the globals write saves, not the rule save.
+    @Test("a dropped rule half keeps the Step length edit")
+    func droppedRuleHalfKeepsTheEdit() throws {
+        let model = try makeModel()
+        model.config.scrollGesture.stepLength = 9.5
+        model.config.scrollGesture.longSwipes = false
+        model.dropRuleHalf()
+        #expect(model.config.scrollGesture.stepLength == 9.5)
+        #expect(model.config.scrollGesture.longSwipes == true)
+    }
 }
