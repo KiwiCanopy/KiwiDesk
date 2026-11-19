@@ -139,23 +139,14 @@ struct InputSourcePreviousTextTests {
         )
     }
 
-    /// Measured by hand 2026-11-15 (#3331 amendment), macOS 27.2: a
-    /// plain `KiwiDesk.bind("ctrl+space", …)` fired on each of two
-    /// presses and the keyboard language did not switch. So it wins
-    /// whether hotkey 60 is on or off, as ⌃⌥Space does.
-    @Test("a Carbon row on ⌃Space takes it from macOS")
-    func carbonRowWins() throws {
+    /// Measured by hand with a source poller 2026-11-19 (#3504),
+    /// macOS 27.2: a plain `KiwiDesk.bind("ctrl+space", …)` stepped
+    /// the Space AND switched the keyboard language on every press.
+    /// So the row is no winner and not dead: both fire while hotkey
+    /// 60 is on, and only the row while it is off.
+    @Test("a Carbon row on ⌃Space fires beside macOS")
+    func carbonRowFiresBoth() throws {
         let row = KeyBinding(combo: "control+space", lua: "a")
-        let reading = try #require(
-            ConflictText.reading(
-                for: row,
-                in: [row],
-                config: layer([row]),
-                system: .live { _ in nil },
-                sides: false
-            )
-        )
-        #expect(reading.severity == .winsFromMacOS(.inputSourcePrevious))
         let found = try #require(
             KeybindingConflicts.conflict(
                 for: row,
@@ -163,10 +154,12 @@ struct InputSourcePreviousTextTests {
                 distinguishingSides: false
             )
         )
-        for disabled: Set<SystemShortcut> in [[], [.inputSourcePrevious]] {
-            let severity = ConflictSeverity.of(found, disabled: disabled)
-            #expect(severity == .winsFromMacOS(.inputSourcePrevious))
-            #expect(!severity.isDead)
-        }
+        let on = ConflictSeverity.of(found, disabled: [])
+        #expect(on == .firesWithMacOS(.inputSourcePrevious, macOSOn: true))
+        #expect(!on.isDead)
+        #expect(
+            ConflictSeverity.of(found, disabled: [.inputSourcePrevious])
+                == .firesWithMacOS(.inputSourcePrevious, macOSOn: false)
+        )
     }
 }

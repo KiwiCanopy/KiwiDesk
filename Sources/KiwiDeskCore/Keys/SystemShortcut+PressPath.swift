@@ -8,35 +8,50 @@ public enum PressPath: Sendable, Equatable {
     case keyboardTap
 }
 
+/// Who answers a press of a macOS shortcut's chord that a KiwiDesk
+/// row holds (#3504): macOS alone (the row never fires), KiwiDesk
+/// alone (macOS loses the shortcut), or both, the row firing and
+/// macOS still running its shortcut.
+public enum PressAnswer: Sendable, Equatable {
+    case macOS
+    case kiwiDesk
+    case both
+}
+
 extension SystemShortcut {
-    /// Whether a KiwiDesk row on this shortcut's chord takes it from
-    /// macOS when its press comes through `path` — the one rule a row,
-    /// a leader and a step key are read by (#3311). A case is true
-    /// only on a path measured to win it, ⌘⇧3 and ⌃← as mirrors of
-    /// their measured twins; the measurements are
-    /// `docs/design-decisions.md` ▸ the #3239, #3311 and #3331
+    /// Who answers a KiwiDesk row on this shortcut's chord, its press
+    /// coming through `path` while macOS has the shortcut on — the one
+    /// rule a row, a leader and a step key are read by (#3311). A case
+    /// leaves `.macOS` only on a path measured to; ⌘⇧3 and ⌃← are
+    /// mirrors of their measured twins. The measurements are
+    /// `docs/design-decisions.md` ▸ the #3239, #3311, #3331 and #3504
     /// amendments.
-    public func losesToKiwiDesk(on path: PressPath) -> Bool {
+    public func answer(on path: PressPath) -> PressAnswer {
         switch self {
-        case .inputSourceNext, .inputSourcePrevious:
-            return true
+        case .inputSourceNext:
+            return .kiwiDesk
+        // A Carbon hotkey on ⌃Space fires and macOS still switches,
+        // where one on ⌃⌥Space does not (#3504, both measured by hand
+        // with a source poller).
+        case .inputSourcePrevious:
+            return path == .keyboardTap ? .kiwiDesk : .both
         case .spotlight, .appSwitcher, .missionControlSpaceLeft,
             .missionControlSpaceRight, .missionControl, .appWindows,
             .screenshot, .screenshotSelection, .screenshotTools,
             .dockHiding, .finderSearch:
-            return path == .keyboardTap
+            return path == .keyboardTap ? .kiwiDesk : .macOS
         // The clipboard screenshots are unmeasured on every path
         // (#3382), so macOS keeps them.
         case .screenshotToClipboard, .screenshotSelectionToClipboard:
-            return false
+            return .macOS
         case .forceQuit, .zoomToggle, .zoomIn, .zoomOut, .invertColors,
             .increaseContrast, .decreaseContrast, .switchToDesktop1,
             .switchToDesktop2, .switchToDesktop3, .switchToDesktop4,
             .switchToDesktop5, .switchToDesktop6, .switchToDesktop7,
             .switchToDesktop8, .switchToDesktop9:
-            return false
+            return .macOS
         case .quitApp, .closeWindow, .minimize, .hideApp:
-            return false
+            return .macOS
         }
     }
 }

@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// One rule for a row on a macOS shortcut, whichever door hears its
-/// press (#3311): `SystemShortcut.losesToKiwiDesk(on:)`, read by a
+/// press (#3311): `SystemShortcut.answer(on:)`, read by a
 /// row's conflict through the path Core stamps on it and by a step
 /// key through `ConflictSeverity.ofStep`.
 struct PressPathSeverityTests {

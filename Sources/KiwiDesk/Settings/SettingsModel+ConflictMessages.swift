@@ -174,7 +174,16 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .sidesTaken,
+            case .firesWithMacOS(_, macOSOn: true):
+                return L(
+                    "keybinding.conflict.system_both",
+                    "Shortcut for \"%1$@\" also runs macOS's "
+                        + "\"%2$@\" on each press.",
+                    name(conflict.binding),
+                    shortcut.localizedName
+                )
+            case .firesWithMacOS, .dormant, .duplicate, .sideCollapse,
+                .sidesTaken,
                 .unrecognized, .takesFromMacOS:
                 break
             }
@@ -258,7 +267,15 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .sideCollapse, .sidesTaken,
+            case .firesWithMacOS(_, macOSOn: true):
+                return L(
+                    "keybinding.conflict.bullet.system_both",
+                    "\"%1$@\" also runs macOS's \"%2$@\" on each press",
+                    name(conflict.binding),
+                    shortcut.localizedName
+                )
+            case .firesWithMacOS, .dormant, .duplicate, .sideCollapse,
+                .sidesTaken,
                 .unrecognized, .takesFromMacOS:
                 break
             }
