@@ -1408,8 +1408,8 @@ space is healed*. The obligations:
   onto the live profile's own set, which resets pins with no
   apply: the reuse re-asserts the lead, so a `set_mode` on the
   seed is lost there — accepted.
-- **Twins stand down.** Two screens with one fingerprint are the
-  standing pin limitation (`docs/accepted-limitations.md`); the
+- **Twins stand down.** Two screens with one fingerprint — a pair
+  macOS left unnumbered (#3496) — are ones a pin cannot tell apart; the
   heal mints once for the pair and refuses to mint again for the
   twin the pin cannot reach (`EmptyDisplayHealTests` ▸
   `twinsMintOnce`) — while a seed that keeps its screen's pin

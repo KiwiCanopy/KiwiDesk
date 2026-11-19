@@ -1988,8 +1988,6 @@
   "presets.focus.name": "フォーカス",
   "presets.for_your.many": "%1$d台の画面向け",
   "presets.for_your.one": "1台の画面向け",
-  "presets.screen_name.main": "メイン画面",
-  "presets.screen_name.numbered": "画面%1$d",
   "presets.starter.shape.laptop": "ノートパソコン",
   "presets.starter.shape.portrait": "縦向き画面",
   "presets.starter.shape.super_ultrawide": "スーパーウルトラワイド",

@@ -83,6 +83,21 @@ extension SettingsModel {
         }?.name ?? fingerprint
     }
 
+    /// The one connected screen `matches` picks out, in copy's
+    /// words (a twin by its position, #3502); nil where none or
+    /// more than one does, which a caller words its own way. A
+    /// stored name stays macOS's; only the words move.
+    func screenWords(where matches: (Display) -> Bool) -> String? {
+        let found = displays.filter(matches)
+        return found.count == 1 ? found.first.map(screenLabel) : nil
+    }
+
+    /// A screen by the name macOS gives it, in copy's words where
+    /// exactly one connected screen carries the name.
+    func screenWords(named name: String) -> String {
+        screenWords { $0.name == name } ?? name
+    }
+
     /// Active main screen (`PositionalDisplays.liveMainID`).
     /// ONE derivation, because the picture reads it twice — the
     /// tray and the "main" badge; a second derivation by

@@ -1988,8 +1988,6 @@
   "presets.focus.name": "Фокус",
   "presets.for_your.many": "Для твоих %1$d экранов",
   "presets.for_your.one": "Для твоего 1 экрана",
-  "presets.screen_name.main": "Главный экран",
-  "presets.screen_name.numbered": "Экран %1$d",
   "presets.starter.shape.laptop": "Ноутбук",
   "presets.starter.shape.portrait": "Вертикальный",
   "presets.starter.shape.super_ultrawide": "Суперультраширокий",

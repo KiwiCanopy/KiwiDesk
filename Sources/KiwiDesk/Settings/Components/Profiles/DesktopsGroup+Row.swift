@@ -115,7 +115,7 @@ extension DesktopsGroup {
                 // for a dormant row, the one it was last seen
                 // on, since the number alone cannot say.
                 if let screen = row.screen {
-                    Text(screen)
+                    Text(model.screenWords(named: screen))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

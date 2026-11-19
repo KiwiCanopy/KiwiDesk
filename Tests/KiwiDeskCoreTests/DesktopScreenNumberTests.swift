@@ -145,37 +145,38 @@ struct DesktopScreenNumberTests {
         #expect(landings[5] == nil)
     }
 
-    @Test("one screen names none; twins take their place")
+    @Test("one screen names none; twins take their position")
     func labels() {
         let core = makeCore()
         defer { resetAuthorityOverrides() }
-        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == nil)
+        #expect(core.screenLabel(of: DisplayID(2))?.twinPosition == nil)
         core.state.workspaces.upsertDisplay(
             authorityDisplay(2, "Built-in", x: 100)
         )
         #expect(
             core.screenLabel(of: DisplayID(1))
-                == ScreenLabel(name: "Built-in", twinPlace: 0)
+                == ScreenLabel(name: "Built-in", twinPosition: .left)
         )
-        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == 1)
+        #expect(core.screenLabel(of: DisplayID(2))?.twinPosition == .right)
         _ = core.state.workspaces.removeDisplay(DisplayID(2))
         #expect(core.screenLabel(of: DisplayID(1)) == nil)
     }
 
     /// macOS numbers identical screens' names itself (#3496).
-    @Test("twins macOS numbered still take their place")
+    @Test("twins macOS numbered take their position, not the number")
     func numberedTwins() {
         let core = makeCore()
         defer { resetAuthorityOverrides() }
-        core.state.workspaces.upsertDisplay(authorityDisplay(1, "Twin (1)"))
+        // macOS numbers the LEFT twin 2 on the owner's desk (#3496).
         core.state.workspaces.upsertDisplay(
-            authorityDisplay(2, "Twin (2)", x: 100)
+            authorityDisplay(1, "Twin (1)", x: 100)
         )
-        #expect(core.screenLabel(of: DisplayID(1))?.twinPlace == 0)
-        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == 1)
+        core.state.workspaces.upsertDisplay(authorityDisplay(2, "Twin (2)"))
+        #expect(core.screenLabel(of: DisplayID(1))?.twinPosition == .right)
+        #expect(core.screenLabel(of: DisplayID(2))?.twinPosition == .left)
         core.state.workspaces.upsertDisplay(
             authorityDisplay(2, "Studio (2)", x: 100)
         )
-        #expect(core.screenLabel(of: DisplayID(2))?.twinPlace == nil)
+        #expect(core.screenLabel(of: DisplayID(2))?.twinPosition == nil)
     }
 }

@@ -6967,6 +6967,9 @@ A share is a number from 0.1 to 1, a fraction of the screen, or a
 string ending in `pt`, a length that is the same on every screen,
 `"1100pt"`, from 100 pt. A length longer than the screen's axis
 fills that axis. A number above 1 is refused, never read as points.
+A point is a macOS point, a logical pixel: two backing pixels on a
+Retina screen, never the typographic 1/72 inch. Like CSS's `px`,
+it is no physical length.
 
 ```lua
 -- A 1100 pt reading column on any screen.

@@ -17,19 +17,8 @@ extension KiwiCore {
         let displays = state.workspaces.allDisplays
         guard let named = displays.first(where: { $0.id == display })
         else { return nil }
-        let base = Display.twinName(named.name)
-        guard
-            displays.filter({ Display.twinName($0.name) == base })
-                .count > 1
-        else {
-            return ScreenLabel(name: named.name)
-        }
-        // The order the presets' "Main screen" / "Screen 2" number.
-        let place = PositionalDisplays.ordered(
-            displays,
-            mainID: PositionalDisplays.liveMainID
-        ).firstIndex { $0.id == display }
-        return ScreenLabel(name: named.name, twinPlace: place)
+        let positions = ScreenShiftPlan.namePositions(of: displays)
+        return ScreenLabel(name: named.name, twinPosition: positions[display])
     }
 
     /// The screen each Desktop number a command takes lands on in

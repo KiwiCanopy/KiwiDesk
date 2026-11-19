@@ -69,10 +69,15 @@ extension AppDelegate {
     private func tourColumns(
         _ option: OnboardingStartOption
     ) -> [OnboardingScreenColumn] {
-        core.tourPlan(for: option.layout).map { column in
+        let displays = core.state.workspaces.allDisplays
+        return core.tourPlan(for: option.layout).map { column in
             OnboardingScreenColumn(
                 id: String(column.display.id.raw),
-                screen: column.display.name,
+                // A twin reads by position, as in Settings (#3502).
+                screen: SettingsModel.displaysLabel(
+                    column.display,
+                    among: displays
+                ),
                 cards: column.spaces.map {
                     OnboardingSpaceCard(
                         id: $0.id.raw,
