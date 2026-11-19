@@ -146,14 +146,12 @@ many there are is set by the release feed rather than by us, so
 the strip falls back to a menu on the same selection wherever it
 does not fit.
 
-:::unreleased
 A speed scale read in order is a second carve-out, beside the
 navigation strip, from five or more choices taking a menu:
 **Animation speed**'s five segments stay a segmented strip (#3254).
 Its control sits stacked under its label at every width
 (`SettingsRowShape(alwaysStacks:)`), because five equal segments
 outgrow the label column's row in several catalogs.
-:::
 
 The Highlights tab's spotlight rows (#2038) are the one place a
 link is dropped rather than greyed: "Show me ›" trails a row only
@@ -206,11 +204,9 @@ by which pane the setting lives in:
   proportion tuned by eye: split ratios, master ratio, gaps.
 - **Segmented / toggle** for a non-numeric choice.
 
-:::unreleased
 A drawn stroke width is a slider, a `PtSlider` in whole points: a
 border, a highlight, the focus ring, a handle (#3513). A stepper's
 pt values are thresholds.
-:::
 
 Minimum window size takes the same idiom on each axis (#204,
 #2237): a precise pt threshold, not a feel knob, drawn as Width
@@ -221,7 +217,6 @@ the gap masters' acknowledging shape over an axis that reads
 "Mixed" ([Interaction states](#interaction-states)), and the
 drawer stays open while any axis is mixed.
 
-:::unreleased
 The stepper runs 100–1700 pt (#3461), a third of a 5120 pt
 screen. A caption under the master names the main screen and
 counts how many windows of that size fit across and down it,
@@ -229,7 +224,6 @@ gaps included, or says a window there cannot reach the size.
 While the master reads "Mixed" the caption moves to the Stack,
 Grid, Track and BSP rows instead. It is a readout and stores
 nothing.
-:::
 
 KiwiVision's **Dim** is a ruled exception: a proportion,
 yet a `StepperRow` (0–100 %, 5 % steps), since with the mode on
@@ -263,7 +257,6 @@ share is a number on a bounded range, which the stepper already
 types everywhere else. A typed percent that rounds to a menu
 fraction stores that fraction, so the menu checks it.
 
-:::unreleased
 A cell may also hold a length in points (#3460). Each fraction in
 the pop-up shows the length it fills on a connected screen of that
 shape, greyed and right-aligned after it, and the closed cell
@@ -274,7 +267,6 @@ whole points from 200 in steps of 10 and never snaps, and a flip
 converts on the row's screen or clears the field with none
 connected. Under the row, a line names each connected screen a
 stored length is too long for, which a press fills on that axis.
-:::
 
 **Layout Defaults picks one layout at a time, and picks it by
 its picture (#204, #678 turn 10).** The layout modes are a
@@ -886,14 +878,12 @@ visible Done and Escape is a second, hidden button carrying
 `SheetPresentationSeamTests` is the register of which files may
 host a sheet, and holds all three.
 
-:::unreleased
 The preset card, its **Layouts** sheet and the card's bare-noun
 action leave Profiles with the Presets section (#3294), so the
 bare-noun exception above has no live instance and the preset
 preview no longer hosts a story thumbnail or a sheet; only the
 tour's Spaces step does. Presets are picked there, and its
 replace confirm is an alert, a question with consequences.
-:::
 
 **Layout schematics draw staged values, never live windows
 (#125).** Each layout has one `GapsDiagram`-family schematic
@@ -926,11 +916,9 @@ Live preview and the Home cards stay at rest. Why is
 [design decisions](design-decisions.md) ▸ *A thumbnail that is
 read rather than compared*.
 
-:::unreleased
 A Back return to the tour's Spaces step rests its rows rather than
 playing them again (#3288). Picking under **Start with** redraws the rows,
 one column per screen, and plays them again (#3294).
-:::
 
 One schematic serves several surfaces at two scales
 (`SchematicScale`, whose own doc comment is the authority on what
@@ -973,12 +961,10 @@ shape. The side says "Scroll for more shortcuts" and counts
 nothing; it is read-only, so the hidden items have no
 controls to lose and a label is admissible.
 
-:::unreleased
 *Amended (#3249): KiwiHub's scrolling lists cue their fold by
 fading the edge that cuts them*, through `FadingScroll`, and count
 nothing; the Shortcuts side no longer says "Scroll for more
 shortcuts".
-:::
 
 The middle clause is arithmetic, so it is code:
 `OverflowSplit.shown(of:fitting:withMarker:)` is the one
@@ -1178,20 +1164,17 @@ The bars' own animations are not on that card: they sit in
 KiwiShelf ▸ KiwiShelf ▸ Show ▸ Durations beside the Reveal picker,
 and the card points there.
 
-:::unreleased
 The drawer holds two switches, **Animate the reveal** and **Animate
 the expand**. Both lengths are Lua-only
 (`animations.set_reveal_duration`, `animations.set_expand_duration`).
 Under Animation speed's Off both grey, their ticks kept, and so
 does the Reveal picker; the shut drawer reads Off, and one line
 under the drawer links to the speed row (#3471).
-:::
 
 While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 
-:::unreleased
 **Animation speed** leads the Animations card: Off · Very Slow ·
 Slow · Medium · Fast, drawn by the same row in Simple's Animations
 card (#3238, #3254); no segment is marked as the default, and the
@@ -1208,7 +1191,6 @@ the preset and **Turn On** grey and the row says why. A pick writes
 at once, in every profile, and durations that match no speed show
 the preset with nothing picked over a caption saying they are
 custom. Its drawer is **Per event**.
-:::
 
 The Space switch is not on that card either: **Switching
 Spaces**, the card after Animations (#3218), holds **Space
@@ -1230,13 +1212,11 @@ shows only while its pick differs from the row above, which says
 the same sentence otherwise. **Slide duration** stays live while
 either pick draws a slide (#2971).
 
-:::unreleased
 **Slide duration** is gone from the card, which holds the two
 pickers alone: the slide's length is the speed preset's, and Lua's
 `set_space_slide_duration` (#3238). A picker's caption says a Slide
 shows the Space under the preset's Off as it does under Reduce
 Motion.
-:::
 
 **A setting that skips Save carries one sentence where it sits
 (#3218)**: under its card's title, or under its row's label among
@@ -1248,10 +1228,8 @@ ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
 mark growing under the pointer, and the shelf's expand
 (`docs/design-decisions.md` ▸ The bars honour Reduce Motion).
 
-:::unreleased
 A hidden bar's handle no longer grows under the pointer; its
 progress fill plays under Reduce Motion in its place (#3360).
-:::
 
 Nothing else is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
@@ -1364,7 +1342,6 @@ discoverable.
 
 On KiwiHub's tinted Fill a button chip's fills fade with the
 panel's other fills (#2725).
-:::unreleased
 The chosen choice chip is drawn like a selected segment: a solid
 accent fill, `accentInk` and a semibold label over the width every
 chip reserves, so choosing one never reflows its strip. A marked
@@ -1372,7 +1349,6 @@ jump chip and a chosen icon cell keep a translucent accent wash
 over neutral ink, each at its own strength; each mark clears
 `ColorVision`'s floor against a resting and a hovered neighbour
 (`ChipMarkSeparationTests`).
-:::
 
 **A tile or card answers the pointer with its edge and a rise
 (#3042).** Home cards, Layout, palette, look and dashed tiles and

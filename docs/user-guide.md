@@ -52,14 +52,12 @@ and every card and panel title is a heading for its rotor.
 
 ## The Status Bar Quick Menu
 
-:::unreleased
 **Show Desktop overview** opens KiwiHub on its Desktop overview
 ([`kiwihub.show`](lua-reference.md#kiwihubshow)) and shows that
 side's shortcut beside it, unless that shortcut is a modifier tap,
 a one-side chord or on ✦, which a menu cannot draw. The row stays
 enabled while KiwiDesk is starting or until you press **Start
 Tiling**.
-:::
 
 A layout switched from the view picker, or from a Space's
 right-click **Layout** menu, is **session-only**: it does not
@@ -104,10 +102,8 @@ saved profile.
   migrated settings out as a backup, and keeps your custom Lua
   (event hooks such as the sketchybar bridge) live.
 
-:::unreleased
 A `gesture.bind` or `gesture.unbind` line counts as a keybinding
 here, and on the first launch below.
-:::
 
 Once `gui.json` exists, the visual editor owns tiling, and
 hand-written `set_gap_global` calls stop applying on screen
@@ -120,10 +116,8 @@ settings, so a file of event hooks boots GUI-managed. An
 keybindings) gets no `gui.json`, and **Adopt into the GUI** is
 offered where it declares rules or keybindings.
 
-:::unreleased
 A `kiwivision.define_lens` or `delete_lens` line counts as a
 setting here.
-:::
 
 ## Start KiwiDesk
 
@@ -288,12 +282,10 @@ folder together.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
-:::unreleased
 An app with no bundle identifier, such as the Android Emulator's
 `qemu-system-aarch64`, is named in these rules by its process name,
 lowercased. An app that has a bundle identifier is named by it,
 whatever its process is called.
-:::
 
 A row may also carry **`desc`**, **`group`** and **`symbol`**,
 written only when set ([Describing a
@@ -380,10 +372,8 @@ animations as they are. When you first run this version, a profile
 whose animations differ from the shared look's starts keeping its
 own look, so nothing changes on screen.
 
-:::unreleased
 How fast the animations play is the same in every profile and no
 look carries it.
-:::
 
 The General section leaves the grid while you edit a stored
 profile without switching to it.
@@ -419,10 +409,8 @@ What the fields' own notes do not say:
   whichever way the axis runs.
   Track sizes and in-track shares are session-only.
 
-:::unreleased
 Scrolling's duration has no row; it is
 `animations.set_scroll_duration` in Lua.
-:::
 
 The track shortcuts sit behind "Move windows in the track
 layout", open from the start once you have a Track Space or a
@@ -570,11 +558,9 @@ A floating window dropped on another screen moves into the Space
 that screen shows, and stays where you let go of it, clear of
 the bars. A sticky window keeps its own Space.
 
-:::unreleased
 A floating window keeps the size and place you give it. Only a bar
 on the top edge moves one: down, at the same size, until its title
 bar shows. A bar on the bottom or a side never moves it.
-:::
 
 ### Sticky Windows
 
@@ -866,13 +852,11 @@ a preset does not name a layout for a space, the space takes the
 layout its screen suits. Applying a preset saves it as a real,
 editable profile; presets cannot be deleted.
 
-:::unreleased
 Presets are picked on the setup tour's Spaces step, under **Start
 with**; Profiles does not list them. Developer is the Standard at
 every screen count. Over Spaces you changed, a preset replaces
 only your Spaces and their layouts, and the step's **Revert** puts
 them back while the tour is open.
-:::
 
 ## App Rules
 
@@ -962,7 +946,6 @@ Screens are measured in points, so a 5K 27" and a 1440p 27" get
 the same answer. "Smallest" is read from width alone, so a 27"
 beside an ultrawide opens in monocle.
 
-:::unreleased
 The total is 3 spaces for one screen and 5 for two, three or
 four, then one more per screen up to ten. Below four screens each
 screen's share is proportional to its width; from four to nine,
@@ -977,7 +960,6 @@ other screen holds, or the one fewest screens hold once all are
 taken: laptop monocle · scrolling, desktop grid · stack · bsp ·
 scrolling, ultrawide stack · track · grid, portrait stack · grid ·
 monocle.
-:::
 
 Each layout is tuned for the screen it sits on, scrolling for
 the widest screen that opens in it, and the minimum window size
@@ -990,7 +972,6 @@ keeps a lone window at its slot size, and each scrolling space
 scrolls the way its own screen faces — vertically on a portrait
 screen.
 
-:::unreleased
 With an ultrawide beside other screens, scrolling lives on the
 ultrawide alone: every other screen holding two or more spaces
 opens in monocle and ends in its own floating space, so a laptop
@@ -998,7 +979,6 @@ beside an ultrawide gets monocle · floating, and the ultrawide
 scrolling · stack · floating. A screen holding one space takes its
 list above, monocle in place of scrolling. From four screens the
 widest ultrawide holds the two spaces and the only floating one.
-:::
 
 While you are still on the starter setup, connecting or removing
 a screen re-derives it and the `⌃⌥N` space shortcuts extend to
@@ -1008,10 +988,8 @@ It is saved as an ordinary profile named after your main screen
 — **Ultrawide**, say, or **Widescreen + 1** across two screens —
 and the same setup is always available as a preset of that name.
 
-:::unreleased
 The tour offers the same setup as **Suggested** under **Start
 with** on the Spaces step, in place of a preset of that name.
-:::
 
 ### Default Shortcuts
 
@@ -1059,18 +1037,14 @@ typing searches your shortcuts, and `⌃⌥L` the **view picker**,
 which switches the layout of the space under the pointer, the
 profile and KiwiVision. `Tab` and `⇧Tab` step through its sides.
 
-:::unreleased
 `⌥⇥` opens the window switcher on the app of the window you used
 last, that window selected
 ([`kiwihub.show_last_app`](lua-reference.md#kiwihubshow_last_app)).
-:::
 
-:::unreleased
 `⌃⌥O` opens KiwiHub's **Desktop overview**, and closes it again.
 While KiwiHub has the keyboard, only a modifier tap set to one of
 its sides works, as that side's shortcut does; while another
 KiwiDesk panel has it, no modifier tap does.
-:::
 
 `⌃⌥R` returns the focused space's sizes to what your profile set
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
@@ -1112,11 +1086,9 @@ shortcuts you added under **Open applications** and **Lua
 bindings** except one sitting on a key a default needs; the
 confirmation counts those.
 
-:::unreleased
 **Restore…** puts the defaults back in the profile you are
 editing. When another profile has changed them too, the
 confirmation names it and asks whether to restore there as well.
-:::
 
 ### Choosing Your Own Shortcuts
 
@@ -1148,10 +1120,8 @@ banner. A collision with a shortcut every app carries (⌘W, ⌘Q,
 ⌘H, ⌘M) means your row works and every app loses that item while
 it is bound.
 
-:::unreleased
 It also marks a row whose keys other rows take on each side, so
 it never runs.
-:::
 
 The recorder **suspends your KiwiDesk shortcuts while it is
 open**, so a combo already bound to a window action is recorded
@@ -1187,16 +1157,12 @@ chords like `cmd+j+k` are not supported — use layers. KiwiDesk
 binds the physical key, so switching input sources changes what
 the caps print, not which key fires.
 
-:::unreleased
 A key sequence — a leader chord, then one key after another — is
 recorded in Shortcuts ▸ Personal ▸ Key sequences, or written with
 [`define_sequence`](lua-reference.md#define_sequence).
-:::
 
-:::unreleased
 A combo can also be a modifier tapped alone, `cmd+cmd` or `rcmd`
 ([Modifiers and Keys](lua-reference.md#modifiers-and-keys)).
-:::
 
 ### Actions
 
@@ -1229,11 +1195,9 @@ A combo can also be a modifier tapped alone, `cmd+cmd` or `rcmd`
   [`focus_or_spawn`](lua-reference.md#focus_or_spawn). Add the
   same app twice to bind one shortcut per behaviour.
 
-:::unreleased
 A floating window's resize and move shortcuts run under a bar on
 the bottom or a side to the screen's edge; only a bar on the top
 edge stops them.
-:::
 
 The verb behind *Open or Focus* is now `focus_or_spawn`, formerly
 `pull_or_spawn`; shortcuts made here are updated for you.
@@ -1271,16 +1235,13 @@ and a profile can put a shared shortcut on another key of its
 own. Ticking a profile that uses the key for something else
 gives the key to this shortcut there.
 
-:::unreleased
 A key sequence's **Applies to** is on its first key's row and
 covers the whole sequence. Where a sequence and a shortcut would
 share one key in a profile, that profile cannot be ticked: the key
 is never taken over.
-:::
 
 A new layer also carries the `⌃⌥,` Open Settings row.
 
-:::unreleased
 ### Gestures
 
 Settings ▸ Shortcuts ▸ Mouse & Trackpad lists every gesture, and
@@ -1298,7 +1259,6 @@ apps keep the gesture.
 
 Every swipe follows macOS's Natural scrolling, save a direction
 given its own action.
-:::
 
 ## macOS Desktops (Mission Control)
 
@@ -1412,12 +1372,10 @@ and windows KiwiDesk managed, so glance through it before
 attaching it. The terminal form is in the [CLI
 reference](cli.md#exporting-the-log).
 
-:::unreleased
 **Report a problem**, at the foot of Home and of the Simple page,
 opens a GitHub bug report with your KiwiDesk and macOS versions,
 screen count and Desktop mode filled in. The exported log also
 lists the settings you changed.
-:::
 
 **Shortcut not working?**  
 Check Shortcuts for a ⚠️ marker ([Conflict

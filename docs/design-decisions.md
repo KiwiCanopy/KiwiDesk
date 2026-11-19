@@ -145,7 +145,6 @@ bundle keeps them (#1407; how the bundle carries them and
 derives its copyright line is
 `.claude/rules/packaging-and-release.md`'s).
 
-:::unreleased
 *About shows the texts itself (#3286, owner, 2026-11-13).* A
 `Link` to a bundled file opened nothing on a packaged build — no
 open attempt logged, TextEdit never launched — while handing the
@@ -156,7 +155,6 @@ as shipped, monospaced and selectable with ⌘F; Return and Escape
 put away that sheet alone. A separate window stays out (#1536).
 Where the bundle carries no text, as under the dev binary, the row
 stays the GitHub link rather than an empty sheet.
-:::
 
 ### Accepted limitations
 
@@ -657,7 +655,6 @@ first-run story that is already a permission wizard, to tell
 someone about an update. No setting was added — the reminder
 costs nothing to ignore.
 
-:::unreleased
 *The mark's third meaning is a stopped sync (#3088).* The orange
 mark says one thing: something waits on you. Its facts are an
 update offer (#1013), a sync that stopped
@@ -676,7 +673,6 @@ check, since the other Mac's build may be one this Mac's channel
 never offers. When an update is also offered, both rows show
 (owner, 2026-11-08): one installs this Mac's update, the other
 says why this Mac stopped syncing.
-:::
 
 ### KiwiDesk draws its own update window (#1542)
 
@@ -4037,13 +4033,11 @@ and the plate both ask, reads through it, and so do the Settings
 rows, so neither the two cues nor the card can disagree about
 which one a switch draws.
 
-:::unreleased
 *KiwiDesk's own Off joins the fallback (#3238).* Core's read and the
 card's captions both take macOS's setting or the speed preset's Off
 (*Off is Reduce Motion for KiwiDesk*, under Spaces, profiles &
 config ownership), so under Off a Slide draws, and the card says,
 Show the Space.
-:::
 
 *Show the Space shows everywhere.* A user who picks the plate has
 asked for it, so it shows on a screen that draws a Space Bar too.
@@ -4087,13 +4081,11 @@ and all grey where
 in every profile (*A setting that skips Save says so where it
 sits*, under Navigation & saving).
 
-:::unreleased
 *The slide's length leaves the card (#3238).* **Slide duration**
 has no row: the speed preset is Settings' one pace control
 (*The speed preset is Settings' one pace control*, under Spaces,
 profiles & config ownership), so the card holds the two pickers,
 and the duration's grey above has no row left to apply to.
-:::
 
 *App-wide, and crossed from the toggle.* It is stored in
 `gui.json` as `space.transition` and `space.slide_duration`,
@@ -4128,10 +4120,8 @@ fewer the Liquid Glass switch has to keep in agreement. With
 glass off, under Reduce transparency or before macOS 26 they take
 the blur nearest KiwiHub's own fallback, so the two keep one look.
 
-:::unreleased
 Under the toggle that blur wears the Fill flat (▸ the shortcuts
 panel entry).
-:::
 
 A tinted plate's variant is pinned dark by a dark Fill, as a
 bar's is (▸ Liquid Glass). Under a light Fill, and untinted, a
@@ -4223,12 +4213,10 @@ and the fade-in, 80 ms, must leave the plates opaque before the
 outgoing windows park. `animations.duration` keeps pacing windows
 only.
 
-:::unreleased
 *The default is Medium's (#3254).* The 300 ms above was 4.2's
 default; the default is Medium's 400 ms (*Five evenly spaced
 speeds*). The saturated-GPU measurement stands for 300 ms, and 400
 ms was not measured there.
-:::
 
 *One panel per screen, ordered in once.* Moving or re-ordering a
 panel per switch queues behind the compositor exactly when the
@@ -6203,7 +6191,6 @@ this issue's strand by another door. This answers ARRIVALS; a
 hand DROP on another display re-files every float, flag or
 floating-mode, at the drop (#1686, below beside #492).
 
-:::unreleased
 **A float is never resized to fit, and only a top bar moves one
 ([#3163](https://github.com/KiwiCanopy/KiwiDesk/issues/3163), owner
 ruling 2026-11-10; amends #1091, #1427 and #1524).** [Principle] A
@@ -6266,7 +6253,6 @@ bar or off the screen, and a float its own app grew past the room
 under a top bar stays that tall. Rejected: keeping the fit on
 tiling-off Spaces only, or on hand drops only. Both keep a net that
 second-guesses a placement, which is the defect.
-:::
 
 **Floating a tiled window centres it at a derived size
 (#1674).** [Principle] The frame a window
@@ -6607,12 +6593,10 @@ hide the menu bar or the Dock for another app's window, which
 is why the frame stops between them — Apple's Window ▸ Fill
 frame.
 
-:::unreleased
 *The bars read Hidden or Auto, not stood down (#3346).* Only the
 ring and the marks still stand down for a Maximize; the bars follow
 [A Maximize reads its bars Hidden or
 Auto](#a-maximize-reads-its-bars-hidden-or-auto-it-does-not-stand-them-down-3346).
-:::
 
 Switching the Space to Monocle with the bars hidden was the
 other candidate and is refused: it retiles and parks every
@@ -6649,7 +6633,6 @@ Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 
-:::unreleased
 *It can follow focus (#3063).* `maximize.set_follow_focus(true)`, or
 the Maximize card's "Maximize follows focus" row, which writes the
 same profile value (#3280), makes a new Maximize move to the tiled
@@ -6666,9 +6649,7 @@ avoids (#2099); so on a Monocle Space a full follow is drawn through
 the "Maximize windows" input transform (#2976), every member at the
 full frame, and a focus step there stays a raise. A Height or Width
 follow on Monocle pays the two writes.
-:::
 
-:::unreleased
 *A floating window takes it too (#3036).* "Tiled windows only for
 now" ends: an effective float — a floated window on any layout, or
 any window of a Floating layout Space — fills the same frame with
@@ -6734,7 +6715,6 @@ unsolicited-resize check that already reads that set first, and a
 learned maximum is centred by the same Monocle pass a tile's fill
 takes. The slots carry no float, so no classifier sees it. Whether
 KiwiVision's fill follows a maximized float is #3064's.
-:::
 
 A sticky window's flag sits on the Space it renders on, where its
 layout input already places it, so leaving that Space ends it
@@ -6767,7 +6747,6 @@ a user typing 33 would see "33 %" as an off-menu item beside the ⅓
 they meant, and a press would size the window just short of the
 third the menu offers.
 
-:::unreleased
 *Amended (#3460, owner, 2026-11-18): a cell holds a fraction or a
 length in points.* A shape covers a wide range of real screens, so
 one fraction gives very different windows: ¼ of a 3200 pt Super
@@ -6805,9 +6784,7 @@ older Mac sharing the sync folder, not only a downgrade.
 The scrolling ultrawide slot stays at 0.3 (ui-designer): a slot
 sets how many windows show and keeps the peek, while a Maximize
 column sets one window's width.
-:::
 
-:::unreleased
 **A Space may carry its own shares and "from", over its screen's
 row (#3090).** An editor Space and a browser Space on one screen
 share one shape row, and that row cannot serve both: the editor
@@ -6831,9 +6808,7 @@ format bump, as #2422's floor.
 (#3090).** A Monocle member already fills the screen, so an axis
 only shrank it into a column, which reads as a defect. A float
 there may still take one, and a full Maximize is unchanged.
-:::
 
-:::unreleased
 ### Monocle's "Maximize windows" hides the bars, it does not stand them down (#2976)
 
 **[Rationale]**
@@ -6868,9 +6843,7 @@ and the marks step aside through the one set of windows that fill
 their screen, `screenFillers(of:)`, which a full Maximize joins too,
 rather than through the Hidden reading, which never reaches them. It applies on
 every Monocle Space; a per-Space override waits for someone to ask.
-:::
 
-:::unreleased
 ### A Maximize reads its bars Hidden or Auto, it does not stand them down (#3346)
 
 **[Rationale]**
@@ -6990,7 +6963,6 @@ drawn on windows the maximize covers, stand down on the bar pass's
 own set for any screen `screenMaximizes(on:)` names. KiwiVision's plate keeps
 dimming under a maximize (#3061). A per-Space value waits for
 someone to ask.
-:::
 
 ### The pocket is one slot beside the Spaces, not a Space (#2446)
 
@@ -7164,7 +7136,6 @@ first run and a look seed, not a runtime link: the pocket edge is
 one for every screen, so a screen's own Space Bar edge (#1948)
 leaves the pocket where it is.
 
-:::unreleased
 *Amended (#3376):* the pocket's edge may now differ per screen, on
 the bars' per-screen doors (▸ *a bar's edge may differ per
 screen*). A screen's own Space Bar edge still does not move it: a
@@ -7183,7 +7154,6 @@ its own approach away while the bar showed, so a pocket that rested
 low on a side edge rose with a Space Bar the pointer reached for at
 its top, and went dead after the bar left. The cost is that a bar
 coming in stands beside a handle rather than carrying a section.
-:::
 
 **Several windows keeps it on screen, empty included, on every
 display.** One window keeps the pocket out of sight, since the key
@@ -7313,7 +7283,6 @@ object at one size. The floor is the handle's 20 pt kiwis, which a
 rise must never shrink; the ceiling, 1.6x, is as far as a growth
 still reads as the pocket coming out rather than a jump.
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3361): **the tab takes a bar
 handle's ink and depth, flush on the edge, and the handle reserves
 nothing.** The tab is the bars' two-tone line, handle-deep (3
@@ -7327,9 +7296,7 @@ edge keeps no strip for it any more, as a bar's handle keeps none
 (#3349): windows reach the edge and the tab floats over them,
 clicks passing through. The whole mark under Always keeps the
 shelf's strip.
-:::
 
-:::unreleased
 *Amended* (owner, 2026-11-19, #3480, ruling back #3446): **a
 full pocket's kiwis look out the same 5 points as an empty
 one's.** A held look-out of 8 points read too far on the device:
@@ -7337,7 +7304,6 @@ the kiwis seemed to start rising. A full pocket says so through
 its tab's fill strength (#3384) alone. Refused: any held lift of
 the kiwis, and a tab standing off the edge, which breaks the
 one-row rule.
-:::
 
 **The handle answers the pointer in two steps, as the bars'
 handles do** (#2807). On the approach the kiwis look 3 pt further
@@ -7350,16 +7316,13 @@ peek never moves the reserved strip, which reads the resting
 depth, and under Reduce Motion it is dropped while the delay
 stands, a delay not being motion.
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3366): **the hover lifts nothing.**
 The kiwis stay where they rest and the tab goes to full strength,
 the progress fill's, in place; the rise is the pocket's own
 (the #3368 amendment below). A lift followed a moment later by the rise read as a
 stutter on the device, two motions where the pointer asked for one,
 and the brighter tab answers the hover without moving anything.
-:::
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3368, after a ui-designer consult
 and a native prototype): **the rise is the pocket's countdown, and
 it joins the bars' approach.** Lingering within about 24 points of
@@ -7395,7 +7358,6 @@ one panel carries the tab and the room, and passing clicks through
 the room cost the tab its own click and hover; a click there in
 the 0.4 s opens the pocket rather than reaching the window under
 it.
-:::
 
 **The pocket is the mark alone: faded while empty, in full colour
 while anything is inside, and edged in black and white while lit
@@ -7421,7 +7383,6 @@ edge standing on the screen read as a border. A hover ring in the
 highlight colour was weighed and set aside, since it reads like the
 focused-window ring; a coloured glow is the focused ring's alone.
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3368): **on a handle, the kiwis
 alone fade.** The tab keeps a bar handle's two-tone line at its
 ink and depth, empty or not, and the empty fade moves off the
@@ -7454,7 +7415,6 @@ jumped it. The clock still decides when the pocket opens; the
 spring that open runs starts from where the pocket is drawn, so the
 two may part by a moment without a jump. A risen pocket going to
 rest sinks like a rise taken back, so nothing pops into the tab.
-:::
 
 **Remove from Pocket takes the float row's slot (#2612 ▸ 4).** A
 pocket window always floats, so the Tile Window the slot would hold
@@ -7519,7 +7479,6 @@ too (#2923): listed apart, under a *Pocket Keys* header with its
 key, since mixed into the general groups it would break the put-in
 order ⌃⌥P steps.
 
-:::unreleased
 KiwiHub's Shortcuts side lists an app's Pocket key the same way
 (#3449, owner on ui-designer's recommendation, 2026-11-18): under
 the Pocket's own rows, wherever those are filed — Size & float
@@ -7529,7 +7488,6 @@ row belongs with its verb's other keys, as on the Pocket card in
 Settings. A "Pocket" subheader inside Apps was refused, since it is
 chrome that keeps a verb inside a noun group, and so was renaming
 the rows "<app> (Pocket)", which fixes the order but not the topic.
-:::
 
 **A key opens the Pocket's list, the same peek a click grows**
 (owner, 2026-11-04, #2974): the list was mouse-only, and a per-app
@@ -7846,7 +7804,6 @@ than kept for an empty card: This Profile on Home now holds
 exactly the profile-scoped cards, which is what its heading
 says.
 
-:::unreleased
 **Animation pace is app-wide; animation on and off stays per
 profile (#3237, owner ruling 2026-11-12).** [Principle] Nobody
 tunes how fast windows move per profile, and a Desktop binding that
@@ -7868,9 +7825,7 @@ Settings row at all (owner ruling 2026-11-12, #3238, reversing the
 first #3237 ruling that kept Scroll duration in Layout Defaults):
 the speed preset is ruled to be Settings' one pace control
 (#3238), and Lua sets an exact length.
-:::
 
-:::unreleased
 **The speed preset is Settings' one pace control (#3238, owner
 ruling 2026-11-12).** [Principle] Settings sets how fast KiwiDesk
 animates through **Animation speed** alone — Off and four speeds
@@ -8055,9 +8010,7 @@ the cause is outside KiwiDesk, and the box carries its one fix.
 Where `init.lua` owns the config, the preset and **Turn On** grey,
 as the Switching Spaces pickers do (#2142): the flag is app-wide,
 so a Lua-owned setup sets it in `init.lua`.
-:::
 
-:::unreleased
 **A lens's stored fade is cleared, not shown read-only (#3246,
 owner ruling 2026-11-12).** [Rationale] A custom lens differs from
 Default in its **Dim and blur** card by Dim and Blur alone: its
@@ -8089,7 +8042,6 @@ into `gui.json` by hand after the update is read, and acts unseen. [Trade-off] A
 loses it on the update and gets it back only from Lua; the
 limitation is on the
 [Accepted limitations](accepted-limitations.md) page.
-:::
 
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** A floating window exempt from
@@ -8247,7 +8199,6 @@ report 2560 pt and want the same answer, while a Retina laptop
 reports 1728 and wants laptop layouts despite having more pixels
 than either.
 
-:::unreleased
 **Spaces are budgeted, never added up per screen.** A laptop's
 three plus a 27"'s five would be eight keys to learn on day one,
 most of them empty — so the total is 3 · 5 · 5 · 5 by screen
@@ -8272,9 +8223,7 @@ handed a four-screen desk eight, most never used; the cost of a
 space is a key to bind and a name to recall, not screen area.
 And we run out of keys before we run out of spaces: past ⌥1–9
 and ⌥0 there are no default go-to keys left.
-:::
 
-:::unreleased
 **Beside an ultrawide, Scrolling lives on the ultrawide alone.**
 With an ultrawide or super ultrawide among several screens, the
 lead rule around this paragraph gives way: the ultrawides lead
@@ -8294,9 +8243,7 @@ screens the lead and the Floating space go to the widest
 *ultrawide*, not the widest screen, and a one-space companion
 whose single-Space order reaches Scrolling takes Monocle instead,
 even as a repeat (ruling, 2026-11-13, #3294, citing #1662).
-:::
 
-:::unreleased
 **From four screens there is one Floating space, on the widest,
 beside an ultrawide too** (owner ruling, #3294, overriding
 #1662's Floating on every screen). #1662 gave each companion its
@@ -8313,7 +8260,6 @@ space; at three screens width order wins, so the narrowest — a
 MacBook beside an ultrawide and a 27", say — holds one space,
 Monocle, and only a companion holding two keeps Monocle ·
 Floating (owner ruling, 2026-11-13, #3294).
-:::
 
 A laptop's Grid is two by two rather than one
 row because a laptop alone reaches the same tuning when a Space
@@ -8355,7 +8301,6 @@ Scrolling leads several screens at once, which the
 no-layout-twice rule carves out explicitly: an accidental
 repeat is still a bug, this one is the feature.
 
-:::unreleased
 **A screen holding one space is not led: it takes its shape's
 single-Space order** (owner ruling, #3294, amending #1018). A lead
 introduces the spaces behind it; on a screen with none behind,
@@ -8374,7 +8319,6 @@ orders run out and an entry repeats, its tuning staying the
 first screen's (`StarterSetup.hosts`); and from ten, where every
 screen holds one space, a desk may have no Scrolling space at
 all, so #1018's "at least one" holds only below that.
-:::
 
 **A starter Scrolling slot is set, not left on `auto`.** `auto`
 resolves near-full — one window with a sliver of the next — which
@@ -8440,12 +8384,10 @@ and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
 
-:::unreleased
 The family that replaces these presets (#3294, [below](#the-tours-spaces-step-is-where-a-preset-is-picked))
 names a mode for every Space, so no shipped preset reaches the
 fallback any more; it stays for a layout that leaves one out.
 The **Layouts** sheet leaves with the Presets section.
-:::
 
 **A preset is its own choices over the screen's tuning, and it
 names the workflow, never the hardware** (owner ruling, #1663).
@@ -8470,11 +8412,9 @@ counting the others — the same for every card in it, so a
 per-card copy would say nothing about any one preset — and
 nothing stores it.
 
-:::unreleased
 Minimalist retires with the old family (#3294), and the group
 caption goes with the Presets section; the rest of this entry
 holds for the new family, whose presets declare no setting.
-:::
 
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,
@@ -8492,14 +8432,12 @@ setups" means. The preset's summary names none of its rungs for
 the same reason: a list of modes would be a different sentence
 on every Mac, so it states the rule and its **Layouts** sheet shows the modes.
 
-:::unreleased
 The Starter stays as described, offered first as the tour's
 Suggested choice (#3294). The count-per-preset model is
 replaced: each screen count has its own family, a desk with more
 screens than four is offered the four-screen presets, and with
 the Presets section gone there is no "For other setups" group,
 summary or **Layouts** sheet.
-:::
 
 **A runtime `delete_space` stays a success, and names what brings
 the space back** (#1509, owner ruling). `init.lua` running at
@@ -8576,7 +8514,6 @@ docks at dozens of desks: the list grows with every one, and
 none of it is visible from the screen in front of you. Screen
 size enters a stored value once, at the seed (below).
 
-:::unreleased
 *Screen size also enters at a readout (#3461).* Under the value,
 Settings counts how many windows of that size fit across and down
 the main screen, so a point value means something without a unit
@@ -8585,7 +8522,6 @@ rather than following the screen
 ([Choosing a control](ui-patterns.md#choosing-a-control)): a band
 that moved whenever a laptop docked would be the invisible
 per-screen value this rules out.
-:::
 
 **A Space may carry its own value, and it outranks its layout's**
 (#2422). Two Spaces sharing a layout can have different jobs — a
@@ -8614,14 +8550,12 @@ and a 5120 pt super ultrawide (640 pt by the division) from one
 above 460. The rounding lands on the Settings stepper's 10 pt
 step.
 
-:::unreleased
 *The height takes the same rule from the screen's height
 (#3462).* Seeded from the width alone, a 3200 × 900 pt screen
 started at 400 × 400, which fits two windows down, so BSP stopped
 after its first horizontal split; from the height it starts at
 400 × 260 and three fit. A profile keeps the value it stored;
 only a new setup takes the seed.
-:::
 
 One rule replaces the starter's fixed 420 pt for the ultrawides,
 so the two never become separate rules. Every layout takes the
@@ -9313,7 +9247,6 @@ so it may take its old frame on arrival; with separate Spaces on, one
 moved across screens stayed a float on the new screen (measured once,
 2026-11-07).
 
-:::unreleased
 ### The tiling-off options' All profiles value lives in gui.json (#3089)
 
 **[Rationale]**
@@ -9352,7 +9285,6 @@ shows it, since the user paused tiling and not the shelf. A full-
 screen window still stands the shelf down. So the row
 greys exactly where every bar is already Hidden in every layout on
 every screen: the tick then changes nothing.
-:::
 
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
 
@@ -9622,7 +9554,6 @@ ruled only if the transience shows on a device.
 
 **[Rationale]**
 
-:::unreleased
 A screen whose two bottom corners both have another screen beside,
 below or past them parks its hidden windows on a neighbour
 ([Accepted limitations](accepted-limitations.md)). KiwiDesk fixes
@@ -9664,7 +9595,6 @@ and asks first (owner rulings 2026-11-15 on #2756):
 Rejected: `kCGConfigureForAppOnly`, which reverts the moment
 KiwiDesk exits, so the arrangement would change at every launch and
 quit.
-:::
 
 ### KiwiVision's blur is Liquid Glass clear, behind one switch (#2103)
 
@@ -9737,13 +9667,10 @@ curve stays out because it is ease out under a confusing name.
 Reduce Motion, a Space switch (#2228) and a lens hold change the
 dim at once.
 
-:::unreleased
 The fade's default is Medium's 400 ms (#3254, *Five evenly spaced
 speeds*), inside the range the owner compared; the 300 ms above was
 4.2's.
-:::
 
-:::unreleased
 With KiwiVision's maximize on (#3064, below), the arrival is still
 instant but no longer still: the window you focus clears at its
 slot and then grows into the fill, while the window you leave fades
@@ -9751,9 +9678,7 @@ as it shrinks back to its slot. The leave fade masks the slot the
 window is heading for, so for the length of the spring the part of
 the shrinking window outside that slot dims at once rather than
 fading; the plates owe a re-mask once the springs settle.
-:::
 
-:::unreleased
 ### KiwiVision's maximize is derived, never stored per Space (#3064)
 
 **[Rationale]**
@@ -9805,7 +9730,6 @@ The new `kiwivision.maximize` key is encoded only when it is not
 Off, so files written before it decode unchanged and it owes no
 crossing. It has no per-profile predecessor either: KiwiVision's
 settings were app-wide from their first release.
-:::
 
 ### KiwiVision switches the appearance and owes it back (#2103)
 
@@ -9869,7 +9793,6 @@ exists to save. A Never dimmed app's windows stay clear on screen
 but are no member, so a step skips them too: they are kept clear
 to be seen, not worked in.
 
-:::unreleased
 ### A lens opens only the apps you switched on, and moves the focus once (#3122)
 
 **[Rationale]**
@@ -9911,9 +9834,7 @@ of what KiwiDesk draws, which also carries renames and turn-offs,
 and never on a relaunch, a reload, a profile switch or `init.lua`'s
 run. When nothing is open and nothing opens, the pill says so, on
 the screen's centre where no window holds the focus.
-:::
 
-:::unreleased
 ### The ring follows the keys at a window's arrival (#3152)
 
 **[Rationale]**
@@ -9956,9 +9877,7 @@ hand-back still works where you are. A refusal only the window can
 meet (a cross-screen move macOS turns down, full screen) comes after
 the call has answered, so it is logged and the window stays where it
 opened, the one answer left once the verb has returned.
-:::
 
-:::unreleased
 ### Opening an app in the background hands the focus back once (#3141)
 
 **[Rationale]**
@@ -9989,7 +9908,6 @@ says nothing about the focus, `launch_in_background` names one of
 the three, and a `focus = false` flag on `focus_or_spawn` would be
 a flag that turns off the focus in a verb named for focusing.
 
-:::
 
 ### A lens holds a stray landing, never refuses it (#2103)
 
@@ -10698,7 +10616,6 @@ applying the saved value live, a Core verb rather than a draft
 writeback (#2411, ▸ *A row's revert writes its one key back
 through a register*).
 
-:::unreleased
 An open window on the live target follows live (#3098): when a
 live change arrives, every draft leaf the user has not edited —
 one still equal to the draft's baseline — takes the live value,
@@ -10721,7 +10638,6 @@ where following would mislead: a stored profile's (another file),
 a stale page's, one with sync questions open (their baseline is
 the other Mac's value), and one whose edits the decoder refuses
 over live.
-:::
 
 ### A row's revert writes its one key back through a register (#792)
 
@@ -11598,7 +11514,6 @@ A bar set to Always leaves the bars row, since its shortcut can
 only refuse — the one place this page reads a setting rather
 than a chord, through the shortcut's own gate.
 
-:::unreleased
 *Tiling Off takes the bars' row (#3287).* The bars step right
 before this page already teaches each bar's show/hide chord, so
 the keys step drops its bars row and, with it, its one read of a
@@ -11606,9 +11521,7 @@ setting. In its place, right after Maximize, a Tiling Off row in
 the menu's words ("Tiling Off for This Space"): a single key a new
 user would never find, which leaves a Space's windows where they
 are and tiles them again on the next press (owner, 2026-11-13).
-:::
 
-:::unreleased
 **The Gestures step exists only on a Mac with a trackpad** (#1873,
 owner 2026-11-15). It comes after Keys and teaches the seeded
 trackpad ladder, so on a Mac with no trackpad it would teach
@@ -11622,9 +11535,7 @@ than arrows, each read from the live bindings so a gesture the
 user unbound is not taught. The screen row needs two or more
 screens. ⌃⌥K closes the page, since it lists every gesture the
 page leaves out.
-:::
 
-:::unreleased
 **Amended (#3427, owner and ui-designer, 2026-11-17): the step
 draws KiwiHub's glyphs, and a mouse has rows of its own.** A
 gesture worded as "3 fingers left/right" is the widest cap on the
@@ -11656,9 +11567,7 @@ Gestures card already makes — a scroll steps as far as you scroll
 wheel notch. Both wheel rows' captions say "scroll": the sideways
 wheel's glyph shows the way, and VoiceOver, which sees no glyph,
 hears "scroll sideways" (#3493).
-:::
 
-:::unreleased
 **Amended (#3447, owner on ui-designer's recommendation,
 2026-11-18): a mouse row draws KiwiHub's glyph for its input, as a
 trackpad row does.** One mouse glyph on every cap broke the
@@ -11675,7 +11584,6 @@ glyph, as they do in KiwiHub, and the chord and the label tell
 them apart. A cap carrying both the mouse and the gesture glyph
 was refused: two pictures on one keycap is the widest cap on the
 page again, and KiwiHub draws one.
-:::
 
 ### The tour's look is written through, and the tour owns its undo
 
@@ -11739,7 +11647,6 @@ colours no palette reads selected until a click, while a look
 whose shape is still live keeps its mark and says "Other colors"
 (`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
 
-:::unreleased
 *Back is navigation, never undo (#3288, owner, 2026-11-13).* Back
 sits bottom-left and Continue (with Revert) bottom-right, as in
 Setup Assistant, on every step whose planned step before it is not
@@ -11750,7 +11657,6 @@ taken on the way back in. Looks holds the bars revealed again on
 re-entry, a return to Spaces rests its rows rather than playing
 them a second time, and a tour that reached its closing beat stays
 reached (`OnboardingBackTests`).
-:::
 
 The bars step (#2515) is the same act on the bars' visibility:
 a pick writes through, its Revert returns the visibility leaves
@@ -11769,7 +11675,6 @@ gives back.
 
 **[Principle]**
 
-:::unreleased
 **Presets live on the tour's Spaces step, under "Start with", and
 nowhere else** (#3294, owner rulings 2026-11-13). Settings ▸
 Profiles carried a Presets card whose job was a first desk, and a
@@ -11857,7 +11762,6 @@ A crash snapshot holding a retired built-in still decodes and
 leaves its held Space where it was (`PresetFamilyTests` ▸
 `retiredStandardDecodes`, `PresetFamilyTests` ▸
 `retiredStandardStaysHeld`); the next reload composes Developer.
-:::
 
 ### The Mac Checklist counts what macOS can confirm
 
@@ -11940,7 +11844,6 @@ habit names the shortcuts panel's LIVE chord, read from the
 resolved layer like the tour's keys, with a second frame for a Mac
 where nothing is bound.
 
-:::unreleased
 *Where Simple shows, the tour lands on Simple's checklist block
 (#3290).* A new install opens Settings on Simple, so the last
 button lands there, scrolled to the block that draws the essentials
@@ -11949,7 +11852,6 @@ the card itself, whether the user picked Advanced or Simple is
 stored and Advanced shows for that window only (owner, 2026-11-13).
 Either way the closing footnote's "opens Settings at Mac Checklist"
 stays true.
-:::
 
 ### The app links the guide, in a language the site actually serves
 
@@ -11999,12 +11901,10 @@ The default action lands on the Mac Checklist card (#1365); ▸ *The
 Mac Checklist counts what macOS can confirm* argues why that is
 not the Open Settings link coming back.
 
-:::unreleased
 Where Simple shows, the default action lands on Simple's checklist
 block instead (#3290), whose header opens this card, so the guide
 pointer at its foot is one click from the landing rather than on
 screen.
-:::
 
 **The banner is one-shot, so only a permanent pointer closes the
 gap.** Home's first-run banner reaches someone who closed the tour
@@ -12542,11 +12442,9 @@ a Floating window is dragged and left where it lands. Each story
 plays once when its thumbnail first appears — staggered down a
 list — and again on hover, and never loops.
 
-:::unreleased
 A host the user has already watched play may rest a first
 appearance instead: the tour's Back return to Spaces does (#3288,
 ▸ *Back is navigation, never undo*).
-:::
 
 This does not reopen the ruling above, which retired a SECOND
 FRAME: a pair shows two states and leaves the tween to the
@@ -12837,7 +12735,6 @@ construction rather than by promise:
   Hiding a thing the user made without saying so is still
   losing their work; hiding it while naming it is curation.
 
-:::unreleased
 *The Mac Checklist's open essentials join Simple (#3290, owner,
 2026-11-13, amending #2737's scope).* After Open applications and
 before the support strip, a header line — "Mac Checklist", the
@@ -12848,7 +12745,6 @@ the same door. A new install opens on Simple, so without the block
 its user never met the four essentials the tour hands them to, and
 the tour's exit now lands Simple scrolled to it. The rows are
 Advanced's, so Simple still owns no editor.
-:::
 
 What changed since #2654 is the premise. That segment's whole
 effect was one card, a decision with no result. This one
@@ -13674,7 +13570,6 @@ one action in one layer, its value the combo:
   from the page's own structure, and both the rule write and the
   globals write read that one base.
 
-:::unreleased
 **Restore Defaults asks how far, and only when another profile
 would change** (#3248 ▸ Ruling and Amendment, owner 2026-11-12).
 Shortcuts ▸ Default shortcuts ▸ Restore… and each gesture card's
@@ -13702,7 +13597,6 @@ seed reclaims, which goes in every profile as it goes in the
 edited one, and the dialog counts those the other profiles lose
 before the answer is chosen (`RestoreReachTests`, `RestoreReachShortcutTests`,
 `RestoreReachWiringTests`).
-:::
 
 **A layer takes the checklist too, and its tick is membership**
 (#2022, owner ruling 2026-10-07). A layer is a set of rows, so
@@ -14061,12 +13955,10 @@ profile, so wandering must stay legal. All of it is
 state-driven on "no saved profiles" (no persisted
 seen-flag) and vanishes with the first profile.
 
-:::unreleased
 The Presets section leaves Profiles (#3294), so the page has
 nothing to reorder and nothing to start from, and the spotlight
 leaves with it: no Home tile dot and no "start here" search badge.
 A first desk is picked on the tour's Spaces step.
-:::
 
 **A binding row reads "Desktop n", and binding is dropdown-only.**
 The naming is the product-wide rule — [macOS has Desktops,
@@ -14238,7 +14130,6 @@ of a one-sided Hyper key, which only one key can produce: one is
 recorded with the switch off, or written in Lua as `cmd+h`.
 Accepted.
 
-:::unreleased
 *Amended (#2614, owner, 2026-11-08): the side is picked after
 recording.* While the switch is on, a **Sides** pull-down sits
 before each row's recorder well, its slot held on every row so the
@@ -14256,13 +14147,11 @@ through the same duplicate check as a recording, and re-recording
 records what is pressed, forgetting an earlier pick. Refused:
 holding both keys of a modifier (a two-key gesture nobody finds)
 and double-tap-and-hold (it collides with recording ⌘⌘).
-:::
 
 What it unblocks: reading keys needs no Input Monitoring, so
 #1874's "tap Hyper alone for Escape" turns on whether posting the
 Escape does, which is #1874's to measure.
 
-:::unreleased
 **Amended (#1872, #1229, #1873; owner, 2026-11-08): a seeded
 binding may run a reader of the trackpad on a default install.**
 The bound above, "a default install, and one that never records a
@@ -14399,9 +14288,7 @@ refuses, and adding one bumps `GuiConfig.currentFormat` and
 (▸ Shortcuts, *Mouse and trackpad gestures are one list of
 bindings*), stored as `gesture` in the same sparse shape, keyed by
 input and keys.
-:::
 
-:::unreleased
 **A modifier tap is one binding kind, decided by one rule
 (#1872).** Any row and any Lua binding may hold a tap in place of
 a chord, a layer switch included, stored in the chord's own
@@ -14459,9 +14346,7 @@ someone asks. A single tap fires at its release when no double
 tap waits on the same key, and 300 ms later when one does. A
 warning about a tap may name only what macOS itself answers; a
 list of other apps' taps would be stale the day it shipped.
-:::
 
-:::unreleased
 **Every pointer event KiwiDesk must swallow goes through one
 active tap, and only while a consumer needs it (#2447, #2764).**
 An `NSEvent` monitor hears a press but cannot drop it, so a
@@ -14531,7 +14416,6 @@ has nothing left to rule: one input with one set of keys is one
 key of the list, so a press can start only one grab, and each
 action may be bound under as many keys as the user wants, every
 `drag` and `hover_move` binding firing on its own.
-:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
@@ -14653,7 +14537,6 @@ it below a Desktop drawer in the same card, by audience size;
 #2655 below supersedes that ranking, and the Track drawer is the
 card's only one.
 
-:::unreleased
 **A drawer of settings opens when asked** (#3261). *Config
 presence expands the surface* protects what a user *made*; a value
 a user *chose* — the Hyper key, the ✦ base, the sides switch — is
@@ -14669,7 +14552,6 @@ refused with Take Over — which opens the drawer, since a fault
 folded out of sight reads as working. This narrows #2654's
 Modifier keys card: it no longer opens on arrival because a key is
 set.
-:::
 
 **The Desktop verbs share one always-mounted macOS Desktops
 section (#2655, owner ruling 2026-10-26), superseding the two
@@ -14909,7 +14791,6 @@ so fixing the conflict anywhere — clearing either row, deleting
 the holder — retires them without a dismiss. (#33/#34/#35, #68
 §3.6.2)
 
-:::unreleased
 *Amended (#3239, measured 2026-11-14): `⌃⌥space` is KiwiDesk's, not
 macOS's.* macOS answers its input-source hotkey (id 61) only when no
 KiwiDesk binding takes the press first. On macOS 27.2 a posted
@@ -14928,9 +14809,7 @@ chord macOS answers first stays a dead row for a Carbon hotkey, save
 ⌃Space, where the row and macOS both answer (#3504 below)
 (`SystemShortcut.answer(on:)`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`).
-:::
 
-:::unreleased
 *Amended (#3311, measured 2026-11-14): a row the keyboard tap decides
 wins macOS's shortcut.* The tap swallows a press before macOS's own
 shortcuts read it. On macOS 27.2, with nothing bound, a posted press
@@ -14956,9 +14835,7 @@ chords: it wins ⌃⌥Space and shares ⌃Space (#1126; #3239, #3504);
 posted presses
 never fire Carbon, so this measurement says nothing about that path
 (`PressPathSeverityTests`, `PressPathConflictTests`).
-:::
 
-:::unreleased
 *Amended (#3319, owner, 2026-11-14): the input-source caption says
 what the shortcut does and where it is changed.* Apple's row name,
 "Select next source in Input menu", does not say on its own that it
@@ -14981,9 +14858,7 @@ below. A shortcut cleared in System Settings, on
 with no key, now reads as switched off everywhere: the row is dormant,
 not dead, and an open sequence no longer lets its old chord through
 (`AnsweredChordTests`).
-:::
 
-:::unreleased
 *Amended (#3331, measured 2026-11-14 and 2026-11-15): ⌃Space is
 macOS's other input-source shortcut, and KiwiDesk reads it the way it
 reads ⌃⌥Space.* "Select the previous input source" (hotkey 60) is a
@@ -15002,9 +14877,7 @@ row on the chord gains its caption, and the keyboard board marks
 Space as macOS's under a ⌃ layer (`InputSourcePreviousTextTests`,
 `InputSourcePreviousInstallTests`, `PressPathConflictTests`,
 `ConflictSeverityTests`).
-:::
 
-:::unreleased
 *Amended (#3504, measured by hand 2026-11-19): a Carbon row on
 ⌃Space fires and macOS still switches.* On macOS 27.2, with hotkeys
 60 and 61 on and two input sources, the owner pressed each case
@@ -15030,7 +14903,6 @@ a hand measurement of an input-source switch now logs the source
 (`FiresWithMacOSTextTests`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`, `InputSourcePreviousTextTests` ▸
 `carbonRowFiresBoth`, `PressPathConflictTests` ▸ `verdicts`).
-:::
 
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
@@ -15506,7 +15378,6 @@ carries its own mark. A Lua-owned setup leaves the mark alone, so
 moving to Settings later still offers every Desktop. Restore Defaults restores the
 tier for the Desktops the Mac has.
 
-:::unreleased
 *Amended (#3444, owner 2026-11-18):* the switch moves the mouse and
 trackpad gestures with the same mapping: every `⌃⌥` gesture row,
 `⌃⌥` drag → `✦` drag and `⌃⌥⇧` drag → `✦⇧` drag among them, and
@@ -15526,7 +15397,6 @@ since `init.lua` declares its own bindings over them. No crossing
 pins the old drags: no release carried them, so every user first
 meets the drags on the new chords, and a pre-release `modifier_drag`
 file gains no second grab on keys its pair uses.
-:::
 
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never
@@ -15667,7 +15537,6 @@ every kind, so it bought nothing a user could feel. Both
 histories are recorded all the time, so changing the setting
 loses nothing.
 
-:::unreleased
 **Amended (#3206; owner, 2026-11-11): the toggle is a verb of its
 own.** "Back then Forward bounces" holds for two keys, not for a
 single gesture: the seeded three-finger tap ran Back, so a second
@@ -15683,7 +15552,6 @@ of the trail, the shown Space and which entries are reachable;
 where the Space left is unreachable it takes the nearest reachable
 entry back. The three-finger tap binds it; Back and Forward keep
 their browser meaning and their keys.
-:::
 
 **Stored like the shortcuts.** The setting is a global base in
 `gui.json` that every profile uses, and a profile may keep its own
@@ -16041,7 +15909,6 @@ so hjkl beside the arrows can only live in one layer, and two
 chords that do the same thing cannot conflict. A duplicate *chord*
 stays refused everywhere (#33/#34/#35). (#1797)
 
-:::unreleased
 *Amended (#1871, owner, 2026-11-08): a sequence's end key is a
 separate trigger.* A key sequence (a leader chord, then keys) may
 end on an action a row already holds on its own chord, and the row
@@ -16063,9 +15930,7 @@ Shortcuts side lists an end key by its path (past four keys, the
 leader, "…" and the last two), finds it by the names
 along that path too, and draws no tree: the hint panel and the
 card already do.
-:::
 
-:::unreleased
 *Amended (#3124, owner, 2026-11-10): a key sequence has a reach.*
 The key table keys a sequence by its layer and leader chord, its
 value the whole tree, so the leader's row carries an "Applies to"
@@ -16080,9 +15945,7 @@ rather than making another. Removing a sequence from Lua or the CLI
 is its own verb, `shortcut.remove_sequence`, destructive like
 `shortcut.remove`, because a whole tree goes with one call;
 `shortcut.remove` refuses a leader and names that verb.
-:::
 
-:::unreleased
 *Amended (#3174, owner, 2026-11-11): the CLI builds a sequence one
 key at a time.* `shortcut.set_sequence_key` and
 `shortcut.name_sequence_key` only add or name, and an end key they
@@ -16091,9 +15954,7 @@ model can call them without asking. `shortcut.remove_sequence_key`
 is destructive: a branch it removes can hold Lua keys, descriptions
 and groups made in Settings, which `set_sequence_key` cannot
 rebuild, so an AI app reaches it only through `run_destructive`.
-:::
 
-:::unreleased
 *Amended (#1871, owner, 2026-11-08): a key sequence runs the
 keyboard tap too.* A key sequence joins the one tap as a consumer,
 so while one is defined the tap runs, active, whatever the sides
@@ -16105,9 +15966,7 @@ the tap's own thread, or the first keys after a leader would reach
 the front app before the main actor heard of it
 (`.claude/rules/input-and-animation.md`). Accepted: Secure Input
 hides key presses from it ([accepted limitations](accepted-limitations.md)).
-:::
 
-:::unreleased
 *Amended (#3173, owner, 2026-11-10): an open sequence lets macOS's
 own shortcuts through.* "Every key press" no longer holds. Swallowing
 every key cost the user macOS itself: ⌘⇧4 beeped and took no
@@ -16130,7 +15989,6 @@ recorded step key wins first, so #1871's strict step keys hold, and
 the recorder warns when a step key takes a macOS chord. User-defined
 App Shortcuts and third-party global shortcuts stay swallowed: no
 list of them exists to read.
-:::
 
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the
@@ -16261,7 +16119,6 @@ overflows any fixed size. The cue is permanent, not a stopgap.
 The panel's width is ruled under ▸ *The shortcuts sheet is the
 key panel's middle side*.
 
-:::unreleased
 *Superseded (#3249, owner via the ui-designer, 2026-11-12): KiwiHub's
 lists say they scroll by fading their cut edges.* The Windows list
 and the Shortcuts sheet fade the edge that cuts content through the
@@ -16291,7 +16148,6 @@ reaches every row by moving through the named scroll area, as on
 the Desktops side. The platform indicator and `.legacy` paragraphs
 above stand, the fade now being what the traversal would fall back
 to.
-:::
 
 **The shortcuts panel takes UNTINTED Liquid Glass, and the
 untinted half is a ruling rather than a limit.** (#1295/#1293,
@@ -16436,7 +16292,6 @@ three reasons are answered one by one:
    may equal the highlight. A hovered row takes the hover fill
    and the Hover item colour (`PanelHighlightTests`).
 
-:::unreleased
 **Amended: without glass the panel wears the Fill flat over its
 material** (#2569, owner ruling 2026-11-11). The first ruling
 kept the fallback untinted because the look's inks on the
@@ -16473,7 +16328,6 @@ by one:
    Reduce transparency, the macOS version, or a KiwiHub leaf a
    config split from the switch.
 
-:::
 
 **The brief pocket's flying plate is one of these plates.** It
 wears the Fill under the toggle, and on glass its panel wears the
@@ -16561,13 +16415,10 @@ with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Personal. (#602, PR #638, #2246)
 
-:::unreleased
 The Desktop overview's opener, seeded on ⌃⌥O (#1229, #3167), is a fourth
 and is dropped the same way; the side switch prints it beside the
 Desktops title.
-:::
 
-:::unreleased
 **The side switch draws titles only (#1229, owner ruling
 2026-11-01, amending #2245).** One line, every side always
 visible and clickable; a side's chord stands in for its title —
@@ -16579,7 +16430,6 @@ the Simple page, in the welcome tour and in the shortcut recorder.
 So the chord that links a key to its side above is shown on
 demand rather than printed. The panel's ceiling rises from 452 to
 488 pt on every side, for the Desktops side's two screen rows.
-:::
 
 **The key panel never takes activation, so there is none to
 hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
@@ -16635,14 +16485,11 @@ shows only the typing: the selection is the green row or tile,
 shown once, and inline completion — weighed — reads as native
 only where → or Tab would accept it, which here they never do.
 
-:::unreleased
 *Amended (#3249): the Shortcuts sheet scrolling past the ceiling,
 and the Windows list past its nine rows, fade the edge that cuts
 them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
-:::
 
-:::unreleased
 **An Apps row says its action in its title** (#3448, owner on
 ui-designer's recommendation, 2026-11-18). A key set to gather or
 to open new reads "Gather Safari Windows" or "New Safari Window";
@@ -16656,7 +16503,6 @@ VoiceOver with no wiring of their own, as the Pocket rows' titles
 already are. The rows still sort by the app's name, so an app's
 keys stay together. A different symbol or a reworded tooltip was
 refused, since either still asks the user to hover.
-:::
 
 **The shortcuts sheet folds what reads as one, and nothing the
 user changed (#2312, owner ruling 2026-10-16).** A digit ladder
@@ -16705,7 +16551,6 @@ once (none under Reduce Motion), the refusal sound plays where it is
 on, and VoiceOver hears "Can't swap: …". Refusal and dead-end
 feedback stay apart (#435/#436), so the panel never shakes.
 
-:::unreleased
 *Amended (#3249, owner via the ui-designer, 2026-11-12): Swap here
 has its own hint beside Move here*, worded at rest so it is found
 without holding ⌥; Move here no longer reads Swap here under ⌥, and
@@ -16729,7 +16574,6 @@ rest everywhere was refused (ui-designer, 2026-11-12).
 `JumpFooterKeycapTests` ▸ `windowsKeycapsArePinned` pins each
 language's keycaps, so a catalog edit moving a language is a
 ruling.
-:::
 
 **⌥ is Swap here, and ⇧ never means "there" (#2885, owner ruling
 2026-11-01).** ⌥↩ and ⇧⌥↩ both bring the selected window into your
@@ -16803,7 +16647,6 @@ shows. One verb opens every side, `kiwihub.show`, and the CLI
 reaches it (▸ *The key panel is KiwiHub*). `JumpScopeModelTests`,
 `ViewPickListTests` and `JumpKeyTests` hold the keys. (#2229)
 
-:::unreleased
 **KiwiHub's rows fill and its tiles ring (#3210, owner ruling
 2026-11-11).** A row marks its selection as native lists do, with
 the solid selection fill. A tile — the app strip's, a layout tile, a
@@ -16819,7 +16662,6 @@ use — the active profile or lens chip, the shown Desktop — wears a
 filled check circle in its own ink, never the accent, and a chip's
 name goes semibold over a width every chip reserves, so the line
 never shifts.
-:::
 
 **In KiwiHub the pointer lifts and the keys select (#2365, owner
 ruling 2026-10-17).** The item under the pointer takes a neutral
@@ -16846,7 +16688,6 @@ change, and the selected item draws none, since a durable marking
 and a pointer state never share a property (#1173). VoiceOver
 follows the selection only. `JumpHoverTests` holds the rule.
 
-:::unreleased
 One owner exception (2026-11-19, #3484): a pointer on a Desktop's
 title in the Desktop overview rings that Desktop's whole column —
 the title and every Space line — with a thin line in the
@@ -16861,7 +16702,6 @@ column. The ring shows only under the pointer, never on the
 selected Desktop's column otherwise. Every other KiwiHub hover keeps the grey lift, a
 hovered window icon's ground included, and the ✓ beside the shown
 Desktop stays in its own ink (#3210).
-:::
 
 Under *Tint KiwiHub and plates* (#2569) the panel wears the bars'
 look (▸ the shortcuts panel entry), so its marks take the look's
@@ -16925,7 +16765,6 @@ lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
 
-:::unreleased
 **The Desktops side is KiwiHub's overview of the whole desk (#1229,
 owner ruling 2026-11-01).** The Space Bar answers what is on the
 Desktop in front of you; nothing answered where everything else
@@ -17004,7 +16843,6 @@ the target line, so a sort goes on; Drop & follow switches the
 screen and closes it (#3165). Inside a Space ↑ ↓ take the places'
 route (#3169): a line with windows is re-entered on the slot the
 selection left, an empty one selected.
-:::
 
 **A KiwiHub list wraps on a fresh press and stops on a held key
 (#2897, owner ruling 2026-11-01).** This reverses #1875's
@@ -17021,7 +16859,6 @@ the position (#2309 ruling 11). `JumpListTests`,
 `ViewPickListTests`, `JumpModelTests`, `JumpScopeModelTests` and
 `JumpPanelEventTests` hold it.
 
-:::unreleased
 **KiwiHub's app strip orders by recency because the order is on
 screen and the pick is explicit (#3135, owner ruling 2026-11-09).**
 [Rationale] #637 rejected recency for a *repeating* gesture: a ring
@@ -17101,9 +16938,7 @@ would drift from a rebound opener, and claim a second chord from
 every app. That is no blind gesture: each press moves a selection
 drawn before it, and nothing lands until ↩ — releasing ⌥ picks
 nothing, so the hold-and-release form stays ruled out.
-:::
 
-:::unreleased
 **KiwiHub shows the window you are in, greyed, and its app's tile
 first (#3168, owner rulings 2026-11-10, amending the 2026-10-12
 ruling that the focused window is left out of the list).**
@@ -17154,7 +16989,6 @@ opener to ⌃⇥ was rejected, since it is every browser's and
 terminal's tab key, and so was a heavier swap chord, which would
 change #2885's chords for everyone to fix one path. Taking over ⌘⇥
 itself stays the opt-in #3136.
-:::
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**
@@ -17534,7 +17368,6 @@ in Settings is a control, and *gesture* is Apple's own word for
 trackpad and mouse input. *One page, three parts*, below, renames
 the page.
 
-:::unreleased
 **One page, three parts** (#3184, owner and ui-designer
 2026-11-10). The page outgrew one map: the built-in shortcuts,
 everything the user adds and the mouse and trackpad took ten
@@ -17587,7 +17420,6 @@ Home, the other two add a navigator.
   objection to tabs — a conflict landing on a page whose sibling is
   hidden — would stand, which is why it is a condition of the
   ruling rather than a nicety.
-:::
 
 **A rule above the Layers card parts what applies everywhere
 from the layer's own rows** (owner 2026-11-08). Everything under
@@ -17603,7 +17435,6 @@ gesture type, which is grouping by widget. That grouping is also
 what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
 
-:::unreleased
 **The bindings themselves are a list per device** (#3199 ▸ Ruling, owner
 2026-11-11; #3183). One **Mouse** card and one **Trackpad** card,
 each a list of rows as macOS's App Shortcuts are, rather than a
@@ -17650,7 +17481,6 @@ could not show where a row came from. The cost is the same as for
 `init.lua` until Adopt into the GUI, a setup that rewrites a retired
 gesture verb into `gesture.bind` hands itself over the same way, and
 an aliased receiver (`local g = gesture`) escapes the scan.
-:::
 
 **An entry is one drawn picture and one sentence, and the picture
 animates on hover.** The one-frame rule (▸ Navigation & saving,
@@ -17665,13 +17495,11 @@ is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
-:::unreleased
 **No picture plays by itself** (#3281, owner 2026-11-13). The
 binding cards lead the part, so a click on Mouse & Trackpad opens
 settings to edit, not a picture to read, and a picture moving
 below the cards draws the eye from them. Hover is the one
 trigger, and Reduce Motion stills it.
-:::
 
 
 **An entry lands with its feature, and greys where its surface is
@@ -17744,7 +17572,6 @@ cue would repeat per notch and per swipe where a rubber-band
 simply restarts. A pill is for a refusal whose reason the user
 cannot see; a row end is on the screen.
 
-:::unreleased
 **A swipe moves focus by direction; a wheel notch walks the
 list** (#3200, owner rulings 2026-11-11, ui-designer advised). On
 every layout without a row — BSP, Stack, Grid, Track, Floating —
@@ -17791,9 +17618,7 @@ wheel walk (the multi-finger swipe families take it with the
 binding list, #3199). It never flips a stored per-direction arm: ↑ means
 fingers up and is stored as such, so a binding reads the same in
 the file whatever the flag says.
-:::
 
-:::unreleased
 **Mouse and trackpad gestures are one list of bindings, keyed by
 the input and the keys held with it** (#3199, owner rulings
 2026-11-11; ui-designer and architect-reviewer advised). Fixed
@@ -17892,7 +17717,6 @@ Reading `gui.json` from a profile's step would make one file's
 migration depend on another file's state and on the order the two
 are read; the doubled or surviving binding is visible instead, and
 a `null` on its key in the profile removes it.
-:::
 
 **One swipe moves one window by default, and long swipes are a
 tick box.** Counting by distance — a window per ~60 pt of finger
@@ -17916,7 +17740,6 @@ direction moves nothing, so notches clicked one at a time each
 count and a spin cannot race down the row (the Space step's
 paragraph below argues the number).
 
-:::unreleased
 **Amended (#1873, owner 2026-11-15): long swipes are on by
 default, and each step re-decides its axis.** The seeded ladder
 puts focus on two fingers, Spaces on three and screens on four,
@@ -17938,9 +17761,7 @@ its false is a choice and stays. That is an exception to the
 rule that a whole-encoded default flip owes no re-default without
 a stored signal (`.claude/rules/profiles.md`, #1359), taken by
 owner ruling, at this one cost.
-:::
 
-:::unreleased
 **Amended (#1873, owner 2026-11-16): a long swipe's later steps
 count finger travel in mm.** The first step fired at the 24 pt
 latch (the #3482 amendment below moves it onto finger travel
@@ -17993,9 +17814,7 @@ raised whether a stored 60 should move with it, as the
 `long_swipes` re-default moved a stored false. The drop answers
 that: no stored value survives, so every user gets the new
 default.
-:::
 
-:::unreleased
 *Amended* (owner, 2026-11-19, #3482): **a long swipe's first
 step costs a step length of finger travel too, so every step is
 even.** Firing the first at the 24 pt latch made it come far
@@ -18011,9 +17830,7 @@ first step waits for it up to one points stride (6 pt per mm of
 pad's and never moves, steps there and counts points. Refused: a
 16 pt latch, which is still points and still speeds up with the
 hand.
-:::
 
-:::unreleased
 *Amended* (#3505, 2026-11-19): **a step counts net finger travel
 along its axis.** Each frame's finger move was counted by its size
 and given the sign of that frame's point delta, so any move whose
@@ -18033,9 +17850,7 @@ flip. Learning the way from the deltas was refused: an early
 rock or a drift on the minor axis could teach it backwards for
 the whole touch. A reversal still steps back once the net travel
 back covers the remainder and a length.
-:::
 
-:::unreleased
 *Amended* (owner, 2026-11-19, #3482, #3505): **in mm, the first
 step owes no point floor, and a touch with a live reading never
 falls back to points** — retiring the #3482 amendment's latch
@@ -18072,9 +17887,7 @@ before the hand meant it. Where no reading exists the default now
 counts 48 pt per window at the same 6 pt per mm, no longer 4.2's
 60 pt; the fallback keeps its rate, not its old spacing. A stored value is kept: `step_length` is a new key in
 this release, so no stored 10 records an older default.
-:::
 
-:::unreleased
 *Amended* (owner, 2026-11-19, #3505, with ui-designer and
 architect): **the step length has a Settings row, and is no longer
 Lua-only** — this retires "It is Lua-only" in the 2026-11-16
@@ -18094,9 +17907,7 @@ judges, and a tick at the default with a light snap onto it. Its
 low edge is Core's clamp (3 mm); its high edge, 20 mm, is the
 GUI's curation, Lua open to 60, and a stored value past it pins
 the knob to that end.
-:::
 
-:::unreleased
 **Amended (#3369, owner 2026-11-16): the Mouse & Trackpad part has
 no "Holding a modifier" group, and Long swipes is one setting at
 the Trackpad card's foot, never per binding.** A scroll with keys
@@ -18115,9 +17926,7 @@ the rows above show what is bound, not that this checkbox needs
 one (`noPanSwipe`). `GestureSeeds.longSwipesApply` reads the pan
 predicate the runner dispatches on, `GestureFamily.runsThePan`, so
 the grey cannot disagree with what a swipe does.
-:::
 
-:::unreleased
 **A swipe splits by axis, and a split has one stored spelling**
 (#1873, owner 2026-11-15; ui-designer and architect consulted). A
 swipe's four directions sit on two levels below the whole family:
@@ -18171,9 +17980,7 @@ previous, as ⌃⌥C and ⌃⌥⇧C), or split into two arms through the
 same stored shape and sub-rows. No Natural flip reaches a
 rotation. None of this shipped before the change (`GestureMap` is
 not in 4.2.x), so it owes no `ConfigMigration`.
-:::
 
-:::unreleased
 **The shortcuts panel lists every gesture once: a badge where its
 action has a row, a row under Gestures where it has none** (#1873,
 owner 2026-11-15; ui-designer and architect consulted). A gesture
@@ -18196,9 +18003,7 @@ than one way — two directions running the same action — wears one
 badge, drawn without a direction, since either arrow alone would
 be half the truth. A search that names a gesture brings its badge
 to the front, so a hit never matches a gesture the row hides.
-:::
 
-:::unreleased
 **A multi-finger swipe also fires on a quick flick, decided at
 the release (#1873).** macOS takes a quick, short swipe as a whole
 one, so a swipe that waits for 12% of the trackpad felt dead
@@ -18224,7 +18029,6 @@ amendment, above).
 The Dock's own stream is not read for the verdict: it exists for
 the Dock's axes alone, never for five fingers. And no gauge shows
 a swipe's progress, since the step it fires is its own feedback.
-:::
 
 **The settings are stored like the shortcuts**: a base in
 `gui.json`, a sparse override per profile, and the **Applies to**
@@ -18238,13 +18042,11 @@ never leaves a value out, so there is no "Not here", and turning
 the gesture off in one profile is an empty chord stored as that
 profile's override.
 
-:::unreleased
 *Amended (#3199): the chords left these settings for the binding
 list above.* `scroll_gesture` keeps Natural scrolling, long swipes
 and the step length, which still store every field in the base;
 turning a gesture off in one profile is that profile's `null` on
 its key.
-:::
 
 **Natural scrolling is KiwiDesk's own, per input, and on by
 default.** The gesture moves windows, not the content under the
@@ -18260,7 +18062,6 @@ finger movement*, so the concept is the one the user already
 knows from System Settings, and the default matches macOS's
 own.
 
-:::unreleased
 *Amended (#3200 ruling ▸ "System" as a third value, owner
 2026-11-11; ui-designer advised): the default is `"system"`, which
 follows macOS live.* Each flag stores `"system"`, `true` or
@@ -18274,7 +18075,6 @@ scroll event, so a scroll pays nothing for it; `true` and `false`
 still pin each input apart for the user who wants the gesture
 against their documents. The decoder accepts exactly the three, so
 a stored bool keeps its meaning and no `ConfigMigration` is owed.
-:::
 
 **The chord takes two or more modifiers, and that is why there
 is no Zoom warning.** Measured on macOS 27 with Zoom's "Use
@@ -18290,7 +18090,6 @@ preference would guard a case that cannot arise. The refusal is
 what makes the warning unnecessary, not the ⌃⌥ default:
 allowing a one-modifier chord anywhere re-opens it.
 
-:::unreleased
 *Amended (#3407, owner 2026-11-17): Hyper counts as two.* A
 gesture's keys may be the Hyper key alone or with any modifiers,
 because Hyper reaches no app, so it is as safe from an app's own
@@ -18302,7 +18101,6 @@ event, keeps Zoom from zooming is unmeasured; a posted event
 proves nothing here, so it waits for a device sitting with
 Zoom's modifier set to ⌃. Until then the refusal still keeps every
 chord without Hyper clear of Zoom, and no warning is added.
-:::
 
 **The two scroll gestures take different chords, and ⌃⌥⌘ is the
 Space step's** (#1519, owner ruling 2026-09-29).
@@ -18319,14 +18117,12 @@ recorder offers **Go to** and nothing else — the other gesture's
 row is where the user decides which of the two gives the keys
 up.
 
-:::unreleased
 *Amended (#3199): the refusal is retired with the fixed chords.*
 The pan and the Space step are bindings of the one list, and one
 input with one set of keys is one binding, so the two can no
 longer meet on a chord. ⇧ stays allowed on a swipe and is refused
 on a wheel, since macOS turns ⇧ + wheel into a sideways scroll,
 which is `wheel_x`'s.
-:::
 
 **⌃⌥⌘ + scroll steps through the Space order of the screen under
 the pointer, one Space per swipe or notch** (#1519, owner and
@@ -18867,7 +18663,6 @@ the gaps it is live on a Floating Space, since it floors every
 float there, so it greys only on Monocle, which applies no
 minimum.
 
-:::unreleased
 **A Space's own Maximize rows are the fourth class, on their own
 tests** (#3090). Its first test is the gaps': a Maximize share
 belongs to no layout and every layout's windows take it. Its second
@@ -18884,7 +18679,6 @@ a Floating Space, whose floats maximize, so they count there too,
 and on Monocle, whose floats may still take an axis. "Reset All
 Layout Overrides" leaves them alone, as it leaves the gaps: each
 row's checkbox is its reset.
-:::
 
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the
@@ -19002,7 +18796,6 @@ default is a pairing the palette's own colours define, so a
 palette that left it out would keep the last palette's ring
 beside its own text.
 
-:::unreleased
 A third kind joined with
 [#3357](https://github.com/KiwiCanopy/KiwiDesk/issues/3357): an
 **adaptive** colour, `ColorPaletteKeys.adaptive`, a `_color` key
@@ -19052,7 +18845,6 @@ palette sets. That is the point of leaving them out: a palette
 recolours the shelf, and a colour the user chose for their own
 marks is theirs to take back, never one a palette quietly
 overwrites.
-:::
 
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
@@ -19520,7 +19312,6 @@ hop, since a hit on a colour opens the drawer (#1250). What moved
 out of hiding is the finish alone, for everyone. Its rows are `.atRest`, so by #277 they take no search
 anchor: a hit lands on the page, where they are already shown.
 
-:::unreleased
 *Amended* (owner, 2026-11-19, #3514): the group is titled
 **Finish**, and the Fill and *Tint KiwiHub and plates* lead it,
 above the Liquid Glass switch and the *Fill fade* it greys, with
@@ -19529,7 +19320,6 @@ a Liquid Glass header they read as glass's; each switch now sits
 directly above what it greys, and below macOS 26 the group reads
 Fill, tint, sheen. The switch keeps the name Liquid Glass, with
 what the glass covers in a caption under it.
-:::
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
@@ -20002,7 +19792,6 @@ edges are where the user put it. The slot is reserved on every
 item, so a window sliding out of view changes no item's length, and
 the disc is drawn at full alpha whatever the item's dim.
 
-:::unreleased
 *Amended* (orchestrator after ui-designer, 2026-11-17, #3387): on a
 vertical bar the reserve is mirrored past the icon, so the item is
 even about its icon whether the disc draws or not. Centring the icon
@@ -20012,7 +19801,6 @@ The cost is a longer item along the run, so a crowded side bar
 scrolls sooner. A horizontal item keeps #2643's trade: its title slot
 already sets it off centre, and a mirrored reserve there would
 lengthen every item for nothing.
-:::
 
 **A sliver is not a part.** (Owner and ui-designer, 2026-10-18.) A
 scrolling row leaves every scrolled-out neighbour a fixed sliver so
@@ -20359,12 +20147,10 @@ only for a drag or a put-in or take-out reserves nothing, so
 pocketing never retiles the Space, and the bars' `reserve` switch
 on that edge still turns the strip off.
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3361): the pocket's resting handle
 reserves nothing either, so a `hidden` or `auto` edge reserves
 nothing at all; only the whole mark keeps a strip. ▸ *A fixed
 handle* under the pocket gives the argument.
-:::
 
 A fresh install's starter takes `auto` (#2515), and only beside
 the welcome tour's bars step, which shows what Auto does and
@@ -20393,11 +20179,9 @@ Each bar holds the rest.
 *Amended* (#2978): the master writes the pocket's own Show too (▸
 *The pocket belongs to KiwiShelf*).
 
-:::unreleased
 *Amended* (#3401): the Position master writes the pocket's edge
 too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
 bar's edge may differ per screen*).
-:::
 
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
@@ -20423,7 +20207,6 @@ over the merged run opening in place with a hover swap: a short
 Space Bar and a long App Bar put the handles at unequal distances
 from the middle, where they read as unrelated.
 
-:::unreleased
 *Amended* (owner, 2026-11-19, #3512): the stand-aside is the
 mouse's rule alone. A bar its key reveals lands under its own
 handle, and every other handle on the edge, the Pocket's included,
@@ -20432,7 +20215,6 @@ bar beside the pinned one. A second press hides only the named
 bar. Hiding the sibling for a key pin made the key read as a
 hover the user had not made, and took away the handles the user
 could still reach for.
-:::
 
 The dots cap at six, so a handle at rest never outgrows its band — a
 growing band gives up the one target size — following the current
@@ -20456,7 +20238,6 @@ An App Bar with no window draws no handle at all, so the count is
 never 0; its show/hide there refuses with a pill, as every refusal
 of a bar's show/hide does, rather than doing nothing silently.
 
-:::unreleased
 *Amended* (owner, 2026-11-15, #3349): **an Auto bar rests as a
 strip along its whole run and leaves macOS its own edges.** The
 handle stays the handle, in code and copy, and only its shape and
@@ -20640,7 +20421,6 @@ Dock stays shown for as long as the pointer stays there. So:
   centred, and the Hidden bar shown by its shortcut joins it as it
   joins an Always sibling. Two Hidden bars are unchanged: one
   revealed lands alone. `reveal_style` stays one setting for both.
-:::
 
 A reveal onto an edge that shows nothing else slides the whole bar
 in from the shelf's screen side, already laid out — out from under
@@ -20694,7 +20474,6 @@ other two. The reveal plays under Reduce Motion too, and so does the mark's hove
 growth (owner ruling, 2026-10-21; ▸ The bars honour Reduce Motion
 argues why).
 
-:::unreleased
 No motion at all is `animations.on_reveal`, a switch beside
 `on_expand` and `on_peek`, never a duration of 0 (owner ruling,
 2026-11-12, #3236): a 0 that doubles as an off switch cannot leave
@@ -20706,7 +20485,6 @@ step); a Lua script spelling `set_reveal_duration(0)` or
 `set_expand_duration(0)`, which no crossing reaches, is refused
 naming the switch, so the change is loud rather than a silent
 floor.
-:::
 
 The marks let the mouse through, so the windows under them keep
 their clicks. The reveal waits long enough that a pointer passing
@@ -20824,7 +20602,6 @@ since the fixed plate glide, just over a quarter second until
 #1838, read as a snap for a bar coming and going; `on_expand` turns it off, outside the window
 animations' master.
 
-:::unreleased
 *Amended* (orchestrator, 2026-11-17, #3386): the growing or
 shrinking section reveals its content in place from the seam. Its
 content stays where its slot lays it while the frame grows out of
@@ -20832,7 +20609,6 @@ the seam or shrinks back into it, so a joiner reads the same
 whichever end faces the section it joins. Content pinned to the
 section's leading end rolled in with the moving edge on one side
 and was revealed in place on the other.
-:::
 
 *A minimum, not a share.* Each section is as long as its items
 while both fit. Once the shelf is full the Space section
@@ -21045,7 +20821,6 @@ names every window and marks the focused one, and a second name
 for it elsewhere on screen is the duplicate the stand-down
 removed, whatever plate it sits on.
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3359): **an Auto App Bar stands the
 front app down too**, on any edge of the screen, so only a Hidden
 App Bar leaves the segment its room. One screen-wide answer keeps
@@ -21059,7 +20834,6 @@ refused: the same setting would then show or hide the segment
 depending on where the App Bar sits, which no caption can say in
 one line. The row is not greyed, since a Hidden App Bar, or a
 layout without one, still shows the segment.
-:::
 
 *The App Bar's edge is global only.* No layout overrides it: an
 edge per layout would carry the bar across the screen on a
@@ -21144,7 +20918,6 @@ nothing about the option, while the `?` names the one thing that
 unlocks it, a profile for more screens, so the grey promises
 nothing a setting would have to keep.
 
-:::unreleased
 *Amended: the pocket's edge may differ per screen too.*
 ([#3376](https://github.com/KiwiCanopy/KiwiDesk/issues/3376),
 ruled 2026-11-17.) The pocket sits on the shelf's edges, so a
@@ -21168,7 +20941,6 @@ screen. Its drawer, Each bar and Pocket, gives the pocket a row and
 Per screen rows of its own beside each bar's, and the separate
 Pocket edge row is gone: two rows writing one value would let the
 master and the row disagree about which was the pocket's edge.
-:::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
@@ -21829,7 +21601,6 @@ once. In code, the members that play them are ruled in
 `BarMotionSeamTests`' `ungated` map, which may neither read the
 flag nor be added to without a ruling.
 
-:::unreleased
 *Amended* (owner, 2026-11-16, #3360): a hidden bar's handle no
 longer grows under the pointer, so the hover growth leaves the
 three, and the handle's progress fill takes its place. It is a
@@ -21839,7 +21610,6 @@ fill's whole job. KiwiDesk's Off steps it to full rather than
 dropping it (owner, 2026-11-18, #3471).
 The pocket's tab joins it under Reduce Motion (#3368): with its
 rise stood down, the tab counts the wait down with the same fill.
-:::
 
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either
@@ -21965,7 +21735,6 @@ order — in the census
 order lists (`BarsRowOrder`), not a per-card invention — and a
 row both bars would read belongs on the shelf card, not twice.
 
-:::unreleased
 *Amended (#3445, owner 2026-11-18), overturning #3401's placement
 of 2026-11-17 under Alignment:* Pocket position sits in Position's
 "Each bar and Pocket" drawer, directly under the Pocket's edge row
@@ -21977,7 +21746,6 @@ the row stays live with its note under it, never a `?` in its
 place: the value still picks the end of the shelf the Pocket takes,
 places it in the strip under Hidden, and governs every screen that
 does not share an edge — so hiding it would hide a working control.
-:::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
 owner ruling 2026-10-21).** Nothing hides rows by experience
@@ -22005,7 +21773,6 @@ duration grey with it while no bar hides (owner ruling,
 every bar on Always — a bar joining a fused shelf, the plate
 gliding — so it greys only while its switch is off.
 
-:::unreleased
 The drawer shows the two motions' switches and no length: both
 lengths are Lua-only, and the speed preset is Settings' one pace
 control for the shelf (*The speed preset is Settings' one pace
@@ -22022,7 +21789,6 @@ their stored values kept, the shut drawer reads Off, and one line
 under the drawer points at Looks & Animations ▸ Animation speed
 (owner, 2026-11-18, #3471): no reveal style plays and neither
 motion does.
-:::
 
 **The bars ship one thickness, 40 pt, on every screen, and the
 slider's floor is the Core floor by derivation.** (#1359, owner
@@ -22610,11 +22376,9 @@ profile travels: writing the leaf off would flip the user's
 choice on every Mac the profile reaches and leave it flipped when
 the setting goes back off. It is read at render time instead.
 
-:::unreleased
 Under *Tint KiwiHub and plates* the panel's off state carries the
 Fill, so there it is the Fill at full alpha over that material (▸
 the shortcuts panel entry).
-:::
 
 **A Fill with no colour is one state, and it paints nothing on
 any path** (#2569, owner ruling 2026-10-24, after an HTML preview;
@@ -22842,11 +22606,9 @@ glass the band takes the Fill's tint. Hovering still grows the
 pill and shows its highlight rim. `GlassTint.applyBehind` was
 that door and the handles its only caller.
 
-:::unreleased
 *Retired* (owner, 2026-11-16, #3360, #3361): the handles no longer
 thicken or draw glass, so no glass paints its Fill behind it and the
 door is gone.
-:::
 
 **The bars, the overflow marks and their list, the hover peek
 and the plates wear the key-window rim.** macOS draws
@@ -23359,10 +23121,8 @@ One glyph means one count: once `display` beside a number is the
 screen count, the collapsed setups chip counts in words
 ("setups: 3").
 
-:::unreleased
 The preset card leaves with the Presets section (#3294); the
 rule holds for the profile row.
-:::
 
 **[Principle]**
 
@@ -23498,10 +23258,8 @@ control, the affordance-for-a-channel-that-does-not-exist case, so
 a caption takes its place and the other counts follow with
 headers.
 
-:::unreleased
 The Presets card leaves this pane (#3294); the Desktop table's
 own grouping stands without it.
-:::
 
 **[Principle]**
 
@@ -23671,7 +23429,6 @@ consequences:
   why.** A scripted save that changes another file must not do it
   silently.
 
-:::unreleased
 *Forgetting a setup is its own act (#3324, owner, 2026-11-14,
 amending the above).* The setup chips on a profile row stay
 claim-only: they carry no ×, and a chip never removes a set,
@@ -23719,7 +23476,6 @@ the row a user points at; the card adds only the rules. Ordering
 by holder, as the card first did, scattered setups of one count
 across the list, and a user looks for a setup by its screens, not
 by which profile holds it.
-:::
 
 **[Principle]**
 
@@ -24301,7 +24057,6 @@ the Float row it qualifies (`AppRuleListsWiringTests` ▸
 `patternEditorScopesToFloat`). An app may sit in both lists.
 This is the storage's own shape, so it costs the engine nothing.
 
-:::unreleased
 *The Space card stops being title-blind (#3341, owner,
 2026-11-15).* A Chromium browser's profiles share one bundle id, so
 a title-blind Space could not give one profile its own Space, and
@@ -24348,7 +24103,6 @@ above; a lens's app titles in KiwiVision share that editor and so
 the popover. The live check of what a typed pattern matches moves
 into the popover with the field, so a title rule is still verified
 before it is stored, through the engine's own resolution as above.
-:::
 A third card, **Automatic floating**, carries the escape for a
 guess (#2173): its checkbox on top and the **Tile instead** list
 it gates below it, so the Tile rows read as the checkbox's
@@ -24429,11 +24183,9 @@ complete rule and never a row with a defaulted facet
 the apps its own list holds, since an app may carry both rules
 (`AppRulesSectionWiringTests` ▸ `cardsTakeTheirOwnState`).
 
-:::unreleased
 The Space card's picker excludes only the apps that hold a bare
 Space rule, so an app with only titled rows can have its bare row
 added back (#3341).
-:::
 
 **Matching windows by title is never withheld.** *Windows
 titled…* is a peer of *All windows* in the Float menu, not a
@@ -24468,7 +24220,6 @@ engine is worse than no preview, because it is trusted — and the
 two details a re-implementation gets wrong are exactly the two
 the check exists to show.
 
-:::unreleased
 *A picked title is checked like a typed one (#3340, owner,
 2026-11-15).* Picking an open window's title opens the "Title
 contains…" field on it, selected, rather than storing it: a title
@@ -24478,7 +24229,6 @@ and storing it on the pick skipped the check this paragraph
 exists for. Return keeps it whole, so a window whose title never
 changes costs one keystroke more. The editor is shared, so Float
 rows and KiwiVision lens apps act the same way.
-:::
 
 This is a read of live window state from Settings, which is not
 the live-*apply* coupling #123 rejects: it reaches the snapshot
@@ -24536,7 +24286,6 @@ one thing, learned twice, and the menu's copy was the poorer one —
 no pictures of the layouts, no search, and submenus that are slow
 to steer with a pointer.
 
-:::unreleased
 The menu bar's way into KiwiHub is **Show Desktop overview**, which
 shows its live chord the way a menu item shows a key equivalent, so
 every pointer trip teaches the faster path. The menu keeps only
@@ -24545,7 +24294,6 @@ rows that can show their key (owner, 2026-11-19, #3485), so the
 enough to teach the chord, and wherever a side's key is a tap, a
 one-side chord or on ✦, which no menu key equivalent can draw
 (#3470), a second row adds a way in and no key.
-:::
 
 What else the menu holds is either a warning or app chrome.
 **Settings…** sits low, next to Quit, where every native
@@ -24590,7 +24338,6 @@ key that might not be the row's. The column is display only: the
 row drops AppKit's matching keyDown, since Carbon's hotkey has
 already acted, or Float would toggle twice.
 
-:::unreleased
 *Amended (#3470, owner on ui-designer's recommendation,
 2026-11-18): a ✦ chord shows nothing too, in the status menu as in
 the bar menus.* AppKit's column draws only ⌃⌥⇧⌘, so `✦L` came out
@@ -24602,7 +24349,6 @@ column, stays grey on the highlight and is read aloud as a star.
 The Settings row keeps the app menu's `⌘,` there, which is true
 while the menu is open. The Desktop overview row takes its live
 chord as the KiwiHub row does.
-:::
 
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain

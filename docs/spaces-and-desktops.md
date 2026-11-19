@@ -336,7 +336,6 @@ it switches to that Desktop and gives the window the focus.
 
 ### With more than one screen
 
-:::unreleased
 KiwiDesk parks in whichever bottom corner of the window's own
 screen leaves less of its parked windows on the other screens,
 counting screens beside it, below it and past each corner, and in
@@ -359,7 +358,6 @@ pointer then crosses between a moved screen and its neighbours off
 from where they stand on the desk by the distance it moved, and
 the arrangement stays yours to change in System Settings ▸
 Displays. Keep as Is is remembered until the arrangement changes.
-:::
 
 A parked window's top sits about 48 pt above the bottom of the
 screen's usable area (above a bottom Dock), a strip 1 pt wide
