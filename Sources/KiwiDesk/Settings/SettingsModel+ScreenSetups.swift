@@ -50,8 +50,9 @@ extension SettingsModel {
     }
 
     /// A setup's screens as one localized list: a connected screen
-    /// by its name, a disconnected one by its fingerprint's name —
-    /// with its size where `sized`, so a same-named pair differs.
+    /// by its name — a twin by its position (#3502) — a
+    /// disconnected one by its fingerprint's name, with its size
+    /// where `sized`, so a same-named pair differs.
     func setupLabel(_ monitors: [String], sized: Bool = false) -> String {
         LocalizedList.join(
             monitors.map { fingerprint in
@@ -59,8 +60,8 @@ extension SettingsModel {
                 guard !sized else {
                     return "\(parts.name) (\(parts.size))"
                 }
-                let connected = screenName(fingerprint)
-                return connected == fingerprint ? parts.name : connected
+                return displays.first { $0.fingerprint == fingerprint }
+                    .map(screenLabel) ?? parts.name
             }
         )
     }

@@ -27,7 +27,12 @@ struct MaximizeShapeRow: View {
                     // length is measured against (#3460).
                     Text(
                         LocalizedList.join(
-                            screens.map(MaximizeShapeText.screenLine)
+                            screens.map {
+                                MaximizeShapeText.screenLine(
+                                    $0,
+                                    named: model.screenLabel($0)
+                                )
+                            }
                         )
                     )
                     .font(.callout)
@@ -100,7 +105,7 @@ struct MaximizeShapeRow: View {
                     MaximizeShapeText.overflow(
                         settings.share(for: axis, on: shape),
                         axis: axis,
-                        on: display,
+                        on: model.screenLabel(display),
                         region: $0
                     )
                 }
@@ -143,25 +148,26 @@ enum MaximizeShapeText {
         StarterTitle.displayName(of: shape.screenClass)
     }
 
-    /// A connected screen as the row lists it: its name and the size
-    /// Displays shows as "Looks like" (#3460).
-    static func screenLine(_ display: Display) -> String {
+    /// A connected screen as the row lists it: its `name` as copy
+    /// says it (a twin by its position, #3502) and the size Displays
+    /// shows as "Looks like" (#3460).
+    static func screenLine(_ display: Display, named name: String) -> String {
         L(
             "layout_defaults.maximize.screen_line",
             "%1$@ · %2$@ × %3$@ pt",
-            display.name,
+            name,
             SettingsValueReadout.trimmed(display.frame.width),
             SettingsValueReadout.trimmed(display.frame.height)
         )
     }
 
-    /// The line saying a stored length is longer than `display`'s
-    /// axis, so a press fills that axis there; nil for a fraction or
-    /// a length that fits (#3460).
+    /// The line saying a stored length is longer than the screen
+    /// `name` names along `axis`, so a press fills that axis there;
+    /// nil for a fraction or a length that fits (#3460).
     static func overflow(
         _ share: MaximizeLength,
         axis: MaximizeAxis,
-        on display: Display,
+        on name: String,
         region: MaximizeRegion
     ) -> String? {
         guard let points = share.points else { return nil }
@@ -175,7 +181,7 @@ enum MaximizeShapeText {
                 "%1$@ is wider than %2$@ (%3$@), so it fills the "
                     + "width there.",
                 length,
-                display.name,
+                name,
                 SettingsValueReadout.points(drawn)
             )
         case .width:
@@ -184,7 +190,7 @@ enum MaximizeShapeText {
                 "%1$@ is taller than %2$@ (%3$@), so it fills the "
                     + "height there.",
                 length,
-                display.name,
+                name,
                 SettingsValueReadout.points(drawn)
             )
         }

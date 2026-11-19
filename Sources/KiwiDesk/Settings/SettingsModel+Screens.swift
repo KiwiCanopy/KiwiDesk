@@ -83,6 +83,13 @@ extension SettingsModel {
         }?.name ?? fingerprint
     }
 
+    /// A screen named as macOS names it, in the words copy says:
+    /// a connected twin by its position (#3502), any other name
+    /// unchanged. A stored name stays macOS's; only the words move.
+    func screenWords(named name: String) -> String {
+        displays.first { $0.name == name }.map(screenLabel) ?? name
+    }
+
     /// Active main screen (`PositionalDisplays.liveMainID`).
     /// ONE derivation, because the picture reads it twice — the
     /// tray and the "main" badge; a second derivation by
