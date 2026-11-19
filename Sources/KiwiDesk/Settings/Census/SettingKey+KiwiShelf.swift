@@ -183,8 +183,8 @@ extension KiwiShelfKey {
             // The accent's bar half (#1857).
             return .row(.coloursAndMotion, .accent, .showMore)
         case .fillColor:
-            // Drawn in the Liquid Glass group, above the rows it
-            // greys, outside the Colors drawer (#2593).
+            // Drawn first in the Finish group, above the tint it
+            // greys, outside the Colors drawer (#2593, #3514).
             return .row(.coloursAndMotion, .kiwishelf, .atRest)
         case .itemColor, .hoverItemColor, .groupBadgeColor,
             .groupBadgeTextColor, .handleColor:

@@ -21,13 +21,14 @@ enum ColorsRowOrder {
         .colours(.paletteDelete),
     ]
 
-    /// The Liquid Glass group's rows, at rest (#2593): the #1307
-    /// master, the Fill above the two rows it and the master gate
-    /// (#2569), then the sheen's own row (#1644).
+    /// The Finish group's rows, at rest (#2593, #3514): the Fill
+    /// and the tint it greys, which need no glass, then the #1307
+    /// master above the fade it greys (#2569), then the sheen's own
+    /// row (#1644) — each switch directly above what it greys.
     static let glassRows: [SettingKey] = [
-        .colours(.liquidGlassMaster),
         .kiwishelf(.fillColor),
         .kiwishelf(.tintHubAndPlates),
+        .colours(.liquidGlassMaster),
         .kiwishelf(.fillFade),
         .colours(.borderSheen),
     ]

@@ -49,9 +49,9 @@ struct SheenCouplingTests {
     func rowPlacement() {
         #expect(
             ColorsRowOrder.glassRows == [
-                .colours(.liquidGlassMaster),
                 .kiwishelf(.fillColor),
                 .kiwishelf(.tintHubAndPlates),
+                .colours(.liquidGlassMaster),
                 .kiwishelf(.fillFade),
                 .colours(.borderSheen),
             ]

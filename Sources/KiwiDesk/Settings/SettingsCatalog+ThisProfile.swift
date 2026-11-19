@@ -164,12 +164,12 @@ struct ColorsControls: Sendable {
         "colors.colors_and_glass.title",
         "Colors & glass"
     )
-    /// The Liquid Glass group AND its master row: one key for
-    /// both (`GlassCard.title`). The group's other rows are at
-    /// rest, so they take no anchor (#277, #2593).
+    /// The Finish group: the Fill, Liquid Glass and the sheen
+    /// (#3514). Its rows are at rest, so they take no anchor (#277,
+    /// #2593); the master row keeps "Liquid Glass" (`GlassCard.title`).
     let liquidGlassGroup = SettingsControl(
-        "colors.liquid_glass",
-        "Liquid Glass"
+        "colors.finish",
+        "Finish"
     )
     /// Every colour group but the Fill, shut on every visit
     /// (#2593), declared with its rows so a hit inside it opens

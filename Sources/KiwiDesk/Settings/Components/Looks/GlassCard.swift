@@ -1,12 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The one Liquid Glass switch, over both bars and the ⌃⌥K
-/// shortcuts panel (#1307), the Fill and the two rows it greys —
-/// "Tint KiwiHub and plates" and "Fill fade" (#2569, #2593) — and
-/// the sheen's own row last (#1644); the Fill, the tint row and
-/// the sheen alone show below macOS 26. The open group of Colors &
-/// glass (#2389).
+/// The Finish group (#3514): the Fill and "Tint KiwiHub and
+/// plates", which need no glass, then the one Liquid Glass switch
+/// over both bars and KiwiHub (#1307) with the "Fill fade" it
+/// greys (#2569, #2593), and the sheen's own row last (#1644); the
+/// Fill, the tint row and the sheen alone show below macOS 26. The
+/// open group of Colors & glass (#2389).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -22,7 +22,6 @@ struct GlassCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.colors.liquidGlassGroup,
-            caption: AppBarStyle.glassAvailable ? caption : nil,
             subsection: true,
             plated: false
         ) {
@@ -85,15 +84,16 @@ struct GlassCard: View {
 
     private var shelf: KiwiShelf { model.config.settings.kiwishelf }
 
-    /// The Reduce-transparency reason, under the switch it greys
-    /// and outside that grey so it survives the dim (#527) — never
-    /// on the header, which would claim it for the sheen too. The
-    /// Fill's grey needs none: the Fill sits right above (#2593).
+    /// Under the switch: what the glass covers, and the
+    /// Reduce-transparency reason, outside that grey so it survives
+    /// the dim (#527) — never on the header, which would claim them
+    /// for the Fill and the sheen (#3514). The Fill's grey needs
+    /// none: its rows sit in the same group (#2593).
     @ViewBuilder private func reasonCaption(
         for key: SettingKey
     ) -> some View {
-        if reduceTransparency, key == .colours(.liquidGlassMaster) {
-            Text(reduceTransparencyHelp)
+        if key == .colours(.liquidGlassMaster) {
+            Text(reduceTransparency ? reduceTransparencyHelp : caption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -151,9 +151,8 @@ struct GlassCard: View {
         )
     }
 
-    /// ONE key for the card and its only row: the product name
-    /// twice under its own header is a second string nothing
-    /// holds in step (localization-auditor, 2026-09-07).
+    /// The master row's label: the product name, while the group
+    /// is titled Finish (#3514).
     static var title: String {
         L("colors.liquid_glass", "Liquid Glass")
     }

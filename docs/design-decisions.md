@@ -19520,6 +19520,17 @@ hop, since a hit on a colour opens the drawer (#1250). What moved
 out of hiding is the finish alone, for everyone. Its rows are `.atRest`, so by #277 they take no search
 anchor: a hit lands on the page, where they are already shown.
 
+:::unreleased
+*Amended* (owner, 2026-11-19, #3514): the group is titled
+**Finish**, and the Fill and *Tint KiwiHub and plates* lead it,
+above the Liquid Glass switch and the *Fill fade* it greys, with
+the sheen last. The Fill and the tint draw without glass, so under
+a Liquid Glass header they read as glass's; each switch now sits
+directly above what it greys, and below macOS 26 the group reads
+Fill, tint, sheen. The switch keeps the name Liquid Glass, with
+what the glass covers in a caption under it.
+:::
+
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
 Settings search indexes destination titles, so a page keeping a
