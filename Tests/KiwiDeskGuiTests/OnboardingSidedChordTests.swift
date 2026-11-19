@@ -36,10 +36,10 @@ struct OnboardingSidedChordTests {
                 spaces: spaces
             )
         )
-        #expect(chord.glyphs == "Left ⌃⌥ 1–3")
+        #expect(chord.glyphs == "Left⌃⌥ 1–3")
     }
 
-    @Test("a sided key alone keeps one space")
+    @Test("a sided key alone is its key, nothing before it")
     func sidedKeyAlone() {
         LocalizationManager.shared.select("en")
         #expect(OnboardingKeys.keyOnly(combo: "rcmd+j") == "J")

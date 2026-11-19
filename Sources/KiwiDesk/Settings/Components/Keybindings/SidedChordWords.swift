@@ -2,7 +2,7 @@ import Foundation
 import KiwiDeskCore
 
 /// A drawn chord as words (#2601 ▸ Ruling 1, amended): each sided
-/// run `ChordGlyphs` drew — `Izq. ⌃⌥ J`, `左⌘H` — read back as the
+/// run `ChordGlyphs` drew — `Izq.⌃⌥J`, `左⌘H` — read back as the
 /// Hyper card's full key names ("⌃ izquierdo ⌥ izquierdo J"), so
 /// VoiceOver and the hover say a short catalog word in full. Reads
 /// the run through the catalog's own side frame, never a second
@@ -60,8 +60,8 @@ enum SidedChordWords {
     }
 
     /// The double tap `drawn` is (#1872): one glyph twice, alone,
-    /// inside one side frame or none — `⌘⌘`, `Right ⌥⌥`. A single
-    /// tap draws as a modifier-layer chip does (`Right ⌘`), so only
+    /// inside one side frame or none — `⌘⌘`, `Right⌥⌥`. A single
+    /// tap draws as a modifier-layer chip does (`Right⌘`), so only
     /// a reader holding the combo can call it a tap.
     private static func tap(
         in drawn: String,

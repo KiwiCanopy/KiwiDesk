@@ -201,15 +201,7 @@ extension SettingsView {
             // new subtree, so the first scrollTo can be a silent
             // no-op — and the wash would paint off-screen.
             proxy.scrollTo(anchor, anchor: .top)
-            let token = model.nav.startFlash(anchor)
-            // Under Reduce Motion, hold absorbs fade duration.
-            try? await Task.sleep(
-                nanoseconds: SettingsReveal.nanoseconds(
-                    SettingsReveal.hold
-                        + (reduceMotion ? SettingsReveal.fade : 0)
-                )
-            )
-            model.nav.endFlash(token: token)
+            await model.flashReveal(anchor, reduceMotion: reduceMotion)
         }
     }
 }

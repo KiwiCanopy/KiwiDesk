@@ -2434,6 +2434,17 @@ AppKit scroller while a mouse is connected (#3413,
 `ShortcutsPanelScrollTests` ▸ `hiddenIsHeld`, whose `allowed` map
 is the one copy of the `.hidden` sites left).
 
+**A page whose fixed control swaps the content below it in place
+lays out at one width whether that content scrolls or fits**: its
+vertical `ScrollView` takes `legacyScrollerGutter` and its content
+the bound it writes, so a legacy scroller's width is held on a
+segment that fits and the columns hold still across segments
+(#3491, `ShortcutKeyColumnTests`); the bound follows a resize a
+layout pass late, which is accepted. A page reached only by
+navigation takes none. In Settings and the tour the scroller style
+is read only through `ScrollerStyleWatch` (`StripScrollerTests` ▸
+`clearanceHome`).
+
 **A strip's content in those two trees clears an overlay scroller
 through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
 that strip's content width and viewport (`StripScrollerTests` ▸
@@ -2450,29 +2461,32 @@ release re-measures `overlayHeight`.
 
 **A surface drawing a chord takes it from `ChordGlyphs`**, which
 names a side as the catalog's word, once per run of same-side
-modifiers — `Left ⌃⌥ J`, `Right ⌘ H` — and leaves an either-side
-chord as Core's plain glyphs; Core names a side by its letter and
-never reaches a screen (owner ruling 2026-10-28, amending #2601's
-Ruling 1; `ChordGlyphsSeamTests`, whose `allowed` map is the one
-copy of who may read the lettered form). A translated side word
-fits the recorder's `labelMinWidth` in every catalog on a one-hand
-chord of up to three modifiers and a one-character key, while a
-longer chord widens its chip (`ChordGlyphsWidthTests`). The run's
-word is a second spelling of a side beside `HyperKeyWords`' key
-names, by ruling: it names a GROUP of modifiers, so it agrees with
-no key noun and stands before its run, whatever order the key
-names take. A surface naming a chord for VoiceOver and on hover
-goes through `SidedChordWords`, which reads each drawn run back
-through the catalog's own frame as the full key names, so a short
-word (`Izq.`) is spoken whole, and names ✦ by `HyperKeyWords.keyName`, since
-VoiceOver reads the glyph as a star (#2700, `SidedChordWordsTests`
-▸ `hyperIsNamed`); a surface speaking a chord takes `label`, never
-a ✦ replacement of its own. A new chord surface joins
-`SidedChordWordsTests` ▸ `surfacesSpeakTheSide` in the change that
-adds it. **Which keys still fire an either-side row beside sided
-rows is Core's `KeybindingConflicts.sideReach`**, read through
-`LayerConflictMemo.reach` and handed to a recorder as its
-`SideNarrowing`, never a sidedness comparison of the GUI's own
+modifiers and glued to it — `Left⌃⌥J`, `Left⌘⌘`, with one space
+only between two runs, `Left⌃ Right⌥J` (owner, 2026-11-19,
+`ChordGlyphsTests`, `ModifierTapWordsTests`) — and leaves an
+either-side chord as Core's plain glyphs; Core names a side by its
+letter and never reaches a screen (owner ruling 2026-10-28,
+amending #2601's Ruling 1; `ChordGlyphsSeamTests`, whose `allowed`
+map is the one copy of who may read the lettered form). A
+translated side word fits the recorder's `labelMinWidth` in every
+catalog on a one-hand chord of up to three modifiers and a
+one-character key, while a longer chord widens its chip
+(`ChordGlyphsWidthTests`). The run's word is a second spelling of
+a side beside `HyperKeyWords`' key names, by ruling: it names a
+GROUP of modifiers, so it agrees with no key noun and stands
+before its run, whatever order the key names take. A surface
+naming a chord for VoiceOver and on hover goes through
+`SidedChordWords`, which reads each drawn run back through the
+catalog's own frame as the full key names, so a short word
+(`Izq.`) is spoken whole, and names ✦ by `HyperKeyWords.keyName`,
+since VoiceOver reads the glyph as a star (#2700,
+`SidedChordWordsTests` ▸ `hyperIsNamed`); a surface speaking a
+chord takes `label`, never a ✦ replacement of its own. A new chord
+surface joins `SidedChordWordsTests` ▸ `surfacesSpeakTheSide` in
+the change that adds it. **Which keys still fire an either-side
+row beside sided rows is Core's `KeybindingConflicts.sideReach`**,
+read through `LayerConflictMemo.reach` and handed to a recorder as
+its `SideNarrowing`, never a sidedness comparison of the GUI's own
 (#3256, `SideReachTests`, `SideNarrowingCaptionTests`). **The
 recorder takes a side only from the
 `\.recorderSides` environment value**, which each recorder mount

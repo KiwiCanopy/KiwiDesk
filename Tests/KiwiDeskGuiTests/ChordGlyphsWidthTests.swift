@@ -28,12 +28,18 @@ struct ChordGlyphsWidthTests {
         #expect(locales.count > 1)
         for locale in locales {
             LocalizationManager.shared.select(locale)
-            for combo in combos {
+            for (combo, side) in zip(combos, [ModifierSide.left, .right]) {
                 let drawn = ChordGlyphs.render(
                     combo,
                     layoutChar: { _ in nil }
                 )
-                #expect(drawn.contains(" "), "\(locale): \(drawn)")
+                // The word glued to its run (#3487).
+                let word = ChordGlyphs.sideWord(side)
+                #expect(drawn.hasPrefix(word), "\(locale): \(drawn)")
+                #expect(
+                    !drawn.dropFirst(word.count).hasPrefix(" "),
+                    "\(locale): \(drawn)"
+                )
                 let width = (drawn as NSString)
                     .size(withAttributes: [.font: font]).width
                 #expect(

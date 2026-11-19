@@ -5,8 +5,9 @@ import Testing
 @testable import KiwiDesk
 
 /// A sided chord is drawn with its side as a word, said once per
-/// run of same-side modifiers (#2601 ▸ Ruling, amended 2026-10-28):
-/// `Left ⌃⌥ J`, never `L⌃L⌥J`, and an either-side chord unchanged.
+/// run of same-side modifiers and glued to it (#2601 ▸ Ruling,
+/// amended 2026-10-28 and 2026-11-19, #3487): `Left⌃⌥J`, never
+/// `L⌃L⌥J`, and an either-side chord unchanged.
 @Suite("Chord glyphs name a side in words (#2601)")
 @MainActor
 struct ChordGlyphsTests {
@@ -20,14 +21,14 @@ struct ChordGlyphsTests {
     @Test("a same-side run is named once")
     func runIsNamedOnce() throws {
         LocalizationManager.shared.select("en")
-        #expect(try drawn("lctrl+lalt+j") == "Left ⌃⌥ J")
-        #expect(try drawn("rcmd+h") == "Right ⌘ H")
+        #expect(try drawn("lctrl+lalt+j") == "Left⌃⌥J")
+        #expect(try drawn("rcmd+h") == "Right⌘H")
     }
 
     @Test("a cross-hand chord names each run")
     func crossHandNamesEach() throws {
         LocalizationManager.shared.select("en")
-        #expect(try drawn("lctrl+ralt+j") == "Left ⌃ Right ⌥ J")
+        #expect(try drawn("lctrl+ralt+j") == "Left⌃ Right⌥J")
     }
 
     @Test("an either-side modifier stays a bare glyph beside a run")
@@ -36,12 +37,12 @@ struct ChordGlyphsTests {
         #expect(
             ChordGlyphs.modifiers(
                 [.control, .option, .side(.right, of: .option)]
-            ) == "⌃ Right ⌥"
+            ) == "⌃ Right⌥"
         )
         #expect(
             ChordGlyphs.modifiers(
                 [.hyper, .command, .side(.right, of: .command)]
-            ) == "✦ Right ⌘"
+            ) == "✦ Right⌘"
         )
     }
 
@@ -49,7 +50,6 @@ struct ChordGlyphsTests {
     func eitherSideUnchanged() throws {
         #expect(try drawn("ctrl+alt+j") == "⌃⌥J")
         #expect(try drawn("hyper+cmd+k") == "✦⌘K")
-        #expect(ChordGlyphs.separator(.command).isEmpty)
     }
 
     @Test("the words come from the catalog, never a fixed language")
@@ -62,10 +62,11 @@ struct ChordGlyphsTests {
         #expect(!japanese.contains("Right"))
     }
 
-    /// The fold and the tour drop `modifiers + separator` off a
-    /// drawn chord, so the three must agree for every side of every
-    /// modifier, or a key loses its first character.
-    @Test("a chord starts with its drawn modifiers and separator")
+    /// The fold and the tour drop the drawn modifiers off a drawn
+    /// chord, so the two must agree for every side of every
+    /// modifier, or a key loses its first character (#3487: nothing
+    /// stands between them).
+    @Test("a chord is its drawn modifiers, then its key")
     func partsAgreeWithTheChord() throws {
         LocalizationManager.shared.select("en")
         for kind in ModifierKind.allCases {
@@ -74,9 +75,7 @@ struct ChordGlyphsTests {
                 if let side { modifiers.formUnion(.side(side, of: kind)) }
                 let combo = KeyCombo(keyCode: 38, modifiers: modifiers)
                 let drawn = ChordGlyphs.render(combo, layoutChar: { _ in "J" })
-                let head =
-                    ChordGlyphs.modifiers(modifiers)
-                    + ChordGlyphs.separator(modifiers)
+                let head = ChordGlyphs.modifiers(modifiers)
                 #expect(drawn == head + "J", "\(drawn)")
             }
         }

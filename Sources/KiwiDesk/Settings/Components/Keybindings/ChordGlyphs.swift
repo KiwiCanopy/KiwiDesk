@@ -3,8 +3,8 @@ import KiwiDeskCore
 
 /// A chord as the GUI draws it (#2601 ▸ Ruling, amended): Core's
 /// glyphs, a run of same-side modifiers led by its side as a word
-/// — `Left ⌃⌥ J`, `Right ⌘ H` — and an either-side chord as plain
-/// glyphs. The one door from `ComboSymbols` to a drawn chord
+/// glued to it — `Left⌃⌥J`, `Left⌃ Right⌥J` — and an either-side
+/// chord as plain glyphs. The one door from `ComboSymbols` to a drawn chord
 /// (`ChordGlyphsSeamTests`): Core names a side by its letter, the
 /// GUI narrates it (#96).
 @MainActor
@@ -20,20 +20,12 @@ enum ChordGlyphs {
         words(ComboSymbols.modifierSymbols(modifiers))
     }
 
-    /// What stands between drawn modifiers and their key: a space
-    /// where a side is drawn as a word, so the word stays with its
-    /// run — read off the drawing itself, so the two never differ.
-    static func separator(_ modifiers: HotkeyModifiers) -> String {
-        let glyphs = ComboSymbols.modifierSymbols(modifiers)
-        return words(glyphs) == glyphs ? "" : " "
-    }
-
     /// A side's word around a run of glyphs, as the catalog frames
     /// it.
     static func word(_ side: ModifierSide, _ run: String) -> String {
         switch side {
-        case .left: L("chord.side.left", "Left %1$@", run)
-        case .right: L("chord.side.right", "Right %1$@", run)
+        case .left: L("chord.side.left", "Left%1$@", run)
+        case .right: L("chord.side.right", "Right%1$@", run)
         }
     }
 
@@ -74,7 +66,8 @@ enum ChordGlyphs {
     }
 
     /// Core's lettered glyphs (`R⌘H`) with each same-side run
-    /// named once; unchanged where no modifier keeps a side.
+    /// named once, one space between runs and none before the key;
+    /// unchanged where no modifier keeps a side.
     private static func words(_ glyphs: String) -> String {
         let parsed = parse(glyphs)
         guard parsed.runs.contains(where: { $0.side != nil }) else {
@@ -83,8 +76,7 @@ enum ChordGlyphs {
         let pieces = parsed.runs.map { run in
             run.side.map { word($0, run.glyphs) } ?? run.glyphs
         }
-        return (pieces + (parsed.key.isEmpty ? [] : [parsed.key]))
-            .joined(separator: " ")
+        return pieces.joined(separator: " ") + parsed.key
     }
 
     /// Splits Core's lettered glyphs into same-side runs and the key.

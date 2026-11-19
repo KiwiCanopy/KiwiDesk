@@ -157,14 +157,16 @@ extension AppRuleSpaceRow {
     }
 
     /// Change Title… rewrites the row; Add Rule… adds a titled rule
-    /// in the row's Space, whose own menu then moves it.
+    /// in the row's Space, whose own menu then moves it, and reveals
+    /// it as every add does (#3490).
     private func commit(_ fragment: String, from composer: SpaceComposer) {
         composing = nil
+        let made = SpaceRuleRow(app: row.app, fragment: fragment)
         if composer.changes {
-            let moved = SpaceRuleRow(app: row.app, fragment: fragment)
-            model.moveSpaceRule(from: row, to: moved) {
+            model.moveSpaceRule(from: row, to: made) {
                 SpaceRuleEdit.setFragment(fragment, of: row, in: &$0)
             }
+            returningRow = made.key
         } else {
             guard
                 SpaceRuleEdit.addTitled(
@@ -173,8 +175,8 @@ extension AppRuleSpaceRow {
                     config: &model.config
                 )
             else { return }
+            onAdd(made.key)
         }
-        returningRow = SpaceRuleRow(app: row.app, fragment: fragment).key
     }
 }
 

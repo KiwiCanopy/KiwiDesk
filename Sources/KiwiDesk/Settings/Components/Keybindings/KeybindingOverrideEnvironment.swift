@@ -20,10 +20,12 @@ private struct SystemShortcutStateKey: EnvironmentKey {
     static let defaultValue = SystemShortcutState.unread
 }
 
-/// Set on a card whose rows end in a trash: a trash-less row in
-/// it (`KeybindingNavRow`, `ShortcutSettingRow`) reads this key
-/// and holds `AppRuleDeleteButton.slot`, so its reach and key
-/// columns line up with the trash rows'.
+/// Set once on the Shortcuts page, whose rows end in a trash
+/// column (#3491): a trash-less row (`KeybindingNavRow`,
+/// `ShortcutSettingRow`) reads this key and holds
+/// `AppRuleDeleteButton.slot`, so its reach and key columns line up
+/// with the trash rows' and the gesture rows' across segments. A
+/// mount with no trash column leaves it false.
 private struct KeybindingReservesTrashSlotKey: EnvironmentKey {
     static let defaultValue = false
 }

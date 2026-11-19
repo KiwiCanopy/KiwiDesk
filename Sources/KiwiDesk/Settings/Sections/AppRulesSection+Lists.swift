@@ -24,9 +24,12 @@ extension AppRulesSection {
                         showsReach: showsReach,
                         composing: $composingSpace,
                         onDelete: { deleteSpace(row, $0) },
+                        onAdd: {
+                            revealedRow = RowReveal(list: .space, key: $0)
+                        },
                         returningRow: $returningSpaceRow
                     )
-                    .id(Self.anchor(.space, row.key))
+                    .rowAnchored(Self.anchor(.space, row.key))
                 }
                 Divider()
             }
@@ -124,7 +127,7 @@ extension AppRulesSection {
                     onDelete: { deleteFloat(app, $0) },
                     returningRow: $returningFloatRow
                 )
-                .id(Self.anchor(.float, app))
+                .rowAnchored(Self.anchor(.float, app))
                 Divider()
             }
             AppSelector(

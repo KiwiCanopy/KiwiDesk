@@ -47,12 +47,9 @@ enum ShortcutFold {
         /// The rendered modifiers and key, e.g. "⌃⌥" and "3".
         let modifiers: String
         let key: String
-        /// What `ChordGlyphs` puts between the modifiers and the key.
-        var separator = ""
-
-        /// The modifiers before `keys`, spaced as a drawn chord.
+        /// The modifiers before `keys`, as a drawn chord.
         func chord(_ keys: String) -> String {
-            modifiers + separator + keys
+            modifiers + keys
         }
         /// Whether a ladder row sits on its own number's digit key,
         /// judged by key code so every keyboard layout folds alike.
@@ -75,7 +72,6 @@ enum ShortcutFold {
     ) -> Tag? {
         guard let place, let combo else { return nil }
         let modifiers = ChordGlyphs.modifiers(combo.modifiers)
-        let separator = ChordGlyphs.separator(combo.modifiers)
         let digit = KeypadKeys.digits.first {
             $0.legend == String(place.position)
         }
@@ -83,8 +79,7 @@ enum ShortcutFold {
         return Tag(
             place: place,
             modifiers: modifiers,
-            key: String(rendered.dropFirst(modifiers.count + separator.count)),
-            separator: separator,
+            key: String(rendered.dropFirst(modifiers.count)),
             ownDigit: digit?.row == combo.keyCode,
             // A row saying where it lands keeps its line (#2792).
             plain: !named && command.unavailable == nil

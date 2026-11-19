@@ -4356,8 +4356,9 @@ container tree, which the flat-`[WindowID]`-array model forbids
 fits the architecture. The Size & float catalog has 5 rows
 (Grow/Shrink × width/height + Make floating), all authored from
 the one shared `resize.step`; scrolling still resizes its slot
-along its own scroll axis whichever axis is passed, and
-monocle/grid stay explicit no-ops (floating did too until
+along its own scroll axis whichever axis is passed, grid sizes its
+columns and rows ([#763](https://github.com/KiwiCanopy/KiwiDesk/issues/763)),
+and monocle stays an explicit no-op (floating was one too until
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)). No
 back-compat alias for the old `bsp.set_ratio` /
 `layout.bsp.ratio` name (pre-release, single user). (#56)
@@ -11592,7 +11593,9 @@ Trackpad first; one device's rows alone take no control; no rows
 on either plan no step. The mouse footnote makes only the claim the
 Gestures card already makes — a scroll steps as far as you scroll
 — since long swipes, the trackpad footnote's subject, never reach a
-wheel notch.
+wheel notch. Both wheel rows' captions say "scroll": the sideways
+wheel's glyph shows the way, and VoiceOver, which sees no glyph,
+hears "scroll sideways" (#3493).
 :::
 
 :::unreleased
@@ -14180,7 +14183,7 @@ Accepted.
 recording.* While the switch is on, a **Sides** pull-down sits
 before each row's recorder well, its slot held on every row so the
 wells line up. It lists each sided modifier of the shortcut with
-Left, Right and Either side, so `Right ⌘ ⌥ H` can keep Right ⌘ and
+Left, Right and Either side, so `Right⌥⌘H` can keep Right ⌘ and
 make ⌥ either-side; a single modifier tap offers Either side too,
 though it records the side pressed (#3259), and the modifier one
 of whose keys is the Hyper key offers no side at all (Ruling 4

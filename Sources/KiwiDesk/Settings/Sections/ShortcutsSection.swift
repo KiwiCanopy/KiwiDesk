@@ -26,6 +26,8 @@ struct ShortcutsSection: View {
     @State var buildsWholePage = false
     @State private var endScroll: Task<Void, Never>?
     @State var targetScroll: Task<Void, Never>?
+    /// The widest the page lays out under a legacy scroller (#3491).
+    @State var scrollerBound: CGFloat?
     @StateObject var coordinator =
         RecorderCoordinator(scrollsInPlace: true)
 
@@ -177,6 +179,8 @@ struct ShortcutsSection: View {
                 }
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
+            .frame(maxWidth: scrollerBound ?? .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .settingsPageBottom()
             .overlay(alignment: .bottom) {
                 Color.clear.frame(height: 1).id(Self.pageEnd)
@@ -187,6 +191,10 @@ struct ShortcutsSection: View {
             .shortcutsJumpSlot(.content)
             .environment(\.keybindingLayerName, selected)
             .environment(\.shortcutsSegment, segment)
+            // Every key well on the page stands left of the trash
+            // column, a row with no trash holding its slot, so the
+            // segments share one key column (#3491).
+            .environment(\.keybindingReservesTrashSlot, true)
             // One live read per section render (#1105), so
             // every row narrates the same verdict (#1126).
             .environment(
@@ -196,6 +204,9 @@ struct ShortcutsSection: View {
             .recorderKeys(model)
             .environmentObject(coordinator)
         }
+        // One width whether a segment scrolls or fits, so every
+        // segment's keys stand in one column (#3491).
+        .legacyScrollerGutter($scrollerBound)
         .shortcutsJumpSlot(.viewport)
         // The chips' groups report under their anchor ids.
         .mapsSectionFrames()

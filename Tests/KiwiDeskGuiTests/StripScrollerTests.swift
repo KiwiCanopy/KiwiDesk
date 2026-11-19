@@ -109,7 +109,7 @@ struct StripScrollerTests {
         #expect(room(50, 100, .legacy) == 0)
     }
 
-    /// The modifier is the one reader of the style, and each strip
+    /// `ScrollerStyleWatch` is the one reader of the style, and each strip
     /// takes it inside its scroll view, its widths read off the content
     /// and the scroll view. The needles are contiguous so the modifier
     /// stays inside the scroll view: a harmless modifier inside a span
@@ -121,7 +121,7 @@ struct StripScrollerTests {
         let readers = sources.filter {
             $0.1.contains("preferredScrollerStyle")
         }
-        #expect(readers.map(\.0) == ["StripScrollerRoom.swift"])
+        #expect(readers.map(\.0) == ["ScrollerStyleWatch.swift"])
         let takers = Dictionary(
             uniqueKeysWithValues: sources.filter {
                 $0.1.contains("StripScrollerRoom")
@@ -138,14 +138,20 @@ struct StripScrollerTests {
             home.contains(
                 ".padding(.bottom,max(floor,Self.room("
                     + "contentWidth:contentWidth,"
-                    + "viewport:viewport,style:style)))"
+                    + "viewport:viewport,style:scroller.style)))"
             )
         )
+        // It follows the style through the one watch, which follows
+        // the system's changes.
         #expect(
             home.contains(
-                "preferredScrollerStyleDidChangeNotification"
+                "@StateObjectprivatevarscroller=ScrollerStyleWatch()"
             )
         )
+        let watch = try #require(
+            sources.first { $0.0 == "ScrollerStyleWatch.swift" }?.1
+        )
+        #expect(watch.contains("preferredScrollerStyleDidChangeNotification"))
         #expect(
             takers["SidewaysStrip.swift"]?.contains(
                 "ScrollView(.horizontal){content"

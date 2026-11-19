@@ -12,11 +12,6 @@ enum KeyboardCensus {
             ChordGlyphs.modifiers(modifiers)
         }
 
-        /// `drawnLabel` spaced to take its key, as a drawn chord is.
-        @MainActor var drawnChord: String {
-            drawnLabel + ChordGlyphs.separator(modifiers)
-        }
-
         /// Ordered by modifier count then raw value for stable reading order.
         static func < (a: Self, b: Self) -> Bool {
             let ca = a.modifiers.rawValue.nonzeroBitCount
@@ -262,7 +257,7 @@ enum KeyboardCensus {
     /// where there is no single combination to name.
     @MainActor static func chordLabel(of scope: Scope) -> String {
         guard case .one(let layer) = scope else { return "" }
-        return layer.drawnChord
+        return layer.drawnLabel
     }
 
     /// What macOS uses a key for under the SHOWN scope, or nil

@@ -422,7 +422,12 @@ why they are here rather than beside the views:
   "Слева"), a usual abbreviation (es "Izq.") — and never reuses the
   single-key word `shortcuts.hyper_key.*` agrees in; VoiceOver
   speaks the run as those key names, so the short form costs no
-  meaning (gui.md ▸ A sided chord, `ChordGlyphsWidthTests`).
+  meaning (gui.md ▸ A sided chord, `ChordGlyphsWidthTests`). The
+  frame glues its word to the run, no space before `%1$@` (owner,
+  2026-11-19, #3487, `ChordGlyphsWidthTests`). A sided key spoken
+  alone ("Right ⌘, press twice") takes `shortcuts.hyper_key.*`,
+  whose word agrees with its key, and never this frame
+  (`ModifierTapWordsTests`).
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own

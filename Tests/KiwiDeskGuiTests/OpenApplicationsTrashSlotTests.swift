@@ -86,22 +86,41 @@ struct OpenApplicationsTrashSlotTests {
         return text.split(whereSeparator: \.isWhitespace).joined()
     }
 
-    /// The card asks, and the row ends in the slot right after its
-    /// key field, where an app row's trash stands. Pocket is the card
-    /// asking since Open Settings left Open applications (#3184).
-    @Test("a trash-less row holds the slot where its card asks")
-    func kiwiDeskRowsHoldTheSlot() throws {
-        let group = try source("PocketGroup.swift")
+    /// The Shortcuts page asks once, and a trash-less row ends in
+    /// the slot right after its key field, where a trash stands, so
+    /// every segment's keys share one column (#3491); no card asks
+    /// again, two writers being how Built-in once split from Pocket.
+    @Test("the Shortcuts page asks once; a trash-less row holds the slot")
+    func pageRowsHoldTheSlot() throws {
+        let page = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
+            )
+        let section = SourceScan.stripComments(
+            try String(contentsOf: page, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
         #expect(
-            group.contains(
-                "}.environment(\\.keybindingReservesTrashSlot,true)"
-                    + "PocketAppRows("
+            section.contains(
+                ".environment(\\.shortcutsSegment,segment)"
+                    + ".environment(\\.keybindingReservesTrashSlot,true)"
             )
         )
-        #expect(
-            try !source("KeybindingAppGroup.swift")
-                .contains("keybindingReservesTrashSlot")
-        )
+        var writers: [String] = []
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        for file in try SourceScan.swiftSources(under: root) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace).joined()
+            let count =
+                text.components(
+                    separatedBy: ".environment(\\.keybindingReservesTrashSlot"
+                ).count - 1
+            if count > 0 { writers.append(file.lastPathComponent) }
+        }
+        #expect(writers == ["ShortcutsSection.swift"])
         let row = try source("KeybindingNavRow.swift")
         #expect(
             row.contains(
@@ -131,29 +150,5 @@ struct OpenApplicationsTrashSlotTests {
         let slot = width(AppRuleDeleteButton.slot)
         #expect(slot > 0)
         #expect(held - bare >= slot)
-    }
-
-    /// The key rows share one ask (Holds retired, #2978); the
-    /// per-app rows, which draw their own trash, stay outside it. The ask
-    /// is the card's one spelling of the key, so no row inside it
-    /// sets it back.
-    @Test("the Pocket card's key rows hold the slot")
-    func pocketHoldsRowHoldsTheSlot() throws {
-        let group = try source("PocketGroup.swift")
-        #expect(
-            group.contains(
-                "Group{ForEach(ShortcutsRowOrder.pocketAtRest"
-            )
-        )
-        #expect(
-            group.contains(
-                "}}.environment(\\.keybindingReservesTrashSlot,true)"
-                    + "PocketAppRows("
-            )
-        )
-        let asks = group.components(
-            separatedBy: "keybindingReservesTrashSlot"
-        )
-        #expect(asks.count == 2, "one ask, nothing overriding it")
     }
 }

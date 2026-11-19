@@ -1,11 +1,11 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A modifier tap as the GUI draws and says it (#1872 ▸ Ruling):
-/// `⌘⌘`, `Right ⌥⌥`, `Right ⌘`, spoken "Command, press twice".
+/// `⌘⌘`, `Right⌥⌥`, `Right⌘`, spoken "Command, press twice".
 @Suite("Modifier tap drawing and words (#1872)")
 @MainActor
 struct ModifierTapWordsTests {
@@ -20,8 +20,8 @@ struct ModifierTapWordsTests {
             ChordGlyphs.render(try self.combo(text), layoutChar: { _ in nil })
         }
         #expect(try draw("cmd+cmd") == "⌘⌘")
-        #expect(try draw("ropt+ropt") == "Right ⌥⌥")
-        #expect(try draw("rcmd") == "Right ⌘")
+        #expect(try draw("ropt+ropt") == "Right⌥⌥")
+        #expect(try draw("rcmd") == "Right⌘")
     }
 
     @Test("a tap says its modifier and how many presses")
@@ -33,11 +33,11 @@ struct ModifierTapWordsTests {
         )
         #expect(
             ModifierTapWords.spoken(try combo("ropt+ropt"))
-                == "Right Option, press twice"
+                == "Right ⌥, press twice"
         )
         #expect(
             ModifierTapWords.spoken(try combo("rcmd"))
-                == "Right Command, press once"
+                == "Right ⌘, press once"
         )
         #expect(ModifierTapWords.spoken(try combo("cmd+h")) == nil)
     }
@@ -52,7 +52,7 @@ struct ModifierTapWordsTests {
         )
         #expect(
             ModifierTapWords.tapAgain(single, sidesKept: true)
-                == "Tap again for Right ⌘⌘"
+                == "Tap again for Right⌘⌘"
         )
     }
 
@@ -69,18 +69,18 @@ struct ModifierTapWordsTests {
         )
         #expect(
             words.drawn
-                == "Right ⌘ recorded. For ⌘⌘, tap twice within a moment."
+                == "Right⌘ recorded. For ⌘⌘, tap twice within a moment."
         )
         #expect(
             words.spoken
-                == "Recorded: Right Command, pressed once. For a double "
+                == "Recorded: Right ⌘, pressed once. For a double "
                 + "press, press Command twice within a moment."
         )
         #expect(
             ModifierTapWords.tapOnceRecorded(
                 try combo("rcmd"),
                 sidesKept: true
-            )?.drawn.contains("Right ⌘⌘") == true
+            )?.drawn.contains("Right⌘⌘") == true
         )
         for other in ["cmd+cmd", "cmd+h"] {
             #expect(
@@ -170,14 +170,35 @@ struct ModifierTapWordsTests {
         LocalizationManager.shared.select("en")
         #expect(SidedChordWords.label("⌘⌘") == "Command, press twice")
         #expect(
-            SidedChordWords.label("Right ⌥⌥")
-                == "Right Option, press twice"
+            SidedChordWords.label("Right⌥⌥")
+                == "Right ⌥, press twice"
         )
         // A single sided glyph is also a modifier-layer chip, so
         // the shared door leaves it as a chord.
-        let chip = SidedChordWords.spoken("Right ⌘")
+        let chip = SidedChordWords.spoken("Right⌘")
         #expect(chip?.contains("press") == false)
         #expect(SidedChordWords.spoken("⌘⌥") == nil)
+    }
+
+    /// The drawn sided tap reads back through each catalog's glued
+    /// frame to the catalog's own name for that key (#3487).
+    @Test("every catalog speaks its drawn sided double tap")
+    func everyCatalogSpeaksSidedTaps() throws {
+        defer { LocalizationManager.shared.select("en") }
+        let locales = LocaleCatalog.availableLocales() + ["en"]
+        #expect(locales.count > 1)
+        for locale in locales {
+            LocalizationManager.shared.select(locale)
+            for text in ["ropt+ropt", "lcmd+lcmd"] {
+                let tap = try combo(text)
+                let drawn = ChordGlyphs.render(tap, layoutChar: { _ in nil })
+                #expect(
+                    SidedChordWords.label(drawn)
+                        == ModifierTapWords.spoken(tap),
+                    "\(locale): \(drawn)"
+                )
+            }
+        }
     }
 
     @Test("a tap row carries no either-side hint, a sided chord does")

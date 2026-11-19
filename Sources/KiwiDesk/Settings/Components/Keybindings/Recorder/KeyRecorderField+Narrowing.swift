@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The caption under an either-side row a sided row narrows
-/// (#3256), "Only Right ⌘⌘ runs this. Left ⌘⌘ runs
+/// (#3256), "Only Right⌘⌘ runs this. Left⌘⌘ runs
 /// “Show KiwiHub”.", with a Go to the other row. Quiet, never a
 /// conflict: the narrower row winning is the intended precedence.
 /// Drawn from Core's one `SideReach`, never a copy of the routers'
@@ -121,7 +121,7 @@ enum SideReachWords {
             drawn(taken.combo),
             holder
         )
-        // Label-first: a spoken tap is a clause ("Right Command,
+        // Label-first: a spoken tap is a clause ("Right ⌘,
         // press twice") no subject slot can take in every catalog.
         let spokenLine = L(
             "key_recorder.narrowed.spoken",

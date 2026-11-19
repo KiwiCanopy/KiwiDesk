@@ -103,8 +103,10 @@ struct OnboardingGestureDevicesTests {
         #expect(rows.map(\.id) == ["focus", "space", "move", "resize"])
         #expect(
             rows.compactMap { cap($0)?.caption }
-                == ["scroll", "scroll sideways", "drag", "drag"]
+                == ["scroll", "scroll", "drag", "drag"]
         )
+        // #3493: the glyph shows the way; VoiceOver hears it.
+        #expect(rows[1].spoken?.contains("scroll sideways") == true)
         // #3447: each cap is the glyph KiwiHub draws for its input.
         let inputs: [GestureInput] = [.wheel, .wheelX, .drag, .drag]
         #expect(

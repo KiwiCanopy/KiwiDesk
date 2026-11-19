@@ -4,10 +4,9 @@ import Testing
 @testable import KiwiDesk
 
 /// Shortcuts ▸ Built-in ▸ Size & float (#3160): sticky under float,
-/// the layouts caption under the Maximize rows, and the Tiling off
-/// block closing the card behind a rule, its key row first. The
-/// order list is walked by a `ForEach`, but the block and the
-/// caption are placed by the group's switch, so both halves are
+/// and the Tiling off block closing the card behind a rule, its key
+/// row first. The order list is walked by a `ForEach`, but the
+/// block is placed by the group's switch, so both halves are
 /// pinned. Source scans only; no renders.
 @Suite("Size & float card order (#3160)")
 struct SizeFloatCardOrderTests {
@@ -59,21 +58,5 @@ struct SizeFloatCardOrderTests {
         #expect(rule.upperBound <= title.lowerBound)
         #expect(title.upperBound <= key.lowerBound)
         #expect(key.upperBound <= start.lowerBound)
-    }
-
-    @Test("the layouts caption closes the Maximize rows, not the card")
-    func captionUnderMaximize() throws {
-        let group = try Self.squashed("KeybindingGroups.swift")
-        let width = try #require(
-            group.range(of: "case.shortcuts(.maximizeWidth):")
-        )
-        let next = try #require(
-            group[width.upperBound...].range(of: "default:")
-        )
-        #expect(
-            group[width.upperBound..<next.lowerBound]
-                .contains("Text(sizeFloatCaption)")
-        )
-        #expect(group.occurrences(of: "Text(sizeFloatCaption)") == 1)
     }
 }

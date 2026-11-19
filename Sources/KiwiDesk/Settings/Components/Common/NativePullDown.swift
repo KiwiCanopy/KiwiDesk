@@ -100,15 +100,16 @@ struct NativePullDown<Label: View>: View {
     }
 }
 
-/// The button's backing view, filled in by `PullDownAnchorView`.
+/// The button's backing view, filled in by `PullDownAnchorView`; a
+/// trigger opening its own `NSMenu` takes it too (#3488).
 @MainActor
-private final class PullDownAnchor {
+final class PullDownAnchor {
     weak var view: NSView?
 }
 
 /// A view laid behind the button at its size, handing the anchor
 /// the `NSView` the menu opens from.
-private struct PullDownAnchorView: NSViewRepresentable {
+struct PullDownAnchorView: NSViewRepresentable {
     let anchor: PullDownAnchor
 
     func makeNSView(context: Context) -> NSView {

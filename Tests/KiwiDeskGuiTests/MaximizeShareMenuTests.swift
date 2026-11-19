@@ -108,30 +108,93 @@ struct MaximizeShareMenuTests {
         #expect(blind.committed == nil)
     }
 
-    /// The share pop-up offers Custom… as its last item and opens the
-    /// popover from that pick, anchored to itself.
-    @Test("the share menu ends in Custom… and opens its popover")
-    func menuWiresCustom() throws {
+    /// The share menu lists the five fractions, each with its
+    /// length on the screen as Core resolves it, a stored share off
+    /// them after a divider, and Custom… last (#3488 ▸ option E).
+    @Test("the share menu ends in Custom…, each fraction its length")
+    func menuEntries() throws {
+        LocalizationManager.shared.select("en")
+        let region = MaximizeRegion(
+            bounds: CGRect(x: 0, y: 25, width: 1728, height: 1092)
+        )
+        let entries = MaximizeShareMenu.entries(
+            .fraction(0.4),
+            axis: .width,
+            region: region
+        )
+        // Fractions, divider, the stored share, divider, Custom….
+        let five = FractionChips.shares.count
+        #expect(entries.count == five + 4)
+        #expect(entries[five] == .divider)
+        #expect(entries.suffix(2) == [.divider, .custom])
+        let shares = entries.compactMap { entry in
+            if case .share(let share, let title, let detail) = entry {
+                return (share, title, detail)
+            }
+            return nil
+        }
+        let titles = FractionChips.shares.map(\.glyph)
+        #expect(
+            shares.map(\.1)
+                == titles + [SettingsValueReadout.percent(0.4)]
+        )
+        for (share, _, detail) in shares {
+            let points = region.points(of: share, axis: .width)
+            #expect(detail == SettingsValueReadout.points(points))
+        }
+        // No screen, no lengths; a preset adds no off-menu line.
+        let blind = MaximizeShareMenu.entries(
+            .fraction(0.5),
+            axis: .width,
+            region: nil
+        )
+        #expect(blind.count == FractionChips.shares.count + 2)
+        #expect(
+            !blind.contains {
+                guard case .share(_, _, let detail) = $0 else {
+                    return false
+                }
+                return !detail.isEmpty
+            }
+        )
+        // VoiceOver hears the length the button draws (#3488).
+        let spoken = MaximizeSharePopUp.spoken(
+            .fraction(0.5),
+            axis: .width,
+            region: region
+        )
+        let half = region.points(of: .fraction(0.5), axis: .width)
+        #expect(spoken.hasPrefix(SettingsValueReadout.percent(0.5)))
+        #expect(spoken.contains(SettingsValueReadout.trimmed(half)))
+        // A length states itself: no second, greyed copy.
+        #expect(
+            MaximizeSharePopUp.detail(
+                .points(723),
+                axis: .width,
+                region: region
+            ).isEmpty
+        )
+    }
+
+    /// Custom… opens the popover anchored to the button, and the
+    /// closed button draws the fraction then its greyed length.
+    @Test("the pop-up opens Custom… and draws its length greyed")
+    func popUpWiring() throws {
         let source = try popUpSource()
+        #expect(source.contains("case.custom:custom=MaximizeCustomRequest("))
+        #expect(source.contains("case.share(letshare,_,_):value=share"))
         #expect(
             source.contains(
-                "Divider()Text(L(\"layout_defaults.maximize.custom\""
+                "Text(Self.glyph(value))"
+                    + "letdetail=Self.detail("
             )
         )
-        #expect(source.contains("case.custom:custom=MaximizeCustomRequest("))
-        // Custom… is last: nothing follows it inside the menu.
-        let tail = try #require(
-            source.components(separatedBy: ".tag(Tag.custom)").last?
-                .components(separatedBy: ".labelsHidden()").first
-        )
-        #expect(source.contains(".tag(Tag.custom)"))
-        #expect(!tail.contains("Text("))
-        #expect(!tail.contains("Divider()"))
-        // The lengths are Core's: the pop-up asks the region.
-        #expect(source.contains("region.points(of:.fraction(fraction)"))
         #expect(
-            source.contains(".popover(item:customBinding)")
+            source.contains(
+                "Text(detail).foregroundStyle(.secondary)"
+            )
         )
+        #expect(source.contains(".popover(item:customBinding)"))
         // The draft is written at the dismissal, never at a teardown.
         #expect(
             source.contains(
@@ -139,6 +202,18 @@ struct MaximizeShareMenuTests {
                     + "value=typed"
             )
         )
+        // The menu's lengths are Core's: it asks the region.
+        let menu = try self.source("MaximizeShareMenu.swift")
+        #expect(source.contains("region.points(of:share,axis:axis)"))
+        #expect(
+            source.contains(
+                ".accessibilityValue(Self.spoken(value,axis:axis,"
+                    + "region:region))"
+            )
+        )
+        #expect(menu.contains("MaximizeSharePopUp.detail("))
+        #expect(menu.contains("NSColor.secondaryLabelColor"))
+        #expect(menu.contains("NSTextTab(textAlignment:.right,"))
     }
 
     /// A menu pop-up draws at its own width whatever frame it gets,
