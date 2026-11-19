@@ -24,7 +24,12 @@ extension KiwiCore {
         let away =
             state.windows[window] == nil
             && state.awayWindows[window] != nil
-        if !away, Self.isShown(native, in: snapshot) {
+        // A Desktop the live Spaces hold behind a full-screen Space
+        // takes its live windows as a shown one does (#3486).
+        if !away,
+            Self.isShown(native, in: snapshot)
+                || holdsLive(native, in: snapshot)
+        {
             let verb = follow ? "move_to_space_and_follow" : "move_to_space"
             return overviewSend(verb, [target, id])
         }
@@ -71,6 +76,17 @@ extension KiwiCore {
         guard let number = desktopMemory.readDesktops().number(of: native)
         else { return }
         overviewSend("focus_desktop", [.number(Double(number))])
+    }
+
+    /// Whether the live Spaces of `native`'s screen hold it while
+    /// that screen shows a full-screen Space (`heldDesktop(on:)`).
+    func holdsLive(
+        _ native: SkyLight.SpaceID,
+        in snapshot: DesktopSnapshot
+    ) -> Bool {
+        state.workspaces.allDisplays.contains {
+            heldDesktop(on: $0.id, in: snapshot) == native
+        }
     }
 
     /// Whether a screen shows `native` now; a reading with no

@@ -7834,6 +7834,10 @@ end)
 
 **Expects:** a side: `"windows"`, `"shortcuts"` or `"view"`.
 
+:::unreleased
+`"desktops"` opens the Desktop overview.
+:::
+
 **Does:** opens **KiwiHub** on that side, switches to it from
 another side, or closes KiwiHub when it already shows that side.
 Over the CLI it is `kiwidesk kiwihub.show windows`; any other side
@@ -7902,8 +7906,9 @@ so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
 :::unreleased
-Under the field sits the **app strip**, shown while you type or
-while it is off **All**; KiwiHub opens on the list alone. It holds
+Under the field sits the **app strip**, shown from the first step
+off **All** or the first letter typed until KiwiHub closes, **All**
+included; KiwiHub opens on the list alone. It holds
 **All** first, then one tile per app with a window in the list, the
 app you are in first, then most recently used, with a count on an
 app with two windows or more. **←** and **→** move along it and a
@@ -7925,9 +7930,7 @@ you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 :::
 
 The `"view"` side is the **view picker**, three lines in one
-panel, the current item on each marked ✓. The menu bar's **Open
-KiwiHub…** row opens it too, its bound combo shown beside that
-row.
+panel, the current item on each marked ✓.
 
 - **Layout** — a tile per layout for the Space shown on the screen
   under the pointer, greyed where there is none; Return applies it
@@ -7975,7 +7978,9 @@ after View: one row per screen, left to right, each screen's
 Desktops as columns, and in each column the screen's Spaces with
 their windows. A window on a Desktop no screen shows is listed in the
 Space it returns to, or under **Not in a Space yet**, which nothing
-can be moved into. The menu bar's **Show Desktop overview** row
+can be moved into. A window in macOS full screen is listed in its
+Space on the Desktop its screen shows, or, while a full-screen app
+is in front, on the Desktop that screen showed last. The menu bar's **Show Desktop overview** row
 opens it too. The side is seeded on **⌃⌥O**, and **Shortcuts ▸
 Built-in ▸ Show & hide ▸ KiwiHub** lists the row to rebind or clear.
 While KiwiHub has the keyboard, a modifier tap whose Shortcuts row

@@ -1400,7 +1400,13 @@ must keep:
   in use — a current view chip, the shown Desktop's title — takes a
   filled check circle in its own ink, never the accent, and a chip's
   name goes semibold over the width every chip reserves; the
-  #3042 exception and the mark are review's.
+  #3042 exception and the mark are review's, save the shown
+  Desktop's check, which names no accent (`DesktopTitleHoverTests`
+  ▸ `checkKeepsItsInk`). **A Desktop's title under the pointer is
+  the owner's exception to the lift (#3484):** it rings its whole
+  column with a thin `paint.selection` stroke, lighter than a
+  selected tile's 2 pt ring, and draws no ground of its own
+  (`DesktopTitleHoverTests` ▸ `columnRings`, `titleStaysPlain`).
 
 ## A diff row's ↺ (#792)
 
@@ -2476,7 +2482,11 @@ equivalent never carries a sided chord**, since it has no side to
 draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`), **nor a ✦
 chord**, which AppKit's column cannot draw: both refusals are
 `KeyCombo.drawsInMenu`'s, which the twin check reads too (#3470,
-`StatusMenuHyperChordTests` ▸ `hyperDrawsNothing`).
+`StatusMenuHyperChordTests` ▸ `hyperDrawsNothing`). **The status
+menu ships a chord row only for a verb whose seeded chord
+`drawsInMenu`**, since a row that cannot show its key teaches
+nothing (#3485, `StatusMenuHyperChordTests` ▸ `seededChordsDraw`,
+whose list a new chord row joins).
 
 ## SwiftUI traps
 

@@ -56,6 +56,9 @@ public struct DesktopOverview: Sendable, Equatable {
         public let number: Int?
         /// Whether its screen shows it now.
         public let isShown: Bool
+        /// Whether the live Spaces hold its windows while its screen
+        /// shows a full-screen Space (#3486); never with `isShown`.
+        public let holdsLive: Bool
         /// The profile its binding names, nil where none is bound.
         public let profile: String?
         public let spaces: [SpaceLine]
@@ -65,6 +68,7 @@ public struct DesktopOverview: Sendable, Equatable {
             label: Int,
             number: Int?,
             isShown: Bool,
+            holdsLive: Bool = false,
             profile: String?,
             spaces: [SpaceLine]
         ) {
@@ -72,6 +76,7 @@ public struct DesktopOverview: Sendable, Equatable {
             self.label = label
             self.number = number
             self.isShown = isShown
+            self.holdsLive = holdsLive
             self.profile = profile
             self.spaces = spaces
         }

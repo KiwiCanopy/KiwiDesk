@@ -17,6 +17,10 @@ struct JumpList {
     /// The apps holding a match for `query`; every app while it is
     /// empty. A tile outside it dims and takes no pick.
     private(set) var matchedApps: Set<pid_t>
+    /// Whether the strip shows (#3168): from a step off All or a
+    /// query until the panel closes, All included, so ⌃⌥J opens on
+    /// the list alone and the panel never jumps once it showed.
+    private(set) var stripShown = false
 
     /// Results that take a ⌘ number.
     static let numbered = 9
@@ -42,6 +46,7 @@ struct JumpList {
             ? Set(snapshot.apps.map(\.pid)) : Set(all.map(\.entry.pid))
         results = all
         selection = results.isEmpty ? nil : 0
+        if !text.isEmpty { stripShown = true }
     }
 
     /// Moves the selection by `delta` rows, clamped at both ends;
@@ -160,10 +165,6 @@ extension JumpList {
     /// How many tiles the strip draws, All included.
     var tileCount: Int { snapshot.apps.count + 1 }
 
-    /// Whether the strip shows (#3168): off All, or under a query,
-    /// so ⌃⌥J opens on the list alone.
-    var stripShown: Bool { tile != 0 || !query.isEmpty }
-
     /// The current window, drawn greyed at the top of All and of
     /// its app's tile (#3168); nil under a query, which never
     /// matches it, and where KiwiDesk tracks none.
@@ -220,6 +221,7 @@ extension JumpList {
                 all.filter { $0.entry.pid == app.pid }
             } ?? all
         selection = results.isEmpty ? nil : 0
+        if index != 0 { stripShown = true }
     }
 
     /// Puts the strip on the app of the window used last — Core's

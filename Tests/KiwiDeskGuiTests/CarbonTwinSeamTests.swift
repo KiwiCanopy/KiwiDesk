@@ -12,7 +12,9 @@ struct CarbonTwinSeamTests {
     /// Every `isCarbonTwin(` call site, by file, and how many.
     private static let twinCallers = [
         "BarMenu.swift": 1,
-        "StatusItemController+Menu.swift": 3,
+        // Settings and the Desktop overview, the status menu's two
+        // chord rows since Open KiwiHub left it (#3485).
+        "StatusItemController+Menu.swift": 2,
         "StatusItemController+TilingRow.swift": 1,
     ]
 

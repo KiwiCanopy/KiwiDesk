@@ -25,8 +25,8 @@ extension JumpModel {
             : L("jump.empty.no_match", "No open windows match")
     }
 
-    /// Reports a list change; a strip that appears or leaves with
-    /// it slides the panel instead of snapping it (#3168).
+    /// Reports a list change; a strip that appears with it slides
+    /// the panel instead of snapping it (#3168).
     func listChanged(stripWas: Bool) {
         if list.stripShown == stripWas {
             onResultsChange()
