@@ -5999,7 +5999,7 @@ stored value is dropped and not carried over.
 ### scroll_gesture.set_step_length
 
 :::unreleased
-**Expects:** mm, 3–60 (default `6`); a value outside the range
+**Expects:** mm, 3–60 (default `8`); a value outside the range
 fails.
 
 **Does:** sets the finger travel on the trackpad per window of a

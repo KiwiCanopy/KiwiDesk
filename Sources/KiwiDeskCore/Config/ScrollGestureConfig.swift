@@ -29,7 +29,7 @@ public struct ScrollGestureBase: Equatable, Sendable {
         naturalTrackpad: .system,
         naturalMouse: .system,
         longSwipes: true,
-        stepLength: 6
+        stepLength: 8
     )
 
     public init(

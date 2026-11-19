@@ -52,7 +52,7 @@ struct ScrollGestureConfigTests {
             text == "{\"long_swipes\":true,"
                 + "\"natural_scrolling\":"
                 + "{\"mouse\":\"system\",\"trackpad\":\"system\"},"
-                + "\"step_length\":6}"
+                + "\"step_length\":8}"
         )
         #expect(
             try decode(ScrollGestureBase.self, text) == .defaults
