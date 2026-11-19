@@ -33,7 +33,11 @@ extension OnboardingGestures {
             rows.append(mouse("focus", focus, key, scroll))
         }
         if let key = first(.wheelX, toward: .left, { $0 == .family(.space) }) {
-            rows.append(mouse("space", space, key, scrollSideways))
+            // Both wheel caps say "scroll" and the glyph shows the way;
+            // VoiceOver, which sees no glyph, hears it (#3493).
+            rows.append(
+                mouse("space", space, key, scrollSideways, cap: scroll)
+            )
         }
         if let key = grab(.move) {
             rows.append(
@@ -104,11 +108,14 @@ extension OnboardingGestures {
         return false
     }
 
+    /// A mouse row, its `motion` spoken and under its cap unless
+    /// `cap` names a shorter caption.
     private static func mouse(
         _ id: String,
         _ label: String,
         _ key: GestureKey,
-        _ motion: String
+        _ motion: String,
+        cap: String? = nil
     ) -> OnboardingKeyFamily {
         row(
             id,
@@ -117,7 +124,7 @@ extension OnboardingGestures {
             motion,
             OnboardingGestureCap(
                 glyph: ShortcutGestureBadge.covering(key, ways: []).symbol,
-                caption: motion
+                caption: cap ?? motion
             )
         )
     }

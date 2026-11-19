@@ -11593,7 +11593,9 @@ Trackpad first; one device's rows alone take no control; no rows
 on either plan no step. The mouse footnote makes only the claim the
 Gestures card already makes — a scroll steps as far as you scroll
 — since long swipes, the trackpad footnote's subject, never reach a
-wheel notch.
+wheel notch. Both wheel rows' captions say "scroll": the sideways
+wheel's glyph shows the way, and VoiceOver, which sees no glyph,
+hears "scroll sideways" (#3493).
 :::
 
 :::unreleased
