@@ -1,12 +1,7 @@
 import KiwiDeskCore
 
-/// The caption of a row whose press macOS still answers beside it
-/// (#3504, `.firesWithMacOS`): both fire while macOS has the shortcut
-/// on, and the only way to have the chord alone is to turn macOS's
-/// shortcut off first — KiwiDesk never pauses it (owner, 2026-11-19).
-/// ⌃Space, the one such chord measured, says what the shortcut does
-/// and where it is changed, as the takes-away caption does (#3319 ▸
-/// Ruling amendment).
+/// The caption of a `.firesWithMacOS` row (#3504): both fire while
+/// macOS has the shortcut on, so the user turns macOS's off first.
 @MainActor
 enum FiresWithMacOSText {
     static func sentence(

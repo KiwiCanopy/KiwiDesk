@@ -14926,7 +14926,7 @@ aggregate count still leaves a switched-off chord out. Read as dead,
 the row told the user a shortcut that works would not. Every other
 chord macOS answers first stays a dead row for a Carbon hotkey, save
 ⌃Space, where the row and macOS both answer (#3504 below)
-(`SystemShortcut.losesToKiwiDesk(on:)`, `ConflictSeverityTests` ▸
+(`SystemShortcut.answer(on:)`, `ConflictSeverityTests` ▸
 `rowsTakeTheInputSourceChord`).
 :::
 
@@ -14942,7 +14942,7 @@ measured twins ⌘⇧4 (#3173) and ⌃→. A step key and a sided row are
 the same tap's swallow, so a leader, a step key and a sided row the tap
 answers read those chords as the input-source chord reads, the row
 working and macOS losing the shortcut, by the one rule
-`losesToKiwiDesk(on:)` that a conflict reads through the press path
+`answer(on:)` that a conflict reads through the press path
 Core stamps on it and a step key through `ConflictSeverity.ofStep`.
 Read apart, a leader on ⌘Space said it was dead while a step key on
 the same chord said it took Spotlight, and one of the two was false
@@ -14972,7 +14972,9 @@ input-source shortcut, "Select the previous input source" (hotkey
 KiwiDesk row holds, the caption adds that its actual chord, read
 live, still switches, so the user knows the language is still in
 reach. When 60 is off, cleared or taken, the clause is absent. "Taken"
-is a row in any of the base layers; a Lua `bind` and a profile's own
+is a row in any of the base layers that takes the chord from macOS,
+so a Carbon row on ⌃Space, which macOS answers beside (#3504), leaves
+the clause in; a Lua `bind` and a profile's own
 override row are not seen (`InputSourceTakenTextTests`). The other
 direction, a KiwiDesk row taking 60 itself, is the #3331 amendment
 below. A shortcut cleared in System Settings, on

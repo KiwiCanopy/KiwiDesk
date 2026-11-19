@@ -108,6 +108,15 @@ enum ConflictSeverity: Equatable {
         }
     }
 
+    /// Whether macOS has the shortcut off, so the row works alone
+    /// until it is turned back on: an info line, nothing to fix.
+    var macOSHasItOff: Bool {
+        switch self {
+        case .dormant, .firesWithMacOS(_, macOSOn: false): return true
+        default: return false
+        }
+    }
+
     /// Whether the row cannot fire as things stand — the reading
     /// the loud row treatment keys on. A duplicate is not dead:
     /// one of its two rows works, and which one is the user's to

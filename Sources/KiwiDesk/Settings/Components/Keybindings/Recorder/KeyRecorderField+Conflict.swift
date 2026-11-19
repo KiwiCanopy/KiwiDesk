@@ -138,8 +138,7 @@ extension KeyRecorderField {
     }
 
     private var readsDormant: Bool {
-        if case .dormant = reading?.severity { return true }
-        return false
+        reading?.severity.macOSHasItOff == true
     }
 
     /// The dead row's caption: the same sentence the badge

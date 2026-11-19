@@ -155,4 +155,77 @@ struct FiresWithMacOSTextTests {
             ) == true
         )
     }
+
+    /// The ⌃⌥Space caption's "⌃Space still switches" (#3319) asks who
+    /// holds ⌃Space by the same rule: a Carbon row there leaves macOS
+    /// switching, a tap row takes it.
+    @Test("a Carbon ⌃Space row leaves ⌃Space still switching")
+    func stillSwitchesBesideACarbonRow() {
+        LocalizationManager.shared.select("en")
+        let next = KeyBinding(combo: "control+option+space", lua: "a")
+        let live = SystemShortcutState.live { _ in nil }
+        func text(_ other: KeyBinding, sides: Bool = false) -> String {
+            var state = live
+            state.sides = sides
+            return ConflictText.reading(
+                for: next,
+                in: [next, other],
+                config: layer([next, other]),
+                system: state,
+                sides: sides
+            )?.sentence ?? ""
+        }
+        let carbon = KeyBinding(combo: "control+space", lua: "b")
+        #expect(
+            text(carbon).hasSuffix(" \(drawn("ctrl+space")) still switches.")
+        )
+        let leader = KeyBinding(combo: "control+space", kind: .sequence)
+        #expect(!text(leader).contains("still switches"))
+        let sided = KeyBinding(combo: "lctrl+space", lua: "b")
+        #expect(!text(sided, sides: true).contains("still switches"))
+        #expect(text(sided, sides: false).hasSuffix("still switches."))
+    }
+
+    @Test("a shared chord off macOS is an info line, not a fix")
+    func offIsNothingToFix() {
+        #expect(
+            ConflictSeverity.firesWithMacOS(
+                .inputSourcePrevious,
+                macOSOn: false
+            ).macOSHasItOff
+        )
+        #expect(
+            !ConflictSeverity.firesWithMacOS(
+                .inputSourcePrevious,
+                macOSOn: true
+            ).macOSHasItOff
+        )
+        #expect(ConflictSeverity.dormant(.invertColors).macOSHasItOff)
+        #expect(!ConflictSeverity.dead(.spotlight).macOSHasItOff)
+    }
+
+    /// No other chord answers `.both` today; the fallback still names
+    /// the shortcut and its state.
+    @Test("another shared chord names its shortcut")
+    func genericNamesTheShortcut() {
+        LocalizationManager.shared.select("en")
+        let name = SystemShortcut.spotlight.localizedName
+        let on = ConflictText.sentence(
+            for: .firesWithMacOS(.spotlight, macOSOn: true),
+            config: GuiConfig(),
+            system: .unread
+        )
+        #expect(
+            on == "Each press also runs \(name) in macOS. To use this "
+                + "shortcut here alone, turn \(name) off in System "
+                + "Settings first."
+        )
+        let off = ConflictText.sentence(
+            for: .firesWithMacOS(.spotlight, macOSOn: false),
+            config: GuiConfig(),
+            system: .unread
+        )
+        #expect(off.hasPrefix("\(name) is switched off"))
+        #expect(!off.contains("keyboard language"))
+    }
 }

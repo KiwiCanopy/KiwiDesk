@@ -28,7 +28,9 @@ extension SettingsModel {
     /// the switched-off set and the other input-source chord. A
     /// section wires it once into `\.systemShortcutState`.
     func systemShortcutState() -> SystemShortcutState {
-        SystemShortcutState.live(reading: readSymbolicHotkey)
+        var state = SystemShortcutState.live(reading: readSymbolicHotkey)
+        state.sides = appWide.modifierSides
+        return state
     }
 
     /// Live derived banner text reflecting active conflicts
