@@ -1022,14 +1022,15 @@ Two consequences fall out, both structural rather than stylistic:
   complete record, every entry linked. Numbering the highlights
   as well makes the reader's eye redo work the section below
   already did, and turns news into a bug list.
-- **Highlights are highlights.** Twenty bullets is a changelog
-  with headings, and a nine-line bullet is a PR description. A
-  bullet is ONE line: the thing you would notice, and that it
+- **Highlights are highlights.** A nine-line bullet is a PR
+  description. A bullet is ONE line: the thing you would notice, and that it
   is fixed. A second sentence is earned only when one line
   cannot say it — a default that changed, a control to go and
   find — and never by the diagnosis, which is the PR's (owner
-  ruling). The whole block should read in one screen of the
-  update window.
+  ruling). The count has no cap: a release with many changes
+  lists every one a user would notice (owner, 2026-11-19), and
+  the Spotlight above the sections is what reads in one screen
+  of the update window.
 - **A site change is news only when a visitor would come for
   it.** A new page, a new language, a changed download earns a
   line. A heading that now fits its column, a corrected term, a

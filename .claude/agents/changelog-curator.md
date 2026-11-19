@@ -142,14 +142,15 @@ stay quiet about:
   has its own home, which the section below refreshes.
 - **A bullet per issue when the issues share a symptom.** The
   reader is not reconciling your issue tracker.
-- **Twenty bullets, or a nine-line bullet.** Ruled: the first
-  is a changelog with headings, the second a PR description. A
+- **A nine-line bullet.** Ruled: it is a PR description. A
   bullet is ONE line — the symptom, and that it is fixed — and a
   second sentence is earned only when one line cannot say it,
   never by the diagnosis, which stays in the PR. The lead
   paragraph is two or three sentences. If a section will not
   come under control, the honest move is usually that half of
-  it is not news.
+  it is not news. The count itself is no limit (owner,
+  2026-11-19): a release with many changes lists every one a
+  user would notice; merge only what shares a symptom.
 - **A site fix.** A corrected heading, a term, a translation, a
   layout nudge — none of it is news to someone installing an
   update, not even as one closing line. Ruled. A site change
