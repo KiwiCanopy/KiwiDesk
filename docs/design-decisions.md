@@ -9823,6 +9823,7 @@ exists to save. A Never dimmed app's windows stay clear on screen
 but are no member, so a step skips them too: they are kept clear
 to be seen, not worked in.
 
+:::unreleased
 ### A lens opens only the apps you switched on, and moves the focus once (#3122)
 
 **[Rationale]**
@@ -9846,15 +9847,17 @@ open. The move is owed through the launch follow's door (#1599)
 and bounded by the slowest cold start, since a background launch
 has no activation to time from.
 
-:::unreleased
 An opened app that brings itself to the front anyway hands the
 focus back once, through `open_in_background`'s hold (#3141), which
-every app the lens opens owes (#3495, #3497). The app whose window
-takes the owed move is released from it, so its own focus report
-keeps the move. The owner accepted the cost (2026-11-19): an app
-that comes forward before its window is adopted is handed back
-first, a brief flicker, and its window then takes the move.
-:::
+every app the lens opens owes (#3495, #3497): with the hold armed
+only where a member was open, a second app coming forward after
+the first window took the owed move kept the keys. The app whose
+window takes the owed move is released from its hold, or the echo
+of an earlier hand-back or the user's own switch to it inside the
+grace would be handed back and undo the move. The owner accepted
+the cost (2026-11-19): an app that comes forward before its window
+is adopted (#1599) is handed back first, a brief flicker, and its
+window then takes the move.
 
 It fires only where the user turned the lens on: in the doors a
 chord, the menu, the CLI and the GUI take, never in the one writer
@@ -9862,6 +9865,7 @@ of what KiwiDesk draws, which also carries renames and turn-offs,
 and never on a relaunch, a reload, a profile switch or `init.lua`'s
 run. When nothing is open and nothing opens, the pill says so, on
 the screen's centre where no window holds the focus.
+:::
 
 :::unreleased
 ### The ring follows the keys at a window's arrival (#3152)

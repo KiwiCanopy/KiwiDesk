@@ -102,4 +102,14 @@ struct KiwiVisionAutoOpenLaterTests {
         #expect(core.launchFollow.holds.opened[F.music] != nil)
         #expect(core.launchFollow.holds.opened[F.notes] != nil)
     }
+
+    /// The lift sits past every gate, not only past the click.
+    @Test("a move cancelled by the lens going off keeps the hold")
+    func lensOffKeepsHold() {
+        let core = Focus.owing()
+        core.setKiwiVision(.off)
+        Focus.arrive(7, bundleID: F.music, on: core)
+        #expect(core.focusedWindowID == WindowID(1))
+        #expect(core.launchFollow.holds.opened[F.music] != nil)
+    }
 }
