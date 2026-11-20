@@ -1396,9 +1396,11 @@ must keep:
   tiles are an owner exception to #3042: on a bare row the pointer
   lifts them with `paint.rowHover`, never `hoverEdge` or
   `hoverRise`. A resting
-  plate on a tile, such as All's plate or a count capsule, takes a
-  neutral fill that is no hover colour
-  (`KiwiHubTileSelectionTests` ▸ `stripPlatesAreNeutral`). An item
+  plate on a tile, such as All's plate, takes a neutral fill that is
+  no hover colour, and a tile's window count wears the shelf's group
+  badge, tinted or not, as the Space Bar's does (owner, 2026-11-20;
+  `KiwiHubTileSelectionTests` ▸ `stripPlatesAreNeutral`,
+  `KiwiHubBadgeTests`). An item
   in use — a current view chip, the shown Desktop's title — takes a
   filled check circle in its own ink, never the accent, and a chip's
   name goes semibold over the width every chip reserves; the

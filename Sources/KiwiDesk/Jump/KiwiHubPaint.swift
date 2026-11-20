@@ -19,7 +19,7 @@ struct KiwiHubPaint {
     var rowHover = SettingsTheme.chipRest
     var chipHover = SettingsTheme.chipHover
     /// A strip tile's window count: the shelf's group badge, solid,
-    /// so its digits read over any glass (the Space Bar's badge).
+    /// tinted or not (`PanelGlass.badge`).
     var badge = Color(kiwiHex: KiwiShelf().groupBadgeColor)
     var badgeInk = Color(kiwiHex: KiwiShelf().groupBadgeTextColor)
     /// A hovered item's ink; nil keeps the item's own.
@@ -53,8 +53,6 @@ struct KiwiHubPaint {
         rowHover = Color(kiwiHex: highlight.hover)
         chipHover = rowHover
         hoverInk = Color(kiwiHex: highlight.hoverInk)
-        badge = Color(kiwiHex: shelf.groupBadgeColor)
-        badgeInk = Color(kiwiHex: shelf.groupBadgeTextColor)
         self.divider = Color(kiwiHex: divider)
         self.axis = axis
         share = shelf.highlightFadeShare(increaseContrast: increaseContrast)
@@ -71,18 +69,23 @@ struct KiwiHubPaint {
         tint: GlassPaint?,
         increaseContrast: Bool
     ) -> KiwiHubPaint {
-        guard let shelf = glass.shelf, let ink else { return KiwiHubPaint() }
-        return KiwiHubPaint(
-            shelf,
-            divider: ink.divider,
-            axis: tint.map {
-                (
-                    UnitPoint(x: $0.start.x, y: $0.start.y),
-                    UnitPoint(x: $0.end.x, y: $0.end.y)
-                )
-            },
-            increaseContrast: increaseContrast
-        )
+        var paint = KiwiHubPaint()
+        if let shelf = glass.shelf, let ink {
+            paint = KiwiHubPaint(
+                shelf,
+                divider: ink.divider,
+                axis: tint.map {
+                    (
+                        UnitPoint(x: $0.start.x, y: $0.start.y),
+                        UnitPoint(x: $0.end.x, y: $0.end.y)
+                    )
+                },
+                increaseContrast: increaseContrast
+            )
+        }
+        paint.badge = Color(kiwiHex: glass.badge)
+        paint.badgeInk = Color(kiwiHex: glass.badgeInk)
+        return paint
     }
 
     /// The far end of a faded fill as a share of its top; nil

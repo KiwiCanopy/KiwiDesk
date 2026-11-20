@@ -11,6 +11,10 @@ struct PanelGlass: Equatable {
     var enabled: Bool
     /// The shelf, while the surface wears its Fill.
     var shelf: KiwiShelf?
+    /// The shelf's group badge fill and ink, tinted or not: a count
+    /// in KiwiHub reads as the Space Bar's does (owner, 2026-11-20).
+    var badge = KiwiShelf().groupBadgeColor
+    var badgeInk = KiwiShelf().groupBadgeTextColor
 
     /// The glass `settings` gives KiwiHub and the plates, which
     /// share KiwiHub's leaf (#2524); Reduce transparency lands
@@ -18,6 +22,8 @@ struct PanelGlass: Equatable {
     init(settings: TilingSettings) {
         enabled = settings.shortcutPanelLiquidGlass
         shelf = settings.kiwishelf.panelsWearFill ? settings.kiwishelf : nil
+        badge = settings.kiwishelf.groupBadgeColor
+        badgeInk = settings.kiwishelf.groupBadgeTextColor
     }
 
     private init(enabled: Bool, shelf: KiwiShelf?) {

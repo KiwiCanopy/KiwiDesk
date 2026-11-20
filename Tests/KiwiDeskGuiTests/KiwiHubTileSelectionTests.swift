@@ -73,6 +73,7 @@ struct KiwiHubTileSelectionTests {
         // The count wears the shelf's solid group badge, never a
         // translucent fill.
         #expect(tile.contains("Capsule().fill(paint.badge)"))
+        #expect(tile.contains(".foregroundStyle(paint.badgeInk)"))
     }
 
     /// On a filled line a tile's hover lifts in the line's ink; the
