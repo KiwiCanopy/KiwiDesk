@@ -5,7 +5,7 @@ import SwiftUI
 /// A gesture row's keys (#3199 ▸ Ruling): the shortcut recorder's
 /// well, recording modifiers alone — the largest set held commits
 /// when every key is released. A gesture that may hold no keys
-/// (`allowsNone`) reads "No extra keys" while empty and keeps its ×
+/// (`allowsNone`) reads "Gesture only" while empty and keeps its ×
 /// to clear back to it; any other reads "Record". A chord `refuse`
 /// answers shows its sentence under the well, is announced and
 /// writes nothing, which is where a clash reads. Needs the section's
@@ -131,7 +131,7 @@ struct GestureChordRecorder: View {
     }
 
     /// What the well draws: the held keys while recording, the chord,
-    /// else "No extra keys" or "Record" by whether no keys is a binding.
+    /// else "Gesture only" or "Record" by whether no keys is a binding.
     static func label(
         chord: ScrollChord,
         allowsNone: Bool,
@@ -148,7 +148,7 @@ struct GestureChordRecorder: View {
     }
 
     static var noneLabel: String {
-        L("shortcuts.gestures.keys.none", "No extra keys")
+        L("shortcuts.gestures.keys.none", "Gesture only")
     }
 
     static var recordHelp: String {

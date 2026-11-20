@@ -2370,7 +2370,7 @@
   "shortcuts.gestures.input_chord": "%1$@, with %2$@",
   "shortcuts.gestures.keys.clear": "Take no keys",
   "shortcuts.gestures.keys.help": "Click, then hold the keys this gesture takes and let go.",
-  "shortcuts.gestures.keys.none": "No extra keys",
+  "shortcuts.gestures.keys.none": "Gesture only",
   "shortcuts.gestures.list.add": "Add",
   "shortcuts.gestures.list.gesture": "Gesture",
   "shortcuts.gestures.list.magic_mouse": "Also applies to the Magic Mouse.",
