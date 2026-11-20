@@ -2396,7 +2396,9 @@ modifiers through `JumpModel.pickModifiers`, never
 door that opens KiwiHub or steps its strip latches what is held
 through `JumpModel.latchOpener`** (#3168): a modifier still held
 from the opener counts for nothing until it is let go, so ↩ under
-the ⌥ of ⌥⇥ jumps. A new opener door or a new pick reader joins
+the ⌥ of ⌥⇥ jumps. The built-in ← → take the same read, so they
+step under the opener's ⌥ as ↑ ↓ do (`JumpStaleModifierTests` ▸ `arrowsUnderTheOpener`). A new
+opener door or a new pick reader joins
 `JumpStaleModifierTests` ▸ `wiring`.
 
 ## A sideways strip fades, follows and keeps its scroller (#2901)
