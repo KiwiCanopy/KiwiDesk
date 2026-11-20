@@ -14,6 +14,20 @@
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
     <item>
+      <title>5.0.2</title>
+      <pubDate>Fri, 20 Nov 2026 15:30:22 +0000</pubDate>
+      <sparkle:version>5.0.2</sparkle:version>
+      <sparkle:shortVersionString>5.0.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<style>:root{color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;}body{margin:0;padding:2px 4px 16px 4px;}h3{font-size:13px;font-weight:600;margin:12px 0 6px 0;}p{margin:0 0 8px 0;}ul{margin:0 0 10px 0;padding-left:18px;}li{margin-bottom:5px;}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:11.5px;padding:1px 4px;border-radius:4px;background:rgba(128,128,128,0.15);}::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.65);}</style><p>KiwiDesk 5.0.2 makes KiwiHub easier to read and to steer from the keyboard, plus small UI polish.</p><h3>Fixed</h3><ul><li><strong>In the window switcher, ← and → now step through the app strip while ⌥ is still held from ⌥⇥</strong>, as ↑ and ↓ already moved through the list.</li><li><strong>Resting the pointer on a window's icon in the Desktop overview now shows the window's title above it</strong>; the tooltip it had before never appeared.</li><li><strong>Other small UI polish</strong>: KiwiHub's search prompt and the app strip's window counts are easier to read, the Classic look's card no longer looks washed out, a gesture that needs no keys reads “Gesture only”, and the gesture cards' Natural scrolling row lines up with the rows under it.</li></ul>]]></description>
+      <kiwidesk:notes><![CDATA[{"format":1,"summary":"KiwiDesk 5.0.2 makes KiwiHub easier to read and to steer from the keyboard, plus small UI polish.","sections":[{"type":"fixed","title":"Fixed","items":["**In the window switcher, ← and → now step through the app strip while ⌥ is still held from ⌥⇥**, as ↑ and ↓ already moved through the list.","**Resting the pointer on a window's icon in the Desktop overview now shows the window's title above it**; the tooltip it had before never appeared.","**Other small UI polish**: KiwiHub's search prompt and the app strip's window counts are easier to read, the Classic look's card no longer looks washed out, a gesture that needs no keys reads “Gesture only”, and the gesture cards' Natural scrolling row lines up with the rows under it."]}]}]]></kiwidesk:notes>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.0.2/KiwiDesk-5.0.2.zip"
+        length="18955268"
+        type="application/octet-stream"
+        sparkle:edSignature="8RwrvGrhTrzx5ukRAMVmGtezMEWL/gZV7vFyQf805LXFHX4B7XlRQAOp0+Gj8mNZR2q0uFMFibzD2xqCM8UqCw==" />
+    </item>
+    <item>
       <title>5.0.1</title>
       <pubDate>Fri, 20 Nov 2026 10:07:17 +0000</pubDate>
       <sparkle:version>5.0.1</sparkle:version>

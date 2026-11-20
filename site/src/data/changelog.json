@@ -2,6 +2,26 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "5.0.2",
+      "tag": "v5.0.2",
+      "date": "2026-11-20",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v5.0.2",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.0.2/KiwiDesk-5.0.2.dmg",
+      "summary": "KiwiDesk 5.0.2 makes KiwiHub easier to read and to steer from the keyboard, plus small UI polish.",
+      "sections": [
+        {
+          "title": "Fixed",
+          "items": [
+            "**In the window switcher, ← and → now step through the app strip while ⌥ is still held from ⌥⇥**, as ↑ and ↓ already moved through the list.",
+            "**Resting the pointer on a window's icon in the Desktop overview now shows the window's title above it**; the tooltip it had before never appeared.",
+            "**Other small UI polish**: KiwiHub's search prompt and the app strip's window counts are easier to read, the Classic look's card no longer looks washed out, a gesture that needs no keys reads “Gesture only”, and the gesture cards' Natural scrolling row lines up with the rows under it."
+          ],
+          "type": "fixed"
+        }
+      ]
+    },
+    {
       "version": "5.0.1",
       "tag": "v5.0.1",
       "date": "2026-11-20",
