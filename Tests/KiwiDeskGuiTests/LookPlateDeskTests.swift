@@ -184,6 +184,22 @@ struct LookPlateDeskTests {
         #expect(source.contains("HomeCardBarsTile.pipPad.vertical*scale"))
     }
 
+    /// A light shelf colour only tints the picture's night, or the
+    /// desk greys into its windows (Classic's pale card); a dark one
+    /// lays whole.
+    @Test("a light shelf colour only tints the ground")
+    @MainActor
+    func lightShelfTints() {
+        func share(_ fill: String) -> Double {
+            var settings = TilingSettings()
+            settings.kiwishelf.fillColor = fill
+            return LookPlate(settings: settings, spaceLabels: [])
+                .groundShare
+        }
+        #expect(share("#F2F2F7B3") < 1)
+        #expect(share("#1C1C1EB3") == 1)
+    }
+
     /// An image's pixels at a fixed 64 px square.
     private static func pixels(_ image: NSImage) -> Data? {
         var rect = CGRect(x: 0, y: 0, width: 64, height: 64)

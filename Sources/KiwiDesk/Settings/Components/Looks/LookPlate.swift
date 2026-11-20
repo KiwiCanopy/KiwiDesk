@@ -68,11 +68,14 @@ struct LookPlate: View {
     static let barScale: CGFloat = 0.62
 
     /// The look's own shelf colour over a night, darkened a step,
-    /// a faint haze of the focus colour from the top.
+    /// a faint haze of the focus colour from the top. A light shelf
+    /// colour only tints the night: laid whole it greys the desk
+    /// into the windows, so the light bar no longer stands out.
     private var ground: some View {
         ZStack {
             SettingsTheme.lookGround
             Color(kiwiHex: settings.kiwishelf.fillColor)
+                .opacity(groundShare)
             SettingsTheme.lookGround.opacity(0.15)
             RadialGradient(
                 colors: [
@@ -86,6 +89,16 @@ struct LookPlate: View {
             )
         }
     }
+
+    /// How much of the shelf colour the ground takes: whole, save a
+    /// light colour, which only tints the night.
+    var groundShare: Double {
+        let luminance = ColorVision.luminance(settings.kiwishelf.fillColor)
+        return (luminance ?? 0) > Self.lightGround ? 0.25 : 1
+    }
+
+    /// The relative luminance above which a shelf colour is light.
+    static let lightGround = 0.5
 
     /// The focused window's ring: the look's colour and sheen at
     /// its width through the shared remap (#786) and its corners;
