@@ -6837,8 +6837,9 @@ The frame is settled when the layout input is built
 member, a parked one included, holds the full frame up front and a
 focus step stays a raise that writes to no app (#2099); the one
 window `Space.maximized` names could not give that. The pocket
-shows no handle and no strip on that layout, only during a drag or
-a play, since a handle at rest would sit on the window. The ring
+takes no strip on that layout; it rests as its handle there as over
+any maximized window (amended by #3523, below), its handle floating
+over the window as a bar's does. The ring
 and the marks step aside through the one set of windows that fill
 their screen, `screenFillers(of:)`, which a full Maximize joins too,
 rather than through the Hidden reading, which never reaches them. It applies on
@@ -6864,8 +6865,9 @@ working shortcut. The value is a new leaf no older build wrote, so
 no `ConfigMigration` step is owed, and it sits under `kiwishelf`,
 not `maximize`, because it covers Monocle as well.
 
-*Both values read Hidden.* A maximize reads every bar and the Pocket
-Hidden through the one `KiwiCore.shelfSettings(on:)` door, as
+*Both values read Hidden.* A maximize reads every bar Hidden, and
+the Pocket as *The Pocket follows the same value* below says,
+through the one `KiwiCore.shelfSettings(on:)` door, as
 #3151's tiling-off tick does; Monocle's reading stays
 `TilingSettings.barVisibilities(in:)`. So nothing is drawn at rest,
 no Space dots and no line, and an Always sibling cannot keep a bar
@@ -6943,8 +6945,9 @@ since it asks for Hidden.
 the Space Bar and every layout's App Bar all stored Hidden; the
 Pocket's Show counts for nothing, since no reveal brings it
 (amended, owner 2026-11-20, #3523: a Pocket not stored Hidden counts,
-since the value gives it its handle, and the sentence's bars stay a
-sufficient condition). Its
+since the value gives it its handle, so the row greys only with the
+bars and the Pocket all Hidden; the reason sentence still names only
+the bars, since setting one of them lifts the grey). Its
 reason names the KiwiShelf card where those are set, through one
 reason value that picks both the grey and its sentence.
 Where even one could show, the row is live and reveals only what is

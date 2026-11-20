@@ -3654,6 +3654,10 @@ Defaults ▸ Maximize writes it as **Show bars at the screen edge**,
 greyed while the Space Bar and every App Bar are `"hidden"`. A look
 never carries it.
 
+:::unreleased
+The row greys only while the pocket is `"hidden"` too.
+:::
+
 **Example:**
 
 ```lua
@@ -6758,10 +6762,18 @@ floating window, a switch to another Space or Desktop and back,
 or KiwiDesk's own restart leaves it filling the screen. Bound to
 `⌃⌥M` by default.
 
-The bars are not stood down: both bars and the pocket read as
-`"hidden"` on that screen, so a bar's shortcut shows it over the
-window and the menu-bar item names the Space. By default, moving the
-pointer to a bar's screen edge brings it in too
+The bars are not stood down: both bars read as `"hidden"` on that
+screen, so a bar's shortcut shows it over the window and the
+menu-bar item names the Space.
+
+:::unreleased
+The pocket rests there as its handle while
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+is `"auto"` and the pocket is not `"hidden"`.
+:::
+
+By default, moving the pointer to a bar's screen edge brings it in
+too
 ([`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)).
 A Height or Width maximize does the same only where the window
 reaches into a bar's strip.
