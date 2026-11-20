@@ -1,14 +1,24 @@
+import CoreGraphics
 import Foundation
 import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
 
-/// A window icon in the Desktop overview draws its own title hint
-/// after the pointer rests on it, since a tooltip never shows while
-/// KiwiDesk is not the active app and KiwiHub never activates it.
+/// A Desktop overview icon hands its title up after the pointer
+/// rests on it, and the side draws the hint above its scroll: a
+/// tooltip never shows while KiwiDesk is not the active app.
 @MainActor
 struct DesktopsLineTitleTests {
+    private static let root = SourceScan.repoRoot(from: #filePath)
+
+    private func source(_ path: String) throws -> String {
+        let text = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(path)
+        )
+        #expect(!text.isEmpty)
+        return text
+    }
     @Test("a window's hint names its title, else its app")
     func titleFallsBackToApp() {
         let titled = DesktopOverview.Window(
@@ -29,21 +39,34 @@ struct DesktopsLineTitleTests {
         #expect(DesktopsText.title(of: bare) == "Ghostty")
     }
 
-    @Test("the icon draws the hint on a rested hover, never a tooltip")
-    func iconDrawsTheHint() throws {
-        let url = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .appendingPathComponent(
-                "../../Sources/KiwiDesk/Jump/DesktopIconView.swift"
+    /// Above its icon, inside the side's width, and below the icon
+    /// where the side's top would cut it — the first line's case.
+    @Test("the hint stays inside the side")
+    func hintStaysInside() {
+        let side = CGSize(width: 400, height: 300)
+        let size = CGSize(width: 120, height: 20)
+        func at(_ target: CGRect) -> CGPoint {
+            DesktopTitleHintLayout.origin(
+                of: size,
+                over: target,
+                in: side,
+                4
             )
-        let source = try String(contentsOf: url, encoding: .utf8)
-            .filter { !$0.isWhitespace }
-        #expect(!source.isEmpty)
-        #expect(source.contains(".overlay(alignment:.top){hint}"))
-        #expect(
-            source.contains("ifhinted{Text(DesktopsText.title(of:window))")
-        )
-        #expect(source.contains(".task(id:isHovered){hinted=false"))
-        #expect(!source.contains(".help("))
+        }
+        let middle = at(CGRect(x: 200, y: 100, width: 30, height: 30))
+        #expect(middle == CGPoint(x: 155, y: 76))
+        let trailing = at(CGRect(x: 380, y: 100, width: 20, height: 20))
+        #expect(trailing.x == CGFloat(276))
+        let first = at(CGRect(x: 200, y: 10, width: 30, height: 30))
+        #expect(first.y == 44)
+    }
+
+    @Test("the side draws the hints its icons hand up")
+    func sideDrawsTheHints() throws {
+        let icon = try source("Sources/KiwiDesk/Jump/DesktopIconView.swift")
+        #expect(icon.contains("key: DesktopTitleHintKey.self"))
+        #expect(!icon.contains(".help("))
+        let side = try source("Sources/KiwiDesk/Jump/DesktopsSideView.swift")
+        #expect(side.contains(".desktopTitleHints()"))
     }
 }

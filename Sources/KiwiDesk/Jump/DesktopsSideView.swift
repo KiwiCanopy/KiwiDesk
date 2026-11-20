@@ -34,6 +34,7 @@ struct DesktopsSideView: View {
             }
         }
         .frame(height: geometry.height)
+        .desktopTitleHints()
         .accessibilityAction(
             named: Text(DesktopsText.editInSettings),
             onSettings

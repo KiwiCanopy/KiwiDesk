@@ -27,12 +27,8 @@ struct DesktopIconView: View {
 
     @Environment(\.kiwiHubPaint) private var paint
     /// Whether the title hint shows: the pointer has rested on the
-    /// icon for `hintDelay`.
+    /// icon for `DesktopTitleHint.delay`.
     @State private var hinted = false
-
-    /// How long the pointer rests before the title shows, about a
-    /// tooltip's wait.
-    static let hintDelay: Duration = .milliseconds(700)
 
     var body: some View {
         icon
@@ -42,15 +38,20 @@ struct DesktopIconView: View {
             .background { ground.padding(-2) }
             .overlay { outline.padding(-2) }
             .overlay(alignment: .bottom) { underline }
-            // A tooltip never shows while KiwiDesk is not the active
-            // app, and KiwiHub never activates it, so the icon draws
-            // its own title above itself.
-            .overlay(alignment: .top) { hint }
-            .zIndex(hinted ? 1 : 0)
+            .anchorPreference(
+                key: DesktopTitleHintKey.self,
+                value: .bounds
+            ) { anchor in
+                hinted
+                    ? DesktopTitleHint(
+                        title: DesktopsText.title(of: window),
+                        anchor: anchor
+                    ) : nil
+            }
             .task(id: isHovered) {
                 hinted = false
                 guard isHovered else { return }
-                try? await Task.sleep(for: Self.hintDelay)
+                try? await Task.sleep(for: DesktopTitleHint.delay)
                 if !Task.isCancelled { hinted = true }
             }
             .contentShape(Rectangle())
@@ -71,29 +72,6 @@ struct DesktopIconView: View {
     private var isHovered: Bool {
         pointer.hover == .window(window.id)
     }
-
-    @ViewBuilder private var hint: some View {
-        if hinted {
-            Text(DesktopsText.title(of: window))
-                .font(.caption)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                // Its own width up to the cap, never the icon's.
-                .frame(maxWidth: Self.hintWidth)
-                .fixedSize()
-                .foregroundStyle(.primary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(.regularMaterial, in: Capsule())
-                .overlay(Capsule().strokeBorder(.quaternary))
-                .alignmentGuide(.top) { $0[.bottom] + 4 }
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-        }
-    }
-
-    /// The widest a title hint grows before it truncates.
-    static let hintWidth: CGFloat = 240
 
     @ViewBuilder private var icon: some View {
         if let image {
