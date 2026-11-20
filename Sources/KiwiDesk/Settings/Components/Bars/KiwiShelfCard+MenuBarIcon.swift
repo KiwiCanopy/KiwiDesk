@@ -42,11 +42,11 @@ extension KiwiShelfCard {
                 + "those Spaces uses. With several screens, it lists "
                 + "each screen's Space in the order the screens are "
                 + "arranged, with a thin line between them: Spaces 2 "
-                + "and 5 read \u{201C}2 | 5\u{201D}, and %4$@ shows "
-                + "those two Spaces' layout symbols the same way. A "
-                + "Space with tiling off adds a pause mark. While a "
-                + "layer other than default is on, its icon comes "
-                + "first.",
+                + "and 5 read \u{201C}2 | 5\u{201D}, and "
+                + "\u{201C}%4$@\u{201D} shows those two Spaces' layout "
+                + "symbols the same way. A Space with tiling off adds "
+                + "a pause mark. While a layer other than "
+                + "\u{201C}default\u{201D} is on, its icon comes first.",
             title(.auto),
             title(.logo),
             title(.identifier),

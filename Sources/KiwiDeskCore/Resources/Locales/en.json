@@ -1229,7 +1229,7 @@
   "kiwishelf.margins.summary": "Outer and inner margin",
   "kiwishelf.menu_bar_icon": "Menu bar icon",
   "kiwishelf.menu_bar_icon.auto": "Auto",
-  "kiwishelf.menu_bar_icon.help": "What KiwiDesk's icon in the menu bar shows. %1$@ — the KiwiDesk logo while the Space Bar is on screen, and the Space instead on any screen where it is hidden. %2$@ — always the KiwiDesk logo. %3$@ — the Space each screen is on: its icon, else its name. %4$@ — the symbol of the layout each of those Spaces uses. With several screens, it lists each screen's Space in the order the screens are arranged, with a thin line between them: Spaces 2 and 5 read “2 | 5”, and %4$@ shows those two Spaces' layout symbols the same way. A Space with tiling off adds a pause mark. While a layer other than default is on, its icon comes first.",
+  "kiwishelf.menu_bar_icon.help": "What KiwiDesk's icon in the menu bar shows. %1$@ — the KiwiDesk logo while the Space Bar is on screen, and the Space instead on any screen where it is hidden. %2$@ — always the KiwiDesk logo. %3$@ — the Space each screen is on: its icon, else its name. %4$@ — the symbol of the layout each of those Spaces uses. With several screens, it lists each screen's Space in the order the screens are arranged, with a thin line between them: Spaces 2 and 5 read “2 | 5”, and “%4$@” shows those two Spaces' layout symbols the same way. A Space with tiling off adds a pause mark. While a layer other than “default” is on, its icon comes first.",
   "kiwishelf.minimum": "Space Bar minimum",
   "kiwishelf.minimum.help": "Only matters once both bars together are longer than the edge: the Space Bar shrinks, but keeps at least this much of the edge, and the App Bar scrolls instead.",
   "kiwishelf.on_expand": "Animate the expand",

@@ -1627,10 +1627,20 @@ window state alone (`TemporarySpaceBarTests` ▸
 A Space with tiling off (#3008) wears `pause` in the same slot,
 **winning it over held or temporary**: `Marker.tilingOff(beside:)`
 carries the state it covers, so the `spaceName` sentence still
-names both. Where a screen draws no Space Bar at rest or the
-tiling-off tick hides it, the menu-bar Space mark lists the Space
-and wears the same marker, read from
-`StatusSpaceMark.tilingOffSymbol`, the one copy of the symbol.
+names both. Where the menu-bar Space mark lists a Space, it wears
+the same marker, read from `StatusSpaceMark.tilingOffSymbol`, the
+one copy of the symbol.
+
+**Which screens the menu-bar mark lists is
+`kiwishelf.menu_bar_icon`'s, read once from the global
+`tiler.settings.kiwishelf` in `statusSpaceMark()`, never per
+screen** (#3532): there is one item. Under `auto` a screen is listed
+only where its Space Bar is not drawn at rest, asked through
+`shelfSettings(on:)` as the bar is; `logo` lists none; `identifier`
+and `layout` list every screen. **Its Layout glyph goes through the
+one `KiwiCore.spaceBarLabel(identifier:mode:label:)`**, never a
+mapping of its own, and the spoken layout follows the same `label`
+(`StatusSpaceMarkChoiceTests`).
 
 ## A per-display bar answers the SHOWN question, never the render one
 

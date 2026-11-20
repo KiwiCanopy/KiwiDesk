@@ -1268,7 +1268,7 @@
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Resta visibile finché una App Bar impostata su «%1$@» condivide il suo bordo.",
-  "kiwishelf.show.visibility.help": "Imposta insieme le barre e la Pocket. «Sempre» le tiene sullo schermo. «Auto» riduce ciascuna alla sua maniglia finché il puntatore non si ferma su di essa. «Nascosta» mostra una barra solo con la sua scorciatoia, sopra le tue finestre, e la Pocket solo mentre una finestra entra o esce, mentre ne trascini una o quando la scorciatoia del suo elenco la apre. Solo %1$@ e %2$@ possono avere una App Bar. Con «%3$@» lasciato sull'impostazione predefinita, la barra dei menu mostra lo spazio in cui si trova ogni schermo ovunque la Space Bar sia nascosta.",
+  "kiwishelf.show.visibility.help": "Imposta insieme le barre e la Pocket. «Sempre» le tiene sullo schermo. «Auto» riduce ciascuna alla sua maniglia finché il puntatore non si ferma su di essa. «Nascosta» mostra una barra solo con la sua scorciatoia, sopra le tue finestre, e la Pocket solo mentre una finestra entra o esce, mentre ne trascini una o quando la scorciatoia del suo elenco la apre. Solo %1$@ e %2$@ possono avere una App Bar. Se «%3$@» resta sull'impostazione predefinita, la barra dei menu mostra lo spazio in cui si trova ogni schermo ovunque la Space Bar sia nascosta.",
   "kiwishelf.thickness": "Spessore",
   "kiwishelf.thickness.help": "Un solo spessore per entrambe le barre. La dimensione glifi automatica lo segue.",
   "kiwishelf.tint_hub_and_plates": "Tingi %1$@ e le piastre",

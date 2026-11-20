@@ -111,7 +111,7 @@ extension KiwiCore {
                 )
             )
             screen.tilingOff = isTilingOff(space)
-            screen.layout = icon == .layout ? mode : nil
+            screen.layout = label == .layout ? mode : nil
             return screen
         }
         return StatusSpaceMark(layer: layer, screens: screens)

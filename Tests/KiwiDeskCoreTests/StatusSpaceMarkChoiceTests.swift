@@ -53,11 +53,13 @@ struct StatusSpaceMarkChoiceTests {
         #expect(response.isSuccess)
     }
 
-    @Test("an absent key reads auto, the stand-in rule")
+    @Test("auto by default: the stand-in rule follows the Show")
     func defaultIsAuto() {
         #expect(KiwiShelf().menuBarIcon == .auto)
         let core = makeCore()
         #expect(core.statusSpaceMark().screens.isEmpty)
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
+        #expect(core.statusSpaceMark().screens.count == 2)
     }
 
     @Test("logo lists no screen while the Space Bar is hidden")

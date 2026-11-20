@@ -706,11 +706,15 @@ While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
 ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
 
-Wherever a screen shows no Space Bar at rest, the menu bar icon
-takes its place: the Space each screen is showing — its icon, or its name
-where it has none — with the active layer's icon ahead of them,
-and the KiwiDesk logo, or the layer's icon, back wherever the bar
-shows at rest.
+The menu bar icon can show the Space each screen is showing — its
+icon, or its name where it has none — with the active layer's icon
+ahead of them.
+
+:::unreleased
+What the menu bar icon shows is Settings ▸ KiwiShelf ▸ Show ▸
+**Menu bar icon**; at its default, Auto, it stands in for the Space
+Bar wherever a screen shows none at rest.
+:::
 
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty

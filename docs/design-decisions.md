@@ -14794,7 +14794,9 @@ through the Space Bar's own `item_label` mapping. The layer rule
 (#1169) holds under every value, so there is no pure-logo mode. The
 setting is per profile, like the Show that `auto` follows. It owes
 no `ConfigMigration`: an absent key decodes as `auto`, which is
-what every existing profile showed.
+what every existing profile showed. A later default other than
+`auto` owes that migration after all: an absent key decodes as the
+default, so the flip would change every stored profile's menu bar.
 :::
 
 **The recorder snaps in on key-down.** (#212, replacing the
