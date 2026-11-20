@@ -137,9 +137,9 @@ extension FullscreenStandDownTests {
         #expect(hidden == nil)
     }
 
-    /// Over a maximized window the Pocket rests nowhere, and a bar
-    /// revealed on its edge comes in alone (#3432, retiring #3346 ▸
-    /// 8).
+    /// Over a maximized window the Pocket rests as its handle at the
+    /// screen edge (#3523), and a bar revealed on its edge comes in
+    /// alone, leaving the handle where it rests (#3432).
     @Test("a Maximize's revealed bar comes in without the Pocket")
     func maximizeRevealLeavesThePocket() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
@@ -151,7 +151,10 @@ extension FullscreenStandDownTests {
         core.tiler.settings.kiwishelf.pocketVisibility = .always
         #expect(core.execute("toggle_maximized").isSuccess)
         core.updateBars()
-        #expect(!core.pocketStands(on: display))
+        #expect(core.pocketStands(on: display))
+        #expect(core.pocketPlace(on: display) == .handle)
+        let resting = core.pocketPlateSpecs().first { $0.display == display }
+        #expect(resting?.risen == false)
         let bar = ShelfRevealer.Key(
             shelf: ShelfManager.Key(
                 display: display,
@@ -164,8 +167,10 @@ extension FullscreenStandDownTests {
         // Control: the reveal took, so the bar is drawn.
         #expect(core.shelves.reveal.reveal(of: bar).isShown)
         #expect(core.pocketPlate.slots[display] == nil)
-        #expect(core.pocketPlate.markBands[display] == nil)
-        #expect(!core.pocketStands(on: display))
+        #expect(core.pocketPlace(on: display) == .handle)
+        let after = core.pocketPlateSpecs().first { $0.display == display }
+        #expect(after?.frame == resting?.frame)
+        #expect(after?.risen == false)
     }
 
     /// The overflow marks sit on windows a maximize covers, so they

@@ -43,6 +43,29 @@ struct TilingOffBarsHiddenTests {
         #expect(settings.someBarShows)
     }
 
+    /// The tick asks for Hidden, so it wins over a maximize, which
+    /// would rest the Pocket as its handle (#3523).
+    @Test("the tick reads the Pocket Hidden over a maximize too")
+    func tickBeatsTheMaximize() {
+        let core = makeCore()
+        core.execute("set_mode", args: [.string("1"), .string("monocle")])
+        core.tiler.settings.monocle.maximizeWindows = true
+        core.tiler.settings.kiwishelf.pocketVisibility = .always
+        core.execute("tiling.set_off_hides_bars", args: [.bool(true)])
+        // Control: tiling on, the maximize rests it as its handle.
+        #expect(core.screenMaximizes(on: display))
+        #expect(
+            core.shelfSettings(on: display).kiwishelf.pocketVisibility
+                == .auto
+        )
+        core.execute("set_tiling", args: [.bool(false)])
+        #expect(
+            core.shelfSettings(on: display).kiwishelf.pocketVisibility
+                == .hidden
+        )
+        #expect(!core.pocketRests(on: display))
+    }
+
     @Test("only a tiling-off Space with the tick reads them Hidden")
     func doorReadsTheTick() {
         let core = makeCore()

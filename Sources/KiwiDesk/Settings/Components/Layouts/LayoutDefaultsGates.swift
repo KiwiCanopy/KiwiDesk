@@ -12,8 +12,8 @@ struct LayoutDefaultsGates {
         case rigidGrid
         case autoSizedGrid
         case autoTracks
-        /// Every bar is Hidden, so the maximized edge reveal brings
-        /// nothing in (#3346 ▸ 9).
+        /// Every bar and the Pocket are Hidden, so the value shows
+        /// nothing over a maximized window (#3346 ▸ 9, #3523).
         case nothingRevealsMaximized
     }
 

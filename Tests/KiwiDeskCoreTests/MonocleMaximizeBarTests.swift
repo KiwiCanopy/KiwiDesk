@@ -21,7 +21,8 @@ private func settings(maximize: Bool) -> TilingSettings {
 
 /// Monocle's "Maximize windows" reads both bars as Hidden in Monocle
 /// through the one `barVisibilities(in:)`, never as a stand-down, and
-/// rests the pocket nowhere there (#2976 ▸ 3, 4).
+/// rests the pocket there as its handle while the maximized reveal is
+/// live, as the bars (#2976 ▸ 3, #3523).
 @Suite("Monocle maximize windows: bars and pocket (#2976)")
 struct MonocleMaximizeBarTests {
     @Test("Both bars read Hidden in Monocle alone")
@@ -88,13 +89,24 @@ struct MonocleMaximizeBarTests {
         #expect(!on.shelfEdges(in: .bsp, on: nil).isEmpty)
     }
 
-    @Test("The pocket rests nowhere on a maximizing Monocle")
-    func pocketRestsNowhere() {
-        let on = settings(maximize: true)
-        #expect(on.pocketRests)
+    @Test("A maximizing Monocle rests the pocket as its handle")
+    func pocketRestsAsHandle() {
+        var on = settings(maximize: true)
+        on.kiwishelf.pocketVisibility = .always
+        #expect(on.pocketRests(in: .monocle))
+        // An Always pocket rests as its handle there, reserving none.
+        #expect(on.pocketRest(in: .monocle, on: nil) == .handle)
+        #expect(on.pocketReservation(in: .monocle, on: nil) == nil)
+        // Control: unmaximized, the Hidden-read edge takes the mark.
+        var off = settings(maximize: false)
+        off.kiwishelf.pocketVisibility = .always
+        off.spaceBarStyle.visibility = .hidden
+        off.monocle.appBar.visibility = .hidden
+        #expect(off.pocketRest(in: .monocle, on: nil) == .mark)
+        // With the maximized reveal off it rests nowhere, as the bars.
+        on.kiwishelf.maximizedVisibility = .hidden
         #expect(!on.pocketRests(in: .monocle))
         #expect(on.pocketRests(in: .bsp))
-        #expect(settings(maximize: false).pocketRests(in: .monocle))
     }
 
     @Test("The pocket's rest takes no section of a Hidden-read bar")

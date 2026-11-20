@@ -2562,8 +2562,15 @@ Layout Defaults ▸ Monocle ▸ Maximize windows.
 visible frame with no gaps, parked windows included. Both bars read
 as Hidden in Monocle, so `space_bar.toggle_reveal()` and
 `app_bar.toggle_reveal()` still show a bar over the window, and the
-menu-bar item names the Space. The pocket shows no handle at rest
-there, only during a window drag or while a window goes in or out.
+menu-bar item names the Space.
+
+:::unreleased
+The pocket rests there as its handle while
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+is `"auto"`, and otherwise shows only during a window drag or while a
+window goes in or out.
+:::
+
 The focus border and the marks step aside on the tiled windows.
 `toggle_maximized` works as on any layout. Moving the pointer to a
 bar's screen edge brings it in as
@@ -3537,14 +3544,16 @@ Under `"always"` and `"auto"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
 with no count, except where KiwiShelf stands down for a native
-full-screen window or a presentation, and on a Monocle Space while
-[`monocle.set_maximize_windows`](#monocleset_maximize_windows) is on,
-where it shows only during a window drag or while a window goes in or
-out.
+full-screen window or a presentation.
 
-A maximized window keeps it off the screen at rest too; there it
-shows only for a window drag, a window going in or out, its keys or
-its list.
+:::unreleased
+Over a maximized window, a Monocle Space with
+[`monocle.set_maximize_windows`](#monocleset_maximize_windows) on
+included, it rests as its handle at the screen edge while
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+is `"auto"`; under `"hidden"` it shows there only for a window drag,
+a window going in or out, its keys or its list.
+:::
 
 Windows keep clear of the
 resting handle or pocket unless `reserve` is off for every bar on
@@ -3630,12 +3639,24 @@ shortcut shows it over the window.
 - `"hidden"` leaves only the shortcuts.
 
 A bar set to `"hidden"` stays hidden under `"auto"` as well, while a
-bar set to `"always"` comes in like an `"auto"` one. A bar comes in
-alone: the pocket stays away from the window, and its keys, its list
-and a window drag reach it under either value. Settings ▸ Layout
+bar set to `"always"` comes in like an `"auto"` one.
+
+:::unreleased
+The pocket follows the same value: under `"auto"` a pocket not set
+to `"hidden"` rests as its handle at the screen edge, where it rests
+over any window, and comes out from there; under `"hidden"` it rests
+nowhere. A bar still comes in alone, and the pocket's keys, its list
+and a window drag reach it under either value.
+:::
+
+Settings ▸ Layout
 Defaults ▸ Maximize writes it as **Show bars at the screen edge**,
 greyed while the Space Bar and every App Bar are `"hidden"`. A look
 never carries it.
+
+:::unreleased
+The row greys only while the pocket is `"hidden"` too.
+:::
 
 **Example:**
 
@@ -6741,10 +6762,18 @@ floating window, a switch to another Space or Desktop and back,
 or KiwiDesk's own restart leaves it filling the screen. Bound to
 `⌃⌥M` by default.
 
-The bars are not stood down: both bars and the pocket read as
-`"hidden"` on that screen, so a bar's shortcut shows it over the
-window and the menu-bar item names the Space. By default, moving the
-pointer to a bar's screen edge brings it in too
+The bars are not stood down: both bars read as `"hidden"` on that
+screen, so a bar's shortcut shows it over the window and the
+menu-bar item names the Space.
+
+:::unreleased
+The pocket rests there as its handle while
+[`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
+is `"auto"` and the pocket is not `"hidden"`.
+:::
+
+By default, moving the pointer to a bar's screen edge brings it in
+too
 ([`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)).
 A Height or Width maximize does the same only where the window
 reaches into a bar's strip.

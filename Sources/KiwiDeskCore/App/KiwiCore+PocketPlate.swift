@@ -13,10 +13,10 @@ extension KiwiCore {
     /// Hidden.
     var pocketRests: Bool { tiler.settings.pocketRests }
 
-    /// Whether the pocket rests on `display`: it rests, and the
-    /// layout that screen shows does not maximize its windows
-    /// (#2976 ▸ 4) — the one per-screen answer the bar plan, the
-    /// pocket's place and its specs read.
+    /// Whether the pocket rests on `display`, as its shelf reads it:
+    /// under a maximize at `maximizedPocketVisibility` (#3523) — the
+    /// one per-screen answer the bar plan, the pocket's place and its
+    /// specs read.
     func pocketRests(on display: DisplayID) -> Bool {
         shelfSettings(on: display).pocketRests(in: shownMode(on: display))
     }

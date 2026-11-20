@@ -71,8 +71,9 @@ struct HandleThicknessRowTests {
     }
 
     /// On a bar's edge the Pocket is a section, save in a layout
-    /// that maximizes its windows, where it rests nowhere (#2976 ▸
-    /// 4): no handle there either.
+    /// that maximizes its windows, where with the maximized reveal
+    /// off it rests nowhere, as the bars (#2976 ▸ 4, #3523): no
+    /// handle there either.
     @Test("a maximizing layout's Pocket is no handle")
     func maximizingPocketRestsNowhere() {
         var settings = nothingRests()
@@ -80,5 +81,18 @@ struct HandleThicknessRowTests {
         settings.kiwishelf.pocketEdge = settings.spaceBarStyle.edge
         settings.monocle.maximizeWindows = true
         #expect(reason(settings) == .noHandle)
+    }
+
+    /// Any maximize gives a resting Pocket its handle while the
+    /// maximized reveal is live, with no bar resting as one (#3523).
+    @Test("a maximize's Pocket handle keeps it live")
+    func maximizedPocketHandleKeepsItLive() {
+        var settings = nothingRests()
+        settings.setEveryBarVisibility(.hidden)
+        settings.kiwishelf.pocketVisibility = .always
+        // Control: the reveal off, nothing rests as a handle.
+        #expect(reason(settings) == .noHandle)
+        settings.kiwishelf.maximizedVisibility = .auto
+        #expect(reason(settings) == nil)
     }
 }
