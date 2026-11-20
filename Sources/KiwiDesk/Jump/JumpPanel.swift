@@ -120,8 +120,9 @@ final class JumpPanel: NSPanel {
 
 extension JumpPanel {
     /// What `event` means: a pick reads `pickModifiers`, so ↩ under
-    /// the ⌥ still held from ⌥⇥ jumps rather than swaps; every
-    /// other key reads all the event's modifiers (#3168). The
+    /// the ⌥ still held from ⌥⇥ jumps rather than swaps, and so
+    /// does a ← → step nothing else claims; every other key reads
+    /// all the event's modifiers (#3168). The
     /// Windows back chord latches its own modifiers.
     func key(for event: NSEvent) -> JumpKey? {
         let flags = event.modifierFlags
@@ -139,11 +140,12 @@ extension JumpPanel {
             return full
         }
         let fresh = pickModifiers(flags)
-        if fresh != flags, let pick = key(event.keyCode, fresh),
-            pick.picks
-        {
-            return pick
-        }
+        guard fresh != flags, let latched = key(event.keyCode, fresh)
+        else { return full }
+        if latched.picks { return latched }
+        // ← → under the ⌥ still held from ⌥⇥ walk the strip, as
+        // ↑ ↓ move the list under it.
+        if full == nil, case .side = latched { return latched }
         return full
     }
 

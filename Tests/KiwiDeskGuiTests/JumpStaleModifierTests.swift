@@ -164,6 +164,18 @@ struct JumpStaleModifierTests {
         #expect(latched.count == 1)
     }
 
+    @Test("← → under a stale ⌥ walk the strip; a fresh ⌥ does not")
+    func arrowsUnderTheOpener() {
+        let left = keyDown(123, "\u{F702}", [.option])
+        let right = keyDown(124, "\u{F703}", [.option])
+        let stale = panel(stale: [.option])
+        #expect(stale.key(for: left) == .side(-1))
+        #expect(stale.key(for: right) == .side(1))
+        #expect(panel(stale: []).key(for: right) == nil)
+        let command = keyDown(124, "\u{F703}", [.option, .command])
+        #expect(stale.key(for: command) != .side(1))
+    }
+
     /// The back chord is the Windows side's alone: elsewhere it
     /// latches nothing.
     @Test("the back chord latches on Windows only")
