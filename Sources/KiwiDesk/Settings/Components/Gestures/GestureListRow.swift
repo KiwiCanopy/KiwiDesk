@@ -152,11 +152,12 @@ struct GestureListRow: View {
         }
     }
 
-    /// The recorder names what it binds: the gesture and its action.
+    /// The recorder names what it binds: the keys for the gesture
+    /// and its action.
     private var recorderName: String {
         L(
             "shortcuts.gestures.recorder_name",
-            "%1$@, %2$@",
+            "Keys for %1$@, %2$@",
             GestureListWords.input(key.input),
             actionTitle
         )

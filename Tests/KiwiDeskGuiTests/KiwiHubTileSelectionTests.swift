@@ -69,7 +69,11 @@ struct KiwiHubTileSelectionTests {
         #expect(!tile.contains("Capsule().fill(isSelected"))
         // The ground's lift is the one hover fill on the tile.
         #expect(tile.occurrences(of: "paint.rowHover") == 1)
-        #expect(tile.occurrences(of: ".fill(.quaternary)") == 2)
+        #expect(tile.occurrences(of: ".fill(.quaternary)") == 1)
+        // The count wears the shelf's solid group badge, never a
+        // translucent fill.
+        #expect(tile.contains("Capsule().fill(paint.badge)"))
+        #expect(tile.contains(".foregroundStyle(paint.badgeInk)"))
     }
 
     /// On a filled line a tile's hover lifts in the line's ink; the

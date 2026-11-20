@@ -164,4 +164,9 @@ enum DesktopsText {
             name
         )
     }
+
+    /// A window's name on its line: its title, else its app's.
+    static func title(of window: DesktopOverview.Window) -> String {
+        window.title.isEmpty ? window.app : window.title
+    }
 }

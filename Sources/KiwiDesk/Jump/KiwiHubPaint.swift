@@ -18,6 +18,10 @@ struct KiwiHubPaint {
     /// A hovered row's or tile's ground, and a hovered chip's.
     var rowHover = SettingsTheme.chipRest
     var chipHover = SettingsTheme.chipHover
+    /// A strip tile's window count: the shelf's group badge, solid,
+    /// tinted or not (`PanelGlass.badge`).
+    var badge = Color(kiwiHex: KiwiShelf().groupBadgeColor)
+    var badgeInk = Color(kiwiHex: KiwiShelf().groupBadgeTextColor)
     /// A hovered item's ink; nil keeps the item's own.
     var hoverInk: Color?
     /// Whether the shelf paints KiwiHub (the toggle is on).
@@ -65,18 +69,23 @@ struct KiwiHubPaint {
         tint: GlassPaint?,
         increaseContrast: Bool
     ) -> KiwiHubPaint {
-        guard let shelf = glass.shelf, let ink else { return KiwiHubPaint() }
-        return KiwiHubPaint(
-            shelf,
-            divider: ink.divider,
-            axis: tint.map {
-                (
-                    UnitPoint(x: $0.start.x, y: $0.start.y),
-                    UnitPoint(x: $0.end.x, y: $0.end.y)
-                )
-            },
-            increaseContrast: increaseContrast
-        )
+        var paint = KiwiHubPaint()
+        if let shelf = glass.shelf, let ink {
+            paint = KiwiHubPaint(
+                shelf,
+                divider: ink.divider,
+                axis: tint.map {
+                    (
+                        UnitPoint(x: $0.start.x, y: $0.start.y),
+                        UnitPoint(x: $0.end.x, y: $0.end.y)
+                    )
+                },
+                increaseContrast: increaseContrast
+            )
+        }
+        paint.badge = Color(kiwiHex: glass.badge)
+        paint.badgeInk = Color(kiwiHex: glass.badgeInk)
+        return paint
     }
 
     /// The far end of a faded fill as a share of its top; nil

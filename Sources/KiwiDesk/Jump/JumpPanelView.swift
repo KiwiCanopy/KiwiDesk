@@ -82,7 +82,9 @@ struct JumpPanelView: View {
                 ),
                 // The field shows only the typing; the selection is
                 // the row or tile below (#2246).
-                prompt: Text(fieldName)
+                // The panel's measured ink, never the system's faint
+                // placeholder grey, which vanishes on light glass.
+                prompt: Text(fieldName).foregroundStyle(.secondary)
             )
             .textFieldStyle(.plain)
             .font(.title3)

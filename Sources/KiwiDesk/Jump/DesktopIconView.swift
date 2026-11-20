@@ -26,6 +26,9 @@ struct DesktopIconView: View {
     let onClick: (Int, NSEvent.ModifierFlags) -> Void
 
     @Environment(\.kiwiHubPaint) private var paint
+    /// Whether the title hint shows: the pointer has rested on the
+    /// icon for `DesktopTitleHint.delay`.
+    @State private var hinted = false
 
     var body: some View {
         icon
@@ -35,6 +38,22 @@ struct DesktopIconView: View {
             .background { ground.padding(-2) }
             .overlay { outline.padding(-2) }
             .overlay(alignment: .bottom) { underline }
+            .anchorPreference(
+                key: DesktopTitleHintKey.self,
+                value: .bounds
+            ) { anchor in
+                hinted
+                    ? DesktopTitleHint(
+                        title: DesktopsText.title(of: window),
+                        anchor: anchor
+                    ) : nil
+            }
+            .task(id: isHovered) {
+                hinted = false
+                guard isHovered else { return }
+                try? await Task.sleep(for: DesktopTitleHint.delay)
+                if !Task.isCancelled { hinted = true }
+            }
             .contentShape(Rectangle())
             .onTapGesture {
                 let click = DesktopsClick.of(NSApp.currentEvent)
@@ -48,7 +67,10 @@ struct DesktopIconView: View {
                 DesktopsText.spoken(window, picked: isPicked)
             )
             .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .help(window.title.isEmpty ? window.app : window.title)
+    }
+
+    private var isHovered: Bool {
+        pointer.hover == .window(window.id)
     }
 
     @ViewBuilder private var icon: some View {

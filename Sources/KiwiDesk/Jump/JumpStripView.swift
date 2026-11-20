@@ -57,8 +57,8 @@ struct JumpStripView: View {
 }
 
 /// One tile: the app's icon — All's grid symbol on a neutral plate
-/// — and its name under it, one line, middle-truncated; a neutral
-/// count capsule for two or more windows, never red. Rows fill,
+/// — and its name under it, one line, middle-truncated; the shelf's
+/// group badge for two or more windows, never red. Rows fill,
 /// tiles ring (#3210): the selected tile wears a 2 pt ring and no
 /// fill, a lifted one the hover ground and its ink.
 struct JumpStripTile: View {
@@ -143,10 +143,10 @@ struct JumpStripTile: View {
         if windows > 1 {
             Text(verbatim: "\(windows)")
                 .font(.caption2.monospacedDigit().weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(paint.badgeInk)
                 .padding(.horizontal, 5)
                 .padding(.vertical, 1)
-                .background(Capsule().fill(.quaternary))
+                .background(Capsule().fill(paint.badge))
                 .offset(x: 10, y: -4)
                 .accessibilityHidden(true)
         }
