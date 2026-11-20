@@ -14,6 +14,20 @@
     <description>Updates for KiwiDesk, a tiling window manager for macOS.</description>
     <language>en</language>
     <item>
+      <title>5.0.1</title>
+      <pubDate>Fri, 20 Nov 2026 10:07:17 +0000</pubDate>
+      <sparkle:version>5.0.1</sparkle:version>
+      <sparkle:shortVersionString>5.0.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<style>:root{color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;}body{margin:0;padding:2px 4px 16px 4px;}h3{font-size:13px;font-weight:600;margin:12px 0 6px 0;}p{margin:0 0 8px 0;}ul{margin:0 0 10px 0;padding-left:18px;}li{margin-bottom:5px;}code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:11.5px;padding:1px 4px;border-radius:4px;background:rgba(128,128,128,0.15);}::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.65);}</style><p>KiwiDesk comes opinionated out of the box but shouldn't force anything on you, so this release gives you more say over the Pocket.</p><h3>Improved</h3><ul><li><strong>You can now keep the Pocket from coming out every time you drag a window:</strong> untick KiwiShelf ▸ Show ▸ Each bar and Pocket ▸ Show the Pocket while dragging a window. Its keys and its list still bring it in.</li></ul><h3>Fixed</h3><ul><li><strong>Over a maximized window the Pocket now rests as its handle at the screen edge, in its usual spot, and comes in from there</strong> instead of sliding out a short way in from the edge. To keep it away there, set its Show to Hidden under KiwiShelf ▸ Show, or untick Layout Defaults ▸ Maximize ▸ Show bars at the screen edge.</li></ul>]]></description>
+      <kiwidesk:notes><![CDATA[{"format":1,"summary":"KiwiDesk comes opinionated out of the box but shouldn't force anything on you, so this release gives you more say over the Pocket.","sections":[{"type":"improved","title":"Improved","items":["**You can now keep the Pocket from coming out every time you drag a window:** untick KiwiShelf ▸ Show ▸ Each bar and Pocket ▸ Show the Pocket while dragging a window. Its keys and its list still bring it in."]},{"type":"fixed","title":"Fixed","items":["**Over a maximized window the Pocket now rests as its handle at the screen edge, in its usual spot, and comes in from there** instead of sliding out a short way in from the edge. To keep it away there, set its Show to Hidden under KiwiShelf ▸ Show, or untick Layout Defaults ▸ Maximize ▸ Show bars at the screen edge."]}],"spotlight":[{"title":"Let the Pocket sit out your drags","line":"Untick one box and dragging a window no longer brings the Pocket out.","setting":"settings.kiwishelf.pocketDragReveal","symbol":"tray.full"}]}]]></kiwidesk:notes>
+      <enclosure
+        url="https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.0.1/KiwiDesk-5.0.1.zip"
+        length="18939507"
+        type="application/octet-stream"
+        sparkle:edSignature="Ue6WLOm56vil7h03vFe1sFA+8Kw2uBWVdK7FuqAlZPxwe86zib3XIVff0Lns4aUctHEqAKq2vgUMGgESaVllCw==" />
+    </item>
+    <item>
       <title>5.0.0</title>
       <pubDate>Thu, 19 Nov 2026 19:48:11 +0000</pubDate>
       <sparkle:version>5.0.0</sparkle:version>
