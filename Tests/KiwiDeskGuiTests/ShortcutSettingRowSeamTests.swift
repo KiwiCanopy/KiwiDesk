@@ -58,7 +58,8 @@ struct ShortcutSettingRowSeamTests {
     }
 
     /// The gesture cards' Natural scrolling row is a setting row,
-    /// never a hand-built one beside it (#3281).
+    /// never a hand-built one beside it (#3281), on the bound rows'
+    /// columns and text indent, as Long swipes is (#3401).
     @Test("the gesture cards' Natural scrolling row takes the shape")
     func naturalRowTakesTheShape() throws {
         let card = try SourceScan.strippedSource(
@@ -76,7 +77,9 @@ struct ShortcutSettingRowSeamTests {
         #expect(row.contains("ShortcutSettingRow("))
         #expect(row.contains("reach: { naturalReach }"))
         #expect(row.contains("control: { naturalPicker }"))
-        #expect(row.contains("SettingsMetrics.shortcutTextIndent"))
+        #expect(row.contains(".columns(.gestures)"))
+        #expect(row.contains("GestureListRow.textIndent"))
+        #expect(!row.contains("SettingsMetrics.shortcutTextIndent"))
         #expect(!row.contains("HStack"))
         let picker = try #require(
             SourceScan.declarationBody(

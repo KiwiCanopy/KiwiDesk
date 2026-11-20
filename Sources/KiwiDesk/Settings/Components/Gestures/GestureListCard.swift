@@ -117,11 +117,13 @@ struct GestureListCard: View {
                 reach: { naturalReach },
                 control: { naturalPicker }
             )
+            // On the bound rows' columns, as Long swipes is (#3401).
+            .columns(.gestures)
             if device == .trackpad {
                 Text(GestureListWords.magicMouseCaption)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
-                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
+                    .padding(.leading, GestureListRow.textIndent)
             }
         }
     }

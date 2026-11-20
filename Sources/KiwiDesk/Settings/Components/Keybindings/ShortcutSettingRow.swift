@@ -40,6 +40,13 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
         self.control = control()
     }
 
+    /// This row on `columns`' metrics.
+    func columns(_ columns: Columns) -> Self {
+        var row = self
+        row.columns = columns
+        return row
+    }
+
     /// The glyph every setting row draws in its icon slot.
     static var settingGlyph: String { "slider.horizontal.3" }
 
