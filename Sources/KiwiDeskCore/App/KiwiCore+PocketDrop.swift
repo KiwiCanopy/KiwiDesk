@@ -123,12 +123,31 @@ extension KiwiCore {
         if pocketPlate.dragging == id { endPocketDrag() }
     }
 
+    /// Whether a window drag shows the pocket (#3522): one moves and
+    /// `kiwishelf.pocket_drag_reveal` is on. The one reader that
+    /// turns a drag into a standing or risen pocket; the drag itself,
+    /// `pocketPlate.dragging`, also tells the revealer a window moves
+    /// (#2795), so it is recorded whatever the setting says.
+    var pocketDragShows: Bool {
+        pocketPlate.dragging != nil
+            && tiler.settings.kiwishelf.pocketDragReveal
+    }
+
+    /// Whether a drag runs that may not bring the pocket out: its
+    /// handle's approach then raises nothing (#3522).
+    var pocketDragHeldDown: Bool {
+        pocketPlate.dragging != nil && !pocketDragShows
+    }
+
     /// The display whose pocket, as drawn, the pointer is over
-    /// (Cocoa points), nil where none.
+    /// (Cocoa points), nil where none. With the drag reveal off an
+    /// Auto handle's tab takes no drop (#3522).
     func pocketUnderPointer() -> DisplayID? {
         let cursor = drag.cursorLocation()
+        let tabs = tiler.settings.kiwishelf.pocketDragReveal
         return pocketPlate.specs.values.first {
             $0.frame.contains(cursor)
+                && (tabs || !$0.isTab)
         }?.display
     }
 }

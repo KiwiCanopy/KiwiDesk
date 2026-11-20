@@ -1260,6 +1260,8 @@
   "kiwishelf.show.pocket.auto": "Auto",
   "kiwishelf.show.pocket.beside_always": "Bei „%1$@“ bleibt die Pocket sichtbar, solange eine Leiste an ihrer Kante auf „%2$@“ steht.",
   "kiwishelf.show.pocket.hidden": "Ausgeblendet",
+  "kiwishelf.show.pocket_drag": "Die Pocket beim Ziehen eines Fensters anzeigen",
+  "kiwishelf.show.pocket_drag.help": "Ist es aus, bleibt die Pocket beim Ziehen ausgeblendet. Die Pocket-Tastenkürzel und die Liste der Pocket erreichen sie weiterhin.",
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Bleibt sichtbar, solange sie sich ihre Kante mit einer App Bar auf „%1$@“ teilt.",

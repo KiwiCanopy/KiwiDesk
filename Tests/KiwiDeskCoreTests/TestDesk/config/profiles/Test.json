@@ -112,6 +112,7 @@
       "minimum" : 30,
       "order" : "spaces_first",
       "outer_margin" : 0,
+      "pocket_drag_reveal" : true,
       "pocket_edge" : "bottom",
       "pocket_position" : 82,
       "pocket_visibility" : "always",

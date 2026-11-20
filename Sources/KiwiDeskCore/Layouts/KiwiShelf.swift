@@ -152,6 +152,8 @@ public struct KiwiShelf: Sendable, Equatable {
     public var pocketVisibility = ShelfVisibility.always
     /// How the bars read while a window is maximized (#3346).
     public var maximizedVisibility = MaximizedVisibility.auto
+    /// Whether a window drag brings the pocket out (#3522).
+    public var pocketDragReveal = true
 
     public init() {}
 

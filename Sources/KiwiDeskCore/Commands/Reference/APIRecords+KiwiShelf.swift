@@ -189,6 +189,11 @@ extension APIReference {
                 + "or hidden.",
             .choice("visibility", ShelfVisibility.self)
         ),
+        "set_pocket_drag_reveal": APIRecord(
+            "Sets whether a window drag brings the pocket out; off, "
+                + "its keys and list still reach it.",
+            .boolean("enabled")
+        ),
         "set_maximized_visibility": APIRecord(
             "Sets whether a bar comes in at its screen edge over a "
                 + "maximized window: auto or hidden.",

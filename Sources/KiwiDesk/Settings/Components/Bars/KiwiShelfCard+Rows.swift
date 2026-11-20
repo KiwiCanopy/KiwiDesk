@@ -122,7 +122,7 @@ extension KiwiShelfCard {
         case .revealStyle:
             revealStyleRow
         // Drawn in the Show drawer (`showRow`).
-        case .pocketVisibility:
+        case .pocketVisibility, .pocketDragReveal:
             EmptyView()
         // Drawn in Layout Defaults ▸ Maximize (`MaximizeCard`).
         case .maximizedVisibility:

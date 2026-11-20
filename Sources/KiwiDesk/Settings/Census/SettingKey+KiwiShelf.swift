@@ -53,6 +53,9 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case pocketPosition = "settings.kiwishelf.pocketPosition"
     /// The pocket's Show (#2978), behind the Show master's drawer.
     case pocketVisibility = "settings.kiwishelf.pocketVisibility"
+    /// Whether a window drag brings the pocket out (#3522), under
+    /// the pocket's Show in its drawer.
+    case pocketDragReveal = "settings.kiwishelf.pocketDragReveal"
     case maximizedVisibility = "settings.kiwishelf.maximizedVisibility"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
@@ -83,6 +86,10 @@ extension KiwiShelfKey {
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
             .outerMargin, .innerMargin, .iconSource, .order, .minimum:
+            return .row(.bars, .kiwishelf, .showMore)
+        case .pocketDragReveal:
+            // Never greyed: an Always pocket rests as its handle
+            // over a maximized window (#3522, #3523).
             return .row(.bars, .kiwishelf, .showMore)
         case .maximizedVisibility:
             // Greyed while nothing could reveal (#3346 ▸ 9).

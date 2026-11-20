@@ -69,7 +69,7 @@ extension PocketPlateOverlay {
     /// the one "was it up" both the room and the view's sink read
     /// (#3383). Nothing was up where `old` drew no handle.
     static func before(_ old: Spec?) -> PocketPlateView.Before {
-        guard let old, old.handle != nil, !old.whole else { return .init() }
+        guard let old, old.drawsHandle else { return .init() }
         return .init(risen: old.risen, rise: old.rise)
     }
 
@@ -80,7 +80,7 @@ extension PocketPlateOverlay {
         old: Spec?,
         shown: Shown
     ) -> Bool {
-        spec.handle != nil && !spec.whole && spec.rise == nil
+        spec.drawsHandle && spec.rise == nil
             && !spec.risen
             && (before(old).isUp || shown.view.sinking)
     }

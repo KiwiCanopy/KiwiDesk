@@ -1260,6 +1260,8 @@
   "kiwishelf.show.pocket.auto": "Авто",
   "kiwishelf.show.pocket.beside_always": "В режиме «%1$@» Pocket остаётся на экране, пока панель у того же края в режиме «%2$@».",
   "kiwishelf.show.pocket.hidden": "Скрыт",
+  "kiwishelf.show.pocket_drag": "Показывать Pocket при перетаскивании окна",
+  "kiwishelf.show.pocket_drag.help": "Если выключено, при перетаскивании Pocket остаётся скрытым. Сочетания клавиш Pocket и его список по-прежнему дают к нему доступ.",
   "kiwishelf.show.scrolling": "App Bar в %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Остаётся на экране, пока у того же края стоит App Bar в режиме «%1$@».",

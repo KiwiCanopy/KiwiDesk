@@ -7446,6 +7446,24 @@ as Tile Window greys for a dialog (▸ *A window is tiled or
 floating*), and only Remove names where that key lives, since
 removing the app's row is the way out.
 
+:::unreleased
+**A drag may leave the pocket alone** (owner, 2026-11-20, #3522).
+`kiwishelf.pocket_drag_reveal` off stops a window drag from standing
+a Hidden pocket or raising an Auto handle; there is no "off" value
+for the pocket itself, since a user who never drags to it still
+reaches it by its keys and its list. A pocket already shown —
+Always, its list open, a play — still takes a drop, while an Auto
+handle's tab takes none: a drag aimed at a screen edge would
+otherwise drop a window into a pocket that never came out. The drag
+is still recorded, because the same record tells the bars' reveal a
+window moves (#2795); only the readers that turn it into a standing
+pocket ask the setting. The Settings row sits under the pocket's
+Show, not under Animations, since it decides whether the pocket
+comes, not how it moves (ui-designer, 2026-11-20). It never greys:
+an Always pocket rests as its handle over a maximized window (#3523),
+where a drag would raise it.
+:::
+
 ### A window changing state animates under its own switch (#2676)
 
 **[Rationale]**

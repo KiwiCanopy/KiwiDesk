@@ -250,7 +250,7 @@ public enum APIReference {
             "set_group_badge_color", "set_group_badge_text_color",
             "set_reveal_timeout", "set_reveal_style", "set_fill_fade",
             "set_tint_hub_and_plates", "set_reading_contrast",
-            "set_pocket_edge", "set_pocket_position",
+            "set_pocket_edge", "set_pocket_position", "set_pocket_drag_reveal",
             "set_pocket_visibility", "set_maximized_visibility",
         ],
         "grid": [

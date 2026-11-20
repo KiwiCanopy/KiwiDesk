@@ -1260,6 +1260,8 @@
   "kiwishelf.show.pocket.auto": "Auto",
   "kiwishelf.show.pocket.beside_always": "Con «%1$@», la Pocket resta visibile finché una barra sul suo bordo è impostata su «%2$@».",
   "kiwishelf.show.pocket.hidden": "Nascosta",
+  "kiwishelf.show.pocket_drag": "Mostra la Pocket mentre trascini una finestra",
+  "kiwishelf.show.pocket_drag.help": "Disattivo: trascinare una finestra lascia nascosta la Pocket. Le scorciatoie Pocket e il suo elenco la raggiungono comunque.",
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Resta visibile finché una App Bar impostata su «%1$@» condivide il suo bordo.",

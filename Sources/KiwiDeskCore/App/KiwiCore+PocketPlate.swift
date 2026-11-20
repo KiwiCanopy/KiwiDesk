@@ -34,7 +34,7 @@ extension KiwiCore {
     func pocketStands(on display: DisplayID) -> Bool {
         Self.pocketStands(
             rests: pocketRests(on: display),
-            dragging: pocketPlate.dragging != nil,
+            dragging: pocketDragShows,
             playing: !pocketPlate.playing.isEmpty,
             listing: pocketListedDisplay == display
         ) && !pocketPlate.standingDown.contains(display)
@@ -49,7 +49,7 @@ extension KiwiCore {
     private func pocketStands(listing: Bool) -> Bool {
         Self.pocketStands(
             rests: pocketRests,
-            dragging: pocketPlate.dragging != nil,
+            dragging: pocketDragShows,
             playing: !pocketPlate.playing.isEmpty,
             listing: listing
         )
@@ -141,7 +141,8 @@ extension KiwiCore {
     /// screen.
     func pocketPlateSpecs() -> [PocketPlateOverlay.Spec] {
         let inside = pocketPlateWindows
-        let dragging = pocketPlate.dragging != nil
+        let dragging = pocketDragShows
+        let heldDown = pocketDragHeldDown
         guard pocketStands else { return [] }
         let name = L(
             "pocket.plate.ax",
@@ -165,18 +166,19 @@ extension KiwiCore {
             // tab (#3366).
             let hovered = pocketPlate.hovered.contains(display.id)
             let approach = pocketApproach(on: display.id)
+            let opened = approach.open && !heldDown
             let risen =
                 place == .handle
-                && (dragging || approach.open
+                && (dragging || opened
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
-            let rising = place == .handle && !risen ? approach.rise : nil
-            let tabFill =
-                place == .handle && !risen ? approach.tabFill : nil
+            let still = place == .handle && !risen && !heldDown
+            let rising = still ? approach.rise : nil
+            let tabFill = still ? approach.tabFill : nil
             // While the rise runs the panel holds its risen room, so
             // only the pointer on the tab lights it (ruling 5).
             let tabHovered =
-                place == .handle && hovered && !risen
+                place == .handle && hovered && !risen && !heldDown
                 && (rising == nil || pocketPointerOnTab(on: display.id))
             let found: CGRect? =
                 switch place {

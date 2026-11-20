@@ -113,6 +113,8 @@ enum SettingsSearchSynonyms {
             return ["icon size", "item size", "padding"]
         case .kiwishelf(.minimum):
             return ["share", "split", "divider"]
+        case .kiwishelf(.pocketDragReveal):
+            return ["drag", "drop", "drop target"]
         // "Glyphs" and "System default" were the two options'
         // labels until #1690; `app_font` is the value Lua writes.
         case .kiwishelf(.iconSource):

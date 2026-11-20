@@ -54,7 +54,7 @@ extension PocketPlateOverlay {
     func paintFade(_ shown: Shown, _ spec: Spec) {
         let faded = spec.faded && !shown.view.flashing
         let alpha = faded ? Self.fadedAlpha : 1
-        let tab = spec.handle != nil && !spec.whole
+        let tab = spec.drawsHandle
         shown.panel?.alphaValue = tab ? 1 : alpha
         shown.holder?.alphaValue = alpha
         shown.view.handle.faded = tab && faded

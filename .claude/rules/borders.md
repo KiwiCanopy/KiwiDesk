@@ -471,7 +471,14 @@ slot, the strip it stands inside and the stand-down. **Whether it
 shows is the one `pocketStands`** — `pocketRests` (its Show is not
 Hidden, #2978), a drag, a play, or on one screen its list, open or
 being opened by `pocket.toggle_list` (#2974, `PocketListKeyTests` ▸
-`oneScreenStands`) — while the shelf's plan states the pocket by
+`oneScreenStands`) — a drag counting only through the one
+`pocketDragShows`, which `kiwishelf.pocket_drag_reveal` gates, and a
+handle's approach standing down during a drag it holds back
+(`pocketDragHeldDown`) (#3522, `PocketDragRevealTests`,
+`PocketApproachTests` ▸ `dragHoldsTheApproachDown`); no reader
+turns `pocketPlate.dragging`, which also tells the revealer a
+window moves, into a standing pocket beside them, which is
+review's — while the shelf's plan states the pocket by
 `pocketRests` alone, so a drag, a play or the list moves no bar (#2793,
 `PocketShelfWiringTests` ▸ `dragStandsThePocket`,
 `PocketListKeyTests` ▸ `oneWindowStandsAndCloses`); it waits out a

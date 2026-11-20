@@ -42,5 +42,11 @@ extension PocketPlateOverlay {
         /// The One-window pocket, which slides out of its edge as it
         /// comes and back as it goes (#2793).
         var slides = false
+
+        /// Whether it draws a handle: no section and no whole mark.
+        var drawsHandle: Bool { handle != nil && !whole }
+        /// Whether it draws only a handle's resting tab, not risen
+        /// (#3522).
+        var isTab: Bool { drawsHandle && !risen }
     }
 }
