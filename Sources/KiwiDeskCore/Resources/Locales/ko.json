@@ -2387,7 +2387,7 @@
   "shortcuts.gestures.per_axis": "축별",
   "shortcuts.gestures.per_button": "버튼별",
   "shortcuts.gestures.per_direction": "방향별",
-  "shortcuts.gestures.recorder_name": "%1$@, %2$@ 키",
+  "shortcuts.gestures.recorder_name": "%1$@ 키, %2$@",
   "shortcuts.gestures.refusal.axis": "축별로 동작을 지정할 수 있는 것은 쓸어넘기기뿐입니다.",
   "shortcuts.gestures.refusal.directional": "쓸어넘기기나 스크롤에는 모든 방향에 하나의 동작을 지정하거나, 방향마다 동작을 하나씩 지정합니다.",
   "shortcuts.gestures.refusal.empty": "동작을 선택하십시오.",

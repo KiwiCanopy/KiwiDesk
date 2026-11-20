@@ -2387,7 +2387,7 @@
   "shortcuts.gestures.per_axis": "依軸分別設定",
   "shortcuts.gestures.per_button": "依按鈕分別設定",
   "shortcuts.gestures.per_direction": "依方向分別設定",
-  "shortcuts.gestures.recorder_name": "%1$@，%2$@ 的按鍵",
+  "shortcuts.gestures.recorder_name": "%1$@的按鍵，%2$@",
   "shortcuts.gestures.refusal.axis": "只有滑動可以依軸指定操作。",
   "shortcuts.gestures.refusal.directional": "滑動或捲動可為所有方向指定同一個操作，或為每個方向各指定一個操作。",
   "shortcuts.gestures.refusal.empty": "請選擇一個操作。",

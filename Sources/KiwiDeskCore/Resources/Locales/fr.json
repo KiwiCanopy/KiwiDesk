@@ -2370,7 +2370,7 @@
   "shortcuts.gestures.input_chord": "%1$@, avec %2$@",
   "shortcuts.gestures.keys.clear": "Sans touche",
   "shortcuts.gestures.keys.help": "Cliquez, puis maintenez les touches de ce geste et relâchez-les.",
-  "shortcuts.gestures.keys.none": "Geste seule",
+  "shortcuts.gestures.keys.none": "Geste seul",
   "shortcuts.gestures.list.add": "Ajouter",
   "shortcuts.gestures.list.gesture": "Geste",
   "shortcuts.gestures.list.magic_mouse": "S'applique aussi à la Magic Mouse.",

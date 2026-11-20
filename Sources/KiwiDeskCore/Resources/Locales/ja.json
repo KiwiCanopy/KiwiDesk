@@ -2387,7 +2387,7 @@
   "shortcuts.gestures.per_axis": "軸ごと",
   "shortcuts.gestures.per_button": "ボタンごと",
   "shortcuts.gestures.per_direction": "方向ごと",
-  "shortcuts.gestures.recorder_name": "%1$@、%2$@ のキー",
+  "shortcuts.gestures.recorder_name": "%1$@のキー、%2$@",
   "shortcuts.gestures.refusal.axis": "軸ごとに操作を割り当てられるのはスワイプだけです。",
   "shortcuts.gestures.refusal.directional": "スワイプやスクロールには、すべての方向に1つの操作か、方向ごとに1つずつ操作を割り当てます。",
   "shortcuts.gestures.refusal.empty": "操作を選択してください。",
