@@ -3647,8 +3647,8 @@ window going in or out — still takes a drop. Its keys, its list and
 [`pocket`](#pocket) reach it either way.
 
 Settings ▸ KiwiShelf writes it as **Show the Pocket while dragging a
-window** under **Show** ▸ **Each bar and Pocket**, greyed while the
-pocket is `"always"`. A look never carries it.
+window** under **Show** ▸ **Each bar and Pocket**. A look never
+carries it.
 
 **Example:**
 

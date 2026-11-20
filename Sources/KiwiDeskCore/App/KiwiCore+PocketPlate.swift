@@ -178,7 +178,7 @@ extension KiwiCore {
             // While the rise runs the panel holds its risen room, so
             // only the pointer on the tab lights it (ruling 5).
             let tabHovered =
-                place == .handle && hovered && !risen
+                place == .handle && hovered && !risen && !heldDown
                 && (rising == nil || pocketPointerOnTab(on: display.id))
             let found: CGRect? =
                 switch place {

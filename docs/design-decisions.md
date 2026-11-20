@@ -7459,8 +7459,9 @@ is still recorded, because the same record tells the bars' reveal a
 window moves (#2795); only the readers that turn it into a standing
 pocket ask the setting. The Settings row sits under the pocket's
 Show, not under Animations, since it decides whether the pocket
-comes, not how it moves (ui-designer, 2026-11-20), and greys under
-Always, where nothing is brought in.
+comes, not how it moves (ui-designer, 2026-11-20). It never greys:
+an Always pocket rests as its handle over a maximized window (#3523),
+where a drag would raise it.
 :::
 
 ### A window changing state animates under its own switch (#2676)

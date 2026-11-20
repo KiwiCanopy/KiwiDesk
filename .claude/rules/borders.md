@@ -474,9 +474,11 @@ being opened by `pocket.toggle_list` (#2974, `PocketListKeyTests` ▸
 `oneScreenStands`) — a drag counting only through the one
 `pocketDragShows`, which `kiwishelf.pocket_drag_reveal` gates, and a
 handle's approach standing down during a drag it holds back
-(`pocketDragHeldDown`), never a read of `pocketPlate.dragging`
-beside them, which also tells the revealer a window moves (#3522,
-`PocketDragRevealTests`) — while the shelf's plan states the pocket by
+(`pocketDragHeldDown`) (#3522, `PocketDragRevealTests`,
+`PocketApproachTests` ▸ `dragHoldsTheApproachDown`); no reader
+turns `pocketPlate.dragging`, which also tells the revealer a
+window moves, into a standing pocket beside them, which is
+review's — while the shelf's plan states the pocket by
 `pocketRests` alone, so a drag, a play or the list moves no bar (#2793,
 `PocketShelfWiringTests` ▸ `dragStandsThePocket`,
 `PocketListKeyTests` ▸ `oneWindowStandsAndCloses`); it waits out a

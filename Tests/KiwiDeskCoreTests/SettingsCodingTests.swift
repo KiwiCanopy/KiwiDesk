@@ -72,6 +72,9 @@ struct SettingsCodingTests {
         // `kiwishelf.set_maximized_visibility` →
         // `kiwishelf.maximized_visibility` (#3346), Auto by default.
         #expect(shelf["maximized_visibility"] as? String == "auto")
+        // `kiwishelf.set_pocket_drag_reveal` →
+        // `kiwishelf.pocket_drag_reveal` (#3522), on by default.
+        #expect(shelf["pocket_drag_reveal"] as? Bool == true)
         // `sticky.set_mark` → `sticky.mark` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.

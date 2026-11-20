@@ -1261,7 +1261,7 @@
   "kiwishelf.show.pocket.beside_always": "Com “%1$@”, o Pocket continua visível enquanto uma barra na borda dele está em “%2$@”.",
   "kiwishelf.show.pocket.hidden": "Oculto",
   "kiwishelf.show.pocket_drag": "Mostrar o Pocket ao arrastar uma janela",
-  "kiwishelf.show.pocket_drag.help": "Desativado, arrastar uma janela deixa o Pocket oculto. Os atalhos do Pocket e a lista dele continuam chegando a ele.",
+  "kiwishelf.show.pocket_drag.help": "Desativado, arrastar uma janela deixa o Pocket oculto. Os atalhos do Pocket e a lista dele continuam dando acesso a ele.",
   "kiwishelf.show.scrolling": "App Bar no %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Continua visível enquanto uma App Bar em “%1$@” compartilha a borda dela.",

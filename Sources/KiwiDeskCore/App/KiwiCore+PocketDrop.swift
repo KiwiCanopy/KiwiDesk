@@ -147,15 +147,7 @@ extension KiwiCore {
         let tabs = tiler.settings.kiwishelf.pocketDragReveal
         return pocketPlate.specs.values.first {
             $0.frame.contains(cursor)
-                && (tabs || !Self.pocketIsTab($0))
+                && (tabs || !$0.isTab)
         }?.display
-    }
-
-    /// Whether `spec` draws only a handle's tab: not risen, no
-    /// section and no whole mark.
-    nonisolated static func pocketIsTab(
-        _ spec: PocketPlateOverlay.Spec
-    ) -> Bool {
-        spec.handle != nil && !spec.whole && !spec.risen
     }
 }

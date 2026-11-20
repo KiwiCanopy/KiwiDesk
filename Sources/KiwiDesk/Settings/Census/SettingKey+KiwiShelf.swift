@@ -88,13 +88,9 @@ extension KiwiShelfKey {
             .outerMargin, .innerMargin, .iconSource, .order, .minimum:
             return .row(.bars, .kiwishelf, .showMore)
         case .pocketDragReveal:
-            // Greyed while the pocket's Show is Always (#3522).
-            return .row(
-                .bars,
-                .kiwishelf,
-                .showMore,
-                gate: .setting(.kiwishelf(.pocketVisibility))
-            )
+            // Never greyed: an Always pocket rests as its handle
+            // over a maximized window (#3522, #3523).
+            return .row(.bars, .kiwishelf, .showMore)
         case .maximizedVisibility:
             // Greyed while nothing could reveal (#3346 ▸ 9).
             return .row(

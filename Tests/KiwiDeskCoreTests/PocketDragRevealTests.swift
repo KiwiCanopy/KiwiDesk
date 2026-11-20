@@ -106,7 +106,7 @@ struct PocketDragRevealTests {
         #expect(!refused.isSuccess)
     }
 
-    @Test("off, a Hidden pocket stands for no drag and takes no drop")
+    @Test("off, a Hidden pocket stands for no drag")
     func hiddenStaysAway() throws {
         // Control: on, the drag shows it.
         let on = try makeCore("hidden")
@@ -121,8 +121,9 @@ struct PocketDragRevealTests {
         #expect(core.pocketPlate.dragging == one)
         #expect(!core.pocketStands)
         #expect(core.pocketPlate.specs.isEmpty)
+        let display = try #require(core.state.workspaces.allDisplays.first)
+        #expect(!core.pocketStands(on: display.id))
         end(core)
-        #expect(core.state.pocketPhase(of: one) == nil)
     }
 
     @Test("off, an Auto handle neither rises nor takes a drop")
@@ -139,7 +140,7 @@ struct PocketDragRevealTests {
         move(core)
         let tab = try #require(core.pocketPlate.specs.values.first)
         #expect(!tab.risen)
-        #expect(KiwiCore.pocketIsTab(tab))
+        #expect(tab.isTab)
         point(core, onPocket: true)
         move(core)
         #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
@@ -149,10 +150,37 @@ struct PocketDragRevealTests {
 
     @Test("off, an Always pocket still takes a drop")
     func shownPocketTakesTheDrop() throws {
+        // Control: off, a drag off the pocket pockets nothing.
+        let off = try makeCore("always")
+        reveal(off, false)
+        point(off, onPocket: false)
+        move(off)
+        end(off)
+        #expect(off.state.pocketPhase(of: one) == nil)
         let core = try makeCore("always")
         reveal(core, false)
         point(core, onPocket: false)
         move(core)
+        point(core, onPocket: true)
+        move(core)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+        end(core)
+        #expect(core.state.pocketPhase(of: one) == .pocketed)
+    }
+
+    /// A handle its list holds risen is shown, so it takes the drop.
+    @Test("off, a handle its list holds up still takes a drop")
+    func listedHandleTakesTheDrop() throws {
+        let core = try makeCore("auto")
+        reveal(core, false)
+        let display = try #require(core.state.workspaces.allDisplays.first)
+        // Control: the resting tab takes none (tabTakesNoDrop).
+        core.pocketPlate.openingList = display.id
+        point(core, onPocket: false)
+        move(core)
+        let risen = try #require(core.pocketPlate.specs.values.first)
+        #expect(risen.risen)
+        #expect(!risen.isTab)
         point(core, onPocket: true)
         move(core)
         #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
@@ -168,6 +196,8 @@ struct PocketDragRevealTests {
         reveal(core, false)
         core.drag.isAnimating = { _ in false }
         core.drag.isMousePressed = { false }
+        // Control: no drag, no window moving.
+        #expect(!core.windowMoveInFlight)
         point(core, onPocket: false)
         move(core)
         core.drag.windowMoved(

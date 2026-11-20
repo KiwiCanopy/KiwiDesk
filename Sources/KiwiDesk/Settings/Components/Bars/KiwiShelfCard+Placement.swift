@@ -134,12 +134,6 @@ extension KiwiShelfCard {
                         + "and list still reach it."
                 )
             )
-            .modifier(
-                GreyOut(
-                    active: model.config.settings.kiwishelf
-                        .pocketVisibility == .always
-                )
-            )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .pocketDragReveal

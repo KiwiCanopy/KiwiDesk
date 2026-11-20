@@ -53,13 +53,6 @@ struct BarsGateWiringTests {
                 "besideAlwaysNote(.app,in:[.scrolling])",
                 // And an Auto Pocket a shown bar keeps up (#2978).
                 "autoPocketNotecase.kiwishelf(.pocketDragReveal):",
-                // The drag reveal greys under an Always Pocket,
-                // whose row sits just above it (#3522).
-                ".modifier(GreyOut(active:model.config.settings"
-                    + ".kiwishelf.pocketVisibility==.always))"
-                    + ".searchAnchored(SettingsCatalog.bars"
-                    + ".kiwishelfShowEach.children.pocketDragReveal)"
-                    + "default:",
                 "screen.barKeepsAutoPocket(in:$0,on:nil)",
                 "model.config.settings.screenVariants",
                 // The Show drawer hangs under its master unruled.
