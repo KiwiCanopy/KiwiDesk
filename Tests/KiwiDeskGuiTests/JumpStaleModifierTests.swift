@@ -172,8 +172,20 @@ struct JumpStaleModifierTests {
         #expect(stale.key(for: left) == .side(-1))
         #expect(stale.key(for: right) == .side(1))
         #expect(panel(stale: []).key(for: right) == nil)
-        let command = keyDown(124, "\u{F703}", [.option, .command])
-        #expect(stale.key(for: command) != .side(1))
+    }
+
+    /// The latch reads the built-in arrows alone: a Lua side key
+    /// under the opener's ⌥ stays typing.
+    @Test("a Lua side key under a stale ⌥ is not latched")
+    func luaSideKeyIsNotLatched() {
+        var keys = KiwiHubKeys()
+        keys.left = "control+h"
+        let stale = panel(stale: [.option])
+        stale.keys = { keys }
+        let h = keyDown(4, "h", [.control, .option])
+        #expect(stale.key(for: h) == nil)
+        // The binding itself works, so the nil above is the latch's.
+        #expect(stale.key(for: keyDown(4, "h", .control)) == .side(-1))
     }
 
     /// The back chord is the Windows side's alone: elsewhere it

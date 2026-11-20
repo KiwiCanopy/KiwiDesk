@@ -245,6 +245,7 @@ enum JumpKey: Equatable {
     /// Whether the key is a ↩ chord or a ⌘ digit — a pick, the
     /// Desktops side's pick-up and follow, or a dead ↩ chord — so it
     /// reads only the modifiers pressed since the opener (#3168).
+    /// `JumpPanel.key(for:)` also reads the built-in ← → that way.
     var picks: Bool {
         switch self {
         case .pick, .swapHere, .quick, .quickSwap, .dead, .pickUp,
@@ -281,6 +282,11 @@ enum JumpKey: Equatable {
         case .pickUp: return scope == .desktops ? .pickUp : nil
         case .follow: return scope == .desktops ? .follow : nil
         }
+    }
+
+    /// Whether the key is the built-in ← or →.
+    static func isSideArrow(_ keyCode: UInt16) -> Bool {
+        keyCode == left || keyCode == right
     }
 
     /// The sides whose ← and → move a selection.
