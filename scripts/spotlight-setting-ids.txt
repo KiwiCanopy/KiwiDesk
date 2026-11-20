@@ -225,6 +225,7 @@ settings.mouse.followsFocus
 settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
 settings.pocketStyle.color
+settings.kiwishelf.pocketDragReveal
 settings.kiwishelf.pocketEdge
 settings.kiwishelf.pocketEdgeOverride[screen]
 settings.kiwishelf.pocketPosition
