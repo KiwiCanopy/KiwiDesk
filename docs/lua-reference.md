@@ -3579,6 +3579,14 @@ edge where one sits, moving no bar, and otherwise one outer margin
 in from the screen edge. An `"auto"` bar on its edge comes in
 alone.
 
+:::unreleased
+While
+[`kiwishelf.set_pocket_drag_reveal`](#kiwishelfset_pocket_drag_reveal)
+is `false`, a window drag brings no pocket: a `"hidden"` one stays
+away, an `"auto"` handle stays down and takes no drop, and the
+drag-time drop target below holds only for a pocket already showing.
+:::
+
 On a handle the kiwis peek out as the pointer reaches it, and the
 pocket comes up once the pointer rests there for 0.15 s, at once
 on a push against the edge or a window drag. Under Reduce Motion
