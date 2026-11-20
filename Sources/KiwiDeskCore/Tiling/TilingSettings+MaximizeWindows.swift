@@ -1,8 +1,9 @@
 import Foundation
 
 /// Monocle's "Maximize windows" (#2976): gaps 0, both bars read as
-/// Hidden and the pocket resting nowhere in that layout, never a
-/// stand-down (`docs/design-decisions.md`, bars.md).
+/// Hidden and the pocket at `maximizedPocketVisibility` in that
+/// layout (#3523), never a stand-down (`docs/design-decisions.md`,
+/// bars.md).
 extension TilingSettings {
     /// Whether a Space laid out in `mode` maximizes every window.
     public func maximizesWindows(in mode: LayoutMode) -> Bool {
@@ -44,12 +45,13 @@ extension TilingSettings {
         return bars
     }
 
-    /// Whether `maximized_visibility` could reveal anything (#3346 ▸
+    /// Whether `maximized_visibility` could show anything (#3346 ▸
     /// 9): the Space Bar or some layout's App Bar is stored to show
-    /// unprompted; a reveal never brings the Pocket (#3432). What
+    /// unprompted, or the Pocket rests, which the value gives its
+    /// handle (#3523) though no reveal brings it (#3432). What
     /// Settings asks to grey its row.
     public var maximizedRevealsAnything: Bool {
-        spaceBarStyle.visibility.showsUnprompted
+        spaceBarStyle.visibility.showsUnprompted || pocketRests
             || LayoutMode.allCases.contains {
                 appBarVisibility(in: $0)?.showsUnprompted == true
             }
@@ -85,7 +87,8 @@ extension TilingSettings {
     /// Hidden, and where `mode` maximizes its windows only as its
     /// handle while the edge reveal is live, as the bars do (#3523).
     public func pocketRests(in mode: LayoutMode) -> Bool {
-        pocketRests && (!maximizesWindows(in: mode) || maximizedRevealLive)
+        maximizesWindows(in: mode)
+            ? maximizedPocketVisibility != .hidden : pocketRests
     }
 
     /// The Pocket's Show over a maximized window (#3523): Auto, its

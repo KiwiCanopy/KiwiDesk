@@ -6,7 +6,8 @@ extension TilingSettings {
     /// (#3451): a bar resting as its handle on its edge, asked of
     /// the one `ShelfEdge.handled(hover:)` with the bars a maximized
     /// window brings in (`maximizedHoverBars`), or the Pocket resting
-    /// as its handle in a layout it rests in (`pocketRests(in:)`).
+    /// as its handle in a layout it rests in (`pocketRests(in:)`) or
+    /// over a maximized window (`maximizedPocketVisibility`, #3523).
     /// A stored Hidden bar rests as nothing, so it counts for none.
     public var someHandleRests: Bool {
         let bar = screenVariants.contains { screen in
@@ -18,12 +19,14 @@ extension TilingSettings {
             }
         }
         let screens: [String?] = [nil] + edgeScreens.map(Optional.some)
-        let pocket = screens.contains { screen in
-            LayoutMode.allCases.contains {
-                pocketRests(in: $0)
-                    && pocketRest(in: $0, on: screen) == .handle
+        let pocket =
+            maximizedPocketVisibility != .hidden
+            || screens.contains { screen in
+                LayoutMode.allCases.contains {
+                    pocketRests(in: $0)
+                        && pocketRest(in: $0, on: screen) == .handle
+                }
             }
-        }
         return bar || pocket
     }
 }

@@ -82,4 +82,17 @@ struct HandleThicknessRowTests {
         settings.monocle.maximizeWindows = true
         #expect(reason(settings) == .noHandle)
     }
+
+    /// Any maximize gives a resting Pocket its handle while the
+    /// maximized reveal is live, with no bar resting as one (#3523).
+    @Test("a maximize's Pocket handle keeps it live")
+    func maximizedPocketHandleKeepsItLive() {
+        var settings = nothingRests()
+        settings.setEveryBarVisibility(.hidden)
+        settings.kiwishelf.pocketVisibility = .always
+        // Control: the reveal off, nothing rests as a handle.
+        #expect(reason(settings) == .noHandle)
+        settings.kiwishelf.maximizedVisibility = .auto
+        #expect(reason(settings) == nil)
+    }
 }

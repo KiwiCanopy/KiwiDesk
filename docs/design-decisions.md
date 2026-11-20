@@ -6937,14 +6937,14 @@ as an Always bar does; the handle reserves nothing (#3349), so no
 window moves. Under Hidden it rests nowhere, as the bars do, and a
 stored Hidden Pocket stays Hidden. A bar's reveal still comes in
 alone (#3432). The tiling-off tick keeps reading the Pocket Hidden,
-since it asks for Hidden. The Settings row still greys on the bars
-alone, so with every bar Hidden the stored value, Auto by default,
-still decides the Pocket's handle while the row cannot change it; a
-reason sentence naming the Pocket is a follow-up.
+since it asks for Hidden.
 
 *The row greys only when nothing could come in* (owner, 2026-11-15):
 the Space Bar and every layout's App Bar all stored Hidden; the
-Pocket's Show counts for nothing, since no reveal brings it. Its
+Pocket's Show counts for nothing, since no reveal brings it
+(amended, owner 2026-11-20, #3523: a Pocket not stored Hidden counts,
+since the value gives it its handle, and the sentence's bars stay a
+sufficient condition). Its
 reason names the KiwiShelf card where those are set, through one
 reason value that picks both the grey and its sentence.
 Where even one could show, the row is live and reveals only what is

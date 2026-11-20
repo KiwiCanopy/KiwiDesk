@@ -197,7 +197,7 @@ struct MaximizedBarsTests {
         #expect(!settings.maximizedHoverBars(in: .monocle).contains(.app))
     }
 
-    @Test("Something reveals unless every bar hides; never the Pocket")
+    @Test("Something shows unless every bar and the Pocket hide")
     func revealsAnything() {
         var settings = TilingSettings()
         settings.spaceBarStyle.visibility = .hidden
@@ -208,10 +208,10 @@ struct MaximizedBarsTests {
             settings[keyPath: path].visibility = .hidden
         }
         #expect(!settings.maximizedRevealsAnything)
-        // A reveal never brings the Pocket (#3432).
+        // The value gives a resting Pocket its handle (#3523).
         var pocket = settings
         pocket.kiwishelf.pocketVisibility = .always
-        #expect(!pocket.maximizedRevealsAnything)
+        #expect(pocket.maximizedRevealsAnything)
         var bar = settings
         bar.spaceBarStyle.visibility = .always
         #expect(bar.maximizedRevealsAnything)

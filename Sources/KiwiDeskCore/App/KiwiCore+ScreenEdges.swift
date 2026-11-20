@@ -38,9 +38,10 @@ extension KiwiCore {
     /// that screen has it, and every bar and the Pocket Hidden on a
     /// tiling-off Space whose tick hides the bars (#3151), so a
     /// shortcut still shows one; where the screen shows a maximized
-    /// window every bar Hidden and the Pocket as its handle
-    /// (#3346, #3523). The one door a reader of a screen's bar or
-    /// Pocket visibility takes (`TilingOffBarsHiddenSeamTests`).
+    /// window every bar Hidden and the Pocket at
+    /// `maximizedPocketVisibility` (#3346, #3523). The one door a
+    /// reader of a screen's bar or Pocket visibility takes
+    /// (`TilingOffBarsHiddenSeamTests`).
     func shelfSettings(on display: DisplayID) -> TilingSettings {
         let shown = settings(on: display)
         if tilingOffHidesShelf(on: display) { return shown.hidingEveryBar() }

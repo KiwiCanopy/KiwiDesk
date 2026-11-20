@@ -17,8 +17,10 @@ extension TilingSettings {
     public var pocketRests: Bool { kiwishelf.pocketVisibility != .hidden }
 
     /// How the pocket stands at rest on `screen` in `mode`: a section
-    /// where its edge draws a bar at rest, else its own Show decides,
-    /// the whole mark under Always and the handle under Auto (#2978).
+    /// where its edge draws a bar at rest, the handle where `mode`
+    /// maximizes its windows, since `maximizedPocketVisibility` reads
+    /// Auto there (#3523), else its own Show decides, the whole mark
+    /// under Always and the handle under Auto (#2978).
     /// The at-rest answer from stored settings, asked only while the
     /// pocket rests (not Hidden): the reservation and the whole mark
     /// read it, while a live section stands where the bar pass draws a
@@ -32,7 +34,6 @@ extension TilingSettings {
             $0.edge == settings.kiwishelf.pocketEdge
         }
         if let edge, !edge.drawsNothingAtRest { return .section }
-        // Over a maximized window it rests as its handle (#3523).
         if maximizesWindows(in: mode) { return .handle }
         return kiwishelf.pocketVisibility == .always ? .mark : .handle
     }

@@ -566,10 +566,11 @@ twice, was a question the user answered twice. The argument is
   `TilingSettings.maximizedPocketVisibility`** (#3523) — Auto, its
   handle at the screen edge, while its own Show is not Hidden and
   the reveal is live, else Hidden — which
-  `hidingEveryBarForMaximize` applies and `pocketRests(in:)` and
-  `pocketRest(in:on:)` mirror for a maximizing Monocle, never a
-  Hidden reading beside it (`MaximizedBarsTests` ▸
-  `pocketFollowsTheBars`, `MonocleMaximizeBarTests`).
+  `hidingEveryBarForMaximize` applies and `pocketRests(in:)`,
+  `pocketRest(in:on:)` and `someHandleRests` read for a stored
+  answer, never a restatement of its condition beside it
+  (`MaximizedBarsTests` ▸ `pocketFollowsTheBars`,
+  `MonocleMaximizeBarTests`).
   **A maximizing Monocle (#2976) is no stand-down**: a bar's
   VISIBILITY answered for a mode is read through the one
   `TilingSettings.barVisibilities(in:)`, which reads both bars Hidden
