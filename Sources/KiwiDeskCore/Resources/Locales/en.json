@@ -1260,6 +1260,8 @@
   "kiwishelf.show.pocket.auto": "Auto",
   "kiwishelf.show.pocket.beside_always": "On %1$@, the Pocket stays shown while a bar on its edge is set to %2$@.",
   "kiwishelf.show.pocket.hidden": "Hidden",
+  "kiwishelf.show.pocket_drag": "Show the Pocket while dragging a window",
+  "kiwishelf.show.pocket_drag.help": "Off, a drag leaves the Pocket hidden. Its keys and list still reach it.",
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Stays shown while an App Bar set to %1$@ shares its edge.",

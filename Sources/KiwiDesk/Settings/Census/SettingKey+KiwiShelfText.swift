@@ -132,6 +132,11 @@ extension KiwiShelfKey {
             return .text("kiwishelf.edge.pocket")
         case .pocketVisibility:
             return .text("kiwishelf.show.pocket")
+        case .pocketDragReveal:
+            return .text(
+                "kiwishelf.show.pocket_drag",
+                help: "kiwishelf.show.pocket_drag.help"
+            )
         case .pocketScreenEdge:
             return .text("kiwishelf.edge.per_screen.pocket")
         case .maximizedVisibility:

@@ -3609,6 +3609,11 @@ refuse it, the pocket does not light and the window goes back. A
 drag that starts with the pointer over the pocket takes no drop
 there until the pointer has left it.
 
+:::unreleased
+[`kiwishelf.set_pocket_drag_reveal`](#kiwishelfset_pocket_drag_reveal)
+turns that drag-time pocket off.
+:::
+
 Settings ▸ KiwiShelf writes it as **Pocket** under **Show** ▸
 **Each bar and Pocket**; **Show** sets it with the bars'
 visibilities. A look never carries it.
@@ -3618,6 +3623,31 @@ visibilities. A look never carries it.
 ```lua
 kiwishelf.set_pocket_visibility("auto")
 ```
+
+:::unreleased
+### kiwishelf.set_pocket_drag_reveal
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** sets, per profile, whether a window drag brings the
+[pocket](#pocket) out as a drop target
+([`kiwishelf.set_pocket_visibility`](#kiwishelfset_pocket_visibility)).
+`false` leaves a `"hidden"` pocket hidden during a drag and an
+`"auto"` pocket's handle down, and that handle takes no drop. A
+pocket already showing — `"always"`, or held out by its list or a
+window going in or out — still takes a drop. Its keys, its list and
+[`pocket`](#pocket) reach it either way.
+
+Settings ▸ KiwiShelf writes it as **Show the Pocket while dragging a
+window** under **Show** ▸ **Each bar and Pocket**, greyed while the
+pocket is `"always"`. A look never carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_pocket_drag_reveal(false)
+```
+:::
 
 ### kiwishelf.set_maximized_visibility
 

@@ -37,6 +37,7 @@ enum KiwiShelfCommandSetting {
     case pocketPosition(CGFloat)
     case pocketVisibility(ShelfVisibility)
     case maximizedVisibility(KiwiShelf.MaximizedVisibility)
+    case pocketDragReveal(Bool)
     case fillFade(CGFloat)
     case tintHubAndPlates(Bool)
     case readingContrast(Double)
@@ -147,6 +148,11 @@ enum KiwiShelfCommandSetting {
                 return .failure("expected boolean")
             }
             return .success(.border(flag))
+        case "pocket_drag_reveal":
+            guard let flag = args.first?.boolValue else {
+                return .failure("expected boolean")
+            }
+            return .success(.pocketDragReveal(flag))
         case "tint_hub_and_plates":
             guard let flag = args.first?.boolValue else {
                 return .failure("expected boolean")
@@ -234,6 +240,7 @@ enum KiwiShelfCommandSetting {
         case .pocketVisibility(let value): shelf.pocketVisibility = value
         case .maximizedVisibility(let value):
             shelf.maximizedVisibility = value
+        case .pocketDragReveal(let value): shelf.pocketDragReveal = value
         case .pocketPosition(let value):
             shelf.pocketPosition = KiwiShelf.clampPocketPosition(value)
         case .minimum(let value):

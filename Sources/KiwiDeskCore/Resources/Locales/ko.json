@@ -1260,6 +1260,8 @@
   "kiwishelf.show.pocket.auto": "자동",
   "kiwishelf.show.pocket.beside_always": "‘%1$@’일 때는 같은 가장자리의 바가 ‘%2$@’(으)로 설정되어 있는 동안 Pocket이 계속 표시됩니다.",
   "kiwishelf.show.pocket.hidden": "가려짐",
+  "kiwishelf.show.pocket_drag": "윈도우를 드래그하는 동안 Pocket 표시",
+  "kiwishelf.show.pocket_drag.help": "끄면 드래그해도 Pocket이 가려진 채로 있습니다. Pocket 단축키와 목록으로는 계속 Pocket에 접근할 수 있습니다.",
   "kiwishelf.show.scrolling": "%1$@의 App Bar",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "‘%1$@’(으)로 설정된 App Bar가 같은 가장자리에 있는 동안 계속 표시됩니다.",

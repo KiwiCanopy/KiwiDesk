@@ -221,6 +221,12 @@ extension SettingsValueReadout {
                 spaceBarSeconds(Int(o.revealTimeout * 1000)),
                 spaceBarSeconds(Int(n.revealTimeout * 1000))
             )
+        case .pocketDragReveal:
+            return spaceBarOnOffRow(
+                census,
+                o.pocketDragReveal,
+                n.pocketDragReveal
+            )
         case .tintHubAndPlates:
             return spaceBarOnOffRow(
                 census,

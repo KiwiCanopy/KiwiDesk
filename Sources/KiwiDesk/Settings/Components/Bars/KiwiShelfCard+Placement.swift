@@ -123,6 +123,27 @@ extension KiwiShelfCard {
                     .pocketShow
             )
             autoPocketNote
+        case .kiwishelf(.pocketDragReveal):
+            ToggleRow(
+                label: SettingsCatalog.bars.kiwishelfShowEach.children
+                    .pocketDragReveal.text,
+                isOn: $model.config.settings.kiwishelf.pocketDragReveal,
+                help: L(
+                    "kiwishelf.show.pocket_drag.help",
+                    "Off, a drag leaves the Pocket hidden. Its keys "
+                        + "and list still reach it."
+                )
+            )
+            .modifier(
+                GreyOut(
+                    active: model.config.settings.kiwishelf
+                        .pocketVisibility == .always
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.kiwishelfShowEach.children
+                    .pocketDragReveal
+            )
         default:
             let _ = assertionFailure(
                 "unrendered Show key: \(key.id)"

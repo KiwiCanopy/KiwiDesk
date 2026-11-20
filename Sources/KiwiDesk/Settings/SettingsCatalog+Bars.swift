@@ -97,6 +97,10 @@ struct KiwiShelfShowControls: Sendable {
         "kiwishelf.show.pocket",
         "Pocket"
     )
+    let pocketDragReveal = SettingsControl(
+        "kiwishelf.show.pocket_drag",
+        "Show the Pocket while dragging a window"
+    )
 }
 
 /// KiwiShelf ▸ Style rows, keyed on their census label keys and

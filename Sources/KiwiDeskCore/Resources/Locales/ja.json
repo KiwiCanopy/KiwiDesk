@@ -1260,6 +1260,8 @@
   "kiwishelf.show.pocket.auto": "自動",
   "kiwishelf.show.pocket.beside_always": "「%1$@」のときは、同じ端のバーが「%2$@」に設定されている間、Pocket は表示されたままになります。",
   "kiwishelf.show.pocket.hidden": "非表示",
+  "kiwishelf.show.pocket_drag": "ウインドウのドラッグ中に Pocket を表示",
+  "kiwishelf.show.pocket_drag.help": "オフにすると、ドラッグしても Pocket は非表示のままです。Pocket のショートカットとリストからは引き続き使えます。",
   "kiwishelf.show.scrolling": "%1$@のApp Bar",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "「%1$@」に設定したApp Barが同じ端にある間は、表示されたままになります。",

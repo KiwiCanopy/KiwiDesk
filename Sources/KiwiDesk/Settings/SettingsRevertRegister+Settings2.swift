@@ -41,6 +41,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.kiwishelf.readingContrast),
         .kiwishelf(.tintHubAndPlates):
             .leaf(\.settings.kiwishelf.tintHubAndPlates),
+        .kiwishelf(.pocketDragReveal):
+            .leaf(\.settings.kiwishelf.pocketDragReveal),
         .kiwishelf(.revealStyle):
             .leaf(\.settings.kiwishelf.revealStyle),
         .kiwishelf(.maximizedVisibility):

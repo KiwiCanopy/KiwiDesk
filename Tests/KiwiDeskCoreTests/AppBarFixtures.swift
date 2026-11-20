@@ -77,6 +77,7 @@ enum AppBarFixtures {
         shelf.pocketEdgeOverride = ["S:1x1": .left]
         shelf.pocketVisibility = .hidden
         shelf.maximizedVisibility = .hidden
+        shelf.pocketDragReveal = false
         return shelf
     }
 }

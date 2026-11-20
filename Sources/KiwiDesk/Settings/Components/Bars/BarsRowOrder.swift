@@ -23,6 +23,7 @@ enum BarsRowOrder {
         .layoutAppBar(.monocleAppBarVisibility),
         .layoutAppBar(.scrollingAppBarVisibility),
         .kiwishelf(.pocketVisibility),
+        .kiwishelf(.pocketDragReveal),
     ]
 
     /// KiwiShelf card, at rest below the Show group: where the
