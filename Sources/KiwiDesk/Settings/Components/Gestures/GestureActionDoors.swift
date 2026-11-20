@@ -1,15 +1,19 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A gesture action's App… and Lua… (#3199 ▸ the action picker,
+/// A gesture action's App…, Shortcut… (#3526) and Lua… (#3199 ▸
+/// the action picker,
 /// #3321): the app picker in the trigger's place while choosing, the
 /// trigger otherwise with its Lua editor anchored on it. One home for
 /// a one-action row and a direction alike; each writes its own
 /// `LuaAction` through `write`.
 struct GestureActionDoors<Menu: View>: View {
     @Binding var choosingApp: Bool
+    @Binding var choosingShortcut: Bool
     @Binding var editingLua: LuaEditRequest?
     @Binding var picking: SequencePickRequest?
+    /// Reads the user's Apple Shortcuts for "Shortcut…" (#3526).
+    let core: KiwiCore
     /// The trigger's id, which the editor's Change Action reopens.
     let id: UUID
     /// The action written now, nil while none runs.
@@ -33,6 +37,17 @@ struct GestureActionDoors<Menu: View>: View {
                 },
                 opensOnAppear: true,
                 onClose: { choosingApp = false }
+            )
+            .fixedSize()
+        } else if choosingShortcut {
+            AppleShortcutPickerButton(
+                core: core,
+                selection: current.flatMap {
+                    AppleShortcutAction.name(from: $0.lua)
+                },
+                onPick: { write(AppleShortcutAction.action($0)) },
+                opensOnAppear: true,
+                onClose: { choosingShortcut = false }
             )
             .fixedSize()
         } else {

@@ -47,6 +47,9 @@ extension SettingsValueReadout {
         config: GuiConfig
     ) -> String {
         if let label = labels[binding.lua] { return label }
+        if let name = AppleShortcutAction.name(from: binding.lua) {
+            return name
+        }
         if binding.kind == .application,
             let bundleID = KeybindingCatalog.appBundleID(
                 from: binding.lua

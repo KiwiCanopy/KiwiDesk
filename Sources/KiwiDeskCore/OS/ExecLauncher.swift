@@ -1,7 +1,8 @@
 import Foundation
 import os
 
-/// Launches external commands non-blockingly via `/bin/sh -c` (#5).
+/// Launches external commands non-blockingly, via `/bin/sh -c` (#5)
+/// or as an argument list (#3526).
 /// Children are fire-and-forget; callbacks and timeouts run asynchronously.
 @MainActor
 public final class ExecLauncher {
@@ -62,6 +63,61 @@ public final class ExecLauncher {
         dedup: Bool = false,
         onExit: ExitHandler? = nil
     ) -> Int32? {
+        spawn(
+            "/bin/sh",
+            ["-c", command],
+            key: command,
+            timeout: timeout,
+            dedup: dedup,
+            onExit: onExit
+        )
+    }
+
+    /// Starts `executable` with `arguments` as an argument list,
+    /// no shell (#3526); `dedup` keys on the whole list.
+    @discardableResult
+    public func launch(
+        argv executable: String,
+        _ arguments: [String],
+        timeout: TimeInterval? = nil,
+        dedup: Bool = false,
+        onExit: ExitHandler? = nil
+    ) -> Int32? {
+        spawn(
+            executable,
+            arguments,
+            key: Self.key(executable, arguments),
+            timeout: timeout,
+            dedup: dedup,
+            onExit: onExit
+        )
+    }
+
+    /// Whether a child of this argument list is still running.
+    func isRunning(
+        argv executable: String,
+        _ arguments: [String]
+    ) -> Bool {
+        (inFlight[Self.key(executable, arguments)] ?? 0) > 0
+    }
+
+    private static func key(
+        _ executable: String,
+        _ arguments: [String]
+    ) -> String {
+        ([executable] + arguments).joined(separator: " ")
+    }
+
+    /// The one spawn both launches share; `command` keys the
+    /// dedup tally and names the child in the log.
+    private func spawn(
+        _ executable: String,
+        _ arguments: [String],
+        key command: String,
+        timeout: TimeInterval?,
+        dedup: Bool,
+        onExit: ExitHandler?
+    ) -> Int32? {
         if dedup, (inFlight[command] ?? 0) > 0 {
             onLog(
                 "exec: skipped duplicate in-flight command "
@@ -70,10 +126,8 @@ public final class ExecLauncher {
             return nil
         }
         let process = Process()
-        process.executableURL = URL(
-            fileURLWithPath: "/bin/sh"
-        )
-        process.arguments = ["-c", command]
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = arguments
         process.environment = Self.childEnvironment()
 
         let capture: OutputCapture?

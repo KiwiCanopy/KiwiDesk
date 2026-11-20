@@ -73,6 +73,12 @@ extension SettingsModel {
         refreshProfiles()
         refreshUnsavedLive()
         liveOnlySpaces = core.liveOnlySpaces
+        // A Shortcut row learns whether its shortcut still exists.
+        if config.layers.flatMap(\.actionBindings).contains(where: {
+            AppleShortcutAction.name(from: $0.lua) != nil
+        }) {
+            Task { await AppleShortcutLibrary.shared.reload(from: core) }
+        }
         refreshPalettes()
         refreshLooks()
         // Recompute, never hand-set: `apply` assigns under

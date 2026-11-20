@@ -8,8 +8,10 @@ extension GestureDirectionRow {
     var actionContainer: some View {
         GestureActionDoors(
             choosingApp: $choosingApp,
+            choosingShortcut: $choosingShortcut,
             editingLua: $editingLua,
             picking: $picking,
+            core: model.core,
             id: id,
             current: arm,
             subject: spokenLabel,
@@ -36,6 +38,7 @@ extension GestureDirectionRow {
                 pick(arm)
             },
             onApp: { choosingApp = true },
+            onShortcut: { choosingShortcut = true },
             onLua: startLua,
             onEditLua: { editingLua = LuaEditRequest(id: id) },
             request: $picking

@@ -62,6 +62,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`open_in_background`](lua-reference.md#open_in_background) | Opens an app without taking focus, in a Space or on a Desktop you name, or where you are. |
 | [`gather`](lua-reference.md#gather) | Moves every window of an app into the Space you are on, from other Desktops too. |
 | [`move_here`](lua-reference.md#move_here) | Moves an app's most recently focused window into the Space you are on, or opens the app. |
+| [`run_shortcut`](lua-reference.md#run_shortcut) | Runs one of your Apple Shortcuts by its name in the Shortcuts app. |
 | [`set_mode`](lua-reference.md#set_mode) | Sets a Space's layout mode; omit the Space to set the active one. |
 | [`cycle_mode`](lua-reference.md#cycle_mode) | Moves the focused Space to the next layout in the cycle list, or the previous one. |
 | [`reset_layout_sizing`](lua-reference.md#reset_layout_sizing) | Undoes manual resizes back to the profile: the active Space, one by id, or every one with `all`. |

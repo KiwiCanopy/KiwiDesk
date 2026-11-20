@@ -54,6 +54,9 @@ extension APIReference {
         KiwiCore.restoreSetupCommand,
         // Overwrites whatever file is at the path it is given.
         KiwiCore.exportSetupCommand,
+        // A shortcut can do anything, a file's deletion included
+        // (#3526).
+        "run_shortcut",
     ]
 
     /// True for an entry in `destructive`.

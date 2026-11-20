@@ -272,6 +272,8 @@ struct ShortcutsSection: View {
                 selected: selection,
                 expander: expander
             )
+        case .appleShortcuts:
+            AppleShortcutsCard(model: model, bindings: bindingsBinding)
         case .keySequences:
             KeySequencesCard(
                 model: model,

@@ -28,6 +28,8 @@ struct SequenceNodeRow: View {
     @State var picking: SequencePickRequest?
     /// "App…" swapped the app list in for the action picker.
     @State private var choosingApp = false
+    /// "Shortcut…" swapped the Shortcuts list in likewise (#3526).
+    @State private var choosingShortcut = false
     @Environment(\.keybindingLayerName) var layerName
 
     var isLeader: Bool { node.id == editing.rootID }
@@ -162,6 +164,20 @@ struct SequenceNodeRow: View {
             )
             .fixedSize()
             .accessibilityLabel(actionLabel)
+        } else if choosingShortcut {
+            AppleShortcutPickerButton(
+                core: model.core,
+                selection: AppleShortcutAction.name(from: node.lua),
+                onPick: { name in
+                    editing.update(node.id) {
+                        $0 = SequenceTree.shortcutKey($0, name: name)
+                    }
+                },
+                opensOnAppear: true,
+                onClose: { choosingShortcut = false }
+            )
+            .fixedSize()
+            .accessibilityLabel(actionLabel)
         } else {
             actionMenu
         }
@@ -195,6 +211,7 @@ struct SequenceNodeRow: View {
                 }
             },
             onApp: { choosingApp = true },
+            onShortcut: { choosingShortcut = true },
             onLua: {
                 editing.update(node.id) { $0 = SequenceTree.luaKey($0) }
                 editingLua = LuaEditRequest(id: node.id)

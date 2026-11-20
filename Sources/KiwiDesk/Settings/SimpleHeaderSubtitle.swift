@@ -35,6 +35,20 @@ import KiwiDeskCore
                     L("simple.header.lua", "%1$d Lua bindings", $0)
                 }
             ),
+            clause(
+                counts.appleShortcuts,
+                one: L(
+                    "simple.header.apple_shortcuts_one",
+                    "1 Apple Shortcut key"
+                ),
+                many: {
+                    L(
+                        "simple.header.apple_shortcuts",
+                        "%1$d Apple Shortcut keys",
+                        $0
+                    )
+                }
+            ),
         ].compactMap { $0 }
         return parts.isEmpty ? nil : join(parts)
     }

@@ -142,6 +142,7 @@ extension ShortcutsReferenceBuilder {
         layer.bindings
             .filter {
                 $0.kind == .application && !$0.combo.isEmpty
+                    && AppleShortcutAction.name(from: $0.lua) == nil
             }
             .map { binding -> ShortcutRow in
                 consumed.insert(binding.id)
@@ -165,6 +166,20 @@ extension ShortcutsReferenceBuilder {
                     appName: name
                 )
             }
+    }
+
+    /// An Apple Shortcut key's row (#3526): its name, or its own
+    /// description, and the Shortcut glyph the catalogue gives its
+    /// verb.
+    static func shortcutRow(_ binding: KeyBinding) -> ShortcutRow? {
+        guard let name = AppleShortcutAction.name(from: binding.lua)
+        else { return nil }
+        return ShortcutRow(
+            id: binding.id.uuidString,
+            label: binding.desc.isEmpty ? name : binding.desc,
+            combo: glyphs(binding.combo),
+            icon: icon(for: NavCommand(label: name, lua: binding.lua))
+        )
     }
 
     /// An Apps row's title: the app's name, or the action in words
@@ -202,7 +217,12 @@ extension ShortcutsReferenceBuilder {
                 !$0.combo.isEmpty && !consumed.contains($0.id)
             }
             .map { binding in
-                OwnRow(
+                // An Apple Shortcut key is the user's own, filed with
+                // their other keys (#3526).
+                if let row = shortcutRow(binding) {
+                    return OwnRow(row: row, group: binding.group)
+                }
+                return OwnRow(
                     row: ShortcutRow(
                         id: binding.id.uuidString,
                         label: binding.desc.isEmpty

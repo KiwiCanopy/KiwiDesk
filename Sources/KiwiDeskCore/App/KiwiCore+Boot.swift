@@ -81,6 +81,7 @@ extension KiwiCore {
         signposter.endInterval("loadConfig", config)
         boot.configDone = ContinuousClock.now
         sleepWake.start()
+        appleShortcuts.watch()
         wireReduceTransparency()
         wireFontSet()
         applyHyperKey()

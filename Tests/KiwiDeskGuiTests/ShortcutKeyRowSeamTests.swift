@@ -30,6 +30,10 @@ struct ShortcutKeyRowSeamTests {
             "Settings/Components/Keybindings/PocketAppRows.swift",
             "KeyRecorderField("
         ),
+        "Settings/Sections/AppleShortcutsCard.swift": (
+            "Settings/Sections/AppleShortcutsCard.swift",
+            "recorder(binding,name:name)"
+        ),
         "Settings/Components/Lua/AdvancedLuaGroup+Row.swift": (
             "Settings/Components/Lua/AdvancedLuaGroup+Row.swift",
             "recorder(binding,name:name)"

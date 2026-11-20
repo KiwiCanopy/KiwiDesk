@@ -7769,6 +7769,41 @@ KiwiDesk.bind("ctrl+shift+i", function()
 end)
 ```
 
+:::unreleased
+### run_shortcut
+
+**Expects:** the name of one of your Apple Shortcuts, exactly as
+the Shortcuts app lists it (`shortcuts list` in Terminal prints
+every name).
+
+**Does:** runs that shortcut, as `shortcuts run` does, without
+waiting for it to finish. The name is passed as an argument, never
+through a shell, so quotes and spaces need no escaping. Pressing
+the key again while the same shortcut is still running does
+nothing; a run still going after two minutes is stopped.
+
+- A name the Shortcuts app does not list — renamed or deleted —
+  is refused with a pill naming it. Over the CLI the answer is
+  `unknown shortcut: <name>`.
+- In Settings, **Shortcut…** beside **App…** and **Lua…** in a
+  key sequence's or a gesture's action picker, and **Choose
+  shortcut…** in Shortcuts ▸ Personal ▸ **Apple Shortcuts**, pick
+  one from the list. A key whose shortcut has gone is marked there.
+- A keyboard shortcut set in the Shortcuts app itself is not
+  checked for conflicts: if KiwiDesk binds the same keys,
+  KiwiDesk's binding wins and the shortcut does not run.
+- `kiwidesk mcp` routes it through `run_destructive`, since a
+  shortcut can do anything.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+m", function()
+    KiwiDesk.run_shortcut("Start Meeting")
+end)
+```
+:::
+
 ## User Interface
 
 ### kiwihub.show

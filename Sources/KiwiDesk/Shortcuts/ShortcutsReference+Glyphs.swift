@@ -106,6 +106,10 @@ extension ShortcutsReferenceBuilder {
     /// card's symbol (#2103). Read through `icon(for:)`, which the
     /// Settings rows draw from too (#2670).
     static func verbIcon(for lua: String) -> String? {
+        // An Apple Shortcut's row, whatever it names (#3526).
+        if AppleShortcutAction.name(from: lua) != nil {
+            return AppleShortcutAction.symbol
+        }
         switch lua {
         case "KiwiDesk.cycle_mode()":
             return nextLayout.drawn

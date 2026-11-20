@@ -9,40 +9,7 @@ extension ApplicationsGroup {
     /// selection carries no information.
     var addRow: some View {
         VStack(alignment: .leading, spacing: 4) {
-            AppPickerButton(
-                placeholder: L(
-                    "shortcuts.choose_app",
-                    "Choose app…"
-                ),
-                selection: nil,
-                onPick: { add($0) },
-                escapeLabel: L(
-                    "shortcuts.other_ellipsis",
-                    "Other…"
-                ),
-                onEscape: {
-                    if let app = AppBundlePanel.pick() {
-                        add(app)
-                    }
-                },
-                exclude: fullyBoundBundleIDs()
-            )
-            // Hug the content: alone in the row it would otherwise
-            // stretch to the section width and read as a field
-            // rather than a control.
-            .fixedSize()
-            // The picker is the add affordance now that the
-            // button is gone, so it carries the census's name —
-            // and gives back the choice that name replaces
-            // (#812). It shows the placeholder permanently,
-            // which is right for an add VERB: its result appears
-            // as a new row above.
-            .accessibilityLabel(
-                L("shortcuts.add_application", "Add application")
-            )
-            .accessibilityValue(
-                L("shortcuts.choose_app", "Choose app…")
-            )
+            appPicker
             if let notice = allBoundNotice {
                 Text(notice)
                     .font(.caption)
@@ -53,6 +20,43 @@ extension ApplicationsGroup {
         // The caption wraps beneath the picker instead of
         // widening the row into a sentence.
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var appPicker: some View {
+        AppPickerButton(
+            placeholder: L(
+                "shortcuts.choose_app",
+                "Choose app…"
+            ),
+            selection: nil,
+            onPick: { add($0) },
+            escapeLabel: L(
+                "shortcuts.other_ellipsis",
+                "Other…"
+            ),
+            onEscape: {
+                if let app = AppBundlePanel.pick() {
+                    add(app)
+                }
+            },
+            exclude: fullyBoundBundleIDs()
+        )
+        // Hug the content: alone in the row it would otherwise
+        // stretch to the section width and read as a field
+        // rather than a control.
+        .fixedSize()
+        // The picker is the add affordance now that the
+        // button is gone, so it carries the census's name —
+        // and gives back the choice that name replaces
+        // (#812). It shows the placeholder permanently,
+        // which is right for an add VERB: its result appears
+        // as a new row above.
+        .accessibilityLabel(
+            L("shortcuts.add_application", "Add application")
+        )
+        .accessibilityValue(
+            L("shortcuts.choose_app", "Choose app…")
+        )
     }
 
     /// Why the last pick created nothing, or nil.

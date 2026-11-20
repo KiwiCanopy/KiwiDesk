@@ -23,6 +23,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     case pocket
     case inactive
     case openApplications
+    case appleShortcuts
     case keySequences
     case luaBindings
     case gestures
@@ -35,7 +36,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     var segments: [ShortcutsSegment] {
         switch self {
         case .conflictBanner, .layers: return [.builtIn, .personal]
-        case .openApplications, .keySequences, .luaBindings:
+        case .openApplications, .appleShortcuts, .keySequences,
+            .luaBindings:
             return [.personal]
         case .gestures: return [.mouse]
         default: return [.builtIn]
@@ -153,6 +155,9 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     /// The part drawing a binding row the recorder names by id.
     private static func owner(of binding: KeyBinding) -> ShortcutsPagePart {
         if PocketAppLuaArg.bundleID(of: binding.lua) != nil { return .pocket }
+        if AppleShortcutAction.name(from: binding.lua) != nil {
+            return .appleShortcuts
+        }
         switch binding.kind {
         case .application: return .openApplications
         case .custom: return .luaBindings
@@ -180,6 +185,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
             (catalog.modifierKeys.control, .modifierKeys),
             (catalog.layersCard.control, .layers),
             (catalog.keySequencesCard.control, .keySequences),
+            (catalog.appleShortcutsCard.control, .appleShortcuts),
             (catalog.moveWindowsTracks.control, .moveWindows),
             (catalog.desktopMoves.control, .macosDesktops),
             (catalog.pocketAppAdd, .pocket),

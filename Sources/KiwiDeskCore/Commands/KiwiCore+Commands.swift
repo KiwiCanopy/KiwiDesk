@@ -130,6 +130,8 @@ extension KiwiCore {
             return namingBundleID(gather(args), args)
         case "move_here":
             return namingBundleID(moveHereCommand(args), args)
+        case "run_shortcut":
+            return runShortcut(args)
         case "set_mode":
             return setMode(args)
         case "cycle_mode":

@@ -16,6 +16,7 @@ struct CommitsOnSaveCensusTests {
         "JumpPanelView.swift": "KiwiHub's search, no draft",
         "FontFamilyPicker.swift": "a searchable picker; Return picks",
         "AppPickerButton.swift": "an app search; Return adds",
+        "AppleShortcutPickerButton.swift": "a shortcut search; Return picks",
         "SequenceActionMenu.swift": "an action search; Return picks",
         "LayerAddPopover.swift": "the new-layer field; Return adds",
         "TitlePatternPopover.swift": "a title popover; Return or Add",
