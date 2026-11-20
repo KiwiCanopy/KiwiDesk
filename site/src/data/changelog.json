@@ -2,6 +2,39 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "5.0.1",
+      "tag": "v5.0.1",
+      "date": "2026-11-20",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v5.0.1",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.0.1/KiwiDesk-5.0.1.dmg",
+      "summary": "KiwiDesk comes opinionated out of the box but shouldn't force anything on you, so this release gives you more say over the Pocket.",
+      "spotlight": [
+        {
+          "title": "Let the Pocket sit out your drags",
+          "line": "Untick one box and dragging a window no longer brings the Pocket out.",
+          "setting": "settings.kiwishelf.pocketDragReveal",
+          "symbol": "tray.full"
+        }
+      ],
+      "sections": [
+        {
+          "title": "Improved",
+          "items": [
+            "**You can now keep the Pocket from coming out every time you drag a window:** untick KiwiShelf ▸ Show ▸ Each bar and Pocket ▸ Show the Pocket while dragging a window. Its keys and its list still bring it in."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**Over a maximized window the Pocket now rests as its handle at the screen edge, in its usual spot, and comes in from there** instead of sliding out a short way in from the edge. To keep it away there, set its Show to Hidden under KiwiShelf ▸ Show, or untick Layout Defaults ▸ Maximize ▸ Show bars at the screen edge."
+          ],
+          "type": "fixed"
+        }
+      ]
+    },
+    {
       "version": "5.0.0",
       "tag": "v5.0.0",
       "date": "2026-11-19",

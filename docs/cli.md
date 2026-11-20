@@ -563,11 +563,9 @@ place the pocket
 ([`kiwishelf.set_pocket_visibility`](lua-reference.md#kiwishelfset_pocket_visibility)).
 `pocket.set_capacity` fails naming it.
 
-:::unreleased
 `kiwishelf.set_pocket_drag_reveal true|false` (default `true`) sets
 whether a window drag brings the pocket out, per profile
 ([`kiwishelf.set_pocket_drag_reveal`](lua-reference.md#kiwishelfset_pocket_drag_reveal)).
-:::
 
 `kiwishelf.set_reading_contrast 1–4.5` (default `2.2`) sets the
 contrast text keeps where the fill fades on KiwiHub, the plates

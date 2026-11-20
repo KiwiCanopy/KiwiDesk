@@ -6929,7 +6929,6 @@ rests over the window, and a bar revealed there comes in alone
 (owner, 2026-11-17, #3432): no reveal brings the Pocket. Its keys,
 its list, a window drag and the play reach it.
 
-:::unreleased
 *Amended* (owner, 2026-11-20, #3523): the Pocket follows its own
 Show, as the bars do. Read Hidden, it came in from just inside the
 bars' strip (#2793), one strip depth in from an edge that drew no
@@ -6941,7 +6940,6 @@ window moves. Under Hidden it rests nowhere, as the bars do, and a
 stored Hidden Pocket stays Hidden. A bar's reveal still comes in
 alone (#3432). The tiling-off tick keeps reading the Pocket Hidden,
 since it asks for Hidden.
-:::
 
 *The row greys only when nothing could come in* (owner, 2026-11-15):
 the Space Bar and every layout's App Bar all stored Hidden; the
@@ -7446,7 +7444,6 @@ as Tile Window greys for a dialog (▸ *A window is tiled or
 floating*), and only Remove names where that key lives, since
 removing the app's row is the way out.
 
-:::unreleased
 **A drag may leave the pocket alone** (owner, 2026-11-20, #3522).
 `kiwishelf.pocket_drag_reveal` off stops a window drag from standing
 a Hidden pocket or raising an Auto handle; there is no "off" value
@@ -7462,7 +7459,6 @@ Show, not under Animations, since it decides whether the pocket
 comes, not how it moves (ui-designer, 2026-11-20). It never greys:
 an Always pocket rests as its handle over a maximized window (#3523),
 where a drag would raise it.
-:::
 
 ### A window changing state animates under its own switch (#2676)
 
