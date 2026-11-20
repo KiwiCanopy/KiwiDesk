@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// With `kiwishelf.pocket_drag_reveal` off, a window drag holds the
-/// handle's approach down: no rise, no progress fill, no risen pocket
+/// handle's approach down: no rise and no risen pocket
 /// (#3522). An extension of this suite for its rig.
 extension PocketApproachTests {
     @Test("off, a drag holds the handle's approach down")
@@ -28,7 +28,6 @@ extension PocketApproachTests {
         try #require(rig.core.shelves.reveal.fills[rig.key] != nil)
         let held = try #require(rig.spec)
         #expect(held.rise == nil)
-        #expect(held.tabFill == nil)
         #expect(!held.risen)
         rig.timers.fireAll()
         rig.pass()

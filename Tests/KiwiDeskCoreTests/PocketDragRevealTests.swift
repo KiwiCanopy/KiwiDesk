@@ -168,6 +168,22 @@ struct PocketDragRevealTests {
         #expect(core.state.pocketPhase(of: one) == .pocketed)
     }
 
+    @Test("off, a held drag lights no tab under the pointer")
+    func tabLightsNothing() throws {
+        let core = try makeCore("auto")
+        reveal(core, false)
+        let display = try #require(core.state.workspaces.allDisplays.first)
+        // Control: no drag, the pointer on the tab lights it.
+        core.pocketHovered(display.id, true)
+        #expect(core.pocketPlate.specs[display.id]?.hovered == true)
+        core.pocketHovered(display.id, false)
+        point(core, onPocket: false)
+        move(core)
+        core.pocketHovered(display.id, true)
+        #expect(core.pocketPlate.specs[display.id]?.hovered == false)
+        end(core)
+    }
+
     /// A handle its list holds risen is shown, so it takes the drop.
     @Test("off, a handle its list holds up still takes a drop")
     func listedHandleTakesTheDrop() throws {
