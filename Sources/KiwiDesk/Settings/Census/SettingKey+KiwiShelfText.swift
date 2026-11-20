@@ -154,6 +154,11 @@ extension KiwiShelfKey {
                 "kiwishelf.handle_thickness",
                 help: "kiwishelf.handle_thickness.help"
             )
+        case .menuBarIcon:
+            return .text(
+                "kiwishelf.menu_bar_icon",
+                help: "kiwishelf.menu_bar_icon.help"
+            )
         case .revealStyle:
             return .text(
                 "kiwishelf.reveal_style.label",

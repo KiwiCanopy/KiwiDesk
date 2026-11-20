@@ -243,7 +243,7 @@ public enum APIReference {
             "set_highlight_width", "set_handle_thickness",
             "set_item_gap", "set_glyph_size", "set_font_size",
             "set_font_family", "set_font_weight", "set_icon_source",
-            "set_dim_factor", "set_item_color",
+            "set_dim_factor", "set_item_color", "set_menu_bar_icon",
             "set_active_item_color", "set_highlight_color",
             "set_hover_fill_color", "set_hover_item_color",
             "set_fill_color", "set_border_color", "set_handle_color",

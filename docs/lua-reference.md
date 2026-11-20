@@ -3688,6 +3688,44 @@ The row greys only while the pocket is `"hidden"` too.
 kiwishelf.set_maximized_visibility("hidden")
 ```
 
+:::unreleased
+### kiwishelf.set_menu_bar_icon
+
+**Expects:** `"auto"`, `"logo"`, `"identifier"` or `"layout"`
+(default `"auto"`).
+
+**Does:** sets, per profile, what KiwiDesk's icon in the menu bar
+shows.
+
+- `"auto"` shows the KiwiDesk logo while each screen's Space Bar is
+  drawn at rest, and lists a screen's current Space wherever its
+  Space Bar is not: `"hidden"`, `"auto"` unless an `"always"` bar
+  shares its edge, or a layout or Space that reads the bars as
+  hidden ([`space_bar.set_visibility`](#space_barset_visibility)).
+- `"logo"` always shows the KiwiDesk logo.
+- `"identifier"` lists every screen's current Space, whatever its
+  Space Bar does: the Space's icon, else its name.
+- `"layout"` lists every screen's current Space as the symbol of the
+  layout it uses, the symbol
+  [`space_bar.set_item_label`](#space_barset_item_label)`("layout")`
+  draws.
+
+Several screens are listed in the order the screens are arranged,
+with a thin line between them. A Space with tiling off adds the
+pause symbol after its glyph. While a layer other than `default` is
+on, its glyph comes first, and under `"logo"` and `"auto"` a layer
+with an icon shows its icon in place of the logo.
+
+Settings ▸ Bars ▸ KiwiShelf writes it as **Menu bar icon**, under
+Show. A look never carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_menu_bar_icon("layout")
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color

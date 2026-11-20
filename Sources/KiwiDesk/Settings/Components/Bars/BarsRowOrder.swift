@@ -5,6 +5,7 @@ enum BarsRowOrder {
     /// Space cue (#761, owner ruling 2026-10-21).
     static let kiwishelfShow: [SettingKey] = [
         .kiwishelf(.visibility),
+        .kiwishelf(.menuBarIcon),
         .kiwishelf(.handleThickness),
         .kiwishelf(.revealStyle),
     ]

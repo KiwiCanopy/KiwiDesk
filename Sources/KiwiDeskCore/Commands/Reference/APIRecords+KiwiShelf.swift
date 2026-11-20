@@ -163,6 +163,11 @@ extension APIReference {
                 + "unfolds out of its mark, or fades in.",
             .choice("style", KiwiShelf.RevealStyle.self)
         ),
+        "set_menu_bar_icon": APIRecord(
+            "Sets what the menu bar icon shows: auto, the logo, "
+                + "each screen's Space, or its layout.",
+            .choice("icon", KiwiShelf.MenuBarIcon.self)
+        ),
         "set_tint_hub_and_plates": APIRecord(
             "Gives KiwiHub and the switch plates the Fill; off, the "
                 + "untinted system appearance.",

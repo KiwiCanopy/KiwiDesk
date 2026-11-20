@@ -78,6 +78,7 @@ enum AppBarFixtures {
         shelf.pocketVisibility = .hidden
         shelf.maximizedVisibility = .hidden
         shelf.pocketDragReveal = false
+        shelf.menuBarIcon = .layout
         return shelf
     }
 }

@@ -199,7 +199,7 @@ extension InterpolatedLabelTests {
         "kiwishelf.reveal_style.label.help": 5,
         "kiwishelf.reveal_style.grow_boxed": 3,
         "bars.app_bar.shelf_caption": 2,
-        "kiwishelf.show.visibility.help": 2,
+        "kiwishelf.show.visibility.help": 3,
         // #1799: the floating mark's help names the layout.
         "floating.mark.help": 1,
         "track.auto_tracks.limit_inert": 1,

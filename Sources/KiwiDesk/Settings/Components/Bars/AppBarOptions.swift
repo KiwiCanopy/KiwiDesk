@@ -166,6 +166,22 @@ enum AppBarOptions {
         ]
     }
 
+    /// What the menu bar icon shows (#3532). "Name or icon" and
+    /// "Layout" are the Space Bar's own label words; "KiwiDesk"
+    /// is the product name.
+    @MainActor
+    static var menuBarIcon: [(KiwiShelf.MenuBarIcon, String)] {
+        [
+            (.auto, L("kiwishelf.menu_bar_icon.auto", "Auto")),
+            (.logo, L("app.name", "KiwiDesk")),
+            (
+                .identifier,
+                L("space_bar.item_label.identifier", "Name or icon")
+            ),
+            (.layout, L("space_bar.item_label.layout", "Layout")),
+        ]
+    }
+
     /// The shelf's bar order while both show (#1517).
     @MainActor
     static var order: [(KiwiShelf.Order, String)] {
