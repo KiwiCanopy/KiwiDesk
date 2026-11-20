@@ -530,7 +530,7 @@ twice, was a question the user answered twice. The argument is
   which nothing else asks (`ShelfStandDownSeamTests` ▸
   `overlaysHalfHasOneReader`); KiwiVision's plate files the bar
   pass's set (#3061). **A maximize is no stand-down (#3346): read
-  its bars and Pocket Hidden through the one
+  its bars Hidden, and its Pocket as below, through the one
   `KiwiCore.shelfSettings(on:)` door**, which asks
   `KiwiCore.screenMaximizes(on:)` beside #3151's tiling-off tick,
   never a maximize read inside `shelfStandsDown`
@@ -557,11 +557,19 @@ twice, was a question the user answered twice. The argument is
   stored Hidden bar gets no handle, and the tiling-off tick
   wins over it (`MaximizedBarsTests`). **A bar revealed over a
   maximized window comes in alone** (#3432, retiring #3346 ▸ 8):
-  the Pocket stands there only by its key, its list, a drag or a
-  play, and a reader of whether it stands takes `pocketStands(on:)`
-  or the pass's slots, never `pocketRests(on:)` alone
-  (`FullscreenStandDownTests` ▸ `maximizeRevealLeavesThePocket`;
-  `MaximizedBarsTests` ▸ `revealsAnything`, which counts no Pocket).
+  no reveal brings the Pocket, and a reader of whether it stands
+  takes `pocketStands(on:)` or the pass's slots, never
+  `pocketRests(on:)` alone (`FullscreenStandDownTests` ▸
+  `maximizeRevealLeavesThePocket`; `MaximizedBarsTests` ▸
+  `revealsAnything`, which counts no Pocket). **Read the Pocket
+  over a maximized window through the one
+  `TilingSettings.maximizedPocketVisibility`** (#3523) — Auto, its
+  handle at the screen edge, while its own Show is not Hidden and
+  the reveal is live, else Hidden — which
+  `hidingEveryBarForMaximize` applies and `pocketRests(in:)` and
+  `pocketRest(in:on:)` mirror for a maximizing Monocle, never a
+  Hidden reading beside it (`MaximizedBarsTests` ▸
+  `pocketFollowsTheBars`, `MonocleMaximizeBarTests`).
   **A maximizing Monocle (#2976) is no stand-down**: a bar's
   VISIBILITY answered for a mode is read through the one
   `TilingSettings.barVisibilities(in:)`, which reads both bars Hidden

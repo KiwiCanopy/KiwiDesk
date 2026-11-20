@@ -57,22 +57,30 @@ struct MonocleMaximizeWiringTests {
         return (core, id)
     }
 
-    @Test("The pocket rests nowhere on the screen at rest")
-    func pocketRestsNowhere() throws {
+    @Test("The pocket rests as its handle on the screen (#3523)")
+    func pocketRestsAsHandle() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (on, display) = try makeCore(maximize: true)
-        #expect(!on.pocketRests(on: display))
-        #expect(on.pocketPlateSpecs().isEmpty)
+        #expect(on.pocketRests(on: display))
+        #expect(on.pocketPlace(on: display) == .handle)
         #expect(on.pocketPlate.slots[display] == nil)
+        #expect(!on.pocketPlateSpecs().isEmpty)
+        // Control: unmaximized, the Always Space Bar holds a section.
         let (off, offDisplay) = try makeCore(maximize: false)
-        #expect(off.pocketRests(on: offDisplay))
-        #expect(!off.pocketPlateSpecs().isEmpty)
+        #expect(off.pocketPlace(on: offDisplay).isSection)
     }
 
-    @Test("A drag stands the pocket with no handle")
+    @Test("With the maximized reveal off a drag stands no handle")
     func dragStandsThePocket() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, display) = try makeCore(maximize: true)
+        core.execute(
+            "kiwishelf.set_maximized_visibility",
+            args: [.string("hidden")]
+        )
+        core.updateBars()
+        #expect(!core.pocketRests(on: display))
+        #expect(core.pocketPlateSpecs().isEmpty)
         core.pocketPlate.dragging = one
         core.updateBars()
         let place = core.pocketPlace(on: display)

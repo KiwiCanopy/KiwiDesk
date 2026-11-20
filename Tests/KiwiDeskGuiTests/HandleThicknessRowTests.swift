@@ -71,8 +71,9 @@ struct HandleThicknessRowTests {
     }
 
     /// On a bar's edge the Pocket is a section, save in a layout
-    /// that maximizes its windows, where it rests nowhere (#2976 ▸
-    /// 4): no handle there either.
+    /// that maximizes its windows, where with the maximized reveal
+    /// off it rests nowhere, as the bars (#2976 ▸ 4, #3523): no
+    /// handle there either.
     @Test("a maximizing layout's Pocket is no handle")
     func maximizingPocketRestsNowhere() {
         var settings = nothingRests()

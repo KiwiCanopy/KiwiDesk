@@ -32,9 +32,10 @@ private func makeCore() -> KiwiCore {
 }
 
 /// A maximized window reads its bars Hidden, never a stand-down
-/// (#3346): both bars and the Pocket read Hidden through the shelf's
-/// door, the shortcut stays live, and Auto adds a hover band for
-/// each bar not stored Hidden. Each case runs its control first.
+/// (#3346): both bars read Hidden through the shelf's door and the
+/// Pocket rests as its handle (#3523), the shortcut stays live, and
+/// Auto adds a hover band for each bar not stored Hidden. Each case
+/// runs its control first.
 @Suite("Maximized bars read Hidden or Auto (#3346)", .serialized)
 @MainActor
 struct MaximizedBarsTests {
@@ -51,16 +52,43 @@ struct MaximizedBarsTests {
         #expect(core.showsMaximized(on: display))
         let shown = core.shelfSettings(on: display)
         #expect(shown.spaceBarStyle.visibility == .hidden)
-        #expect(!core.pocketRests(on: display))
+        // The Pocket rests as its handle, as an Auto bar (#3523).
+        #expect(shown.kiwishelf.pocketVisibility == .auto)
+        #expect(core.pocketRests(on: display))
         #expect(!core.shelfStandsDown(on: display))
         // An Always bar reads Hidden, so nothing keeps it shown.
         #expect(!shown.autoReadsAlways(.space, in: .bsp, on: nil))
         #expect(shown.revealActionLive(.space, in: .bsp))
     }
 
+    /// The Pocket's reading follows its own Show and the maximized
+    /// reveal, as a bar's handle does (#3523): Hidden stays Hidden,
+    /// and with the reveal off nothing rests.
+    @Test("The Pocket's handle follows its Show and the reveal")
+    func pocketFollowsTheBars() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        // Control: Always with the reveal live rests as the handle.
+        #expect(core.pocketRests(on: display))
+        core.tiler.settings.kiwishelf.pocketVisibility = .hidden
+        #expect(!core.pocketRests(on: display))
+        core.tiler.settings.kiwishelf.pocketVisibility = .auto
+        #expect(core.pocketRests(on: display))
+        core.execute(
+            "kiwishelf.set_maximized_visibility",
+            args: [.string("hidden")]
+        )
+        #expect(
+            core.shelfSettings(on: display).kiwishelf.pocketVisibility
+                == .hidden
+        )
+        #expect(!core.pocketRests(on: display))
+    }
+
     /// The two refusals' absence is this case's claim: the fixture
     /// draws no target, and `FullscreenStandDownTests` ▸
-    /// `maximizePocketRides` drives a reveal on a real screen.
+    /// `maximizeRevealLeavesThePocket` drives a reveal on a real
+    /// screen.
     @Test("The shortcut is not refused as a stand-down or as Always")
     func revealIsNotRefused() {
         let core = makeCore()

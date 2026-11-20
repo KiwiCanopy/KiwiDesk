@@ -32,6 +32,8 @@ extension TilingSettings {
             $0.edge == settings.kiwishelf.pocketEdge
         }
         if let edge, !edge.drawsNothingAtRest { return .section }
+        // Over a maximized window it rests as its handle (#3523).
+        if maximizesWindows(in: mode) { return .handle }
         return kiwishelf.pocketVisibility == .always ? .mark : .handle
     }
 

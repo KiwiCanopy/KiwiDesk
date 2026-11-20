@@ -82,10 +82,26 @@ extension TilingSettings {
     }
 
     /// Whether the pocket rests on screen in `mode`: its Show is not
-    /// Hidden and `mode` does not maximize its windows, where a
-    /// handle at rest would sit on the window (#2976 ▸ 4).
+    /// Hidden, and where `mode` maximizes its windows only as its
+    /// handle while the edge reveal is live, as the bars do (#3523).
     public func pocketRests(in mode: LayoutMode) -> Bool {
-        pocketRests && !maximizesWindows(in: mode)
+        pocketRests && (!maximizesWindows(in: mode) || maximizedRevealLive)
+    }
+
+    /// The Pocket's Show over a maximized window (#3523): Auto, its
+    /// handle at rest, where its own Show is not Hidden and the edge
+    /// reveal is live, as a bar's (#3349); Hidden otherwise.
+    public var maximizedPocketVisibility: ShelfVisibility {
+        pocketRests && maximizedRevealLive ? .auto : .hidden
+    }
+
+    /// These settings as a screen showing a maximized window reads
+    /// them (#3346, #3523): every bar Hidden, the Pocket at
+    /// `maximizedPocketVisibility`.
+    public func hidingEveryBarForMaximize() -> TilingSettings {
+        var out = hidingEveryBar()
+        out.kiwishelf.pocketVisibility = maximizedPocketVisibility
+        return out
     }
 }
 
