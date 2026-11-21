@@ -82,6 +82,10 @@ With Nix, the [KiwiCanopy flake](https://github.com/KiwiCanopy/nix)
 installs the same app through Home Manager (`programs.kiwidesk`), CLI
 included. That copy updates with `home-manager switch`.
 
+To uninstall, run `brew uninstall --zap --cask kiwidesk`; a `.dmg`
+or Nix install takes a few manual steps, listed under
+**[Uninstall](docs/index.md#uninstall)**.
+
 On first launch a wizard walks you through the Accessibility
 permission; nothing moves until you press **Start Tiling**. Everything past
 that — Settings, the CLI, Lua — is in the
