@@ -91,23 +91,33 @@ public enum ServiceManager {
         }
     }
 
-    /// Stops and unloads the LaunchAgent service (#328).
+    /// Stops and unloads the LaunchAgent service and deletes its
+    /// plist, which launchd would load again at login (#328, #3538).
     public static func stop() -> Outcome {
         guard isLoaded() else {
+            let failure = removeAgent(at: agentURL)
             return Outcome(
-                "KiwiDesk service is not running",
-                ok: true
+                failure ?? "KiwiDesk service is not running",
+                ok: failure == nil
             )
         }
         let (status, output) = launchctl([
             "bootout", domain, agentURL.path,
         ])
-        return status == 0
-            ? Outcome("KiwiDesk service stopped", ok: true)
-            : Outcome(
+        guard status == 0 else {
+            return Outcome(
                 "launchctl bootout failed: \(output)",
                 ok: false
             )
+        }
+        guard let failure = removeAgent(at: agentURL) else {
+            return Outcome("KiwiDesk service stopped", ok: true)
+        }
+        return Outcome(
+            "KiwiDesk service stopped, but \(failure); it starts "
+                + "again at login",
+            ok: false
+        )
     }
 
     /// Boots out and re-bootstraps the LaunchAgent service (#328).

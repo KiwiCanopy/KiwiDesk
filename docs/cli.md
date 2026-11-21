@@ -383,6 +383,13 @@ spawns one supervised launch; it finds the instance lock held,
 brings the running copy forward once — taking focus from your
 terminal — and exits cleanly.
 
+:::unreleased
+`stop` also deletes `~/Library/LaunchAgents/org.kiwidesk.KiwiDesk.plist`,
+so the service stays off after the next login; `start` writes it
+again. Run on its own, `stop` deletes a plist an earlier release
+left behind.
+:::
+
 `start` and `restart` refuse a copy opened straight from
 Downloads, which macOS runs from a temporary location that
 changes each time it starts: move `KiwiDesk.app` to

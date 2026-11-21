@@ -135,4 +135,36 @@ struct InPlaceRestartWiringTests {
             "service stop must gather: it is no restart (#930)"
         )
     }
+
+    /// Each of `stop()`'s branches deletes the agent (#3538): the
+    /// unloaded one first thing in its `else`, the loaded one only
+    /// after its bootout succeeded.
+    @Test("service stop removes the agent in both branches")
+    func stopRemovesTheAgent() throws {
+        let stop = try body(
+            of: #"public static func stop\(\) -> Outcome \{"#,
+            in: "Sources/KiwiDeskCore/Service/ServiceManager.swift"
+        )
+        let call = #"removeAgent\(at: agentURL\)"#
+        #expect(
+            stop.range(
+                of: #"guard isLoaded\(\) else \{\s*let failure = "#
+                    + call,
+                options: .regularExpression
+            ) != nil,
+            "the unloaded branch no longer opens with the removal"
+        )
+        let bootout = try #require(stop.range(of: "\"bootout\""))
+        let checked = try #require(
+            stop.range(of: "guard status == 0 else {")
+        )
+        #expect(bootout.upperBound < checked.lowerBound)
+        #expect(
+            stop[checked.upperBound...].range(
+                of: #"\}\s*guard let failure = "# + call,
+                options: .regularExpression
+            ) != nil,
+            "the loaded branch no longer removes after its bootout"
+        )
+    }
 }
