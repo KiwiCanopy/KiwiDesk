@@ -122,7 +122,8 @@ struct SpaceCuePlateTests {
     @Test("the Reveal row follows Each bar in the Show group")
     func revealFollowsEachBar() {
         let show = BarsRowOrder.kiwishelfShow
-        #expect(show.dropFirst(2).first == .kiwishelf(.revealStyle))
+        // Show, Menu bar icon (#3532), Handle thickness, Reveal.
+        #expect(show.dropFirst(3).first == .kiwishelf(.revealStyle))
         #expect(
             !BarsRowOrder.kiwishelfStyle.contains(.kiwishelf(.revealStyle))
         )
