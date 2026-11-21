@@ -112,6 +112,13 @@ extension SettingsValueReadout {
                 n.revealStyle,
                 AppBarOptions.revealStyle
             )
+        case .menuBarIcon:
+            return spaceBarChoiceRow(
+                census,
+                o.menuBarIcon,
+                n.menuBarIcon,
+                AppBarOptions.menuBarIcon
+            )
         case .minimum:
             return spaceBarRow(
                 census,

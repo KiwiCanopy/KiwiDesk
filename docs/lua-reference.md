@@ -2561,8 +2561,12 @@ Layout Defaults ▸ Monocle ▸ Maximize windows.
 **Does:** on every Monocle Space, every window fills the screen's
 visible frame with no gaps, parked windows included. Both bars read
 as Hidden in Monocle, so `space_bar.toggle_reveal()` and
-`app_bar.toggle_reveal()` still show a bar over the window, and the
-menu-bar item names the Space.
+`app_bar.toggle_reveal()` still show a bar over the window.
+
+:::unreleased
+Under [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)'s
+default, `"auto"`, the menu-bar item names the Space.
+:::
 
 The pocket rests there as its handle while
 [`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
@@ -3688,6 +3692,43 @@ The row greys only while the pocket is `"hidden"` too.
 kiwishelf.set_maximized_visibility("hidden")
 ```
 
+:::unreleased
+### kiwishelf.set_menu_bar_icon
+
+**Expects:** `"auto"`, `"logo"`, `"identifier"` or `"layout"`
+(default `"auto"`).
+
+**Does:** sets, per profile, what KiwiDesk's icon in the menu bar
+shows.
+
+- `"auto"` shows the KiwiDesk logo while each screen's Space Bar is
+  drawn at rest, and lists a screen's current Space wherever its
+  Space Bar is not
+  ([`space_bar.set_visibility`](#space_barset_visibility)).
+- `"logo"` always shows the KiwiDesk logo.
+- `"identifier"` lists every screen's current Space, whatever its
+  Space Bar does: the Space's icon, else its name.
+- `"layout"` lists every screen's current Space as the symbol of the
+  layout it uses, the symbol
+  [`space_bar.set_item_label`](#space_barset_item_label)`("layout")`
+  draws.
+
+Several screens are listed in the order the screens are arranged,
+with a thin line between them. A Space with tiling off adds the
+pause symbol after its glyph. While a layer other than `default` is
+on, its glyph leads the listed Spaces; where no Space is listed, a
+layer with an icon shows its icon in place of the logo.
+
+Settings ▸ KiwiShelf writes it as **Menu bar icon** under
+**Show**. A look never carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_menu_bar_icon("layout")
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
@@ -4108,8 +4149,13 @@ App Bar in monocle and scrolling.
 - `"auto"` hides it to its handle at its edge (below).
 - `"hidden"` draws nothing and reserves nothing; only
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
-  in the same reveal style. The menu bar then shows the Space each
-  screen is on.
+  in the same reveal style.
+
+:::unreleased
+While [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)
+is `"auto"`, its default, the menu bar shows the Space each screen
+is on wherever its Space Bar is not drawn at rest.
+:::
 
 An `"auto"` bar's handle is a thin line along the
 bar's whole length, flush on the edge: a capsule in the label ink,
@@ -6787,8 +6833,12 @@ or KiwiDesk's own restart leaves it filling the screen. Bound to
 `⌃⌥M` by default.
 
 The bars are not stood down: both bars read as `"hidden"` on that
-screen, so a bar's shortcut shows it over the window and the
-menu-bar item names the Space.
+screen, so a bar's shortcut shows it over the window.
+
+:::unreleased
+Under [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)'s
+default, `"auto"`, the menu-bar item names the Space.
+:::
 
 The pocket rests there as its handle while
 [`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
@@ -7109,9 +7159,14 @@ its screen, for every profile without its own value — the All
 profiles value of Settings' "Hide the bars while tiling is off"
 row under Shortcuts ▸ Built-in ▸ Size & float. Default `false`. A
 profile's own value wins. For this session only. Every bar and the Pocket then act as if set to Hidden on that
-Space: gone at rest, and a bar's shortcut still shows it. Where the
-Space Bar is hidden, the menu-bar item shows the Space with the
-pause symbol.
+Space: gone at rest, and a bar's shortcut still shows it.
+
+:::unreleased
+Wherever [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)
+lists the Space — on that Space under `"auto"`, and always under
+`"identifier"` and `"layout"` — the menu-bar item adds the pause
+symbol after it.
+:::
 
 **Example:**
 
@@ -8474,11 +8529,17 @@ Layers and its Switch to row there and on KiwiHub's Shortcuts
 side; a layer without one keeps the plain chip and the generic
 layers symbol on its row.
 
-Where a screen's Space Bar draws nothing at rest
-([`space_bar.set_visibility`](#space_barset_visibility)), the
-status item shows the Space that screen is showing instead
-([User Guide ▸ Space Bar](user-guide.md#space-bar)), led by the layer's icon — or
-the two-character cut of its name — the way the bar is.
+Where the status item lists Spaces, the layer's icon — or the
+two-character cut of its name — leads them, the way it leads the
+bar.
+
+:::unreleased
+Which Spaces it lists is
+[`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)'s;
+under its default, `"auto"`, it lists the Space a screen is showing
+wherever that screen's Space Bar draws nothing at rest
+([`space_bar.set_visibility`](#space_barset_visibility)).
+:::
 
 **Example:**
 

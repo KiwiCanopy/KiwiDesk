@@ -52,6 +52,7 @@ extension KiwiShelf {
         case pocketVisibility = "pocket_visibility"
         case maximizedVisibility = "maximized_visibility"
         case pocketDragReveal = "pocket_drag_reveal"
+        case menuBarIcon = "menu_bar_icon"
     }
 
     /// Decodes a shelf, a missing key taking its default.
@@ -180,6 +181,9 @@ extension KiwiShelf {
         pocketDragReveal =
             try c.decodeIfPresent(Bool.self, forKey: .pocketDragReveal)
             ?? d.pocketDragReveal
+        menuBarIcon =
+            try c.decodeIfPresent(MenuBarIcon.self, forKey: .menuBarIcon)
+            ?? d.menuBarIcon
         fillFade = Self.clampFillFade(
             try c.decodeIfPresent(CGFloat.self, forKey: .fillFade)
                 ?? d.fillFade

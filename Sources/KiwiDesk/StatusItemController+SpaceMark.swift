@@ -1,8 +1,8 @@
 import AppKit
 import KiwiDeskCore
 
-/// The active layer and, while the Space Bar is off, the Space
-/// each screen shows, in the menu bar (#1413): one composite
+/// The active layer and the Space each screen shows, as the Menu
+/// bar icon setting picks, in the menu bar (#1413, #3532): one composite
 /// image, a template unless an emoji is in it, so the #1013 mark
 /// composites on it like on the brand icon — the argument is in
 /// `docs/design-decisions.md` ▸ the menu bar item is the Space
@@ -54,13 +54,22 @@ extension StatusItemController {
     /// screen's Space in the drawn order.
     static func spaceMarkName(_ mark: StatusSpaceMark) -> String {
         let names = screens(of: mark).map { screen in
-            screen.tilingOff
+            let space =
+                screen.layout.map {
+                    L(
+                        "menu.status.space.layout",
+                        "%1$@, %2$@ layout",
+                        screen.space.raw,
+                        $0.displayName
+                    )
+                } ?? screen.space.raw
+            return screen.tilingOff
                 ? L(
                     "menu.status.space.tiling_off",
                     "%1$@, tiling off",
-                    screen.space.raw
+                    space
                 )
-                : screen.space.raw
+                : space
         }
         let spaces = LocalizedList.join(names)
         let several = names.count > 1

@@ -45,6 +45,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.kiwishelf.pocketDragReveal),
         .kiwishelf(.revealStyle):
             .leaf(\.settings.kiwishelf.revealStyle),
+        .kiwishelf(.menuBarIcon):
+            .leaf(\.settings.kiwishelf.menuBarIcon),
         .kiwishelf(.maximizedVisibility):
             .leaf(\.settings.kiwishelf.maximizedVisibility),
         .kiwishelf(.fillColor): .leaf(\.settings.kiwishelf.fillColor),

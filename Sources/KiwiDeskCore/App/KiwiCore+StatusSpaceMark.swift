@@ -1,7 +1,8 @@
 import AppKit
 
-/// What the menu bar item draws for the active layer and, while
-/// the Space Bar is off, for the Space each screen shows (#1413).
+/// What the menu bar item draws for the active layer and the Space
+/// each screen shows, as `kiwishelf.menu_bar_icon` picks (#1413,
+/// #3532).
 /// The layer's menu-bar glyph has this one derivation, over
 /// `activeLayerGlyph`. Core hands structure; the GUI draws and
 /// names it (#96).
@@ -43,6 +44,9 @@ public struct StatusSpaceMark: Equatable {
         /// Whether the Space has tiling off (#3008): the mark wears
         /// the Space Bar's `pause` marker.
         public var tilingOff = false
+        /// The Space's layout where the glyph is its symbol (#3532),
+        /// so VoiceOver names the layout; nil where it is the name.
+        public var layout: LayoutMode?
     }
 
     /// The SF Symbol a tiling-off Space wears (#3008): the Space
@@ -52,8 +56,10 @@ public struct StatusSpaceMark: Equatable {
     /// nil on `default`, which has no icon.
     public let layer: Layer?
     /// One per display showing a Space, unordered — the GUI
-    /// ranks them (`DeskOrder`). A screen is listed only where its
-    /// edge fold draws no Space Bar at rest (#1413, #761).
+    /// ranks them (`DeskOrder`). Under `auto` a screen is listed
+    /// only where its edge fold draws no Space Bar at rest (#1413,
+    /// #761); `identifier` and `layout` list every screen, `logo`
+    /// none (#3532).
     public let screens: [Screen]
 }
 
@@ -65,6 +71,10 @@ extension KiwiCore {
                 glyph: StatusSpaceMark.Glyph($0.glyph),
                 hasIcon: $0.hasIcon
             )
+        }
+        let icon = tiler.settings.kiwishelf.menuBarIcon
+        guard icon != .logo else {
+            return StatusSpaceMark(layer: layer, screens: [])
         }
         let screens = state.workspaces.allDisplays.compactMap {
             display -> StatusSpaceMark.Screen? in
@@ -78,19 +88,30 @@ extension KiwiCore {
             let mode = state.workspaces[space]?.mode ?? .bsp
             // A tiling-off Space whose tick hides the bars reads its
             // Space Bar Hidden (#3008, #3151, bars.md).
-            guard
-                !shelfSettings(on: display.id).drawsAtRest(
+            if icon == .auto,
+                shelfSettings(on: display.id).drawsAtRest(
                     .space,
                     in: mode,
                     on: display.fingerprint
                 )
-            else { return nil }
+            {
+                return nil
+            }
+            let label: SpaceBarStyle.ItemLabel =
+                icon == .layout ? .layout : .identifier
             var screen = StatusSpaceMark.Screen(
                 display: display,
                 space: space,
-                glyph: StatusSpaceMark.Glyph(spaceGlyph(for: space))
+                glyph: StatusSpaceMark.Glyph(
+                    Self.spaceBarLabel(
+                        identifier: spaceGlyph(for: space),
+                        mode: mode,
+                        label: label
+                    )
+                )
             )
             screen.tilingOff = isTilingOff(space)
+            screen.layout = label == .layout ? mode : nil
             return screen
         }
         return StatusSpaceMark(layer: layer, screens: screens)

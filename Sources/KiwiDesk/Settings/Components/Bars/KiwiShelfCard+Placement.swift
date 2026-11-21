@@ -37,10 +37,12 @@ extension KiwiShelfCard {
                     + "only while a window goes in or out, while "
                     + "you drag one, or when its list's shortcut "
                     + "opens it. Only %1$@ and %2$@ can carry an "
-                    + "App Bar. With the Space Bar hidden, the "
-                    + "menu bar shows the Space each screen is on.",
+                    + "App Bar. With \u{201C}%3$@\u{201D} left at its "
+                    + "default, the menu bar shows the Space each "
+                    + "screen is on wherever the Space Bar is hidden.",
                 L("layout.monocle.name", "Monocle"),
-                L("layout.scrolling.name", "Scrolling")
+                L("layout.scrolling.name", "Scrolling"),
+                L("kiwishelf.menu_bar_icon", "Menu bar icon")
             )
     }
 

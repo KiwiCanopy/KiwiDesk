@@ -72,6 +72,7 @@ public enum LookKeys {
         "kiwishelf.pocket_visibility": functionality,
         "kiwishelf.maximized_visibility": functionality,
         "kiwishelf.pocket_drag_reveal": functionality,
+        "kiwishelf.menu_bar_icon": functionality,
         "kiwishelf.reveal_style": "how a revealed bar moves — motion, "
             + "which a bundled look and the tour's paint never change "
             + "(#2176)",

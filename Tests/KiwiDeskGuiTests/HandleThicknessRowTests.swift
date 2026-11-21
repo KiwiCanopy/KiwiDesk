@@ -30,7 +30,8 @@ struct HandleThicknessRowTests {
     func order() {
         #expect(
             BarsRowOrder.kiwishelfShow == [
-                .kiwishelf(.visibility), key, .kiwishelf(.revealStyle),
+                .kiwishelf(.visibility), .kiwishelf(.menuBarIcon), key,
+                .kiwishelf(.revealStyle),
             ]
         )
         #expect(BarsGates.resolved.contains(key))

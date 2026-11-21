@@ -14779,6 +14779,26 @@ its Space Bar is not drawn at rest — Hidden, or Auto unless an
 Always bar shares its edge — since the menu bar is then the one
 place that names the Space until the pointer reveals the bar.
 
+:::unreleased
+**Amended (#3532, owner 2026-11-20): what the menu bar item shows
+is now a setting.** The owner asked for the choice the entry above
+said nobody had asked for. Some users want the Space Bar on screen
+and the Space in the menu bar as well. Others hide the bar and want
+a quiet logo. Others want each Space's layout at a glance.
+`kiwishelf.menu_bar_icon` takes four values. `auto` is the stand-in
+rule above, unchanged, and stays the default for fresh installs
+too. `logo`, `identifier` and `layout` ignore the Space Bar's Show:
+`logo` lists no screen, and the other two list every screen's
+current Space, as its icon or name, or as its layout's symbol
+through the Space Bar's own `item_label` mapping. The layer rule
+(#1169) holds under every value, so there is no pure-logo mode. The
+setting is per profile, like the Show that `auto` follows. It owes
+no `ConfigMigration`: an absent key decodes as `auto`, which is
+what every existing profile showed. A later default other than
+`auto` owes that migration after all: an absent key decodes as the
+default, so the flip would change every stored profile's menu bar.
+:::
+
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed and
 released freely — the preview mirrors what is held — and the first

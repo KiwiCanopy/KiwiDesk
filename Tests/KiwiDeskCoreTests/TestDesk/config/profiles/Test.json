@@ -109,6 +109,7 @@
       "item_gap" : 6,
       "liquid_glass" : true,
       "maximized_visibility" : "auto",
+      "menu_bar_icon" : "auto",
       "minimum" : 30,
       "order" : "spaces_first",
       "outer_margin" : 0,

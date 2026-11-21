@@ -113,6 +113,8 @@ enum SettingsSearchSynonyms {
             return ["icon size", "item size", "padding"]
         case .kiwishelf(.minimum):
             return ["share", "split", "divider"]
+        case .kiwishelf(.menuBarIcon):
+            return ["status item", "status bar", "menu extra"]
         case .kiwishelf(.pocketDragReveal):
             return ["drag", "drop", "drop target"]
         // "Glyphs" and "System default" were the two options'

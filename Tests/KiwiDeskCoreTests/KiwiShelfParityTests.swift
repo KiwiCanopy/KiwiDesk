@@ -84,7 +84,7 @@ struct KiwiShelfCommandParityTests {
             .pocketEdge(.left),
             .pocketScreenEdge(.left, screen: "S:1x1"), .pocketPosition(30),
             .pocketVisibility(.hidden), .maximizedVisibility(.hidden),
-            .pocketDragReveal(false),
+            .pocketDragReveal(false), .menuBarIcon(.layout),
         ]
     }
 
@@ -178,6 +178,7 @@ struct KiwiShelfCommandParityTests {
         case .pocketVisibility: return [.string("hidden")]
         case .maximizedVisibility: return [.string("hidden")]
         case .pocketDragReveal: return [.bool(false)]
+        case .menuBarIcon: return [.string("layout")]
         case .minimum, .thickness, .outerMargin, .innerMargin,
             .cornerRoundness, .borderWidth, .highlightWidth, .itemGap,
             .handleThickness, .glyphSize,

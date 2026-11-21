@@ -154,6 +154,8 @@ public struct KiwiShelf: Sendable, Equatable {
     public var maximizedVisibility = MaximizedVisibility.auto
     /// Whether a window drag brings the pocket out (#3522).
     public var pocketDragReveal = true
+    /// What the menu bar item shows (#3532).
+    public var menuBarIcon = MenuBarIcon.auto
 
     public init() {}
 

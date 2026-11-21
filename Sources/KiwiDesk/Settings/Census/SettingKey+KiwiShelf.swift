@@ -57,6 +57,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     /// the pocket's Show in its drawer.
     case pocketDragReveal = "settings.kiwishelf.pocketDragReveal"
     case maximizedVisibility = "settings.kiwishelf.maximizedVisibility"
+    /// What the menu bar item shows (#3532), under Show.
+    case menuBarIcon = "settings.kiwishelf.menuBarIcon"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
@@ -91,6 +93,10 @@ extension KiwiShelfKey {
             // Never greyed: an Always pocket rests as its handle
             // over a maximized window (#3522, #3523).
             return .row(.bars, .kiwishelf, .showMore)
+        case .menuBarIcon:
+            // Under the Show master and its drawer; never greyed,
+            // since no choice but Auto reads the Show (#3532 ▸ 9).
+            return .row(.bars, .kiwishelf, .atRest)
         case .maximizedVisibility:
             // Greyed while nothing could reveal (#3346 ▸ 9).
             return .row(

@@ -231,6 +231,8 @@ settings.kiwishelf.pocketEdgeOverride[screen]
 settings.kiwishelf.pocketPosition
 settings.kiwishelf.pocketVisibility
 settings.kiwishelf.maximizedVisibility
+settings.kiwishelf.menuBarIcon
+settings.kiwishelf.menuBarIcon
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone

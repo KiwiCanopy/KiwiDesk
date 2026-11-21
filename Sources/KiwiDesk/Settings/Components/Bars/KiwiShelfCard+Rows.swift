@@ -121,6 +121,8 @@ extension KiwiShelfCard {
             handleThicknessRow
         case .revealStyle:
             revealStyleRow
+        case .menuBarIcon:
+            menuBarIconRow
         // Drawn in the Show drawer (`showRow`).
         case .pocketVisibility, .pocketDragReveal:
             EmptyView()

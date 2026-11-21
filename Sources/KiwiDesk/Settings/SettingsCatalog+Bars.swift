@@ -43,6 +43,10 @@ struct BarsControls: Sendable {
         "kiwishelf.handle_thickness",
         "Handle thickness"
     )
+    let kiwishelfMenuBarIcon = SettingsControl(
+        "kiwishelf.menu_bar_icon",
+        "Menu bar icon"
+    )
     let kiwishelfRevealStyle = SettingsControl(
         "kiwishelf.reveal_style.label",
         "Reveal"
