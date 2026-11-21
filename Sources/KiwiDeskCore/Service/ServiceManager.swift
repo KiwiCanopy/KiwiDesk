@@ -110,10 +110,13 @@ public enum ServiceManager {
                 ok: false
             )
         }
-        let failure = removeAgent(at: agentURL)
+        guard let failure = removeAgent(at: agentURL) else {
+            return Outcome("KiwiDesk service stopped", ok: true)
+        }
         return Outcome(
-            failure ?? "KiwiDesk service stopped",
-            ok: failure == nil
+            "KiwiDesk service stopped, but \(failure); it starts "
+                + "again at login",
+            ok: false
         )
     }
 

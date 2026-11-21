@@ -5,12 +5,14 @@ import Testing
 
 /// `service stop` deletes the LaunchAgent plist, which launchd
 /// otherwise loads again at the next login (#3538). The launchctl
-/// calls themselves are not exercised here.
+/// calls themselves are not exercised here; the wiring is
+/// `InPlaceRestartWiringTests` ▸ `stopRemovesTheAgent`.
 @Suite("Service stop removes the agent")
 struct ServiceStopRemovesAgentTests {
     private func scratchPlist() throws -> URL {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
+        let dir =
+            testTemporaryDirectory
+            .appendingPathComponent("agent-\(UUID().uuidString)")
         try FileManager.default.createDirectory(
             at: dir,
             withIntermediateDirectories: true
@@ -30,45 +32,5 @@ struct ServiceStopRemovesAgentTests {
     func missingIsSuccess() throws {
         let url = try scratchPlist()
         #expect(ServiceManager.removeAgent(at: url) == nil)
-    }
-
-    /// Both of `stop()`'s branches delete the agent, the loaded one
-    /// only after its bootout: deleting either call leaves the pure
-    /// function green.
-    @Test("stop deletes the agent in both branches")
-    func stopCallsTheRemoval() throws {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        let source = try String(
-            contentsOf: root.appendingPathComponent(
-                "Sources/KiwiDeskCore/Service/ServiceManager.swift"
-            ),
-            encoding: .utf8
-        )
-        let flat = source.split(whereSeparator: \.isWhitespace)
-            .joined()
-        let start = try #require(
-            flat.range(of: "publicstaticfuncstop()->Outcome{")
-        )
-        let end = try #require(
-            flat[start.upperBound...].range(
-                of: "publicstaticfuncrestart()"
-            )
-        )
-        let body = flat[start.upperBound..<end.lowerBound]
-        let call = "removeAgent(at:agentURL)"
-        let parts = body.components(separatedBy: call)
-        #expect(parts.count == 3, "stop() calls removeAgent twice")
-        let unloaded = try #require(body.range(of: "guardisLoaded()"))
-        let bootout = try #require(body.range(of: "\"bootout\""))
-        let first = try #require(body.range(of: call))
-        let last = try #require(
-            body.range(of: call, options: .backwards)
-        )
-        #expect(unloaded.lowerBound < first.lowerBound)
-        #expect(first.upperBound < bootout.lowerBound)
-        #expect(bootout.upperBound < last.lowerBound)
     }
 }
