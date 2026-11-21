@@ -104,6 +104,9 @@ struct CoreLocalizationBoundaryTests {
         // spellings (#2612), its Desktop move refusal (#2888), on
         // the same pill, and its list key's (#2974) by its edge.
         "Commands/PocketRefusal.swift": 5,
+        // `run_shortcut`'s unknown-name pill (#3526), on the same
+        // Core-drawn overlay.
+        "Commands/KiwiCore+RunShortcut.swift": 1,
         // The three marks' VoiceOver names (#1799, #2446), with
         // the plate's glyph images since #2671.
         "Borders/StickyMarkOverlay+Glyphs.swift": 3,

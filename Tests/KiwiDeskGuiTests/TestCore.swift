@@ -286,9 +286,8 @@ func makeTestCore(
     // A Desktop move's frame write reaches the AX element of a
     // real app (#3048); a suite that crosses answers it itself.
     core.awayFrameWrite = { _, _, _, _, landed in landed(false) }
-    // Same clock class (#1161): the placement ledger's echo
-    // window is measured on its own seam; a test wanting the
-    // expiry moves this clock ahead.
+    // Same clock class (#1161): the placement ledger's echo window
+    // is its own seam; a test wanting the expiry moves this clock.
     core.tiler.placements.clock = { 0 }
     // And the focus-report ledgers' (#1852): a stamp read across
     // a starved runner's second aged out of its echo window.
@@ -321,6 +320,7 @@ func makeTestCore(
         if let key { testAppKitFrames[key] = frame }
         return frame
     }
+    core.appleShortcuts.tool = "/usr/bin/false"  // no host shortcut, #3526
     return core
 }
 

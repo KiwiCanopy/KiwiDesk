@@ -71,7 +71,8 @@ extension ShortcutsReferenceBuilder {
             if app == nil {
                 glyph =
                     run.meta.usableSymbol.map { .symbol($0) }
-                    ?? entry.flatMap(icon(for:)) ?? ownIcon(run.meta)
+                    ?? entry.flatMap(icon(for:)) ?? shortcutIcon(run)
+                    ?? ownIcon(run.meta)
             }
             return GestureReach(
                 badge: badge,
@@ -80,6 +81,11 @@ extension ShortcutsReferenceBuilder {
                 icon: glyph,
                 bundleID: app
             )
+        }
+        func shortcutIcon(_ run: LuaAction) -> ShortcutGlyph? {
+            guard AppleShortcutAction.name(from: run.lua) != nil
+            else { return nil }
+            return icon(for: NavCommand(label: "", lua: run.lua))
         }
         return bindings.keys.sorted().flatMap { key -> [GestureReach] in
             guard let action = bindings[key] else { return [] }

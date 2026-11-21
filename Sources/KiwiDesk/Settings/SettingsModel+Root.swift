@@ -88,13 +88,16 @@ extension SettingsModel {
     }
 
     /// What Simple hides that the draft holds: App Rules, every
-    /// layer but the default, and Lua bindings across all layers.
+    /// layer but the default, and Lua bindings and Apple Shortcut
+    /// keys across all layers.
     var simpleHiddenCounts: SimpleHiddenCounts {
         SimpleHiddenCounts(
             appRules: appRuleCount,
             layers: config.layers.filter { !$0.isDefault }.count,
             luaBindings: config.layers.flatMap(\.bindings)
-                .filter(ShortcutsGates.isLuaBinding).count
+                .filter(ShortcutsGates.isLuaBinding).count,
+            appleShortcuts: config.layers.flatMap(\.bindings)
+                .filter(AppleShortcutAction.isRow).count
         )
     }
 

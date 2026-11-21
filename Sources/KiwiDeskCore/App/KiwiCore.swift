@@ -20,8 +20,7 @@ public final class KiwiCore {
     let shelves = ShelfManager()
     let spaceBarDrop = SpaceBarDropCoordinator()  // Space Bar drop, #372
     let modifierGrab = ModifierGrabState()  // #2447
-    /// Live cross-display make-room gesture state (#504).
-    let dragCrossing = DragCrossingCoordinator()
+    let dragCrossing = DragCrossingCoordinator()  // make-room, #504
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
     /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
@@ -38,6 +37,7 @@ public final class KiwiCore {
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
+    public private(set) lazy var appleShortcuts = AppleShortcuts(exec: exec)
     /// Following a sync folder (#2324 slice 3, `+SyncFollow`).
     public let sync = SyncFollower()
     /// What `keys` holds, by the apply that installed it (#2482).

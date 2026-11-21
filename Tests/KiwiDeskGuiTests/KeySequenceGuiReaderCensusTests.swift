@@ -87,7 +87,11 @@ struct KeySequenceGuiReaderCensusTests {
         "Settings/SettingsModel+RevealLanding.swift":
             (1, "a reveal finds a sequence by id: its card"),
         "Settings/SettingsModel+Root.swift":
-            (1, "Simple's hidden Lua rows by kind: a sequence is none"),
+            (
+                2,
+                "Simple's hidden Lua and Apple Shortcut rows: a "
+                    + "sequence is neither"
+            ),
         "Settings/SettingsModel+ShortcutBase.swift":
             (4, "a leader left on ⌃⌥ is listed by its chord"),
         "Settings/SettingsRevertRegister+Rules.swift":

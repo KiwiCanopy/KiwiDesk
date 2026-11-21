@@ -18,6 +18,12 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.key_sequences",
         "Key sequences"
     )
+    /// Keys running the user's Apple Shortcuts, a collapsible card
+    /// after Open applications (#3526).
+    let appleShortcutsCard = SettingsDrawer(
+        "shortcuts.section.apple_shortcuts",
+        "Apple Shortcuts"
+    )
     /// The Show & hide card: KiwiHub, KiwiShelf and KiwiVision,
     /// each a sub-group titled by its product name below.
     let showHideKeys = SettingsControl(

@@ -187,6 +187,9 @@ enum GestureListWords {
     /// has none.
     static func runName(_ run: LuaAction) -> String {
         if !run.meta.desc.trimmed.isEmpty { return run.meta.desc }
+        if let name = AppleShortcutAction.name(from: run.lua) {
+            return name
+        }
         if run.kind == .application,
             let bundleID = KeybindingCatalog.appBundleID(from: run.lua)
         {

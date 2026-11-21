@@ -41,8 +41,10 @@ struct SimpleHiddenCounts: Equatable, Sendable {
     var appRules = 0
     var layers = 0
     var luaBindings = 0
+    var appleShortcuts = 0
 
     var isEmpty: Bool {
         appRules == 0 && layers == 0 && luaBindings == 0
+            && appleShortcuts == 0
     }
 }

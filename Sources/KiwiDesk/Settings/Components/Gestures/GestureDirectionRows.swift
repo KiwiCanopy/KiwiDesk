@@ -108,6 +108,7 @@ struct GestureDirectionRow: View {
 
     @State var picking: SequencePickRequest?
     @State var choosingApp = false
+    @State var choosingShortcut = false
     @State var editingLua: LuaEditRequest?
     @State var id = UUID()
 

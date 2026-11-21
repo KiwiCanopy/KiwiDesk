@@ -25,7 +25,7 @@ struct ShortcutsSegmentTests {
         #expect(
             ShortcutsPagePart.parts(in: .personal) == [
                 .conflictBanner, .layers, .openApplications,
-                .keySequences, .luaBindings,
+                .appleShortcuts, .keySequences, .luaBindings,
             ]
         )
         #expect(ShortcutsPagePart.parts(in: .mouse) == [.gestures])

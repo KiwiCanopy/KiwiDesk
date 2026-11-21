@@ -988,6 +988,16 @@ not yet here into the Space you are on and focuses it — a
 minimized one only once no open one is left; an app with no window
 is opened. See [move_here](lua-reference.md#move_here).
 
+:::unreleased
+`run_shortcut` (Launch) takes the name of one of your Apple
+Shortcuts and runs it, as `shortcuts run` does, without waiting
+for it to finish (`kiwidesk run_shortcut "Start Meeting"`). A name
+the Shortcuts app does not list answers `unknown shortcut: <name>`.
+`kiwidesk mcp` sends it only through `run_destructive`, and
+`shortcut.set` does not bind it. See
+[run_shortcut](lua-reference.md#run_shortcut).
+:::
+
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
 argument, a window `id` from `get_state`: they then act on that

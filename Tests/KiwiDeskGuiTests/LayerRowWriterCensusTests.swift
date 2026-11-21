@@ -211,6 +211,12 @@ struct LayerRowWriterCensusTests {
             (1, "an offer: hands the holder to its rows"),
         "KiwiDesk/Settings/Sections/LayersCard.swift":
             (1, "the layer card: hands the holder to its rows"),
+        "KiwiDesk/Settings/Sections/AppleShortcutsCard.swift":
+            (
+                1,
+                "the Apple Shortcuts card (#3526): appends a row "
+                    + "running a shortcut, records and removes it"
+            ),
         "KiwiDesk/Settings/Sections/KeySequencesCard.swift":
             (
                 1,

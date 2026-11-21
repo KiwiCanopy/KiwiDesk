@@ -281,6 +281,11 @@ extension APIReference {
                 + "on, from other Desktops too.",
             .text("bundle_id")
         ),
+        "run_shortcut": APIRecord(
+            "Runs one of your Apple Shortcuts by its name in the "
+                + "Shortcuts app.",
+            .text("name")
+        ),
         "move_here": APIRecord(
             "Moves an app's most recently focused window into the "
                 + "Space you are on, or opens the app.",

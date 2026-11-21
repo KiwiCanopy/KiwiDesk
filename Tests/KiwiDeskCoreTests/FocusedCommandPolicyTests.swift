@@ -42,6 +42,8 @@ struct FocusedCommandPolicyTests {
         "spawn_new",
         // Opens an app behind the focus (#3141), moving no window.
         "open_in_background",
+        // Runs an Apple Shortcut by name (#3526), naming no window.
+        "run_shortcut",
         // Re-lays the focused Space out, like set_mode without a
         // Space, moving no window between Spaces (#453).
         "cycle_mode",

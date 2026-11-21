@@ -36,6 +36,8 @@ struct SequenceActionMenu: View {
     /// and a Lua action wears the dashed container only where it
     /// can be edited (#3183: no affordance for a missing channel).
     var onApp: (() -> Void)?
+    /// "Shortcut…": the Apple Shortcuts list (#3526).
+    var onShortcut: (() -> Void)?
     var onLua: (() -> Void)?
     /// A click on a Lua key's dashed container.
     var onEditLua: (() -> Void)?
@@ -89,9 +91,18 @@ struct SequenceActionMenu: View {
             }
             Divider()
             list(groups)
-            if onApp != nil || onLua != nil { Divider() }
+            if onApp != nil || onShortcut != nil || onLua != nil {
+                Divider()
+            }
             if onApp != nil {
                 pinned(.app, Self.appLabel, symbol: Self.appSymbol)
+            }
+            if onShortcut != nil {
+                pinned(
+                    .shortcut,
+                    Self.shortcutLabel,
+                    symbol: AppleShortcutAction.symbol
+                )
             }
             if onLua != nil {
                 pinned(.lua, Self.luaLabel, symbol: Self.luaSymbol)
@@ -306,6 +317,10 @@ struct SequenceActionMenu: View {
     static let luaSymbol = "chevron.left.forwardslash.chevron.right"
     /// App… before an app is chosen (#3321 ▸ Ruling, owner).
     static let appSymbol = "plus.square.on.square"
+
+    static var shortcutLabel: String {
+        L("shortcuts.sequence.apple_shortcut", "Apple Shortcut…")
+    }
 
     static var luaLabel: String {
         L("shortcuts.sequence.lua", "Lua…")

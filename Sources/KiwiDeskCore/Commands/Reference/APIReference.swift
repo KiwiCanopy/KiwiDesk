@@ -70,6 +70,7 @@ public enum APIReference {
             ("open_in_background", "open_in_background"),
             ("gather", "gather"),
             ("move_here", "move_here"),
+            ("run_shortcut", "run_shortcut"),
             ("set_mode", "set_mode"),
             ("cycle_mode", "cycle_mode"),
             ("set_mode_cycle", "set_mode_cycle"),
@@ -80,10 +81,7 @@ public enum APIReference {
                 "set_min_window_size_override",
                 "set_min_window_size_override"
             ),
-            (
-                "set_swap_skips_cascade",
-                "set_swap_skips_cascade"
-            ),
+            ("set_swap_skips_cascade", "set_swap_skips_cascade"),
             ("set_float_placement", "set_float_placement"),
             (
                 "set_float_scale_on_display_change",

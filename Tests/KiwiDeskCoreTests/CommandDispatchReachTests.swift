@@ -76,6 +76,8 @@ struct CommandDispatchReachTests {
         "unknown window: ": "a window id no tracked window carries",
         "unknown look: ": "a look name no bundled or saved look "
             + "carries (#1685)",
+        "unknown shortcut: ": "a name the Shortcuts app's list does "
+            + "not carry (#3526)",
     ]
 
     /// The one catalogued name `execute` never sees:

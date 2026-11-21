@@ -9,6 +9,8 @@ enum SequencePickSlot: Hashable {
     case pinned(String)
     case command(String)
     case app
+    /// "Shortcut…": one of the user's Apple Shortcuts (#3526).
+    case shortcut
     case lua
 }
 

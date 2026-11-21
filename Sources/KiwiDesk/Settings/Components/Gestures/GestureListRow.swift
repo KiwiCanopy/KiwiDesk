@@ -37,6 +37,7 @@ struct GestureListRow: View {
 
     @State var picking: SequencePickRequest?
     @State var choosingApp = false
+    @State var choosingShortcut = false
     @State var editingLua: LuaEditRequest?
     /// The gesture pop-up's drawn width, the directions' name column,
     /// so their actions line up under the row's.

@@ -103,6 +103,13 @@ enum SequenceTree {
         return key
     }
 
+    /// `node` running the Apple Shortcut `name` (#3526).
+    static func shortcutKey(_ node: KeyBinding, name: String) -> KeyBinding {
+        var key = AppleShortcutAction.binding(name, combo: node.combo)
+        key.id = node.id
+        return key
+    }
+
     /// `node` running the user's own Lua, kept where it already did.
     static func luaKey(_ node: KeyBinding) -> KeyBinding {
         guard node.kind != .custom else { return node }

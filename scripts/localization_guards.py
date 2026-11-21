@@ -275,6 +275,11 @@ GLOSSARY = {
     # `system_shortcut.*` keys follow macOS per locale, but these
     # words stay English inside prose in every locale.
     "bundle",  # "Bundle identifier"
+    # "Apple Shortcuts" (#3526): the company name tells Apple's
+    # Shortcuts app from KiwiDesk's own Shortcuts page in every
+    # locale. Trade: a stray "apple" in non-Latin prose is no
+    # longer caught.
+    "apple",
     # "Caps Lock": Apple's own key name, which macOS's Keyboard
     # pane keeps Latin in ja, ko, ru and pt-BR (#1870). Trade: a
     # stray "caps" or "lock" in non-Latin prose is no longer

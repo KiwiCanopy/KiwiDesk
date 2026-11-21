@@ -82,7 +82,7 @@ struct ApplicationsGroup: View {
     private var orderedAppIDs: [UUID] {
         let appIDs =
             bindings
-            .filter { $0.kind == .application }
+            .filter(Self.isAppRow)
             .map(\.id)
         let present = Set(appIDs)
         let known = displayOrder.filter(present.contains)
@@ -93,7 +93,7 @@ struct ApplicationsGroup: View {
     private func recomputeOrder() {
         displayOrder =
             bindings
-            .filter { $0.kind == .application }
+            .filter(Self.isAppRow)
             .sorted { lhs, rhs in
                 let order = lhs.label
                     .localizedCaseInsensitiveCompare(rhs.label)
@@ -122,6 +122,11 @@ struct ApplicationsGroup: View {
                 }
             }
         )
+    }
+
+    /// An app row; an Apple Shortcut row is its own card's (#3526).
+    static func isAppRow(_ binding: KeyBinding) -> Bool {
+        AppleShortcutAction.isAppRow(binding)
     }
 
     /// Removes the binding from the draft.

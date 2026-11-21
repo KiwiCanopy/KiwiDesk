@@ -20,6 +20,7 @@ extension GestureListRow {
             showsCatalogue: offersCatalogue,
             onPick: { bind(GestureListEdits.action(picking: $0)) },
             onApp: appDoor,
+            onShortcut: shortcutDoor,
             onLua: luaDoor,
             onEditLua: editLuaDoor,
             request: $picking
@@ -30,6 +31,11 @@ extension GestureListRow {
     private var appDoor: (() -> Void)? {
         guard offersCatalogue else { return nil }
         return { choosingApp = true }
+    }
+
+    private var shortcutDoor: (() -> Void)? {
+        guard offersCatalogue else { return nil }
+        return { choosingShortcut = true }
     }
 
     private var luaDoor: (() -> Void)? {
@@ -55,7 +61,8 @@ extension GestureListRow {
         case .split(let split): GestureListWords.face(split, on: key.input)
         case .grab(let grab): GestureListWords.grab(grab)
         case .run(let run):
-            catalog.command(running: run.lua)?.resolvedLabel
+            AppleShortcutAction.name(from: run.lua)
+                ?? catalog.command(running: run.lua)?.resolvedLabel
                 ?? GestureListWords.value(action, on: key.input)
         }
     }

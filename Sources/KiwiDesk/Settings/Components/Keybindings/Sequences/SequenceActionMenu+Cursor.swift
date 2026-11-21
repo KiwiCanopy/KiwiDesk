@@ -3,8 +3,8 @@ import SwiftUI
 
 /// The action picker's one cursor (`DropdownCursor`): over the
 /// pinned entries, the commands the search left and the pinned
-/// "App…" and "Lua…", in that order — the pinned entries alone where
-/// the picker offers no catalogue.
+/// "App…", "Shortcut…" and "Lua…", in that order — the pinned
+/// entries alone where the picker offers no catalogue.
 extension SequenceActionMenu {
     /// The catalogue groups narrowed to the query's matches.
     var shownGroups: [SequenceActionCatalog.Group] {
@@ -19,7 +19,9 @@ extension SequenceActionMenu {
             groups,
             pinned: pins.map(\.id),
             catalogue: showsCatalogue,
-            tail: (onApp == nil ? [] : [.app]) + (onLua == nil ? [] : [.lua])
+            tail: (onApp == nil ? [] : [.app])
+                + (onShortcut == nil ? [] : [.shortcut])
+                + (onLua == nil ? [] : [.lua])
         )
     }
 
@@ -115,6 +117,10 @@ extension SequenceActionMenu {
             request = nil
             // The app list opens once this popover has gone.
             DispatchQueue.main.async { onApp?() }
+        case .shortcut:
+            request = nil
+            // The shortcut list opens once this popover has gone.
+            DispatchQueue.main.async { onShortcut?() }
         case .lua:
             request = nil
             // The editor opens once this popover has gone.
@@ -139,6 +145,7 @@ extension SequenceActionMenu {
         case .pinned(let id):
             return pins.first { $0.id == id }?.title ?? id
         case .app: return Self.appLabel
+        case .shortcut: return Self.shortcutLabel
         case .lua: return Self.luaLabel
         case .command(let lua):
             return catalog.command(running: lua)?.resolvedLabel ?? lua

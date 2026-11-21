@@ -213,8 +213,11 @@ struct KeyRecorderField: View {
         return ModifierTapWords.spoken(parsed)
     }
 
+    /// How recording works, then what the conflict check cannot see:
+    /// a chord the Shortcuts app holds (#3526).
     private var recordHelp: String {
-        recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
+        let how = recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
+        return how + "\n" + AppleShortcutAction.conflictBlindSpot
     }
 
     /// A Hyper chord while no Hyper key is set: it cannot fire.

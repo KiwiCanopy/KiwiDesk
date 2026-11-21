@@ -52,6 +52,6 @@ import KiwiDeskCore
         return [model.config, model.cleanConfig]
             .compactMap { $0.layers.first(where: \.isDefault) }
             .flatMap(\.bindings)
-            .contains { $0.lua == lua && $0.kind == .application }
+            .contains { $0.lua == lua && AppleShortcutAction.isAppRow($0) }
     }
 }

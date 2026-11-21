@@ -11,8 +11,10 @@ extension GestureListRow {
     var actionContainer: some View {
         GestureActionDoors(
             choosingApp: $choosingApp,
+            choosingShortcut: $choosingShortcut,
             editingLua: $editingLua,
             picking: $picking,
+            core: model.core,
             id: entry.id,
             current: run,
             subject: GestureListWords.input(key.input),

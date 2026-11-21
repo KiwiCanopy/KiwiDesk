@@ -12763,7 +12763,8 @@ construction rather than by promise:
   is the defect this entry exists to forbid.
 - **Config presence.** Simple hides what a user made, so it
   names it instead: the header's subtitle counts the App Rules,
-  shortcut layers and Lua bindings it does not draw ("kept in
+  shortcut layers, Lua bindings and Apple Shortcut keys (#3526) it
+  does not draw ("kept in
   Advanced ›"), a Space with overrides keeps its Customize
   badge, and a pin to a missing screen keeps "Pin offline".
   Hiding a thing the user made without saying so is still
@@ -17452,6 +17453,14 @@ Home, the other two add a navigator.
   shortcut groups, one word in every catalog. Open applications
   now follows Layers, so #1520's refusal to move it up concerned
   the one long page and is spent.
+  *Amended (#3526, owner 2026-11-20):* Personal also holds **Apple
+  Shortcuts**, between Open applications and Key sequences: keys
+  that run one of the user's Apple Shortcuts. It is its own card
+  because Open applications is about reaching an app's window, and a
+  shortcut runs an automation with no window and a conflict blind
+  spot of its own (a chord set in the Shortcuts app is unseen). Like
+  Key sequences it is shut with a summary until a row exists, and
+  its rows are fixed once added, as an app row's app is (#2708).
 - **Mouse & Trackpad** opens with the Mouse and Trackpad binding
   cards, the part's own settings (#3298), then holds open groups
   ordered by where the hand is — on your windows, on the

@@ -28,6 +28,7 @@ extension SequenceActionMenu {
                 request = SequencePickRequest(id: face.id)
             } label: {
                 HStack(spacing: 4) {
+                    shortcutGlyph
                     appIcon
                     commandGlyph
                     titleText
@@ -61,12 +62,26 @@ extension SequenceActionMenu {
 
     /// An action's catalogue glyph, as its Shortcuts row draws it.
     @ViewBuilder var commandGlyph: some View {
-        if marksKind, bundleID == nil,
+        if marksKind, bundleID == nil, shortcutName == nil,
             let command = catalog.command(running: face.lua),
             let glyph = ShortcutsReferenceBuilder.icon(for: command)
         {
             ShortcutGlyphView(glyph: glyph)
         }
+    }
+
+    /// An Apple Shortcut key's mark, a warning where the Shortcuts
+    /// app no longer lists it (#3526).
+    @ViewBuilder var shortcutGlyph: some View {
+        if let shortcutName {
+            AppleShortcutMark(name: shortcutName)
+        }
+    }
+
+    /// The Apple Shortcut a key runs; nil for every other key.
+    var shortcutName: String? {
+        guard face.kind == .application else { return nil }
+        return AppleShortcutAction.name(from: face.lua)
     }
 
     /// The app an app key opens; nil for every other key.
@@ -86,6 +101,7 @@ extension SequenceActionMenu {
         if let bundleID {
             return KeybindingCatalog.displayName(forBundleID: bundleID)
         }
+        if let shortcutName { return shortcutName }
         if let command = catalog.command(running: face.lua) {
             return command.resolvedLabel
         }
