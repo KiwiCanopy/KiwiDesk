@@ -302,7 +302,7 @@
   "guide_faq_3_q": "Is my data private?",
   "guide_faq_4_a": "KiwiDesk is a small, native macOS app built to sit quietly in the background. It only does work when your windows actually change, and its animations run at each screen's own natural refresh rate. Day to day, you shouldn't notice it in the background at all. If you'd rather have no animation at all, one switch in Looks &amp; Animations turns off every window animation at once, and KiwiDesk already honors Reduce Motion if that's on in your System Settings.",
   "guide_faq_4_q": "Will it slow down my Mac or drain the battery?",
-  "guide_faq_5_a": "Quit KiwiDesk from its menu-bar icon and remove the app like any other. If you installed it with Homebrew, run <code>brew uninstall --cask kiwidesk</code>. The moment it's off, your windows behave exactly like normal macOS windows again — free to drag, resize, and overlap. Nothing sticks, and nothing of yours was ever changed.",
+  "guide_faq_5_a": "Quit KiwiDesk from its menu-bar icon and move the app to the Trash. The moment it's off, your windows behave exactly like normal macOS windows again — free to drag, resize, and overlap. With Homebrew, run <code>brew uninstall --zap --cask kiwidesk</code> instead; it also removes your settings and every file KiwiDesk kept. Installed from the <code>.dmg</code> or with Nix? The <a href=\"/docs/#uninstall\">uninstall steps</a> list the few files to delete by hand and the Accessibility entry to remove.",
   "guide_faq_5_q": "How do I uninstall it?",
   "guide_faq_6_a": "Yes. ⌃⌥M fills the screen with the tiled window you’re in, without macOS’s full-screen mode, and the same key puts it back in its place.",
   "guide_faq_6_q": "Can one window still take the whole screen?",

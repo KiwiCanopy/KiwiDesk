@@ -73,3 +73,51 @@ Settings › Privacy & Security › Accessibility**.
 
 To build it yourself, `swift build -c release` produces
 `.build/release/KiwiDesk`, which takes the same commands.
+
+## Uninstall
+
+Quit KiwiDesk from its menu-bar icon first.
+
+With Homebrew, one command removes the app, the `kiwidesk` link,
+the login service and every file below:
+
+```sh
+brew uninstall --zap --cask kiwidesk
+```
+
+Drop `--zap` to keep your settings for a later reinstall.
+
+From the `.dmg`:
+
+1. If you ran `kiwidesk service start`, run
+   `kiwidesk service stop`. Without the CLI link, run
+   `/Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk service stop`.
+2. Move `/Applications/KiwiDesk.app` to the Trash.
+3. If you linked the CLI, remove the link:
+   `sudo rm /usr/local/bin/kiwidesk`.
+4. Remove the files KiwiDesk keeps in your home folder:
+
+   ```sh
+   defaults delete com.kiwicanopy.kiwidesk
+   rm -rf ~/.config/KiwiDesk \
+     ~/Library/Application\ Support/KiwiDesk \
+     ~/Library/Application\ Support/CrashReporter/KiwiDesk_*.plist \
+     ~/Library/Caches/com.kiwicanopy.kiwidesk \
+     ~/Library/HTTPStorages/com.kiwicanopy.kiwidesk \
+     ~/Library/WebKit/com.kiwicanopy.kiwidesk \
+     ~/Library/Preferences/com.kiwicanopy.kiwidesk.plist \
+     ~/Library/LaunchAgents/org.kiwidesk.KiwiDesk.plist
+   ```
+
+   `~/.config/KiwiDesk` holds your settings, profiles and
+   `init.lua`; leave it out of the command to keep them.
+
+With Nix, run step 1, then remove `programs.kiwidesk` and run
+`home-manager switch`, which removes the app and a managed
+`init.lua`; then run step 4.
+
+However you installed it, remove KiwiDesk from **System Settings ›
+Privacy & Security › Accessibility** with the − button; macOS
+keeps that entry until you do. If you added KiwiDesk to Claude
+Desktop, remove it from Claude Desktop's extensions. A folder
+chosen under **Sync across Macs** keeps its copy of your setup.
