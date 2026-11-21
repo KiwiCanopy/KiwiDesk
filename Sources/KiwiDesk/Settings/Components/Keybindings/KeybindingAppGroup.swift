@@ -126,8 +126,7 @@ struct ApplicationsGroup: View {
 
     /// An app row; an Apple Shortcut row is its own card's (#3526).
     static func isAppRow(_ binding: KeyBinding) -> Bool {
-        binding.kind == .application
-            && AppleShortcutAction.name(from: binding.lua) == nil
+        AppleShortcutAction.isAppRow(binding)
     }
 
     /// Removes the binding from the draft.

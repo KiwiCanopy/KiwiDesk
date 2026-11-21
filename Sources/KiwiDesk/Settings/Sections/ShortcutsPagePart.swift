@@ -155,9 +155,7 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
     /// The part drawing a binding row the recorder names by id.
     private static func owner(of binding: KeyBinding) -> ShortcutsPagePart {
         if PocketAppLuaArg.bundleID(of: binding.lua) != nil { return .pocket }
-        if AppleShortcutAction.name(from: binding.lua) != nil {
-            return .appleShortcuts
-        }
+        if AppleShortcutAction.isRow(binding) { return .appleShortcuts }
         switch binding.kind {
         case .application: return .openApplications
         case .custom: return .luaBindings

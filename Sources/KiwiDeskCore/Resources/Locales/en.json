@@ -2624,7 +2624,7 @@
   "shortcuts.sequence.add_key": "Add Key",
   "shortcuts.sequence.also": "Also %1$@",
   "shortcuts.sequence.app": "App…",
-  "shortcuts.sequence.apple_shortcut": "Shortcut…",
+  "shortcuts.sequence.apple_shortcut": "Apple Shortcut…",
   "shortcuts.sequence.caption": "Also known as a leader key. Press the first chord (the leader) and a panel lists the next keys. A key can open more keys; the last key runs its action. esc cancels, ⌫ goes back one step.",
   "shortcuts.sequence.change_action": "Change action…",
   "shortcuts.sequence.choose": "Choose…",

@@ -319,7 +319,7 @@ struct SequenceActionMenu: View {
     static let appSymbol = "plus.square.on.square"
 
     static var shortcutLabel: String {
-        L("shortcuts.sequence.apple_shortcut", "Shortcut…")
+        L("shortcuts.sequence.apple_shortcut", "Apple Shortcut…")
     }
 
     static var luaLabel: String {

@@ -153,7 +153,7 @@ struct SequenceNodeRow: View {
         if choosingApp {
             AppPickerButton(
                 placeholder: L("shortcuts.choose_app", "Choose app…"),
-                selection: node.kind == .application ? name : nil,
+                selection: AppleShortcutAction.isAppRow(node) ? name : nil,
                 onPick: pickApp,
                 escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
                 onEscape: {

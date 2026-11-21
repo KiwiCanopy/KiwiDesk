@@ -20,7 +20,7 @@ struct AppleShortcutsCard: View {
     @State private var displayOrder: [UUID] = []
 
     private var shortcuts: [KeyBinding] {
-        bindings.filter { AppleShortcutAction.name(from: $0.lua) != nil }
+        bindings.filter(AppleShortcutAction.isRow)
     }
 
     var body: some View {

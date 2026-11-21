@@ -7777,23 +7777,25 @@ the Shortcuts app lists it (`shortcuts list` in Terminal prints
 every name).
 
 **Does:** runs that shortcut, as `shortcuts run` does, without
-waiting for it to finish. The name is passed as an argument, never
-through a shell, so quotes and spaces need no escaping. Pressing
-the key again while the same shortcut is still running does
-nothing; a run still going after two minutes is stopped.
+waiting for it to finish. A name with spaces or quotes runs as
+written. Pressing the key again while the same shortcut is still
+running does nothing; after two minutes KiwiDesk stops waiting on
+a run, and the key starts the shortcut again.
 
 - A name the Shortcuts app does not list — renamed or deleted —
-  is refused with a pill naming it. Over the CLI the answer is
-  `unknown shortcut: <name>`.
+  is refused with a pill naming it. KiwiDesk checks the list as it
+  is at the press, so a shortcut made a moment ago runs. If the
+  list cannot be read, the shortcut runs and the Shortcuts app
+  answers for it.
 - In Settings, **Shortcut…** beside **App…** and **Lua…** in a
   key sequence's or a gesture's action picker, and **Choose
   shortcut…** in Shortcuts ▸ Personal ▸ **Apple Shortcuts**, pick
-  one from the list. A key whose shortcut has gone is marked there.
+  one from the list. A key whose shortcut has gone is marked on the
+  Apple Shortcuts card and in a key sequence.
 - A keyboard shortcut set in the Shortcuts app itself is not
   checked for conflicts: if KiwiDesk binds the same keys,
-  KiwiDesk's binding wins and the shortcut does not run.
-- `kiwidesk mcp` routes it through `run_destructive`, since a
-  shortcut can do anything.
+  KiwiDesk's binding wins and the shortcut does not run (measured
+  on macOS 27.2.1, #3526).
 
 **Example:**
 

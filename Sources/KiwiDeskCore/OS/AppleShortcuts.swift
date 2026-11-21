@@ -3,24 +3,34 @@ import Foundation
 
 /// The user's Apple Shortcuts, read and run through
 /// `/usr/bin/shortcuts` as an argument list, never a shell
-/// (#3526). Every child goes through `ExecLauncher`, so nothing
-/// here blocks the main actor; Core hands plain names and the GUI
-/// narrates them.
+/// (#3526). Runs and background list reads go through
+/// `ExecLauncher`; the one wait on the main actor is `readNow`, a
+/// list read bounded by `readNowTimeout`, which a press takes only
+/// when the name is not in the last list. Core hands plain names
+/// and the GUI narrates them.
 @MainActor
 public final class AppleShortcuts {
+    /// The mark a Shortcut row, its picker entry and its pill wear.
+    nonisolated public static let symbol = "square.2.layers.3d"
     /// The tool the Shortcuts app ships; a test core pins another.
     var tool = "/usr/bin/shortcuts"
     /// Bounds a hung run, and how long dedup holds its name; a
     /// shortcut asking for input may wait on the user that long.
     static let runTimeout: TimeInterval = 120
-    /// Bounds a hung `shortcuts list`, measured at 0.01 s.
+    /// Bounds a hung background `shortcuts list`.
     static let listTimeout: TimeInterval = 10
+    /// Bounds the press's own list read, measured at 0.01 s: past
+    /// it the list reads as unreadable and the press runs anyway.
+    static let readNowTimeout: TimeInterval = 1
     /// The Shortcuts app, whose deactivation may follow an edit.
     static let appBundleID = "com.apple.shortcuts"
 
     private let exec: ExecLauncher
     /// The last list read, nil until one finished.
     public private(set) var names: Set<String>?
+    /// Every list read that succeeded, sorted, for the GUI's one
+    /// copy; wired once at app launch.
+    public var onNamesChanged: @MainActor ([String]) -> Void = { _ in }
     /// Callers waiting on the list read in flight.
     private var waiting: [@MainActor ([String]?) -> Void] = []
     private var observer: NSObjectProtocol?
@@ -58,8 +68,8 @@ public final class AppleShortcuts {
         refresh()
     }
 
-    /// Re-reads the list; `done` gets it sorted, nil where the
-    /// read failed. Concurrent calls share one child.
+    /// Re-reads the list in the background; `done` gets it sorted,
+    /// nil where the read failed. Concurrent calls share one child.
     public func refresh(
         _ done: (@MainActor ([String]?) -> Void)? = nil
     ) {
@@ -85,6 +95,42 @@ public final class AppleShortcuts {
         }
     }
 
+    /// Reads the list now, waiting at most `readNowTimeout`; nil
+    /// where it could not be read in time. A press's miss takes it,
+    /// so a shortcut made or renamed since the last read is seen.
+    func readNow() -> [String]? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: tool)
+        process.arguments = ["list"]
+        let out = Pipe()
+        process.standardOutput = out
+        process.standardError = FileHandle.nullDevice
+        let exited = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in exited.signal() }
+        guard (try? process.run()) != nil else { return nil }
+        // Drained beside the wait, so a long list cannot fill the
+        // pipe and stall the exit.
+        nonisolated(unsafe) var data = Data()
+        let drained = DispatchGroup()
+        drained.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            data = out.fileHandleForReading.readDataToEndOfFile()
+            drained.leave()
+        }
+        guard
+            exited.wait(timeout: .now() + Self.readNowTimeout)
+                == .success
+        else {
+            process.terminate()
+            return nil
+        }
+        drained.wait()
+        guard process.terminationStatus == 0 else { return nil }
+        let list = Self.parse(String(decoding: data, as: UTF8.self))
+        store(list)
+        return list
+    }
+
     /// Runs `name`; the list is re-read once the run ends, so a
     /// rename the run itself made is seen.
     @discardableResult
@@ -100,10 +146,15 @@ public final class AppleShortcuts {
     }
 
     private func listed(_ list: [String]?) {
-        if let list { names = Set(list) }
+        if let list { store(list) }
         let callers = waiting
         waiting = []
         callers.forEach { $0(list) }
+    }
+
+    private func store(_ list: [String]) {
+        names = Set(list)
+        onNamesChanged(list)
     }
 
     /// One name per line; blank lines dropped, order by name.

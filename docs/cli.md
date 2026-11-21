@@ -993,7 +993,9 @@ is opened. See [move_here](lua-reference.md#move_here).
 Shortcuts and runs it, as `shortcuts run` does, without waiting
 for it to finish (`kiwidesk run_shortcut "Start Meeting"`). A name
 the Shortcuts app does not list answers `unknown shortcut: <name>`.
-See [run_shortcut](lua-reference.md#run_shortcut).
+`kiwidesk mcp` sends it only through `run_destructive`, and
+`shortcut.set` does not bind it. See
+[run_shortcut](lua-reference.md#run_shortcut).
 :::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,

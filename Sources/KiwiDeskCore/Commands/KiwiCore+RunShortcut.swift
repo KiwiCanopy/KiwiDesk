@@ -1,39 +1,31 @@
 import Foundation
 
 /// `run_shortcut` (#3526): runs one of the user's Apple Shortcuts
-/// by name through `AppleShortcuts`. A name the last list read does
-/// not carry is refused with a pill naming it, and the list is read
-/// again; before any list has been read, the press waits on one.
+/// by name through `AppleShortcuts`. A name the last list lacks is
+/// checked against a fresh read before it is refused, so a shortcut
+/// made or renamed since is never refused; a list that cannot be
+/// read refuses nothing, and `shortcuts run` answers for itself.
 extension KiwiCore {
     func runShortcut(_ args: [JSONValue]) -> CommandResponse {
         guard let name = args.first?.stringValue, !name.isEmpty else {
             return .fail("expected a shortcut name")
         }
         let library = appleShortcuts
-        guard let names = library.names else {
-            library.refresh { [weak self] list in
-                guard let self else { return }
-                if list?.contains(name) ?? false {
-                    self.startShortcut(name)
-                } else {
-                    self.refuseUnknownShortcut(name)
-                }
+        if library.names?.contains(name) != true {
+            switch library.readNow() {
+            case let list? where !list.contains(name):
+                refuseUnknownShortcut(name)
+                return .fail("unknown shortcut: \(name)")
+            case nil:
+                onLog("run_shortcut: list unreadable, running '\(name)'")
+            default:
+                break
             }
-            return .ok()
         }
-        guard names.contains(name) else {
-            refuseUnknownShortcut(name)
-            library.refresh()
-            return .fail("unknown shortcut: \(name)")
-        }
-        startShortcut(name)
-        return .ok()
-    }
-
-    private func startShortcut(_ name: String) {
-        if appleShortcuts.run(name) {
+        if library.run(name) {
             onLog("run_shortcut: running '\(name)'")
         }
+        return .ok()
     }
 
     /// The pill on the focused window, else centred on the active
@@ -46,7 +38,7 @@ extension KiwiCore {
                 + "Shortcuts app",
             name
         )
-        let symbol = "square.2.layers.3d"
+        let symbol = AppleShortcuts.symbol
         if let window = focusedWindowID, refusalPillFrame(window) != nil {
             soundIfDrawn(
                 flashRefusalPill(

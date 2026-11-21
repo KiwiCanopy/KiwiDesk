@@ -91,6 +91,10 @@ enum KeybindingImportClassifier {
         } else if let label = navigation[binding.lua] {
             binding.kind = .navigation
             binding.label = label
+        } else if let name = AppleShortcutAction.name(from: binding.lua) {
+            // Kind and Lua agree after any load (#3526).
+            binding.kind = .application
+            binding.label = name
         } else if let bundleID = KeybindingCatalog.appBundleID(
             from: binding.lua
         ) {

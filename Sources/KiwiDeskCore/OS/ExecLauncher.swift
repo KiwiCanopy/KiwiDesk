@@ -105,7 +105,9 @@ public final class ExecLauncher {
         _ executable: String,
         _ arguments: [String]
     ) -> String {
-        ([executable] + arguments).joined(separator: " ")
+        // A separator no argument holds, apart from every shell
+        // command string, so no argv split or `exec` text collides.
+        "argv\u{0}" + ([executable] + arguments).joined(separator: "\u{0}")
     }
 
     /// The one spawn both launches share; `command` keys the

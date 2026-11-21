@@ -8,8 +8,9 @@ import SwiftUI
 /// no `KeyBinding` shape to migrate. It is filed as an `.application`
 /// row, the picker family that launches something.
 enum AppleShortcutAction {
-    /// The mark a Shortcut row, its picker entry and its pill wear.
-    static let symbol = "square.2.layers.3d"
+    /// The mark a Shortcut row and its picker entry wear: Core's,
+    /// which its pill wears too.
+    static let symbol = AppleShortcuts.symbol
 
     private static let prefix = "KiwiDesk.run_shortcut(\""
     private static let suffix = "\")"
@@ -58,6 +59,18 @@ enum AppleShortcutAction {
         return escaping ? nil : name
     }
 
+    /// Whether `binding` runs an Apple Shortcut: every reader asks
+    /// here, never `kind` alone, since the row is filed as an app's.
+    static func isRow(_ binding: KeyBinding) -> Bool {
+        name(from: binding.lua) != nil
+    }
+
+    /// An app row of the Open applications card: `.application`
+    /// that runs no Apple Shortcut.
+    static func isAppRow(_ binding: KeyBinding) -> Bool {
+        binding.kind == .application && !isRow(binding)
+    }
+
     /// The binding a pick writes.
     static func binding(
         _ name: String,
@@ -93,27 +106,40 @@ enum AppleShortcutAction {
     }
 }
 
-/// The user's Apple Shortcuts as Core last read them (#3526): one
-/// list the pickers and the rows share, so a row knows whether its
-/// shortcut still exists. Core reads the list off the main actor.
+/// The user's Apple Shortcuts as Core last read them (#3526): the
+/// GUI's one copy of `AppleShortcuts.names`, kept by Core's
+/// `onNamesChanged`, so the pickers and the rows agree with what a
+/// press decides by.
 @MainActor
 final class AppleShortcutLibrary: ObservableObject {
     static let shared = AppleShortcutLibrary()
 
-    /// Sorted names, nil until a read finished or where it failed.
+    /// Sorted names, nil until a read finished.
     @Published private(set) var names: [String]?
 
-    /// Re-reads the list through `core`.
-    func reload(from core: KiwiCore) async {
-        if let list = await core.appleShortcuts.list() {
-            if list != names { names = list }
+    /// Mirrors `core`'s list from now on; called once at launch.
+    func attach(_ core: KiwiCore) {
+        if let names = core.appleShortcuts.names {
+            take(Array(names).sorted())
         }
+        core.appleShortcuts.onNamesChanged = { [weak self] list in
+            self?.take(list)
+        }
+    }
+
+    /// Asks `core` for a fresh read; its answer lands here too.
+    func reload(from core: KiwiCore) async {
+        if let list = await core.appleShortcuts.list() { take(list) }
     }
 
     /// Whether `name` is known to be gone; false while unread.
     func isMissing(_ name: String) -> Bool {
         guard let names else { return false }
         return !names.contains(name)
+    }
+
+    private func take(_ list: [String]) {
+        if list != names { names = list }
     }
 
     #if DEBUG

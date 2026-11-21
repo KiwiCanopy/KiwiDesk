@@ -1090,6 +1090,10 @@ shortcuts you added under **Open applications** and **Lua
 bindings** except one sitting on a key a default needs; the
 confirmation counts those.
 
+:::unreleased
+Keys under **Apple Shortcuts** are kept the same way.
+:::
+
 **Restore…** puts the defaults back in the profile you are
 editing. When another profile has changed them too, the
 confirmation names it and asks whether to restore there as well.

@@ -2315,6 +2315,13 @@ step lists its branches and end keys alone (#3428,
 catalogue lookup handed to `withGestures`, never a closure per
 field.
 
+**An Apple Shortcut key is an `.application` row whose Lua runs
+`run_shortcut` (#3526), so a reader meaning "an app row" asks
+`AppleShortcutAction.isAppRow`, and one meaning "a shortcut row"
+`AppleShortcutAction.isRow`, never the kind alone**
+(`ApplicationKindReaderCensusTests`, whose register a new
+comparison joins with its reason).
+
 **An app's Pocket key row is read through
 `PocketAppLuaArg.bundleID(of:)` alone** — profiles.md ▸ *A verb
 the GUI writes into a stored binding* owns the obligation.

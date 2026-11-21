@@ -97,8 +97,7 @@ extension SettingsModel {
             luaBindings: config.layers.flatMap(\.bindings)
                 .filter(ShortcutsGates.isLuaBinding).count,
             appleShortcuts: config.layers.flatMap(\.bindings)
-                .filter { AppleShortcutAction.name(from: $0.lua) != nil }
-                .count
+                .filter(AppleShortcutAction.isRow).count
         )
     }
 

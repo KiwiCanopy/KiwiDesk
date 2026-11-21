@@ -141,8 +141,7 @@ extension ShortcutsReferenceBuilder {
     ) -> [ShortcutRow] {
         layer.bindings
             .filter {
-                $0.kind == .application && !$0.combo.isEmpty
-                    && AppleShortcutAction.name(from: $0.lua) == nil
+                AppleShortcutAction.isAppRow($0) && !$0.combo.isEmpty
             }
             .map { binding -> ShortcutRow in
                 consumed.insert(binding.id)

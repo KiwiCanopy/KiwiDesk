@@ -73,6 +73,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Shorten the hover-help delay before any window opens
         // (`ToolTipDelay` carries why).
         ToolTipDelay.install()
+        // Settings' Shortcut rows mirror Core's one list (#3526).
+        AppleShortcutLibrary.shared.attach(core)
 
         // Adopt persisted language before views read L(_:_:) (#9).
         LocalizationManager.shared.adoptPersistedSelection(

@@ -2624,7 +2624,7 @@
   "shortcuts.sequence.add_key": "加入按鍵",
   "shortcuts.sequence.also": "另可用 %1$@",
   "shortcuts.sequence.app": "App…",
-  "shortcuts.sequence.apple_shortcut": "捷徑…",
+  "shortcuts.sequence.apple_shortcut": "Apple 捷徑…",
   "shortcuts.sequence.caption": "也稱為前導鍵。按下第一個快速鍵（前導鍵），面板會列出接下來的按鍵。一個按鍵可以開啟更多按鍵；最後一個按鍵執行其操作。esc 取消，⌫ 返回上一步。",
   "shortcuts.sequence.change_action": "變更操作…",
   "shortcuts.sequence.choose": "選擇…",
