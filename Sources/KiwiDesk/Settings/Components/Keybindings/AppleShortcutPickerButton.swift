@@ -150,7 +150,7 @@ struct AppleShortcutPickerButton: View {
             .padding(.horizontal, 4)
         }
         .buttonStyle(.plain)
-        .hoverHighlight(rest: .clear, edge: nil, padding: 0)
+        .rowHoverHighlight()
         .accessibilityAddTraits(picked ? .isSelected : [])
     }
 

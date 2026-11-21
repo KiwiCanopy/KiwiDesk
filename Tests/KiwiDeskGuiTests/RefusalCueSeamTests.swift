@@ -79,6 +79,11 @@ struct RefusalCueSeamTests {
             + joined.occurrences(
                 of: "soundIfDrawn(flashRefusalPill("
             )
+            // A refusal with no focused window, on its screen
+            // (#3526).
+            + joined.occurrences(
+                of: "soundIfDrawn(borders.flashScreenPill("
+            )
         #expect(drawn > 0)
         #expect(joined.occurrences(of: "soundIfDrawn(") == drawn + 1)
         // And the speaker is reached only THROUGH that gate. The

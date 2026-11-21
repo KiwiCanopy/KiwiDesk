@@ -139,6 +139,8 @@ extension RefusalCueSeamTests {
                 "KiwiCore+Pocket.swift": .sounded(1),
                 "KiwiCore+PocketApp.swift": .sounded(1),
                 "KiwiCore+DesktopMoveRefusal.swift": .sounded(1),
+                // An unknown Apple Shortcut's name (#3526).
+                "KiwiCore+RunShortcut.swift": .sounded(1),
                 // A Hyper press with nothing to do (#2480): silent
                 // by ruling, on a window or else the shelf.
                 "KiwiCore+HyperBarePress.swift": .unsounded(2),

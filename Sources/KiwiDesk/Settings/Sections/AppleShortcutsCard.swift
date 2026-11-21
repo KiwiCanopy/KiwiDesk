@@ -87,7 +87,7 @@ struct AppleShortcutsCard: View {
     }
 
     private func name(of binding: KeyBinding) -> String {
-        AppleShortcutAction.name(from: binding.lua) ?? binding.label
+        AppleShortcutAction.name(from: binding.lua) ?? ""
     }
 
     private func row(_ binding: KeyBinding) -> some View {
@@ -116,7 +116,6 @@ struct AppleShortcutsCard: View {
                 missingLine(name)
             }
         }
-        .id(binding.id.uuidString)
     }
 
     /// Why the row does nothing, drawn, not hover text alone.
