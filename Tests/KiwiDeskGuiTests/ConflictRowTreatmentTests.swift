@@ -40,8 +40,8 @@ struct ConflictRowTreatmentTests {
             // The row draws it in `danger` with its shape cue.
             // Spacing and font are glue, as above.
             "case.dead(letsentence):"
-                + "error(sentence).accessibilityHidden(true)",
-            "privatefuncerror(_text:String)->someView{"
+                + "deadLine(sentence).accessibilityHidden(true)",
+            "privatefuncdeadLine(_text:String)->someView{"
                 + "HStack(alignment:.firstTextBaseline,spacing:6){"
                 + "Image(systemName:\"exclamationmark.triangle.fill\")"
                 + ".accessibilityHidden(true)Text(text)"

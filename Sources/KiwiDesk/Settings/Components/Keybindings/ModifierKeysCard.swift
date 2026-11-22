@@ -118,9 +118,12 @@ struct ModifierKeysCard: View {
     }
 
     /// The refused key's reason, a line across the row under the
-    /// recorder, drawn as the recorders' refusals are (#3553).
+    /// recorder (#3258's shape).
     private var refusal: some View {
-        RecorderCaptionLines(captions: [.refused(HyperKeyWords.typesText)])
+        Text(HyperKeyWords.typesText)
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink2)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
