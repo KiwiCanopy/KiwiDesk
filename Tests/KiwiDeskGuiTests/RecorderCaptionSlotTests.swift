@@ -39,6 +39,11 @@ struct RecorderCaptionSlotTests {
         return text[start.upperBound..<index]
     }
 
+    /// The views a recorder's `body` may build itself.
+    private static let layoutViews: Set<String> = [
+        "VStack", "HStack", "RecorderCaptionLines",
+    ]
+
     private static let recorders = [
         components + "Keybindings/Recorder/KeyRecorderField.swift",
         components + "Gestures/GestureChordRecorder.swift",
@@ -70,14 +75,26 @@ struct RecorderCaptionSlotTests {
             ] {
                 #expect(text.contains(needle), "\(path): \(needle)")
             }
-            // Its body draws no text of its own beside the lines,
-            // under any name: only the lines view may say anything.
+            // Its body builds no view beside its stacks and the
+            // lines view, and mounts nothing named a caption. Trade:
+            // a view drawn through a helper property, or built by a
+            // static factory (`Type.make(`), is unseen: the scan reads
+            // `body` alone and sees a capitalised call only.
             let run = Self.body(text)
-                .replacingOccurrences(of: "RecorderCaptionLines(", with: "")
-                .replacingOccurrences(of: "publishesCaptions(", with: "")
             #expect(!run.isEmpty, "\(path)")
-            #expect(!run.contains("Text("), "\(path)")
-            #expect(!run.contains("Caption"), "\(path)")
+            let built = Set(
+                run.matches(of: /(?:^|\W)([A-Z]\w*)\(/)
+                    .map { String($0.output.1) }
+            )
+            #expect(built.isSubset(of: Self.layoutViews), "\(path): \(built)")
+            #expect(
+                !run.replacingOccurrences(of: "publishesCaptions(", with: "")
+                    .replacingOccurrences(
+                        of: "RecorderCaptionLines(",
+                        with: ""
+                    ).contains("Caption"),
+                "\(path)"
+            )
         }
         let lines = try Self.source(
             Self.components + "Keybindings/Recorder/"
