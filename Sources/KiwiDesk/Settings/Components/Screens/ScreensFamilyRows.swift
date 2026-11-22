@@ -1,3 +1,5 @@
+import CoreGraphics
+import Foundation
 import KiwiDeskCore
 
 /// Instance representing expanded row in Screens census (#678).
@@ -29,6 +31,9 @@ struct ScreensFamilyRows {
     let resolutions: [SpaceID: SpaceResolution]
     let pins: [SpaceID: String]
     let displays: [Display]
+    /// The draft's splits by fingerprint (#3517); a screen with
+    /// none, or a whole one, is one area 0.
+    var splits: [String: ScreenSplit] = [:]
 
     /// Connected screens in left-to-right desk reading order.
     var orderedDisplays: [Display] {
@@ -62,11 +67,46 @@ struct ScreensFamilyRows {
         spaces.filter { mainSpaces.contains($0) }
     }
 
-    /// Total spaces active on screen including follows-main spaces on main
-    /// screen.
-    func held(on display: Display, isMain: Bool) -> Int {
-        chips(on: display.fingerprint).count
-            + (isMain ? trayChips.count : 0)
+    /// Spaces an area holds — `key` names it as a pin stores it —
+    /// with the follows-main Spaces where it is the first area of
+    /// the main screen (#3517 ruling 29).
+    func held(on key: String, isMain: Bool) -> Int {
+        let first = ScreenAreaKey(parsing: key).areaID == 0
+        return chips(on: key).count
+            + (isMain && first ? trayChips.count : 0)
+    }
+
+    /// `display`'s areas in reading order, each with the key a pin
+    /// stores; a whole screen is one area under its fingerprint.
+    func areas(of display: Display) -> [(area: ScreenArea, key: String)] {
+        Self.areas(of: display, in: splits)
+    }
+
+    /// `areas(of:)` over a draft's splits, without a rows pass.
+    static func areas(
+        of display: Display,
+        in splits: [String: ScreenSplit]
+    ) -> [(area: ScreenArea, key: String)] {
+        guard let split = splits[display.fingerprint], !split.isWhole
+        else {
+            let whole = ScreenArea(
+                id: 0,
+                x: 0,
+                y: 0,
+                w: Int(display.frame.width),
+                h: Int(display.frame.height)
+            )
+            return [(whole, display.fingerprint)]
+        }
+        return ScreenArea.readingOrder(split.areas).map { area in
+            (
+                area,
+                ScreenAreaKey(
+                    fingerprint: display.fingerprint,
+                    areaID: area.id
+                ).description
+            )
+        }
     }
 
     /// Stored pins for currently disconnected screens — read from
@@ -78,7 +118,11 @@ struct ScreensFamilyRows {
         let connected = Set(displays.map(\.fingerprint))
         return
             pins
-            .filter { !connected.contains($0.value) }
+            .filter {
+                !connected.contains(
+                    ScreenAreaKey(parsing: $0.value).fingerprint
+                )
+            }
             .filter { !mainSpaces.contains($0.key) }
             .map { OrphanPin(space: $0.key, fingerprint: $0.value) }
             .sorted { $0.space.raw < $1.space.raw }
@@ -92,7 +136,7 @@ struct ScreensFamilyRows {
         var seen: Set<SpaceID> = []
         return
             orderedDisplays
-            .flatMap { chips(on: $0.fingerprint) }
+            .flatMap { areas(of: $0).flatMap { chips(on: $0.key) } }
             .filter { seen.insert($0.space).inserted }
     }
 

@@ -89,6 +89,16 @@ extension ScreenEdged {
             scope.screens.contains($0.key)
         }
     }
+
+    /// A merged-away area's entry moved to the area that absorbed
+    /// it (#3517 ruling 22), where that area has none of its own;
+    /// otherwise the survivor keeps its edge. No other screen moves.
+    public mutating func moveScreen(_ old: String, to new: String) {
+        guard let moved = edgeOverride.removeValue(forKey: old) else {
+            return
+        }
+        if edgeOverride[new] == nil { edgeOverride[new] = moved }
+    }
 }
 
 extension TilingSettings {

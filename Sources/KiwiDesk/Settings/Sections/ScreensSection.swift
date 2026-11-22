@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import SwiftUI
 
@@ -6,7 +7,11 @@ import SwiftUI
 struct ScreensSection: View {
     @ObservedObject var model: SettingsModel
     @State var advancedExpanded = false
-    @State var selection: DisplayID?
+    @State var selection: ScreenSelection?
+    @State var renameRequest: AreaRenameRequest?
+    @State var sizesRequest: AreaSizesRequest?
+    /// The area giving way while Adjust… is open (#3517 ruling 26).
+    @State var givingWay: ScreenSelection?
 
     var body: some View {
         let rows = model.screenRows
@@ -28,12 +33,16 @@ struct ScreensSection: View {
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()
         }
+        .onChange(of: model.config.settings.displayAreas) {
+            selection = normalized(selection, rows: model.screenRows)
+        }
     }
 
     private var areaCaption: String {
         L(
-            "monitors.area.caption",
-            "Drag a Space onto the screen it belongs to."
+            "monitors.picture.caption",
+            "Drag a Space onto the screen it belongs to. Select a "
+                + "screen to split it into areas."
         )
     }
 
@@ -76,7 +85,9 @@ struct ScreensSection: View {
             ScreensPicture(
                 model: model,
                 rows: rows,
-                selection: $selection
+                selection: $selection,
+                givingWay: givingWay,
+                act: act
             )
             if ScreenArrangement.isApproximate(rows.displays) {
                 note(clampedNote)
@@ -86,6 +97,7 @@ struct ScreensSection: View {
             }
             ScreenShiftNote(model: model)
             selectionReadout(rows: rows)
+            selectionEditor(rows: rows)
         }
     }
 
@@ -124,12 +136,13 @@ struct ScreensSection: View {
         )
     }
 
-    /// Description of spaces assigned to selected screen.
+    /// Description of spaces assigned to the selected screen or
+    /// area.
     @ViewBuilder private func selectionReadout(
         rows: ScreensFamilyRows
     ) -> some View {
         if let display = rows.displays.first(where: {
-            $0.id == selection
+            $0.id == selection?.display
         }) {
             Text(readout(for: display, rows: rows))
                 .font(.caption)
@@ -142,12 +155,87 @@ struct ScreensSection: View {
         for display: Display,
         rows: ScreensFamilyRows
     ) -> String {
-        ScreenReadout.sentence(
+        let key = ScreenAreaKey(
+            fingerprint: display.fingerprint,
+            areaID: selection?.area ?? 0
+        ).description
+        return ScreenReadout.sentence(
             held: rows.held(
-                on: display,
+                on: key,
                 isMain: model.mainDisplay?.id == display.id
             ),
             showing: model.showingSpace(on: display.id)
+        )
+    }
+
+    /// The selection's editor (#3517 ruling 24), which leaves with
+    /// the selection: a selection is not a mode.
+    @ViewBuilder private func selectionEditor(
+        rows: ScreensFamilyRows
+    ) -> some View {
+        if let display = rows.displays.first(where: {
+            $0.id == selection?.display
+        }) {
+            Divider()
+            ScreenAreaEditor(
+                model: model,
+                display: display,
+                area: selection?.area,
+                rename: $renameRequest,
+                sizes: $sizesRequest,
+                givingWay: $givingWay,
+                select: { selection = $0 }
+            )
+        }
+    }
+
+    /// An area menu's request: select its area, then open the
+    /// popover on the editor that selection draws, a turn later.
+    private func act(_ action: ScreenAreaAction) {
+        switch action {
+        case .select(let next):
+            selection = next
+        case .rename(let area):
+            selection = area
+            DispatchQueue.main.async {
+                renameRequest = AreaRenameRequest(
+                    display: area.display,
+                    area: area.area ?? 0
+                )
+            }
+        case .adjust(let area):
+            selection = area
+            let display = model.displays.first { $0.id == area.display }
+            guard let split = display.flatMap(model.areaSplit) else {
+                return
+            }
+            DispatchQueue.main.async {
+                sizesRequest = AreaSizesRequest(
+                    display: area.display,
+                    seed: split
+                )
+            }
+        }
+    }
+
+    /// `selection` kept on an area that exists: area 0 once its
+    /// screen is split, none once it is whole again.
+    private func normalized(
+        _ selection: ScreenSelection?,
+        rows: ScreensFamilyRows
+    ) -> ScreenSelection? {
+        guard let selection,
+            let display = rows.displays.first(where: {
+                $0.id == selection.display
+            })
+        else { return nil }
+        guard let split = model.areaSplit(of: display) else {
+            return ScreenSelection(display: display.id, area: nil)
+        }
+        let kept = split.areas.contains { $0.id == selection.area }
+        return ScreenSelection(
+            display: display.id,
+            area: kept ? selection.area : 0
         )
     }
 

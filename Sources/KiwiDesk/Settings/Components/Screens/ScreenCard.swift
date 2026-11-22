@@ -1,7 +1,11 @@
+import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// Screen card in the Screens arrangement preview (#678, #758).
+/// Screen card in the Screens arrangement preview (#678, #758): the
+/// plate, outline, main glow and rise of one physical screen, laid
+/// with one `ScreenAreaPane` per area and, on a split screen, the
+/// dividers between them (#3517 rulings 24, 25, 27).
 struct ScreenCard: View {
     @ObservedObject var model: SettingsModel
     let display: Display
@@ -9,42 +13,32 @@ struct ScreenCard: View {
     let rows: ScreensFamilyRows
     /// Scaled dimensions from arrangement.
     let size: CGSize
-    @Binding var selection: DisplayID?
-    @State private var targeted = false
-    @State private var showingOverflow = false
+    @Binding var selection: ScreenSelection?
+    /// The area giving way in an open Adjust… popover.
+    let givingWay: ScreenSelection?
+    let act: (ScreenAreaAction) -> Void
     @State private var hovering = false
+    @State private var drag: AreaDividerDrag?
     @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
-        VStack(
-            alignment: .leading,
-            spacing: ScreenCardChips.stackSpacing
-        ) {
-            header
-            chips
+        let split = drag?.split ?? model.areaSplit(of: display)
+        ZStack(alignment: .topLeading) {
+            ForEach(panes(split), id: \.id) { pane in
+                paneView(pane, split: split)
+            }
+            if let stored = model.areaSplit(of: display) {
+                dividers(stored)
+                capsules(split)
+            }
         }
-        .padding(ScreenCardChips.cardPadding)
         .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity,
+            width: size.width,
+            height: size.height,
             alignment: .topLeading
         )
-        // The wash sits UNDER the chips, not over them: it is a
-        // ground signal, and painted on top it dimmed the very
-        // assignments you are dragging onto — worst for the
-        // automatic chip, which has no fill to survive it
-        // (#1240, owner 2026-09-06).
-        .background(dropWash)
         .background(plate)
         .overlay(border)
-        .overlay(
-            SelectionStroke(
-                selected: isSelected,
-                shape: RoundedRectangle(cornerRadius: 6),
-                style: .tint,
-                lineWidth: SettingsTheme.screenCardStrokeSelected
-            )
-        )
         .clipShape(RoundedRectangle(cornerRadius: 6))
         // Main screen accent glow (#758, ui-designer 2026-08-09).
         .compositingGroup()
@@ -58,20 +52,9 @@ struct ScreenCard: View {
         .onHover { hovering = $0 }
         // Over the next card, which would cover the shadow.
         .zIndex(risen ? 1 : 0)
-        .dropDestination(for: DraggableSpace.self) { items, _ in
-            pin(items)
-        } isTargeted: { hovering in
-            targeted = hovering
-        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(model.screenLabel(display))
-        .accessibilityValue(readout)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-        .accessibilityAction(named: selectActionName) {
-            toggleSelection()
-        }
-        .onTapGesture { toggleSelection() }
-        .help(readout)
+        .accessibilityValue(splitValue)
     }
 
     /// Checked by ID rather than fingerprint for duplicate screens
@@ -80,182 +63,198 @@ struct ScreenCard: View {
         model.mainDisplay?.id == display.id
     }
 
-    private var isSelected: Bool { selection == display.id }
-
-    /// A selected card rises too: its click deselects (#3042). A drag
-    /// answers with the wash instead.
+    /// A card rises under the pointer, selected or not: its click
+    /// deselects (#3042). A drag in flight answers with its wash.
     private var risen: Bool { hovering && isEnabled && !targeted }
 
-    /// No `Divider()`: at the floor a card is barely two chip
-    /// rows tall, and a rule across it spends height on chrome
-    /// the capsules below already provide.
-    private var header: some View {
-        HStack(spacing: 4) {
-            Text(model.screenLabel(display))
-                .font(.caption)
-                .bold()
-                .lineLimit(1)
-                .truncationMode(.tail)
-            if isMain {
-                BadgeChip(
-                    label: L("monitor_card.main_badge", "main")
-                )
-            }
-            Spacer(minLength: 0)
-        }
-        .frame(height: ScreenCardChips.headerHeight)
+    /// A Space dragged over the card: each pane owns its own drop,
+    /// so the card asks whether the pointer carries one.
+    @State private var targeted = false
+
+    private struct Pane {
+        let id: Int
+        let rect: CGRect
+        let key: String
+        let leads: Bool
     }
 
-    @ViewBuilder private var chips: some View {
-        let assignments = rows.chips(on: display.fingerprint)
-        if assignments.isEmpty {
-            Text(L("monitor_card.drop_here", "Drop a Space here"))
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
-        } else {
-            let split = ScreenCardChips.split(
-                assignments,
-                in: size
+    private func panes(_ split: ScreenSplit?) -> [Pane] {
+        ScreenArrangement.unitAreas(of: split).enumerated().map {
+            index,
+            unit in
+            Pane(
+                id: unit.id,
+                rect: ScreenArrangement.paneRect(unit.rect, in: size),
+                key: ScreenAreaKey(
+                    fingerprint: display.fingerprint,
+                    areaID: split == nil ? 0 : unit.id
+                ).description,
+                leads: index == 0
             )
-            HStack(alignment: .top, spacing: ScreenCardChips.spacing) {
-                WrapChips(split.shown) { entry in
-                    chip(entry)
-                }
-                if split.overflow > 0 {
-                    overflowChip(assignments, split.overflow)
-                }
-            }
         }
     }
 
-    private func chip(_ entry: SpaceAssignment) -> some View {
-        SpaceAssignmentChip(
+    private func paneView(_ pane: Pane, split: ScreenSplit?) -> some View {
+        ScreenAreaPane(
             model: model,
-            space: entry.space,
-            kind: entry.kind,
-            displays: rows.orderedDisplays
+            display: display,
+            rows: rows,
+            area: split == nil ? nil : pane.id,
+            key: pane.key,
+            leads: pane.leads,
+            size: pane.rect.size,
+            corners: corners(pane.rect),
+            givesWay: givingWay
+                == ScreenSelection(display: display.id, area: pane.id),
+            selection: $selection,
+            act: act,
+            cardTargeted: $targeted
+        )
+        .offset(x: pane.rect.minX, y: pane.rect.minY)
+    }
+
+    /// Round only the corners that are the card's own, so a seam
+    /// meets its neighbour square.
+    private func corners(_ rect: CGRect) -> RectangleCornerRadii {
+        let left = rect.minX < 0.5
+        let top = rect.minY < 0.5
+        let right = rect.maxX > size.width - 0.5
+        let bottom = rect.maxY > size.height - 0.5
+        return RectangleCornerRadii(
+            topLeading: left && top ? 6 : 0,
+            bottomLeading: left && bottom ? 6 : 0,
+            bottomTrailing: right && bottom ? 6 : 0,
+            topTrailing: right && top ? 6 : 0
         )
     }
 
-    /// The chips this card has no room for, reachable rather than
-    /// clipped away — with their clear button and their menu,
-    /// which are the only routes back out of a pin.
-    private func overflowChip(
-        _ all: [SpaceAssignment],
-        _ count: Int
-    ) -> some View {
-        Button {
-            showingOverflow = true
-        } label: {
-            Text(
-                L("monitor_card.more_spaces", "+%1$d", count)
+    /// Card points per screen point along each axis.
+    private func scale(_ split: ScreenSplit) -> CGSize {
+        let width = CGFloat(split.areas.map { $0.x + $0.w }.max() ?? 1)
+        let height = CGFloat(split.areas.map { $0.y + $0.h }.max() ?? 1)
+        return CGSize(width: size.width / width, height: size.height / height)
+    }
+
+    /// Each divider is handed the STORED cut, which its drag starts
+    /// from, and drawn where the drag in flight has it.
+    @ViewBuilder private func dividers(_ stored: ScreenSplit) -> some View {
+        let width = stored.areas.map { $0.x + $0.w }.max() ?? 0
+        let height = stored.areas.map { $0.y + $0.h }.max() ?? 0
+        let cuts =
+            ScreenAreaCuts.cuts(of: stored.areas, width: width, height: height)
+            ?? []
+        let drawn =
+            drag.flatMap {
+                ScreenAreaCuts.cuts(
+                    of: $0.split.areas,
+                    width: width,
+                    height: height
+                )
+            } ?? cuts
+        let factor = scale(stored)
+        ForEach(Array(cuts.enumerated()), id: \.offset) { index, cut in
+            let side = cut.axis == .sideBySide
+            let position =
+                drawn.indices.contains(index)
+                ? drawn[index].position : cut.position
+            let at = CGFloat(position) * (side ? factor.width : factor.height)
+            let band = ScreenAreaDivider.hitBand
+            ScreenAreaDivider(
+                model: model,
+                display: display,
+                split: stored,
+                index: index,
+                cut: cut,
+                scale: side ? factor.width : factor.height,
+                drag: $drag
             )
-            .font(.caption)
-            .fontWeight(.medium)
-            .foregroundStyle(SettingsTheme.ink)
-            .lineLimit(1)
-            .frame(width: ScreenCardChips.markerWidth)
-            .padding(.vertical, 3)
-            // The SHARED adaptive chip, not the pinned chip's
-            // fill: this opens a popover, and wearing a drag
-            // source's costume is what diluted the chips' own
-            // rest cue (#1240). `padding: 0` keeps it inside the
-            // reserved marker column.
-            .hoverHighlight(
-                cornerRadius: ScreenCardChips.chipHeight / 2,
-                padding: 0
+            .frame(
+                width: side ? band : size.width,
+                height: side ? size.height : band
+            )
+            .offset(
+                x: side ? at - band / 2 : 0,
+                y: side ? 0 : at - band / 2
             )
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(
-            L(
-                "monitor_card.more_spaces.axlabel",
-                "%1$d more Spaces on this screen",
-                count
-            )
-        )
-        .popover(isPresented: $showingOverflow) {
-            WrapChips(all) { entry in
-                chip(entry)
+    }
+
+    /// While a divider moves, each area beside it shows its length,
+    /// the one a snap made a screen fraction naming it (ruling 25).
+    @ViewBuilder private func capsules(_ split: ScreenSplit?) -> some View {
+        if let drag, let split,
+            let cut = ScreenAreaCuts.cuts(
+                of: split.areas,
+                width: split.areas.map { $0.x + $0.w }.max() ?? 0,
+                height: split.areas.map { $0.y + $0.h }.max() ?? 0
+            )?[safe: drag.cut]
+        {
+            let side = cut.axis == .sideBySide
+            ForEach(
+                (cut.leading.prefix(1) + cut.trailing.prefix(1)),
+                id: \.self
+            ) { id in
+                if let unit = ScreenArrangement.unitAreas(of: split)
+                    .first(where: { $0.id == id })?.rect,
+                    let area = split.areas.first(where: { $0.id == id })
+                {
+                    let rect = ScreenArrangement.paneRect(unit, in: size)
+                    AreaSizeCapsule(
+                        length: side ? area.w : area.h,
+                        snap: drag.snap,
+                        total: side
+                            ? split.areas.map { $0.x + $0.w }.max() ?? 0
+                            : split.areas.map { $0.y + $0.h }.max() ?? 0
+                    )
+                    .position(x: rect.midX, y: rect.midY)
+                }
             }
-            .frame(width: 240)
-            .padding(12)
         }
     }
 
     private var plate: some View {
         RoundedRectangle(cornerRadius: 6)
-            // The soft green, not the white card surface: a
-            // wall of white screens on the well glared, and
-            // the strengthened rest border now carries the
-            // card/well separation (owner, 2026-08-09 — the
-            // prototype's own colouring).
+            // The soft green, not the white card surface (owner,
+            // 2026-08-09 — the prototype's own colouring).
             .fill(SettingsTheme.sunken)
             .shadow(radius: 0.5, y: 0.5)
     }
 
-    /// Drop targeting is a WASH, not a heavier border: dragging
-    /// onto an already-selected card has to change something, and
-    /// two states sharing the border channel changed nothing. It
-    /// is laid behind the content — see the call site.
-    @ViewBuilder private var dropWash: some View {
-        if targeted {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(.tint.opacity(0.2))
-        }
-    }
-
+    /// A whole screen's hover edge is the card's; a split card's
+    /// panes take it instead, so the outline stays at rest.
     private var border: some View {
-        RoundedRectangle(cornerRadius: 6)
+        let edge = risen && model.areaSplit(of: display) == nil
+        return RoundedRectangle(cornerRadius: 6)
             .strokeBorder(
-                targeted
-                    ? AnyShapeStyle(.tint)
-                    : AnyShapeStyle(
-                        risen
-                            ? SettingsTheme.hoverEdge
-                            : SettingsTheme.ink3.opacity(0.5)
-                    ),
-                lineWidth: risen
+                edge
+                    ? SettingsTheme.hoverEdge
+                    : SettingsTheme.ink3.opacity(0.5),
+                lineWidth: edge
                     ? SettingsTheme.hoverEdgeStroke
                     : SettingsTheme.screenCardStroke
             )
     }
 
-    /// Readout sentence describing assigned and showing spaces.
-    private var readout: String {
-        ScreenReadout.sentence(
-            held: rows.held(on: display, isMain: isMain),
-            showing: model.showingSpace(on: display.id)
-        )
-    }
-
-    private var selectActionName: String {
-        isSelected
+    /// The card's value: how it is split, the panes saying the rest.
+    private var splitValue: String {
+        guard let split = model.areaSplit(of: display) else { return "" }
+        let count = split.areas.count
+        return split.axis == .stacked
             ? L(
-                "monitors.deselect",
-                "Hide the Spaces on this screen"
+                "monitor_card.split.stacked.ax",
+                "Areas: %1$d, stacked",
+                count
             )
             : L(
-                "monitors.select",
-                "Show the Spaces on this screen"
+                "monitor_card.split.side_by_side.ax",
+                "Areas: %1$d, side by side",
+                count
             )
     }
+}
 
-    private func toggleSelection() {
-        selection = isSelected ? nil : display.id
-    }
-
-    /// Pins dropped spaces to screen fingerprint (#36).
-    private func pin(_ items: [DraggableSpace]) -> Bool {
-        var assigned = false
-        for item in items {
-            let space = SpaceID(item.raw)
-            guard model.config.spaces.contains(space) else {
-                continue
-            }
-            model.place(space, .screen(display.fingerprint))
-            assigned = true
-        }
-        return assigned
+extension Array {
+    fileprivate subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

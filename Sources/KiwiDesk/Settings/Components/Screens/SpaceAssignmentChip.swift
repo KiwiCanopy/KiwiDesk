@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import SwiftUI
 
@@ -204,27 +205,32 @@ struct SpaceAssignmentChip: View {
             model.place(space, .followsMain)
         }
         .disabled(kind == .main)
-        let elsewhere = displays.filter {
-            $0.fingerprint != currentFingerprint
+        // Every screen, and every area of a split one (#3517), but
+        // the one the Space is pinned to.
+        let elsewhere = displays.flatMap { display in
+            ScreensFamilyRows.areas(
+                of: display,
+                in: model.config.settings.displayAreas
+            ).map(\.key)
         }
+        .filter { $0 != currentKey }
         if !elsewhere.isEmpty {
             Divider()
-            ForEach(elsewhere, id: \.id) { display in
+            ForEach(elsewhere, id: \.self) { key in
                 Button(
                     L(
                         "monitor_chip.move_to",
                         "Move to %1$@",
-                        SpaceScreenChoice.screen(display.fingerprint)
-                            .title(in: model)
+                        SpaceScreenChoice.screen(key).title(in: model)
                     )
                 ) {
-                    model.place(space, .screen(display.fingerprint))
+                    model.place(space, .screen(key))
                 }
             }
         }
     }
 
-    private var currentFingerprint: String? {
+    private var currentKey: String? {
         kind == .main ? nil : model.config.spacePins[space]
     }
 

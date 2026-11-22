@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Screens settings diff readout generators.
@@ -59,7 +60,9 @@ extension SettingsValueReadout {
     }
 
     /// One row per screen whose split changed (#3517), each side
-    /// read as its areas' lengths in reading order.
+    /// read as its areas in reading order — id, name and size — so
+    /// a re-split that changes only ids, or a rename, never reads
+    /// alike on both sides.
     private static func screensAreaRows(
         _ census: SettingKey,
         old: [String: ScreenSplit],
@@ -82,7 +85,10 @@ extension SettingsValueReadout {
 
     private static func areaSizes(_ split: ScreenSplit) -> String {
         ScreenArea.readingOrder(split.areas)
-            .map { "\($0.w)×\($0.h)" }
+            .map { area in
+                let name = area.name.map { " “\($0)”" } ?? ""
+                return "#\(area.id)\(name) \(area.w)×\(area.h)"
+            }
             .joined(separator: " · ")
     }
 

@@ -96,12 +96,15 @@ struct ScreensChromeWiringTests {
         let card = try squashed(
             "Components/Screens/ScreenCard.swift"
         )
+        let pane = try squashed(
+            "Components/Screens/ScreenAreaPane.swift"
+        )
         #expect(
-            card.contains(
+            pane.contains(
                 "lineWidth:SettingsTheme.screenCardStrokeSelected"
             )
                 && card.contains(
-                    "lineWidth:risen?SettingsTheme.hoverEdgeStroke"
+                    "lineWidth:edge?SettingsTheme.hoverEdgeStroke"
                         + ":SettingsTheme.screenCardStroke)"
                 ),
             Comment(

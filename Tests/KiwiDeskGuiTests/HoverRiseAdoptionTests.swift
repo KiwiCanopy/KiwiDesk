@@ -176,7 +176,7 @@ struct HoverRiseAdoptionTests {
         for (path, selected) in [
             ("Components/Layouts/LayoutStrip.swift", "selected:selected"),
             ("Components/Looks/PaletteTile.swift", "selected:isApplied"),
-            ("Components/Screens/ScreenCard.swift", "selected:isSelected"),
+            ("Components/Screens/ScreenAreaPane.swift", "selected:isSelected"),
         ] {
             #expect(
                 try squashed(path).contains("SelectionStroke(" + selected),
@@ -194,7 +194,7 @@ struct HoverRiseAdoptionTests {
         )
         #expect(stroke.contains("reduceMotion?nil:"))
         #expect(
-            try squashed("Components/Screens/ScreenCard.swift").contains(
+            try squashed("Components/Screens/ScreenAreaPane.swift").contains(
                 "style:.tint,lineWidth:SettingsTheme.screenCardStrokeSelected"
             )
         )
@@ -234,7 +234,12 @@ struct HoverRiseAdoptionTests {
     @Test("a risen Screen card opens no gap above its stand")
     func standTucksUnderTheCard() throws {
         let picture = try squashed("Components/Screens/ScreensPicture.swift")
-        #expect(picture.contains(".background(alignment:.bottom){stand("))
+        #expect(
+            picture.contains(
+                ".background(alignment:.bottom){ifstanding.contains("
+                    + "drawn.id){stand("
+            )
+        )
         #expect(picture.contains("$0[.top]+SettingsTheme.hoverRise"))
         #expect(
             picture.contains(

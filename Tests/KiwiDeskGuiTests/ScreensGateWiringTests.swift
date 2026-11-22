@@ -79,14 +79,14 @@ struct ScreensGateWiringTests {
     @Test("the views consult the family seam")
     func viewsConsultTheFamilySeam() throws {
         let consults: [String: [String]] = [
-            "Components/Screens/ScreenCard.swift": [
+            "Components/Screens/ScreenAreaPane.swift": [
                 // The ASSIGNMENT site, not the call: the bare
                 // call appears twice in this file, and the
                 // tooltip's copy satisfied this needle while the
                 // chips themselves were hand-rolled from
                 // `model.config.spacePins` — green on the whole
                 // suite (guard-prover, 2026-08-04).
-                "letassignments=rows.chips(on:display.fingerprint)"
+                "letassignments=rows.chips(on:key)"
             ],
             "Components/Screens/FollowsMainTray.swift": [
                 "rows.trayChips",
@@ -175,7 +175,7 @@ struct ScreensGateWiringTests {
                 "model.askScreenShift(offer)",
                 "}elseifcase.shifted(letids)=state.answer{",
             ],
-            "Components/Screens/ScreenCard.swift": [
+            "Components/Screens/ScreenAreaPane.swift": [
                 // The `+n` itself, not merely the arithmetic
                 // behind it: `cardCountsOverflow` stayed green
                 // with the marker deleted and the chips clipped
@@ -191,6 +191,8 @@ struct ScreensGateWiringTests {
                 // needle two entries down, and the same fix.
                 "split.overflow>0",
                 "overflowChip(assignments,split.overflow)",
+            ],
+            "Components/Screens/ScreenCard.swift": [
                 // The main display's glow (#758). Decoration —
                 // the badge is the answer — but a decoration
                 // branch deletes as silently as any other. TWO
@@ -252,7 +254,7 @@ struct ScreensGateWiringTests {
     /// drag handle with them.
     @Test("the card counts its overflow rather than clipping")
     func cardCountsOverflow() throws {
-        let name = "Components/Screens/ScreenCard.swift"
+        let name = "Components/Screens/ScreenAreaPane.swift"
         let source = try squashed(name)
         #expect(source.contains("ScreenCardChips.split("))
     }
@@ -283,6 +285,7 @@ struct ScreensGateWiringTests {
             for name in [
                 "Sections/ScreensSection.swift",
                 "Components/Screens/ScreenCard.swift",
+                "Components/Screens/ScreenAreaPane.swift",
             ] {
                 #expect(
                     !(try read(name)).contains(key),

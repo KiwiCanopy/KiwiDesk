@@ -11,15 +11,21 @@ enum ScreenTray {
     static func fold(
         cards: [ScreenArrangement.Drawn],
         main: DisplayID?,
-        trayHeight: CGFloat = ScreenArrangement.trayHeight
+        trayHeight: CGFloat = ScreenArrangement.trayHeight,
+        mainArea: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     ) -> ScreenArrangement.Layout {
         guard !cards.isEmpty else {
             return ScreenArrangement.Layout()
         }
         let anchor = cards.first { $0.id == main }
         let tray = anchor.map { anchored in
+            // Under the main screen's first area, where follows-main
+            // Spaces land (#3517 ruling 29).
             rect(
-                anchoredTo: anchored.rect,
+                anchoredTo: ScreenArrangement.paneRect(
+                    mainArea,
+                    in: anchored.rect.size
+                ).offsetBy(dx: anchored.rect.minX, dy: anchored.rect.minY),
                 avoiding: cards.filter { card in
                     card.id != anchored.id
                 }

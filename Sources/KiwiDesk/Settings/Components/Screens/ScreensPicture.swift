@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import SwiftUI
 
@@ -6,7 +7,10 @@ import SwiftUI
 struct ScreensPicture: View {
     @ObservedObject var model: SettingsModel
     let rows: ScreensFamilyRows
-    @Binding var selection: DisplayID?
+    @Binding var selection: ScreenSelection?
+    /// The area giving way in an open Adjust… popover.
+    var givingWay: ScreenSelection? = nil
+    var act: (ScreenAreaAction) -> Void = { _ in }
 
     private static let canvasHeight: CGFloat = 248
     /// Room inside the clip for a risen card's shadow and the main
@@ -81,33 +85,41 @@ struct ScreensPicture: View {
             displays: rows.displays,
             mainID: model.mainDisplay?.id,
             canvas: canvas,
-            trayChips: rows.mainSpaces.count
+            trayChips: rows.mainSpaces.count,
+            splits: model.config.settings.displayAreas
         )
     }
 
     private func picture(
         _ layout: ScreenArrangement.Layout
     ) -> some View {
-        ZStack(alignment: .topLeading) {
+        let standing = ScreenArrangement.standing(layout)
+        return ZStack(alignment: .topLeading) {
             ForEach(layout.displays) { drawn in
                 ScreenCard(
                     model: model,
                     display: drawn.display,
                     rows: rows,
                     size: drawn.rect.size,
-                    selection: $selection
+                    selection: $selection,
+                    givingWay: givingWay,
+                    act: act
                 )
                 .frame(
                     width: drawn.rect.width,
                     height: drawn.rect.height
                 )
                 // Behind the card and tucked under its edge, so a
-                // risen card opens no gap above the neck.
+                // risen card opens no gap above the neck; only a
+                // card whose foot lands on no other card keeps it
+                // (#3517 ruling 28).
                 .background(alignment: .bottom) {
-                    stand(cardWidth: drawn.rect.width)
-                        .alignmentGuide(.bottom) {
-                            $0[.top] + SettingsTheme.hoverRise
-                        }
+                    if standing.contains(drawn.id) {
+                        stand(cardWidth: drawn.rect.width)
+                            .alignmentGuide(.bottom) {
+                                $0[.top] + SettingsTheme.hoverRise
+                            }
+                    }
                 }
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
             }

@@ -153,7 +153,7 @@ struct SpaceChipAffordanceTests {
     /// adaptive chip instead — the seam, never which alpha.
     @Test("the +n marker draws no tint of its own")
     func overflowMarkerIsNotAChip() throws {
-        for file in ["ScreenCard.swift", "FollowsMainTray.swift"] {
+        for file in ["ScreenAreaPane.swift", "FollowsMainTray.swift"] {
             let body = try declarationBody(
                 "privatefuncoverflowChip",
                 in: try squashed(file)
@@ -206,7 +206,7 @@ struct SpaceChipAffordanceTests {
     /// this green.
     @Test("the drop wash is drawn behind the chips")
     func dropWashSitsUnderTheContent() throws {
-        let source = try squashed("ScreenCard.swift")
+        let source = try squashed("ScreenAreaPane.swift")
         #expect(
             source.contains(".background(dropWash)"),
             Comment(

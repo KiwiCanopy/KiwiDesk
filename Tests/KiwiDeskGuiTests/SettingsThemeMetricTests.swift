@@ -38,7 +38,7 @@ struct SettingsThemeMetricTests {
         "disclosureRadius": "SettingsDisclosure.swift",
         "chipRadius": "Chips.swift",
         "screenCardStroke": "ScreenCard.swift",
-        "screenCardStrokeSelected": "ScreenCard.swift",
+        "screenCardStrokeSelected": "ScreenAreaPane.swift",
         "screenStandScale": "ScreensPicture.swift",
         "screenStandMin": "ScreensPicture.swift",
         "screenStandMax": "ScreensPicture.swift",

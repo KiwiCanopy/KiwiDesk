@@ -36,4 +36,20 @@ extension TilingSettings {
         }
         minWindowSizeOverride = [:]
     }
+
+    /// The fewest points Settings lets a screen area keep along
+    /// `axis` (#3517 ruling 3): the largest tiling layout's minimum
+    /// window size on that axis, read live and never stored, and
+    /// never under `ScreenArea.minimumSide`. Floating places no
+    /// window to a floor, so it takes no part.
+    public func areaFloor(along axis: ScreenAreaCut.Axis) -> Int {
+        let sides = MinWindowSizes.Layout.allCases
+            .filter { $0 != .floating }
+            .map { layout -> CGFloat in
+                let size = minWindowSize(for: layout.mode, in: nil)
+                return axis == .sideBySide ? size.width : size.height
+            }
+        let largest = Int((sides.max() ?? 0).rounded(.up))
+        return max(largest, ScreenArea.minimumSide)
+    }
 }

@@ -141,9 +141,9 @@ struct ScreenReadoutTests {
         // One carded chip, two in the tray.
         #expect(rows.chips(on: desk.fingerprint).count == 1)
         #expect(rows.trayChips.count == 2)
-        #expect(rows.held(on: desk, isMain: true) == 3)
+        #expect(rows.held(on: desk.fingerprint, isMain: true) == 3)
         // A display that is NOT main holds only its own.
-        #expect(rows.held(on: desk, isMain: false) == 1)
+        #expect(rows.held(on: desk.fingerprint, isMain: false) == 1)
     }
 
     /// The everything-follows-main desk, end to end: without the
@@ -166,7 +166,7 @@ struct ScreenReadoutTests {
             displays: [desk]
         )
         let sentence = ScreenReadout.sentence(
-            held: rows.held(on: desk, isMain: true),
+            held: rows.held(on: desk.fingerprint, isMain: true),
             showing: SpaceID("code")
         )
         #expect(sentence.hasPrefix("3 Spaces here"))

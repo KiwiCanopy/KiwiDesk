@@ -14,7 +14,7 @@ struct SettingsPopoverChromeCensusTests {
     private static let exempt: [String: String] = [
         "SettingsFooter+Unsaved.swift unsavedPopover":
             "the change list's Keep and ↺ fills and value swatches",
-        "ScreenCard.swift WrapChips":
+        "ScreenAreaPane.swift WrapChips":
             "its overflow Space chips carry fills",
         "FollowsMainTray.swift WrapChips":
             "its overflow Space chips carry fills",
