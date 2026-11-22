@@ -59,6 +59,8 @@ struct CommandRejectionDerivationTests {
         // with `MaximizeAxis` (#3062) and are not its vocabulary.
         "expected at most width, height, layout": "not MaximizeAxis",
         "expected at most space, width, height": "not MaximizeAxis",
+        // `set_float_size` / `size_floating` (#3554): two points.
+        "expected positive width and height": "not MaximizeAxis",
     ]
 
     @Test("the vocabularies are non-empty")
