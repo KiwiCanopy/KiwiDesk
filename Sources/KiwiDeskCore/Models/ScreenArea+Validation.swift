@@ -17,6 +17,9 @@ public enum ScreenAreaProblem: Equatable, Sendable {
     /// Cuts run in both directions: a nested split, which 5.1.0
     /// does not offer (ruling 20; lifted by #3541).
     case mixedAxes
+    /// No area holds id 0 as the first in reading order, so nothing
+    /// answers to the screen's bare fingerprint (rulings 14, 22).
+    case missingLeadArea
 }
 
 extension ScreenArea {
@@ -51,6 +54,9 @@ extension ScreenArea {
             for b in areas[(i + 1)...] where a.rect.intersects(b.rect) {
                 return .overlap(a.id, b.id)
             }
+        }
+        guard ScreenArea.readingOrder(areas).first?.id == 0 else {
+            return .missingLeadArea
         }
         let covered = areas.reduce(0) { $0 + $1.w * $1.h }
         guard covered == width * height else { return .gap }

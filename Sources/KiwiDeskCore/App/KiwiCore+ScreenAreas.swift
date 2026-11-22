@@ -16,11 +16,17 @@ extension KiwiCore {
         }
     }
 
-    /// The area an arriving window sits in, off the one arrival
-    /// frame door (#3052); nil unless a screen is split.
-    func arrivalArea(of window: ManagedWindow) -> PlacementID? {
-        areaPlacement(holding: arrivalFrame(of: window))
+    /// The one door from the stored splits to the placement list
+    /// (#3517): the splits `display_areas` holds while
+    /// `honoursAreaSplits` is raised, none otherwise. Production
+    /// keeps it lowered until splits take effect, so a stored
+    /// split moves no window; a suite raises it to drive areas.
+    func syncAreaSplits() {
+        state.workspaces.setAreaSplits(
+            honoursAreaSplits ? tiler.settings.displayAreas : [:]
+        )
     }
+
     /// `space`'s area — its rect in its screen's own points — and
     /// stored key, nil where its screen is not split.
     func splitArea(of space: SpaceID) -> (rect: CGRect, key: String)? {
@@ -31,7 +37,8 @@ extension KiwiCore {
         return (placement.area.rect, placement.key.description)
     }
 
-    /// The AX frames of every area of every split screen.
+    /// The AX frames of every area of every split screen, each
+    /// clipped to its screen's visible frame.
     func splitAreaBounds() -> [CGRect] {
         state.workspaces.allDisplays.flatMap { display -> [CGRect] in
             let areas = state.workspaces.placements(of: display.id)
@@ -42,11 +49,11 @@ extension KiwiCore {
         }
     }
 
-    /// The area of a split screen an AX `frame` sits in — the one
-    /// holding its centre — nil on an unsplit screen (#3517 ruling
-    /// 5). Resolves the physical screen first, as `screen(containing:)`
-    /// does, so a frame never lands in another screen's area.
-    /// The frame is read only while a screen is split.
+    /// The area of a split screen an AX `frame` mostly covers, by
+    /// the rule `TilingEngine.screen(containing:)` takes, nil on an
+    /// unsplit screen (#3517 ruling 5). The physical screen is
+    /// resolved first, so a frame never lands in another screen's
+    /// area. The frame is read only while a screen is split.
     func areaPlacement(
         holding read: @autoclosure () -> CGRect
     ) -> PlacementID? {
@@ -59,18 +66,23 @@ extension KiwiCore {
         guard let screen = TilingEngine.screen(containing: frame),
             let display = screen.kiwiDisplayID
         else { return nil }
-        let areas = state.workspaces.placements(of: display)
-        guard areas.count > 1 else { return nil }
-        let centre = CGPoint(x: frame.midX, y: frame.midY)
-        return areas.first {
-            tiler.areaFrame($0.area.rect, on: screen).contains(centre)
-        }?.id
+        let areas = state.workspaces.placements(of: display).map {
+            ($0.id, tiler.areaFrame($0.area.rect, on: screen))
+        }
+        guard areas.count > 1,
+            let rect = GeometryUtils.rect(
+                mostlyContaining: frame,
+                among: areas.map(\.1)
+            )
+        else { return nil }
+        return areas.first { $0.1 == rect }?.0
     }
 
     /// Every placement's AX frame for the screen hop (#3517 ruling
     /// 18): an unsplit screen's visible frame as `displayFrames`
-    /// reports it, a split screen's areas clipped to it. A screen
-    /// with no placement record (a fixture) takes its Spaces' own.
+    /// reports it, a split screen's areas through `areaFrame`. A
+    /// screen with no placement record (a fixture) takes its
+    /// Spaces' own.
     func placementFrames() -> [(id: PlacementID, frame: CGRect)] {
         tiler.displayFrames().flatMap { display, frame in
             let areas = state.workspaces.placements(of: display)
@@ -85,12 +97,7 @@ extension KiwiCore {
                 return id.map { [($0, frame)] } ?? []
             }
             return areas.map { area in
-                (
-                    area.id,
-                    frame.intersection(
-                        tiler.areaFrame(area.area.rect, on: screen)
-                    )
-                )
+                (area.id, tiler.areaFrame(area.area.rect, on: screen))
             }
         }
     }
@@ -104,28 +111,25 @@ extension KiwiCore {
 
     /// A screen-or-area argument (#3517 ruling 16), in order: a
     /// number names a physical screen, as Desktop bindings count
-    /// them, and lands in its focused area, else its first; then a
-    /// fingerprint or area key; then a screen's name, its first
-    /// area; then an area's own name, refused where two share it.
+    /// them, and lands in its area 0; then a fingerprint or area
+    /// key, area 0 where the area is gone; then a screen's name,
+    /// its area 0; then an area's own name, refused where two
+    /// share it.
     func resolveAreaArg(_ arg: JSONValue?) -> PlacementID? {
         let ws = state.workspaces
-        func lead(_ display: DisplayID) -> PlacementID? {
-            if let here = focusedPlacement, here.display == display {
-                return here
-            }
-            return ws.placements(of: display).first?.id
-        }
         if arg?.intValue != nil {
-            return resolveDisplayArg(arg).flatMap(lead)
+            return resolveDisplayArg(arg).flatMap(ws.leadPlacement)
         }
         guard let raw = arg?.stringValue else { return nil }
         let key = ScreenAreaKey(parsing: raw)
         if let screen = ws.allDisplays.first(where: {
             $0.fingerprint == key.fingerprint
         }) {
-            return ws.placements(of: screen.id).first { $0.key == key }?.id
+            return ws.placement(keyed: key, on: screen.id)
         }
-        if let screen = resolveDisplayArg(arg) { return lead(screen) }
+        if let screen = resolveDisplayArg(arg) {
+            return ws.leadPlacement(of: screen)
+        }
         let named = ws.allPlacements.filter { $0.area.name == raw }
         return named.count == 1 ? named[0].id : nil
     }

@@ -11,7 +11,11 @@ import Testing
 /// whole screen's (ruling 6); an inner edge reads as a neighbour but
 /// never moves the park (ruling 31). Needs a host screen to hang the
 /// pinned bounds on, so a screenless runner skips.
-@Suite("Area layout bounds", .serialized)
+@Suite(
+    "Area layout bounds",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct AreaLayoutBoundsTests {
     private static let whole = CGRect(x: 0, y: 0, width: 3440, height: 1440)

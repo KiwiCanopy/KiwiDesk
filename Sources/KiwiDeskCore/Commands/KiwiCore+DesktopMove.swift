@@ -251,7 +251,8 @@ extension KiwiCore {
             let destination = state.screenHome(
                 of: managed,
                 leaving: from,
-                landingOn: display
+                landingOn: display,
+                in: state.workspaces.leadPlacement(of: display)
             )
         else { return }
         onLog(

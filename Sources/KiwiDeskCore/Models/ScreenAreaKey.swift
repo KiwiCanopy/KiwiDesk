@@ -33,7 +33,7 @@ public struct ScreenAreaKey: Hashable, Sendable,
         if let mark = raw.lastIndex(of: Self.separator) {
             let head = String(raw[..<mark])
             let tail = raw[raw.index(after: mark)...]
-            if let id = Int(tail), id > 0, tail.allSatisfy(\.isASCII),
+            if let id = Int(tail), id > 0, String(id) == tail,
                 Self.isFingerprint(head)
             {
                 self.init(fingerprint: head, areaID: id)

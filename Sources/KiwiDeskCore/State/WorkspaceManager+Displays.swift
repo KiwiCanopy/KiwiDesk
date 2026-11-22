@@ -26,7 +26,7 @@ extension WorkspaceManager {
         return displays.removeValue(forKey: id)
     }
 
-    /// Places `space` on `display`'s leading area — the whole
+    /// Places `space` on `display`'s area 0 — the whole
     /// screen when it is not split.
     public mutating func assign(
         _ space: SpaceID,
@@ -34,7 +34,7 @@ extension WorkspaceManager {
     ) {
         assign(
             space,
-            to: placements(of: display).first?.id
+            to: leadPlacement(of: display)
                 ?? PlacementID(display: display, area: 0)
         )
     }
@@ -100,6 +100,25 @@ extension WorkspaceManager {
         placements[id]
     }
 
+    /// The placement a stored area `key` names on `display`, else
+    /// that screen's area 0 — a key naming an area the split no
+    /// longer has falls back there (ruling 22). Nil only for a
+    /// screen with no placement record.
+    public func placement(
+        keyed key: ScreenAreaKey,
+        on display: DisplayID
+    ) -> PlacementID? {
+        let areas = placements(of: display)
+        return
+            (areas.first { $0.key == key }
+            ?? areas.first { $0.area.id == 0 })?.id
+    }
+
+    /// `display`'s area 0, the area a bare screen reference names.
+    public func leadPlacement(of display: DisplayID) -> PlacementID? {
+        placements(of: display).first { $0.area.id == 0 }?.id
+    }
+
     /// Replaces every screen's split and rebuilds the placements.
     public mutating func setAreaSplits(_ splits: [String: ScreenSplit]) {
         guard splits != areaSplits else { return }
@@ -135,13 +154,10 @@ extension WorkspaceManager {
                 key: ScreenAreaKey(
                     fingerprint: display.fingerprint,
                     areaID: area.id
-                ),
-                frame: Placement.frame(of: area, on: display.frame)
+                )
             )
         }
-        let fallback =
-            placements(of: id).first { $0.area.id == 0 }?.id
-            ?? placements(of: id).first?.id
+        let fallback = leadPlacement(of: id)
         for (space, placement) in spacePlacement
         where placement.display == id && placements[placement] == nil {
             spacePlacement[space] = fallback

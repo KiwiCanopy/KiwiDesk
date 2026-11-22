@@ -148,9 +148,16 @@ struct SecondaryDisplaySpaceTests {
     func focusedScreenMovesTheActiveSpace() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
-        // Focus sits on display B.
+        // B shows 4 while the focus is elsewhere; focusing B's 3
+        // takes B's entry out of the map, its own invariant.
+        core.state.workspaces.show(SpaceID(4), on: DisplayID(2))
         core.state.workspaces.activate(SpaceID(3))
         #expect(core.state.workspaces.activeSpace == SpaceID(3))
+        #expect(
+            core.state.workspaces.secondaryShown[
+                PlacementID(display: DisplayID(2), area: 0)
+            ] == nil
+        )
         let arriving = snapshot(secondaryCurrent: 21)
         core.moveSwitchedDisplaySpaces(
             DisplaySwitch(

@@ -9,7 +9,11 @@ import Testing
 /// a split screen as between screens (#3517 ruling 18). Needs a host
 /// screen to hang the pinned frames on, so a screenless runner
 /// skips.
-@Suite("Area screen hop", .serialized)
+@Suite(
+    "Area screen hop",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct AreaScreenHopTests {
     private static let whole = CGRect(x: 0, y: 0, width: 3440, height: 1440)

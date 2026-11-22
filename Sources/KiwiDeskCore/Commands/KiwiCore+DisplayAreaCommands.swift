@@ -12,6 +12,7 @@ extension KiwiCore {
     /// w=, h=, id=, name=}, …})` takes the rects whole. The sizes or
     /// rects must tile the screen exactly.
     func setDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
+        guard honoursAreaSplits else { return .fail(Self.areasOff) }
         guard let screen = splitScreen(args.first) else {
             return .fail("unknown screen: \(args.first?.stringValue ?? "")")
         }
@@ -31,8 +32,12 @@ extension KiwiCore {
         ) {
             return .fail(Self.message(for: problem))
         }
+        // A whole split stays stored once one existed, so its next id
+        // outlives the merge and a later split mints none reused
+        // (ruling 21).
         tiler.settings.displayAreas[screen.fingerprint] =
-            split.isWhole ? nil : split
+            split.isWhole && previous == nil ? nil : split
+        syncAreaSplits()
         retile()
         return .ok()
     }
@@ -41,6 +46,7 @@ extension KiwiCore {
     /// names (as `list_monitors` prints it); an empty name clears
     /// it back to the positional default.
     func setDisplayAreaName(_ args: [JSONValue]) -> CommandResponse {
+        guard honoursAreaSplits else { return .fail(Self.areasOff) }
         guard let raw = args.first?.stringValue,
             let name = args.dropFirst().first?.stringValue
         else { return .fail("expected an area and a name") }
@@ -51,18 +57,27 @@ extension KiwiCore {
             })
         else { return .fail("unknown area: \(raw)") }
         let trimmed = name.trimmingCharacters(in: .whitespaces)
-        if !trimmed.isEmpty {
-            if trimmed.allSatisfy(\.isNumber) {
-                return .fail("an area name cannot be a number")
-            }
-            if areaNameTaken(trimmed, except: key) {
-                return .fail("another area is already named \(trimmed)")
-            }
+        switch ScreenArea.nameProblem(
+            trimmed,
+            for: key,
+            splits: tiler.settings.displayAreas,
+            screenNames: state.workspaces.allDisplays.map(\.name)
+        ) {
+        case .number?:
+            return .fail("an area name cannot be a number")
+        case .taken?:
+            return .fail("another area or screen is already named \(trimmed)")
+        case nil:
+            break
         }
         split.areas[at].name = trimmed.isEmpty ? nil : trimmed
         tiler.settings.displayAreas[key.fingerprint] = split
+        syncAreaSplits()
         return .ok()
     }
+
+    /// The refusal while splits take no effect (`syncAreaSplits`).
+    static let areasOff = "screen areas are not available in this build"
 
     /// The screen a split names: a connected screen by number,
     /// fingerprint or name, else a fingerprint whose size it reads.
@@ -96,7 +111,8 @@ extension KiwiCore {
     ) -> AreaParse {
         let whole = ScreenSplit.whole(
             width: screen.width,
-            height: screen.height
+            height: screen.height,
+            after: previous
         )
         guard let first = args.first else { return .split(whole) }
         if case .array(let list) = first, args.count == 1 {
@@ -111,27 +127,23 @@ extension KiwiCore {
         guard sizes.count == args.count - 1, !sizes.isEmpty else {
             return .refused(.fail("expected sizes in points"))
         }
-        let base = ScreenSplit(
-            areas: sizes.indices.map {
-                ScreenArea(
-                    id: $0,
-                    x: 0,
-                    y: 0,
-                    w: screen.width,
-                    h: screen.height
-                )
-            },
-            nextID: previous?.nextID
+        return .split(
+            ScreenSplit.laidOut(
+                sizes,
+                axis: axis,
+                width: screen.width,
+                height: screen.height,
+                after: previous
+            )
         )
-        return .split(base.resized(sizes, axis: axis))
     }
 
     private static func rectSplit(
         _ list: [JSONValue],
         after previous: ScreenSplit?
     ) -> AreaParse {
-        var areas: [ScreenArea] = []
-        for (index, entry) in list.enumerated() {
+        var entries: [(id: Int?, area: ScreenArea)] = []
+        for entry in list {
             guard case .object(let fields) = entry,
                 let x = fields["x"]?.intValue,
                 let y = fields["y"]?.intValue,
@@ -140,33 +152,17 @@ extension KiwiCore {
             else {
                 return .refused(.fail("expected areas as {x, y, w, h}"))
             }
-            areas.append(
-                ScreenArea(
-                    id: fields["id"]?.intValue ?? index,
-                    x: x,
-                    y: y,
-                    w: w,
-                    h: h,
-                    name: fields["name"]?.stringValue
-                )
+            let area = ScreenArea(
+                id: 0,
+                x: x,
+                y: y,
+                w: w,
+                h: h,
+                name: fields["name"]?.stringValue
             )
+            entries.append((fields["id"]?.intValue, area))
         }
-        return .split(
-            ScreenSplit(areas: areas, nextID: previous?.nextID)
-        )
-    }
-
-    private func areaNameTaken(
-        _ name: String,
-        except key: ScreenAreaKey
-    ) -> Bool {
-        tiler.settings.displayAreas.contains { fingerprint, split in
-            split.areas.contains {
-                $0.name == name
-                    && ScreenAreaKey(fingerprint: fingerprint, areaID: $0.id)
-                        != key
-            }
-        } || state.workspaces.allDisplays.contains { $0.name == name }
+        return .split(ScreenSplit.adopting(entries, after: previous))
     }
 
     /// The refusal for a broken split, naming the rule it breaks.
@@ -184,6 +180,8 @@ extension KiwiCore {
             "the areas must be separable by straight lines"
         case .mixedAxes:
             "areas must all run side by side or all stacked"
+        case .missingLeadArea:
+            "the top-left area must keep id 0"
         }
     }
 }
@@ -196,19 +194,16 @@ enum AreaParse {
 
 extension KiwiCore {
     /// `list_monitors`' areas for `display`: each area's key, its
-    /// name if any, and its rect in the screen's own points.
+    /// name if any, and its rect in the screen's own points — read
+    /// off the placement list, so it shows the split in effect.
     func areasJSON(of display: Display) -> JSONValue {
-        guard let split = tiler.settings.displayAreas[display.fingerprint]
-        else { return .array([]) }
+        let areas = state.workspaces.placements(of: display.id)
+        guard areas.count > 1 else { return .array([]) }
         return .array(
-            ScreenArea.readingOrder(split.areas).map { area in
-                .object([
-                    "key": .string(
-                        ScreenAreaKey(
-                            fingerprint: display.fingerprint,
-                            areaID: area.id
-                        ).description
-                    ),
+            areas.map { placement in
+                let area = placement.area
+                return .object([
+                    "key": .string(placement.key.description),
                     "name": area.name.map(JSONValue.string) ?? .null,
                     "x": .number(Double(area.x)),
                     "y": .number(Double(area.y)),

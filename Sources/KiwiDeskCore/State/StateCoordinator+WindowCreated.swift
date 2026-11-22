@@ -239,7 +239,7 @@ extension StateCoordinator {
         of window: ManagedWindow?,
         remembered: SpaceMemory?,
         arrival: DisplayID?,
-        area: PlacementID? = nil
+        area: PlacementID?
     ) -> SpaceID? {
         guard let window,
             case .departed(let home)? = remembered

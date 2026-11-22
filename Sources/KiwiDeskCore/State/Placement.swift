@@ -1,4 +1,3 @@
-import CoreGraphics
 import Foundation
 
 /// A placement target (#3517): one area of a connected physical
@@ -11,8 +10,8 @@ public struct PlacementID: Hashable, Sendable, CustomStringConvertible {
     /// The area's `ScreenArea.id`, never its place in the list.
     public let area: Int
 
-    /// Built only by `WorkspaceManager.rebuildPlacements` and the key
-    /// resolver (`PlacementConstructionCensusTests`).
+    /// Built only where a screen and its split are in hand
+    /// (`WorkspaceMapSealTests` counts the sites).
     init(display: DisplayID, area: Int) {
         self.display = display
         self.area = area
@@ -28,22 +27,7 @@ public struct Placement: Sendable, Equatable {
     public let area: ScreenArea
     /// The stored identity a pin or a per-screen map keys by.
     public let key: ScreenAreaKey
-    /// The area's frame in AppKit global coordinates (y up), like
-    /// `Display.frame`.
-    public let frame: CGRect
-
     /// The physical screen this area is part of.
     public var display: DisplayID { id.display }
 
-    /// `area`'s frame in AppKit coordinates on `screen`: the stored
-    /// rect is top-left, y down, so its top sits `y` below the
-    /// screen's top edge.
-    static func frame(of area: ScreenArea, on screen: CGRect) -> CGRect {
-        CGRect(
-            x: screen.minX + CGFloat(area.x),
-            y: screen.maxY - CGFloat(area.y + area.h),
-            width: CGFloat(area.w),
-            height: CGFloat(area.h)
-        )
-    }
 }

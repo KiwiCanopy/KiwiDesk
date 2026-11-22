@@ -20,13 +20,10 @@ extension KiwiCore {
         windowPlacements(of: space, floats: floats).mapValues(\.visibility)
     }
 
-    /// The Spaces a screen shows, the active one included.
+    /// The Spaces a screen shows, the active one included — every
+    /// area's on a split screen (#3517), through the one shown set.
     func shownSpaceIDs() -> Set<SpaceID> {
-        Set(
-            state.workspaces.allDisplays.compactMap {
-                state.workspaces.currentSpace(on: $0.id)
-            } + [state.workspaces.activeSpace].compactMap { $0 }
-        )
+        state.workspaces.visibleSpaces
     }
 
     /// The verdict per window of `space`'s tiled members and

@@ -154,7 +154,7 @@ struct SnapshotStoreCensusTests {
         let core = try desk()
         let found = idContainers(
             core,
-            isID: { $0 is WindowID || $0 is SpaceID }
+            isID: { $0 is WindowID || $0 is SpaceID || $0 is PlacementID }
         )
         let paths = Set(found.map(\.path))
         // Non-vacuous: the stores the ruling names were reached.

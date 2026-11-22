@@ -176,10 +176,16 @@ editing here:
   `PlacementID` only where a screen and its split are in hand
   (`WorkspaceMapSealTests` counts the constructions), never
   `area: 0` to make a call site compile, which sends a split
-  screen's Space to its first area whatever its pin says. Store a
-  reference as a `ScreenAreaKey`, never a `PlacementID`, and
-  resolve it through `areaPlacement(of:on:)`, an area gone falling
-  back to area 0 (`AreaPinResolveTests`, `PlacementIdentityTests`).
+  screen's Space to its first area whatever its pin says; the one
+  `area: 0` fallback a door may take is for a screen with no
+  placement record yet (a fixture that never upserted it), after
+  `leadPlacement(of:)` answered nil. Store a reference as a
+  `ScreenAreaKey`, never a `PlacementID`, and resolve it through
+  `WorkspaceManager.placement(keyed:on:)`, an area gone falling
+  back to area 0 (`AreaPinResolveTests`, `AreaArgumentTests`,
+  `PlacementIdentityTests`). Stored splits reach the placement
+  list through `syncAreaSplits` alone, which feeds none while
+  `honoursAreaSplits` is lowered.
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through

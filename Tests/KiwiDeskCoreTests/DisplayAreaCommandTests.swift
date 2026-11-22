@@ -18,6 +18,7 @@ struct DisplayAreaCommandTests {
 
     private func core() -> KiwiCore {
         let core = makeTestCore()
+        core.honoursAreaSplits = true
         core.state.workspaces.upsertDisplay(wide)
         return core
     }
@@ -82,7 +83,8 @@ struct DisplayAreaCommandTests {
             args: [.string(wide.fingerprint)]
         )
         #expect(reply.isSuccess)
-        #expect(split(core) == nil)
+        // Kept whole, so its next id outlives the merge (ruling 21).
+        #expect(split(core)?.isWhole == true)
     }
 
     @Test func brokenSplitsAreRefused() {
@@ -172,5 +174,30 @@ struct DisplayAreaCommandTests {
         let empty = try JSONEncoder().encode(TilingSettings())
         let emptyJSON = try #require(String(data: empty, encoding: .utf8))
         #expect(!emptyJSON.contains("display_areas"))
+    }
+
+    @Test func verbsRefuseWhileSplitsAreOff() {
+        let core = makeTestCore()
+        core.state.workspaces.upsertDisplay(wide)
+        let reply = core.execute(
+            "set_display_areas",
+            args: [.number(1), .string("side_by_side"), .number(1720)]
+        )
+        #expect(!reply.isSuccess)
+        #expect(split(core) == nil)
+    }
+
+    @Test func remergedScreenKeepsItsNextID() throws {
+        let core = core()
+        let fp = JSONValue.string(wide.fingerprint)
+        for args: [JSONValue] in [
+            [fp, .string("side_by_side"), .number(1720), .number(1720)],
+            [fp],
+            [fp, .string("side_by_side"), .number(1720), .number(1720)],
+        ] {
+            #expect(core.execute("set_display_areas", args: args).isSuccess)
+        }
+        // The second split mints a fresh id rather than reusing 1.
+        #expect(try #require(split(core)).areas.map(\.id) == [0, 2])
     }
 }

@@ -43,7 +43,7 @@ public final class KiwiCore {
     /// What `keys` holds, by the apply that installed it (#2482).
     var installedKeybindings: InstalledKeybindings?
     var bundledLooksMemo = BundledLooksMemo()  // #2993
-
+    var honoursAreaSplits = false  // #3517, `syncAreaSplits`
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()
     /// Holds AX reconciles while `loadConfig` tries candidate rule

@@ -25,7 +25,7 @@ extension StateCoordinator {
         of window: ManagedWindow,
         leaving home: SpaceID?,
         landingOn display: DisplayID?,
-        in area: PlacementID? = nil
+        in area: PlacementID?
     ) -> SpaceID? {
         guard !window.isFloating,
             !window.isSticky,

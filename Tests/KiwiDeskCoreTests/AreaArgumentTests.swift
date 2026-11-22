@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A screen argument names an area (#3517 ruling 16): a number is a
-/// physical screen, landing in its focused area, else its first; an
+/// physical screen, landing in its area 0 wherever the focus is; an
 /// area key or an area's own name names that area; a shared name is
 /// refused. `pin_space_to_display` stores the area's key.
 @Suite("Area arguments")
@@ -45,10 +45,23 @@ struct AreaArgumentTests {
         #expect(core.resolveAreaArg(.string("Nowhere")) == nil)
     }
 
-    @Test func numberLandsInTheFocusedArea() throws {
+    @Test func numberLandsInAreaZero() throws {
         let (core, areas) = try core()
         core.state.workspaces.activate(SpaceID("2"))
-        #expect(core.resolveAreaArg(.number(1)) == areas[1])
+        #expect(core.resolveAreaArg(.number(1)) == areas[0])
+    }
+
+    @Test func goneAreaKeyLandsInAreaZero() throws {
+        let (core, areas) = try core()
+        #expect(
+            core.resolveAreaArg(.string("\(wide.fingerprint)#7")) == areas[0]
+        )
+    }
+
+    @Test func everyAreaSpaceReadsShown() throws {
+        let (core, _) = try core()
+        // Space 2 shows in the non-lead area while 1 is active.
+        #expect(core.shownSpaceIDs() == [SpaceID("1"), SpaceID("2")])
     }
 
     @Test func pinStoresTheAreaKey() throws {
@@ -70,5 +83,27 @@ struct AreaArgumentTests {
         )
         #expect(reply.isSuccess)
         #expect(core.state.workspaces.placement(of: SpaceID("1"))?.area == 1)
+    }
+
+    @Test func sharedAreaNameIsRefused() throws {
+        let (core, _) = try core()
+        var split = core.state.workspaces.placements(of: wide.id)
+            .map(\.area)
+        split[0].name = "Calls"
+        core.state.workspaces.setAreaSplits([
+            wide.fingerprint: ScreenSplit(areas: split)
+        ])
+        #expect(core.resolveAreaArg(.string("Calls")) == nil)
+    }
+
+    @Test func screenNameWinsOverAnAreaName() throws {
+        let (core, areas) = try core()
+        var split = core.state.workspaces.placements(of: wide.id)
+            .map(\.area)
+        split[1].name = "Wide"
+        core.state.workspaces.setAreaSplits([
+            wide.fingerprint: ScreenSplit(areas: split)
+        ])
+        #expect(core.resolveAreaArg(.string("Wide")) == areas[0])
     }
 }

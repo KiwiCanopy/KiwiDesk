@@ -84,9 +84,10 @@ struct LayoutBoundsRoutingTests {
         "App/KiwiCore+FocusDistrust.swift": 1,
         // The `layoutBounds(on:)` seam — the one legitimate
         // consumer, and what every span reads through — and the
-        // area clip it reads through (#3517): the declaration and
-        // its one read of the whole screen.
-        "Tiling/TilingEngine+LayoutBounds.swift": 3,
+        // area clip it reads through (#3517): the declaration, an
+        // unsplit Space's whole screen and the one clip every area
+        // reader takes.
+        "Tiling/TilingEngine+LayoutBounds.swift": 4,
         // The neighbor scan's own-screen rect (#878): adjacency
         // compares whole screens, so it measures NO span and
         // classifies NO midpoint, and reserving the bar strip

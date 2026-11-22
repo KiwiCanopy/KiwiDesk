@@ -29,8 +29,8 @@ extension TilingEngine {
     }
 
     /// Every space shown in place this pass paired with the
-    /// screen it lays out on: one entry per connected display
-    /// (its `activeSpace(on:)`). Falls back to the focused
+    /// screen it lays out on: one entry per placement — each area
+    /// of a split screen, each unsplit screen whole. Falls back to the focused
     /// `activeSpace` on the main screen when no displays are
     /// tracked yet (unit tests, early boot) — the single-monitor
     /// path. The focused active space is always included even if
@@ -51,14 +51,11 @@ extension TilingEngine {
         let fallback = ScreenList.mainOrFirst
         // Keyed by physical screen (frame origin — stable across
         // the fresh `NSScreen` instances `NSScreen.screens` may
-        // hand back), so a screen hosts exactly ONE space. Two
-        // displays that both fall back to `main` (unresolvable), or
-        // a focused active space whose display is untracked landing
-        // on `main`, cannot double-place two different spaces on
-        // one screen — the focused active space, written last, wins
-        // its screen.
-        // Keyed by physical screen (frame origin) and area, so each
-        // area of a screen hosts exactly ONE space (#3517).
+        // hand back) and area, so each area of a screen hosts
+        // exactly ONE space (#3517): two placements falling back to
+        // `main`, or a focused active space whose display is
+        // untracked, cannot double-place one area — the focused
+        // active space, written last, wins its area.
         var byScreen: [String: (space: Space, screen: NSScreen)] = [:]
         func key(_ s: NSScreen, _ area: Int) -> String {
             "\(s.frame.origin.x),\(s.frame.origin.y)#\(area)"

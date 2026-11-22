@@ -64,6 +64,14 @@ struct ScreenAreaTests {
         )
     }
 
+    @Test func areaZeroMustLead() {
+        #expect(
+            problem([
+                area(1, 0, 0, 1720, 1440), area(0, 1720, 0, 1720, 1440),
+            ]) == .missingLeadArea
+        )
+    }
+
     @Test func nestedAndPinwheelSplitsAreRefused() {
         #expect(
             problem([

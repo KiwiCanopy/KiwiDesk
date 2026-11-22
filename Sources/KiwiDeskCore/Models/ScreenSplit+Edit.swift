@@ -2,10 +2,76 @@ import CoreGraphics
 import Foundation
 
 extension ScreenSplit {
-    /// An unsplit screen `width` × `height`: one area, id 0.
-    public static func whole(width: Int, height: Int) -> ScreenSplit {
-        ScreenSplit(areas: [ScreenArea(id: 0, x: 0, y: 0, w: width, h: height)]
+    /// An unsplit screen `width` × `height`: one area, id 0,
+    /// keeping `previous`'s next id so a later split mints no id
+    /// the screen already used (ruling 21).
+    public static func whole(
+        width: Int,
+        height: Int,
+        after previous: ScreenSplit? = nil
+    ) -> ScreenSplit {
+        ScreenSplit(
+            areas: [ScreenArea(id: 0, x: 0, y: 0, w: width, h: height)],
+            nextID: previous?.nextID
         )
+    }
+
+    /// Areas of `lengths` along `axis`, in reading order: the ids
+    /// `previous` held in reading order are kept — the lead stays
+    /// 0 — and the rest are minted from its next id, so re-laying a
+    /// split moves no pin (rulings 14, 21).
+    public static func laidOut(
+        _ lengths: [Int],
+        axis: ScreenAreaCut.Axis,
+        width: Int,
+        height: Int,
+        after previous: ScreenSplit?
+    ) -> ScreenSplit {
+        var kept =
+            previous.map { ScreenArea.readingOrder($0.areas) }?
+            .map(\.id) ?? [0]
+        if kept.first != 0 { kept = [0] }
+        var next = previous?.nextID ?? 1
+        let ids = lengths.indices.map { i -> Int in
+            if i < kept.count { return kept[i] }
+            defer { next += 1 }
+            return next
+        }
+        let base = ScreenSplit(
+            areas: ids.map {
+                ScreenArea(id: $0, x: 0, y: 0, w: width, h: height)
+            },
+            nextID: next
+        )
+        return base.resized(lengths, axis: axis)
+    }
+
+    /// Areas given as rects, an id where the caller named one: an
+    /// unnamed one takes 0 when it leads and no area holds 0, else
+    /// a fresh id from `previous`'s next one (ruling 21).
+    public static func adopting(
+        _ entries: [(id: Int?, area: ScreenArea)],
+        after previous: ScreenSplit?
+    ) -> ScreenSplit {
+        var next = previous?.nextID ?? 1
+        let ordered = entries.sorted {
+            ($0.area.y, $0.area.x) < ($1.area.y, $1.area.x)
+        }
+        var zeroTaken = ordered.contains { $0.id == 0 }
+        let areas = ordered.enumerated().map { index, entry in
+            var area = entry.area
+            if let id = entry.id {
+                area.id = id
+            } else if index == 0, !zeroTaken {
+                area.id = 0
+                zeroTaken = true
+            } else {
+                area.id = next
+                next += 1
+            }
+            return area
+        }
+        return ScreenSplit(areas: areas, nextID: next)
     }
 
     /// Halves area `id` along `axis` (ruling 23): the left or top
@@ -65,13 +131,10 @@ extension ScreenSplit {
             union.width * union.height
                 == ra.width * ra.height + rb.width * rb.height
         else { return nil }
-        let (keep, drop): (Int, Int)
-        if a == 0 || b == 0 {
-            (keep, drop) = a == 0 ? (ia, ib) : (ib, ia)
-        } else {
-            let aFirst = (ra.minY, ra.minX) < (rb.minY, rb.minX)
-            (keep, drop) = aFirst ? (ia, ib) : (ib, ia)
-        }
+        // The top/left one keeps its id — area 0 whenever it takes
+        // part, since a valid split leads with it (`missingLeadArea`).
+        let aFirst = (ra.minY, ra.minX) < (rb.minY, rb.minX)
+        let (keep, drop) = aFirst ? (ia, ib) : (ib, ia)
         var survivor = areas[keep]
         survivor.x = Int(union.minX)
         survivor.y = Int(union.minY)

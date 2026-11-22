@@ -32,7 +32,7 @@ struct PlacementIdentityTests {
         #expect(areas.count == 1)
         #expect(areas[0].area.id == 0)
         #expect(areas[0].key.description == wide.fingerprint)
-        #expect(areas[0].frame == wide.frame)
+        #expect(areas[0].area.rect.size == wide.frame.size)
     }
 
     @Test func splitScreenHasOnePlacementPerArea() throws {
@@ -47,11 +47,11 @@ struct PlacementIdentityTests {
                 "\(wide.fingerprint)#2",
             ]
         )
-        #expect(areas.map(\.frame.minX) == [0, 1720, 2580])
-        #expect(areas.allSatisfy { $0.frame.height == 1440 })
+        #expect(areas.map(\.area.x) == [0, 1720, 2580])
+        #expect(areas.allSatisfy { $0.area.h == 1440 })
     }
 
-    @Test func stackedAreaFramesAreAppKit() throws {
+    @Test func stackedAreasReadTopDown() throws {
         var ws = WorkspaceManager()
         let split = try #require(
             ScreenSplit.whole(width: 3440, height: 1440)
@@ -60,9 +60,9 @@ struct PlacementIdentityTests {
         ws.setAreaSplits([wide.fingerprint: split])
         ws.upsertDisplay(wide)
         let areas = ws.placements(of: wide.id)
-        // Top (area 0) sits at the larger AppKit y.
-        #expect(areas[0].frame.minY == 720)
-        #expect(areas[1].frame.minY == 0)
+        // Area 0 is the top one, in the screen's top-left points.
+        #expect(areas.map(\.area.y) == [0, 720])
+        #expect(areas.map(\.area.id) == [0, 1])
     }
 
     @Test func eachAreaShowsItsOwnSpace() throws {
@@ -84,8 +84,11 @@ struct PlacementIdentityTests {
         )
         #expect(ws.display(of: SpaceID(13)) == wide.id)
         #expect(ws.spaces(on: wide.id).count == 6)
+        // Area 1 keeps the Space it showed — not its first — when
+        // the focus moves to another area of the same screen.
+        ws.activate(SpaceID(12))
         ws.activate(SpaceID(11))
-        #expect(ws.activeSpace(on: areas[1]) == SpaceID(2))
+        #expect(ws.activeSpace(on: areas[1]) == SpaceID(12))
     }
 
     @Test func vanishedAreaFallsBackToAreaZero() throws {

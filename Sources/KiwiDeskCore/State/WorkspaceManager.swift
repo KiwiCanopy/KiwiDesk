@@ -137,6 +137,8 @@ public struct WorkspaceManager: Sendable {
     /// the display holds the ACTIVE space the switch moves that
     /// instead, so the map's own invariant (the active display is
     /// never a key here) survives a swipe on the focused screen.
+    /// On a split screen it shows `id` in its own area, through
+    /// `show(_:on: PlacementID)` (#3517).
     public mutating func show(_ id: SpaceID, on display: DisplayID) {
         guard let placement = spacePlacement[id],
             placement.display == display

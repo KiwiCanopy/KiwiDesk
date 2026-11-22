@@ -39,5 +39,13 @@ struct AreaHealTests {
             core.state.workspaces.spaces(on: right.id).first
         )
         #expect(core.spacePins[seed] == right.key.description)
+        // A pin reset that empties the area again re-pins THAT
+        // seed rather than minting another.
+        core.spacePins[seed] = nil
+        core.state.workspaces.assign(seed, to: areas[0].id)
+        core.resolveSpaceDisplays(mainID: wide.id)
+        #expect(core.state.workspaces.allSpaces.count == count)
+        #expect(core.state.workspaces.placement(of: seed) == right.id)
+        #expect(core.spacePins[seed] == right.key.description)
     }
 }

@@ -49,8 +49,28 @@ struct AreaPinResolveTests {
 
     @Test func pinToAVanishedAreaTakesAreaZero() throws {
         let core = try core()
+        let right = try #require(
+            core.state.workspaces.placements(of: wide.id).last
+        ).id
+        // Held in the right area, its pin names an area gone: the pin
+        // still decides, and area 0 is where it falls back to.
+        core.state.workspaces.assign(SpaceID(2), to: right)
         core.spacePins[SpaceID(2)] = "\(wide.fingerprint)#7"
         core.resolveSpaceDisplays(mainID: wide.id)
         #expect(core.state.workspaces.placement(of: SpaceID(2))?.area == 0)
+    }
+
+    @Test func areaPinNamesItsScreen() throws {
+        let core = try core()
+        let laptop = Display(
+            id: DisplayID(900_202),
+            name: "Built-in",
+            frame: CGRect(x: -1512, y: 0, width: 1512, height: 982)
+        )
+        core.state.workspaces.upsertDisplay(laptop)
+        core.spacePins[SpaceID(2)] = "\(wide.fingerprint)#1"
+        core.resolveSpaceDisplays(mainID: laptop.id)
+        #expect(core.state.workspaces.display(of: SpaceID(2)) == wide.id)
+        #expect(core.state.workspaces.placement(of: SpaceID(2))?.area == 1)
     }
 }

@@ -132,23 +132,21 @@ extension KiwiCore {
         of space: SpaceID,
         on display: DisplayID
     ) -> PlacementID {
-        let areas = state.workspaces.placements(of: display)
-        if let pin = spacePins[space] {
-            let key = ScreenAreaKey(parsing: pin)
-            if let named = areas.first(where: { $0.key == key }) {
-                return named.id
-            }
-            if let zero = areas.first(where: { $0.area.id == 0 }) {
-                return zero.id
-            }
+        let ws = state.workspaces
+        if let pin = spacePins[space],
+            let named = ws.placement(
+                keyed: ScreenAreaKey(parsing: pin),
+                on: display
+            )
+        {
+            return named
         }
-        if let held = state.workspaces.placement(of: space),
-            held.display == display,
-            areas.contains(where: { $0.id == held })
+        if let held = ws.placement(of: space), held.display == display,
+            ws[placement: held] != nil
         {
             return held
         }
-        return areas.first?.id
+        return ws.leadPlacement(of: display)
             ?? PlacementID(display: display, area: 0)
     }
 

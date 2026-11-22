@@ -16,8 +16,8 @@ extension WorkspaceManager {
     }
 
     /// The space a physical screen shows: the active space where it
-    /// lives on that screen, else the leading area's. On an unsplit
-    /// screen, its one area's.
+    /// lives on that screen, else area 0's — the area a bare screen
+    /// reference names. On an unsplit screen, its one area's.
     public func activeSpace(on display: DisplayID) -> SpaceID? {
         if let active = activeSpace,
             spacePlacement[active]?.display == display
@@ -28,7 +28,7 @@ extension WorkspaceManager {
         // record; its Spaces' own placement stands in.
         let placed = order.lazy.compactMap { self.spacePlacement[$0] }
         guard
-            let lead = placements(of: display).first?.id
+            let lead = leadPlacement(of: display)
                 ?? placed.first(where: { $0.display == display })
         else { return nil }
         return activeSpace(on: lead)

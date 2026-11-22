@@ -40,11 +40,10 @@ extension KiwiCore {
             // needs `NSScreen` plus the AX/AppKit y-flip —
             // neither of which the pure state core may read
             // (§2.6). `screen(containing:)` owns the flip.
+            let arrival = arrivalFrame(of: window)
             state.arrivalDisplay =
-                TilingEngine.screen(
-                    containing: arrivalFrame(of: window)
-                )?.kiwiDisplayID
-            state.arrivalPlacement = arrivalArea(of: window)  // #3517
+                TilingEngine.screen(containing: arrival)?.kiwiDisplayID
+            state.arrivalPlacement = areaPlacement(holding: arrival)
             // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()
             // How it may take the focus (#3122, #3152), likewise.

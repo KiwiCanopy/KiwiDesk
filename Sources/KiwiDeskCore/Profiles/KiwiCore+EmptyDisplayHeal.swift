@@ -65,20 +65,22 @@ extension KiwiCore {
 
     /// An area is never left with no Space either (#3517): each
     /// empty area of a split screen is seeded one, pinned to the
-    /// area's key and filed in the ledger under it, reused like a
-    /// screen's seed while the pin still names that area.
+    /// area's key and filed in the ledger under it, reused — its
+    /// lead re-asserted — and stood down for a twin exactly as a
+    /// screen's seed is.
     private func healEmptyAreas(of display: Display, lead: LayoutMode) {
         let areas = state.workspaces.placements(of: display.id)
         guard areas.count > 1 else { return }
         for area in areas where state.workspaces.spaces(on: area.id).isEmpty {
             let key = area.key.description
             let seed: SpaceID
-            if let earlier = healedSpaces[key],
-                state.workspaces[earlier] != nil,
-                spacePins[earlier] == nil || spacePins[earlier] == key
-            {
+            switch earlierSeed(for: key) {
+            case .heldByTwin:
+                continue
+            case .reusable(let earlier):
                 seed = earlier
-            } else {
+                setSpaceMode(seed, lead, keepingSizes: false)
+            case .absent:
                 seed = mintedSpaceNumber()
                 state.workspaces.ensureSpace(seed, mode: lead)
                 healedSpaces[key] = seed
@@ -146,10 +148,18 @@ extension KiwiCore {
         case nil:
             return .reusable(earlier)
         case fingerprint?:
-            let host = state.workspaces.display(of: earlier)
-            let onTwin = state.workspaces.allDisplays.contains {
-                $0.id == host && $0.fingerprint == fingerprint
-            }
+            // `fingerprint` is a screen's or an area's key (#3517):
+            // the seed is on a twin when its own placement answers
+            // to the same key on another screen.
+            let ws = state.workspaces
+            let host = ws.display(of: earlier)
+            let onTwin =
+                ws.allDisplays.contains {
+                    $0.id == host && $0.fingerprint == fingerprint
+                }
+                || ws.placement(of: earlier).flatMap {
+                    ws[placement: $0]?.key.description
+                } == fingerprint
             return onTwin ? .heldByTwin : .absent
         default:
             return .absent
