@@ -48,6 +48,7 @@ struct ResetSizesSeedTests {
                 + DefaultKeybindings.rows(ofGeneration: 12)
                 + DefaultKeybindings.rows(ofGeneration: 13)
                 + DefaultKeybindings.rows(ofGeneration: 14)
+                + DefaultKeybindings.rows(ofGeneration: 15)
         )
     }
 
@@ -74,6 +75,7 @@ struct ResetSizesSeedTests {
                 + DefaultKeybindings.rows(ofGeneration: 12)
                 + DefaultKeybindings.rows(ofGeneration: 13)
                 + DefaultKeybindings.rows(ofGeneration: 14)
+                + DefaultKeybindings.rows(ofGeneration: 15)
         )
     }
 

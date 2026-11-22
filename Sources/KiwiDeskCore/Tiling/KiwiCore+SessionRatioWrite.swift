@@ -57,6 +57,38 @@ extension KiwiCore {
         }
     }
 
+    /// Every Space's sizes and the key they are filed under, each
+    /// screen's Desktop read once: the layout undo snapshot (#3515),
+    /// which covers every Space on every command.
+    func sessionSizingOfEverySpace() -> [SpaceID: SpaceSizing] {
+        var shown: [DisplayID?: ShownDesktop] = [:]
+        var out: [SpaceID: SpaceSizing] = [:]
+        for space in state.workspaces.allSpaces {
+            let display = state.workspaces.display(of: space.id)
+            let desktop =
+                shown[display] ?? shownDesktop(onDisplay: display)
+            shown[display] = desktop
+            // `sizingKey(of:)`'s rule, with the Desktop read shared.
+            var native: SkyLight.SpaceID?
+            if case .shown(let id) = desktop { native = id }
+            let key = SessionSizingKey(
+                desktop: native,
+                arrangement: sizingOwner(of: space.id)
+            )
+            out[space.id] = SpaceSizing(
+                key: key,
+                ratios: sizes(at: key)[space.id] ?? SessionRatios()
+            )
+        }
+        return out
+    }
+
+    /// Puts back sizes a layout undo recorded (#3515), on the
+    /// Desktop shown now — the one its step was validated against.
+    func restoreSessionRatios(_ ratios: SessionRatios, of space: SpaceID) {
+        withSessionRatios(of: space) { $0 = ratios }
+    }
+
     private func sizes(at key: SessionSizingKey) -> DesktopMemory.SpaceRatios {
         desktopMemory.sessionRatios[key.desktop]?[key.arrangement] ?? [:]
     }

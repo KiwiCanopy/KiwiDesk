@@ -1012,6 +1012,7 @@ with** on the Spaces step, in place of a preset of that name.
 | Toggle KiwiVision | `⌃⌥V` |
 | Next / previous layout | `⌃⌥C` / `⌃⌥⇧C` |
 | Reset the space's sizes | `⌃⌥R` |
+| Undo / redo a layout change | `⌃⌥Z` / `⌃⌥⇧Z` |
 | Maximize the window | `⌃⌥M` |
 | Pocket this window | `⌃⌥P` |
 | Show / hide Space Bar, App Bar | `⌃⌥G`, `⌃⌥H` |
@@ -1019,6 +1020,12 @@ with** on the Spaces step, in place of a preset of that name.
 | Show shortcuts panel | `⌃⌥K` |
 
 **Open Settings** ships on `⌃⌥,` as well.
+
+:::unreleased
+`⌃⌥Z` takes back the last change to the space's arrangement and
+`⌃⌥⇧Z` makes it again
+([`undo_layout`](lua-reference.md#undo_layout)).
+:::
 
 `⌃⌥` moves your focus, `⇧` acts on the window — swaps it or
 sends it to a space — and `⌘` steps through the spaces or sends

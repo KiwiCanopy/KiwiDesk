@@ -84,6 +84,15 @@ extension APIReference {
             ?? derivedKind(of: entry.name)
     }
 
+    /// The kind of a command as `execute` is handed it, its
+    /// namespace included: no catalogue walk, so the per-command
+    /// undo bracket can ask it (#3515).
+    static func kind(ofName qualified: String) -> APIKind {
+        let last = qualified.split(separator: ".").last
+        let name = last.map(String.init) ?? qualified
+        return kindExceptions[qualified] ?? derivedKind(of: name)
+    }
+
     /// `groups` narrowed to one kind, in their own order; a group
     /// left empty is dropped. Nil keeps every group whole.
     public static func groups(of kind: APIKind?) -> [APIGroup] {

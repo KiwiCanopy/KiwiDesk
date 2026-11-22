@@ -17,6 +17,7 @@ extension KiwiCore {
                 || self.tiler.didRecentlySetFrame(id)
         }
         drag.onDragMove = { [weak self] id, start, frame in
+            self?.beginLayoutGesture(id)
             self?.withUserMotion {
                 self?.handleDragMove(id, start: start, frame: frame)
             }
@@ -25,6 +26,7 @@ extension KiwiCore {
             self?.withUserMotion {
                 self?.handleDragEnd(id, start: start, frame: frame)
             }
+            self?.endLayoutGesture(id)
         }
         drag.isMousePressed = { [weak self] in
             self?.mouse.leftButtonHeld == true

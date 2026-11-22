@@ -219,7 +219,7 @@ public final class KiwiCore {
     let launchFollow = LaunchFollowIntent()
     let arrivals = ArrivalProvenanceDoor()
     let jump = JumpState()
-
+    let layoutHistory = LayoutHistoryLedger()  // #3515
     /// The MAIN display's current native Desktop (#888): the binding
     /// authority and the Space memory's key (#1147), never a number.
     var lastDesktop: DesktopKey?

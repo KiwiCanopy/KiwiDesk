@@ -1101,6 +1101,55 @@ KiwiDesk.reset_layout_sizing("mail")
 KiwiDesk.reset_layout_sizing("all")
 ```
 
+### undo_layout
+
+:::unreleased
+**Expects:** nothing.
+
+**Does:** takes back the last change to the active space's
+arrangement — a swap, a move, a resize, a layout change, a
+Maximize or a drag — and puts its windows, sizes and layout back.
+Each space keeps its own history of about 20 steps for the
+session. One key press is one step, whatever its binding runs,
+and presses of the same key less than a second apart are one step
+too, so a burst of `⌃⌥C` comes back to the layout you started on.
+A window moved to another space is one step on both spaces, so
+undo from either one sends it back.
+
+The history covers what KiwiDesk did. Focus, scrolling and
+floating windows are not part of it. A change it did not record —
+a window opening or closing, a Desktop switch, a profile load —
+makes the next undo fail: it plays the refusal sound
+([`set_refusal_sound`](#set_refusal_sound)) and clears that
+space's history.
+
+`⌃⌥Z` runs it by default, listed as **Undo layout change** under
+Shortcuts ▸ Built-in ▸ Size & float.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.undo_layout()
+```
+
+### redo_layout
+
+:::unreleased
+**Expects:** nothing.
+
+**Does:** makes again the change [`undo_layout`](#undo_layout)
+took back. Any new change to the space clears what redo could
+make again. `⌃⌥⇧Z` runs it by default, listed as **Redo layout
+change**.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.redo_layout()
+```
+
 ### set_swap_skips_cascade
 
 **Expects:** `true` or `false` (default `true`).

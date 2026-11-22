@@ -62,6 +62,14 @@ extension APIReference {
                 + "Space, one by id, or every one with `all`.",
             .space("space", optional: true)
         ),
+        "undo_layout": APIRecord(
+            "Takes back the last change to the active Space's "
+                + "layout: a swap, move, resize or drag."
+        ),
+        "redo_layout": APIRecord(
+            "Makes the arrangement change undo_layout took back "
+                + "again."
+        ),
         "set_refusal_sound": APIRecord(
             "Also plays an alert sound whenever a blocked "
                 + "keyboard action draws its refusal pill.",

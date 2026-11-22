@@ -25,6 +25,9 @@ struct MaximizedReaderCensusTests {
         // The model's initializer; `remove`, the rekey and the
         // reorder release write the field bare, inside the type.
         "Models/SpaceModel.swift": 1,
+        // Layout undo copies the stored intent out and back with the
+        // rest of the arrangement (#3515); it reads no verdict.
+        "Models/SpaceArrangement.swift": 2,
         // The in-place carry of the window, its shape (#3062) and its
         // follow (#3063), written and adopted.
         "Models/StateSnapshot+InPlace.swift": 5,

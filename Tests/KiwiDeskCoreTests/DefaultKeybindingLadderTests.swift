@@ -38,6 +38,10 @@ struct DefaultKeybindingLadderTests {
                 "KiwiDesk.toggle_maximized(\"height\")",
                 "maximizes the same window on one axis (#3062)"
             ),
+            "KiwiDesk.undo_layout()": (
+                "KiwiDesk.redo_layout()",
+                "reverses the undo, as ⌘⇧Z (#3515)"
+            ),
         ]
 
     /// Whether `row` is the ruled `⇧` variant of its seeded twin.

@@ -30,6 +30,10 @@ extension ShortcutsKey {
             return .text("keybinding.shrink_height")
         case .resetSizes:
             return .text("keybinding.reset_sizes")
+        case .undoLayout:
+            return .text("keybinding.undo_layout")
+        case .redoLayout:
+            return .text("keybinding.redo_layout")
         case .maximize:
             return .text(
                 "keybinding.maximize",

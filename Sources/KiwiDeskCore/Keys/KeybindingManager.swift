@@ -45,6 +45,9 @@ public final class KeybindingManager {
     /// (#1871 ▸ unbound step key, `KiwiCore+Bootstrap`), so a bare
     /// manager stays silent.
     var beep: @MainActor () -> Void = {}
+    /// Wraps each fire, named for its key: one undo step (#3515).
+    var fireScope: @MainActor (_ label: String, _ fire: () -> Void) -> Void =
+        { $1() }
     /// Whether the hint panel was last told a sequence is open.
     var sequenceOpen = false
     /// The sequence epoch: bumped with every row set the tap is

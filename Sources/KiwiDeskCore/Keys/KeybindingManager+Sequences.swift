@@ -64,7 +64,7 @@ extension KeybindingManager {
         // switch must not close the next sequence already typed.
         firingEndKey = true
         defer { firingEndKey = false }
-        firePress(id: nil) {
+        firePress(id: nil, label: "sequence \(ref)") {
             if let error = call(ref: ref) {
                 onLog("key sequence: end key failed: \(error)")
             }

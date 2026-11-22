@@ -21,10 +21,16 @@ extension KiwiCore {
     /// a screen the last switch did not file (plugged in since)
     /// answers `.none` until its first switch — accepted residue.
     func shownDesktop(of space: SpaceID) -> ShownDesktop {
+        shownDesktop(onDisplay: state.workspaces.display(of: space))
+    }
+
+    /// `shownDesktop(of:)` for every Space on `display` — one
+    /// WindowServer UUID read, which a caller covering many Spaces
+    /// pays once per screen (#3515).
+    func shownDesktop(onDisplay display: DisplayID?) -> ShownDesktop {
         guard !desktopMemory.shownSpaces.isEmpty else { return .shown(nil) }
         let uuid =
-            state.workspaces.display(of: space)
-            .flatMap { desktopMemory.readDisplayUUID($0) } ?? ""
+            display.flatMap { desktopMemory.readDisplayUUID($0) } ?? ""
         guard let native = shownDesktop(onScreen: uuid) else {
             return .none
         }

@@ -20,6 +20,7 @@ extension SettingsValueReadout {
             .moveToDesktopFollow, .layoutCycle, .viewPicker,
             .desktopOverview, .jumpToWindow, .jumpToLastApp,
             .growWidth, .shrinkWidth, .growHeight, .shrinkHeight, .resetSizes,
+            .undoLayout, .redoLayout,
             .maximize, .maximizeHeight, .maximizeWidth,
             .toggleFloating, .toggleTiling, .toggleKiwiVision, .toggleLens,
             .toggleSpaceBar, .toggleAppBar,

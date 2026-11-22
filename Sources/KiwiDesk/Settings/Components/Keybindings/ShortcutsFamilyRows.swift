@@ -112,6 +112,10 @@ struct ShortcutsFamilyRows {
             return [resizeRow(.shrinkHeight)]
         case .resetSizes:
             return [KeybindingCatalog.resetSizes]
+        case .undoLayout:
+            return [KeybindingCatalog.undoLayout]
+        case .redoLayout:
+            return [KeybindingCatalog.redoLayout]
         case .maximize:
             return [KeybindingCatalog.maximize]
         case .maximizeHeight:

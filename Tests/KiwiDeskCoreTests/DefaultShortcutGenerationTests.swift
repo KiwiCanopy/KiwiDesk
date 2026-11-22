@@ -33,6 +33,7 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.toggle_tiling()",
         KiwiHubSide.desktops.lua,
         KiwiHubSide.lastAppLua,
+        "KiwiDesk.undo_layout()", "KiwiDesk.redo_layout()",
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.

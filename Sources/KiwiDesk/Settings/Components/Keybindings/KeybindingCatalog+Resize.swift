@@ -6,7 +6,7 @@ extension KeybindingCatalog {
     static func resizeAndFloat(step: Int) -> [NavCommand] {
         ResizeRow.allCases.map { resizeRow($0, step: step) }
             + [
-                resetSizes,
+                resetSizes, undoLayout, redoLayout,
                 maximize,
                 maximizeHeight,
                 maximizeWidth,
@@ -26,6 +26,8 @@ extension KeybindingCatalog {
     /// label the banner interpolated untranslated.
     static let stepFreeCommands: [NavCommand] = [
         resetSizes,
+        undoLayout,
+        redoLayout,
         maximize,
         maximizeHeight,
         maximizeWidth,

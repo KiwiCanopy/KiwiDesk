@@ -106,7 +106,14 @@ extension KiwiCore {
     /// slot `from` (a single window or a whole group) to slot
     /// `to` within `space`, rewriting the tiled order in place —
     /// floating windows keep their positions in the flat array.
+    /// One layout undo step (#3515).
     func moveBarItem(space id: SpaceID, from: Int, to: Int) {
+        recordingLayoutStep("app_bar") {
+            reorderBarItem(space: id, from: from, to: to)
+        }
+    }
+
+    private func reorderBarItem(space id: SpaceID, from: Int, to: Int) {
         guard let space = state.workspaces[id],
             let host = barHost(for: space.mode)
         else { return }

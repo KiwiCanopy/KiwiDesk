@@ -130,6 +130,10 @@ extension ShortcutsReferenceBuilder {
             return "list.bullet"
         case "KiwiDesk.reset_layout_sizing()":
             return "arrow.counterclockwise"
+        case "KiwiDesk.undo_layout()":
+            return "arrow.uturn.backward"
+        case "KiwiDesk.redo_layout()":
+            return "arrow.uturn.forward"
         // KiwiHub's sides: the window switcher, the swap of two
         // windows (owner, 2026-10-27), and its last-app opener, which
         // opens the same side (#3135); the Shortcuts page's symbol;

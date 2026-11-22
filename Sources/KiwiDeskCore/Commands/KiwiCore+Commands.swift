@@ -24,6 +24,10 @@ extension KiwiCore {
             return swapCommand(args)
         case "swap_here":
             return swapHereCommand(args)
+        case Self.undoLayoutCommand:
+            return takeLayoutStep(.undo)
+        case Self.redoLayoutCommand:
+            return takeLayoutStep(.redo)
         case "focus_window":
             return focusWindowRecordingFlight(args)
         case "focus_space":
