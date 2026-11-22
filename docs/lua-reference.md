@@ -1175,7 +1175,7 @@ nothing.
 **Does:** the size a window takes when [`set_float_placement`](#set_float_placement)'s
 `"center"` places it, in place of the size measured from its screen.
 The frame a window last floated at still comes first. A size larger
-than the area its screen leaves clear of the bars is cut to fit, and
+than its screen clear of the bars is cut to fit, and
 app limits apply as they do to the measured size. With nothing, the
 measured size comes back.
 It is also what [`size_floating`](#size_floating) takes with no
@@ -6621,8 +6621,7 @@ end)
 nothing.
 
 **Does:** sizes the focused floating window, keeping its centre where
-it is, and keeps it inside the area its screen leaves clear of the
-bars. With nothing it takes [`set_float_size`](#set_float_size)'s
+it is, and keeps it on its screen clear of the bars. With nothing it takes [`set_float_size`](#set_float_size)'s
 size, else the size [`set_float_placement`](#set_float_placement)
 measures from the screen. A size that does not fit the screen, or
 that passes a limit KiwiDesk has learned for the app, lands as close
