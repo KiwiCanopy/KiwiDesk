@@ -1715,7 +1715,7 @@
   "menu.file.close": "Cerrar",
   "menu.file.title": "Archivo",
   "menu.layout": "Diseño",
-  "menu.layout.keep": "Conservar el diseño en el perfil «%1$@»",
+  "menu.layout.keep": "Conservar en el perfil «%1$@»",
   "menu.layout.save_failed.title": "No se pudo guardar el diseño",
   "menu.layout.unsaved": "sin guardar en el perfil",
   "menu.quit": "Salir de KiwiDesk",

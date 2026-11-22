@@ -1,6 +1,6 @@
 import Foundation
 
-/// Keep Layout in Profile (#1179, re-ruled by #1790): the one
+/// Keep in Profile (#1179, re-ruled by #1790): the one
 /// write both Keep rows take.
 extension KiwiCore {
     /// Writes the live mode of each Space the live profile declares

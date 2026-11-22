@@ -123,7 +123,7 @@ extension KiwiCore {
                 .action(
                     L(
                         "menu.layout.keep",
-                        "Keep Layout in Profile “%1$@”",
+                        "Keep in Profile “%1$@”",
                         profile
                     ),
                     enabled: drift.keepArmed

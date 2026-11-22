@@ -123,7 +123,7 @@ struct BarMenuRowsTests {
             let layout = try self.submenu(core.barMenuRows(.space(one))[0])
             return try #require(layout.last)
         }
-        #expect(try keep().title == "Keep Layout in Profile “Desk”")
+        #expect(try keep().title == "Keep in Profile “Desk”")
         #expect(try keep().enabled == false)
         let current = try #require(core.state.workspaces[one]?.mode)
         let other: LayoutMode = current == .grid ? .stack : .grid
@@ -203,7 +203,7 @@ struct BarMenuRowsTests {
         core.execute("set_mode", args: [.string("1"), .string("grid")])
         let layout = try submenu(core.barMenuRows(.space(one))[0])
         #expect(layout.allSatisfy { $0.subtitle == nil })
-        #expect(!layout.contains { $0.title.hasPrefix("Keep Layout") })
+        #expect(!layout.contains { $0.title.hasPrefix("Keep in Profile") })
     }
 
     @Test("the divider's reset is greyed at the default")
