@@ -114,4 +114,23 @@ struct AreaEdgeTests {
         #expect(style.edge == .bottom)
         #expect(style.edgeOverride.isEmpty)
     }
+
+    /// An area key stores nothing where it asks for its screen's
+    /// edge; a screen key's own entry is kept on a repeat write of
+    /// the same edge, and its next write pins the area where it was.
+    @Test("each key stores only what it would not inherit")
+    func keysStoreOnlyTheirOwn() {
+        let scope = ScreenEdgeScope(
+            screens: [fp, "\(fp)#1", "\(fp)#2", "Other:100x100"]
+        )
+        var style = SpaceBarStyle()
+        style.setEdge(.top)
+        style.setEdge(.left, on: fp, among: scope)
+        style.setEdge(.left, on: "\(fp)#1", among: scope)
+        #expect(style.edgeOverride["\(fp)#1"] == nil)
+        style.setEdge(.bottom, on: fp, among: scope)
+        style.setEdge(.bottom, on: fp, among: scope)
+        #expect(style.edgeOverride[fp] == .bottom)
+        #expect(style.edge(on: "\(fp)#1") == .left)
+    }
 }

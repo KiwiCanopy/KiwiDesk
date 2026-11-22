@@ -54,7 +54,10 @@ extension SettingsModel {
     /// The keys a screen's rows take: its areas' on a split screen
     /// in the draft, in reading order (#3517), else its fingerprint.
     func areaKeys(of fingerprint: String) -> [String] {
-        ScreenSplit.areaKeys(of: fingerprint, in: config.settings.displayAreas)
+        ScreenSplit.areaKeys(
+            of: fingerprint,
+            in: core.laidOutSplits(config.settings.displayAreas)
+        )
     }
 
     /// A bar's screen rows, one per fingerprint: the profile's
@@ -75,11 +78,8 @@ extension SettingsModel {
         // A screen split in the draft takes a row per area, and an
         // entry for an area it no longer has keeps a row of its own.
         var keyed: [String: Int] = [:]
-        var split: Set<String> = []
         for (screen, count) in counts {
-            let keys = areaKeys(of: screen)
-            if keys.count > 1 { split.insert(screen) }
-            for key in keys { keyed[key] = count }
+            for key in areaKeys(of: screen) { keyed[key] = count }
         }
         let shows: [String] =
             switch show {
@@ -100,9 +100,8 @@ extension SettingsModel {
                 id: key,
                 name: Self.perScreenName(
                     screen: Display.fingerprintParts(area.fingerprint).name,
-                    areaID: area.areaID,
-                    split: split.contains(area.fingerprint)
-                        || area.areaID != 0
+                    key: key,
+                    splits: core.laidOutSplits(config.settings.displayAreas)
                 ),
                 count: count,
                 present: connected.contains(area.fingerprint)

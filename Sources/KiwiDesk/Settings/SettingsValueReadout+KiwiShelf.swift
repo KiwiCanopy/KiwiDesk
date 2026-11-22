@@ -44,14 +44,16 @@ extension SettingsValueReadout {
                 census,
                 bar: .spaceBarEdge,
                 old.settings.spaceBarStyle,
-                new.settings.spaceBarStyle
+                new.settings.spaceBarStyle,
+                splits: new.settings.displayAreas
             )
         case .appBarScreenEdge:
             return screenEdgeRows(
                 census,
                 bar: .appBarEdge,
                 old.settings.appBarStyle,
-                new.settings.appBarStyle
+                new.settings.appBarStyle,
+                splits: new.settings.displayAreas
             )
         case .spaceBarScreenVisibility:
             return screenShowRows(
@@ -61,14 +63,16 @@ extension SettingsValueReadout {
                 own: (
                     old.settings.spaceBarStyle.visibility,
                     new.settings.spaceBarStyle.visibility
-                )
+                ),
+                splits: new.settings.displayAreas
             )
         case .appBarScreenVisibility:
             return screenShowRows(
                 census,
                 old.settings.appBarStyle.visibilityOverride,
                 new.settings.appBarStyle.visibilityOverride,
-                own: nil
+                own: nil,
+                splits: new.settings.displayAreas
             )
         case .alignment:
             return spaceBarChoiceRow(
@@ -96,7 +100,8 @@ extension SettingsValueReadout {
                 census,
                 bar: .pocketEdge,
                 old.settings.kiwishelf.pocketEdges,
-                new.settings.kiwishelf.pocketEdges
+                new.settings.kiwishelf.pocketEdges,
+                splits: new.settings.displayAreas
             )
         case .pocketPosition:
             return [
@@ -311,40 +316,5 @@ extension SettingsValueReadout {
             return L("diff.value.mixed", "mixed")
         }
         return AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
-    }
-
-    /// One row per screen whose own edge changed (#1948), under
-    /// its bar's edge label and the screen's whole fingerprint —
-    /// two models of one name differ by size — each side the
-    /// edge that screen actually gets.
-    private static func screenEdgeRows<Bar: ScreenEdged>(
-        _ census: SettingKey,
-        bar: KiwiShelfKey,
-        _ old: Bar,
-        _ new: Bar
-    ) -> [SettingsDiffRow] {
-        let base = label(for: .kiwishelf(bar))
-        let name: (AppBarEdge) -> String = { edge in
-            AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
-        }
-        let screens = Set(old.edgeOverride.keys)
-            .union(new.edgeOverride.keys)
-        return
-            screens
-            .filter { old.edge(on: $0) != new.edge(on: $0) }
-            .sorted()
-            .map { screen in
-                let parts = Display.fingerprintParts(screen)
-                return .change(
-                    census,
-                    instance: screen,
-                    label: instanceLabel(
-                        base,
-                        "\(parts.name) \(parts.size)"
-                    ),
-                    old: name(old.edge(on: screen)),
-                    new: name(new.edge(on: screen))
-                )
-            }
     }
 }

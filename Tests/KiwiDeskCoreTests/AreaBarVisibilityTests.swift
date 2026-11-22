@@ -70,6 +70,18 @@ struct AreaBarVisibilityTests {
         #expect(shown.height < visible.height)
     }
 
+    /// The Show master selects nothing while an area shows a bar
+    /// its own way, since its pick clears that entry (ruling 32).
+    @Test("an area's own Show makes the bars differ")
+    func areaEntryDiffers() {
+        var settings = TilingSettings()
+        settings.setEveryBarVisibility(.always)
+        #expect(settings.uniformBarVisibility == .always)
+        settings.spaceBarStyle.visibilityOverride["Wide:3440x1440#1"] =
+            .hidden
+        #expect(settings.uniformBarVisibility == nil)
+    }
+
     @Test("the map stays out of the JSON while empty and round-trips")
     func storedSparse() throws {
         var style = SpaceBarStyle()

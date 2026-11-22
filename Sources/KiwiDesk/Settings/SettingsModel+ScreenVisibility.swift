@@ -124,20 +124,23 @@ extension SettingsModel {
         return [(nil, perLayout)] + values
     }
 
-    /// A Per screen row's name, and its diff row's: the screen's,
-    /// and on a split screen its area's number after it (#3517),
-    /// every area of the split numbered, its first included.
+    /// A Per screen row's name, and its diff row's: `screen`, and on
+    /// a split screen its area's place in reading order, every area
+    /// numbered — interim until the positional area names (#3517).
     static func perScreenName(
         screen: String,
-        areaID: Int,
-        split: Bool
+        key: String,
+        splits: [String: ScreenSplit]
     ) -> String {
-        guard split else { return screen }
+        let area = ScreenAreaKey(parsing: key)
+        let keys = ScreenSplit.areaKeys(of: area.fingerprint, in: splits)
+        guard keys.count > 1 || area.areaID != 0 else { return screen }
+        let place = keys.firstIndex(of: key) ?? area.areaID
         return L(
             "kiwishelf.per_screen.area_name",
             "%1$@ – Area %2$@",
             screen,
-            String(areaID + 1)
+            String(place + 1)
         )
     }
 

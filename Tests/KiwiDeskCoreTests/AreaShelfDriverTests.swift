@@ -169,4 +169,35 @@ struct AreaShelfDriverTests {
                 == [lead]
         )
     }
+
+    /// A float keeps clear of its own area's bar strips only, and
+    /// of the Pocket's mark only in the lead area.
+    @Test("a Space's float strips are its own area's")
+    func floatStripsPerArea() throws {
+        let (core, screen, areas) = try #require(
+            makeCore({ $0.splitting(0, .sideBySide) }) {
+                $0.kiwishelf.pocketVisibility = .always
+                $0.kiwishelf.pocketEdges.setEdge(.bottom)
+            }
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        for (i, area) in areas.enumerated() {
+            let rect = frame(of: area, in: core, on: screen)
+            let strips = core.reservedStrips(forSpace: SpaceID(i + 1))
+            let bars = strips.filter { $0.edge == .top }
+            #expect(bars.count == 1, "\(area.id)")
+            #expect(
+                bars.allSatisfy {
+                    $0.strip.minX >= rect.minX - 0.5
+                        && $0.strip.maxX <= rect.maxX + 0.5
+                },
+                "\(area.id)"
+            )
+            // The Pocket's mark rests in the lead area alone.
+            #expect(
+                strips.contains { $0.edge == .bottom } == (i == 0),
+                "\(area.id)"
+            )
+        }
+    }
 }
