@@ -112,7 +112,7 @@ struct ScreenShowRowsTests {
         let area = "Wide:3440x1440#1"
         model.screenShowBinding(.space, on: area).wrappedValue = .hidden
         model.screenShowBinding(.app, on: area).wrappedValue = .hidden
-        model.barShowBinding(.appBar(\.monocle.appBar)).wrappedValue = .auto
+        model.barShowBinding(.appBar(.monocle)).wrappedValue = .auto
         #expect(model.config.settings.appBarStyle.visibilityOverride.isEmpty)
         #expect(
             !model.config.settings.spaceBarStyle.visibilityOverride.isEmpty

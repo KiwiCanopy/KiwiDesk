@@ -12,7 +12,7 @@ enum ScreenShowBar {
 /// A bar's own Show row: the Space Bar's, or one layout's App Bar's.
 enum BarShowRow {
     case spaceBar
-    case appBar(WritableKeyPath<TilingSettings, LayoutAppBar>)
+    case appBar(LayoutMode)
 }
 
 /// The Show menu in a bar's Per screen rows (#3517 ruling 30): an
@@ -78,16 +78,18 @@ extension SettingsModel {
                 switch row {
                 case .spaceBar:
                     self.config.settings.spaceBarStyle.visibility
-                case .appBar(let layout):
-                    self.config.settings[keyPath: layout].visibility
+                case .appBar(let mode):
+                    TilingSettings.appBarPath(for: mode).map {
+                        self.config.settings[keyPath: $0].visibility
+                    } ?? .always
                 }
             },
             set: { value in
                 var next = self.config.settings
                 switch row {
                 case .spaceBar: next.spaceBarStyle.setVisibility(value)
-                case .appBar(let layout):
-                    next.setLayoutAppBarVisibility(value, in: layout)
+                case .appBar(let mode):
+                    next.setAppBarVisibility(value, in: mode)
                 }
                 guard next != self.config.settings else { return }
                 self.config.settings = next

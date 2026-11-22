@@ -23,7 +23,7 @@ extension TilingSettings {
     public mutating func setEveryBarVisibility(_ visibility: ShelfVisibility) {
         // A bar-level pick clears each area's own (#3517 ruling 32).
         spaceBarStyle.setVisibility(visibility)
-        appBarStyle.visibilityOverride = [:]
+        appBarStyle.visibilityOverride = [:]  // no layout may host one
         kiwishelf.pocketVisibility = visibility
         for mode in LayoutMode.allCases {
             setAppBarVisibility(visibility, in: mode)
@@ -31,13 +31,18 @@ extension TilingSettings {
     }
 
     /// `mode`'s App Bar visibility, where the mode hosts one —
-    /// through the one `appBarPath(for:)`.
+    /// through the one `appBarPath(for:)` — which clears every
+    /// area's App Bar value (#3517 ruling 32), as the Space Bar's
+    /// `setVisibility(_:)` clears its own. Its Settings row and
+    /// `<layout>.set_app_bar_visibility` write through it alone
+    /// (`AppBarVisibilityWriteCensusTests`).
     public mutating func setAppBarVisibility(
         _ visibility: ShelfVisibility,
         in mode: LayoutMode
     ) {
         guard let path = Self.appBarPath(for: mode) else { return }
         self[keyPath: path].visibility = visibility
+        appBarStyle.visibilityOverride = [:]
     }
 
     /// `other`'s visibility on every element, nothing else of it — a

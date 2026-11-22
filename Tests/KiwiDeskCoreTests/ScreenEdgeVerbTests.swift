@@ -258,7 +258,7 @@ struct ScreenEdgeVerbTests {
         let response = core.applyBarOverride(
             field: "edge_override",
             [.string("left")],
-            into: \.monocle.appBar
+            into: .monocle
         )
         #expect(!response.isSuccess)
         #expect(

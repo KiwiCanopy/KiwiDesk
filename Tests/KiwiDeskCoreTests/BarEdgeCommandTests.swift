@@ -61,7 +61,7 @@ struct BarEdgeCommandTests {
             !core.applyBarOverride(
                 field: "edge",
                 [.string("left")],
-                into: \.monocle.appBar
+                into: .monocle
             ).isSuccess
         )
         #expect(core.tiler.settings == before)

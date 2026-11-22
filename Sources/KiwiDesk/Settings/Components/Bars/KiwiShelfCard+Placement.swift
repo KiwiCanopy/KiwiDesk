@@ -93,7 +93,7 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .monocleShowIn.text,
-                model.barShowBinding(.appBar(\.monocle.appBar)),
+                model.barShowBinding(.appBar(.monocle)),
                 help: model.screenShowsHelp(.app)
             )
             .modifier(GreyOut(active: maximizes))
@@ -110,7 +110,7 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .scrollingShowIn.text,
-                model.barShowBinding(.appBar(\.scrolling.appBar)),
+                model.barShowBinding(.appBar(.scrolling)),
                 help: model.screenShowsHelp(.app)
             )
             .searchAnchored(

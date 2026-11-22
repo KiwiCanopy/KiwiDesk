@@ -72,7 +72,7 @@ extension KiwiCore {
         return applyBarOverride(
             field: field,
             args,
-            into: \.scrolling.appBar
+            into: .scrolling
         )
     }
 

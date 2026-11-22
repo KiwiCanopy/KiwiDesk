@@ -187,7 +187,12 @@ editing here:
   list through `syncAreaSplits` alone, which every write of
   `display_areas` runs through `TilingEngine.onAreaSplits`, never
   a call beside a settings install, and which feeds none while
-  `honoursAreaSplits` is lowered (`AreaSplitSyncTests`).
+  `honoursAreaSplits` is lowered (`AreaSplitSyncTests`). A per-area
+  reader beside the placement list — a write's scope, a Settings
+  row — reads stored splits through the one
+  `KiwiCore.laidOutSplits(_:)`, the same gate, so nothing judges or
+  names an area nothing lays out (`AreaEdgeTests`); retiring the
+  flag retires that door with it. Which readers take it is review's.
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through
