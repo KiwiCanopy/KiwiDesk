@@ -66,14 +66,7 @@ struct RecorderCaptionLines: View {
         switch caption {
         case .dead(let sentence):
             // The record button's value and the badge speak it.
-            HStack(spacing: 4) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                Text(sentence)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.danger)
-            .accessibilityHidden(true)
+            error(sentence).accessibilityHidden(true)
         case .narrowing(let drawn, let spoken, let row):
             narrowing(drawn: drawn, spoken: spoken, row: row)
         case .tapAgain(let hint):
@@ -81,13 +74,23 @@ struct RecorderCaptionLines: View {
         case .tapOnce(let drawn, let spoken):
             plain(drawn).accessibilityLabel(spoken)
         case .refused(let sentence):
-            Text(sentence)
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.danger)
-                .fixedSize(horizontal: false, vertical: true)
+            error(sentence)
         case .dormant(let sentence):
             plain(sentence)
         }
+    }
+
+    /// `KeyRecorderRejectionRow`'s shape: the triangle is the cue
+    /// beside the red (WCAG 1.4.1), hidden from VoiceOver.
+    private func error(_ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .accessibilityHidden(true)
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.caption)
+        .foregroundStyle(SettingsTheme.danger)
     }
 
     private func plain(_ text: String) -> some View {

@@ -39,11 +39,14 @@ struct ConflictRowTreatmentTests {
         "Recorder/RecorderCaptionLines.swift": [
             // The row draws it in `danger` with its shape cue.
             // Spacing and font are glue, as above.
-            "case.dead(letsentence):HStack(spacing:4){"
+            "case.dead(letsentence):"
+                + "error(sentence).accessibilityHidden(true)",
+            "privatefuncerror(_text:String)->someView{"
+                + "HStack(alignment:.firstTextBaseline,spacing:6){"
                 + "Image(systemName:\"exclamationmark.triangle.fill\")"
-                + "Text(sentence).fixedSize(horizontal:false,"
-                + "vertical:true)}.font(.caption)"
-                + ".foregroundStyle(SettingsTheme.danger)"
+                + ".accessibilityHidden(true)Text(text)"
+                + ".fixedSize(horizontal:false,vertical:true)}"
+                + ".font(.caption).foregroundStyle(SettingsTheme.danger)",
         ],
         "Recorder/KeyRecorderField.swift": [
             // The chrome is handed the flag…
