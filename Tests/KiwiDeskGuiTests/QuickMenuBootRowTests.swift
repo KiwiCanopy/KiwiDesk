@@ -145,7 +145,7 @@ struct QuickMenuBootRowTests {
 
     /// Ruling 9 of #2309: KiwiHub's row stays enabled while
     /// KiwiDesk boots.
-    @Test("Show Desktop overview stays enabled while starting")
+    @Test("KiwiHub row stays enabled while starting")
     func hubRowEnabledWhileStarting() {
         let starting = menu(
             controller(phase: .scanning(scanned: 2, total: 9))

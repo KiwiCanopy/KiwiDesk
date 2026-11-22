@@ -9,7 +9,8 @@ import Foundation
 /// both lists — and a divergent copy would silently exempt a file
 /// from a fail-open guard.
 enum QuickMenuBuilders {
-    /// KiwiHub's one quick-menu row, in English (#3485).
+    /// KiwiHub's one quick-menu row in English, the
+    /// `menu.desktop_overview_in_kiwihub` phrase (#3545).
     static let hubRow = "Show Desktop overview in KiwiHub"
 
     /// Every file that builds quick-menu rows.

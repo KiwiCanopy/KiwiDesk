@@ -81,9 +81,8 @@ extension StatusItemController {
         // menu keeps only rows that can show their key. Enabled
         // while KiwiDesk boots or waits for Start Tiling (#2309).
         let overview = NSMenuItem(
-            // The Shortcuts row's words plus the hub's name, which
-            // the panel never draws; a whole phrase, so each
-            // language keeps its own word order.
+            // Names the hub, which the panel never draws (#3545);
+            // a whole phrase, so each language keeps its order.
             title: L(
                 "menu.desktop_overview_in_kiwihub",
                 "Show Desktop overview in %1$@",

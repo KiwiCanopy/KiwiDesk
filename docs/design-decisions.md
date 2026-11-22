@@ -24350,8 +24350,8 @@ no pictures of the layouts, no search, and submenus that are slow
 to steer with a pointer.
 
 The menu bar's way into KiwiHub is **Show Desktop overview in
-KiwiHub**, which shows its live chord the way a menu item shows a key equivalent, so
-every pointer trip teaches the faster path. The menu keeps only
+KiwiHub**, which shows its live chord the way a menu item shows a
+key equivalent, so every pointer trip teaches the faster path. The menu keeps only
 rows that can show their key (owner, 2026-11-19, #3485), so the
 **Open KiwiHub…** row that stood here left: one row into KiwiHub is
 enough to teach the chord, and wherever a side's key is a tap, a

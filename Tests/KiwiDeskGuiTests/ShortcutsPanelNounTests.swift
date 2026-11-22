@@ -96,6 +96,12 @@ struct ShortcutsPanelNounTests {
             opener: "keybinding.show_desktop_overview",
             translated: true
         ),
+        // The quick menu's row opens the same side (#3545).
+        Pair(
+            panelName: "desktop_overview.panel.ax_label",
+            opener: "menu.desktop_overview_in_kiwihub",
+            translated: true
+        ),
     ]
 
     /// Panel names authored before their translation round, whose
