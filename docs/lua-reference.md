@@ -10306,16 +10306,14 @@ carry `track_breaks` (ids of the windows that start a track,
 
 :::unreleased
 Each space object also has `display`, the `list_monitors` id of
-the screen it sits on, `nil`
-for a Space on no screen, and `shown`: whether KiwiDesk shows it on
-that screen now, the `shown` [`list_windows`](#list_windows) gives
-its windows. A native full-screen Space in front leaves `shown`
-true. A Space whose `shown` is true and whose `display` is D is the
-one `list_monitors` names as D's `space_id`, so a bar can draw each
-screen's Spaces, empty ones included, from these two queries. It
-re-reads them on `space_change`, `desktop_change` and
-`monitor_change`: a swipe on a second screen sends only
-`desktop_change`.
+the screen it sits on, `nil` for a Space on no screen, and `shown`:
+whether KiwiDesk shows it on that screen now. The active Space is
+always `shown`, even with no screen, and a native full-screen Space
+in front leaves `shown` true. A Space whose `shown` is true and
+whose `display` is D is the one `list_monitors` names as D's
+`space_id`, so a bar can draw each screen's Spaces, empty ones
+included, from these two queries. A bar re-reads them on
+`space_change`, `desktop_change` and `monitor_change`.
 :::
 
 A Stack space object also has `stack_position`: the side its stack
@@ -10500,14 +10498,14 @@ full-screen window has no `visibility`.
 its shown Space lays windows out in.
 
 :::unreleased
-Each `list_monitors` entry also carries `space_id`, the Space that
-screen shows (`nil` while it shows none), as
-[`get_state`](#get_state) marks that Space `shown` on its `display`.
+It also reports `space_id`, the Space that screen shows (`null`
+while it shows none), the Space [`get_state`](#get_state) marks
+`shown` on that `display`.
 :::
 
-Each entry also carries `app`, `pid`, `index` (the window's
-place in its Space's row, from 1; `null` for a window no Space
-holds) and `z`: its stacking rank among the windows KiwiDesk
+Each `list_windows` entry also carries `app`, `pid`, `index` (the
+window's place in its Space's row, from 1; `null` for a window no
+Space holds) and `z`: its stacking rank among the windows KiwiDesk
 tracks on the screen `display` names, `0` frontmost, as macOS
 reports it. A window no screen shows — on a Space no screen shows,
 parked out of sight or minimized — has `z` `null`. The list's own

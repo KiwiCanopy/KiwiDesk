@@ -1011,13 +1011,10 @@ the Shortcuts app does not list answers `unknown shortcut: <name>`.
 :::
 
 :::unreleased
-Each `get_state` space object carries `display`, the `list_monitors`
-id of the screen it sits on (`null` on none), and `shown`, whether
-KiwiDesk shows it there now; each `list_monitors` entry carries
-`space_id`, the Space that screen shows. A bar drawing each screen's
-Spaces, empty ones included, joins the two, and re-queries on
-`space_change`, `desktop_change` and `monitor_change` (a swipe on a
-second screen sends only `desktop_change`):
+`get_state`'s space objects carry `display` and `shown`, and
+`list_monitors`' entries `space_id`, so a bar groups each screen's
+Spaces, empty ones included, from one reply. See
+[get_state](lua-reference.md#get_state).
 
 ```bash
 kiwidesk get_state | jq '.spaces | group_by(.display)
