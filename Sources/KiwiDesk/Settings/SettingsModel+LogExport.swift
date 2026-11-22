@@ -88,6 +88,14 @@ extension SettingsModel {
     /// The run itself, split from the panel so a test can drive
     /// it through the `logExport` seam (`LogExportModelTests`).
     func exportLog(_ range: LogExport.Range, to url: URL) async {
+        logExportProblem = await runLogExport(range, to: url)
+    }
+
+    /// Writes the log to `url`; the problem, nil once written.
+    func runLogExport(
+        _ range: LogExport.Range,
+        to url: URL
+    ) async -> LogExportProblem? {
         let export = logExport
         let header = core.logExportHeader
         isExportingLog = true
@@ -98,18 +106,9 @@ extension SettingsModel {
             }
         }.value
         switch outcome {
-        case .success(.written):
-            break
-        case .success(.empty):
-            logExportProblem = .empty
-        case .failure(let failure):
-            logExportProblem = LogExportProblem(failure)
+        case .success(.written): return nil
+        case .success(.empty): return .empty
+        case .failure(let failure): return LogExportProblem(failure)
         }
-    }
-
-    /// Opens the bug form with the version, macOS and desk facts
-    /// filled in (#3214) — the footer's link, its one door.
-    func reportProblem() {
-        NSWorkspace.shared.open(core.problemReport.formURL)
     }
 }

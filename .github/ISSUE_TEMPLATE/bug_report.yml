@@ -13,13 +13,14 @@ body:
         something that only happens sometimes?** Then the log
         helps us most — a plainly broken setting or wrong label
         doesn't need one. If you can, make the problem happen
-        again first. Then open KiwiDesk Settings ▸ Advanced ▸
-        General ▸ Files & Reset, and on the **Log** row pick a
-        time range that reaches back to before it happened, press
-        **Export…**, and drag the file into *Extra context* below.
-        It also lists the settings you changed. Can't open
-        Settings? The CLI reference shows the log export from a
-        terminal:
+        again first. Then press **Report a problem** at the foot
+        of KiwiDesk Settings, which offers to export one, or open
+        Settings ▸ Advanced ▸ General ▸ Files & Reset, and on the
+        **Log** row pick a time range that reaches back to before
+        it happened and press **Export…**. Drag the file into
+        *Extra context* below. It also lists the settings you
+        changed. Can't open Settings? The CLI reference shows the
+        log export from a terminal:
         https://kiwidesk.app/docs/cli/#exporting-the-log
 
   - type: input
@@ -89,7 +90,7 @@ body:
         helps a lot — crop out anything private first. If the
         note above asked for the log, drag it in here too.
       placeholder: |
-        (attached: KiwiDesk-log-….txt, Last 15 minutes)
+        (attached: KiwiDesk-log-….txt)
         (attached: screenshot of the misplaced window)
 
         Happens only with a specific app?

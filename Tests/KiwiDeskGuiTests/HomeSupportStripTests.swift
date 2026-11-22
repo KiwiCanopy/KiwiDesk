@@ -128,7 +128,9 @@ struct HomeSupportStripTests {
             source.range(of: "Button(action:{model.onShowTour()})")
         )
         let report = try #require(
-            source.range(of: "Button(action:{model.reportProblem()})")
+            source.range(
+                of: "Button(action:{Task{awaitmodel.reportProblem()}})"
+            )
         )
         let about = try #require(source.range(of: "Button(action:openAbout)"))
         #expect(tour.upperBound < report.lowerBound)
@@ -153,7 +155,7 @@ struct HomeSupportStripTests {
             }
         }
         #expect(callers == ["HomeSupportStrip.swift"])
-        #expect(readers == ["SettingsModel+LogExport.swift"])
+        #expect(readers == ["SettingsModel+ReportProblem.swift"])
     }
 
     /// One door to the notes (#2308, amending #1536's exclusive

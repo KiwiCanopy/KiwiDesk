@@ -147,13 +147,14 @@ struct HomeSupportStrip: View {
             .font(.system(size: 12))
             .linkHover()
             separator
-            Button(action: { model.reportProblem() }) {
+            Button(action: { Task { await model.reportProblem() } }) {
                 Text(L("home.footer.report", "Report a problem"))
                     .underline()
             }
             .buttonStyle(.plain)
             .font(.system(size: 12))
             .linkHover()
+            .disabled(model.isExportingLog)
             separator
             Button(action: openAbout) {
                 Text(L("home.footer.about", "About KiwiDesk")).underline()

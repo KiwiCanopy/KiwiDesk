@@ -38,7 +38,18 @@ public struct ProblemReport: Sendable, Equatable {
 
     /// The form's address with the facts filled in. Settings never
     /// ride here: the form is public and they name apps and paths.
-    public var formURL: URL {
+    public var formURL: URL { formURL(logFile: nil) }
+
+    /// The same, naming the log `logFile` the user just saved to
+    /// Downloads (#3544): a timestamp, so safe on a public form, and
+    /// shown where the drag lands.
+    public func formURL(logFile: String?) -> URL {
+        var context = deskLines
+        if let logFile {
+            context.append(
+                "Log saved to Downloads: \(logFile) — drag it here."
+            )
+        }
         var parts = URLComponents(
             url: Self.form,
             resolvingAgainstBaseURL: false
@@ -49,7 +60,7 @@ public struct ProblemReport: Sendable, Equatable {
             URLQueryItem(name: "macos_version", value: macOS),
             URLQueryItem(
                 name: "extra_context",
-                value: deskLines.joined(separator: "\n")
+                value: context.joined(separator: "\n")
             ),
         ]
         // `+` reads as a space in a form query.

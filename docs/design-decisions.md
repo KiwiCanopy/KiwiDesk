@@ -24863,7 +24863,10 @@ user; the footer is on Home and Simple both. It opens the bug form with the
 version, macOS, screen count and Desktop mode filled in, and
 nothing else: the form is public, so the settings a report needs
 ride in the exported log's header, which the user attaches by
-hand. That drag is the consent, so the link asks nothing. It is
+hand. That drag stays the consent; the link asks one question
+first — export a log or continue without — because Simple, which
+the footer serves, has no Log row, and the export writes only to
+Downloads, so the question publishes nothing (#3544). It is
 the form's one door: the Log row gains search words, not a
 button. "Report a problem" names the act; "bug report" stays the
 name of the thing filed.
