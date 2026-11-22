@@ -143,7 +143,6 @@ struct ModifierTapWordsTests {
             // before its outcome arrives.
             "letnote=tapOnceNote(for:recorded)"
                 + "ifcommit(recorded){tapOnceNote=note}",
-            "tapOnceCaption",
         ] {
             #expect(field.contains(needle), "\(needle)")
         }

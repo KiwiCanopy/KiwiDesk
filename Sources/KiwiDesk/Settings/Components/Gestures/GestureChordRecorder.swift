@@ -7,9 +7,9 @@ import SwiftUI
 /// when every key is released. A gesture that may hold no keys
 /// (`allowsNone`) reads "Gesture only" while empty and keeps its ×
 /// to clear back to it; any other reads "Record". A chord `refuse`
-/// answers shows its sentence under the well, is announced and
-/// writes nothing, which is where a clash reads. Needs the section's
-/// `RecorderCoordinator`.
+/// answers shows its sentence under the row, is announced and
+/// writes nothing, which is where a clash reads; the row draws the
+/// line (#3553). Needs the section's `RecorderCoordinator`.
 struct GestureChordRecorder: View {
     /// VoiceOver's name for the well.
     let name: String
@@ -23,6 +23,7 @@ struct GestureChordRecorder: View {
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
+    @Environment(\.recorderCaptionSlot) private var captionSlot
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
@@ -50,18 +51,11 @@ struct GestureChordRecorder: View {
                 recordButton
                 clearButton
             }
-            if let refusal {
-                Text(refusal)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.danger)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else if hyperDormant {
-                Text(Self.dormantCaption)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
+            if captionSlot == nil {
+                RecorderCaptionLines(captions: captions)
             }
         }
+        .publishesCaptions(captions, to: captionSlot)
         .onChange(of: coordinator.generation) { _, _ in
             refusal = nil
             recorder.stop()
@@ -108,6 +102,13 @@ struct GestureChordRecorder: View {
     /// A Hyper chord while no Hyper key is set: it cannot fire.
     private var hyperDormant: Bool {
         hyperKeyIsOff && !recording && chord.contains(.hyper)
+    }
+
+    /// The line under the row (#3553): a refusal, or why a Hyper
+    /// chord cannot fire.
+    private var captions: [RecorderCaption] {
+        if let refusal { return [.refused(refusal)] }
+        return hyperDormant ? [.dormant(Self.dormantCaption)] : []
     }
 
     static var dormantCaption: String {

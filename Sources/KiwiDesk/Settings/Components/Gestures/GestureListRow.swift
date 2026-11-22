@@ -44,6 +44,8 @@ struct GestureListRow: View {
     @State var gestureColumn: CGFloat = 0
     /// A gesture pop-up pick refused for the keys another row holds.
     @State var clash: String?
+    /// The recorder's lines, drawn under the row (#3553).
+    @State var keyCaptions: [RecorderCaption] = []
 
     var key: GestureKey { entry.key }
 
@@ -76,6 +78,7 @@ struct GestureListRow: View {
                     onRecord: { rekey(to: GestureKey(key.input, $0)) },
                     armsOnAppear: armsOnAppear
                 )
+                .environment(\.recorderCaptionSlot, $keyCaptions)
                 AppRuleDeleteButton(
                     help: L(
                         "shortcuts.gestures.remove",
@@ -89,11 +92,19 @@ struct GestureListRow: View {
                     onRemove()
                 }
             }
-            if let hint {
-                Text(hint)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink3)
-                    .padding(.leading, Self.textIndent)
+            if hint != nil || !keyCaptions.isEmpty {
+                // What the row is, then what the last press left.
+                VStack(alignment: .leading, spacing: 4) {
+                    if let hint {
+                        Text(hint)
+                            .font(.caption)
+                            .foregroundStyle(SettingsTheme.ink3)
+                    }
+                    if !keyCaptions.isEmpty {
+                        RecorderCaptionLines(captions: keyCaptions)
+                    }
+                }
+                .padding(.leading, Self.textIndent)
             }
             if isOpen, !key.input.directions.isEmpty {
                 GestureDirectionRows(

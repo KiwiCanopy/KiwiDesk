@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// A DEAD row says so in the flow (#1126): the chord outlined in
-/// `danger`, a worded caption in the recorder's caption slot, the
+/// `danger`, a worded caption under the row, the
 /// badge in `danger`, and the record button's VoiceOver value
 /// carrying the cost. Wires pinned at their use sites — the
 /// `KeyboardConflictWiringTests` shape — contiguous through the
@@ -30,22 +30,29 @@ struct ConflictRowTreatmentTests {
         ],
         "Recorder/KeyRecorderField+Conflict.swift": [
             // The caption exists only for a dead row and speaks
-            // the same sentence the badge carries. Spacing and
-            // font are glue, as above.
-            "ifisDead,letsentence=conflictSentence{"
-                + "HStack(spacing:4){"
-                + "Image(systemName:\"exclamationmark.triangle.fill\")"
-                + "Text(sentence)}.font(.caption)"
-                + ".foregroundStyle(SettingsTheme.danger)",
+            // the same sentence the badge carries.
+            "guardisDead,letsentence=conflictSentence"
+                + "else{returnnil}return.dead(sentence)",
             // The badge reads the same flag.
             "isDead?SettingsTheme.danger:SettingsTheme.warningInk",
+        ],
+        "Recorder/RecorderCaptionLines.swift": [
+            // The row draws it in `danger` with its shape cue.
+            // Spacing and font are glue, as above.
+            "case.dead(letsentence):HStack(spacing:4){"
+                + "Image(systemName:\"exclamationmark.triangle.fill\")"
+                + "Text(sentence).fixedSize(horizontal:false,"
+                + "vertical:true)}.font(.caption)"
+                + ".foregroundStyle(SettingsTheme.danger)"
         ],
         "Recorder/KeyRecorderField.swift": [
             // The chrome is handed the flag…
             "RecorderButtonChrome(recording:recording,dead:isDead,",
-            // …the caption is mounted under the field…
+            // …the captions go to the row's slot, drawn in the
+            // field only where no row hosts it…
             "clearButton}.alignmentGuide(.shortcutLine){"
-                + "$0[VerticalAlignment.center]}deadCaption",
+                + "$0[VerticalAlignment.center]}ifcaptionSlot==nil{"
+                + "RecorderCaptionLines(captions:captions)}",
             // …and the tier and its sentence arrive as ONE
             // value, declared `let` with no default so the
             // memberwise init REQUIRES it: widening this to a

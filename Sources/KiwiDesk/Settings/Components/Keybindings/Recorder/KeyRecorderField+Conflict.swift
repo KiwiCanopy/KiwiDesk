@@ -143,17 +143,8 @@ extension KeyRecorderField {
 
     /// The dead row's caption: the same sentence the badge
     /// carries, in the flow (`KeyRecorderRejectionRow`'s idiom).
-    /// Hidden from VoiceOver — the record button's value already
-    /// speaks it, and the badge's label does too.
-    @ViewBuilder var deadCaption: some View {
-        if isDead, let sentence = conflictSentence {
-            HStack(spacing: 4) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                Text(sentence)
-            }
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.danger)
-            .accessibilityHidden(true)
-        }
+    var deadLine: RecorderCaption? {
+        guard isDead, let sentence = conflictSentence else { return nil }
+        return .dead(sentence)
     }
 }

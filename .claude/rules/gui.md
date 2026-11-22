@@ -2291,7 +2291,15 @@ and a new mount joins `ShortcutKeyRowSeamTests`' register with
 its host (#3258; `ShortcutKeyRowSeamTests` ▸ `registerIsComplete`,
 `rowsTakeTheDoor`). The line draws the field's re-checked offer
 (#34), never the one stored at the refusal
-(`ShortcutKeyRowOfferTests` ▸ `stealFollowsTheHolder`). In a key
+(`ShortcutKeyRowOfferTests` ▸ `stealFollowsTheHolder`). **A
+recorder's lasting captions go to its row through
+`\.recorderCaptionSlot`, never into its trailing column**, where
+a long one widens the column into the row's label (#3553): a new
+line is a `RecorderCaption` case drawn by `RecorderCaptionLines`,
+and a row mounting a `GestureChordRecorder` sets the slot and
+draws the lines at `GestureListRow.textIndent`
+(`RecorderCaptionSlotTests` ▸ `recordersPublish`, `hostsDraw`,
+`gestureMountsAreHosts`). In a key
 sequence line the pill's title is the one part that gives way: it
 truncates at its tail with the full name on hover, while the
 chord, the icons, the reach column and the remove keep their size;
