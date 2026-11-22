@@ -68,7 +68,7 @@ extension KiwiCore {
 
     func stateJSON() -> JSONValue {
         // The same set `list_windows`' `shown` reads (#3549).
-        let shown = shownSpaceIDs()
+        let shown = state.workspaces.visibleSpaces
         let spaces = state.workspaces.allSpaces.map { space in
             var object: [String: JSONValue] = [
                 "id": .string(space.id.raw),
