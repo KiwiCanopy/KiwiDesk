@@ -1966,7 +1966,7 @@
   "panel.caption.with_hover_hint": "%1$@%2$@",
   "panel.changed_in_draft": "這份草稿的變更 — %1$d 項",
   "panel.draft_clean": "全部都與已儲存的描述檔相符。",
-  "panel.draft_clean_area": "這個區域沒有變更 — 草稿中其他地方有 %1$d 項。",
+  "panel.draft_clean_section": "這裡沒有變更 — 草稿中其他地方有 %1$d 項。",
   "panel.hide_preview": "隱藏預覽",
   "panel.live_preview": "即時預覽 · %1$@",
   "panel.move_preview": "拖移即可移動預覽",

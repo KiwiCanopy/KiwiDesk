@@ -1966,7 +1966,7 @@
   "panel.caption.with_hover_hint": "%1$@ %2$@",
   "panel.changed_in_draft": "Modifiche in questa bozza — %1$d",
   "panel.draft_clean": "Tutto corrisponde al profilo salvato.",
-  "panel.draft_clean_area": "Nessuna modifica in quest'area — %1$d in altre aree della bozza.",
+  "panel.draft_clean_section": "Nessuna modifica qui — %1$d altrove nella bozza.",
   "panel.hide_preview": "Nascondi anteprima",
   "panel.live_preview": "Anteprima dal vivo · %1$@",
   "panel.move_preview": "Trascina per spostare l’anteprima",

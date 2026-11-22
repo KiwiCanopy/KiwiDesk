@@ -1966,7 +1966,7 @@
   "panel.caption.with_hover_hint": "%1$@ %2$@",
   "panel.changed_in_draft": "Modifications dans ce brouillon — %1$d",
   "panel.draft_clean": "Tout correspond au profil enregistré.",
-  "panel.draft_clean_area": "Aucune modification dans cette section — %1$d ailleurs dans le brouillon.",
+  "panel.draft_clean_section": "Aucune modification dans cette section — %1$d ailleurs dans le brouillon.",
   "panel.hide_preview": "Masquer l’aperçu",
   "panel.live_preview": "Aperçu en direct · %1$@",
   "panel.move_preview": "Faire glisser pour déplacer l’aperçu",

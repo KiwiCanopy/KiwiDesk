@@ -1966,7 +1966,7 @@
   "panel.caption.with_hover_hint": "%1$@ %2$@",
   "panel.changed_in_draft": "Cambios en este borrador — %1$d",
   "panel.draft_clean": "Todo coincide con el perfil guardado.",
-  "panel.draft_clean_area": "Sin cambios en esta área — %1$d en otras partes del borrador.",
+  "panel.draft_clean_section": "Sin cambios aquí — %1$d en otras partes del borrador.",
   "panel.hide_preview": "Ocultar vista previa",
   "panel.live_preview": "Vista previa en vivo · %1$@",
   "panel.move_preview": "Arrastrar para mover la vista previa",

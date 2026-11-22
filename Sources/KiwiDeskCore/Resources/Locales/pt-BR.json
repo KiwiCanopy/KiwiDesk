@@ -1966,7 +1966,7 @@
   "panel.caption.with_hover_hint": "%1$@ %2$@",
   "panel.changed_in_draft": "Alterações neste rascunho — %1$d",
   "panel.draft_clean": "Tudo coincide com o perfil salvo.",
-  "panel.draft_clean_area": "Nenhuma alteração nesta área — %1$d em outras partes do rascunho.",
+  "panel.draft_clean_section": "Nenhuma alteração aqui — %1$d em outras partes do rascunho.",
   "panel.hide_preview": "Ocultar pré-visualização",
   "panel.live_preview": "Pré-visualização ao vivo · %1$@",
   "panel.move_preview": "Arrastar para mover a pré-visualização",

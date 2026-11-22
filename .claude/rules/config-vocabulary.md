@@ -374,6 +374,19 @@ synonym:
   register. What the incident adds to the LADDER is one clause,
   and it lives there: a locale shipping in both corpora is two
   files, and rule 2 reads both.
+- **area** — one of the side-by-side or stacked parts a screen
+  is **split** into, each with its own Spaces (#3517); *split* is
+  the verb. In copy an area is named by position (Left / Middle /
+  Right, Top / Bottom, "Area 1" onwards from four) or by the
+  name a user gave it, and a Space's place reads "Screen 1 –
+  Left". Never *segment* (the Space Bar's front-app segment and
+  segmented pickers spend it), *part*, *region*, *zone*,
+  *display* or *monitor*, and never a bare *screen*, which keeps
+  meaning the physical one. Author no other sense of *area* in
+  copy; the code type `SettingsArea` is not copy, and the Swift
+  type for a split part is `ScreenArea` so the two never meet.
+  The wire spells it in the frozen display family
+  (`display_areas`, `set_display_areas`).
 - **screen** vs **display** vs **monitor** — a physical screen is
   a **screen**, in a label, a caption or a doc comment. *Display*
   is reserved for **quoting Apple**: System Settings ▸ Displays,
@@ -491,8 +504,8 @@ synonym:
   widths, not heights", "This zone has nothing to divide"),
   which is layout-agnostic and so covers bsp and track where
   neither layout has zones of its own. Do not coin *region* or
-  *area* for that third sense: `area` is spoken for by
-  `SettingsArea`, and the reason `zone` was struck off the
+  *area* for that third sense: *area* names a screen's split
+  (below), and the reason `zone` was struck off the
   Space-rename candidates is that it already meant two things
   (`docs/design-decisions.md`).
 - **style** — names WHERE or HOW something is drawn, not what
