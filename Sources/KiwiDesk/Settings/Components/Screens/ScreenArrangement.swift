@@ -56,7 +56,8 @@ enum ScreenArrangement {
         mainID: DisplayID?,
         canvas: CGSize,
         hostsChips: Bool = true,
-        trayChips: Int = 0
+        trayChips: Int = 0,
+        splits: [String: ScreenSplit] = [:]
     ) -> Layout {
         let band = trayHeight(chips: trayChips, width: canvas.width)
         let drawable = displays.filter {
@@ -67,7 +68,13 @@ enum ScreenArrangement {
         let capped = capping(drawable)
         let bounds = union(capped.map(\.rect))
         let scale = self.scale(
-            for: capped.map(\.rect.size),
+            for: capped.map {
+                (
+                    $0.rect.size,
+                    unitAreas(of: splits[$0.display.fingerprint])
+                        .map(\.rect)
+                )
+            },
             bounds: bounds.size,
             floored: hostsChips,
             canvas: CGSize(
@@ -92,10 +99,13 @@ enum ScreenArrangement {
             bare.displays = cards
             return bare
         }
+        let mainSplit = drawable.first { $0.id == mainID }
+            .flatMap { splits[$0.fingerprint] }
         return ScreenTray.fold(
             cards: cards,
             main: mainID,
-            trayHeight: band
+            trayHeight: band,
+            mainArea: unitAreas(of: mainSplit)[0].rect
         )
     }
 
@@ -143,10 +153,11 @@ enum ScreenArrangement {
         }
     }
 
-    /// Step 2 & 3: uniform scale fitted to canvas and floored at
-    /// `minimumCard`.
+    /// Step 2 & 3: uniform scale fitted to canvas and floored so
+    /// every AREA of every card holds `minimumCard` (#3517): a split
+    /// card's smallest pane is the one that must fit a chip.
     private static func scale(
-        for sizes: [CGSize],
+        for sizes: [(size: CGSize, units: [CGRect])],
         bounds: CGSize,
         floored: Bool,
         canvas: CGSize
@@ -157,11 +168,15 @@ enum ScreenArrangement {
         )
         guard floored else { return fit }
         let floor =
-            sizes.map { size in
-                max(
-                    minimumCard.width / max(size.width, 1),
-                    minimumCard.height / max(size.height, 1)
-                )
+            sizes.flatMap { entry in
+                entry.units.map { unit in
+                    max(
+                        minimumCard.width
+                            / max(entry.size.width * unit.width, 1),
+                        minimumCard.height
+                            / max(entry.size.height * unit.height, 1)
+                    )
+                }
             }
             .max() ?? 0
         return max(fit, floor)

@@ -108,10 +108,13 @@ extension WorkspaceManager {
         keyed key: ScreenAreaKey,
         on display: DisplayID
     ) -> PlacementID? {
+        guard key.fingerprint == displays[display]?.fingerprint else {
+            return leadPlacement(of: display)
+        }
         let areas = placements(of: display)
-        return
-            (areas.first { $0.key == key }
-            ?? areas.first { $0.area.id == 0 })?.id
+        // The one fallback rule, which Settings' picture reads too.
+        let landing = ScreenSplit(areas: areas.map(\.area)).landing(key)
+        return areas.first { $0.area.id == landing }?.id
     }
 
     /// `display`'s area 0, the area a bare screen reference names.
@@ -134,18 +137,13 @@ extension WorkspaceManager {
         guard let display = displays[id] else { return }
         let width = Int(display.frame.width)
         let height = Int(display.frame.height)
-        var areas = [
-            ScreenArea(id: 0, x: 0, y: 0, w: width, h: height)
-        ]
-        if let split = areaSplits[display.fingerprint],
-            ScreenArea.problem(
-                with: split.areas,
+        let areas =
+            ScreenSplit.effective(
+                areaSplits[display.fingerprint],
                 width: width,
                 height: height
-            ) == nil
-        {
-            areas = split.areas
-        }
+            )?.areas
+            ?? ScreenSplit.whole(width: width, height: height).areas
         for area in areas {
             let pid = PlacementID(display: id, area: area.id)
             placements[pid] = Placement(

@@ -60,6 +60,12 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to the row-menu builder the rowActions "
                     + "seam feeds (#845)"
             ),
+            // A screen area's menu (#3517).
+            "ScreenAreaMenu.swift": (
+                5, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
+            ),
             "LooksShelf.swift": (
                 3, "menuItem",
                 "Returned to the row-menu builder the rowActions "

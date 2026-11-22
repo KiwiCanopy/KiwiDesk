@@ -25,10 +25,12 @@ struct SettingsNavigationResetTests {
     /// target belong to that same in-flight request, and the
     /// counters are monotonic by construction — the trail's
     /// focus request (#2038) is a change signal, never a value.
+    /// Screens' Adjust… unit lasts while Settings stays open,
+    /// across visits (#3517 ruling 26).
     private static let survivesReset: Set<String> = [
         "pendingReveal", "pendingScroll",
         "flash", "flashToken", "revealTarget", "homeReturnFocus",
-        "trailFocusRequest",
+        "trailFocusRequest", "areaSizesInPercent",
     ]
 
     /// Every field set away from its fresh value, so a field the
@@ -52,6 +54,7 @@ struct SettingsNavigationResetTests {
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true
         nav.trailFocusRequest = 3
+        nav.areaSizesInPercent = true
         return nav
     }
 

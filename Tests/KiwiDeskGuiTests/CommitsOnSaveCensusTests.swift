@@ -20,6 +20,8 @@ struct CommitsOnSaveCensusTests {
         "SequenceActionMenu.swift": "an action search; Return picks",
         "LayerAddPopover.swift": "the new-layer field; Return adds",
         "TitlePatternPopover.swift": "a title popover; Return or Add",
+        "AreaSizesPopover.swift":
+            "Adjust…; each field commits on Return, Tab or leaving it",
     ]
 
     private func flat(_ path: String) throws -> String {

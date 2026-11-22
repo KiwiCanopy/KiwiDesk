@@ -2,6 +2,64 @@ import CoreGraphics
 import Foundation
 
 extension ScreenSplit {
+    /// The split a `width` × `height` screen lays out in: `stored`
+    /// where it is a valid split into two or more areas, else nil —
+    /// the whole screen as one area 0. The one answer the placement
+    /// list and the Settings picture both take (#3517).
+    public static func effective(
+        _ stored: ScreenSplit?,
+        width: Int,
+        height: Int
+    ) -> ScreenSplit? {
+        guard let stored, !stored.isWhole,
+            ScreenArea.problem(
+                with: stored.areas,
+                width: width,
+                height: height
+            ) == nil
+        else { return nil }
+        return stored
+    }
+
+    /// `effective(_:width:height:)` on `display`'s own frame.
+    public static func effective(
+        _ stored: ScreenSplit?,
+        for display: Display
+    ) -> ScreenSplit? {
+        effective(
+            stored,
+            width: Int(display.frame.width),
+            height: Int(display.frame.height)
+        )
+    }
+
+    /// The area a stored key lands in on this split: its own while
+    /// the split holds it, else area 0 (ruling 22's fallback).
+    public func landing(_ key: ScreenAreaKey) -> Int {
+        areas.contains { $0.id == key.areaID } ? key.areaID : 0
+    }
+
+    /// The split's own extent in points, read from its areas, which
+    /// tile the screen exactly.
+    public var extent: (width: Int, height: Int) {
+        (
+            areas.map { $0.x + $0.w }.max() ?? 0,
+            areas.map { $0.y + $0.h }.max() ?? 0
+        )
+    }
+
+    /// `display` unsplit: one area 0 over its whole frame.
+    public static func whole(
+        of display: Display,
+        after previous: ScreenSplit? = nil
+    ) -> ScreenSplit {
+        whole(
+            width: Int(display.frame.width),
+            height: Int(display.frame.height),
+            after: previous
+        )
+    }
+
     /// An unsplit screen `width` × `height`: one area, id 0,
     /// keeping `previous`'s next id so a later split mints no id
     /// the screen already used (ruling 21).

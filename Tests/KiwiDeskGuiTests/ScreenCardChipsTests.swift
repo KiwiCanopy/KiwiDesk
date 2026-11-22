@@ -40,7 +40,7 @@ struct ScreenCardChipsTests {
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Screens"
             )
-        for name in ["ScreenCard.swift", "FollowsMainTray.swift"] {
+        for name in ["ScreenAreaPane.swift", "FollowsMainTray.swift"] {
             // The tray's header is the one whose height the
             // arithmetic cannot infer — the card frames its own,
             // the tray's is an unsized `.caption2`. Deleting that

@@ -214,6 +214,15 @@ restated `20...80` satisfies on the day it is written.
   flip read `KiwiCore.maximizeRegion(on:)`, never a `Display`
   frame; state-and-layout.md ▸ *A Maximize length resolves* owns
   the rule (`MaximizeLengthResolutionSeamTests`).
+- **A screen split's floor, legality and names are Core's the same
+  way (#3517)**: the Screens editor greys, stops a divider and
+  clamps a typed size at `TilingSettings.areaFloor(along:)`, acts
+  through `ScreenSplit`'s `splitting`, `moving`, `snapped`,
+  `setting` and the one `GuiConfig.mergeAreas` door, reads positions from
+  `ScreenSplit.positions` and refuses a name through
+  `ScreenArea.nameProblem` — never arithmetic or a rule of its own
+  over a screen frame (`ScreenAreaEditTests`,
+  `ScreenAreaRemapParityTests`).
 - **A schematic draws ONE frame, and a fact about motion goes in
   the caption.** Never add a second mini-screen, an arrow between
   panes, or a sub-caption under one: a pair denotes two *states*

@@ -28,6 +28,11 @@ struct SettingsNavigation {
     /// able to set and clear it.
     var layoutModeTab: LayoutMode?
 
+    /// Whether Screens ▸ Adjust… types in percent (#3517 ruling
+    /// 26): it lasts while Settings stays open, across pages, and is
+    /// never stored.
+    var areaSizesInPercent = false
+
     /// Selected keybinding layer in Shortcuts — on the model
     /// rather than the section's `@State` (#1127), because the
     /// live preview panel is the section's SIBLING: the

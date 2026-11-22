@@ -75,10 +75,20 @@ struct ScreensChromeWiringTests {
         let picture = try squashed(
             "Components/Screens/ScreensPicture.swift"
         )
+        // The base's width is the arrangement's, which a foot's
+        // room is measured by too (#3517 ruling 28).
+        let stands = try squashed(
+            "Components/Screens/ScreenArrangement+Areas.swift"
+        )
         for needle in [
             "SettingsTheme.screenStandScale",
             "SettingsTheme.screenStandMin",
             "SettingsTheme.screenStandMax",
+        ] {
+            #expect(stands.contains(needle), "lost `\(needle)`")
+        }
+        #expect(picture.contains("ScreenArrangement.standBase("))
+        for needle in [
             "SettingsTheme.screenNeckScale",
             "SettingsTheme.screenNeckMin",
             "SettingsTheme.screenNeckMax",
@@ -96,13 +106,21 @@ struct ScreensChromeWiringTests {
         let card = try squashed(
             "Components/Screens/ScreenCard.swift"
         )
+        let pane = try squashed(
+            "Components/Screens/ScreenAreaPane.swift"
+        )
         #expect(
-            card.contains(
+            pane.contains(
                 "lineWidth:SettingsTheme.screenCardStrokeSelected"
             )
                 && card.contains(
-                    "lineWidth:risen?SettingsTheme.hoverEdgeStroke"
+                    "lineWidth:edge?SettingsTheme.hoverEdgeStroke"
                         + ":SettingsTheme.screenCardStroke)"
+                )
+                // A split card's outline stays at rest; its panes
+                // take the hover edge (#3517).
+                && card.contains(
+                    "letedge=risen&&model.areaSplit(of:display)==nil"
                 ),
             Comment(
                 rawValue:

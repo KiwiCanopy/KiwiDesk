@@ -1,3 +1,5 @@
+import CoreGraphics
+import Foundation
 import KiwiDeskCore
 
 /// Screen layout model extension for `SettingsModel` (#678 turn 13b).
@@ -14,7 +16,7 @@ extension SettingsModel {
         let assignment = placementAssignment()
         var resolved: [SpaceID: SpaceResolution] = [:]
         for space in config.spaces {
-            resolved[space] = Self.reading(
+            resolved[space] = reading(
                 SpacePlacement.resolve(
                     space: space,
                     pins: config.spacePins,
@@ -22,7 +24,8 @@ extension SettingsModel {
                     displays: displays,
                     mainID: mainID,
                     assignment: assignment
-                )
+                ),
+                pin: config.spacePins[space]
             )
         }
         return resolved
@@ -49,17 +52,24 @@ extension SettingsModel {
             mainSpaces: config.mainSpaces,
             resolutions: resolutions(),
             pins: config.spacePins,
-            displays: displays
+            displays: displays,
+            splits: config.settings.displayAreas
         )
     }
 
-    /// Converts `SpacePlacement.Resolution` into the view `SpaceResolution`.
-    private static func reading(
-        _ resolved: SpacePlacement.Resolution?
+    /// Converts `SpacePlacement.Resolution` into the view
+    /// `SpaceResolution`. A pin to a connected screen keeps its area
+    /// key while the draft's split holds that area, else its screen's
+    /// area 0, as the runtime's one resolver falls back (#3517 ruling
+    /// 22); every other placement lands in area 0.
+    private func reading(
+        _ resolved: SpacePlacement.Resolution?,
+        pin: String?
     ) -> SpaceResolution {
         switch resolved {
         case .pinned(let display):
-            return .pinned(display.fingerprint)
+            // The pin's own key, its area gone → area 0 (ruling 22).
+            return .pinned(resolvedPin(pin ?? display.fingerprint))
         case .pinnedAbsent(intent: let pin, fallback: _):
             return .pinned(pin)
         case .main:

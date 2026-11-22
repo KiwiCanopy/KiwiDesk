@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Where a Space is placed, as the Screen menus offer it. Every
@@ -17,7 +18,7 @@ extension SettingsModel {
     /// The draft's placement of `space`.
     func screenChoice(of space: SpaceID) -> SpaceScreenChoice {
         if let pin = config.spacePins[space], !pin.isEmpty {
-            return .screen(pin)
+            return .screen(resolvedPin(pin))
         }
         return config.mainSpaces.contains(space)
             ? .followsMain : .auto
@@ -48,22 +49,24 @@ extension SpaceScreenChoice {
             L("monitor_chip.automatic", "Automatic")
         case .followsMain:
             L("monitor_card.follows_main", "Follows main screen")
-        case .screen(let fingerprint):
-            // A connected twin reads by position (#3496).
-            model.screenWords { $0.fingerprint == fingerprint }
-                ?? model.screenName(fingerprint)
+        case .screen(let key):
+            // A connected twin reads by position (#3496); an area as
+            // "Screen – Left" (#3517 ruling 11).
+            model.pinWords(key)
+                ?? model.screenName(ScreenAreaKey(parsing: key).fingerprint)
         }
     }
 
-    /// Automatic, Follows main screen, each connected screen, and
-    /// the Space's own pin where its screen is not connected.
+    /// Automatic, Follows main screen, each connected screen — each
+    /// area of a split one (#3517 ruling 11) — and the Space's own
+    /// pin where its screen or area is not there.
     @MainActor static func offered(
         for space: SpaceID,
         in model: SettingsModel
     ) -> [SpaceScreenChoice] {
         var choices: [SpaceScreenChoice] =
             [.auto, .followsMain]
-            + model.displays.map { .screen($0.fingerprint) }
+            + model.areaKeys.map { SpaceScreenChoice.screen($0) }
         let current = model.screenChoice(of: space)
         if !choices.contains(current) { choices.append(current) }
         return choices
