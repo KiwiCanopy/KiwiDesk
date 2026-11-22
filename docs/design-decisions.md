@@ -6367,6 +6367,20 @@ new default (the #1255 reading, owner ruling 2026-09-26). An
 `ConfigMigration` carve-out): `set_float_nudge` joins
 `APIReference.retired`, so the call fails naming its replacement.
 
+:::unreleased
+*A fixed size beside it (#3554).* `set_float_size(w, h)` replaces
+the derived size in the centred branch alone, so the precedence is
+remembered frame, then `float_size`, then the derived size; the one
+`defaultFloatSize` reading serves the placement and `size_floating`,
+which snaps the focused float to it on the user's ask and so stands
+outside #3163's never-resize-to-fit. Lua-only with the other float
+polish knobs (#502): the derived size already adapts to the screen's
+shape and the app's limits, so a GUI field would put a choice before
+every user to serve one workflow, and a fixed size in points suits
+one screen and not the next, which a caption could not say. Presets
+are bindings calling the verb, not a stored map.
+:::
+
 **`resize` reads the *effective* float, so a floating-mode space
 resizes like a flag-float
 ([#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)).**

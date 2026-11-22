@@ -563,7 +563,7 @@ maximizing or going into the Pocket and out, the last as a brief
 pocket
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 
-`center_floating` follows it too.
+`center_floating` and `size_floating` follow it too.
 
 `kiwishelf.set_pocket_edge top|bottom|left|right` (default
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
@@ -727,6 +727,7 @@ every lens with why it cannot turn on.
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `center_floating` | — the focused floating window moves to the middle of its screen, at its size ([`center_floating`](lua-reference.md#center_floating)) |
+| | `size_floating` | width, height (pt), or nothing — sizes the focused floating window, keeping its centre ([`size_floating`](lua-reference.md#size_floating)) |
 | | `move_floating` | `x\|y`, delta (pt, positive y down) — moves the focused floating window, stopping at its screen's edge or a bar ([`move_floating`](lua-reference.md#move_floating)) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `focus_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
@@ -749,6 +750,7 @@ every lens with why it cannot turn on.
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |
+| | `set_float_size` | width, height (pt), or nothing to clear — the size a centred floating window takes ([`set_float_size`](lua-reference.md#set_float_size)) |
 | | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows follow you across macOS Desktops (needs the window-management bridge) |
 | | `set_fallback_space` | space id ("" clears) — rehome target for the windows of a space that goes |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |

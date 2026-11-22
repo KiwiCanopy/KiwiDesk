@@ -499,6 +499,7 @@
   "diff.label.fallback_space": "Fallback-Space",
   "diff.label.float_placement": "Platzierung beim Schweben",
   "diff.label.float_scale_on_display_change": "Schwebende Fenster über Bildschirme skalieren",
+  "diff.label.float_size": "Größe beim Schweben",
   "diff.label.gap_override": "Abstands-Überschreibung",
   "diff.label.hover_focus_delay": "Fokus-Verzögerung beim Ruhen",
   "diff.label.ignore_rule": "Ignorier-Regel",

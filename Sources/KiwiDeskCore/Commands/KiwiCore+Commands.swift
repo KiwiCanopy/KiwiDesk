@@ -112,6 +112,8 @@ extension KiwiCore {
             return centerFloating()
         case "move_floating":
             return moveFloating(args)
+        case "size_floating":
+            return sizeFloating(args)
         case "move_to_track":
             return moveToTrack(args)
         case "track.swap":
@@ -152,6 +154,8 @@ extension KiwiCore {
             return setSwapSkipsCascade(args)
         case "set_float_placement":
             return setFloatPlacement(args)
+        case "set_float_size":
+            return setFloatSize(args)
         case "set_float_scale_on_display_change":
             return setFloatScaleOnDisplayChange(args)
         case "set_resize_step":

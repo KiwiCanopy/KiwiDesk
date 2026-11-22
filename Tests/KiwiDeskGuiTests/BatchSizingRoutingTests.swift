@@ -131,6 +131,10 @@ struct BatchSizingRoutingTests {
         // float at its own size, a state change like the verb's.
         "KiwiDeskCore/Commands/KiwiCore+FloatMove.swift":
             Site(names: 2, promises: 1),
+        // `size_floating` (#3554): the same direct write of one
+        // float, at the size the user asked, a state change.
+        "KiwiDeskCore/Commands/KiwiCore+FloatSize.swift":
+            Site(names: 2, promises: 1),
         // `applyFrame` (the animate-or-instant policy) moved
         // here when #677's additions hit the main file's line
         // ceiling; it still only threads the caller's promise.

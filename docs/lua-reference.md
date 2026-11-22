@@ -1154,11 +1154,39 @@ toggle. Replaces `set_float_nudge`: a saved setting that had the
 nudge off becomes `"keep"`, while an `init.lua` call to
 `set_float_nudge` fails naming this verb and must be renamed.
 
+:::unreleased
+[`set_float_size`](#set_float_size) replaces that measured size with
+one you choose. Either size is at least the Floating layout's
+[`set_min_window_size`](#set_min_window_size).
+:::
+
 **Example:**
 
 ```lua
 KiwiDesk.set_float_placement("keep")
 ```
+
+### set_float_size
+
+:::unreleased
+**Expects:** a width and a height in points, both positive; or
+nothing.
+
+**Does:** the size a window takes when [`set_float_placement`](#set_float_placement)'s
+`"center"` places it, in place of the size measured from its screen.
+The frame a window last floated at still comes first. A size larger
+than its screen clear of the bars is cut to fit, and
+app limits apply as they do to the measured size. With nothing, the
+measured size comes back.
+It is also what [`size_floating`](#size_floating) takes with no
+arguments. Global (per profile, all spaces); no Settings toggle.
+
+**Example:**
+
+```lua
+KiwiDesk.set_float_size(1100, 800)
+```
+:::
 
 ### set_float_scale_on_display_change
 
@@ -6586,6 +6614,44 @@ KiwiDesk.bind("ctrl+alt+shift+c", function()
 end)
 ```
 
+### size_floating
+
+:::unreleased
+**Expects:** a width and a height in points, both positive; or
+nothing.
+
+**Does:** sizes the focused floating window, keeping its centre where
+it is, and keeps it on its screen clear of the bars. With nothing it takes [`set_float_size`](#set_float_size)'s
+size, else the size [`set_float_placement`](#set_float_placement)
+measures from the screen. A size that does not fit the screen, or
+that passes a limit KiwiDesk has learned for the app, lands as close
+as it can and shows a pill.
+
+It follows
+[`animations.set_on_state_change`](#animationsset_on_state_change),
+refuses a full-screen or a tiled window the way
+[`center_floating`](#center_floating) does, and does nothing while
+you drag the window. A maximized floating window goes back to the
+frame it had first, and that frame is sized.
+
+No shortcut comes with it. Sizes you return to often are bindings
+calling it with different numbers:
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+1", function()
+    KiwiDesk.size_floating(800, 600)
+end)
+KiwiDesk.bind("ctrl+alt+shift+2", function()
+    KiwiDesk.size_floating(1100, 800)
+end)
+KiwiDesk.bind("ctrl+alt+shift+3", function()
+    KiwiDesk.size_floating(1400, 1000)
+end)
+```
+:::
+
 ### move_floating
 
 **Expects:**
@@ -6867,8 +6933,8 @@ to a tiled window of the Space puts it back too, as does tiling it
 or putting it in the Pocket; focus on another floating window keeps
 it, and the maximized window stays beneath that one. On a Floating
 layout Space nothing is tiled, so only a second call or the window
-leaving ends it. `move_floating`, `center_floating`, a resize and a
-mouse drag put it back first; a mouse resize of its edge keeps the
+leaving ends it. `move_floating`, `center_floating`, `size_floating`,
+a resize and a mouse drag put it back first; a mouse resize of its edge keeps the
 new size instead. Fails with a pill on a dialog, a panel or a
 full-screen window. A floating window takes an axis too,
 and `"in_place"` centres it on the frame it had.
@@ -9852,7 +9918,8 @@ Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
 
-[`center_floating`](#center_floating) follows it too.
+[`center_floating`](#center_floating) follows it too, and so does
+[`size_floating`](#size_floating).
 
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)

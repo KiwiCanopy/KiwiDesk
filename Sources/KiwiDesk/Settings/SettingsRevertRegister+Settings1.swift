@@ -47,6 +47,7 @@ extension SettingsRevertRegister {
         .behaviour(.swapSkipsCascade): .leaf(\.settings.swapSkipsCascade),
         .behaviour(.mouseResize): .leaf(\.settings.mouseResize),
         .behaviour(.floatPlacement): .leaf(\.settings.floatPlacement),
+        .behaviour(.floatSize): .leaf(\.settings.floatSize),
         .behaviour(.floatScaleOnDisplayChange):
             .leaf(\.settings.floatScaleOnDisplayChange),
         .behaviour(.minSizePerSpaceOverride):

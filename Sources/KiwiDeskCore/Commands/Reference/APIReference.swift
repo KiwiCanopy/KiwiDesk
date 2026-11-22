@@ -64,6 +64,7 @@ public enum APIReference {
             ("resize", "resize"),
             ("center_floating", "center_floating"),
             ("move_floating", "move_floating"),
+            ("size_floating", "size_floating"),
             ("move_to_track", "move_to_track"),
             ("focus_or_spawn", "focus_or_spawn"),
             ("focus_app_window", "focus_app_window"),
@@ -85,6 +86,7 @@ public enum APIReference {
             ),
             ("set_swap_skips_cascade", "set_swap_skips_cascade"),
             ("set_float_placement", "set_float_placement"),
+            ("set_float_size", "set_float_size"),
             (
                 "set_float_scale_on_display_change",
                 "set_float_scale_on_display_change"
@@ -151,26 +153,6 @@ public enum APIReference {
                 "bind_profile_to_desktop"
             ),
         ]
-
-    /// The verbs `space_bar` and `app_bar` carry beside a setter
-    /// per field (#761): the show/hide action, which writes
-    /// nothing stored.
-    public static let barActions = ["toggle_reveal"]
-
-    /// The bar a `space_bar.` / `app_bar.` action names, nil for
-    /// any other command — the dispatch's one reading of
-    /// `barActions`.
-    static func barAction(of command: String) -> ShelfBar? {
-        for (prefix, bar) in [
-            ("space_bar.", ShelfBar.space), ("app_bar.", .app),
-        ]
-        where command.hasPrefix(prefix)
-            && barActions.contains(String(command.dropFirst(prefix.count)))
-        {
-            return bar
-        }
-        return nil
-    }
 
     /// Layout sub-APIs exposed as global Lua tables. Keys must
     /// be fresh, valid Lua identifiers: they are interpolated

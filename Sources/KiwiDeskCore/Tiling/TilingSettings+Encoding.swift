@@ -26,6 +26,7 @@ extension TilingSettings {
             floatPlacement,
             forKey: .floatPlacement
         )
+        try container.encodeIfPresent(floatSize, forKey: .floatSize)
         try container.encode(
             floatScaleOnDisplayChange,
             forKey: .floatScaleOnDisplayChange

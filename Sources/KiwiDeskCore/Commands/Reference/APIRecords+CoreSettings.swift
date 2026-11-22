@@ -42,6 +42,12 @@ extension APIReference {
             "Sets where a window lands when toggled to floating.",
             .choice("placement", FloatPlacement.self)
         ),
+        "set_float_size": APIRecord(
+            "Sets the size a centred floating window takes; "
+                + "width and height both, or neither to clear.",
+            .number("width", optional: true),
+            .number("height", optional: true)
+        ),
         "set_float_scale_on_display_change": APIRecord(
             "Scales floating windows when moved across screens.",
             .boolean("enabled")

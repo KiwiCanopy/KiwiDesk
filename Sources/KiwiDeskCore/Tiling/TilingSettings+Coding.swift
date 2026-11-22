@@ -25,6 +25,7 @@ extension TilingSettings: Codable {
         case minWindowSizeOverride = "min_window_size_override"
         case swapSkipsCascade = "swap_skips_cascade"
         case floatPlacement = "float_placement"
+        case floatSize = "float_size"
         case floatScaleOnDisplayChange =
             "float_scale_on_display_change"
         case placementOverride =
@@ -100,6 +101,10 @@ extension TilingSettings: Codable {
                 FloatPlacement.self,
                 forKey: .floatPlacement
             ) ?? .center
+        floatSize = try container.decodeIfPresent(
+            FloatSize.self,
+            forKey: .floatSize
+        )
         floatScaleOnDisplayChange =
             try container.decodeIfPresent(
                 Bool.self,
