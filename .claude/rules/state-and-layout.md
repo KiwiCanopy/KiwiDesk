@@ -184,8 +184,10 @@ editing here:
   `WorkspaceManager.placement(keyed:on:)`, an area gone falling
   back to area 0 (`AreaPinResolveTests`, `AreaArgumentTests`,
   `PlacementIdentityTests`). Stored splits reach the placement
-  list through `syncAreaSplits` alone, which feeds none while
-  `honoursAreaSplits` is lowered.
+  list through `syncAreaSplits` alone, which every write of
+  `display_areas` runs through `TilingEngine.onAreaSplits`, never
+  a call beside a settings install, and which feeds none while
+  `honoursAreaSplits` is lowered (`AreaSplitSyncTests`).
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through
