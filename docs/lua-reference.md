@@ -1154,6 +1154,11 @@ toggle. Replaces `set_float_nudge`: a saved setting that had the
 nudge off becomes `"keep"`, while an `init.lua` call to
 `set_float_nudge` fails naming this verb and must be renamed.
 
+:::unreleased
+[`set_float_size`](#set_float_size) replaces that measured size with
+one you choose.
+:::
+
 **Example:**
 
 ```lua
@@ -1168,11 +1173,10 @@ nothing.
 
 **Does:** the size a window takes when [`set_float_placement`](#set_float_placement)'s
 `"center"` places it, in place of the size measured from its screen.
-A window floated again still returns to the frame it last floated at,
-so the order is: that frame, then this size, then the measured size.
-A size larger than the area its screen leaves clear of the bars is
-cut to fit, and an app that will not go that small or that large
-keeps its own limit. With nothing, the measured size comes back.
+The frame a window last floated at still comes first. A size larger
+than the area its screen leaves clear of the bars is cut to fit, and
+app limits apply as they do to the measured size. With nothing, the
+measured size comes back.
 It is also what [`size_floating`](#size_floating) takes with no
 arguments. Global (per profile, all spaces); no Settings toggle.
 
@@ -6620,7 +6624,8 @@ it is, and keeps it inside the area its screen leaves clear of the
 bars. With nothing it takes [`set_float_size`](#set_float_size)'s
 size, else the size [`set_float_placement`](#set_float_placement)
 measures from the screen. A size that does not fit the screen, or
-that the app refuses, lands as close as it can and shows a pill.
+that passes a limit KiwiDesk has learned for the app, lands as close
+as it can and shows a pill.
 
 It follows
 [`animations.set_on_state_change`](#animationsset_on_state_change),
@@ -6928,8 +6933,8 @@ to a tiled window of the Space puts it back too, as does tiling it
 or putting it in the Pocket; focus on another floating window keeps
 it, and the maximized window stays beneath that one. On a Floating
 layout Space nothing is tiled, so only a second call or the window
-leaving ends it. `move_floating`, `center_floating`, a resize and a
-mouse drag put it back first; a mouse resize of its edge keeps the
+leaving ends it. `move_floating`, `center_floating`, `size_floating`,
+a resize and a mouse drag put it back first; a mouse resize of its edge keeps the
 new size instead. Fails with a pill on a dialog, a panel or a
 full-screen window. A floating window takes an axis too,
 and `"in_place"` centres it on the frame it had.
@@ -9913,7 +9918,8 @@ Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
 
-[`center_floating`](#center_floating) follows it too.
+[`center_floating`](#center_floating) follows it too, and so does
+[`size_floating`](#size_floating).
 
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)

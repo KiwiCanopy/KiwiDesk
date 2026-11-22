@@ -6373,10 +6373,12 @@ the derived size in the centred branch alone, so the precedence is
 remembered frame, then `float_size`, then the derived size; the one
 `defaultFloatSize` reading serves the placement and `size_floating`,
 which snaps the focused float to it on the user's ask and so stands
-outside #3163's never-resize-to-fit. Lua-only for the same reason as
-#502: points that suit one screen do not suit another, which Lua can
-choose per screen and a GUI field cannot, and presets are bindings
-calling the verb, not a stored map.
+outside #3163's never-resize-to-fit. Lua-only with the other float
+polish knobs (#502): the derived size already adapts to the screen's
+shape and the app's limits, so a GUI field would put a choice before
+every user to serve one workflow, and a fixed size in points suits
+one screen and not the next, which a caption could not say. Presets
+are bindings calling the verb, not a stored map.
 :::
 
 **`resize` reads the *effective* float, so a floating-mode space

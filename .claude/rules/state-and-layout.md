@@ -293,7 +293,16 @@ editing here:
   traveler's home (`FloatCentreRenderSpaceTests`); one stepping by a
   delta also takes
   `FloatMove.holdingTheAsk` against that clamp's push
-  (`FloatNudgeRenderSpaceTests`).
+  (`FloatNudgeRenderSpaceTests`). A float's DEFAULT size — the centred
+  placement's and `size_floating`'s — is read through the one
+  `defaultFloatSize`, over the `floatGrowBounds` of the Space the
+  window renders on, so `float_size` and the derived size mean one
+  thing to both (#3554). A verb that resizes a float on the user's
+  own ask floors it at `plannedMinSize`, fits an aspect-locked app to
+  its ratio and writes it at once, and cues the limit
+  `FloatPlacement.defaultSize` names; a correcting path never sizes a
+  placed float through it, which #3163 forbids
+  (`FloatSizeCommandTests`, `FloatSizeSettingTests`).
 - The **create fold's spawn grant** — the focus a fresh window
   gets for existing, not one macOS reported — consults
   `ManagedWindow.isTransientOverlay`

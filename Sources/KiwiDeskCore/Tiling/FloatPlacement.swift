@@ -38,11 +38,8 @@ extension FloatPlacement {
     /// size-bound ledger and outranks the derived size, as a
     /// learned `maximum` caps it; the result is confined to
     /// `region` wherever it fits.
-    /// `asked` is `float_size` (#3554), taken in place of the
-    /// derived size and capped to `region`.
     public static func centered(
         in region: CGRect,
-        asked: CGSize? = nil,
         minimum: CGSize = .zero,
         maximum: CGSize = CGSize(
             width: CGFloat.infinity,
@@ -50,20 +47,36 @@ extension FloatPlacement {
         )
     ) -> CGRect {
         centered(
-            defaultSize(
-                in: region,
-                asked: asked,
-                minimum: minimum,
-                maximum: maximum
-            ),
+            defaultSize(in: region, minimum: minimum, maximum: maximum)
+                .size,
             in: region
         )
+    }
+
+    /// What decided one axis of a default float size short of or
+    /// past the asked one (#3554), for the truncation cue.
+    public enum SizeLimit: Equatable, Sendable {
+        /// A learned app floor raised it.
+        case floor
+        /// A learned app ceiling capped it.
+        case ceiling
+        /// The region capped it.
+        case region
+    }
+
+    /// A default float size and, per axis, the limit that moved it
+    /// off the asked size; nil where none did or nothing was asked.
+    public struct DefaultSize: Equatable, Sendable {
+        public let size: CGSize
+        public let width: SizeLimit?
+        public let height: SizeLimit?
     }
 
     /// The default float size in `region` (#3554): `asked` capped to
     /// the region, else the derived size; a learned app `maximum`
     /// caps either and a learned `minimum` outranks both. The one
-    /// home of that size, for the placement and `size_floating`.
+    /// home of that size and its clamp order, for the placement and
+    /// `size_floating`.
     public static func defaultSize(
         in region: CGRect,
         asked: CGSize? = nil,
@@ -72,20 +85,46 @@ extension FloatPlacement {
             width: CGFloat.infinity,
             height: CGFloat.infinity
         )
-    ) -> CGSize {
-        let span =
-            asked.map {
-                CGSize(
-                    width: min($0.width, region.width),
-                    height: min($0.height, region.height)
-                )
-            } ?? derivedSize(in: region)
-        return CGSize(
-            width: max(min(span.width, maximum.width), minimum.width),
-            height: max(
-                min(span.height, maximum.height),
-                minimum.height
-            )
+    ) -> DefaultSize {
+        let derived = derivedSize(in: region)
+        func axis(
+            _ want: CGFloat?,
+            derived: CGFloat,
+            span: CGFloat,
+            floor: CGFloat,
+            ceiling: CGFloat
+        ) -> (CGFloat, SizeLimit?) {
+            var value = want.map { min($0, span) } ?? derived
+            var limit: SizeLimit? =
+                want.map { $0 > span ? .region : nil } ?? nil
+            if value > ceiling {
+                value = ceiling
+                limit = want == nil ? nil : .ceiling
+            }
+            if value < floor {
+                value = floor
+                limit = want == nil ? nil : .floor
+            }
+            return (value, limit)
+        }
+        let width = axis(
+            asked?.width,
+            derived: derived.width,
+            span: region.width,
+            floor: minimum.width,
+            ceiling: maximum.width
+        )
+        let height = axis(
+            asked?.height,
+            derived: derived.height,
+            span: region.height,
+            floor: minimum.height,
+            ceiling: maximum.height
+        )
+        return DefaultSize(
+            size: CGSize(width: width.0, height: height.0),
+            width: width.1,
+            height: height.1
         )
     }
 

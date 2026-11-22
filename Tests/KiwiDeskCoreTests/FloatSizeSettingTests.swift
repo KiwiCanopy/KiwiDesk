@@ -85,16 +85,42 @@ struct FloatSizeSettingTests {
         #expect(core.tiler.settings.floatSize == nil)
     }
 
-    @Test("an asked size is capped to a small region, still centred")
-    func cappedCentring() {
+    @Test("an asked size is capped to a small region, and says so")
+    func cappedSize() {
         let region = CGRect(x: 0, y: 25, width: 900, height: 600)
-        let frame = FloatPlacement.centered(
+        let answer = FloatPlacement.defaultSize(
             in: region,
             asked: CGSize(width: 1100, height: 400)
         )
-        #expect(frame.size == CGSize(width: 900, height: 400))
-        #expect(frame.midX == region.midX)
-        #expect(frame.midY == region.midY)
+        #expect(answer.size == CGSize(width: 900, height: 400))
+        #expect(answer.width == FloatPlacement.SizeLimit.region)
+        #expect(answer.height == nil)
+        let tall = FloatPlacement.defaultSize(
+            in: region,
+            asked: CGSize(width: 400, height: 800)
+        )
+        #expect(tall.size == CGSize(width: 400, height: 600))
+        #expect(tall.height == FloatPlacement.SizeLimit.region)
+    }
+
+    @Test("the clamp order names the limit that decided each axis")
+    func clampOrder() {
+        let region = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        let answer = FloatPlacement.defaultSize(
+            in: region,
+            asked: CGSize(width: 1200, height: 200),
+            minimum: CGSize(width: 0, height: 300),
+            maximum: CGSize(width: 900, height: CGFloat.infinity)
+        )
+        #expect(answer.size == CGSize(width: 900, height: 300))
+        #expect(answer.width == FloatPlacement.SizeLimit.ceiling)
+        #expect(answer.height == FloatPlacement.SizeLimit.floor)
+        let derived = FloatPlacement.defaultSize(
+            in: region,
+            maximum: CGSize(width: 500, height: CGFloat.infinity)
+        )
+        #expect(derived.size.width == 500)
+        #expect(derived.width == nil)
     }
 
     /// Two windows on space 1, w2 tiled and focused at `slot`.

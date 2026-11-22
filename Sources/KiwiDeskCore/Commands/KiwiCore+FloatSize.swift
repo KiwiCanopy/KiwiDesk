@@ -22,9 +22,10 @@ extension KiwiCore {
 
     /// `size_floating([width, height])`: the focused float at the
     /// asked size, else `float_size`, else the derived size, kept
-    /// centred where it is and confined to its float region. A
-    /// size the region or the app's learned bounds truncate cues.
-    /// A user's own ask, so outside #3163's never-resize-to-fit.
+    /// centred where it is and confined to the region the placement
+    /// measures in. A size the region or the app's learned bounds
+    /// truncate cues. A user's own ask, so outside #3163's
+    /// never-resize-to-fit.
     func sizeFloating(_ args: [JSONValue]) -> CommandResponse {
         var asked: CGSize?
         if !args.isEmpty {
@@ -42,9 +43,25 @@ extension KiwiCore {
         let returned = endMaximizeBeforeFloatVerb(id)  // #3036
         let base =
             returned ?? tiler.commandedFrame(of: id) ?? target.window.frame
+        let region = floatGrowBounds(on: target.space) ?? target.region
         let ask = asked ?? tiler.settings.floatSize?.size
-        let size = defaultFloatSize(of: id, in: target.region, asked: ask)
-        if let ask { cueFloatSizeTruncation(id, asked: ask, got: size) }
+        let answer = defaultFloatSize(
+            of: id,
+            in: region,
+            asked: ask,
+            floor: CGSize(
+                width: plannedMinSize(of: id, axis: "x"),
+                height: plannedMinSize(of: id, axis: "y")
+            )
+        )
+        cueFloatSizeTruncation(id, answer)
+        // A locked app takes its box whole, fitted to its ratio, as
+        // a float resize does (#2973): springing it lands short.
+        let lockedRatio = state.floatAspects[id]?.ratio
+        let size =
+            lockedRatio.map {
+                FloatResize.fitted(answer.size, ratio: $0)
+            } ?? answer.size
         let sized = floatMoveFrame(
             GeometryUtils.confine(
                 CGRect(
@@ -53,7 +70,7 @@ extension KiwiCore {
                     width: size.width,
                     height: size.height
                 ),
-                to: target.region
+                to: region
             ),
             for: target
         )
@@ -62,7 +79,8 @@ extension KiwiCore {
             id,
             from: base,
             to: sized,
-            animated: tiler.settings.animations.onStateChange,
+            animated: tiler.settings.animations.onStateChange
+                && lockedRatio == nil,
             sizing: .allSpringSized
         )
         holdRingForStateChange([id])
@@ -80,32 +98,20 @@ extension KiwiCore {
         return FloatSize(width: width, height: height)
     }
 
-    /// Cues the first axis `got` missed `asked` on: a learned floor
-    /// raising it, else the app's ceiling or the region capping it.
+    /// Cues the first axis a limit moved off the asked size, by
+    /// the limit `FloatPlacement.defaultSize` reports.
     private func cueFloatSizeTruncation(
         _ id: WindowID,
-        asked: CGSize,
-        got: CGSize
+        _ answer: FloatPlacement.DefaultSize
     ) {
-        let bound = tiler.sizeBound(for: id)
-        let axes: [(String, CGFloat, CGFloat, CGFloat?)] = [
-            ("x", asked.width, got.width, bound?.maxWidth),
-            ("y", asked.height, got.height, bound?.maxHeight),
-        ]
-        let epsilon = Self.resizeTruncationEpsilon
-        for (axis, want, landed, ceiling) in axes {
-            if landed > want + epsilon {
-                refuseShrinkAtMinimum(id, axis: axis)
-                return
+        for (axis, limit) in [("x", answer.width), ("y", answer.height)] {
+            switch limit {
+            case .floor: refuseShrinkAtMinimum(id, axis: axis)
+            case .ceiling: refuseGrowAtMaximum(id, axis: axis)
+            case .region: refuseGrowAtBoundary(id, axis: axis)
+            case nil: continue
             }
-            if landed < want - epsilon {
-                if let ceiling, landed >= ceiling - epsilon {
-                    refuseGrowAtMaximum(id, axis: axis)
-                } else {
-                    refuseGrowAtBoundary(id, axis: axis)
-                }
-                return
-            }
+            return
         }
     }
 }

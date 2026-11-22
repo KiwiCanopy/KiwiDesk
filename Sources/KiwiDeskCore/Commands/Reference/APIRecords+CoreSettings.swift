@@ -43,8 +43,8 @@ extension APIReference {
             .choice("placement", FloatPlacement.self)
         ),
         "set_float_size": APIRecord(
-            "Sets the size in points a centred floating window "
-                + "takes; no arguments restores the derived size.",
+            "Sets the size a centred floating window takes; "
+                + "width and height both, or neither to clear.",
             .number("width", optional: true),
             .number("height", optional: true)
         ),

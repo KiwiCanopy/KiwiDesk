@@ -208,7 +208,7 @@ extension KiwiCore {
                 of: id,
                 in: region,
                 asked: tiler.settings.floatSize?.size
-            ),
+            ).size,
             in: region
         )
         return FloatPlacement.cascaded(
@@ -220,20 +220,25 @@ extension KiwiCore {
 
     /// `id`'s default float size in `region` (#3554): `asked`, else
     /// the derived size, within the app's learned bounds — the one
-    /// reading the placement and `size_floating` share.
+    /// reading the placement and `size_floating` share. `region` is
+    /// `floatGrowBounds` of the Space the window renders on, for both.
+    /// `floor` replaces the learned floor: a sizing verb passes the
+    /// window's planned minimum (#2774), as a float resize reads it.
     func defaultFloatSize(
         of id: WindowID,
         in region: CGRect,
-        asked: CGSize?
-    ) -> CGSize {
+        asked: CGSize?,
+        floor: CGSize? = nil
+    ) -> FloatPlacement.DefaultSize {
         let bound = tiler.sizeBound(for: id)
         return FloatPlacement.defaultSize(
             in: region,
             asked: asked,
-            minimum: CGSize(
-                width: bound?.minWidth ?? 0,
-                height: bound?.minHeight ?? 0
-            ),
+            minimum: floor
+                ?? CGSize(
+                    width: bound?.minWidth ?? 0,
+                    height: bound?.minHeight ?? 0
+                ),
             maximum: CGSize(
                 width: bound?.maxWidth ?? .infinity,
                 height: bound?.maxHeight ?? .infinity

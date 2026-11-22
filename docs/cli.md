@@ -563,7 +563,7 @@ maximizing or going into the Pocket and out, the last as a brief
 pocket
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 
-`center_floating` follows it too.
+`center_floating` and `size_floating` follow it too.
 
 `kiwishelf.set_pocket_edge top|bottom|left|right` (default
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)

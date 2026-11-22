@@ -239,8 +239,8 @@ extension APIReference {
                 + "its screen, clear of the bars, at its size."
         ),
         "size_floating": APIRecord(
-            "Sizes the focused floating window, keeping its "
-                + "centre; no arguments takes set_float_size's.",
+            "Sizes the focused floating window about its centre: "
+                + "width and height, or neither.",
             .number("width", optional: true),
             .number("height", optional: true)
         ),

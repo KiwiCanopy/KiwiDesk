@@ -54,7 +54,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`resize`](lua-reference.md#resize) | Resizes the focused window along the x or y axis. |
 | [`center_floating`](lua-reference.md#center_floating) | Moves the focused floating window to the middle of its screen, clear of the bars, at its size. |
 | [`move_floating`](lua-reference.md#move_floating) | Moves the focused floating window along x or y by a delta in points, positive y moving down. |
-| [`size_floating`](lua-reference.md#size_floating) | Sizes the focused floating window, keeping its centre; no arguments takes set_float_size's. |
+| [`size_floating`](lua-reference.md#size_floating) | Sizes the focused floating window about its centre: width and height, or neither. |
 | [`move_to_track`](lua-reference.md#move_to_track) | Moves the focused window one track along; takes prev or next. |
 | [`focus_or_spawn`](lua-reference.md#focus_or_spawn) | Focuses an app's window, or launches a new instance. |
 | [`focus_app_window`](lua-reference.md#focus_app_window) | Focuses the focused app's next or previous window, on any Space, screen or Desktop. |

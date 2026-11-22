@@ -70,7 +70,7 @@ struct FloatSizeCommandTests {
         #expect(frames[one]?.size == CGSize(width: 700, height: 500))
         core.tiler.settings.floatSize = nil
         #expect(core.execute("size_floating").isSuccess)
-        let region = try #require(core.floatBounds(on: SpaceID(1)))
+        let region = try #require(core.floatGrowBounds(on: SpaceID(1)))
         #expect(
             frames[one]?.size == FloatPlacement.derivedSize(in: region)
         )
@@ -126,11 +126,25 @@ struct FloatSizeCommandTests {
         #expect(
             core.execute("size_floating", args: size(5000, 450)).isSuccess
         )
-        let region = try #require(core.floatBounds(on: SpaceID(1)))
+        let region = try #require(core.floatGrowBounds(on: SpaceID(1)))
         let frame = try #require(frames[one])
         #expect(frame.width == region.width)
         #expect(region.contains(frame))
         #expect(cues == [.ownMaximum(one, axis: "x", atBoundary: true)])
+    }
+
+    @Test("a too-tall ask cues on the y axis")
+    func truncationCuesHeight() throws {
+        var cues: [ResizeRefusal] = []
+        var frames: [WindowID: CGRect] = [:]
+        let core = makeCore { frames[$0] = $1 }
+        core.borders.onResizeRefusal = { cues.append($0) }
+        #expect(
+            core.execute("size_floating", args: size(600, 5000)).isSuccess
+        )
+        let region = try #require(core.floatGrowBounds(on: SpaceID(1)))
+        #expect(frames[one]?.height == region.height)
+        #expect(cues == [.ownMaximum(one, axis: "y", atBoundary: true)])
     }
 
     @Test("an ask that fits draws no cue")
@@ -142,5 +156,78 @@ struct FloatSizeCommandTests {
             core.execute("size_floating", args: size(600, 450)).isSuccess
         )
         #expect(cues.isEmpty)
+    }
+
+    /// A corroborated bound for w1: two distinct asks, one answer.
+    private func seedBound(
+        _ core: KiwiCore,
+        width: (asks: [CGFloat], answer: CGFloat),
+        height: (asks: [CGFloat], answer: CGFloat)
+    ) {
+        var ledger = SizeBoundLearner.Ledger()
+        ledger.width = width.asks.map {
+            EffectiveSizeBound.Axis(asked: $0, answered: width.answer)
+        }
+        ledger.height = height.asks.map {
+            EffectiveSizeBound.Axis(asked: $0, answered: height.answer)
+        }
+        core.tiler.boundLearner.bounds[one] = ledger
+    }
+
+    @Test("a learned app ceiling caps the ask, cues it, then is forgotten")
+    func ceilingCues() throws {
+        var cues: [ResizeRefusal] = []
+        var frames: [WindowID: CGRect] = [:]
+        let core = makeCore { frames[$0] = $1 }
+        core.borders.onResizeRefusal = { cues.append($0) }
+        seedBound(
+            core,
+            width: ([1200, 1000], 700),
+            height: ([1200, 1000], 500)
+        )
+        #expect(
+            core.execute("size_floating", args: size(900, 450)).isSuccess
+        )
+        #expect(frames[one]?.size == CGSize(width: 700, height: 450))
+        #expect(cues == [.ownMaximum(one, axis: "x", atBoundary: false)])
+        #expect(core.tiler.sizeBound(for: one) == nil)
+    }
+
+    @Test("an ask under the window's floor is raised to it and cues")
+    func floorCues() throws {
+        var cues: [ResizeRefusal] = []
+        var frames: [WindowID: CGRect] = [:]
+        let core = makeCore { frames[$0] = $1 }
+        core.borders.onResizeRefusal = { cues.append($0) }
+        core.execute("set_min_window_size", args: [.number(300)])
+        let floor = core.plannedMinSize(of: one, axis: "x")
+        #expect(floor >= 300)
+        #expect(
+            core.execute("size_floating", args: size(100, 450)).isSuccess
+        )
+        #expect(frames[one]?.width == CGFloat(floor))
+        #expect(cues.count == 1)
+        if case .ownMinimum(let window, let axis, _) = cues.first {
+            #expect(window == one)
+            #expect(axis == "x")
+        } else {
+            Issue.record("expected an own-minimum cue, got \(cues)")
+        }
+    }
+
+    @Test("a locked app's ask is fitted to its ratio")
+    func lockedRatio() throws {
+        var frames: [WindowID: CGRect] = [:]
+        let core = makeCore { frames[$0] = $1 }
+        core.state.floatAspects[one] = .init(pid: 900_001, ratio: 2)
+        #expect(
+            core.execute("size_floating", args: size(800, 800)).isSuccess
+        )
+        // Written at once, so it reaches the applier, not the spring.
+        #expect(frames[one] == nil)
+        #expect(
+            core.tiler.commandedFrame(of: one)?.size
+                == CGSize(width: 800, height: 400)
+        )
     }
 }
