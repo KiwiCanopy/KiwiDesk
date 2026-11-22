@@ -238,6 +238,12 @@ extension APIReference {
             "Moves the focused floating window to the middle of "
                 + "its screen, clear of the bars, at its size."
         ),
+        "size_floating": APIRecord(
+            "Sizes the focused floating window, keeping its "
+                + "centre; no arguments takes set_float_size's.",
+            .number("width", optional: true),
+            .number("height", optional: true)
+        ),
         "move_floating": APIRecord(
             "Moves the focused floating window along x or y by "
                 + "a delta in points, positive y moving down.",

@@ -1160,6 +1160,29 @@ nudge off becomes `"keep"`, while an `init.lua` call to
 KiwiDesk.set_float_placement("keep")
 ```
 
+### set_float_size
+
+:::unreleased
+**Expects:** a width and a height in points, both positive; or
+nothing.
+
+**Does:** the size a window takes when [`set_float_placement`](#set_float_placement)'s
+`"center"` places it, in place of the size measured from its screen.
+A window floated again still returns to the frame it last floated at,
+so the order is: that frame, then this size, then the measured size.
+A size larger than the area its screen leaves clear of the bars is
+cut to fit, and an app that will not go that small or that large
+keeps its own limit. With nothing, the measured size comes back.
+It is also what [`size_floating`](#size_floating) takes with no
+arguments. Global (per profile, all spaces); no Settings toggle.
+
+**Example:**
+
+```lua
+KiwiDesk.set_float_size(1100, 800)
+```
+:::
+
 ### set_float_scale_on_display_change
 
 **Expects:** `true` or `false` (default `true`).
@@ -6585,6 +6608,44 @@ KiwiDesk.bind("ctrl+alt+shift+c", function()
     KiwiDesk.center_floating()
 end)
 ```
+
+### size_floating
+
+:::unreleased
+**Expects:** a width and a height in points, both positive; or
+nothing.
+
+**Does:** sizes the focused floating window, keeping its centre where
+it is, and keeps it inside the area its screen leaves clear of the
+bars. With nothing it takes [`set_float_size`](#set_float_size)'s
+size, else the size [`set_float_placement`](#set_float_placement)
+measures from the screen. A size that does not fit the screen, or
+that the app refuses, lands as close as it can and shows a pill.
+
+It follows
+[`animations.set_on_state_change`](#animationsset_on_state_change),
+refuses a full-screen or a tiled window the way
+[`center_floating`](#center_floating) does, and does nothing while
+you drag the window. A maximized floating window goes back to the
+frame it had first, and that frame is sized.
+
+No shortcut comes with it. Sizes you return to often are bindings
+calling it with different numbers:
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+1", function()
+    KiwiDesk.size_floating(800, 600)
+end)
+KiwiDesk.bind("ctrl+alt+shift+2", function()
+    KiwiDesk.size_floating(1100, 800)
+end)
+KiwiDesk.bind("ctrl+alt+shift+3", function()
+    KiwiDesk.size_floating(1400, 1000)
+end)
+```
+:::
 
 ### move_floating
 

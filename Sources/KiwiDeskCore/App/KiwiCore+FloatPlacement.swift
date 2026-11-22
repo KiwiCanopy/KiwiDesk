@@ -169,7 +169,8 @@ extension KiwiCore {
     }
 
     /// Where `id` floats on its placement space: its remembered
-    /// frame, else centred at the derived size and cascaded off
+    /// frame, else centred at `float_size` or the derived size
+    /// (#3554) and cascaded off
     /// the other floats there (#1708); nil under `keep`.
     private func floatPlacementTarget(for id: WindowID) -> CGRect? {
         guard tiler.settings.floatPlacement == .center,
@@ -203,17 +204,40 @@ extension KiwiCore {
             }
         if let remembered { return remembered }
         let centred = FloatPlacement.centered(
-            in: region,
-            minimum: minimum,
-            maximum: CGSize(
-                width: bound?.maxWidth ?? .infinity,
-                height: bound?.maxHeight ?? .infinity
-            )
+            defaultFloatSize(
+                of: id,
+                in: region,
+                asked: tiler.settings.floatSize?.size
+            ),
+            in: region
         )
         return FloatPlacement.cascaded(
             centred,
             avoiding: otherFloatFrames(on: space, besides: id),
             in: region
+        )
+    }
+
+    /// `id`'s default float size in `region` (#3554): `asked`, else
+    /// the derived size, within the app's learned bounds — the one
+    /// reading the placement and `size_floating` share.
+    func defaultFloatSize(
+        of id: WindowID,
+        in region: CGRect,
+        asked: CGSize?
+    ) -> CGSize {
+        let bound = tiler.sizeBound(for: id)
+        return FloatPlacement.defaultSize(
+            in: region,
+            asked: asked,
+            minimum: CGSize(
+                width: bound?.minWidth ?? 0,
+                height: bound?.minHeight ?? 0
+            ),
+            maximum: CGSize(
+                width: bound?.maxWidth ?? .infinity,
+                height: bound?.maxHeight ?? .infinity
+            )
         )
     }
 

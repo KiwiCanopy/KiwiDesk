@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 
 /// Behaviour settings diff readout generators.
@@ -76,6 +77,15 @@ extension SettingsValueReadout {
                     ),
                     old: behaviourFloatPlacement(before.floatPlacement),
                     new: behaviourFloatPlacement(after.floatPlacement)
+                )
+            ]
+        case .floatSize:
+            return [
+                .change(
+                    census,
+                    label: L("diff.label.float_size", "Float size"),
+                    old: floatSizeWords(before.floatSize),
+                    new: floatSizeWords(after.floatSize)
                 )
             ]
         case .floatScaleOnDisplayChange:
@@ -254,6 +264,14 @@ extension SettingsValueReadout {
         case .keep:
             return L("diff.value.float_placement.keep", "Kept in place")
         }
+    }
+
+    /// `float_size` (#3554): its points, or the derived size.
+    private static func floatSizeWords(_ size: FloatSize?) -> String {
+        guard let size else {
+            return L("settings.readout.auto", "Automatic")
+        }
+        return minSize(MinSize(width: size.width, height: size.height))
     }
 
     /// `set_mouse_resize`'s two values, for the Lua-only diff row.

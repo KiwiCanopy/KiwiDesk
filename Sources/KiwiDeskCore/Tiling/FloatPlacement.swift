@@ -38,14 +38,59 @@ extension FloatPlacement {
     /// size-bound ledger and outranks the derived size, as a
     /// learned `maximum` caps it; the result is confined to
     /// `region` wherever it fits.
+    /// `asked` is `float_size` (#3554), taken in place of the
+    /// derived size and capped to `region`.
     public static func centered(
         in region: CGRect,
+        asked: CGSize? = nil,
         minimum: CGSize = .zero,
         maximum: CGSize = CGSize(
             width: CGFloat.infinity,
             height: CGFloat.infinity
         )
     ) -> CGRect {
+        centered(
+            defaultSize(
+                in: region,
+                asked: asked,
+                minimum: minimum,
+                maximum: maximum
+            ),
+            in: region
+        )
+    }
+
+    /// The default float size in `region` (#3554): `asked` capped to
+    /// the region, else the derived size; a learned app `maximum`
+    /// caps either and a learned `minimum` outranks both. The one
+    /// home of that size, for the placement and `size_floating`.
+    public static func defaultSize(
+        in region: CGRect,
+        asked: CGSize? = nil,
+        minimum: CGSize = .zero,
+        maximum: CGSize = CGSize(
+            width: CGFloat.infinity,
+            height: CGFloat.infinity
+        )
+    ) -> CGSize {
+        let span =
+            asked.map {
+                CGSize(
+                    width: min($0.width, region.width),
+                    height: min($0.height, region.height)
+                )
+            } ?? derivedSize(in: region)
+        return CGSize(
+            width: max(min(span.width, maximum.width), minimum.width),
+            height: max(
+                min(span.height, maximum.height),
+                minimum.height
+            )
+        )
+    }
+
+    /// The size measured on the region's short and long axes.
+    static func derivedSize(in region: CGRect) -> CGSize {
         let landscape = region.width >= region.height
         let short = min(region.width, region.height)
         let long = max(region.width, region.height)
@@ -55,21 +100,9 @@ extension FloatPlacement {
             max(long * longShare, longFloor),
             shortSpan * longCap
         )
-        let width = max(
-            min(landscape ? longSpan : shortSpan, maximum.width),
-            minimum.width
-        )
-        let height = max(
-            min(landscape ? shortSpan : longSpan, maximum.height),
-            minimum.height
-        )
-        let frame = CGRect(
-            x: region.midX - width / 2,
-            y: region.midY - height / 2,
-            width: width,
-            height: height
-        )
-        return GeometryUtils.confine(frame, to: region)
+        return landscape
+            ? CGSize(width: longSpan, height: shortSpan)
+            : CGSize(width: shortSpan, height: longSpan)
     }
 
     /// `size` centred in `region` and never resized (#3007). An axis

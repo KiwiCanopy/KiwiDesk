@@ -30,6 +30,7 @@ struct SettingsCodingDecodeTests {
         settings.minWindowSizes = MinWindowSizes(all: 200)
         settings.swapSkipsCascade = false
         settings.floatPlacement = .keep
+        settings.floatSize = FloatSize(width: 1100, height: 800)
         settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
         settings.shortcutPanelLiquidGlass = true

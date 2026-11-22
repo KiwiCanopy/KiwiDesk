@@ -33,6 +33,9 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case resizeStep = "settings.resizeStep"
     case swapSkipsCascade = "settings.swapSkipsCascade"
     case floatPlacement = "settings.floatPlacement"
+    /// The size a centred float takes (#3554), Lua-only like
+    /// `floatPlacement` beside it.
+    case floatSize = "settings.floatSize"
     case floatScaleOnDisplayChange = "settings.floatScaleOnDisplayChange"
     case placementOverride = "settings.placementOverride[space]"
     case mouseResize = "settings.mouseResize"
@@ -92,7 +95,7 @@ extension BehaviourKey {
                 gate: .setting(.spaces(.spaceModes))
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride,
+            .floatSize, .floatScaleOnDisplayChange, .placementOverride,
             .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal,
             .mouseResize:
@@ -170,7 +173,7 @@ extension BehaviourKey {
                 help: "space_override.min_size.help"
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride,
+            .floatSize, .floatScaleOnDisplayChange, .placementOverride,
             .tilingStartOverride, .tilingStartGlobal,
             .tilingOffHidesBordersGlobal, .tilingOffHidesBarsGlobal,
             .mouseResize:

@@ -64,6 +64,7 @@ public enum APIReference {
             ("resize", "resize"),
             ("center_floating", "center_floating"),
             ("move_floating", "move_floating"),
+            ("size_floating", "size_floating"),
             ("move_to_track", "move_to_track"),
             ("focus_or_spawn", "focus_or_spawn"),
             ("focus_app_window", "focus_app_window"),
@@ -85,6 +86,7 @@ public enum APIReference {
             ),
             ("set_swap_skips_cascade", "set_swap_skips_cascade"),
             ("set_float_placement", "set_float_placement"),
+            ("set_float_size", "set_float_size"),
             (
                 "set_float_scale_on_display_change",
                 "set_float_scale_on_display_change"

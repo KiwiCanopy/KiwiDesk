@@ -25,6 +25,9 @@ public struct TilingSettings: Sendable, Equatable {
     /// Where an explicit float verb lands a window
     /// (`float_placement`); read only when one fires.
     public var floatPlacement: FloatPlacement = .center
+    /// The size a centred float takes (`float_size`, #3554); nil
+    /// keeps the derived size. Read only when a float is placed.
+    public var floatSize: FloatSize?
     /// Scale float size proportionally on display change (#502,
     /// superseding #444/#493's keep-the-size). Read only by
     /// `FloatReanchor.target` at a display-crossing re-anchor,
