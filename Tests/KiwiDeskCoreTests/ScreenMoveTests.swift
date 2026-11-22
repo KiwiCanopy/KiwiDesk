@@ -114,7 +114,7 @@ struct ScreenMoveTests {
     @Test("a direction takes the screen focus_display would")
     func directionMatchesFocus() {
         let core = makeCore(screens: 3)
-        #expect(core.screenAhead(.right) == Self.b)
+        #expect(core.screenAhead(.right)?.display == Self.b)
         #expect(
             core.execute("move_to_display", args: [.string("right")])
                 .isSuccess
