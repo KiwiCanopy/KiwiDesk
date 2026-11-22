@@ -101,4 +101,32 @@ extension KiwiCore {
             state.workspaces.placement(of: $0)
         }
     }
+
+    /// A screen-or-area argument (#3517 ruling 16), in order: a
+    /// number names a physical screen, as Desktop bindings count
+    /// them, and lands in its focused area, else its first; then a
+    /// fingerprint or area key; then a screen's name, its first
+    /// area; then an area's own name, refused where two share it.
+    func resolveAreaArg(_ arg: JSONValue?) -> PlacementID? {
+        let ws = state.workspaces
+        func lead(_ display: DisplayID) -> PlacementID? {
+            if let here = focusedPlacement, here.display == display {
+                return here
+            }
+            return ws.placements(of: display).first?.id
+        }
+        if arg?.intValue != nil {
+            return resolveDisplayArg(arg).flatMap(lead)
+        }
+        guard let raw = arg?.stringValue else { return nil }
+        let key = ScreenAreaKey(parsing: raw)
+        if let screen = ws.allDisplays.first(where: {
+            $0.fingerprint == key.fingerprint
+        }) {
+            return ws.placements(of: screen.id).first { $0.key == key }?.id
+        }
+        if let screen = resolveDisplayArg(arg) { return lead(screen) }
+        let named = ws.allPlacements.filter { $0.area.name == raw }
+        return named.count == 1 ? named[0].id : nil
+    }
 }
