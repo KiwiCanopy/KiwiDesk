@@ -141,6 +141,8 @@ struct FloatSizeSettingTests {
             ratio: 2
         )
         #expect(floored.size == CGSize(width: 1000, height: 500))
+        #expect(floored.height == FloatPlacement.SizeLimit.ceiling)
+        #expect(floored.width == nil)
     }
 
     @Test("a sub-point miss names no limit")
