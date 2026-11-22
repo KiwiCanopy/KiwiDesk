@@ -41,7 +41,7 @@ struct KeyRecorderField: View {
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
     /// A single modifier tap waiting out the gap (#1872).
-    @State private var pendingTap: KeyCombo?
+    @State var pendingTap: KeyCombo?
     /// Set when a click-away cancelled recording — the button's own
     /// click lands right after the mouse monitor and must not
     /// immediately restart it.
@@ -53,6 +53,7 @@ struct KeyRecorderField: View {
     /// a standalone or test mount.
     @State var ownRejection: RecorderRejection?
     @Environment(\.recorderConflictSlot) var conflictSlot
+    @Environment(\.recorderCaptionSlot) var captionSlot
     @State private var flashing = false
     @State var conflictPopoverShown = false
 
@@ -69,19 +70,12 @@ struct KeyRecorderField: View {
                 clearButton
             }
             .alignmentGuide(.shortcutLine) { $0[VerticalAlignment.center] }
-            deadCaption
-            narrowingCaption
-            if recording, let pendingTap,
-                let hint = ModifierTapWords.tapAgain(
-                    pendingTap,
-                    sidesKept: recorderSides != nil
-                )
-            {
-                Text(hint)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
+            if captionSlot == nil {
+                RecorderCaptionLines(captions: captions)
             }
-            tapOnceCaption
+            if !wellLines.isEmpty {
+                RecorderCaptionLines(captions: wellLines)
+            }
             if conflictSlot == nil, let rejection = liveRejection {
                 KeyRecorderRejectionRow.wired(
                     rejection,
@@ -89,6 +83,7 @@ struct KeyRecorderField: View {
                 ) { self.rejection = nil }
             }
         }
+        .publishesCaptions(captions, to: captionSlot)
         .onChange(of: coordinator.generation) { _, _ in
             tapOnceNote = nil
             rejection = nil

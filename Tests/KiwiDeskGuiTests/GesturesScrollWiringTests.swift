@@ -117,9 +117,14 @@ struct GesturesScrollWiringTests {
             list.components(separatedBy: "GestureChordRecorder(")
                 .dropFirst().first
         )
-        let trash = "armsOnAppear:armsOnAppear)AppRuleDeleteButton("
+        let trash =
+            "armsOnAppear:armsOnAppear)"
+            + ".environment(\\.recorderCaptionSlot,$keyCaptions)"
+            + "AppRuleDeleteButton("
         #expect(tail.contains(trash))
-        #expect(tail.contains("onRemove()}}iflethint{"))
+        #expect(
+            tail.contains("onRemove()}}ifhint!=nil||!keyCaptions.isEmpty{")
+        )
         let recorder = Self.squash(
             try Self.source("GestureChordRecorder.swift")
         )

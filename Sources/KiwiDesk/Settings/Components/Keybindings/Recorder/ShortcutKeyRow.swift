@@ -28,13 +28,15 @@ extension EnvironmentValues {
 }
 
 /// A Shortcuts row that holds a key recorder: its controls on one
-/// line aligned on the well, and a refused chord's conflict row as a
-/// line of its own under them, across the row (#3258 ▸ owner
-/// ruling). The one door for such a row (`ShortcutKeyRowSeamTests`).
+/// line aligned on the well, and the recorder's captions (#3553) and
+/// a refused chord's conflict row as lines of their own under them,
+/// across the row (#3258 ▸ owner ruling). The one door for such a
+/// row (`ShortcutKeyRowSeamTests`).
 struct ShortcutKeyRow<Content: View>: View {
     let spacing: CGFloat?
     let content: Content
     @State private var conflict: RecorderRejection?
+    @State private var captions: [RecorderCaption] = []
 
     init(
         spacing: CGFloat? = nil,
@@ -63,6 +65,11 @@ struct ShortcutKeyRow<Content: View>: View {
                 content
             }
             .environment(\.recorderConflictSlot, $conflict)
+            .environment(\.recorderCaptionSlot, $captions)
+            if !captions.isEmpty {
+                RecorderCaptionLines(captions: captions)
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
+            }
             if let conflict {
                 RecorderConflictLine(rejection: conflict) {
                     self.conflict = nil

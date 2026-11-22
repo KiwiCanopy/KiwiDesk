@@ -112,21 +112,29 @@ struct SideNarrowingCaptionTests {
             ).filter { !$0.isWhitespace }
         }
         let field = try read("KeyRecorderField.swift")
-        #expect(field.contains("deadCaptionnarrowingCaption"))
         #expect(field.contains("letnarrowing:SideNarrowing?"))
         let caption = try read("KeyRecorderField+Narrowing.swift")
         // At rest, and stepping aside for a row nothing runs.
-        #expect(caption.contains("if!recording,!isDead,letnarrowing,"))
-        #expect(caption.contains(".accessibilityLabel(words.spoken)"))
-        // The Go to is a VoiceOver action only where it is drawn.
+        #expect(caption.contains("guard!recording,!isDead,letnarrowing,"))
+        let lines = try read("RecorderCaptionLines.swift")
         #expect(
-            caption.contains(
-                "GoToAction(title:Self.goToTitle,"
+            lines.contains(
+                "case.narrowing(letdrawn,letspoken,letrow):"
+                    + "narrowing(drawn:drawn,spoken:spoken,row:row)"
+            )
+        )
+        // One element speaking the words, its Go to a VoiceOver
+        // action only where it is drawn.
+        #expect(
+            lines.contains(
+                ".accessibilityElement(children:.ignore)"
+                    + ".accessibilityLabel(spoken)"
+                    + ".modifier(GoToAction(title:KeyRecorderField.goToTitle,"
                     + "live:coordinator.scrollsInPlace)"
             )
         )
-        #expect(caption.contains("iflive{content.accessibilityAction("))
-        #expect(caption.contains("coordinator.scrollTarget=row"))
+        #expect(lines.contains("iflive{content.accessibilityAction("))
+        #expect(lines.contains("coordinator.scrollTarget=row"))
     }
 
     /// Every recorder mount over a layer hands its row's narrowing;

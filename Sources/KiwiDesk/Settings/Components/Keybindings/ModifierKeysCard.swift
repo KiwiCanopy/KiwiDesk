@@ -16,6 +16,8 @@ struct ModifierKeysCard: View {
     /// once the remap is KiwiDesk's, and the recorder stays drawn.
     @FocusState private var recorderFocused: Bool
     @State private var expanded = false
+    /// The recorder refused a key that types text (#1870).
+    @State private var hyperRefused = false
 
     private var reason: ShortcutsGates.InertReason? {
         ShortcutsGates(config: model.config, guiManaged: model.guiManaged)
@@ -55,11 +57,14 @@ struct ModifierKeysCard: View {
             spokenSummary: summary(spoken: true)
         ) {
             VStack(alignment: .leading, spacing: 6) {
-                keyRow
-                    .searchAnchored(
-                        SettingsCatalog.shortcuts.modifierKeys.children
-                            .hyperKey
-                    )
+                VStack(alignment: .leading, spacing: 4) {
+                    keyRow
+                        .searchAnchored(
+                            SettingsCatalog.shortcuts.modifierKeys
+                                .children.hyperKey
+                        )
+                    if hyperRefused { refusal }
+                }
                 // The key is app-wide; "Shortcuts use" below it is
                 // the draft's (#3218).
                 if reason != .appWideLuaOwned {
@@ -105,10 +110,21 @@ struct ModifierKeysCard: View {
                     get: { model.appWide.hyperKey },
                     set: { model.recordHyperKey($0) }
                 ),
+                refused: $hyperRefused,
                 disabled: reason == .appWideLuaOwned,
                 focus: $recorderFocused
             )
         }
+    }
+
+    /// The refused key's reason, a line across the row under the
+    /// recorder (#3258's shape).
+    private var refusal: some View {
+        Text(HyperKeyWords.typesText)
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink2)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     /// The caption, or — while a leftover remap keeps Hyper off —

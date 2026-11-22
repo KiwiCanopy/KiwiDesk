@@ -50,18 +50,35 @@ extension KeyRecorderField {
         return KeyCombo.parse(now) == note
     }
 
-    @ViewBuilder var tapOnceCaption: some View {
-        if !recording, let note = tapOnceNote,
+    /// The lines under the row, in order (#3553): the hosting
+    /// `ShortcutKeyRow` draws them across its width.
+    var captions: [RecorderCaption] {
+        [deadLine, narrowingLine, tapOnceLine].compactMap { $0 }
+    }
+
+    /// The tap gap's hint stays under the well the user is watching:
+    /// short in every catalog, and up for 0.3 s at most.
+    var wellLines: [RecorderCaption] {
+        tapAgainLine.map { [$0] } ?? []
+    }
+
+    private var tapAgainLine: RecorderCaption? {
+        guard recording, let pendingTap,
+            let hint = ModifierTapWords.tapAgain(
+                pendingTap,
+                sidesKept: recorderSides != nil
+            )
+        else { return nil }
+        return .tapAgain(hint)
+    }
+
+    private var tapOnceLine: RecorderCaption? {
+        guard !recording, let note = tapOnceNote,
             let words = ModifierTapWords.tapOnceRecorded(
                 note,
                 sidesKept: recorderSides != nil
             )
-        {
-            Text(words.drawn)
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink2)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityLabel(words.spoken)
-        }
+        else { return nil }
+        return .tapOnce(drawn: words.drawn, spoken: words.spoken)
     }
 }

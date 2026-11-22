@@ -4,11 +4,14 @@ import SwiftUI
 
 /// The Hyper key's recorder (#1870): records ONE physical key,
 /// sided, in `ChordRecorder`'s `.sourceKey` mode. A key that types
-/// text is refused with its reason under the field and announced;
-/// × is off. The scroll chord field's shape (#1656). Needs the
-/// section's `RecorderCoordinator`.
+/// text sets `refused` and is announced; the card draws the reason
+/// across its row, since a caption here would widen the trailing
+/// column. × is off. Needs the section's `RecorderCoordinator`.
 struct HyperKeyField: View {
     @Binding var key: HyperSourceKey?
+    /// The last press typed text; cleared by the next recording, ×
+    /// and a section or profile switch.
+    @Binding var refused: Bool
     let disabled: Bool
     /// The row's focus destination for the recorder (#816).
     var focus: FocusState<Bool>.Binding
@@ -17,30 +20,24 @@ struct HyperKeyField: View {
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var cancelledByClick: Date?
-    @State private var refused = false
     @State private var flashing = false
 
     private var recording: Bool { coordinator.active == fieldID }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                recordButton
-                clearButton
-            }
-            if refused {
-                Text(HyperKeyWords.typesText)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+        HStack(spacing: 6) {
+            recordButton
+            clearButton
         }
         .disabled(disabled)
         .onChange(of: coordinator.generation) { _, _ in
             refused = false
             recorder.stop()
         }
-        .onDisappear(perform: stop)
+        .onDisappear {
+            refused = false
+            stop()
+        }
     }
 
     private var recordButton: some View {
