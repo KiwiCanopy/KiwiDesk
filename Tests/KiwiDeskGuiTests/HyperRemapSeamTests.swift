@@ -108,6 +108,99 @@ struct HyperRemapSeamTests {
         )
     }
 
+    /// The register of the re-check's doors (#3550): the Shortcuts
+    /// page opening, a Hyper key recorded, a Settings Save (and
+    /// `saveGuiConfig` beneath it), a wake or unlock, and nowhere
+    /// else. A door owing through `oweHyperRemap` directly is
+    /// counted too, so it cannot sidestep the register. Both count
+    /// the bare name, so a call through a reference counts too; the
+    /// trade is that each declaration counts once.
+    @Test("the remap re-check has its doors")
+    func recheckDoors() throws {
+        let files = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent("Sources")
+        )
+        #expect(files.count > 100)
+        var callers: [String: Int] = [:]
+        var owers: [String: Int] = [:]
+        for file in files {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let name = file.lastPathComponent
+            let hits = Self.count("recheckHyperKey", in: text)
+            if hits > 0 { callers[name] = hits }
+            let owes = Self.count("oweHyperRemap", in: text)
+            if owes > 0 { owers[name] = owes }
+        }
+        #expect(
+            owers == [
+                // The declaration and the re-check's one call.
+                "KiwiCore+HyperKey.swift": 2,
+                // A changed key, the dedupe a reload relies on.
+                "KiwiCore+AppWideLive.swift": 1,
+            ],
+            "\(owers)"
+        )
+        #expect(
+            callers == [
+                "KiwiCore+HyperKey.swift": 1,  // the declaration
+                "KiwiCore+GuiConfig.swift": 1,
+                "KiwiCore+Bootstrap.swift": 1,
+                "SettingsModel+AppWide.swift": 1,
+                "SettingsModel+SaveAction.swift": 1,
+                "ShortcutsSection.swift": 1,
+            ],
+            "\(callers)"
+        )
+        let gui = try Self.source(
+            "Sources/KiwiDeskCore/App/KiwiCore+GuiConfig.swift"
+        )
+        #expect(
+            try Self.body(
+                of: gui,
+                from: "func saveGuiConfig(",
+                to: "func recoverKeybindings()"
+            ).contains("recheckHyperKey()")
+        )
+        let bootstrap = try Self.source(
+            "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+        )
+        #expect(
+            try Self.body(
+                of: bootstrap,
+                from: "sleepWake.onReturn = {",
+                to: "}"
+            ).contains("recheckHyperKey()")
+        )
+        let section = try Self.source(
+            "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
+        )
+        #expect(
+            try Self.body(
+                of: section,
+                from: ".onAppear {",
+                to: "}"
+            ).contains("recheckHyperKey()")
+        )
+        let card = try Self.source(
+            "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                + "ModifierKeysCard.swift"
+        )
+        #expect(Self.count("model.recordHyperKey(", in: card) == 1)
+        #expect(!card.contains("$0.hyperKey ="))
+        let save = try Self.source(
+            "Sources/KiwiDesk/Settings/SettingsModel+SaveAction.swift"
+        )
+        #expect(
+            try Self.body(
+                of: save,
+                from: "func performPrimarySave()",
+                to: "\n    }\n"
+            ).contains("core.recheckHyperKey()")
+        )
+    }
+
     /// The text between two needles, the second after the first.
     private static func body(
         of text: String,

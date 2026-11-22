@@ -52,7 +52,9 @@ extension KiwiCore {
     /// A changed key from any door — a row, a verb, a reload, a
     /// restore — remaps once, after the change settles, and only
     /// while KiwiDesk manages windows: a reload that resets the
-    /// value and has `init.lua` set it again remaps once.
+    /// value and has `init.lua` set it again remaps once. A
+    /// re-check of a mapping another tool may have changed owes
+    /// through here too (#3550, `recheckHyperKey`).
     func oweHyperRemap() {
         guard eventLoop.isRunning else { return }
         deferred.schedule(.hyperRemap, after: .zero) { [weak self] in
@@ -75,12 +77,23 @@ extension KiwiCore {
         // Off asked is off had: a mapping KiwiDesk cannot touch
         // is not the user's Hyper key.
         let status = want == nil ? .off : outcome
+        let before = keys.hyperStatus
         setHyperState(status)
-        if want != nil, outcome != .on {
+        // Once per change of status, from every door: a re-check
+        // finding the same refusal says nothing again (#3550).
+        if want != nil, outcome != .on, status != before {
             let what = outcome == .failed ? "failed" : "refused"
             onLog("hyper: remap \(what)\(outcome.foreignNote), Hyper key off")
         }
         return status
+    }
+
+    /// Re-checks the remap where the user is about to rely on it
+    /// (#3550): another tool can change or clear `UserKeyMapping`
+    /// under KiwiDesk, and nothing announces it. Owed, never run
+    /// inline, so the GUI never reads `hidutil`. Not a verb.
+    public func recheckHyperKey() {
+        oweHyperRemap()
     }
 
     /// Gives the key back at `stop()`; the choice is kept, so the

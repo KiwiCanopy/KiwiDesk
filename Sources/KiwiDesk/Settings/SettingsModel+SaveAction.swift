@@ -102,5 +102,7 @@ extension SettingsModel {
         case .saveGlobalsOnly: saveGlobalsWhilePaused()
         case .saveAsNewProfile: newProfileNamingRequested = true
         }
+        // Every Save re-checks the Hyper remap (#3550).
+        core.recheckHyperKey()
     }
 }

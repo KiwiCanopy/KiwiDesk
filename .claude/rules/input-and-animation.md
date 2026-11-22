@@ -455,6 +455,17 @@ editing here:
   Core's `claimable` verdict, never a key comparison in the GUI
   (`HyperRemapRecordWriterCensusTests`, `HyperKeyTakeOverTests`,
   `HyperTakeOverOfferTests`).
+- **A Hyper remap re-check is owed through `recheckHyperKey` into
+  the coalesced `.hyperRemap` slot, never run inline (#3550)**, at
+  the doors `HyperRemapSeamTests` ▸ `recheckDoors` registers; a new
+  door joins that register. `start()` and `set_hyper_key` apply
+  inline, for the crash clear and the verb's reply. Never owe one
+  from a layer activation, `loadConfig` or `appWideLiveChanged`,
+  whose skip of an unchanged key keeps a reload from spawning
+  `hidutil`; a re-check reaches `hyperStatus` only through
+  `applyHyperKey`'s `setHyperState`, and the GUI asks Core rather
+  than reading `hidutil` (`HyperRemapRecheckTests`,
+  `HyperRowRecheckTests`).
 - **A gesture reader learns Hyper only from the one `HyperHold`,
   at its chord build (#3407).** Hyper is a Carbon F18 layer, never
   an event flag, so the scroll tap, the pointer tap and the touch

@@ -78,6 +78,9 @@ struct ShortcutsSection: View {
         }
         .onAppear {
             ensureSelection()
+            // Another tool may have changed the Hyper remap; heal
+            // before any recorder here starts (#3550).
+            model.core.recheckHyperKey()
             // Suspend hotkeys while capturing to avoid trigger during edit
             // (#213).
             coordinator.onArmedChange = { [model] armed in

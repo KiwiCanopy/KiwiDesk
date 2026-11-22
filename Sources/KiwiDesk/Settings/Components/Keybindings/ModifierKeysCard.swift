@@ -103,9 +103,7 @@ struct ModifierKeysCard: View {
             HyperKeyField(
                 key: Binding(
                     get: { model.appWide.hyperKey },
-                    set: { key in
-                        model.setAppWide { $0.hyperKey = key }
-                    }
+                    set: { model.recordHyperKey($0) }
                 ),
                 disabled: reason == .appWideLuaOwned,
                 focus: $recorderFocused
