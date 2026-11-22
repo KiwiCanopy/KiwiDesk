@@ -126,7 +126,7 @@ extension KiwiCore {
 
     /// The area of `display` that `space` lays out in (#3517): the
     /// area its pin names, else the area it already holds on that
-    /// screen, else the screen's leading area. A pin naming an area
+    /// screen, else the screen's area 0. A pin naming an area
     /// the split no longer has falls back to area 0 (ruling 22).
     func areaPlacement(
         of space: SpaceID,

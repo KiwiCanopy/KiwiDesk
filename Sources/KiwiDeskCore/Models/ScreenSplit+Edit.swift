@@ -48,12 +48,14 @@ extension ScreenSplit {
 
     /// Areas given as rects, an id where the caller named one: an
     /// unnamed one takes 0 when it leads and no area holds 0, else
-    /// a fresh id from `previous`'s next one (ruling 21).
+    /// a fresh id past `previous`'s next one and every named id
+    /// (ruling 21).
     public static func adopting(
         _ entries: [(id: Int?, area: ScreenArea)],
         after previous: ScreenSplit?
     ) -> ScreenSplit {
-        var next = previous?.nextID ?? 1
+        let named = entries.compactMap(\.id)
+        var next = max(previous?.nextID ?? 1, (named.max() ?? 0) + 1)
         let ordered = entries.sorted {
             ($0.area.y, $0.area.x) < ($1.area.y, $1.area.x)
         }

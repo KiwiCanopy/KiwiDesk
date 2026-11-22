@@ -103,4 +103,17 @@ struct ScreenSplitEditTests {
                 == nil
         )
     }
+
+    @Test func adoptedRectsMintPastNamedIDs() {
+        let split = ScreenSplit.adopting(
+            [
+                (nil, ScreenArea(id: 0, x: 0, y: 0, w: 1000, h: 1440)),
+                (nil, ScreenArea(id: 0, x: 1000, y: 0, w: 1000, h: 1440)),
+                (1, ScreenArea(id: 0, x: 2000, y: 0, w: 1440, h: 1440)),
+            ],
+            after: nil
+        )
+        #expect(split.areas.map(\.id) == [0, 2, 1])
+        #expect(split.nextID == 3)
+    }
 }

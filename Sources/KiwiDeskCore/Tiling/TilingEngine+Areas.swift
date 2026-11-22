@@ -30,12 +30,12 @@ extension TilingEngine {
 
     /// Every space shown in place this pass paired with the
     /// screen it lays out on: one entry per placement — each area
-    /// of a split screen, each unsplit screen whole. Falls back to the focused
-    /// `activeSpace` on the main screen when no displays are
-    /// tracked yet (unit tests, early boot) — the single-monitor
-    /// path. The focused active space is always included even if
-    /// its display is momentarily untracked, so its windows are
-    /// never left unplaced.
+    /// of a split screen, each unsplit screen whole. Falls back to
+    /// the focused `activeSpace` on the main screen when no
+    /// displays are tracked yet (unit tests, early boot) — the
+    /// single-monitor path. The focused active space is always
+    /// included even if its display is momentarily untracked, so
+    /// its windows are never left unplaced.
     func visiblePlacements(
         state: StateCoordinator
     ) -> [(space: Space, screen: NSScreen)] {
