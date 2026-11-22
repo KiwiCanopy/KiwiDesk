@@ -12,9 +12,9 @@ struct ScreensSection: View {
     @State var sizesRequest: AreaSizesRequest?
     /// The area giving way while Adjust… is open (#3517 ruling 26).
     @State var givingWay: ScreenSelection?
-    /// Adjust…'s unit: a switch to percent lasts while Settings
-    /// stays open, never stored (ruling 26).
-    @State var sizesInPercent = false
+    /// The pane a menu's Split or Merge hands focus to, since the
+    /// focused pane may be the one merged away.
+    @State var paneFocus: ScreenSelection?
 
     var body: some View {
         let rows = model.screenRows
@@ -90,6 +90,7 @@ struct ScreensSection: View {
                 rows: rows,
                 selection: $selection,
                 givingWay: givingWay,
+                paneFocus: paneFocus,
                 act: act
             )
             if ScreenArrangement.isApproximate(rows.displays) {
@@ -190,7 +191,7 @@ struct ScreensSection: View {
                 rename: $renameRequest,
                 sizes: $sizesRequest,
                 givingWay: $givingWay,
-                percent: $sizesInPercent,
+                percent: $model.nav.areaSizesInPercent,
                 select: { selection = $0 }
             )
         }
@@ -202,6 +203,7 @@ struct ScreensSection: View {
         switch action {
         case .select(let next):
             selection = next
+            paneFocus = next
         case .rename(let area):
             selection = area
             DispatchQueue.main.async {

@@ -10,6 +10,8 @@ struct ScreensPicture: View {
     @Binding var selection: ScreenSelection?
     /// The area giving way in an open Adjust… popover.
     var givingWay: ScreenSelection? = nil
+    /// The pane a menu's Split or Merge hands focus to.
+    var paneFocus: ScreenSelection? = nil
     var act: (ScreenAreaAction) -> Void = { _ in }
 
     private static let canvasHeight: CGFloat = 248
@@ -92,7 +94,7 @@ struct ScreensPicture: View {
             mainID: model.mainDisplay?.id,
             canvas: canvas,
             trayChips: rows.mainSpaces.count,
-            splits: model.config.settings.displayAreas
+            splits: model.effectiveSplits
         )
     }
 
@@ -109,6 +111,7 @@ struct ScreensPicture: View {
                     size: drawn.rect.size,
                     selection: $selection,
                     givingWay: givingWay,
+                    paneFocus: paneFocus,
                     act: act
                 )
                 .frame(

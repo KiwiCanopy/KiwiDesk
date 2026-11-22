@@ -16,7 +16,9 @@ import Testing
 // element (`[K: SomeStruct]` holding a key in a field) reads as
 // neither and escapes the scan; so do a `Set` or an `Array` of
 // keys, a map keyed by a typed `ScreenAreaKey`, and an optional
-// map left nil, which reflects no children. Such a store owes a
+// map left nil, which reflects no children; an optional's own
+// field name is dropped from the path, so an exemption names the
+// map inside it by its parent's path. Such a store owes a
 // behavioural test of its own. A profile's other monitor sets
 // (`Profile.monitorSets[].spaceMonitorMap`) are outside the draft
 // a merge edits: a pin there naming the vanished area falls back

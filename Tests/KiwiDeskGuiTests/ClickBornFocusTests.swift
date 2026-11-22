@@ -142,6 +142,8 @@ struct ClickBornFocusTests {
         let ruled = [
             "SettingsView+Detail.swift": "true",
             "SpaceAssignmentChip.swift": "false",
+            // An area pane holds focusable chips (#3517).
+            "ScreenAreaPane.swift": "true",
             "SettingsSlider.swift": "false",
             "SegmentedPicker.swift": "false",
             // A greyed row of the layout cycle popover (#2673).

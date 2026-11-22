@@ -16,6 +16,8 @@ struct ScreenCard: View {
     @Binding var selection: ScreenSelection?
     /// The area giving way in an open Adjust… popover.
     let givingWay: ScreenSelection?
+    /// The pane a menu's Split or Merge hands focus to.
+    let paneFocus: ScreenSelection?
     let act: (ScreenAreaAction) -> Void
     @State private var hovering = false
     @State private var drag: AreaDividerDrag?
@@ -110,6 +112,7 @@ struct ScreenCard: View {
                 == ScreenSelection(display: display.id, area: pane.id),
             selection: $selection,
             act: act,
+            focusRequest: paneFocus,
             onTargeted: { inside in
                 if inside {
                     targetedPanes.insert(pane.id)

@@ -136,6 +136,10 @@ struct ScreenAreaEditTests {
         #expect(
             model.screenChoice(of: space) == .screen(screen.fingerprint)
         )
+        // A twin shares the fingerprint, so its keys are offered once.
+        model.core.state.workspaces.upsertDisplay(
+            Display(id: DisplayID(78), name: "Wide", frame: screen.frame)
+        )
         let offered = SpaceScreenChoice.offered(for: space, in: model)
         #expect(offered.count == Set(offered).count)
         #expect(offered.count == 4)

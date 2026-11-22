@@ -18,7 +18,15 @@ struct ScreenAreaEditor: View {
     let select: (ScreenSelection?) -> Void
     /// After a Split or Merge removes the button pressed, focus lands
     /// on the first Split button, always drawn with a selection.
-    @FocusState private var splitFocus: ScreenAreaCut.Axis?
+    @FocusState private var focus: EditorFocus?
+    /// A Split or Merge pressed: focus lands once the editor redraws
+    /// for the new split.
+    @State private var landing = false
+
+    private enum EditorFocus: Hashable {
+        case split(ScreenAreaCut.Axis)
+        case rename
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -28,6 +36,9 @@ struct ScreenAreaEditor: View {
                 mergeRow(area)
                 sizesRow
             }
+        }
+        .onChange(of: model.config.settings.displayAreas) {
+            if landing { DispatchQueue.main.async { land() } }
         }
     }
 
@@ -45,6 +56,7 @@ struct ScreenAreaEditor: View {
                     )
                 }
                 .settingsActionButton()
+                .focused($focus, equals: .rename)
                 .popover(item: $rename) { request in
                     renamePopover(request).settingsPopoverChrome()
                 }
@@ -91,7 +103,7 @@ struct ScreenAreaEditor: View {
         }
         .settingsActionButton()
         .disabled(greyed)
-        .focused($splitFocus, equals: axis)
+        .focused($focus, equals: .split(axis))
         .help(
             greyed
                 ? ScreenAreaEditing.floorReason(
@@ -182,11 +194,20 @@ struct ScreenAreaEditor: View {
         }
     }
 
-    /// Focus on the first Split button once the row redraws: the
-    /// button pressed may be gone (gui.md ▸ the keyboard path).
-    private func landFocus() {
-        DispatchQueue.main.async {
-            splitFocus = ScreenAreaEditing.axes(of: model, display).first
+    /// Asks for focus to land once the editor redraws: the button
+    /// pressed may be gone (gui.md ▸ the keyboard path).
+    private func landFocus() { landing = true }
+
+    /// The first enabled Split button, else Rename…, both drawn
+    /// while an area is selected; read from the redrawn editor.
+    private func land() {
+        landing = false
+        if let axis = ScreenAreaEditing.axes(of: model, display).first(
+            where: { model.canSplit(id, on: display, $0) }
+        ) {
+            focus = .split(axis)
+        } else if area != nil {
+            focus = .rename
         }
     }
 

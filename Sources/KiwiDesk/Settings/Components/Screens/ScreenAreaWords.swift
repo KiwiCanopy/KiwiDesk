@@ -51,6 +51,16 @@ extension SettingsModel {
         )
     }
 
+    /// Every connected screen's split in effect, by fingerprint —
+    /// what the picture lays its panes and scale floor out from.
+    var effectiveSplits: [String: ScreenSplit] {
+        var splits: [String: ScreenSplit] = [:]
+        for display in displays {
+            splits[display.fingerprint] = areaSplit(of: display)
+        }
+        return splits
+    }
+
     /// `display`'s split as the editor acts on it: the split in
     /// effect, else the whole screen as one area 0, keeping the
     /// stored next id (ruling 21).

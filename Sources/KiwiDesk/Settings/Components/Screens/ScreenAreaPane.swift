@@ -21,11 +21,14 @@ struct ScreenAreaPane: View {
     let givesWay: Bool
     @Binding var selection: ScreenSelection?
     let act: (ScreenAreaAction) -> Void
+    /// A menu's Split or Merge landed here: take the focus.
+    let focusRequest: ScreenSelection?
     /// Tells the card a dragged Space came over this pane or left.
     let onTargeted: (Bool) -> Void
     @State private var targeted = false
     @State private var showingOverflow = false
     @State private var hovering = false
+    @FocusState private var focused: Bool
     @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
@@ -65,6 +68,20 @@ struct ScreenAreaPane: View {
         // A pane is a stop on the keyboard path: Space or Return
         // selects it, as a click does, and its menu takes ⌃. there.
         .focusable()
+        .focused($focused)
+        // A click must not ring the pane (#996): its chips and the
+        // overflow button are focusable inside it.
+        .onChange(of: focused) { _, now in
+            guard now,
+                ClickBornFocus.isClickBorn(focusMayBeADescendant: true)
+            else { return }
+            focused = false
+        }
+        .onChange(of: focusRequest) { _, request in
+            if request == ScreenSelection(display: display.id, area: area) {
+                focused = true
+            }
+        }
         .onKeyPress(.space) {
             toggleSelection()
             return .handled

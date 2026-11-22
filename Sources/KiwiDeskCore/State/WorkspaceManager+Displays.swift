@@ -108,6 +108,9 @@ extension WorkspaceManager {
         keyed key: ScreenAreaKey,
         on display: DisplayID
     ) -> PlacementID? {
+        guard key.fingerprint == displays[display]?.fingerprint else {
+            return leadPlacement(of: display)
+        }
         let areas = placements(of: display)
         // The one fallback rule, which Settings' picture reads too.
         let landing = ScreenSplit(areas: areas.map(\.area)).landing(key)
