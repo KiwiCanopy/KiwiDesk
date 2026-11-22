@@ -40,15 +40,12 @@ public struct ProblemReport: Sendable, Equatable {
     /// ride here: the form is public and they name apps and paths.
     public var formURL: URL { formURL(logFile: nil) }
 
-    /// The same, naming the log `logFile` the user just saved to
-    /// Downloads (#3544): a timestamp, so safe on a public form, and
-    /// shown where the drag lands.
+    /// The same, naming the log the user just saved at `logFile`,
+    /// home abbreviated to `~` (#3544): shown where the drag lands.
     public func formURL(logFile: String?) -> URL {
         var context = deskLines
         if let logFile {
-            context.append(
-                "Log saved to Downloads: \(logFile) — drag it here."
-            )
+            context.append("Log saved as \(logFile) — drag it here.")
         }
         var parts = URLComponents(
             url: Self.form,

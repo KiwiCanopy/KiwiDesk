@@ -2,10 +2,8 @@ import AppKit
 import KiwiDeskCore
 
 /// Report a problem's one question (#3544): export a log first, or
-/// continue without. An `NSAlert` sheet over Settings, its time
-/// range the accessory popup, since a SwiftUI alert cannot hold a
-/// picker and a sheet with two commit buttons is a dialog in the
-/// wrong chrome (`docs/ui-patterns.md` ▸ Transient surfaces).
+/// continue without. An `NSAlert` sheet over Settings with the
+/// time range as its accessory popup.
 @MainActor
 enum ReportProblemPrompt {
     enum Answer: Equatable {
@@ -14,12 +12,17 @@ enum ReportProblemPrompt {
         case cancel
     }
 
-    /// Last hour, reset on every open: 15 minutes misses a problem
-    /// reproduced a while ago, and a launch can be days back.
+    /// The range each open starts on (#3544).
     static let defaultRange = SettingsModel.LogExportRange.lastHour
+
+    /// True while the question is up, so a second click asks
+    /// nothing.
+    private(set) static var isAsking = false
 
     /// Asks over `window` and returns the answer.
     static func ask(over window: NSWindow) async -> Answer {
+        isAsking = true
+        defer { isAsking = false }
         let (alert, popup) = alert()
         let response = await withCheckedContinuation { done in
             alert.beginSheetModal(for: window) { done.resume(returning: $0) }
@@ -45,7 +48,7 @@ enum ReportProblemPrompt {
             withTitle: L("report.log.without", "Continue Without Log")
         )
         let cancel = alert.addButton(
-            withTitle: L("spaces.delete_confirm.cancel", "Cancel")
+            withTitle: L("report.log.cancel", "Cancel")
         )
         // A translated title is not AppKit's own "Cancel", which
         // alone gets Escape for free.
@@ -75,17 +78,35 @@ enum ReportProblemPrompt {
     }
 
     private static func rangePicker() -> (NSView, NSPopUpButton) {
-        let title = L("general.advanced.log.range", "Time range")
-        let label = NSTextField(labelWithString: title + ":")
+        let label = NSTextField(
+            labelWithString: L("report.log.range", "Time range:")
+        )
         let popup = NSPopUpButton(frame: .zero, pullsDown: false)
         let ranges = SettingsModel.LogExportRange.allCases
         popup.addItems(withTitles: ranges.map(\.title))
         popup.selectItem(at: ranges.firstIndex(of: defaultRange) ?? 0)
-        popup.setAccessibilityLabel(title)
+        popup.setAccessibilityLabel(
+            L("general.advanced.log.range", "Time range")
+        )
         let stack = NSStackView(views: [label, popup])
         stack.orientation = .horizontal
         stack.spacing = 8
         stack.frame.size = stack.fittingSize
         return (stack, popup)
+    }
+
+    /// What stopped the export, for this path's alert. A write
+    /// failure has its own sentence: no save panel offers another
+    /// folder here.
+    static func sentence(for problem: LogExportProblem) -> String {
+        guard case .writeFailed = problem else {
+            return LogExportText.sentence(for: problem)
+        }
+        return L(
+            "report.log.write_failed",
+            "KiwiDesk couldn't save the log to your Downloads folder. "
+                + "Check that it exists and has free space, then try "
+                + "again."
+        )
     }
 }

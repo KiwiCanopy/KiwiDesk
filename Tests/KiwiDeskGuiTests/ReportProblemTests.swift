@@ -61,7 +61,7 @@ struct ReportProblemTests {
     }
 
     @Test("export writes, then opens the form naming the file")
-    func exportRevealsThenOpens() async throws {
+    func exportWritesThenOpens() async throws {
         let folder = try scratchFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let calls = Calls()
@@ -77,10 +77,27 @@ struct ReportProblemTests {
         let name = try #require(written.first)
         #expect(name.hasPrefix("KiwiDesk-log-"))
         #expect(calls.opened.count == 1)
+        let shown = (folder.appendingPathComponent(name).path as NSString)
+            .abbreviatingWithTildeInPath
         #expect(
             context(calls.opened.first)?.hasSuffix(
-                "Log saved to Downloads: \(name) — drag it here."
+                "Log saved as \(shown) — drag it here."
             ) == true
+        )
+    }
+
+    /// Two exports in one minute share a name; the second takes
+    /// `-2` rather than replacing the log the first form names.
+    @Test("a second export in the same minute keeps the first")
+    func sameMinuteKeepsBoth() throws {
+        let folder = try scratchFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let first = folder.appendingPathComponent("KiwiDesk-log-x.txt")
+        #expect(SettingsModel.unused(first) == first)
+        try Data().write(to: first)
+        #expect(
+            SettingsModel.unused(first).lastPathComponent
+                == "KiwiDesk-log-x-2.txt"
         )
     }
 
@@ -141,6 +158,8 @@ struct ReportProblemTests {
             ReportProblemPrompt.answer(.alertThirdButtonReturn, picked: 0)
                 == .cancel
         )
+        // A quit ends the sheet as `.cancel` (`QuitSheets`).
+        #expect(ReportProblemPrompt.answer(.cancel, picked: 0) == .cancel)
     }
 
     @Test("the footer link greys while a log exports")

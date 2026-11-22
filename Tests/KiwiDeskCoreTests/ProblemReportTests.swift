@@ -46,11 +46,11 @@ struct ProblemReportTests {
     /// the plain form names none.
     @Test("the form names a saved log only when given one")
     func formNamesTheLog() {
-        let name = "KiwiDesk-log-2026-11-22-1200.txt"
+        let file = "~/Downloads/KiwiDesk-log-2026-11-22-1200.txt"
         #expect(
-            query(report.formURL(logFile: name))["extra_context"]
+            query(report.formURL(logFile: file))["extra_context"]
                 == "Screens: 2\nDisplays have separate Spaces: on\n"
-                + "Log saved to Downloads: \(name) — drag it here."
+                + "Log saved as \(file) — drag it here."
         )
         #expect(report.formURL(logFile: nil) == report.formURL)
     }

@@ -72,17 +72,21 @@ extension SettingsModel {
         panel.allowedContentTypes = [.plainText]
         panel.nameFieldStringValue = LogExport.defaultFilename()
         panel.canCreateDirectories = true
-        // Downloads, not Documents: the file's next stop is a
-        // browser's attach dialog (owner ruling 2026-09-02).
-        panel.directoryURL =
-            FileManager.default.urls(
-                for: .downloadsDirectory,
-                in: .userDomainMask
-            ).first
+        panel.directoryURL = Self.logFolder
         guard panel.runModal() == .OK, let url = panel.url else {
             return
         }
         await exportLog(choice.range, to: url)
+    }
+
+    /// Where an exported log goes: Downloads, not Documents, since
+    /// its next stop is a browser's attach dialog (owner ruling
+    /// 2026-09-02). Report a problem writes here too (#3544).
+    nonisolated static var logFolder: URL? {
+        FileManager.default.urls(
+            for: .downloadsDirectory,
+            in: .userDomainMask
+        ).first
     }
 
     /// The run itself, split from the panel so a test can drive

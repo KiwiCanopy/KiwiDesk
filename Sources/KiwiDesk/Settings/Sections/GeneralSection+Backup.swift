@@ -104,11 +104,9 @@ extension GeneralSection {
     /// consequences, saved data replaced and the draft dropped.
     private func confirmRestore(_ bundle: SetupBundle) {
         // The window the Restore… button was clicked in.
-        guard
-            let window = NSApp.windows.first(where: {
-                $0.delegate is SettingsWindowController
-            })
-        else { return }
+        guard let window = SettingsWindowController.openWindow else {
+            return
+        }
         RestoreConfirm.ask(
             model.core.restoreChoices(for: bundle),
             over: window
