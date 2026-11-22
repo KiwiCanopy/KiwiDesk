@@ -1715,7 +1715,7 @@
   "menu.file.close": "关闭",
   "menu.file.title": "文件",
   "menu.layout": "布局",
-  "menu.layout.keep": "将布局保留在描述文件“%1$@”中",
+  "menu.layout.keep": "保留在描述文件“%1$@”中",
   "menu.layout.save_failed.title": "无法存储布局",
   "menu.layout.unsaved": "未存储到描述文件",
   "menu.quit": "退出 KiwiDesk",

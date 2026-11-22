@@ -1715,7 +1715,7 @@
   "menu.file.close": "Закрыть",
   "menu.file.title": "Файл",
   "menu.layout": "Раскладка",
-  "menu.layout.keep": "Оставить раскладку в профиле «%1$@»",
+  "menu.layout.keep": "Оставить в профиле «%1$@»",
   "menu.layout.save_failed.title": "Не удалось сохранить раскладку",
   "menu.layout.unsaved": "не сохранено в профиль",
   "menu.quit": "Завершить KiwiDesk",

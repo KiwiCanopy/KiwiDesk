@@ -1715,7 +1715,7 @@
   "menu.file.close": "閉じる",
   "menu.file.title": "ファイル",
   "menu.layout": "レイアウト",
-  "menu.layout.keep": "レイアウトをプロファイル「%1$@」に保持",
+  "menu.layout.keep": "プロファイル「%1$@」に保持",
   "menu.layout.save_failed.title": "レイアウトを保存できませんでした",
   "menu.layout.unsaved": "プロファイルに未保存",
   "menu.quit": "KiwiDeskを終了",

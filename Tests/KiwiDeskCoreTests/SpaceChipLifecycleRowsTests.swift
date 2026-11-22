@@ -198,7 +198,7 @@ struct SpaceChipLifecycleRowsTests {
         guard
             case .submenu(let layout)? = row(core, one, "Layout")?.kind
         else { return nil }
-        let title = "Keep Layout in Profile “p”"
+        let title = "Keep in Profile “p”"
         return layout.first { $0.title == title }
     }
 

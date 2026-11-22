@@ -1715,7 +1715,7 @@
   "menu.file.close": "Chiudi",
   "menu.file.title": "File",
   "menu.layout": "Layout",
-  "menu.layout.keep": "Conserva il layout nel profilo «%1$@»",
+  "menu.layout.keep": "Conserva nel profilo «%1$@»",
   "menu.layout.save_failed.title": "Impossibile salvare il layout",
   "menu.layout.unsaved": "non salvato nel profilo",
   "menu.quit": "Esci da KiwiDesk",

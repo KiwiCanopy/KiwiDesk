@@ -1715,7 +1715,7 @@
   "menu.file.close": "닫기",
   "menu.file.title": "파일",
   "menu.layout": "레이아웃",
-  "menu.layout.keep": "레이아웃을 프로필 ‘%1$@’에 유지",
+  "menu.layout.keep": "프로필 ‘%1$@’에 유지",
   "menu.layout.save_failed.title": "레이아웃을 저장하지 못했습니다",
   "menu.layout.unsaved": "프로필에 저장되지 않음",
   "menu.quit": "KiwiDesk 종료",

@@ -1715,7 +1715,7 @@
   "menu.file.close": "Fermer",
   "menu.file.title": "Fichier",
   "menu.layout": "Disposition",
-  "menu.layout.keep": "Conserver la disposition dans le profil « %1$@ »",
+  "menu.layout.keep": "Conserver dans le profil « %1$@ »",
   "menu.layout.save_failed.title": "Impossible d'enregistrer la disposition",
   "menu.layout.unsaved": "non enregistrée dans le profil",
   "menu.quit": "Quitter KiwiDesk",
