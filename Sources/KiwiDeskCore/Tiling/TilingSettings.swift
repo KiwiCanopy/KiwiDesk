@@ -89,6 +89,9 @@ public struct TilingSettings: Sendable, Equatable {
     /// after a pick of the user's own or a bundled look. Written by
     /// a pick (`ShelfLook.pick`) alone.
     public var lookOrigin: ShelfLook?
+    /// Each split physical screen's areas (#3517), keyed by its
+    /// `Display.fingerprint`; a screen absent here is whole.
+    public var displayAreas: [String: ScreenSplit] = [:]
 
     public init() {}
 }

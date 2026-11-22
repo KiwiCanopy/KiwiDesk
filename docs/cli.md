@@ -711,6 +711,8 @@ every lens with why it cannot turn on.
 | | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
+| | `set_display_areas` | display, then nothing (whole) or `side_by_side`\|`stacked` and one size in points per area |
+| | `set_display_area_name` | area key (from `list_monitors`), name (empty clears) |
 | | `create_space` | space id, [mode] — see [`create_space`](lua-reference.md#create_space) |
 | | `delete_space` | space id — see [Deleting a Space](#deleting-a-space) |
 | Window | `make_floating` | — |

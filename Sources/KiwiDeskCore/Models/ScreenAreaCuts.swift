@@ -6,9 +6,9 @@ import Foundation
 /// cut's x (`.sideBySide`) or y (`.stacked`) in screen points;
 /// `start`/`end` its extent along the other axis.
 public struct ScreenAreaCut: Equatable, Sendable {
-    public enum Axis: Equatable, Sendable {
+    public enum Axis: String, CaseIterable, Equatable, Sendable {
         /// A vertical line: the areas sit side by side.
-        case sideBySide
+        case sideBySide = "side_by_side"
         /// A horizontal line: the areas are stacked.
         case stacked
     }

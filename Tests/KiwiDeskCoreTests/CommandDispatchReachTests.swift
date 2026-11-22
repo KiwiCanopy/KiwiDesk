@@ -78,6 +78,9 @@ struct CommandDispatchReachTests {
             + "carries (#1685)",
         "unknown shortcut: ": "a name the Shortcuts app's list does "
             + "not carry (#3526)",
+        "unknown screen: ": "a screen no number, fingerprint or name "
+            + "names (#3517)",
+        "unknown area: ": "an area key no split carries (#3517)",
     ]
 
     /// The one catalogued name `execute` never sees:

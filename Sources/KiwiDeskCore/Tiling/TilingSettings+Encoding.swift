@@ -47,6 +47,9 @@ extension TilingSettings {
         try container.encode(mouseResize, forKey: .mouseResize)
         try container.encode(mouse, forKey: .mouse)
         try container.encodeIfPresent(lookOrigin, forKey: .lookOrigin)
+        if !displayAreas.isEmpty {
+            try container.encode(displayAreas, forKey: .displayAreas)
+        }
         var gap = container.nestedContainer(
             keyedBy: GapKeys.self,
             forKey: .gap

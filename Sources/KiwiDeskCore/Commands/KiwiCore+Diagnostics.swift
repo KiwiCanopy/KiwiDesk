@@ -60,6 +60,7 @@ extension KiwiCore {
                 // The Space this screen shows: `get_state`'s
                 // `shown` Space whose `display` is this id (#3549).
                 "space_id": shown.map { .string($0.id.raw) } ?? .null,
+                "areas": areasJSON(of: display),
             ])
         }
         return .ok(.array(monitors))
