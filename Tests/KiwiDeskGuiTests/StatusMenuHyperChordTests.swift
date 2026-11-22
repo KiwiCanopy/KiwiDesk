@@ -91,7 +91,7 @@ struct StatusMenuHyperChordTests {
             KeyCombo(keyCode: 31, modifiers: [.control, .option])
         }
         var row = menu(controller).items.first {
-            $0.title == "Show Desktop overview"
+            $0.title == QuickMenuBuilders.hubRow
         }
         #expect(row?.keyEquivalent == "o")
         #expect(row?.keyEquivalentModifierMask == [.control, .option])
@@ -99,7 +99,7 @@ struct StatusMenuHyperChordTests {
             KeyCombo(keyCode: 31, modifiers: [.hyper])
         }
         row = menu(controller).items.first {
-            $0.title == "Show Desktop overview"
+            $0.title == QuickMenuBuilders.hubRow
         }
         #expect(row?.keyEquivalent == "")
     }
@@ -114,7 +114,7 @@ struct StatusMenuHyperChordTests {
         controller.onOpenDesktopOverview = { opened += 1 }
         func fire() {
             let item = menu(controller).items.first {
-                $0.title == "Show Desktop overview"
+                $0.title == QuickMenuBuilders.hubRow
             }
             _ = item?.target?.perform(item?.action, with: item)
         }

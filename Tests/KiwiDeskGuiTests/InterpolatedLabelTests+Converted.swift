@@ -44,22 +44,19 @@ extension InterpolatedLabelTests {
     /// `layout.schematic.grid.ax` picks between two labels for
     /// ONE slot with a ternary (so 2).
     /// The eleven from `app_bar.alignment.label.help` on are the
-    /// `i18n/terminology-round` batch, less
-    /// `profiles.current_setup_note`, retired with its note
-    /// (#1530). Five of them had ALREADY
-    /// drifted in a shipped catalog before the conversion —
-    /// `es` named the boxed style "En casillas" against a picker
-    /// reading "En caja", `it` a colour row "Elemento sotto il
-    /// puntatore" against a row reading "Elemento al passaggio
-    /// mouse" — which is the strongest evidence this suite's
-    /// premise is right rather than tidy. The count here is
-    /// LABELS, which is what the scan derives — not the
-    /// specifier count, which a ternary can make smaller. The
-    /// two `*.alignment.label.help` frames briefly spent `%1$@`
-    /// twice, and that was backed out: `placeholder_drift`
-    /// compares a multiset, so a repeat makes a stylistic second
-    /// mention mandatory in every language and fails a
-    /// translation that pronominalises it; `gui.md` ▸ Strings bans it.
+    /// `i18n/terminology-round` batch, less `profiles.current_setup_note`,
+    /// retired with its note (#1530). Five of them had ALREADY drifted in a
+    /// shipped catalog before the conversion — `es` named the boxed style
+    /// "En casillas" against a picker reading "En caja", `it` a colour row
+    /// "Elemento sotto il puntatore" against a row reading "Elemento al
+    /// passaggio mouse" — which is the strongest evidence this suite's
+    /// premise is right rather than tidy. The count here is LABELS, which is
+    /// what the scan derives — not the specifier count, which a ternary can
+    /// make smaller. The two `*.alignment.label.help` frames briefly spent
+    /// `%1$@` twice, and that was backed out: `placeholder_drift` compares a
+    /// multiset, so a repeat makes a stylistic second mention mandatory in
+    /// every language and fails a translation that pronominalises it;
+    /// `gui.md` ▸ Strings bans it.
     static let converted: [String: Int] = [
         "app_rules.float.help": 1,  // the Tile row (#2975)
         // Simple's Spaces pointer and KiwiHub hover name a page by
@@ -205,6 +202,8 @@ extension InterpolatedLabelTests {
         "track.auto_tracks.limit_inert": 1,
         "monitors.not_connected.caption": 1,
         "menu.status.config_error.tooltip": 1,
+        // #3545: the quick menu's overview row names KiwiHub.
+        "menu.desktop_overview_in_kiwihub": 1,
         "border.fit_gaps.action_hint": 1,
         "border.fit_gaps.updated": 1,
         "border.fit_gaps.updated_inactive": 1,

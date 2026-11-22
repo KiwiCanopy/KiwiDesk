@@ -1704,6 +1704,7 @@
   "menu.app.hide_others": "Скрыть остальные",
   "menu.app.show_all": "Показать все",
   "menu.config_issues": "Проблемы с конфигурацией…",
+  "menu.desktop_overview_in_kiwihub": "Показать обзор рабочих столов в %1$@",
   "menu.edit.copy": "Скопировать",
   "menu.edit.cut": "Вырезать",
   "menu.edit.paste": "Вставить",

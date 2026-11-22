@@ -7951,7 +7951,7 @@ their windows. A window on a Desktop no screen shows is listed in the
 Space it returns to, or under **Not in a Space yet**, which nothing
 can be moved into. A window in macOS full screen is listed in its
 Space on the Desktop its screen shows, or, while a full-screen app
-is in front, on the Desktop that screen showed last. The menu bar's **Show Desktop overview** row
+is in front, on the Desktop that screen showed last. The menu bar's **Show Desktop overview in KiwiHub** row
 opens it too. The side is seeded on **⌃⌥O**, and **Shortcuts ▸
 Built-in ▸ Show & hide ▸ KiwiHub** lists the row to rebind or clear.
 While KiwiHub has the keyboard, a modifier tap whose Shortcuts row

@@ -9,6 +9,10 @@ import Foundation
 /// both lists — and a divergent copy would silently exempt a file
 /// from a fail-open guard.
 enum QuickMenuBuilders {
+    /// KiwiHub's one quick-menu row in English, the
+    /// `menu.desktop_overview_in_kiwihub` phrase (#3545).
+    static let hubRow = "Show Desktop overview in KiwiHub"
+
     /// Every file that builds quick-menu rows.
     ///
     /// **A list with a coverage check, not one hard-coded path.**
@@ -58,8 +62,9 @@ enum QuickMenuBuilders {
         "StatusItemController+Menu.swift":
             "builds the quick menu's rows and states enablement only "
             + "where a row greys (the starting count) or must stay "
-            + "live (Start Tiling, Show Desktop overview, #2309); the rest "
-            + "SHOULD be enabled and unstated means enabled. Its "
+            + "live (Start Tiling, Show Desktop overview in "
+            + "KiwiHub, #2309); the rest SHOULD be enabled and "
+            + "unstated means enabled. Its "
             + "menu is created in StatusItemController.swift, so "
             + "the per-menu flag count cannot pair it here",
         "LicenseSheet.swift":
