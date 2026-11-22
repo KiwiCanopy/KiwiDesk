@@ -13884,10 +13884,11 @@ scratch Space into the file, or dropped a Space the user had
 deleted for the afternoon, did more than it said, and the bar's
 New Space made that the common case rather than the corner one.
 Which Spaces a profile has is changed deliberately (*A Space
-made on the fly is temporary*, under Profiles), so the row whose
-word is *layout* keeps layouts, and the verb whose word is
-*save* keeps the setup. Each moves an open draft's saved baseline
-for exactly what it wrote and leaves staged edits staged.
+made on the fly is temporary*, under Profiles), so Keep, which
+the Layout menu and the view picker carry, keeps layouts, and
+the verb whose word is *save* keeps the setup. Each moves an
+open draft's saved baseline for exactly what it wrote and leaves
+staged edits staged.
 
 Each half of the Settings Save fails in a way the other hides. A
 Save that re-applies the draft over live and then captures live

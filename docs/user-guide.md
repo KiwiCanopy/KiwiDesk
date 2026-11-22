@@ -64,9 +64,8 @@ right-click **Layout** menu, is **session-only**: it does not
 rewrite the profile, and both say "not saved to profile" while
 it drifts. **Keep in Profile** (`⌘S` in the view picker, and
 the Layout menu's last row) writes what is on screen, every
-screen at once, into the
-active profile — the layouts, not a keyboard or mouse resize,
-which is session-only. A Settings Save does not touch a
+screen at once, into the active profile — the layouts, not a
+keyboard or mouse resize, which is session-only. A Settings Save does not touch a
 temporary layout, which stays on screen through it; the one
 exception is a Space whose layout you changed in **Settings →
 Spaces**, which wins on Save.
