@@ -156,8 +156,8 @@ extension APIReference {
             .integer("milliseconds")
         ),
         "get_state": APIRecord(
-            "Returns a snapshot of Spaces, windows, and "
-                + "screens."
+            "Returns a snapshot of Spaces, the screen each sits on, "
+                + "and windows."
         ),
         "get_config_status": APIRecord(
             "Returns the Config Issues and the sync folder's status."
@@ -182,7 +182,8 @@ extension APIReference {
             "Returns diagnostic info for the active Space."
         ),
         "list_monitors": APIRecord(
-            "Lists connected screens with IDs and geometry."
+            "Lists connected screens with their IDs, geometry and "
+                + "the Space each shows."
         ),
         "list_windows": APIRecord(
             "Lists every window's title, frame, screen, visibility "
