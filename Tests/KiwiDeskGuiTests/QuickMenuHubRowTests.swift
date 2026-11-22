@@ -15,12 +15,12 @@ private final class FakeStatusItem: StatusItemHandle {
 }
 
 /// The quick menu's chord rows (#2309 ruling 8, #3485): KiwiHub's
-/// one row is "Show Desktop overview" — the Layout, Switch Profile,
-/// KiwiVision, View Shortcuts and Open KiwiHub rows are gone, since
-/// the menu keeps only rows that can show their key — and the
-/// Settings row, each showing its live chord. `.serialized`
-/// because `LocalizationManager` is a process-wide singleton
-/// (titles are matched in English).
+/// one row is "Show Desktop overview in KiwiHub" — the Layout,
+/// Switch Profile, KiwiVision, View Shortcuts and Open KiwiHub
+/// rows are gone, since the menu keeps only rows that can show
+/// their key — and the Settings row, each showing its live chord.
+/// `.serialized` because `LocalizationManager` is a process-wide
+/// singleton (titles are matched in English).
 @Suite("Quick menu KiwiHub and Settings rows", .serialized)
 @MainActor
 struct QuickMenuHubRowTests {
@@ -72,7 +72,7 @@ struct QuickMenuHubRowTests {
         #expect(!rows.contains { $0.hasPrefix("Profile: ") })
         #expect(
             rows.filter { !$0.isEmpty } == [
-                "Show Desktop overview", "Settings…", "Quit KiwiDesk",
+                QuickMenuBuilders.hubRow, "Settings…", "Quit KiwiDesk",
             ]
         )
     }
@@ -91,7 +91,9 @@ struct QuickMenuHubRowTests {
         func fire() {
             let menu = NSMenu()
             controller.menuNeedsUpdate(menu)
-            let item = menu.items.first { $0.title == "Show Desktop overview" }
+            let item = menu.items.first {
+                $0.title == QuickMenuBuilders.hubRow
+            }
             _ = item?.target?.perform(item?.action, with: item)
         }
         controller.menuKeyDown = { [self] in press(37, [.control, .option]) }
@@ -123,7 +125,7 @@ struct QuickMenuHubRowTests {
 
         controller.menuNeedsUpdate(menu)
 
-        let item = menu.items.first { $0.title == "Show Desktop overview" }
+        let item = menu.items.first { $0.title == QuickMenuBuilders.hubRow }
         #expect(item?.keyEquivalent == "l")
         #expect(item?.keyEquivalentModifierMask == [.control, .option])
         #expect(item?.attributedTitle == nil)
@@ -221,7 +223,7 @@ struct QuickMenuHubRowTests {
             controller.menuNeedsUpdate(menu)
 
             let item = menu.items.first {
-                $0.title == "Show Desktop overview"
+                $0.title == QuickMenuBuilders.hubRow
             }
             #expect(
                 item?.keyEquivalent.count == 1,

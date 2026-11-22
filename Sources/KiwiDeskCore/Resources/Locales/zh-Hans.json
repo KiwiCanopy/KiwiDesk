@@ -1704,6 +1704,7 @@
   "menu.app.hide_others": "隐藏其他",
   "menu.app.show_all": "显示全部",
   "menu.config_issues": "配置问题…",
+  "menu.desktop_overview_in_kiwihub": "在 %1$@ 中显示桌面概览",
   "menu.edit.copy": "拷贝",
   "menu.edit.cut": "剪切",
   "menu.edit.paste": "粘贴",

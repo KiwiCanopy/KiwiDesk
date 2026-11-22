@@ -197,7 +197,7 @@ struct StartTilingGateTests {
         }
         #expect(presses == 1)
         // KiwiHub stays reachable from the menu (#2309 ruling 9).
-        let hub = items.first { $0.title == "Show Desktop overview" }
+        let hub = items.first { $0.title == QuickMenuBuilders.hubRow }
         #expect(hub?.isEnabled == true)
     }
 
@@ -207,7 +207,7 @@ struct StartTilingGateTests {
         #expect(!items.contains { $0.title == "Start Tiling" })
         #expect(
             items.first {
-                $0.title == "Show Desktop overview"
+                $0.title == QuickMenuBuilders.hubRow
             }?.isEnabled == true
         )
     }

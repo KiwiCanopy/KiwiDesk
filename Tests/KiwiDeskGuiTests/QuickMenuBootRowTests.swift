@@ -151,12 +151,12 @@ struct QuickMenuBootRowTests {
             controller(phase: .scanning(scanned: 2, total: 9))
         )
         #expect(
-            row(starting, titled: "Show Desktop overview")?.isEnabled
+            row(starting, titled: QuickMenuBuilders.hubRow)?.isEnabled
                 == true
         )
         let ready = menu(controller(phase: .ready))
         #expect(
-            row(ready, titled: "Show Desktop overview")?.isEnabled == true
+            row(ready, titled: QuickMenuBuilders.hubRow)?.isEnabled == true
         )
     }
 

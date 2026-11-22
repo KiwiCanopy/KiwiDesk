@@ -1704,6 +1704,7 @@
   "menu.app.hide_others": "Andere ausblenden",
   "menu.app.show_all": "Alle einblenden",
   "menu.config_issues": "Konfigurationsprobleme…",
+  "menu.desktop_overview_in_kiwihub": "Schreibtischübersicht in %1$@ anzeigen",
   "menu.edit.copy": "Kopieren",
   "menu.edit.cut": "Ausschneiden",
   "menu.edit.paste": "Einfügen",

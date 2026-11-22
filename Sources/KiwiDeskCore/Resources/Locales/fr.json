@@ -1704,6 +1704,7 @@
   "menu.app.hide_others": "Masquer les autres",
   "menu.app.show_all": "Tout afficher",
   "menu.config_issues": "Problèmes de configuration…",
+  "menu.desktop_overview_in_kiwihub": "Afficher l'aperçu des Bureaux dans %1$@",
   "menu.edit.copy": "Copier",
   "menu.edit.cut": "Couper",
   "menu.edit.paste": "Coller",
