@@ -11,13 +11,20 @@ public enum ScreenAreaProblem: Equatable, Sendable {
     case outsideScreen(id: Int)
     case overlap(Int, Int)
     case gap
+    /// No full-span cut separates the areas (a pinwheel), so no
+    /// dividers can be derived (ruling 20).
+    case notGuillotine
+    /// Cuts run in both directions: a nested split, which 5.1.0
+    /// does not offer (ruling 20; lifted by #3541).
+    case mixedAxes
 }
 
 extension ScreenArea {
     /// The first problem with `areas` as the split of a screen
     /// `width` × `height` points, or nil when they tile it exactly:
     /// every area inside the screen, none below `minimumSide`, no
-    /// two overlapping, and their sizes adding up to the screen.
+    /// two overlapping, their sizes adding up to the screen, and
+    /// every cut full-span and in one direction.
     public static func problem(
         with areas: [ScreenArea],
         width: Int,
@@ -46,6 +53,15 @@ extension ScreenArea {
             }
         }
         let covered = areas.reduce(0) { $0 + $1.w * $1.h }
-        return covered == width * height ? nil : .gap
+        guard covered == width * height else { return .gap }
+        guard
+            let cuts = ScreenAreaCuts.cuts(
+                of: areas,
+                width: width,
+                height: height
+            )
+        else { return .notGuillotine }
+        let axes = Set(cuts.map { $0.axis == .sideBySide })
+        return axes.count > 1 ? .mixedAxes : nil
     }
 }

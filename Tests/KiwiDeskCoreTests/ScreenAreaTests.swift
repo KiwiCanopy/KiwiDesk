@@ -62,11 +62,26 @@ struct ScreenAreaTests {
                 area(0, 0, 0, 3440, 720), area(4, 0, 720, 3440, 720),
             ]) == nil
         )
+    }
+
+    @Test func nestedAndPinwheelSplitsAreRefused() {
         #expect(
             problem([
                 area(0, 0, 0, 1000, 1440), area(1, 1000, 0, 1440, 720),
                 area(2, 1000, 720, 1440, 720), area(3, 2440, 0, 1000, 1440),
-            ]) == nil
+            ]) == .mixedAxes
+        )
+        // Five rects, no full-span cut.
+        #expect(
+            ScreenArea.problem(
+                with: [
+                    area(0, 0, 0, 200, 100), area(1, 200, 0, 100, 200),
+                    area(2, 100, 200, 200, 100), area(3, 0, 100, 100, 200),
+                    area(4, 100, 100, 100, 100),
+                ],
+                width: 300,
+                height: 300
+            ) == .notGuillotine
         )
     }
 
