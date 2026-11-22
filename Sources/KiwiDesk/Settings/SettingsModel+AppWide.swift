@@ -25,6 +25,17 @@ extension SettingsModel {
         core.takeOverHyperRemap()
     }
 
+    /// The Hyper row's record (#3550): the key already chosen
+    /// re-checks the remap, which the live values would skip as
+    /// unchanged; any other key is a change.
+    func recordHyperKey(_ key: HyperSourceKey?) {
+        guard key != nil, key == appWide.hyperKey else {
+            setAppWide { $0.hyperKey = key }
+            return
+        }
+        core.recheckHyperKey()
+    }
+
     func setAppWide(_ change: (inout AppWideSettings) -> Void) {
         objectWillChange.send()
         core.withUserMotion { core.setAppWide(persisting: true, change) }

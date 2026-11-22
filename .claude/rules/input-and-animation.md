@@ -455,6 +455,16 @@ editing here:
   Core's `claimable` verdict, never a key comparison in the GUI
   (`HyperRemapRecordWriterCensusTests`, `HyperKeyTakeOverTests`,
   `HyperTakeOverOfferTests`).
+- **The Hyper remap re-check is owed when the Shortcuts page opens,
+  on the same Hyper key recorded again, at a Settings Save, on the
+  return from rest and at `start()`, only through `recheckHyperKey`
+  or `oweHyperRemap` into the coalesced `.hyperRemap` slot, never
+  inline (#3550)** — and never from a layer activation, `loadConfig`
+  or `appWideLiveChanged`, whose skip of an unchanged key keeps a
+  reload from spawning `hidutil`; `applyHyperKey` stays the one
+  writer of `hyperStatus`. A new re-check door joins that list and
+  `HyperRemapSeamTests` ▸ `recheckDoors`; nothing in the GUI reads
+  `hidutil` (`HyperRemapRecheckTests`, `HyperRowRecheckTests`).
 - **A gesture reader learns Hyper only from the one `HyperHold`,
   at its chord build (#3407).** Hyper is a Carbon F18 layer, never
   an event flag, so the scroll tap, the pointer tap and the touch

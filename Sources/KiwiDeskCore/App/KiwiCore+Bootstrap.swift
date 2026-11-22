@@ -343,6 +343,7 @@ extension KiwiCore {
         sleepWake.onReturn = { [weak self] in
             self?.eventLoop.sessionDidReturn()
             self?.mouse.trackpad.rearm()
+            self?.recheckHyperKey()  // #3550
         }
     }
 }

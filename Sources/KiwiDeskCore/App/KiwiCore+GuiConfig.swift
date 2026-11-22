@@ -265,6 +265,7 @@ extension KiwiCore {
         )
         try guiConfigStore.save(config)
         loadConfig()
+        recheckHyperKey()  // #3550
     }
 
     /// Recovers the live keybindings as editable modes (#4): each

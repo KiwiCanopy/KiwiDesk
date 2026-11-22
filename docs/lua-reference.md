@@ -1362,6 +1362,16 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
+:::unreleased
+KiwiDesk re-checks the mapping when the Shortcuts page opens, when
+the **Hyper key** row records the key it already holds, when
+Settings saves and after a wake or an unlock (#3550): a mapping
+that vanished is set again, and another tool's mapping turns Hyper
+off as above. Nothing else watches it, so a mapping another tool
+breaks in between stays broken until one of those happens, the
+verb runs again or KiwiDesk restarts.
+:::
+
 Save **⌃⌥Space**, which a KiwiDesk row wins; on **⌃Space** the row
 and macOS both answer
 ([Modifiers and Keys](#modifiers-and-keys)).
