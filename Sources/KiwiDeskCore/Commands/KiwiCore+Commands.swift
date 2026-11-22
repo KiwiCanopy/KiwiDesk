@@ -64,6 +64,10 @@ extension KiwiCore {
             return moveSpaceToDisplay(args)
         case "pin_space_to_display":
             return pinSpaceToDisplay(args)
+        case "set_display_areas":
+            return setDisplayAreas(args)
+        case "set_display_area_name":
+            return setDisplayAreaName(args)
         case "create_space":
             return createSpace(args)
         case "delete_space":

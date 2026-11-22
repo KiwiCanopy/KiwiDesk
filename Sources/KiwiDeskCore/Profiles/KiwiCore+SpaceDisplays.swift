@@ -35,7 +35,10 @@ extension KiwiCore {
                     assignment: assignment
                 )
             else { continue }
-            state.workspaces.assign(space.id, to: display)
+            state.workspaces.assign(
+                space.id,
+                to: areaPlacement(of: space.id, on: display)
+            )
         }
         // A display the resolve left with no space is healed
         // HERE (#1175), before relocation is judged: a reused
@@ -84,7 +87,10 @@ extension KiwiCore {
                     assignment: assignment
                 )
             else { continue }
-            state.workspaces.assign(space, to: display)
+            state.workspaces.assign(
+                space,
+                to: areaPlacement(of: space, on: display)
+            )
         }
         return true
     }
@@ -116,6 +122,32 @@ extension KiwiCore {
             displays: displays,
             mainID: mainID
         )
+    }
+
+    /// The area of `display` that `space` lays out in (#3517): the
+    /// area its pin names, else the area it already holds on that
+    /// screen, else the screen's area 0. A pin naming an area
+    /// the split no longer has falls back to area 0 (ruling 22).
+    func areaPlacement(
+        of space: SpaceID,
+        on display: DisplayID
+    ) -> PlacementID {
+        let ws = state.workspaces
+        if let pin = spacePins[space],
+            let named = ws.placement(
+                keyed: ScreenAreaKey(parsing: pin),
+                on: display
+            )
+        {
+            return named
+        }
+        if let held = ws.placement(of: space), held.display == display,
+            ws[placement: held] != nil
+        {
+            return held
+        }
+        return ws.leadPlacement(of: display)
+            ?? PlacementID(display: display, area: 0)
     }
 
     /// The one copy of the `SpacePlacement` call every placement

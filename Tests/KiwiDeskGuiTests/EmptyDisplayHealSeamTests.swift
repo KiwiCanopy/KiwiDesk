@@ -36,10 +36,11 @@ struct EmptyDisplayHealSeamTests {
     ]
 
     /// Every file that may WRITE `healedSpaces`: the mint, the
-    /// gone-seed drop, the retire filter and the orphan retire
-    /// (#1612) in the heal file; the first-launch reset.
+    /// gone-seed drop, the retire filter, the orphan retire
+    /// (#1612) and an area's mint (#3517) in the heal file; the
+    /// first-launch reset.
     private let writers: [String: Int] = [
-        "Profiles/KiwiCore+EmptyDisplayHeal.swift": 4,
+        "Profiles/KiwiCore+EmptyDisplayHeal.swift": 5,
         "App/KiwiCore+Reset.swift": 1,
     ]
 

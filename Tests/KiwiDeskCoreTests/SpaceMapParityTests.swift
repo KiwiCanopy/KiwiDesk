@@ -52,10 +52,12 @@ private func dictionaryDescriptions(
 ) -> [String] {
     var found: [String] = []
     for child in Mirror(reflecting: value).children {
-        // A bar's and the pocket's per-screen edges are keyed by a
-        // screen's fingerprint, never a Space (#1948, #3376).
+        // A bar's and the pocket's per-screen edges, and a screen's
+        // split, are keyed by a screen's fingerprint, never a Space
+        // (#1948, #3376, #3517).
         if child.label == "edgeOverride"
             || child.label == "pocketEdgeOverride"
+            || child.label == "displayAreas"
         {
             continue
         }

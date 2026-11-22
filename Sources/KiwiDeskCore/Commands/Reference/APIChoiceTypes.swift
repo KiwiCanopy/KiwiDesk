@@ -61,3 +61,4 @@ extension BorderStyle.CornerStyle: APIChoiceType {}
 extension BorderStyle.DrawOrder: APIChoiceType {}
 extension ScrollInput: APIChoiceType {}
 extension ModifierDragStart: APIChoiceType {}
+extension ScreenAreaCut.Axis: APIChoiceType {}

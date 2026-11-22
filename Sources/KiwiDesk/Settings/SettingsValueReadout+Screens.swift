@@ -21,6 +21,12 @@ extension SettingsValueReadout {
                 old: old.mainSpaces,
                 new: new.mainSpaces
             )
+        case .displayAreas:
+            return screensAreaRows(
+                census,
+                old: old.settings.displayAreas,
+                new: new.settings.displayAreas
+            )
         case .orphanPinClear, .fingerprints,
             .placementUnavailable:
             // no model path — never booked by the diff
@@ -50,6 +56,34 @@ extension SettingsValueReadout {
                 new: new[space] ?? unset
             )
         }
+    }
+
+    /// One row per screen whose split changed (#3517), each side
+    /// read as its areas' lengths in reading order.
+    private static func screensAreaRows(
+        _ census: SettingKey,
+        old: [String: ScreenSplit],
+        new: [String: ScreenSplit]
+    ) -> [SettingsDiffRow] {
+        let base = L("diff.label.screen_areas", "Screen areas")
+        let touched = Set(old.keys).union(new.keys)
+            .filter { old[$0] != new[$0] }
+            .sorted()
+        return touched.map { screen in
+            .change(
+                census,
+                instance: screen,
+                label: instanceLabel(base, screen),
+                old: old[screen].map(areaSizes) ?? unset,
+                new: new[screen].map(areaSizes) ?? unset
+            )
+        }
+    }
+
+    private static func areaSizes(_ split: ScreenSplit) -> String {
+        ScreenArea.readingOrder(split.areas)
+            .map { "\($0.w)×\($0.h)" }
+            .joined(separator: " · ")
     }
 
     /// Diff rows for spaces joining or leaving the follows-main set.

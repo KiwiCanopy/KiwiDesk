@@ -99,7 +99,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(),
                 leaving: SpaceID("1"),
-                landingOn: displayB
+                landingOn: displayB,
+                in: nil
             ) == SpaceID("6")
         )
     }
@@ -111,7 +112,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(),
                 leaving: SpaceID("1"),
-                landingOn: displayA
+                landingOn: displayA,
+                in: nil
             ) == nil
         )
     }
@@ -126,7 +128,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(),
                 leaving: SpaceID("6"),
-                landingOn: displayB
+                landingOn: displayB,
+                in: nil
             ) == nil
         )
     }
@@ -138,7 +141,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(),
                 leaving: SpaceID("1"),
-                landingOn: nil
+                landingOn: nil,
+                in: nil
             ) == nil
         )
     }
@@ -150,7 +154,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(),
                 leaving: nil,
-                landingOn: displayB
+                landingOn: displayB,
+                in: nil
             ) == nil
         )
     }
@@ -162,7 +167,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(isFloating: true),
                 leaving: SpaceID("1"),
-                landingOn: displayB
+                landingOn: displayB,
+                in: nil
             ) == nil
         )
     }
@@ -175,7 +181,8 @@ struct ScreenHomePredicateTests {
                 state.screenHome(
                     of: window(sticky: scope),
                     leaving: SpaceID("1"),
-                    landingOn: displayB
+                    landingOn: displayB,
+                    in: nil
                 ) == nil
             )
         }
@@ -201,7 +208,8 @@ struct ScreenHomePredicateTests {
             state.screenHome(
                 of: window(),
                 leaving: SpaceID("1"),
-                landingOn: displayB
+                landingOn: displayB,
+                in: nil
             ) == nil
         )
     }

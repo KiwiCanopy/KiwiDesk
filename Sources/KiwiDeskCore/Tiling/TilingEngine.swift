@@ -29,6 +29,9 @@ public final class TilingEngine {
             if settings.tiling != oldValue.tiling {
                 onTilingToggleSettings?()
             }
+            if settings.displayAreas != oldValue.displayAreas {
+                onAreaSplits?()
+            }
             if settings != oldValue { onSettingsChange(settings) }
         }
     }
@@ -38,6 +41,9 @@ public final class TilingEngine {
     var onMouseSettings: (@MainActor (MouseSettings) -> Void)?
     /// Told when `settings.tiling` changes: the start mirror (#3008).
     var onTilingToggleSettings: (@MainActor () -> Void)?
+    /// Told when `settings.displayAreas` changes, at the write and
+    /// so before any pin resolves against the placements (#3517).
+    var onAreaSplits: (@MainActor () -> Void)?
     /// Told when the settings change, by whichever write (#2604).
     var onSettingsChange: @MainActor (TilingSettings) -> Void = { _ in }
 
@@ -217,6 +223,30 @@ public final class TilingEngine {
             GeometryUtils.axVisibleFrame(of: $0)
         }
     }
+
+    /// The area a Space lays out in — its rect in its screen's own
+    /// points, top-left origin — and its stored key, nil where its
+    /// screen is not split (#3517); wired by `KiwiCore` from the
+    /// placement list. An unsplit screen keeps every bound exactly
+    /// as it was.
+    var spaceArea: @MainActor (SpaceID) -> (rect: CGRect, key: String)? = {
+        _ in nil
+    }
+
+    /// A screen's whole frame in AX coordinates, the origin an
+    /// area's rect is laid from; pinned by tests that split a
+    /// screen, since the live flip reads the host's main screen.
+    var screenFrameAX: @MainActor (NSScreen) -> CGRect = {
+        GeometryUtils.flip(
+            $0.frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
+    }
+
+    /// The AX frames of every area of every SPLIT screen (#3517),
+    /// for the neighbour scan's edge flags; empty while no screen
+    /// is split.
+    var splitAreaBounds: @MainActor () -> [CGRect] = { [] }
 
     /// Every screen's AX visible frame by its display, for the focus
     /// keys' screen hop (#2493); `allScreenBounds`' sibling, pinned

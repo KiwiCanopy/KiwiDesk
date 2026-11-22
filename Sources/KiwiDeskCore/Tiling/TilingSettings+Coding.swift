@@ -35,6 +35,7 @@ extension TilingSettings: Codable {
         case resize
         case space
         case lookOrigin = "look_origin"
+        case displayAreas = "display_areas"
     }
 
     enum SpaceKeys: String, CodingKey {
@@ -173,6 +174,11 @@ extension TilingSettings: Codable {
             ShelfLook.self,
             forKey: .lookOrigin
         )
+        displayAreas =
+            try container.decodeIfPresent(
+                [String: ScreenSplit].self,
+                forKey: .displayAreas
+            ) ?? [:]
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)

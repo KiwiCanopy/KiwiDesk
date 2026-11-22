@@ -122,6 +122,19 @@ extension APIReference {
             .space("space"),
             .text("display")
         ),
+        "set_display_areas": APIRecord(
+            "Splits a screen into areas of these point sizes, whole "
+                + "with none; Lua may pass rects.",
+            .text("display"),
+            .choice("direction", ScreenAreaCut.Axis.self, optional: true),
+            .integer("sizes", optional: true)
+        ),
+        "set_display_area_name": APIRecord(
+            "Names a screen area, by its key from list_monitors; an "
+                + "empty name clears it.",
+            .text("area"),
+            .text("name")
+        ),
         "create_space": APIRecord(
             "Makes a Space; temporary unless scope is profile, "
                 + "which may take the optional mode's place.",

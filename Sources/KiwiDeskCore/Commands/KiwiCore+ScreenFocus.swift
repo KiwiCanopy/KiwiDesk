@@ -47,11 +47,12 @@ extension KiwiCore {
         return focusScreen(target)
     }
 
-    /// The nearest screen `direction` of the focused one, the one
-    /// answer every screen verb's direction form takes (#3117).
-    func screenAhead(_ direction: Direction) -> DisplayID? {
-        let screens = tiler.displayFrames()
-        guard let here = focusedScreen,
+    /// The nearest screen or area `direction` of the focused one,
+    /// the one answer every screen verb's direction form takes
+    /// (#3117, #3517).
+    func screenAhead(_ direction: Direction) -> PlacementID? {
+        let screens = placementFrames()
+        guard let here = focusedPlacement,
             let frame = screens.first(where: { $0.id == here })?.frame
         else { return nil }
         return ScreenHop.ahead(
@@ -67,6 +68,15 @@ extension KiwiCore {
     /// it.
     private func focusScreen(_ display: DisplayID) -> CommandResponse {
         guard let shown = state.workspaces.activeSpace(on: display) else {
+            return .fail("no Space on that screen")
+        }
+        switchSpace(to: shown, warp: true)
+        return .ok()
+    }
+
+    /// Switches to the Space an area shows (#3517).
+    private func focusScreen(_ area: PlacementID) -> CommandResponse {
+        guard let shown = state.workspaces.activeSpace(on: area) else {
             return .fail("no Space on that screen")
         }
         switchSpace(to: shown, warp: true)

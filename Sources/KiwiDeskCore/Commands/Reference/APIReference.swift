@@ -40,6 +40,8 @@ public enum APIReference {
             ("move_to_desktop_and_follow", "move_to_desktop_and_follow"),
             ("move_space_to_display", "move_space_to_display"),
             ("pin_space_to_display", "pin_space_to_display"),
+            ("set_display_areas", "set_display_areas"),
+            ("set_display_area_name", "set_display_area_name"),
             ("create_space", "create_space"),
             ("delete_space", "delete_space"),
             ("make_floating", "make_floating"),

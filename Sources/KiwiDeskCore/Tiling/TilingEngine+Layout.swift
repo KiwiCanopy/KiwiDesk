@@ -34,10 +34,13 @@ extension TilingEngine {
         space.mode = state.placementMode(of: space)
         // The shelf's reservation (#293, #1517) comes off the
         // visible frame before any layout sees its bounds.
+        // Parking stays physical (#3517 ruling 6): `visible` is the
+        // whole screen, `region` the Space's area of it.
         let visible = visibleBounds(screen)
+        let region = visibleBounds(screen, for: space.id)
         // A full Monocle follow takes #2976's transform (#3063 ▸ 4).
         let follows = state.monocleFollowFills(space)
-        let bounds = follows ? visible : layoutBounds(on: screen, for: space)
+        let bounds = follows ? region : layoutBounds(on: screen, for: space)
         let tiled = state.effectiveTiledMembers(of: space)
         var context = settings.context(
             bounds: bounds,
@@ -59,10 +62,7 @@ extension TilingEngine {
             // adjacency is an input, never a cache, so a screen
             // plugged in or out is correct from the retile the
             // display change already triggers.
-            screenNeighbors: ScreenNeighbors.detect(
-                around: visible,
-                among: allScreenBounds()
-            ),
+            screenNeighbors: neighbors(around: region, on: visible),
             // Confirmed app-enforced bounds (#677), read fresh
             // from the learner like the neighbors above: these
             // frames reach real windows, so the residue of a
@@ -82,56 +82,6 @@ extension TilingEngine {
         context.probesBeyondBounds = probeBeyondBoundsPass
         if follows { context.gaps = .none }
         return (space, tiled, context)
-    }
-
-    /// Every space shown in place this pass paired with the
-    /// screen it lays out on: one entry per connected display
-    /// (its `activeSpace(on:)`). Falls back to the focused
-    /// `activeSpace` on the main screen when no displays are
-    /// tracked yet (unit tests, early boot) — the single-monitor
-    /// path. The focused active space is always included even if
-    /// its display is momentarily untracked, so its windows are
-    /// never left unplaced.
-    func visiblePlacements(
-        state: StateCoordinator
-    ) -> [(space: Space, screen: NSScreen)] {
-        let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else {
-            guard
-                let id = state.workspaces.activeSpace,
-                let space = state.workspaces[id],
-                let screen = ScreenList.mainOrFirst
-            else { return [] }
-            return [(space, screen)]
-        }
-        let fallback = ScreenList.mainOrFirst
-        // Keyed by physical screen (frame origin — stable across
-        // the fresh `NSScreen` instances `NSScreen.screens` may
-        // hand back), so a screen hosts exactly ONE space. Two
-        // displays that both fall back to `main` (unresolvable), or
-        // a focused active space whose display is untracked landing
-        // on `main`, cannot double-place two different spaces on
-        // one screen — the focused active space, written last, wins
-        // its screen.
-        var byScreen: [String: (space: Space, screen: NSScreen)] = [:]
-        func key(_ s: NSScreen) -> String {
-            "\(s.frame.origin.x),\(s.frame.origin.y)"
-        }
-        for display in displays {
-            guard
-                let id = state.workspaces.activeSpace(on: display.id),
-                let space = state.workspaces[id],
-                let screen = Self.screen(for: display.id) ?? fallback
-            else { continue }
-            byScreen[key(screen)] = (space, screen)
-        }
-        if let id = state.workspaces.activeSpace,
-            let space = state.workspaces[id],
-            let screen = Self.screen(for: id, in: state)
-        {
-            byScreen[key(screen)] = (space, screen)
-        }
-        return Array(byScreen.values)
     }
 
     /// The fill-then-spill capacity (#437) of every track-mode

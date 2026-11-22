@@ -28,11 +28,37 @@ extension TilingEngine {
     /// Much smaller than the strip this fixed, and not a
     /// licence to assume the seam is exact.
     func layoutBounds(on screen: NSScreen, for space: Space) -> CGRect {
-        settings.layoutBounds(
-            from: visibleBounds(screen),
+        let area = spaceArea(space.id)
+        return settings.layoutBounds(
+            from: visibleBounds(screen, for: space.id),
             mode: space.mode,
-            on: fingerprint(of: screen),
+            on: area?.key ?? fingerprint(of: screen),
             pocketAtRest: settings.pocketRests
         )
+    }
+
+    /// The visible frame `space` lays out in on `screen`: the
+    /// screen's own where it is not split, else its area's rect
+    /// intersected with it, so the menu bar, notch and Dock insets
+    /// land on the area that touches them (#3517 ruling 8). The
+    /// screen's size still enters through `visibleBounds` alone.
+    func visibleBounds(_ screen: NSScreen, for space: SpaceID) -> CGRect {
+        guard let area = spaceArea(space) else {
+            return visibleBounds(screen)
+        }
+        return areaFrame(area.rect, on: screen)
+    }
+
+    /// An area's rect, given in its screen's own points, as AX
+    /// coordinates clipped to the screen's visible frame — the one
+    /// clip every area reader takes (#3517): layout, the neighbour
+    /// scan, the screen hop and the arrival area.
+    func areaFrame(_ rect: CGRect, on screen: NSScreen) -> CGRect {
+        let visible = visibleBounds(screen)
+        let whole = screenFrameAX(screen)
+        let clipped = visible.intersection(
+            rect.offsetBy(dx: whole.minX, dy: whole.minY)
+        )
+        return clipped.isNull ? visible : clipped
     }
 }

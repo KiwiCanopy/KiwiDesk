@@ -56,4 +56,25 @@ extension KiwiCore {
         }
         return moveToSpace(window, shown, follow: follow)
     }
+
+    /// Files the focused window into the Space an area shows
+    /// (#3517), as `moveToScreen(_:follow:)` above.
+    private func moveToScreen(
+        _ area: PlacementID,
+        follow: Bool
+    ) -> CommandResponse {
+        guard let window = focusedWindowID else {
+            return .fail("no focused window")
+        }
+        if let refusal = spaceMoveRefusal(window) { return refusal }
+        guard screenShowsUserSpace(on: area.display) else {
+            let refusal = WindowActionRefusal.screenShowsFullScreen
+            cueWindowAction(refusal, on: window)
+            return .fail(refusal.logReason)
+        }
+        guard let shown = state.workspaces.activeSpace(on: area) else {
+            return .fail("no Space on that screen")
+        }
+        return moveToSpace(window, shown, follow: follow)
+    }
 }

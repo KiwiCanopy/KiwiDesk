@@ -5,11 +5,11 @@ import Testing
 /// so the `+Displays` split (§2.1 file ceiling) could read them
 /// cross-file — which also lets any `KiwiDeskCore` file compile
 /// a direct write. The write invariants live in the methods, not
-/// the maps: every `spaceDisplay` write must run `ensureSpace`
+/// the maps: every `spacePlacement` write must run `ensureSpace`
 /// plus the stale-`secondaryShown` filter (`assign(_:to:)`), and
 /// a stray `secondaryShown` write strands exactly the entries
 /// that filter exists to drop. This pins the maps' names to the
-/// two `WorkspaceManager*` files, so a third toucher must add
+/// three `WorkspaceManager*` files, so a third toucher must add
 /// itself here and say why.
 ///
 /// **This map is the exemption list** — the property comments in
@@ -43,13 +43,23 @@ struct WorkspaceMapSealTests {
     /// case, and a caller spelling either itself is the stranded
     /// entry `assign(_:to:)`'s filter exists to drop.
     private let allowed: [String: [String: Int]] = [
-        "spaceDisplay": [
-            "State/WorkspaceManager.swift": 8,
-            "State/WorkspaceManager+Displays.swift": 6,
+        "spacePlacement": [
+            "State/WorkspaceManager.swift": 5,
+            "State/WorkspaceManager+Displays.swift": 11,
+            "State/WorkspaceManager+Placements.swift": 6,
         ],
         "secondaryShown": [
-            "State/WorkspaceManager.swift": 7,
-            "State/WorkspaceManager+Displays.swift": 3,
+            "State/WorkspaceManager.swift": 5,
+            "State/WorkspaceManager+Displays.swift": 6,
+            "State/WorkspaceManager+Placements.swift": 2,
+        ],
+        // A placement is minted from a screen and its split (#3517):
+        // a `PlacementID(display:area: 0)` written to make a call
+        // site compile sends a split screen's Space to its first
+        // area whatever its pin says.
+        "PlacementID(": [
+            "State/WorkspaceManager+Displays.swift": 2,
+            "Profiles/KiwiCore+SpaceDisplays.swift": 1,
         ],
     ]
 

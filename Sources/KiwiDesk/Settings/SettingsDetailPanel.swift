@@ -163,8 +163,8 @@ struct SettingsDetailPanel: View {
             } else {
                 Text(
                     L(
-                        "panel.draft_clean_area",
-                        "No changes in this area — %1$d "
+                        "panel.draft_clean_section",
+                        "No changes in this section — %1$d "
                             + "elsewhere in the draft.",
                         all.count
                     )

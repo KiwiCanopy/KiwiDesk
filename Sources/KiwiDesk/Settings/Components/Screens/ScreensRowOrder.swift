@@ -6,6 +6,7 @@ enum ScreensRowOrder {
         .screens(.placementUnavailable),
         .screens(.spacePins),
         .screens(.mainSpaces),
+        .screens(.displayAreas),
     ]
 
     /// Orphaned screen pins container rows.

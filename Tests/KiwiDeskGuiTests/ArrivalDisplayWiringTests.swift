@@ -76,8 +76,12 @@ struct ArrivalDisplayWiringTests {
         // answers a stale AX frame (#3052) — a comparison spelled by
         // hand here is silently wrong on a screen at a negative y,
         // which is the topology that needs it.
-        #expect(arm.contains("TilingEngine.screen("))
-        #expect(arm.contains("containing: arrivalFrame(of: window)"))
+        // The frame is read ONCE, so the screen and the area (#3517)
+        // answer for the same reading.
+        #expect(arm.contains("let arrival = arrivalFrame(of: window)"))
+        #expect(arm.contains("TilingEngine.screen(containing: arrival)"))
+        #expect(arm.contains("areaPlacement(holding: arrival)"))
+        #expect(String(arm).occurrences(of: "arrivalFrame(of:") == 1)
     }
 
     @Test("nothing else in the file writes the seam")

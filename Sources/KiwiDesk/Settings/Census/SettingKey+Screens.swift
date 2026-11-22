@@ -2,6 +2,8 @@
 
 enum ScreensKey: String, CaseIterable, Hashable {
     case spacePins = "config.spacePins[space]"
+    /// A screen's split into areas (#3517), stored per profile.
+    case displayAreas = "settings.displayAreas[screen]"
     case mainSpaces = "config.mainSpaces"
     case orphanPinClear = "(action) monitors.orphan_pin.clear"
     case fingerprints = "(readonly) monitors.fingerprints"
@@ -11,7 +13,7 @@ enum ScreensKey: String, CaseIterable, Hashable {
 extension ScreensKey {
     var placement: SettingPlacement {
         switch self {
-        case .spacePins, .mainSpaces:
+        case .spacePins, .mainSpaces, .displayAreas:
             // Ungated: picture availability is governed by the banner gate
             // (#678).
             return .row(.screens, .spacePlacement, .atRest)
@@ -38,7 +40,7 @@ extension ScreensKey {
 extension ScreensKey {
     var text: SettingRowText {
         switch self {
-        case .spacePins:
+        case .spacePins, .displayAreas:
             return .dynamic
         case .mainSpaces:
             return .text("monitor_card.follows_main")

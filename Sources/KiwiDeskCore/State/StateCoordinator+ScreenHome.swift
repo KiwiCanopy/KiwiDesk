@@ -16,16 +16,30 @@ extension StateCoordinator {
     ///
     /// The float arm reads the FLAG by ruling (#1362, the
     /// `EffectiveFloat` roster carries the argument).
+    ///
+    /// On a split screen the landing is an AREA (#3517): `area`, the
+    /// one the frame sits in, is the destination's, and a window
+    /// landing in another area of its own screen is re-homed as one
+    /// landing on another screen.
     func screenHome(
         of window: ManagedWindow,
         leaving home: SpaceID?,
-        landingOn display: DisplayID?
+        landingOn display: DisplayID?,
+        in area: PlacementID?
     ) -> SpaceID? {
         guard !window.isFloating,
             !window.isSticky,
             let home,
-            let display,
-            let current = workspaces.display(of: home),
+            let display
+        else { return nil }
+        if let area, area.display == display {
+            guard workspaces.placement(of: home) != area,
+                let destination = workspaces.activeSpace(on: area),
+                destination != home
+            else { return nil }
+            return destination
+        }
+        guard let current = workspaces.display(of: home),
             current != display,
             let destination = workspaces.activeSpace(on: display),
             destination != home

@@ -53,15 +53,13 @@ extension KiwiCore {
             return .fail("expected space id")
         }
         guard
-            let display = resolveDisplayArg(
-                args.count > 1 ? args[1] : nil
-            )
+            let area = resolveAreaArg(args.count > 1 ? args[1] : nil)
         else {
             return .fail("expected display index or name")
         }
         let space = SpaceID(raw)
         state.workspaces.ensureSpace(space)
-        state.workspaces.assign(space, to: display)
+        state.workspaces.assign(space, to: area)
         // The one relocation that bypasses the resolve, so it
         // heals the screen it may have emptied itself (#1175).
         healEmptyDisplays(mainID: PositionalDisplays.liveMainID)
@@ -94,18 +92,14 @@ extension KiwiCore {
             return .fail("expected space id")
         }
         guard
-            let display = resolveDisplayArg(
-                args.count > 1 ? args[1] : nil
-            ),
-            let monitor = state.workspaces.allDisplays.first(where: {
-                $0.id == display
-            })
+            let area = resolveAreaArg(args.count > 1 ? args[1] : nil),
+            let key = state.workspaces[placement: area]?.key
         else {
             return .fail("expected display index or name")
         }
         let space = SpaceID(raw)
         state.workspaces.ensureSpace(space)
-        spacePins[space] = monitor.fingerprint
+        spacePins[space] = key.description
         // A pin and the Main role are mutually exclusive
         // placements (`SpacePlacement` precedence); a fresh pin
         // wins, so drop any stale Main designation.

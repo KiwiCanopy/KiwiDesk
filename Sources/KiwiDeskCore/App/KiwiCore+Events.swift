@@ -31,9 +31,7 @@ extension KiwiCore {
         // window creation consumes it, so skip the per-space context
         // builds on every other (higher-frequency) event.
         if case .windowCreated(let window) = event {
-            state.trackCapacities = tiler.trackCapacities(
-                state: state
-            )
+            state.trackCapacities = tiler.trackCapacities(state: state)
             // The screen the arriving window physically sits on
             // (#1010, #3052), mirrored in like the capacities
             // above: the fold prefers the space THAT display
@@ -42,10 +40,10 @@ extension KiwiCore {
             // needs `NSScreen` plus the AX/AppKit y-flip —
             // neither of which the pure state core may read
             // (§2.6). `screen(containing:)` owns the flip.
+            let arrival = arrivalFrame(of: window)
             state.arrivalDisplay =
-                TilingEngine.screen(
-                    containing: arrivalFrame(of: window)
-                )?.kiwiDisplayID
+                TilingEngine.screen(containing: arrival)?.kiwiDisplayID
+            state.arrivalPlacement = areaPlacement(holding: arrival)
             // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()
             // How it may take the focus (#3122, #3152), likewise.

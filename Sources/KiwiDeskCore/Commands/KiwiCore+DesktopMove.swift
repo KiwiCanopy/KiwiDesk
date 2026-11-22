@@ -137,7 +137,9 @@ extension KiwiCore {
                         state.workspaces.space(of: window)
                     {
                         if !held
-                            || !shownSpaceIDs().contains(destination)
+                            || !state.workspaces.visibleSpaces.contains(
+                                destination
+                            )
                         {
                             followSwitch(
                                 to: destination,
@@ -251,7 +253,8 @@ extension KiwiCore {
             let destination = state.screenHome(
                 of: managed,
                 leaving: from,
-                landingOn: display
+                landingOn: display,
+                in: state.workspaces.leadPlacement(of: display)
             )
         else { return }
         onLog(

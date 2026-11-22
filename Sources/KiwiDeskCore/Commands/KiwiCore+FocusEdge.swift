@@ -158,21 +158,21 @@ extension KiwiCore {
         band: CGRect,
         leaving: WindowID?
     ) -> (space: SpaceID, window: WindowID)? {
-        guard let here = state.workspaces.display(of: origin)
+        guard let here = state.workspaces.placement(of: origin)
         else { return nil }
-        let screens = tiler.displayFrames()
+        let screens = placementFrames()
         let order = ScreenHop.hopOrder(
             from: here,
             in: direction,
             band: band,
             among: screens
         )
-        for display in order {
+        for area in order {
             guard
-                let shown = state.workspaces.activeSpace(on: display),
+                let shown = state.workspaces.activeSpace(on: area),
                 shown != origin,
                 let space = state.workspaces[shown],
-                let bounds = screens.first(where: { $0.id == display })?
+                let bounds = screens.first(where: { $0.id == area })?
                     .frame,
                 let landing = landing(
                     in: space,

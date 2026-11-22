@@ -6,16 +6,26 @@ public struct WorkspaceManager: Sendable {
     /// Creation order; `WorkspaceMapSealTests` pins cross-file internal
     /// access.
     var order: [SpaceID] = []
+    /// The physical screens: the one list every physical read —
+    /// NSScreen, WindowServer, parking, numbering — takes (#3517
+    /// ruling 10).
     var displays: [DisplayID: Display] = [:]
-    var spaceDisplay: [SpaceID: DisplayID] = [:]
+    /// The placement targets derived from `displays` and
+    /// `areaSplits`: one per area, one per unsplit screen. Written
+    /// by `rebuildPlacements` alone.
+    var placements: [PlacementID: Placement] = [:]
+    /// Each split screen's areas, by fingerprint; a screen absent
+    /// here is one area.
+    var areaSplits: [String: ScreenSplit] = [:]
+    var spacePlacement: [SpaceID: PlacementID] = [:]
     /// Space shown on currently focused display.
     public private(set) var activeSpace: SpaceID?
 
-    /// Spaces shown on non-focused displays (#multi-monitor). The
-    /// invariant: `display(of: activeSpace)` is never a key here;
-    /// a display absent from the map falls back to its
+    /// Spaces shown on non-focused placements (#multi-monitor). The
+    /// invariant: `placement(of: activeSpace)` is never a key here;
+    /// a placement absent from the map falls back to its
     /// first-assigned space.
-    var secondaryShown: [DisplayID: SpaceID] = [:]
+    var secondaryShown: [PlacementID: SpaceID] = [:]
 
     /// Window holding system-wide focus (#414).
     public private(set) var lastFocused: WindowID?
@@ -101,16 +111,16 @@ public struct WorkspaceManager: Sendable {
         order = front + rest
     }
 
-    /// Activates space on its display and shifts display focus.
+    /// Activates space on its placement and shifts focus there.
     public mutating func activate(_ id: SpaceID) {
         ensureSpace(id)
-        let newDisplay = spaceDisplay[id]
-        let oldDisplay = activeSpace.flatMap { spaceDisplay[$0] }
-        if let newDisplay, newDisplay != oldDisplay {
-            if let oldDisplay, let old = activeSpace {
-                secondaryShown[oldDisplay] = old
+        let newPlacement = spacePlacement[id]
+        let oldPlacement = activeSpace.flatMap { spacePlacement[$0] }
+        if let newPlacement, newPlacement != oldPlacement {
+            if let oldPlacement, let old = activeSpace {
+                secondaryShown[oldPlacement] = old
             }
-            secondaryShown[newDisplay] = nil
+            secondaryShown[newPlacement] = nil
         }
         activeSpace = id
     }
@@ -127,50 +137,23 @@ public struct WorkspaceManager: Sendable {
     /// the display holds the ACTIVE space the switch moves that
     /// instead, so the map's own invariant (the active display is
     /// never a key here) survives a swipe on the focused screen.
+    /// On a split screen it shows `id` in its own area, through
+    /// `show(_:on: PlacementID)` (#3517).
     public mutating func show(_ id: SpaceID, on display: DisplayID) {
-        ensureSpace(id)
-        guard spaceDisplay[id] == display else { return }
-        if activeSpace.flatMap({ spaceDisplay[$0] }) == display {
-            activate(id)
+        guard let placement = spacePlacement[id],
+            placement.display == display
+        else {
+            ensureSpace(id)
             return
         }
-        secondaryShown[display] = id
-    }
-
-    /// Active space shown on specified display.
-    public func activeSpace(on display: DisplayID) -> SpaceID? {
-        if let active = activeSpace, spaceDisplay[active] == display {
-            return active
-        }
-        // Self-healing: a pick counts only while that space still
-        // lives on THIS display — a stale entry would lay one
-        // space on two screens, so it is ignored rather than
-        // honored.
-        if let shown = secondaryShown[display],
-            spaceDisplay[shown] == display
-        {
-            return shown
-        }
-        return spaces(on: display).first
-    }
-
-    /// All spaces currently visible across displays.
-    public var visibleSpaces: Set<SpaceID> {
-        var result: Set<SpaceID> = []
-        if let active = activeSpace { result.insert(active) }
-        for display in displays.keys {
-            if let shown = activeSpace(on: display) {
-                result.insert(shown)
-            }
-        }
-        return result
+        show(id, on: placement)
     }
 
     /// Removes space and clears display assignments.
     public mutating func removeSpace(_ id: SpaceID) {
         spaces[id] = nil
         order.removeAll { $0 == id }
-        spaceDisplay[id] = nil
+        spacePlacement[id] = nil
         secondaryShown = secondaryShown.filter { $0.value != id }
         if activeSpace == id {
             activeSpace = order.first

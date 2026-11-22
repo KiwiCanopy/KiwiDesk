@@ -165,6 +165,29 @@ editing here:
   true the day it is written and silently false after (#614);
   read `Models/SpaceModel.swift`'s stored properties, the only
   statement of it that cannot disagree with itself.
+- **A Space lays out in a placement, an area of a physical screen
+  (#3517).** Take a physical read — NSScreen, WindowServer,
+  parking, positional numbering, Desktop binding counts — from
+  `WorkspaceManager.displays`, never from `placements`; key a
+  Space, its shown Space and a per-area store by the placement,
+  and write `placements` only through `rebuildPlacements`, which
+  derives them from `displays` and the stored splits (an unsplit
+  screen is one area 0 keyed by its bare fingerprint). Mint a
+  `PlacementID` only where a screen and its split are in hand
+  (`WorkspaceMapSealTests` counts the constructions), never
+  `area: 0` to make a call site compile, which sends a split
+  screen's Space to its first area whatever its pin says; the one
+  `area: 0` fallback a door may take is for a screen with no
+  placement record yet (a fixture that never upserted it), after
+  `leadPlacement(of:)` answered nil. Store a reference as a
+  `ScreenAreaKey`, never a `PlacementID`, and resolve it through
+  `WorkspaceManager.placement(keyed:on:)`, an area gone falling
+  back to area 0 (`AreaPinResolveTests`, `AreaArgumentTests`,
+  `PlacementIdentityTests`). Stored splits reach the placement
+  list through `syncAreaSplits` alone, which every write of
+  `display_areas` runs through `TilingEngine.onAreaSplits`, never
+  a call beside a settings install, and which feeds none while
+  `honoursAreaSplits` is lowered (`AreaSplitSyncTests`).
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through

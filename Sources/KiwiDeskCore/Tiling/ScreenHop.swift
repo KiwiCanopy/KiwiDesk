@@ -12,12 +12,12 @@ public enum ScreenHop {
 
     /// The screens past `current` in `direction`, overlapping
     /// `band`, nearest first.
-    public static func ahead(
+    public static func ahead<ID>(
         of current: CGRect,
         in direction: Direction,
         band: CGRect,
-        among screens: [Screen]
-    ) -> [DisplayID] {
+        among screens: [(id: ID, frame: CGRect)]
+    ) -> [ID] {
         screens.filter {
             overlaps($0.frame, band, direction)
                 && gap(from: current, to: $0.frame, direction) >= -touch
@@ -33,12 +33,12 @@ public enum ScreenHop {
     /// the screens ahead, nearest first, then — wrapping around —
     /// those on the opposite side, farthest first. `current` is
     /// never listed; it is the wrap's last resort.
-    public static func hopOrder(
-        from current: DisplayID,
+    public static func hopOrder<ID: Equatable>(
+        from current: ID,
         in direction: Direction,
         band: CGRect,
-        among screens: [Screen]
-    ) -> [DisplayID] {
+        among screens: [(id: ID, frame: CGRect)]
+    ) -> [ID] {
         guard let here = screens.first(where: { $0.id == current })
         else { return [] }
         let others = screens.filter { $0.id != current }

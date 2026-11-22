@@ -58,6 +58,38 @@ extension KiwiCore {
                     + "seeded space \(seed.raw)"
             )
         }
+        for (position, display) in ordered.enumerated() {
+            healEmptyAreas(of: display, lead: leads[position].first ?? .bsp)
+        }
+    }
+
+    /// An area is never left with no Space either (#3517): each
+    /// empty area of a split screen is seeded one, pinned to the
+    /// area's key and filed in the ledger under it, reused — its
+    /// lead re-asserted — and stood down for a twin exactly as a
+    /// screen's seed is.
+    private func healEmptyAreas(of display: Display, lead: LayoutMode) {
+        let areas = state.workspaces.placements(of: display.id)
+        guard areas.count > 1 else { return }
+        for area in areas where state.workspaces.spaces(on: area.id).isEmpty {
+            let key = area.key.description
+            let seed: SpaceID
+            switch earlierSeed(for: key) {
+            case .heldByTwin:
+                continue
+            case .reusable(let earlier):
+                seed = earlier
+                setSpaceMode(seed, lead, keepingSizes: false)
+            case .absent:
+                seed = mintedSpaceNumber()
+                state.workspaces.ensureSpace(seed, mode: lead)
+                healedSpaces[key] = seed
+            }
+            spacePins[seed] = key
+            mainSpaces.remove(seed)
+            state.workspaces.assign(seed, to: area.id)
+            onLog("heal: area \(key) had no space — seeded \(seed.raw)")
+        }
     }
 
     /// Retires the ledger entries a declaration has adopted
@@ -75,7 +107,9 @@ extension KiwiCore {
     /// in-between report seeds one for a screen that never
     /// settles, and an apply that keeps the profile prunes nothing.
     func retireOrphanedHealSeeds() {
-        let live = Set(liveFingerprints)
+        let live = Set(liveFingerprints).union(
+            state.workspaces.allPlacements.map(\.key.description)
+        )
         for (fingerprint, seed) in healedSpaces
         where !live.contains(fingerprint) {
             guard state.workspaces[seed]?.windows.isEmpty ?? true,
@@ -114,10 +148,18 @@ extension KiwiCore {
         case nil:
             return .reusable(earlier)
         case fingerprint?:
-            let host = state.workspaces.display(of: earlier)
-            let onTwin = state.workspaces.allDisplays.contains {
-                $0.id == host && $0.fingerprint == fingerprint
-            }
+            // `fingerprint` is a screen's or an area's key (#3517):
+            // the seed is on a twin when its own placement answers
+            // to the same key on another screen.
+            let ws = state.workspaces
+            let host = ws.display(of: earlier)
+            let onTwin =
+                ws.allDisplays.contains {
+                    $0.id == host && $0.fingerprint == fingerprint
+                }
+                || ws.placement(of: earlier).flatMap {
+                    ws[placement: $0]?.key.description
+                } == fingerprint
             return onTwin ? .heldByTwin : .absent
         default:
             return .absent
