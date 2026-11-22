@@ -165,6 +165,21 @@ editing here:
   true the day it is written and silently false after (#614);
   read `Models/SpaceModel.swift`'s stored properties, the only
   statement of it that cannot disagree with itself.
+- **A Space lays out in a placement, an area of a physical screen
+  (#3517).** `WorkspaceManager.displays` stays the one list every
+  physical read takes — NSScreen, WindowServer, parking,
+  positional numbering, Desktop binding counts — and
+  `placements`, derived from it and the stored splits by the one
+  `rebuildPlacements`, is what a Space, its shown Space and every
+  per-area store key by; an unsplit screen is one area 0 keyed by
+  its bare fingerprint. Mint a `PlacementID` only where a screen
+  and its split are in hand (`WorkspaceMapSealTests` counts the
+  constructions), never `area: 0` to make a call site compile,
+  which sends a split screen's Space to its first area whatever
+  its pin says. A stored reference is a `ScreenAreaKey`, never a
+  `PlacementID`, and resolves through `areaPlacement(of:on:)`, an
+  area gone falling back to area 0 (`AreaPinResolveTests`,
+  `PlacementIdentityTests`).
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through

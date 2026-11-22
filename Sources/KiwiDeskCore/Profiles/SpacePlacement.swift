@@ -56,8 +56,11 @@ public enum SpacePlacement {
             assignment: assignment
         )
         guard let pin = pins[space] else { return unpinned }
+        // A pin may name an area (#3517): its screen is the key's
+        // fingerprint; the area is the caller's to place in.
+        let screen = ScreenAreaKey(parsing: pin).fingerprint
         if let pinned = displays.first(where: {
-            $0.fingerprint == pin
+            $0.fingerprint == screen
         }) {
             return .pinned(pinned)
         }

@@ -35,7 +35,10 @@ extension KiwiCore {
                     assignment: assignment
                 )
             else { continue }
-            state.workspaces.assign(space.id, to: display)
+            state.workspaces.assign(
+                space.id,
+                to: areaPlacement(of: space.id, on: display)
+            )
         }
         // A display the resolve left with no space is healed
         // HERE (#1175), before relocation is judged: a reused
@@ -84,7 +87,10 @@ extension KiwiCore {
                     assignment: assignment
                 )
             else { continue }
-            state.workspaces.assign(space, to: display)
+            state.workspaces.assign(
+                space,
+                to: areaPlacement(of: space, on: display)
+            )
         }
         return true
     }
@@ -116,6 +122,34 @@ extension KiwiCore {
             displays: displays,
             mainID: mainID
         )
+    }
+
+    /// The area of `display` that `space` lays out in (#3517): the
+    /// area its pin names, else the area it already holds on that
+    /// screen, else the screen's leading area. A pin naming an area
+    /// the split no longer has falls back to area 0 (ruling 22).
+    func areaPlacement(
+        of space: SpaceID,
+        on display: DisplayID
+    ) -> PlacementID {
+        let areas = state.workspaces.placements(of: display)
+        if let pin = spacePins[space] {
+            let key = ScreenAreaKey(parsing: pin)
+            if let named = areas.first(where: { $0.key == key }) {
+                return named.id
+            }
+            if let zero = areas.first(where: { $0.area.id == 0 }) {
+                return zero.id
+            }
+        }
+        if let held = state.workspaces.placement(of: space),
+            held.display == display,
+            areas.contains(where: { $0.id == held })
+        {
+            return held
+        }
+        return areas.first?.id
+            ?? PlacementID(display: display, area: 0)
     }
 
     /// The one copy of the `SpacePlacement` call every placement

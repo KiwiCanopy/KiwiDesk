@@ -511,6 +511,7 @@
   "diff.label.placement_override": "落位覆盖",
   "diff.label.profile_binding": "描述文件绑定",
   "diff.label.resize_step": "调整大小步长",
+  "diff.label.screen_areas": "显示器区域",
   "diff.label.space_icon": "空间图标",
   "diff.label.space_list": "空间",
   "diff.label.space_mode": "布局模式",

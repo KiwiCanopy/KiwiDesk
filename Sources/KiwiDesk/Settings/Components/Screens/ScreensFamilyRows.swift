@@ -117,7 +117,7 @@ struct ScreensFamilyRows {
             return orphans.map {
                 ScreensRowInstance.orphan($0.space.raw)
             }
-        case .fingerprints:
+        case .fingerprints, .displayAreas:
             return orderedDisplays.map {
                 ScreensRowInstance.display($0.fingerprint)
             }

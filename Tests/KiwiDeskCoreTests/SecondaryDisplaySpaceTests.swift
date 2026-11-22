@@ -161,7 +161,9 @@ struct SecondaryDisplaySpaceTests {
         )
         #expect(core.state.workspaces.activeSpace == SpaceID(4))
         #expect(
-            core.state.workspaces.secondaryShown[DisplayID(2)]
+            core.state.workspaces.secondaryShown[
+                PlacementID(display: DisplayID(2), area: 0)
+            ]
                 == nil
         )
     }
@@ -186,7 +188,9 @@ struct SecondaryDisplaySpaceTests {
         // Space 1 lays out on display A.
         core.state.workspaces.show(SpaceID(1), on: DisplayID(2))
         #expect(
-            core.state.workspaces.secondaryShown[DisplayID(2)]
+            core.state.workspaces.secondaryShown[
+                PlacementID(display: DisplayID(2), area: 0)
+            ]
                 == SpaceID(3)
         )
     }

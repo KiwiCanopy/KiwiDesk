@@ -1,50 +1,79 @@
+import CoreGraphics
 import Foundation
 
 /// Display tracking and space assignment for WorkspaceManager.
 extension WorkspaceManager {
+    /// The physical screens (#3517 ruling 10).
     public var allDisplays: [Display] {
         Array(displays.values)
     }
 
     public mutating func upsertDisplay(_ display: Display) {
         displays[display.id] = display
+        rebuildPlacements(of: display.id)
     }
 
     @discardableResult
     public mutating func removeDisplay(
         _ id: DisplayID
     ) -> Display? {
-        for (space, display) in spaceDisplay where display == id {
-            spaceDisplay[space] = nil
+        for (space, placement) in spacePlacement
+        where placement.display == id {
+            spacePlacement[space] = nil
         }
-        secondaryShown[id] = nil
+        secondaryShown = secondaryShown.filter { $0.key.display != id }
+        placements = placements.filter { $0.key.display != id }
         return displays.removeValue(forKey: id)
     }
 
+    /// Places `space` on `display`'s leading area — the whole
+    /// screen when it is not split.
     public mutating func assign(
         _ space: SpaceID,
         to display: DisplayID
     ) {
+        assign(
+            space,
+            to: placements(of: display).first?.id
+                ?? PlacementID(display: display, area: 0)
+        )
+    }
+
+    public mutating func assign(
+        _ space: SpaceID,
+        to placement: PlacementID
+    ) {
         // Placing a Space is not asking for it: only a missing one
         // enters the `referenced` ledger (#1526, #1509).
         if self[space] == nil { ensureSpace(space) }
-        spaceDisplay[space] = display
+        spacePlacement[space] = placement
         // Reassigning a space can strand a `secondaryShown` entry
-        // that still points at it on its OLD display; drop any
-        // entry no longer matching its display so stale picks
+        // that still points at it on its OLD placement; drop any
+        // entry no longer matching its placement so stale picks
         // never accumulate (the read path also ignores them).
-        secondaryShown = secondaryShown.filter { display, space in
-            spaceDisplay[space] == display
+        secondaryShown = secondaryShown.filter { placement, space in
+            spacePlacement[space] == placement
         }
     }
 
+    /// The physical screen `space` lays out on.
     public func display(of space: SpaceID) -> DisplayID? {
-        spaceDisplay[space]
+        spacePlacement[space]?.display
     }
 
-    /// Spaces assigned to one display, in creation order.
+    /// The area `space` lays out in.
+    public func placement(of space: SpaceID) -> PlacementID? {
+        spacePlacement[space]
+    }
+
+    /// Spaces on any area of one physical screen, in creation order.
     public func spaces(on display: DisplayID) -> [SpaceID] {
-        order.filter { spaceDisplay[$0] == display }
+        order.filter { spacePlacement[$0]?.display == display }
+    }
+
+    /// Spaces placed in one area, in creation order.
+    public func spaces(on placement: PlacementID) -> [SpaceID] {
+        order.filter { spacePlacement[$0] == placement }
     }
 
     /// The space a display currently shows. Alias of
@@ -52,5 +81,74 @@ extension WorkspaceManager {
     /// that predate the per-display active model.
     public func currentSpace(on display: DisplayID) -> SpaceID? {
         activeSpace(on: display)
+    }
+
+    /// Every placement target, screens in id order and each
+    /// screen's areas in reading order.
+    public var allPlacements: [Placement] {
+        displays.keys.sorted { $0.raw < $1.raw }
+            .flatMap { placements(of: $0) }
+    }
+
+    /// One physical screen's areas, in reading order.
+    public func placements(of display: DisplayID) -> [Placement] {
+        placements.values.filter { $0.display == display }
+            .sorted { ($0.area.y, $0.area.x) < ($1.area.y, $1.area.x) }
+    }
+
+    public subscript(placement id: PlacementID) -> Placement? {
+        placements[id]
+    }
+
+    /// Replaces every screen's split and rebuilds the placements.
+    public mutating func setAreaSplits(_ splits: [String: ScreenSplit]) {
+        guard splits != areaSplits else { return }
+        areaSplits = splits
+        for id in displays.keys { rebuildPlacements(of: id) }
+    }
+
+    /// The one writer of `placements` for `display`: its split when
+    /// one is stored and tiles its frame, else one whole area. A
+    /// space whose area is gone falls back to area 0 (ruling 22).
+    mutating func rebuildPlacements(of id: DisplayID) {
+        placements = placements.filter { $0.key.display != id }
+        guard let display = displays[id] else { return }
+        let width = Int(display.frame.width)
+        let height = Int(display.frame.height)
+        var areas = [
+            ScreenArea(id: 0, x: 0, y: 0, w: width, h: height)
+        ]
+        if let split = areaSplits[display.fingerprint],
+            ScreenArea.problem(
+                with: split.areas,
+                width: width,
+                height: height
+            ) == nil
+        {
+            areas = split.areas
+        }
+        for area in areas {
+            let pid = PlacementID(display: id, area: area.id)
+            placements[pid] = Placement(
+                id: pid,
+                area: area,
+                key: ScreenAreaKey(
+                    fingerprint: display.fingerprint,
+                    areaID: area.id
+                ),
+                frame: Placement.frame(of: area, on: display.frame)
+            )
+        }
+        let fallback =
+            placements(of: id).first { $0.area.id == 0 }?.id
+            ?? placements(of: id).first?.id
+        for (space, placement) in spacePlacement
+        where placement.display == id && placements[placement] == nil {
+            spacePlacement[space] = fallback
+        }
+        secondaryShown = secondaryShown.filter { placement, space in
+            placements[placement] != nil
+                && spacePlacement[space] == placement
+        }
     }
 }

@@ -79,8 +79,12 @@ extension SnapshotStoreCensusTests {
             (.behind, "declared by the config at load"),
         "state.workspaces.referenced":
             (.behind, "derived by the config load"),
-        "state.workspaces.spaceDisplay":
+        "state.workspaces.spacePlacement":
             (.behind, "resolved from the screens at load"),
+        "state.workspaces.placements":
+            (.behind, "derived from the screens and their split (#3517)"),
+        "state.workspaces.areaSplits":
+            (.behind, "copied from the profile's display_areas (#3517)"),
         "state.workspaces.secondaryShown":
             (
                 .behind,

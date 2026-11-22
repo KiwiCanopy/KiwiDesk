@@ -54,6 +54,10 @@ enum SettingsRevertRegister {
         .appRules(.ignoreRules): .list(\.ignoreRules),
         .screens(.spacePins): .entry(\.spacePins, key: { SpaceID($0) }),
         .screens(.mainSpaces): .setMember(\.mainSpaces) { SpaceID($0) },
+        .screens(.displayAreas): .entry(
+            \.settings.displayAreas,
+            key: { $0 }
+        ),
         .profiles(.profileBindings): .entry(
             \.profileBindings,
             key: DesktopKey.init(stored:)

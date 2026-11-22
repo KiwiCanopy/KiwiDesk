@@ -511,6 +511,7 @@
   "diff.label.placement_override": "Placement override",
   "diff.label.profile_binding": "Profile binding",
   "diff.label.resize_step": "Resize step",
+  "diff.label.screen_areas": "Screen areas",
   "diff.label.space_icon": "Space icon",
   "diff.label.space_list": "Spaces",
   "diff.label.space_mode": "Layout mode",
