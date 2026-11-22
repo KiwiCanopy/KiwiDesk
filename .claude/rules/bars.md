@@ -165,7 +165,14 @@ twice, was a question the user answered twice. The argument is
   (#1948) resolves before this fold, through the one
   `TilingSettings.onScreen(_:)`, never beside it** — a second
   read beside it lets one screen's drawn and reserved strips
-  disagree. The reservation (`shelfEdges(in:on:)`), each
+  disagree. **A per-area visibility (#3517 ruling 30) resolves in
+  the same step**: `space_bar.visibility_override` and
+  `app_bar.visibility_override`, sparse and keyed by
+  `ScreenAreaKey`, replace the bar's stored visibility there — the
+  App Bar's in every layout that carries one, never giving a
+  layout one it lacks — so an area whose bars are `hidden` draws
+  and reserves nothing (`AreaBarVisibilityTests`). The
+  reservation (`shelfEdges(in:on:)`), each
   display's live plan in `updateBars()` and every style a bar
   draws read the edges it resolved, so the views read
   `style.edge` and never a screen (`ScreenEdgeTests`,
@@ -204,7 +211,8 @@ twice, was a question the user answered twice. The argument is
   through `shelfReservation(in:on:pocketAtRest:)`, and the skip
   comparison covers every axis that input is keyed by** —
   `KiwiCore.shelfReservations` compares every mode on every
-  connected screen, or a bar write skips a pass the bounds owed
+  connected screen and every area of a split one, or a bar write
+  skips a pass the bounds owed
   (`ScreenEdgeCoreTests` ▸ `screenWriteOwesThePass`).
   `BarReserveTests` holds the fold, `BarReserveCoreTests` the
   float region and the skipped pass, `BarReserveVerbTests` the
@@ -802,17 +810,42 @@ twice, was a question the user answered twice. The argument is
   `ShelfBoxedDividerTests`, `ShelfStripPreviewTests` ▸
   `boxedDrawsNoDivider`).
 
-## One shelf panel per display and edge draws the plate; the bars draw sections
+## One shelf panel per area and edge draws the plate; the bars draw sections
 
 Two panels each painting a plate put two fills and a seam on one
 strip, and a plate a bar drew for itself could not know where the
 other section ended. So the surface is the shelf's and the bars
-render content into it (#1517). Obligations:
+render content into it (#1517). A screen split into areas (#3517)
+shows one Space per area, so a bar per screen would show several
+shown Spaces at once and an App Bar could follow only one of them:
+the unit a shelf is built for is the AREA, an unsplit screen being
+its one area (#3517 ruling 30). What a shelf reads of the screen
+stays physical. Obligations:
 
+- **Build each area's shelves from its placement, and every
+  screen read from the physical screen.** `updateBars()` walks
+  `WorkspaceManager.placements(of:)` for each display, never a
+  display alone: the bars a placement draws are the Space
+  `activeSpace(on:)` answers for that `PlacementID`, its
+  settings `shelfSettings(on:)` resolved for its `ScreenAreaKey`
+  (edge and visibility per area), its plans measured on its area's
+  frame — the screen's visible frame intersected with the area's
+  rect, so the menu bar, notch and Dock land on the area touching
+  them (ruling 8), and a stacked split's lower area puts a top
+  bar mid-screen, on its own top edge. The `NSScreen`, the
+  visible frame, the full-screen and presentation stand-down and
+  parking stay per physical screen (rulings 6, 10). A push opens a
+  hiding bar only on a free edge: an area's inner edge is a
+  crossing, judged by `HidingShelves.continues` handed every other
+  area beside the physical screens. The Pocket rests in each
+  screen's lead area alone, and the reservation reserves its strip
+  there alone (`AreaShelfDriverTests`).
 - **The panel, the ONE plate and the section divider are
-  `ShelfOverlay`'s, one per display and edge — one while the bars
+  `ShelfOverlay`'s, one per area and edge — one while the bars
   share an edge, two while they are split (#1731), keyed by
-  `ShelfManager.Key` and retired when an edge empties; a bar
+  `ShelfManager.Key` (a `PlacementID` and an edge) and retired
+  when an edge empties; each bar manager keys its overlays by the
+  same `PlacementID`; a bar
   overlay renders its section into its `root` and paints no
   plate.** `ShelfSplitDriverTests` holds the two shelves and the
   re-fuse. A shelf carries the sections its plan placed on it
@@ -1685,7 +1718,10 @@ reading a bar still makes for itself:
   BUILT for, chrome coverage. It is a bare alias of
   `activeSpace(on:)`, so a new read states which of the two
   questions it means in a word beside the call — they are one
-  token apart and read identically at a glance.
+  token apart and read identically at a glance. A bar answers it
+  for its AREA (#3517): its builder takes the `PlacementID` and
+  asks `activeSpace(on:)` and `spaces(on:)` of that, never of the
+  display, which on a split screen names one area for all.
 - `SpaceBarStickyScreenTests` pins the two-screen half from the
   driver: the global-sticky arm on both sides of a switch, the
   screen-sticky arm that refuses the over-broad "prune every sticky off an unfocused
