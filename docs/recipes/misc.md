@@ -31,9 +31,8 @@ Query state on demand:
 ```
 
 :::unreleased
-Each Space in `get_state` names its screen's `list_monitors` id
-in `display`. [Commands](../cli.md#commands) has a `jq` filter
-that groups the Spaces by screen.
+[Commands](../cli.md#commands) has a `jq` filter that groups
+the Spaces by screen.
 :::
 
 The event stream is useful for durable external daemons, shell

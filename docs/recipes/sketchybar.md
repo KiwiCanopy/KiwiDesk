@@ -464,8 +464,8 @@ With more than one screen, the widget above brightens only
 Each `get_state` Space also reports `shown` and `display`
 ([get_state](../lua-reference.md#get_state)), so the widget can
 brighten every Space on show and draw each Space on its own
-screen's bar, empty Spaces included. Three changes to
-`update_spaces()` do it.
+screen's bar, empty Spaces included. These changes to the
+widget do it.
 
 First, read the two fields in the jq filter, ahead of the window
 list, which stays last:
@@ -495,8 +495,9 @@ Second, parse them into each Space:
 Third, map KiwiDesk's screen ids to SketchyBar's. `display` is
 the screen's `list_monitors` id, the same number SketchyBar
 reports as `DirectDisplayID`, while an item's `display` property
-takes SketchyBar's `arrangement-id`. Build the map on every
-update, since a screen's id changes when it reconnects:
+takes SketchyBar's `arrangement-id`. Add this function above
+`update_spaces()`, and build the map on every update, since a
+screen's id changes when it reconnects:
 
 ```lua
 local function arrangement_ids()
@@ -538,9 +539,8 @@ on show and place the Space and its window slots on its screen:
             -- window keeps is_focused)
 ```
 
-The `monitor_change` hook in the event list above redraws the
-bar when a screen connects or disconnects. Moving a Space to
-another screen sends `space_change`, which redraws it too.
+Moving a Space to another screen sends `space_change`, which
+redraws the bar.
 :::
 
 ### Cold-start race condition
