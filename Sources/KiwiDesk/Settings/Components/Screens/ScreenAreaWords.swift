@@ -46,8 +46,7 @@ extension SettingsModel {
     func areaSplit(of display: Display) -> ScreenSplit? {
         ScreenSplit.effective(
             config.settings.displayAreas[display.fingerprint],
-            width: Int(display.frame.width),
-            height: Int(display.frame.height)
+            for: display
         )
     }
 

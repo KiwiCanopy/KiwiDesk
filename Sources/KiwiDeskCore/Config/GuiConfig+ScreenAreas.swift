@@ -52,6 +52,25 @@ extension GuiConfig {
             spacePins[space] = remap.rewrite(pin)
         }
         settings.apply(remap)
+        look?.apply(remap)
+    }
+}
+
+extension LookBody {
+    /// The shared look's half: a per-screen styling value (the bars'
+    /// and the pocket's `edge_override`) is a JSON object keyed by
+    /// screen, its vanished entry moved as `ScreenEdged.moveScreen`
+    /// moves the settings' own.
+    public mutating func apply(_ remap: ScreenAreaRemap) {
+        let old = remap.vanished.description
+        let new = remap.survivor.description
+        for (path, value) in style {
+            guard case .object(var entries) = value,
+                let moved = entries.removeValue(forKey: old)
+            else { continue }
+            if entries[new] == nil { entries[new] = moved }
+            style[path] = .object(entries)
+        }
     }
 }
 

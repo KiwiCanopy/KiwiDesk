@@ -21,6 +21,18 @@ extension ScreenSplit {
         return stored
     }
 
+    /// `effective(_:width:height:)` on `display`'s own frame.
+    public static func effective(
+        _ stored: ScreenSplit?,
+        for display: Display
+    ) -> ScreenSplit? {
+        effective(
+            stored,
+            width: Int(display.frame.width),
+            height: Int(display.frame.height)
+        )
+    }
+
     /// The area a stored key lands in on this split: its own while
     /// the split holds it, else area 0 (ruling 22's fallback).
     public func landing(_ key: ScreenAreaKey) -> Int {

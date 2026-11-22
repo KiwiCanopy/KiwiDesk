@@ -90,17 +90,10 @@ struct ScreensFamilyRows {
         guard
             let split = ScreenSplit.effective(
                 splits[display.fingerprint],
-                width: Int(display.frame.width),
-                height: Int(display.frame.height)
+                for: display
             )
         else {
-            let whole = ScreenArea(
-                id: 0,
-                x: 0,
-                y: 0,
-                w: Int(display.frame.width),
-                h: Int(display.frame.height)
-            )
+            let whole = ScreenSplit.whole(of: display).areas[0]
             return [(whole, display.fingerprint)]
         }
         return ScreenArea.readingOrder(split.areas).map { area in

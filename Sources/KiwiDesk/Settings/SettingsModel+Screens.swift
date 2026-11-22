@@ -68,14 +68,8 @@ extension SettingsModel {
     ) -> SpaceResolution {
         switch resolved {
         case .pinned(let display):
-            let key = ScreenAreaKey(parsing: pin ?? "")
-            let area = areaSplit(of: display)?.landing(key) ?? 0
-            return .pinned(
-                ScreenAreaKey(
-                    fingerprint: display.fingerprint,
-                    areaID: area
-                ).description
-            )
+            // The pin's own key, its area gone → area 0 (ruling 22).
+            return .pinned(resolvedPin(pin ?? display.fingerprint))
         case .pinnedAbsent(intent: let pin, fallback: _):
             return .pinned(pin)
         case .main:

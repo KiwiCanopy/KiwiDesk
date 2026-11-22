@@ -44,6 +44,18 @@ extension ScreenArrangement {
         )
     }
 
+    /// The stand's base width under a card `cardWidth` wide: what
+    /// `ScreensPicture` draws and `standing` measures a foot by.
+    static func standBase(cardWidth: CGFloat) -> CGFloat {
+        min(
+            max(
+                cardWidth * SettingsTheme.screenStandScale,
+                SettingsTheme.screenStandMin
+            ),
+            SettingsTheme.screenStandMax
+        )
+    }
+
     /// Height of the band a stand takes under its card.
     static let standDepth: CGFloat = 12 + SettingsTheme.hoverRise
 
@@ -53,7 +65,7 @@ extension ScreenArrangement {
     static func standing(_ layout: Layout) -> Set<DisplayID> {
         Set(
             layout.displays.filter { drawn in
-                let base = ScreensPicture.standBase(
+                let base = standBase(
                     cardWidth: drawn.rect.width
                 )
                 let foot = CGRect(

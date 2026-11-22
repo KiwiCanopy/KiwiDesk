@@ -143,7 +143,7 @@ extension WorkspaceManager {
                 width: width,
                 height: height
             )?.areas
-            ?? [ScreenArea(id: 0, x: 0, y: 0, w: width, h: height)]
+            ?? ScreenSplit.whole(width: width, height: height).areas
         for area in areas {
             let pid = PlacementID(display: id, area: area.id)
             placements[pid] = Placement(

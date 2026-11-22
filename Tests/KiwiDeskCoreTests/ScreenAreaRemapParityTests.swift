@@ -16,9 +16,8 @@ import Testing
 // element (`[K: SomeStruct]` holding a key in a field) reads as
 // neither and escapes the scan; so do a `Set` or an `Array` of
 // keys, a map keyed by a typed `ScreenAreaKey`, and an optional
-// map left nil, which reflects no children; an optional's own
-// field name is dropped from the path, so an exemption names the
-// map inside it by its parent's path. Such a store owes a
+// map left nil, which reflects no children (`populated()` sets
+// `look` and `appWide` so theirs are seen). Such a store owes a
 // behavioural test of its own. A profile's other monitor sets
 // (`Profile.monitorSets[].spaceMonitorMap`) are outside the draft
 // a merge edits: a pin there naming the vanished area falls back
@@ -37,6 +36,7 @@ private let notAreaKeyed: [String: String] = [
     "settings.spaceIcons": "an SF Symbol name per Space",
     "settings.displayAreas":
         "keyed by the PHYSICAL screen; a merge rewrites its split",
+    "look.colors": "a colour path to its hex",
 ]
 
 /// A config whose every area-keyed field names `vanished`. This
@@ -49,6 +49,11 @@ private func populated() -> GuiConfig {
     config.settings.spaceBarStyle.edgeOverride[key] = .bottom
     config.settings.appBarStyle.edgeOverride[key] = .left
     config.settings.kiwishelf.pocketEdgeOverride[key] = .right
+    config.appWide = AppWideSettings()
+    config.look = LookBody(
+        style: ["space_bar.edge_override": .object([key: .string("top")])],
+        colors: [:]
+    )
     return config
 }
 
@@ -71,8 +76,11 @@ private func stringMaps(
             }
         } else if mirror.displayStyle == .struct, depth > 1 {
             found += stringMaps(child.value, path: here, depth: depth - 1)
-        } else if mirror.displayStyle == .optional, depth > 1 {
-            found += stringMaps(child.value, path: path, depth: depth - 1)
+        } else if mirror.displayStyle == .optional, depth > 1,
+            let wrapped = mirror.children.first?.value
+        {
+            // Through the optional, keeping its field's name.
+            found += stringMaps(wrapped, path: here, depth: depth - 1)
         }
     }
     return found
