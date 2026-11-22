@@ -58,6 +58,36 @@ extension KiwiCore {
                     + "seeded space \(seed.raw)"
             )
         }
+        for (position, display) in ordered.enumerated() {
+            healEmptyAreas(of: display, lead: leads[position].first ?? .bsp)
+        }
+    }
+
+    /// An area is never left with no Space either (#3517): each
+    /// empty area of a split screen is seeded one, pinned to the
+    /// area's key and filed in the ledger under it, reused like a
+    /// screen's seed while the pin still names that area.
+    private func healEmptyAreas(of display: Display, lead: LayoutMode) {
+        let areas = state.workspaces.placements(of: display.id)
+        guard areas.count > 1 else { return }
+        for area in areas where state.workspaces.spaces(on: area.id).isEmpty {
+            let key = area.key.description
+            let seed: SpaceID
+            if let earlier = healedSpaces[key],
+                state.workspaces[earlier] != nil,
+                spacePins[earlier] == nil || spacePins[earlier] == key
+            {
+                seed = earlier
+            } else {
+                seed = mintedSpaceNumber()
+                state.workspaces.ensureSpace(seed, mode: lead)
+                healedSpaces[key] = seed
+            }
+            spacePins[seed] = key
+            mainSpaces.remove(seed)
+            state.workspaces.assign(seed, to: area.id)
+            onLog("heal: area \(key) had no space — seeded \(seed.raw)")
+        }
     }
 
     /// Retires the ledger entries a declaration has adopted
@@ -75,7 +105,9 @@ extension KiwiCore {
     /// in-between report seeds one for a screen that never
     /// settles, and an apply that keeps the profile prunes nothing.
     func retireOrphanedHealSeeds() {
-        let live = Set(liveFingerprints)
+        let live = Set(liveFingerprints).union(
+            state.workspaces.allPlacements.map(\.key.description)
+        )
         for (fingerprint, seed) in healedSpaces
         where !live.contains(fingerprint) {
             guard state.workspaces[seed]?.windows.isEmpty ?? true,
