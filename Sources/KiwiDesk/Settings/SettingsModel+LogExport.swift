@@ -72,22 +72,34 @@ extension SettingsModel {
         panel.allowedContentTypes = [.plainText]
         panel.nameFieldStringValue = LogExport.defaultFilename()
         panel.canCreateDirectories = true
-        // Downloads, not Documents: the file's next stop is a
-        // browser's attach dialog (owner ruling 2026-09-02).
-        panel.directoryURL =
-            FileManager.default.urls(
-                for: .downloadsDirectory,
-                in: .userDomainMask
-            ).first
+        panel.directoryURL = Self.logFolder
         guard panel.runModal() == .OK, let url = panel.url else {
             return
         }
         await exportLog(choice.range, to: url)
     }
 
+    /// Where an exported log goes: Downloads, not Documents, since
+    /// its next stop is a browser's attach dialog (owner ruling
+    /// 2026-09-02). Report a problem writes here too (#3544).
+    nonisolated static var logFolder: URL? {
+        FileManager.default.urls(
+            for: .downloadsDirectory,
+            in: .userDomainMask
+        ).first
+    }
+
     /// The run itself, split from the panel so a test can drive
     /// it through the `logExport` seam (`LogExportModelTests`).
     func exportLog(_ range: LogExport.Range, to url: URL) async {
+        logExportProblem = await runLogExport(range, to: url)
+    }
+
+    /// Writes the log to `url`; the problem, nil once written.
+    func runLogExport(
+        _ range: LogExport.Range,
+        to url: URL
+    ) async -> LogExportProblem? {
         let export = logExport
         let header = core.logExportHeader
         isExportingLog = true
@@ -98,18 +110,9 @@ extension SettingsModel {
             }
         }.value
         switch outcome {
-        case .success(.written):
-            break
-        case .success(.empty):
-            logExportProblem = .empty
-        case .failure(let failure):
-            logExportProblem = LogExportProblem(failure)
+        case .success(.written): return nil
+        case .success(.empty): return .empty
+        case .failure(let failure): return LogExportProblem(failure)
         }
-    }
-
-    /// Opens the bug form with the version, macOS and desk facts
-    /// filled in (#3214) — the footer's link, its one door.
-    func reportProblem() {
-        NSWorkspace.shared.open(core.problemReport.formURL)
     }
 }

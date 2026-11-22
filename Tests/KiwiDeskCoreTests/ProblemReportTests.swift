@@ -42,6 +42,19 @@ struct ProblemReportTests {
         #expect(fields.count == 4)
     }
 
+    /// The Export path names the saved log under the facts (#3544);
+    /// the plain form names none.
+    @Test("the form names a saved log only when given one")
+    func formNamesTheLog() {
+        let file = "~/Downloads/KiwiDesk-log-2026-11-22-1200.txt"
+        #expect(
+            query(report.formURL(logFile: file))["extra_context"]
+                == "Screens: 2\nDisplays have separate Spaces: on\n"
+                + "Log saved as \(file) — drag it here."
+        )
+        #expect(report.formURL(logFile: nil) == report.formURL)
+    }
+
     @Test("a plus in a fact survives the form's query")
     func plusIsEscaped() {
         var plus = report

@@ -5,6 +5,12 @@ import SwiftUI
 /// Owns the dashboard window and its view model.
 @MainActor
 final class SettingsWindowController: NSObject, NSWindowDelegate {
+    /// The open Settings window, for a sheet one of its
+    /// controls asks for.
+    static var openWindow: NSWindow? {
+        NSApp.windows.first { $0.delegate is SettingsWindowController }
+    }
+
     /// Internal so a test can drive the controller's verdicts
     /// without opening its window.
     let model: SettingsModel
