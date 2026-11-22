@@ -215,10 +215,12 @@ struct FloatSizeCommandTests {
         }
     }
 
-    @Test("a locked app's ask is fitted to its ratio")
+    @Test("a locked app's ask is fitted to its ratio, and cues the cut")
     func lockedRatio() throws {
         var frames: [WindowID: CGRect] = [:]
+        var cues: [ResizeRefusal] = []
         let core = makeCore { frames[$0] = $1 }
+        core.borders.onResizeRefusal = { cues.append($0) }
         core.state.floatAspects[one] = .init(pid: 900_001, ratio: 2)
         #expect(
             core.execute("size_floating", args: size(800, 800)).isSuccess
@@ -229,5 +231,6 @@ struct FloatSizeCommandTests {
             core.tiler.commandedFrame(of: one)?.size
                 == CGSize(width: 800, height: 400)
         )
+        #expect(cues == [.ownMaximum(one, axis: "y", atBoundary: false)])
     }
 }

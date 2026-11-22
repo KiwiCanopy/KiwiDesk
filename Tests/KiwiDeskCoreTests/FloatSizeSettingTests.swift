@@ -123,6 +123,36 @@ struct FloatSizeSettingTests {
         #expect(derived.width == nil)
     }
 
+    @Test("a locked ratio fits the ask, never under the floor")
+    func ratioFit() {
+        let region = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        let fitted = FloatPlacement.defaultSize(
+            in: region,
+            asked: CGSize(width: 800, height: 800),
+            ratio: 2
+        )
+        #expect(fitted.size == CGSize(width: 800, height: 400))
+        #expect(fitted.width == nil)
+        #expect(fitted.height == FloatPlacement.SizeLimit.ceiling)
+        let floored = FloatPlacement.defaultSize(
+            in: region,
+            asked: CGSize(width: 800, height: 800),
+            minimum: CGSize(width: 0, height: 500),
+            ratio: 2
+        )
+        #expect(floored.size == CGSize(width: 1000, height: 500))
+    }
+
+    @Test("a sub-point miss names no limit")
+    func slackIsQuiet() {
+        let region = CGRect(x: 0, y: 0, width: 900.4, height: 600)
+        let sizing = FloatPlacement.defaultSize(
+            in: region,
+            asked: CGSize(width: 900.6, height: 400)
+        )
+        #expect(sizing.width == nil)
+    }
+
     /// Two windows on space 1, w2 tiled and focused at `slot`.
     private func makeCore(
         applied: @escaping @MainActor (WindowID, CGRect) -> Void

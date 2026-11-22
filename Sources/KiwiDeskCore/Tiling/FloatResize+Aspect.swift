@@ -23,16 +23,6 @@ extension FloatResize {
     /// each press re-bases on the last press's error.
     public static let ratioChange: CGFloat = 0.1
 
-    /// The largest size inside `box` at `ratio` (width over height),
-    /// as a locked app fits an ask (#3554); `box` where the ratio is
-    /// not positive.
-    public static func fitted(_ box: CGSize, ratio: CGFloat) -> CGSize {
-        guard ratio > 0, box.height > 0 else { return box }
-        return box.width / box.height > ratio
-            ? CGSize(width: box.height * ratio, height: box.height)
-            : CGSize(width: box.width, height: box.width / ratio)
-    }
-
     /// The ratio a press scales by: the held one, until the window
     /// measures clearly different.
     public static func heldRatio(

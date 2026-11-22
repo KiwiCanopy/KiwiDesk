@@ -74,9 +74,12 @@ extension FloatPlacement {
 
     /// The default float size in `region` (#3554): `asked` capped to
     /// the region, else the derived size; a learned app `maximum`
-    /// caps either and a learned `minimum` outranks both. The one
-    /// home of that size and its clamp order, for the placement and
-    /// `size_floating`.
+    /// caps either and a learned `minimum` outranks both. A `ratio`
+    /// (width over height, an aspect-locked app's, #2973) fits the
+    /// result to it, never under `minimum` nor past the region where
+    /// both cannot hold. The one home of that size and its clamp
+    /// order, for the placement and `size_floating`; a limit is
+    /// named only past `ScrollSlotDomain.truncationEpsilon`.
     public static func defaultSize(
         in region: CGRect,
         asked: CGSize? = nil,
@@ -84,8 +87,10 @@ extension FloatPlacement {
         maximum: CGSize = CGSize(
             width: CGFloat.infinity,
             height: CGFloat.infinity
-        )
+        ),
+        ratio: CGFloat? = nil
     ) -> DefaultSize {
+        let slack = ScrollSlotDomain.truncationEpsilon
         let derived = derivedSize(in: region)
         func axis(
             _ want: CGFloat?,
@@ -96,31 +101,56 @@ extension FloatPlacement {
         ) -> (CGFloat, SizeLimit?) {
             var value = want.map { min($0, span) } ?? derived
             var limit: SizeLimit? =
-                want.map { $0 > span ? .region : nil } ?? nil
+                want.map { $0 > span + slack ? .region : nil } ?? nil
             if value > ceiling {
+                if value > ceiling + slack, want != nil { limit = .ceiling }
                 value = ceiling
-                limit = want == nil ? nil : .ceiling
             }
             if value < floor {
+                if value < floor - slack, want != nil { limit = .floor }
                 value = floor
-                limit = want == nil ? nil : .floor
             }
             return (value, limit)
         }
-        let width = axis(
+        var width = axis(
             asked?.width,
             derived: derived.width,
             span: region.width,
             floor: minimum.width,
             ceiling: maximum.width
         )
-        let height = axis(
+        var height = axis(
             asked?.height,
             derived: derived.height,
             span: region.height,
             floor: minimum.height,
             ceiling: maximum.height
         )
+        if let ratio, ratio > 0, height.0 > 0 {
+            var fit =
+                width.0 / height.0 > ratio
+                ? CGSize(width: height.0 * ratio, height: height.0)
+                : CGSize(width: width.0, height: width.0 / ratio)
+            // Never under the floor: grow both along the ratio.
+            let grow = max(
+                1,
+                minimum.width / max(fit.width, 1),
+                minimum.height / max(fit.height, 1)
+            )
+            fit = CGSize(
+                width: min(fit.width * grow, region.width),
+                height: min(fit.height * grow, region.height)
+            )
+            // The lock is the app's own limit on the axis it cut.
+            if asked != nil, fit.width < width.0 - slack {
+                width.1 = width.1 ?? .ceiling
+            }
+            if asked != nil, fit.height < height.0 - slack {
+                height.1 = height.1 ?? .ceiling
+            }
+            width.0 = fit.width
+            height.0 = fit.height
+        }
         return DefaultSize(
             size: CGSize(width: width.0, height: height.0),
             width: width.1,

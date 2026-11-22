@@ -223,12 +223,14 @@ extension KiwiCore {
     /// reading the placement and `size_floating` share. `region` is
     /// `floatGrowBounds` of the Space the window renders on, for both.
     /// `floor` replaces the learned floor: a sizing verb passes the
-    /// window's planned minimum (#2774), as a float resize reads it.
+    /// window's planned minimum (#2774), as a float resize reads it,
+    /// and an aspect-locked app's `ratio` (#2973).
     func defaultFloatSize(
         of id: WindowID,
         in region: CGRect,
         asked: CGSize?,
-        floor: CGSize? = nil
+        floor: CGSize? = nil,
+        ratio: CGFloat? = nil
     ) -> FloatPlacement.DefaultSize {
         let bound = tiler.sizeBound(for: id)
         return FloatPlacement.defaultSize(
@@ -242,7 +244,8 @@ extension KiwiCore {
             maximum: CGSize(
                 width: bound?.maxWidth ?? .infinity,
                 height: bound?.maxHeight ?? .infinity
-            )
+            ),
+            ratio: ratio
         )
     }
 
