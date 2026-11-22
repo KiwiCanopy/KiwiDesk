@@ -754,7 +754,7 @@ every lens with why it cannot turn on.
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `quit.set_layout` | `grid` (default) — how windows are spread on quit |
 | | `quit.set_grid_target_depth` | 1–20 (default 5) — quit-grid density target (windows per cell before the grid grows) |
-| | `get_state` | — (returns `{active_space, spaces, windows, away_windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop; `away_windows` lists the windows on Desktops no screen shows, each with `id`, `app`, `bundle_id`, `space_id` and `desktop` (`nil` on a full-screen Space), and each space object carries its own `away_windows` ids) |
+| | `get_state` | — (returns `{active_space, spaces, windows, away_windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop; `away_windows` lists the windows on Desktops no screen shows, each with `id`, `app`, `bundle_id`, `space_id` and `desktop` (`nil` on a full-screen Space), and each space object carries its own `away_windows` ids, its screen's `display` id and whether it is `shown`) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name (updates in place when it exists; see [Profile Screen Setups](lua-reference.md#profile-screen-setups)) |
@@ -765,7 +765,7 @@ every lens with why it cannot turn on.
 | | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
 | | `bind_profile_to_desktop` | Desktop number, profile, screen fingerprints… (optional; scopes the binding to that setup) (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
-| | `list_monitors` | — |
+| | `list_monitors` | — (returns each screen's `id`, `name`, `frame`, `layout_frame`, `fingerprint` and `space_id`, the Space it shows) |
 | | `list_windows` | [space] |
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000) |
@@ -1008,6 +1008,18 @@ the Shortcuts app does not list answers `unknown shortcut: <name>`.
 `kiwidesk mcp` sends it only through `run_destructive`, and
 `shortcut.set` does not bind it. See
 [run_shortcut](lua-reference.md#run_shortcut).
+:::
+
+:::unreleased
+`get_state`'s space objects carry `display` and `shown`, and
+`list_monitors`' entries `space_id`, so a bar groups each screen's
+Spaces, empty ones included, from one reply. See
+[get_state](lua-reference.md#get_state).
+
+```bash
+kiwidesk get_state | jq '.spaces | group_by(.display)
+  | map({display: .[0].display, spaces: map({id, shown})})'
+```
 :::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,

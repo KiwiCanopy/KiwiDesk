@@ -10304,6 +10304,18 @@ carry `track_breaks` (ids of the windows that start a track,
 #128) and, while a track holds an uneven cross-axis split,
 `track_weights` (head window id → session weight).
 
+:::unreleased
+Each space object also has `display`, the `list_monitors` id of
+the screen it sits on, `nil` for a Space on no screen, and `shown`:
+whether KiwiDesk shows it on that screen now. The active Space is
+always `shown`, even with no screen, and a native full-screen Space
+in front leaves `shown` true. A Space whose `shown` is true and
+whose `display` is D is the one `list_monitors` names as D's
+`space_id`, so a bar can draw each screen's Spaces, empty ones
+included, from these two queries. A bar re-reads them on
+`space_change`, `desktop_change` and `monitor_change`.
+:::
+
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
 [flip](#stacktoggle_stack_position) included.
@@ -10485,9 +10497,15 @@ full-screen window has no `visibility`.
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
 
-Each entry also carries `app`, `pid`, `index` (the window's
-place in its Space's row, from 1; `null` for a window no Space
-holds) and `z`: its stacking rank among the windows KiwiDesk
+:::unreleased
+It also reports `space_id`, the Space that screen shows (`null`
+while it shows none), the Space [`get_state`](#get_state) marks
+`shown` on that `display`.
+:::
+
+Each `list_windows` entry also carries `app`, `pid`, `index` (the
+window's place in its Space's row, from 1; `null` for a window no
+Space holds) and `z`: its stacking rank among the windows KiwiDesk
 tracks on the screen `display` names, `0` frontmost, as macOS
 reports it. A window no screen shows — on a Space no screen shows,
 parked out of sight or minimized — has `z` `null`. The list's own

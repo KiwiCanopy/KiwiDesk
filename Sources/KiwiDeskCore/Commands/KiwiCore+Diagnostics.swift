@@ -57,15 +57,24 @@ extension KiwiCore {
                 "frame": Self.json(rect: frame),
                 "layout_frame": laid.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
+                // The Space this screen shows: `get_state`'s
+                // `shown` Space whose `display` is this id (#3549).
+                "space_id": shown.map { .string($0.id.raw) } ?? .null,
             ])
         }
         return .ok(.array(monitors))
     }
 
     func stateJSON() -> JSONValue {
+        // The same set `list_windows`' `shown` reads (#3549).
+        let shown = shownSpaceIDs()
         let spaces = state.workspaces.allSpaces.map { space in
             var object: [String: JSONValue] = [
                 "id": .string(space.id.raw),
+                // The screen it sits on, the `list_monitors` id.
+                "display": state.workspaces.display(of: space.id)
+                    .map { .number(Double($0.raw)) } ?? .null,
+                "shown": .bool(shown.contains(space.id)),
                 "mode": .string(space.mode.rawValue),
                 "windows": .array(
                     space.windows.map {
