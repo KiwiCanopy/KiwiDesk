@@ -54,13 +54,7 @@ extension SettingsModel {
     /// The keys a screen's rows take: its areas' on a split screen
     /// in the draft, in reading order (#3517), else its fingerprint.
     func areaKeys(of fingerprint: String) -> [String] {
-        guard let split = config.settings.displayAreas[fingerprint],
-            split.areas.count > 1
-        else { return [fingerprint] }
-        return split.areas.sorted { ($0.y, $0.x) < ($1.y, $1.x) }.map {
-            ScreenAreaKey(fingerprint: fingerprint, areaID: $0.id)
-                .description
-        }
+        ScreenSplit.areaKeys(of: fingerprint, in: config.settings.displayAreas)
     }
 
     /// A bar's screen rows, one per fingerprint: the profile's
@@ -81,8 +75,11 @@ extension SettingsModel {
         // A screen split in the draft takes a row per area, and an
         // entry for an area it no longer has keeps a row of its own.
         var keyed: [String: Int] = [:]
+        var split: Set<String> = []
         for (screen, count) in counts {
-            for key in areaKeys(of: screen) { keyed[key] = count }
+            let keys = areaKeys(of: screen)
+            if keys.count > 1 { split.insert(screen) }
+            for key in keys { keyed[key] = count }
         }
         let shows: [String] =
             switch show {
@@ -101,7 +98,12 @@ extension SettingsModel {
             let area = ScreenAreaKey(parsing: key)
             return ScreenEdgeRow(
                 id: key,
-                name: Self.rowName(of: area),
+                name: Self.perScreenName(
+                    screen: Display.fingerprintParts(area.fingerprint).name,
+                    areaID: area.areaID,
+                    split: split.contains(area.fingerprint)
+                        || area.areaID != 0
+                ),
                 count: count,
                 present: connected.contains(area.fingerprint)
             )
@@ -114,13 +116,6 @@ extension SettingsModel {
             case .orderedSame: return a.id < b.id
             }
         }
-    }
-
-    /// A row's name: the screen's, and on a split screen the area's
-    /// stored id after it, until the positional names land (#3517).
-    private static func rowName(of key: ScreenAreaKey) -> String {
-        let screen = Display.fingerprintParts(key.fingerprint).name
-        return key.areaID == 0 ? screen : "\(screen) #\(key.areaID)"
     }
 
     /// One screen's picker: the edge that screen gets; a pick of
@@ -138,7 +133,8 @@ extension SettingsModel {
                     edge,
                     on: screen,
                     among: self.core.screenEdgeScope(
-                        monitorSets: self.draftMonitorSets
+                        monitorSets: self.draftMonitorSets,
+                        splits: self.config.settings.displayAreas
                     )
                 )
                 guard next != self.config.settings else { return }

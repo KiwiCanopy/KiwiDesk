@@ -183,8 +183,10 @@ twice, was a question the user answered twice. The argument is
   edge naming its reason too (▸ `guiReadersAreCensused`).
   **Write a bar's edge through the `ScreenEdged` doors** —
   `setEdge(_:)` for every screen, `setEdge(_:on:among:)` for one,
-  judged over the one `KiwiCore.screenEdgeScope(monitorSets:)`
-  handed the written profile's monitor sets, and
+  judged over the one `KiwiCore.screenEdgeScope(monitorSets:splits:)`
+  handed the written profile's monitor sets and splits, which adds
+  every area of each screen (#3517, `AreaEdgeTests` ▸
+  `scopeHoldsTheAreas`), and
   `setEdgeKeepingScreens(_:)` for a look, which leaves the
   entries exactly as they are, and `keepScreens(in:)` for a
   forgotten screen setup (#3324), which drops only the entries
@@ -195,8 +197,14 @@ twice, was a question the user answered twice. The argument is
   (`ScreenEdgeTests` ▸ `judgementsReadDrawnEdges`), and no
   caller collapses by hand (`BarEdgeWriteCensusTests` ▸
   `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
-  `screenEdgeScope(monitorSets:)` (`BarEdgeWriteCensusTests` ▸
-  `scopeHasOneHome`). **Write the pocket's edge through the same
+  `screenEdgeScope(monitorSets:splits:)` (`BarEdgeWriteCensusTests`
+  ▸ `scopeHasOneHome`). **An edge is per area with one lookup
+  (#3517 rulings 7, 22, 30)**: `edge(on:)` reads an area's entry,
+  then its screen's, then the bar's; a write of a screen's own key
+  pins each of its other areas in scope first, so no write moves
+  an area it did not name; and a verb's screen argument resolves
+  through the one `KiwiCore.areaKey(named:)`, `set_edge`'s and
+  `set_visibility`'s alike (`AreaEdgeTests`). **Write the pocket's edge through the same
   doors (#3376)**, on `KiwiShelf.pocketEdges`, and read a
   display's pocket edge through `KiwiCore.shelf(on:)` or
   `settings(on:)`, never `tiler.settings.kiwishelf.pocketEdge`,
@@ -485,7 +493,7 @@ twice, was a question the user answered twice. The argument is
   reserve spelled beside it (#3387, `AppBarHalfMoonTests` ▸
   `sideBarPillIsSymmetric`).
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
-  never a single-bar sync.** It builds each display's plan once
+  never a single-bar sync.** It builds each area's plan once
   from both bars' content and syncs both managers from it, so a
   change to either bar's need moves the other in the same pass;
   a path refreshing one bar leaves the other in a segment the
@@ -838,8 +846,15 @@ stays physical. Obligations:
   hiding bar only on a free edge: an area's inner edge is a
   crossing, judged by `HidingShelves.continues` handed every other
   area beside the physical screens. The Pocket rests in each
-  screen's lead area alone, and the reservation reserves its strip
-  there alone (`AreaShelfDriverTests`).
+  screen's lead area alone, and the reservation and the float
+  region reserve its strip there alone, through the one
+  `TilingEngine.shelfInput(for:on:)` every carve of a Space's
+  bounds takes. A float's bar strips are its area's, read off each
+  strip's `placement` (`AreaShelfDriverTests` holds the per-area
+  strips, the mid-screen top bar and the lead-area Pocket; the
+  inner-edge crossing, the insets landing on the touching area and
+  the per-screen stand-down and parking are review's until a split
+  ships).
 - **The panel, the ONE plate and the section divider are
   `ShelfOverlay`'s, one per area and edge — one while the bars
   share an edge, two while they are split (#1731), keyed by

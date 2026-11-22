@@ -3988,7 +3988,7 @@ layout that has an App Bar; the values mean what
 other screens keep each layout's value. The values are stored per
 profile under `app_bar.visibility_override`, keyed by fingerprint.
 Settings ▸ KiwiShelf writes them in the App Bar's **Per screen**
-rows.
+rows under **Position** ▸ **Each bar and Pocket**.
 
 **Example:**
 
@@ -4130,6 +4130,14 @@ overrides are the same setters prefixed with the layout name:
 
 The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
 no per-layout override either.
+
+:::unreleased
+A screen's own App Bar visibility, set with
+[`app_bar.set_visibility`](#app_barset_visibility), outranks every
+layout's on that screen. A layout's `set_app_bar_visibility` takes
+no screen, refusing one, and clears every screen's own App Bar
+visibility.
+:::
 
 **Example:**
 
@@ -4302,7 +4310,8 @@ that screen's alone. Naming the bar's own value returns a screen
 to it; a call without a screen sets every screen and clears their
 own values. The values are stored per profile under
 `space_bar.visibility_override`, keyed by fingerprint. Settings ▸
-KiwiShelf writes them in each bar's **Per screen** rows.
+KiwiShelf writes them in the Space Bar's **Per screen** rows under
+**Position** ▸ **Each bar and Pocket**.
 
 ```lua
 space_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")
@@ -4375,6 +4384,16 @@ their own edges. A look sets the bars' edges and leaves each
 screen's own untouched. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
 fingerprint.
+
+:::unreleased
+**Per area:** on a screen split into areas, the screen argument
+may also name one area — its key, `fingerprint#id`, or its own
+name — and the edge is that area's alone. An area with no edge of
+its own uses its screen's, then the bar's; setting the screen's
+own edge keeps each of its other areas where it was. The areas
+are judged with the screens, so the edges collapse only once
+every area sits on one edge.
+:::
 
 ```lua
 space_bar.set_edge("top")
@@ -9654,6 +9673,12 @@ set becomes the default unless the count already has another.
 - It refuses the connected setup (`reason: "connected_setup"`) and
   a setup no profile holds (`reason: "unknown_setup"`). Settings ▸
   Profiles ▸ **Known screen setups** does the same.
+
+:::unreleased
+`forget_monitor_set` also drops the bars' per-screen visibilities
+(`space_bar.visibility_override`, `app_bar.visibility_override`)
+for the screens whose edges it drops.
+:::
 
 **Example:**
 

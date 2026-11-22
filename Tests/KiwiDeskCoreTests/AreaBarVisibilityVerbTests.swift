@@ -118,4 +118,31 @@ struct AreaBarVisibilityVerbTests {
         )
         #expect(unknown.error?.contains("expected a screen") == true)
     }
+
+    /// A layout's own App Bar Show clears every area's App Bar
+    /// value, as its Settings row does (ruling 32); its other
+    /// fields leave them.
+    @Test func layoutShowClearsTheAreas() throws {
+        let core = try core(split: true)
+        let area = "Wide:3440x1440#1"
+        core.execute(
+            "app_bar.set_visibility",
+            args: [.string("hidden"), .string(area)]
+        )
+        core.execute(
+            "monocle.set_app_bar_title_cap",
+            args: [.number(12)]
+        )
+        #expect(
+            core.tiler.settings.appBarStyle.visibilityOverride
+                == [area: .hidden]
+        )
+        let set = core.execute(
+            "monocle.set_app_bar_visibility",
+            args: [.string("auto")]
+        )
+        #expect(set.isSuccess)
+        #expect(core.tiler.settings.monocle.appBar.visibility == .auto)
+        #expect(core.tiler.settings.appBarStyle.visibilityOverride.isEmpty)
+    }
 }

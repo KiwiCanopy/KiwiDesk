@@ -107,7 +107,25 @@ extension KiwiCore {
             let lead = state.workspaces.leadPlacement(of: display.id)
             // One shelf per area, each for the Space it shows
             // (#3517 ruling 30); an unsplit screen is one area.
-            for placement in state.workspaces.placements(of: display.id) {
+            // A screen with no placement record yet is one whole
+            // area 0, as `placementOrWhole(of:)` names it.
+            let records = state.workspaces.placements(of: display.id)
+            let areas =
+                records.isEmpty
+                ? [
+                    Placement(
+                        id: state.workspaces.placementOrWhole(of: display.id),
+                        area: ScreenSplit.wholeArea(
+                            width: Int(display.frame.width),
+                            height: Int(display.frame.height)
+                        ),
+                        key: ScreenAreaKey(
+                            fingerprint: display.fingerprint,
+                            areaID: 0
+                        )
+                    )
+                ] : records
+            for placement in areas {
                 let id = placement.id
                 // Each bar's edge and visibility as THIS area has
                 // them (#1948), so the plan and every style a bar
@@ -224,7 +242,11 @@ extension KiwiCore {
         // hiding edges (#761).
         syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
-        let live = Set(state.workspaces.allPlacements.map(\.id))
+        // Every area, and the whole area 0 a screen with no
+        // placement record drew.
+        let live = Set(state.workspaces.allPlacements.map(\.id)).union(
+            displays.map { state.workspaces.placementOrWhole(of: $0.id) }
+        )
         retireDepartedBars(live: live)
         // KiwiVision stands down where the shelf does, never for a
         // maximize (#2103, #3061, #3346).

@@ -6,9 +6,9 @@ import SwiftUI
 /// per area on a split screen — and for the two bars a Show menu
 /// beside it, that screen's or area's visibility (#3517 ruling 30).
 /// A pick of the bar's own edge stores nothing; the drawer opens
-/// by itself, held open, while a screen has an edge of its own.
-/// On a one-screen profile its rows grey, its `?` naming what
-/// unlocks them (#2677).
+/// by itself, held open, while a screen has an edge or a Show of
+/// its own. On a one-screen profile with no split its rows grey,
+/// its `?` naming what unlocks them (#2677).
 /// Not a `SettingsDisclosure`: its key is a catalog CHILD of Each
 /// bar, which search opens, and its rows are dynamic, so a hit
 /// lands on this header.
@@ -87,8 +87,9 @@ struct ScreenEdgesDrawer<Bar: ScreenEdged>: View {
 
     static var oneScreenHelp: String {
         L(
-            "kiwishelf.edge.per_screen.one_screen",
-            "Needs a profile with two or more screens."
+            "kiwishelf.edge.per_screen.one_screen_or_split",
+            "Needs a profile with two or more screens, or a screen "
+                + "split into areas."
         )
     }
 

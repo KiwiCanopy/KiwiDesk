@@ -12,7 +12,7 @@ enum SpaceBarCommandSetting {
     /// screen resolved to its fingerprint. It needs the screens a
     /// write judges, so `apply(to:)` writes nothing for it and
     /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
-    /// among:)` with `screenEdgeScope(monitorSets:)`.
+    /// among:)` with `screenEdgeScope(monitorSets:splits:)`.
     case screenEdge(AppBarEdge, screen: String)
     /// `set_visibility(value, screen)` — one area's visibility
     /// (#3517), the screen resolved to its area key.

@@ -66,6 +66,31 @@ extension SpaceBarStyle {
     }
 }
 
+extension AppBarStyle {
+    /// One screen's or area's App Bar visibility (#3517); nil, which
+    /// follows each layout's own, stores nothing.
+    public mutating func setVisibility(
+        _ value: ShelfVisibility?,
+        on screen: String
+    ) {
+        visibilityOverride[screen] = value
+    }
+}
+
+extension TilingSettings {
+    /// A layout's own App Bar visibility — its Settings row or
+    /// `<layout>.set_app_bar_visibility` — which clears every area's
+    /// App Bar value (#3517 ruling 32), as the Space Bar's
+    /// `setVisibility(_:)` clears its own.
+    public mutating func setLayoutAppBarVisibility(
+        _ value: ShelfVisibility,
+        in layout: WritableKeyPath<TilingSettings, LayoutAppBar>
+    ) {
+        self[keyPath: layout].visibility = value
+        appBarStyle.visibilityOverride = [:]
+    }
+}
+
 extension KeyedEncodingContainer {
     /// Leaves an empty `[String: ShelfVisibility]` out of the JSON
     /// (#3517), as the per-screen edge map is. The scope is the

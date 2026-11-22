@@ -9,6 +9,12 @@ enum ScreenShowBar {
     case app
 }
 
+/// A bar's own Show row: the Space Bar's, or one layout's App Bar's.
+enum BarShowRow {
+    case spaceBar
+    case appBar(WritableKeyPath<TilingSettings, LayoutAppBar>)
+}
+
 /// The Show menu in a bar's Per screen rows (#3517 ruling 30): an
 /// area's own visibility, keyed by its `ScreenAreaKey` — an unsplit
 /// screen by its fingerprint.
@@ -28,7 +34,9 @@ extension SettingsModel {
     }
 
     /// The menu's binding: the Space Bar's own value stores nothing
-    /// for the area; the App Bar's nil, Per layout, clears it.
+    /// for the area; the App Bar's nil, Per layout, clears it. A
+    /// pick needs the rows offered, since a greyed `.menu` picker
+    /// still takes one (gui.md).
     func screenShowBinding(
         _ bar: ScreenShowBar,
         on key: String
@@ -36,13 +44,14 @@ extension SettingsModel {
         Binding(
             get: { self.screenShow(bar, on: key) },
             set: { value in
+                guard self.offersScreenShows(bar) else { return }
                 var next = self.config.settings
                 switch bar {
                 case .space:
                     guard let value else { return }
                     next.spaceBarStyle.setVisibility(value, on: key)
                 case .app:
-                    next.appBarStyle.visibilityOverride[key] = value
+                    next.appBarStyle.setVisibility(value, on: key)
                 }
                 guard next != self.config.settings else { return }
                 self.config.settings = next
@@ -50,22 +59,35 @@ extension SettingsModel {
         )
     }
 
+    /// Whether `bar`'s Per screen rows take a Show pick: the edge
+    /// drawer's own offer for that bar.
+    private func offersScreenShows(_ bar: ScreenShowBar) -> Bool {
+        switch bar {
+        case .space: offersScreenEdges(\.spaceBarStyle, show: .space)
+        case .app: offersScreenEdges(\.appBarStyle, show: .app)
+        }
+    }
+
     /// A bar's own Show row — the Space Bar's, or a layout's App
-    /// Bar's at `path` — whose pick clears that bar's per-screen
-    /// and per-area values (#3517 ruling 32), as a bar's edge pick
-    /// clears its screens' edges.
-    func barShowBinding(
-        _ path: WritableKeyPath<TilingSettings, ShelfVisibility>,
-        clearing bar: ScreenShowBar
-    ) -> Binding<ShelfVisibility> {
+    /// Bar's — whose pick clears that bar's per-screen and per-area
+    /// values through Core's doors (#3517 ruling 32), as a bar's
+    /// edge pick clears its screens' edges.
+    func barShowBinding(_ row: BarShowRow) -> Binding<ShelfVisibility> {
         Binding(
-            get: { self.config.settings[keyPath: path] },
+            get: {
+                switch row {
+                case .spaceBar:
+                    self.config.settings.spaceBarStyle.visibility
+                case .appBar(let layout):
+                    self.config.settings[keyPath: layout].visibility
+                }
+            },
             set: { value in
                 var next = self.config.settings
-                next[keyPath: path] = value
-                switch bar {
-                case .space: next.spaceBarStyle.visibilityOverride = [:]
-                case .app: next.appBarStyle.visibilityOverride = [:]
+                switch row {
+                case .spaceBar: next.spaceBarStyle.setVisibility(value)
+                case .appBar(let layout):
+                    next.setLayoutAppBarVisibility(value, in: layout)
                 }
                 guard next != self.config.settings else { return }
                 self.config.settings = next
@@ -84,6 +106,12 @@ extension SettingsModel {
         }
     }
 
+    /// A bar Show row's `?` while some screen or area shows `bar`
+    /// its own way, which a pick there clears.
+    func screenShowsHelp(_ bar: ScreenShowBar) -> String? {
+        hasScreenShows(bar) ? BarsGateHelp.screenShowsDiffer : nil
+    }
+
     /// The Show menu's choices for `bar`: the App Bar's Per layout,
     /// which stores nothing, leads its three values.
     static func screenShowOptions(
@@ -94,6 +122,23 @@ extension SettingsModel {
         }
         guard bar == .app else { return values }
         return [(nil, perLayout)] + values
+    }
+
+    /// A Per screen row's name, and its diff row's: the screen's,
+    /// and on a split screen its area's number after it (#3517),
+    /// every area of the split numbered, its first included.
+    static func perScreenName(
+        screen: String,
+        areaID: Int,
+        split: Bool
+    ) -> String {
+        guard split else { return screen }
+        return L(
+            "kiwishelf.per_screen.area_name",
+            "%1$@ – Area %2$@",
+            screen,
+            String(areaID + 1)
+        )
     }
 
     /// The App Bar's "no value of its own" choice.

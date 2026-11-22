@@ -25,25 +25,27 @@ extension KiwiShelfCard {
     }
 
     var visibilityMasterHelp: String {
-        visibilitySplit
-            ? BarsGateHelp.visibilityDiffers
-            : L(
-                "kiwishelf.show.visibility.help",
-                "Sets the bars and the Pocket together. Always "
-                    + "keeps them on screen. Auto hides each to its "
-                    + "handle until the pointer rests on it. "
-                    + "Hidden shows a bar only through its "
-                    + "shortcut, over your windows, and the Pocket "
-                    + "only while a window goes in or out, while "
-                    + "you drag one, or when its list's shortcut "
-                    + "opens it. Only %1$@ and %2$@ can carry an "
-                    + "App Bar. With \u{201C}%3$@\u{201D} left at its "
-                    + "default, the menu bar shows the Space each "
-                    + "screen is on wherever the Space Bar is hidden.",
-                L("layout.monocle.name", "Monocle"),
-                L("layout.scrolling.name", "Scrolling"),
-                L("kiwishelf.menu_bar_icon", "Menu bar icon")
-            )
+        model.config.settings.hasScreenVisibilities
+            ? BarsGateHelp.visibilityDiffersPerScreen
+            : visibilitySplit
+                ? BarsGateHelp.visibilityDiffers
+                : L(
+                    "kiwishelf.show.visibility.help",
+                    "Sets the bars and the Pocket together. Always "
+                        + "keeps them on screen. Auto hides each to its "
+                        + "handle until the pointer rests on it. "
+                        + "Hidden shows a bar only through its "
+                        + "shortcut, over your windows, and the Pocket "
+                        + "only while a window goes in or out, while "
+                        + "you drag one, or when its list's shortcut "
+                        + "opens it. Only %1$@ and %2$@ can carry an "
+                        + "App Bar. With \u{201C}%3$@\u{201D} left at its "
+                        + "default, the menu bar shows the Space each "
+                        + "screen is on wherever the Space Bar is hidden.",
+                    L("layout.monocle.name", "Monocle"),
+                    L("layout.scrolling.name", "Scrolling"),
+                    L("kiwishelf.menu_bar_icon", "Menu bar icon")
+                )
     }
 
     /// The Show master and its Each bar drawer, attached to it.
@@ -76,10 +78,8 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .spaceBarShow.text,
-                model.barShowBinding(
-                    \.spaceBarStyle.visibility,
-                    clearing: .space
-                )
+                model.barShowBinding(.spaceBar),
+                help: model.screenShowsHelp(.space)
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children
@@ -93,10 +93,8 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .monocleShowIn.text,
-                model.barShowBinding(
-                    \.monocle.appBar.visibility,
-                    clearing: .app
-                )
+                model.barShowBinding(.appBar(\.monocle.appBar)),
+                help: model.screenShowsHelp(.app)
             )
             .modifier(GreyOut(active: maximizes))
             .searchAnchored(
@@ -112,10 +110,8 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .scrollingShowIn.text,
-                model.barShowBinding(
-                    \.scrolling.appBar.visibility,
-                    clearing: .app
-                )
+                model.barShowBinding(.appBar(\.scrolling.appBar)),
+                help: model.screenShowsHelp(.app)
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children
@@ -239,12 +235,14 @@ extension KiwiShelfCard {
     private func visibilityRow(
         _ title: String,
         _ selection: Binding<ShelfVisibility>,
-        options: [(ShelfVisibility, String)] = AppBarOptions.visibility
+        options: [(ShelfVisibility, String)] = AppBarOptions.visibility,
+        help: String? = nil
     ) -> some View {
         SegmentedPicker(
             title,
             selection: selection,
-            options: options.map { ($0.1, $0.0) }
+            options: options.map { ($0.1, $0.0) },
+            help: help
         )
     }
 

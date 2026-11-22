@@ -98,6 +98,12 @@ struct SettingsRevertRegisterTests {
                 )
                 continue
             }
+            // A bar's own Show takes the per-screen Show map the
+            // doors clear with it (#3517 ruling 32).
+            #expect(
+                Set(writer.paths).isSuperset(of: showMaps([id])),
+                Comment(rawValue: "\(key.id) ← \(writer.paths)")
+            )
             #expect(
                 // Never a bare `.` prefix: a parent struct's writer
                 // would pass for each of its leaves.

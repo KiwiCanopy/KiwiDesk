@@ -151,13 +151,12 @@ extension KiwiCore {
         var carved = tiler.settings
         carved.spaceBarStyle.reserve = true
         carved.appBarStyle.reserve = true
-        // The Space's own area where its screen is split (#3517).
+        let input = tiler.shelfInput(for: space.id, on: screen)
         return carved.layoutBounds(
             from: tiler.visibleBounds(screen, for: space.id),
             mode: space.mode,
-            on: tiler.spaceArea(space.id)?.key
-                ?? tiler.fingerprint(of: screen),
-            pocketAtRest: carved.pocketRests
+            on: input.key,
+            pocketAtRest: input.pocketAtRest
         )
     }
 

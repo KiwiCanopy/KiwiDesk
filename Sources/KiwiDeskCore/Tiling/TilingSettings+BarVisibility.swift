@@ -6,8 +6,11 @@ import Foundation
 extension TilingSettings {
     /// The visibility every element shares — the Space Bar's, each
     /// hosting layout's App Bar and the pocket — or nil while they
-    /// differ: what Settings' Show master selects (#761, #2978).
+    /// differ, a screen or area showing a bar its own way included,
+    /// since the master's pick clears it (#3517 ruling 32): what
+    /// Settings' Show master selects (#761, #2978).
     public var uniformBarVisibility: ShelfVisibility? {
+        guard !hasScreenVisibilities else { return nil }
         let all =
             [spaceBarStyle.visibility] + appBarHosts.map(\.visibility)
             + [kiwishelf.pocketVisibility]

@@ -53,7 +53,7 @@ extension KiwiCore {
         return applyBarOverride(
             field: field,
             args,
-            into: &tiler.settings.monocle.appBar
+            into: \.monocle.appBar
         )
     }
 

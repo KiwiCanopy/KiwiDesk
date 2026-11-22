@@ -28,10 +28,11 @@ extension SettingsValueReadout {
             .map { key in
                 let area = ScreenAreaKey(parsing: key)
                 let parts = Display.fingerprintParts(area.fingerprint)
-                let screen =
-                    area.areaID == 0
-                    ? "\(parts.name) \(parts.size)"
-                    : "\(parts.name) \(parts.size) #\(area.areaID)"
+                let screen = SettingsModel.perScreenName(
+                    screen: "\(parts.name) \(parts.size)",
+                    areaID: area.areaID,
+                    split: area.areaID != 0
+                )
                 return .change(
                     census,
                     instance: key,

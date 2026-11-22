@@ -16,7 +16,6 @@ extension InterpolatedLabelTests {
     /// not a mirror of the keys: the keys still come only from
     /// the scan, so this cannot name a wrong one — the defect
     /// that killed the first cut.
-    ///
     /// It exists because `guard-prover` showed the derived scan
     /// alone cannot see a FULL revert. Put the literal label
     /// back and drop the nested `L(` argument, and the label
@@ -115,6 +114,8 @@ extension InterpolatedLabelTests {
         "kiwishelf.background_fit.boxed_only": 1,
         "kiwishelf.edge.screens_differ.help": 2,
         "kiwishelf.edge.pocket.screens_differ.help": 1,
+        "kiwishelf.show.differ_per_screen.help": 2,  // #3517
+        "kiwishelf.show.screens_differ.help": 2,
         // #3471: the Off pointer names its page; the scan does not
         // read the catalog row it also names.
         "kiwishelf.durations.animations_off.link": 1,

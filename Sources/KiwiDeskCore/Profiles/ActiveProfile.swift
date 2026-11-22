@@ -29,7 +29,7 @@ struct ActiveProfile {
     let isStarterSetup: Bool
     /// Its monitor sets — what a bar's per-screen edge write
     /// judges beside the connected screens (#1948,
-    /// `KiwiCore.screenEdgeScope(monitorSets:)`). Unlike the
+    /// `KiwiCore.screenEdgeScope(monitorSets:splits:)`). Unlike the
     /// Spaces it follows every write of the file, since a claim
     /// moves a set without an apply (`refiled(_:)`).
     let monitorSets: [MonitorSet]

@@ -64,6 +64,26 @@ struct ScreenShowRowsTests {
         #expect(split.offersScreenEdges(\.spaceBarStyle, show: .space))
     }
 
+    @Test("an entry for an area the draft no longer has keeps a row")
+    func leftoverEntryKeepsARow() throws {
+        let model = try model(split: false)
+        let area = "Wide:3440x1440#1"
+        model.config.settings.spaceBarStyle.visibilityOverride = [
+            area: .hidden
+        ]
+        model.config.settings.appBarStyle.visibilityOverride = [
+            area: .auto
+        ]
+        #expect(
+            model.screenEdgeRows(\.spaceBarStyle, show: .space).map(\.id)
+                .contains(area)
+        )
+        #expect(
+            model.screenEdgeRows(\.appBarStyle, show: .app).map(\.id)
+                .contains(area)
+        )
+    }
+
     @Test("an area's Show writes its own value; the bar's stores none")
     func showWritesTheArea() throws {
         let model = try model(split: true)
@@ -90,14 +110,12 @@ struct ScreenShowRowsTests {
         let area = "Wide:3440x1440#1"
         model.screenShowBinding(.space, on: area).wrappedValue = .hidden
         model.screenShowBinding(.app, on: area).wrappedValue = .hidden
-        model.barShowBinding(\.monocle.appBar.visibility, clearing: .app)
-            .wrappedValue = .auto
+        model.barShowBinding(.appBar(\.monocle.appBar)).wrappedValue = .auto
         #expect(model.config.settings.appBarStyle.visibilityOverride.isEmpty)
         #expect(
             !model.config.settings.spaceBarStyle.visibilityOverride.isEmpty
         )
-        model.barShowBinding(\.spaceBarStyle.visibility, clearing: .space)
-            .wrappedValue = .auto
+        model.barShowBinding(.spaceBar).wrappedValue = .auto
         #expect(model.config.settings.spaceBarStyle.visibilityOverride.isEmpty)
         model.screenShowBinding(.space, on: area).wrappedValue = .hidden
         model.screenShowBinding(.app, on: area).wrappedValue = .hidden

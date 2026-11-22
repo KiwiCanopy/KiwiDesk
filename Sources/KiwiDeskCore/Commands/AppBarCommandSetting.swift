@@ -23,7 +23,7 @@ enum AppBarCommandSetting {
     /// screen resolved to its fingerprint. It needs the screens a
     /// write judges, so `apply(to:)` writes nothing for it and
     /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
-    /// among:)` with `screenEdgeScope(monitorSets:)`.
+    /// among:)` with `screenEdgeScope(monitorSets:splits:)`.
     case screenEdge(AppBarEdge, screen: String)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case titleCap(Int)
@@ -119,7 +119,7 @@ enum AppBarCommandSetting {
         // `apply(to: LayoutAppBar)` alone.
         case .visibility: break
         case .screenVisibility(let value, let screen):
-            style.visibilityOverride[screen] = value
+            style.setVisibility(value, on: screen)
         }
     }
 

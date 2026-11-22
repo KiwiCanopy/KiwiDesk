@@ -102,7 +102,10 @@ extension SettingsModel {
         config.profileBindings.forgetSetup(monitors)
         cleanConfig.profileBindings.forgetSetup(monitors)
         if (editingProfile ?? core.profiles.currentName) == name {
-            let scope = core.screenEdgeScope(monitorSets: draftMonitorSets)
+            let scope = core.screenEdgeScope(
+                monitorSets: draftMonitorSets,
+                splits: config.settings.displayAreas
+            )
             config.settings.keepScreenEdges(in: scope)
             cleanConfig.settings.keepScreenEdges(in: scope)
         }

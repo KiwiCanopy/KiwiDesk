@@ -125,7 +125,7 @@ extension KiwiCore {
     func applyBarOverride(
         field: String,
         _ args: [JSONValue],
-        into bar: inout LayoutAppBar
+        into layout: WritableKeyPath<TilingSettings, LayoutAppBar>
     ) -> CommandResponse {
         if let global = AppBarStyle.layoutFixedKeys.first(where: {
             $0.key.stringValue == field
@@ -136,8 +136,12 @@ extension KiwiCore {
         {
         case .success(.screenVisibility):
             return .fail(Self.appBarScreenVisibilityIsGlobal)
+        case .success(.visibility(let value)):
+            // A layout's own Show clears every area's (ruling 32).
+            tiler.settings.setLayoutAppBarVisibility(value, in: layout)
+            return .ok()
         case .success(let setting):
-            setting.apply(to: &bar)
+            setting.apply(to: &tiler.settings[keyPath: layout])
             return .ok()
         case .failure(let error):
             return .fail(error.message)

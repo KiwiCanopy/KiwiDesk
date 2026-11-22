@@ -90,18 +90,20 @@ public final class SpaceBarManager {
         Set(shownBars.map(\.display))
     }
 
-    /// Painted strips with display and edge metadata (#242, QA 2026-07-19).
+    /// Painted strips with display, edge and area metadata (#242,
+    /// QA 2026-07-19; #3517).
     public var shownStrips:
         [(
             display: DisplayID, strip: CGRect,
-            edge: AppBarEdge
+            edge: AppBarEdge, placement: PlacementID
         )]
     {
         shownBars.map {
             (
                 display: $0.display,
                 strip: $0.strip,
-                edge: $0.style.edge
+                edge: $0.style.edge,
+                placement: $0.placement
             )
         }
     }

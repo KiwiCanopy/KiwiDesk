@@ -135,4 +135,38 @@ struct AreaShelfDriverTests {
             #expect((bounds.maxY < rect.maxY - 1) == (i == 0), "\(area.id)")
         }
     }
+
+    @Test("the Pocket's section stands in the lead area alone")
+    func pocketDrawsInTheLeadArea() throws {
+        let (core, screen, areas) = try #require(
+            makeCore({ $0.splitting(0, .sideBySide) }) {
+                $0.kiwishelf.pocketVisibility = .always
+                $0.kiwishelf.pocketEdges.setEdge(.top)
+            }
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let first = try #require(areas.first)
+        let lead = frame(of: first, in: core, on: screen)
+        let slot = try #require(core.pocketPlate.slots[first.display])
+        #expect(slot.minX >= lead.minX - 0.5 && slot.maxX <= lead.maxX + 0.5)
+    }
+
+    @Test("an area that merged away drops its bars")
+    func departedAreaRetires() throws {
+        let (core, _, areas) = try #require(
+            makeCore { $0.splitting(0, .sideBySide) }
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        #expect(core.spaceBars.overlaysForTesting.count == 2)
+        var settings = core.tiler.settings
+        settings.displayAreas = [:]
+        core.tiler.settings = settings
+        core.updateBars()
+        let lead = try #require(areas.first).id
+        #expect(Set(core.spaceBars.overlaysForTesting.keys) == [lead])
+        #expect(
+            Set(core.shelves.overlaysForTesting.keys.map(\.placement))
+                == [lead]
+        )
+    }
 }

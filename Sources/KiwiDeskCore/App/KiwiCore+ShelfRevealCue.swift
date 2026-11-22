@@ -54,12 +54,10 @@ extension KiwiCore {
             return shelf
         }
         guard let screen = screen(for: placement.display) else { return nil }
-        let settings = tiler.settings
-        let key = areaKey(of: placement)
+        let settings = tiler.settings.onScreen(areaKey(of: placement))
         let edge =
             bar == .app
-            ? settings.appBarStyle.edge(on: key)
-            : settings.spaceBarStyle.edge(on: key)
+            ? settings.appBarStyle.edge : settings.spaceBarStyle.edge
         let area = state.workspaces[placement: placement]
         return (refusalStrip(of: screen, edge: edge, in: area), edge)
     }
