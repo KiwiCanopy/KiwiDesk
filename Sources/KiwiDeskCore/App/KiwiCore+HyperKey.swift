@@ -79,8 +79,8 @@ extension KiwiCore {
         let status = want == nil ? .off : outcome
         let before = keys.hyperStatus
         setHyperState(status)
-        // Once per change of status: a re-check finding the same
-        // refusal says nothing again (#3550).
+        // Once per change of status, from every door: a re-check
+        // finding the same refusal says nothing again (#3550).
         if want != nil, outcome != .on, status != before {
             let what = outcome == .failed ? "failed" : "refused"
             onLog("hyper: remap \(what)\(outcome.foreignNote), Hyper key off")

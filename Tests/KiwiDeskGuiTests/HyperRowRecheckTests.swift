@@ -4,9 +4,9 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The Hyper row's record (#3550): the key already chosen
-/// re-checks the remap, which the live values would skip as
-/// unchanged, and heals it; another key is a plain change.
+/// The Hyper row's record (#3550): stored like any app-wide row,
+/// then re-checked, so the key it already holds heals a remap
+/// another tool cleared, and a key a verb set live is kept.
 @MainActor
 @Suite("Hyper row re-check", .serialized)
 struct HyperRowRecheckTests {
@@ -41,28 +41,53 @@ struct HyperRowRecheckTests {
         }
     }
 
-    @Test("the same key re-checks and heals; another key is a change")
-    func sameKeyRechecks() async {
-        let core = makeTestCore()
+    private func runningModel() -> (KiwiCore, Host, SettingsModel) {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("hyper-row-\(UUID().uuidString)")
+        )
         core.deferred.sleep = { _ in }
+        try? core.guiConfigStore.save(GuiConfig())
         let host = Host()
         core.hyperRemapHost = host.host
         core.eventLoop.isRunning = true
-        let model = makeTestModel(core: core)
-        var changes = 0
+        return (core, host, makeTestModel(core: core))
+    }
+
+    @Test("recording the key it holds heals with one listing")
+    func sameKeyRechecks() async {
+        let (core, host, model) = runningModel()
         model.recordHyperKey(.capsLock)
         await core.deferred.task(for: .hyperRemap)?.value
         #expect(core.keys.hyperStatus == .on)
         host.mapping = []  // another tool cleared it
         let gets = host.gets
-        core.onAppWideChange = { changes += 1 }
         model.recordHyperKey(.capsLock)
-        #expect(changes == 0)  // no ledger write: a re-check
         await core.deferred.task(for: .hyperRemap)?.value
         #expect(host.gets == gets + 1)
         #expect(host.mapping == [HyperKeyRemap.pair(for: .capsLock)])
+    }
+
+    @Test("another key is one change, read once")
+    func otherKeyIsOneChange() async {
+        let (core, host, model) = runningModel()
+        model.recordHyperKey(.capsLock)
+        await core.deferred.task(for: .hyperRemap)?.value
+        let gets = host.gets
         model.recordHyperKey(.f13)
+        await core.deferred.task(for: .hyperRemap)?.value
         #expect(core.appWide.hyperKey == .f13)
-        #expect(changes >= 1)  // the live values moved
+        #expect(host.gets == gets + 1)  // the change and re-check coalesce
+    }
+
+    @Test("a key a verb set live is stored when recorded again")
+    func verbKeyIsStored() async {
+        let (core, _, model) = runningModel()
+        _ = core.execute("set_hyper_key", args: [.string("caps_lock")])
+        #expect(core.guiConfigStore.load()?.appWide?.hyperKey == nil)
+        model.recordHyperKey(.capsLock)
+        await core.deferred.task(for: .hyperRemap)?.value
+        #expect(core.guiConfigStore.load()?.appWide?.hyperKey == .capsLock)
     }
 }

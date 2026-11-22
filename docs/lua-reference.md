@@ -1369,7 +1369,8 @@ Settings saves and after a wake or an unlock (#3550): a mapping
 that vanished is set again, and another tool's mapping turns Hyper
 off as above. Nothing else watches it, so a mapping another tool
 breaks in between stays broken until one of those happens, the
-verb runs again or KiwiDesk restarts.
+verb runs, Take Over is pressed or KiwiDesk starts managing
+windows again.
 :::
 
 Save **⌃⌥Space**, which a KiwiDesk row wins; on **⌃Space** the row

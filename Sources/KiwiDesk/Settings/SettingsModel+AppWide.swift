@@ -25,14 +25,11 @@ extension SettingsModel {
         core.takeOverHyperRemap()
     }
 
-    /// The Hyper row's record (#3550): the key already chosen
-    /// re-checks the remap, which the live values would skip as
-    /// unchanged; any other key is a change.
+    /// The Hyper row's record (#3550): stored like any app-wide
+    /// row, then re-checked, since the live values skip a key they
+    /// already hold; a changed key's remap coalesces with it.
     func recordHyperKey(_ key: HyperSourceKey?) {
-        guard key != nil, key == appWide.hyperKey else {
-            setAppWide { $0.hyperKey = key }
-            return
-        }
+        setAppWide { $0.hyperKey = key }
         core.recheckHyperKey()
     }
 

@@ -91,10 +91,17 @@ struct HyperRemapRecheckTests {
         return (core, host, log)
     }
 
-    /// Owed, never run inline: nothing is read until the slot runs.
-    private func settle(_ core: KiwiCore, _ host: Host) async {
-        let gets = host.gets
-        #expect(core.deferred.isScheduled(.hyperRemap))
+    /// Runs `door` and requires the re-check owed, never run
+    /// inline: a new slot task, and nothing read until it runs.
+    /// Read before the door, since a fired slot keeps its task.
+    private func owed(
+        _ core: KiwiCore,
+        _ host: Host,
+        by door: () throws -> Void
+    ) async rethrows {
+        let (slot, gets) = (core.deferred.task(for: .hyperRemap), host.gets)
+        try door()
+        #expect(core.deferred.task(for: .hyperRemap) != slot)
         #expect(host.gets == gets)
         await core.deferred.task(for: .hyperRemap)?.value
     }
@@ -103,8 +110,7 @@ struct HyperRemapRecheckTests {
     func recheckHeals() async throws {
         let (core, host, _) = try await applied()
         host.mapping = []
-        core.recheckHyperKey()
-        await settle(core, host)
+        await owed(core, host) { core.recheckHyperKey() }
         #expect(host.mapping == [ours])
         #expect(host.written == ours)
         #expect(core.keys.hyperStatus == .on)
@@ -115,8 +121,7 @@ struct HyperRemapRecheckTests {
         let (core, host, _) = try await applied()
         host.mapping = []
         let config = try #require(core.guiConfigStore.load())
-        try core.saveGuiConfig(config)
-        await settle(core, host)
+        try await owed(core, host) { try core.saveGuiConfig(config) }
         #expect(host.mapping == [ours])
         #expect(core.keys.hyperStatus == .on)
     }
@@ -125,8 +130,7 @@ struct HyperRemapRecheckTests {
     func returnHeals() async throws {
         let (core, host, _) = try await applied()
         host.mapping = []
-        core.sleepWake.onReturn()
-        await settle(core, host)
+        await owed(core, host) { core.sleepWake.onReturn() }
         #expect(host.mapping == [ours])
         #expect(core.keys.hyperStatus == .on)
     }
@@ -206,6 +210,15 @@ struct HyperRemapRecheckTests {
         core.keys.activate(core.keys.currentLayer)
         core.loadConfig()
         #expect(core.deferred.task(for: .hyperRemap) == settled)
+        #expect(host.gets == gets)
+    }
+
+    @Test("another app-wide change owes no remap")
+    func otherAppWideChangeIsQuiet() async throws {
+        let (core, host, _) = try await applied()
+        let (slot, gets) = (core.deferred.task(for: .hyperRemap), host.gets)
+        core.setAppWide(persisting: false) { $0.modifierSides.toggle() }
+        #expect(core.deferred.task(for: .hyperRemap) == slot)
         #expect(host.gets == gets)
     }
 
