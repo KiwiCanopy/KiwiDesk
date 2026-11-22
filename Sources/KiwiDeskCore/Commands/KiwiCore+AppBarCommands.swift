@@ -16,9 +16,11 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("app_bar.set_".count)
         )
+        if field == "visibility", args.count < 2 {
+            return .fail(Self.appBarVisibilityNeedsAScreen)
+        }
         let given: [JSONValue]
-        switch screenResolvedEdgeArgs(field: field, screenField: "edge", args)
-        {
+        switch screenResolvedBarArgs(field: field, args) {
         case .success(let resolved): given = resolved
         case .failure(let error): return .fail(error.message)
         }
@@ -53,8 +55,7 @@ extension KiwiCore {
             command.dropFirst("space_bar.set_".count)
         )
         let given: [JSONValue]
-        switch screenResolvedEdgeArgs(field: field, screenField: "edge", args)
-        {
+        switch screenResolvedBarArgs(field: field, args) {
         case .success(let resolved): given = resolved
         case .failure(let error): return .fail(error.message)
         }
@@ -133,6 +134,8 @@ extension KiwiCore {
         }
         switch AppBarCommandSetting.parse(field: field, args: args)
         {
+        case .success(.screenVisibility):
+            return .fail(Self.appBarScreenVisibilityIsGlobal)
         case .success(let setting):
             setting.apply(to: &bar)
             return .ok()

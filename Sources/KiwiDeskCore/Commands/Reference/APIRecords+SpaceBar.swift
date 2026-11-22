@@ -14,8 +14,10 @@ extension APIReference {
             .boolean("reserve")
         ),
         "set_visibility": APIRecord(
-            "Sets the Space Bar to always, auto or hidden.",
-            .choice("visibility", ShelfVisibility.self)
+            "Sets the Space Bar to always, auto or hidden on all "
+                + "screens, or on one screen or area.",
+            .choice("visibility", ShelfVisibility.self),
+            .text("screen", optional: true)
         ),
         "toggle_reveal": APIRecord(
             "Shows or hides the Space Bar over the windows on the "

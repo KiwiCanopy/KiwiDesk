@@ -254,6 +254,13 @@ final class PocketPlateOverlay {
         specs = specs.filter { live.contains($0.key) }
     }
 
+    /// The same for the areas of `live`'s screens (#3517): the
+    /// pocket stands per screen, so a screen with any live area
+    /// keeps its views.
+    func retire(except live: Set<PlacementID>) {
+        retire(except: Set(live.map(\.display)))
+    }
+
     /// Each display's light, so one display's flash never strands
     /// another's lit (#2678 review 8); `PocketPlateOverlay+Light`'s.
     var flashGeneration: [DisplayID: Int] = [:]

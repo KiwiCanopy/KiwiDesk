@@ -11,6 +11,12 @@ extension APIReference {
             .choice("edge", AppBarEdge.self),
             .text("screen", optional: true)
         ),
+        "set_visibility": APIRecord(
+            "Sets the App Bar to always, auto or hidden on one "
+                + "screen or area, in every layout that has one.",
+            .choice("visibility", ShelfVisibility.self),
+            .text("screen")
+        ),
         "set_reserve": APIRecord(
             "Reserves the App Bar's strip; false draws it over "
                 + "the windows, the strip unclickable.",

@@ -85,9 +85,15 @@ struct BarVisibilityMasterTests {
             model.config.settings.kiwishelf.pocketVisibility
                 == clean.kiwishelf.pocketVisibility
         )
+        // Beside the followers, the per-screen Show maps the master
+        // clears (#3517 ruling 32).
         #expect(
             Set(writer.paths)
                 == Set(SettingKey.masterWrites[.kiwishelf(.visibility)] ?? [])
+                .union([
+                    "settings.spaceBarStyle.visibilityOverride",
+                    "settings.appBarStyle.visibilityOverride",
+                ])
         )
     }
 

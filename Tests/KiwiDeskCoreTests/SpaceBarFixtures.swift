@@ -15,6 +15,7 @@ enum SpaceBarFixtures {
         style.visibility = .auto
         style.edge = .left
         style.edgeOverride = ["Screen:1x1": .right]
+        style.visibilityOverride = ["Screen:1x1#1": .hidden]
         style.glyphSpan = 8
         style.glyphGap = 3
         style.inactiveContent = .count

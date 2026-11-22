@@ -17,6 +17,12 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     /// that bar's Per screen drawer.
     case spaceBarScreenEdge = "settings.spaceBarStyle.edgeOverride[screen]"
     case appBarScreenEdge = "settings.appBarStyle.edgeOverride[screen]"
+    /// Each bar's per-screen and per-area Show (#3517): the Show menu
+    /// in that bar's Per screen rows.
+    case spaceBarScreenVisibility =
+        "settings.spaceBarStyle.visibilityOverride[screen]"
+    case appBarScreenVisibility =
+        "settings.appBarStyle.visibilityOverride[screen]"
     case thickness = "settings.kiwishelf.thickness"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
@@ -82,7 +88,8 @@ extension KiwiShelfKey {
         case .thickness, .alignment:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
-            .appBarScreenEdge, .pocketEdge, .pocketScreenEdge,
+            .appBarScreenEdge, .spaceBarScreenVisibility,
+            .appBarScreenVisibility, .pocketEdge, .pocketScreenEdge,
             .pocketPosition, .pocketVisibility:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,

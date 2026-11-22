@@ -18,7 +18,9 @@ extension TilingSettings {
     /// stored per bar, per layout and for the pocket, nothing linked
     /// (#761, #2978).
     public mutating func setEveryBarVisibility(_ visibility: ShelfVisibility) {
-        spaceBarStyle.visibility = visibility
+        // A bar-level pick clears each area's own (#3517 ruling 32).
+        spaceBarStyle.setVisibility(visibility)
+        appBarStyle.visibilityOverride = [:]
         kiwishelf.pocketVisibility = visibility
         for mode in LayoutMode.allCases {
             setAppBarVisibility(visibility, in: mode)

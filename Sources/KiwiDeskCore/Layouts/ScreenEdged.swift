@@ -27,6 +27,12 @@ public protocol ScreenEdged {
 /// adds the connected screens, so no write can judge fewer.
 public struct ScreenEdgeScope: Sendable, Equatable {
     let screens: Set<String>
+
+    /// Whether `key` — a fingerprint, or an area's `ScreenAreaKey`
+    /// — names a screen in scope (#3517).
+    func holds(_ key: String) -> Bool {
+        screens.contains(ScreenAreaKey(parsing: key).fingerprint)
+    }
 }
 
 extension ScreenEdged {
@@ -83,11 +89,10 @@ extension ScreenEdged {
     }
 
     /// Drops the entries of screens outside `scope` — a forgotten
-    /// setup's leftovers (#3324). No screen in scope moves.
+    /// setup's leftovers (#3324). No screen in scope moves; an
+    /// area's entry is judged by its screen (#3517).
     public mutating func keepScreens(in scope: ScreenEdgeScope) {
-        edgeOverride = edgeOverride.filter {
-            scope.screens.contains($0.key)
-        }
+        edgeOverride = edgeOverride.filter { scope.holds($0.key) }
     }
 
     /// A merged-away area's entry moved to the area that absorbed
@@ -102,12 +107,16 @@ extension ScreenEdged {
 }
 
 extension TilingSettings {
-    /// Both bars' and the pocket's per-screen edges kept to
-    /// `scope` (#3324, #3376).
+    /// Both bars' and the pocket's per-screen edges, and both bars'
+    /// per-area visibilities, kept to `scope` (#3324, #3376, #3517).
     public mutating func keepScreenEdges(in scope: ScreenEdgeScope) {
         spaceBarStyle.keepScreens(in: scope)
         appBarStyle.keepScreens(in: scope)
         kiwishelf.pocketEdges.keepScreens(in: scope)
+        spaceBarStyle.visibilityOverride =
+            spaceBarStyle.visibilityOverride.filter { scope.holds($0.key) }
+        appBarStyle.visibilityOverride =
+            appBarStyle.visibilityOverride.filter { scope.holds($0.key) }
     }
 }
 

@@ -45,10 +45,12 @@ struct ShelfRetireWiringTests {
             source.components(separatedBy: ".retire(except: keep)").count - 1
                 == retires
         )
-        // …which is the live set united with the leaving displays…
+        // …which is the live set united with the leaving areas
+        // (#3517)…
         #expect(
-            source.components(separatedBy: ".union(shelves.leavingDisplays)")
-                .count - 1 == 1
+            source.components(
+                separatedBy: ".union(shelves.leavingPlacements)"
+            ).count - 1 == 1
         )
         // …and both branches of `updateBars()` call that door AFTER
         // syncing the shelves, which is when a departing display's

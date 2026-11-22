@@ -53,6 +53,23 @@ extension SettingsValueReadout {
                 old.settings.appBarStyle,
                 new.settings.appBarStyle
             )
+        case .spaceBarScreenVisibility:
+            return screenShowRows(
+                census,
+                old.settings.spaceBarStyle.visibilityOverride,
+                new.settings.spaceBarStyle.visibilityOverride,
+                own: (
+                    old.settings.spaceBarStyle.visibility,
+                    new.settings.spaceBarStyle.visibility
+                )
+            )
+        case .appBarScreenVisibility:
+            return screenShowRows(
+                census,
+                old.settings.appBarStyle.visibilityOverride,
+                new.settings.appBarStyle.visibilityOverride,
+                own: nil
+            )
         case .alignment:
             return spaceBarChoiceRow(
                 census,

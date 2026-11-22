@@ -48,6 +48,24 @@ extension TilingSettings {
     }
 }
 
+extension SpaceBarStyle {
+    /// The bar on every screen and area: a screen-less
+    /// `set_visibility`, which clears their own values.
+    public mutating func setVisibility(_ value: ShelfVisibility) {
+        visibility = value
+        visibilityOverride = [:]
+    }
+
+    /// One screen's or area's visibility (#3517); the bar's own
+    /// value stores nothing for it.
+    public mutating func setVisibility(
+        _ value: ShelfVisibility,
+        on screen: String
+    ) {
+        visibilityOverride[screen] = value == visibility ? nil : value
+    }
+}
+
 extension KeyedEncodingContainer {
     /// Leaves an empty `[String: ShelfVisibility]` out of the JSON
     /// (#3517), as the per-screen edge map is. The scope is the

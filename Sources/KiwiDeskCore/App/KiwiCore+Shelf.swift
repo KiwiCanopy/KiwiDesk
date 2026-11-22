@@ -113,14 +113,14 @@ extension KiwiCore {
                 // them (#1948), so the plan and every style a bar
                 // draws carry them, and a tiling-off Space's Hidden
                 // bars (#3151).
-                let shown = shelfSettings(on: placement)
+                let shown = shelfSettings(on: id)
                 let look = shown.spaceBarLook
                 let app = down ? nil : appBarContent(on: id, settings: shown)
                 let items = down ? nil : spaceBarContent(on: id, style: look)
                 guard app != nil || items != nil else { continue }
                 let carriesPocket = id == lead
                 let reveal = shelves.reveal
-                let hover = maximizedHoverBars(on: placement)
+                let hover = maximizedHoverBars(on: id)
                 let planned = shelfPlans(
                     visible: shelfFrame(
                         of: placement,
@@ -224,9 +224,8 @@ extension KiwiCore {
         // hiding edges (#761).
         syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
-        retireDepartedBars(
-            live: Set(state.workspaces.allPlacements.map(\.id))
-        )
+        let live = Set(state.workspaces.allPlacements.map(\.id))
+        retireDepartedBars(live: live)
         // KiwiVision stands down where the shelf does, never for a
         // maximize (#2103, #3061, #3346).
         noteVisionStandDown(standingDown)
@@ -245,7 +244,7 @@ extension KiwiCore {
         let keep = live.union(shelves.leavingPlacements)
         appBars.retire(except: keep)
         spaceBars.retire(except: keep)
-        pocketPlate.retire(except: Set(keep.map(\.display)))
+        pocketPlate.retire(except: keep)
     }
 
     /// Hands each shelf the sections its bars just rendered on its

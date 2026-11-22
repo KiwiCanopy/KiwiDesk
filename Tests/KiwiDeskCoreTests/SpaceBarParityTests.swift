@@ -61,6 +61,7 @@ struct SpaceBarCommandParityTests {
         .reserve(false), .visibility(.auto),
         .edge(.left),
         .screenEdge(.left, screen: "S:1x1"),
+        .screenVisibility(.hidden, screen: "S:1x1#1"),
         .glyphSpan(8), .glyphGap(3), .frontAppTitleCap(40),
         .inactiveContent(.count), .itemLabel(.layout),
         .activeIndicator(.edgeMark),
@@ -153,6 +154,8 @@ struct SpaceBarCommandParityTests {
         case .activeIndicator: return [.string("edge_mark")]
         case .edge: return [.string("left")]
         case .edgeOverride: return [.string("left"), .string("S:1x1")]
+        case .visibilityOverride:
+            return [.string("hidden"), .string("S:1x1#1")]
         case .activeDimFactor:
             return [.number(0.5)]
         case .springDelay: return [.number(1000)]

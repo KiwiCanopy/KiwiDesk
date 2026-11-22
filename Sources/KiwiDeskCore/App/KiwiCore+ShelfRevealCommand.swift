@@ -16,8 +16,7 @@ extension KiwiCore {
         let workspaces = state.workspaces
         // The area the active Space lays out in (#3517).
         guard let space = workspaces.activeSpace,
-            let id = workspaces.placement(of: space),
-            let placement = workspaces[placement: id]
+            let placement = workspaces.placement(of: space)
         else { return .fail("the \(name) draws on no screen here") }
         let display = placement.display
         // Asked before the layout and the setting: a window filling
@@ -43,17 +42,17 @@ extension KiwiCore {
         if settings.autoReadsAlways(
             bar,
             in: mode,
-            on: placement.key.description
+            on: areaKey(of: placement)
         ) {
             cueRevealRefusal(.shownBesideAlways(bar), placement: placement)
             return .fail("the \(name) is shown beside an always bar")
         }
         guard
             let key = shelves.reveal.targets.keys.first(where: {
-                $0.shelf.placement == id && $0.bar == bar
+                $0.shelf.placement == placement && $0.bar == bar
             })
         else {
-            if let refusal = emptyRefusal(bar, on: id) {
+            if let refusal = emptyRefusal(bar, on: placement) {
                 cueRevealRefusal(refusal, placement: placement)
             }
             return .fail("the \(name) has nothing to show here")

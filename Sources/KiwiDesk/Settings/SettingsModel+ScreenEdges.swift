@@ -1,10 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One screen row in a bar's Per screen drawer (#1948).
+/// One screen row in a bar's Per screen drawer (#1948), or one
+/// area's on a split screen (#3517 ruling 30).
 struct ScreenEdgeRow: Identifiable, Equatable {
     /// The screen's fingerprint (`Name:WxH`), which identical
-    /// models share — so they share one row.
+    /// models share — so they share one row — or an area's
+    /// `ScreenAreaKey`.
     let id: String
     let name: String
     /// How many of the profile's screens carry this fingerprint.
@@ -39,17 +41,34 @@ extension SettingsModel {
     /// #1948) — unless that bar's screens already differ, which
     /// the rows must then show.
     func offersScreenEdges<Bar: ScreenEdged>(
-        _ bar: KeyPath<TilingSettings, Bar>
+        _ bar: KeyPath<TilingSettings, Bar>,
+        show: ScreenShowBar? = nil
     ) -> Bool {
-        draftMonitorSets.contains { Set($0.monitors).count > 1 }
+        draftMonitorSets.contains { set in
+            Set(set.monitors).reduce(0) { $0 + areaKeys(of: $1).count } > 1
+        }
             || config.settings[keyPath: bar].screensDiffer
+            || show.map(hasScreenShows) == true
+    }
+
+    /// The keys a screen's rows take: its areas' on a split screen
+    /// in the draft, in reading order (#3517), else its fingerprint.
+    func areaKeys(of fingerprint: String) -> [String] {
+        guard let split = config.settings.displayAreas[fingerprint],
+            split.areas.count > 1
+        else { return [fingerprint] }
+        return split.areas.sorted { ($0.y, $0.x) < ($1.y, $1.x) }.map {
+            ScreenAreaKey(fingerprint: fingerprint, areaID: $0.id)
+                .description
+        }
     }
 
     /// A bar's screen rows, one per fingerprint: the profile's
     /// screens and any screen holding an edge of its own,
     /// connected ones first, then the rest, each A–Z by name.
     func screenEdgeRows<Bar: ScreenEdged>(
-        _ bar: KeyPath<TilingSettings, Bar>
+        _ bar: KeyPath<TilingSettings, Bar>,
+        show: ScreenShowBar? = nil
     ) -> [ScreenEdgeRow] {
         let connected = Set(displays.map(\.fingerprint))
         var counts: [String: Int] = [:]
@@ -59,15 +78,32 @@ extension SettingsModel {
                 counts[screen] = max(counts[screen] ?? 0, n)
             }
         }
-        for screen in config.settings[keyPath: bar].edgeOverride.keys {
-            counts[screen] = max(counts[screen] ?? 0, 1)
+        // A screen split in the draft takes a row per area, and an
+        // entry for an area it no longer has keeps a row of its own.
+        var keyed: [String: Int] = [:]
+        for (screen, count) in counts {
+            for key in areaKeys(of: screen) { keyed[key] = count }
         }
-        return counts.map { screen, count in
-            ScreenEdgeRow(
-                id: screen,
-                name: Display.fingerprintParts(screen).name,
+        let shows: [String] =
+            switch show {
+            case .space?:
+                Array(config.settings.spaceBarStyle.visibilityOverride.keys)
+            case .app?:
+                Array(config.settings.appBarStyle.visibilityOverride.keys)
+            case nil: []
+            }
+        for key in Array(config.settings[keyPath: bar].edgeOverride.keys)
+            + shows
+        {
+            keyed[key] = max(keyed[key] ?? 0, 1)
+        }
+        return keyed.map { key, count in
+            let area = ScreenAreaKey(parsing: key)
+            return ScreenEdgeRow(
+                id: key,
+                name: Self.rowName(of: area),
                 count: count,
-                present: connected.contains(screen)
+                present: connected.contains(area.fingerprint)
             )
         }
         .sorted { a, b in
@@ -78,6 +114,13 @@ extension SettingsModel {
             case .orderedSame: return a.id < b.id
             }
         }
+    }
+
+    /// A row's name: the screen's, and on a split screen the area's
+    /// stored id after it, until the positional names land (#3517).
+    private static func rowName(of key: ScreenAreaKey) -> String {
+        let screen = Display.fingerprintParts(key.fingerprint).name
+        return key.areaID == 0 ? screen : "\(screen) #\(key.areaID)"
     }
 
     /// One screen's picker: the edge that screen gets; a pick of

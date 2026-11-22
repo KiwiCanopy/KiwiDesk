@@ -26,7 +26,7 @@ extension KiwiCore {
     /// never on a window, never beside the other bar's shelf.
     func cueRevealRefusal(
         _ refusal: RevealRefusal,
-        placement: Placement
+        placement: PlacementID
     ) {
         let display = placement.display
         guard let place = refusalPlace(of: refusal.bar, on: placement)
@@ -48,36 +48,35 @@ extension KiwiCore {
     /// along `bar`'s edge of the area's frame (#3517).
     func refusalPlace(
         of bar: ShelfBar,
-        on placement: Placement
+        on placement: PlacementID
     ) -> (strip: CGRect, edge: AppBarEdge)? {
-        if let shelf = shelves.drawnStrip(on: placement.id, carrying: bar) {
+        if let shelf = shelves.drawnStrip(on: placement, carrying: bar) {
             return shelf
         }
         guard let screen = screen(for: placement.display) else { return nil }
         let settings = tiler.settings
-        let key = placement.key.description
+        let key = areaKey(of: placement)
         let edge =
             bar == .app
             ? settings.appBarStyle.edge(on: key)
             : settings.spaceBarStyle.edge(on: key)
-        // Chrome is drawn on a REAL screen (`VisibleBoundsRoutingTests`).
-        let visible = shelfFrame(
-            of: placement,
-            visible: GeometryUtils.axVisibleFrame(of: screen),
-            on: screen
-        )
-        return (refusalStrip(in: visible, edge: edge), edge)
+        let area = state.workspaces[placement: placement]
+        return (refusalStrip(of: screen, edge: edge, in: area), edge)
     }
 
-    /// A zero-depth strip along `edge` of `screen`'s visible frame, AX
+    /// A zero-depth strip along `edge` of `screen`'s visible frame —
+    /// cut to `area`'s frame on a split screen (#3517) — AX
     /// coordinates: where a pill stands with no shelf beside it.
-    func refusalStrip(of screen: NSScreen, edge: AppBarEdge) -> CGRect {
+    func refusalStrip(
+        of screen: NSScreen,
+        edge: AppBarEdge,
+        in area: Placement? = nil
+    ) -> CGRect {
         // Chrome is drawn on a REAL screen (`VisibleBoundsRoutingTests`).
-        refusalStrip(in: GeometryUtils.axVisibleFrame(of: screen), edge: edge)
-    }
-
-    /// A zero-depth strip along `edge` of `visible`, AX coordinates.
-    func refusalStrip(in visible: CGRect, edge: AppBarEdge) -> CGRect {
+        let whole = GeometryUtils.axVisibleFrame(of: screen)
+        let visible =
+            area.map { shelfFrame(of: $0, visible: whole, on: screen) }
+            ?? whole
         switch edge {
         case .top:
             return CGRect(

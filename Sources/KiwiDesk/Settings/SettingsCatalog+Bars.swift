@@ -209,6 +209,10 @@ struct KiwiShelfEdgeControls: Sendable {
         "kiwishelf.edge.per_screen.space_bar",
         "Per screen"
     )
+    let kiwishelfSpaceBarScreenShows = SettingsControl(
+        "kiwishelf.show.per_screen.space_bar",
+        "Space Bar: Show per screen"
+    )
     let kiwishelfAppBarEdge = SettingsControl(
         "kiwishelf.edge.app_bar",
         "App Bar"
@@ -216,6 +220,10 @@ struct KiwiShelfEdgeControls: Sendable {
     let kiwishelfAppBarScreenEdges = SettingsControl(
         "kiwishelf.edge.per_screen.app_bar",
         "Per screen"
+    )
+    let kiwishelfAppBarScreenShows = SettingsControl(
+        "kiwishelf.show.per_screen.app_bar",
+        "App Bar: Show per screen"
     )
     let kiwishelfPocketEdge = SettingsControl(
         "kiwishelf.edge.pocket",

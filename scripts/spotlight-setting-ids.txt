@@ -131,6 +131,7 @@ settings.appBarStyle.edge
 settings.appBarStyle.edgeOverride[screen]
 settings.appBarStyle.groupAdjacentWindows
 settings.appBarStyle.titleCap
+settings.appBarStyle.visibilityOverride[screen]
 settings.borderStyle.cornerStyle
 settings.borderStyle.enabled
 settings.borderStyle.focusedColor
@@ -256,6 +257,7 @@ settings.spaceBarStyle.showFrontApp
 settings.spaceBarStyle.springDelay
 settings.spaceBarStyle.visibility
 settings.spaceBarStyle.visibility (master)
+settings.spaceBarStyle.visibilityOverride[screen]
 settings.stack.fillWhenAlone
 settings.stack.masterCount
 settings.stack.masterOrientation

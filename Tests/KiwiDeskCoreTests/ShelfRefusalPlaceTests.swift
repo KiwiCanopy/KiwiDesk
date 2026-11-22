@@ -37,7 +37,7 @@ struct ShelfRefusalPlaceTests {
         core.updateBars()
         #expect(core.focusedWindowID == nil)
         let area = try #require(
-            core.state.workspaces.placements(of: display.id).first
+            core.state.workspaces.leadPlacement(of: display.id)
         )
         let place = try #require(core.refusalPlace(of: .app, on: area))
         #expect(place.edge == .bottom)

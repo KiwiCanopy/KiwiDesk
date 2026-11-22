@@ -12,6 +12,14 @@ extension KiwiShelfCard {
             .followersDiffer(for: .kiwishelf(.edge))
     }
 
+    /// Whether the Each bar and Pocket drawer is held open: the
+    /// edges differ, or a screen or area shows a bar its own way,
+    /// which its Per screen rows draw (#3517).
+    var edgesHeldOpen: Bool {
+        edgesSplit || model.hasScreenShows(.space)
+            || model.hasScreenShows(.app)
+    }
+
     var edgeMasterHelp: String {
         edgesSplit
             ? BarsGateHelp.edgesDiffer
@@ -36,41 +44,59 @@ extension KiwiShelfCard {
             chrome: .attached,
             isExpanded: $edgesExpanded,
             scrollHoisted: true,
-            locked: edgesSplit
+            locked: edgesHeldOpen
         ) {
             // Spelled out in `BarsRowOrder.kiwishelfEdges`' order:
             // `row(for:)` renders this very row, and an opaque
             // type cannot contain itself.
             VStack(alignment: .leading, spacing: 10) {
                 spaceBarEdgeRow
-                ScreenEdgesDrawer(
-                    model: model,
-                    bar: \.spaceBarStyle,
-                    title: L(
-                        "kiwishelf.edge.per_screen.space_bar",
-                        "Per screen"
-                    ),
-                    barName: L("kiwishelf.edge.space_bar", "Space Bar"),
-                    options: edgeOptions
-                )
+                // The Show menus anchor apart from the edges, so a hit
+                // on either lands on these rows (#3517).
+                VStack(alignment: .leading, spacing: 0) {
+                    ScreenEdgesDrawer(
+                        model: model,
+                        bar: \.spaceBarStyle,
+                        title: L(
+                            "kiwishelf.edge.per_screen.space_bar",
+                            "Per screen"
+                        ),
+                        barName: L("kiwishelf.edge.space_bar", "Space Bar"),
+                        options: edgeOptions,
+                        show: .space
+                    )
+                    .searchAnchored(
+                        SettingsCatalog.bars.kiwishelfEdges.children
+                            .kiwishelfSpaceBarScreenEdges
+                    )
+                }
                 .searchAnchored(
                     SettingsCatalog.bars.kiwishelfEdges.children
-                        .kiwishelfSpaceBarScreenEdges
+                        .kiwishelfSpaceBarScreenShows
                 )
                 appBarEdgeRow
-                ScreenEdgesDrawer(
-                    model: model,
-                    bar: \.appBarStyle,
-                    title: L(
-                        "kiwishelf.edge.per_screen.app_bar",
-                        "Per screen"
-                    ),
-                    barName: L("kiwishelf.edge.app_bar", "App Bar"),
-                    options: edgeOptions
-                )
+                // The Show menus anchor apart from the edges, so a hit
+                // on either lands on these rows (#3517).
+                VStack(alignment: .leading, spacing: 0) {
+                    ScreenEdgesDrawer(
+                        model: model,
+                        bar: \.appBarStyle,
+                        title: L(
+                            "kiwishelf.edge.per_screen.app_bar",
+                            "Per screen"
+                        ),
+                        barName: L("kiwishelf.edge.app_bar", "App Bar"),
+                        options: edgeOptions,
+                        show: .app
+                    )
+                    .searchAnchored(
+                        SettingsCatalog.bars.kiwishelfEdges.children
+                            .kiwishelfAppBarScreenEdges
+                    )
+                }
                 .searchAnchored(
                     SettingsCatalog.bars.kiwishelfEdges.children
-                        .kiwishelfAppBarScreenEdges
+                        .kiwishelfAppBarScreenShows
                 )
                 pocketEdgeRow
                 ScreenEdgesDrawer(

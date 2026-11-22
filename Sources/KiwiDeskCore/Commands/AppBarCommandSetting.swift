@@ -30,6 +30,9 @@ enum AppBarCommandSetting {
     case groupAdjacentWindows(Bool)
     case reserve(Bool)
     case visibility(ShelfVisibility)
+    /// `app_bar.set_visibility(value, screen)` — one area's App
+    /// Bar visibility in every layout that carries one (#3517).
+    case screenVisibility(ShelfVisibility, screen: String)
 
     /// Parses setter field name and arguments.
     static func parse(
@@ -72,8 +75,11 @@ enum AppBarCommandSetting {
             }
             return .success(.reserve(flag))
         case "visibility":
-            return BarSettingChoice.value(args, ShelfVisibility.self)
-                .map(Self.visibility)
+            return BarSettingChoice.visibility(args).map { parsed in
+                parsed.screen.map {
+                    .screenVisibility(parsed.value, screen: $0)
+                } ?? .visibility(parsed.value)
+            }
         default:
             return nil
         }
@@ -112,6 +118,8 @@ enum AppBarCommandSetting {
         // A layout's own value (#761), written through
         // `apply(to: LayoutAppBar)` alone.
         case .visibility: break
+        case .screenVisibility(let value, let screen):
+            style.visibilityOverride[screen] = value
         }
     }
 
@@ -119,7 +127,7 @@ enum AppBarCommandSetting {
     /// field in `AppBarStyle.layoutFixedKeys` has none to write.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
-        case .edge, .screenEdge, .reserve: break
+        case .edge, .screenEdge, .reserve, .screenVisibility: break
         case .visibility(let value): bar.visibility = value
         case .activeIndicator(let value):
             bar.activeIndicator = value

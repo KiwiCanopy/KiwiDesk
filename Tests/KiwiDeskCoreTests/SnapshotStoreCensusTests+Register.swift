@@ -171,6 +171,9 @@ extension SnapshotStoreCensusTests {
             ),
         "borders.cornerRadii": (.behind, "render state, redrawn"),
         "borders.overlays": (.behind, "render state, redrawn"),
+        // One bar per area (#3517).
+        "spaceBars.overlays": (.behind, "render state, redrawn"),
+        "appBars.overlays": (.behind, "render state, redrawn"),
         "borders.specs": (.behind, "render state, redrawn"),
         "borders.watch.heard[]": (.behind, "render state, re-requested"),
         "stickyMarks.overlays": (.behind, "render state, redrawn"),

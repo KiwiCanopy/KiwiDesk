@@ -18,6 +18,22 @@ enum BarSettingChoice {
         return .success(value)
     }
 
+    /// `set_visibility`'s arguments (#3517): the value, then an
+    /// optional screen — an area key by now, since `KiwiCore`
+    /// resolves a number or a name ahead of the parse.
+    static func visibility(
+        _ args: [JSONValue]
+    ) -> Result<
+        (value: ShelfVisibility, screen: String?), AppBarSettingError
+    > {
+        value(args, ShelfVisibility.self).flatMap { value in
+            guard args.count > 1 else { return .success((value, nil)) }
+            guard let screen = args[1].stringValue, !screen.isEmpty
+            else { return .failure("expected a screen") }
+            return .success((value, screen))
+        }
+    }
+
     /// `set_edge`'s arguments (#1948): the edge, then an optional
     /// screen — a fingerprint by now, since `KiwiCore` resolves a
     /// number or a name ahead of the parse

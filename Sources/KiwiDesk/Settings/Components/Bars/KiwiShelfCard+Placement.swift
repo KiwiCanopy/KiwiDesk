@@ -76,7 +76,10 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .spaceBarShow.text,
-                $model.config.settings.spaceBarStyle.visibility
+                model.barShowBinding(
+                    \.spaceBarStyle.visibility,
+                    clearing: .space
+                )
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children
@@ -90,7 +93,10 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .monocleShowIn.text,
-                $model.config.settings.monocle.appBar.visibility
+                model.barShowBinding(
+                    \.monocle.appBar.visibility,
+                    clearing: .app
+                )
             )
             .modifier(GreyOut(active: maximizes))
             .searchAnchored(
@@ -106,7 +112,10 @@ extension KiwiShelfCard {
             visibilityRow(
                 SettingsCatalog.bars.kiwishelfShowEach.children
                     .scrollingShowIn.text,
-                $model.config.settings.scrolling.appBar.visibility
+                model.barShowBinding(
+                    \.scrolling.appBar.visibility,
+                    clearing: .app
+                )
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfShowEach.children

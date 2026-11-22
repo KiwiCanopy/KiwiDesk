@@ -55,9 +55,9 @@ extension KiwiCore {
     /// of the Space it shows — `shelfSettings(on:)` for an area,
     /// which a split screen's bars take. On an unsplit screen the
     /// two answer alike.
-    func shelfSettings(on placement: Placement) -> TilingSettings {
-        let shown = tiler.settings.onScreen(placement.key.description)
-        if tilingOffHidesShelf(on: placement.id) {
+    func shelfSettings(on placement: PlacementID) -> TilingSettings {
+        let shown = tiler.settings.onScreen(areaKey(of: placement))
+        if tilingOffHidesShelf(on: placement) {
             return shown.hidingEveryBar()
         }
         return screenMaximizes(on: placement)
@@ -66,23 +66,31 @@ extension KiwiCore {
 
     /// Whether `placement` shows a maximized window, the area's
     /// `screenMaximizes(on:)`.
-    func screenMaximizes(on placement: Placement) -> Bool {
-        let space = state.workspaces.activeSpace(on: placement.id)
+    func screenMaximizes(on placement: PlacementID) -> Bool {
+        let space = state.workspaces.activeSpace(on: placement)
         return showsMaximized(space, on: placement.display)
-            || tiler.settings.onScreen(placement.key.description)
+            || tiler.settings.onScreen(areaKey(of: placement))
                 .maximizesWindows(in: shownMode(of: space))
     }
 
     /// The bars a pointer at their edge brings in over the window
     /// `placement` shows maximized, the area's
     /// `maximizedHoverBars(on:)`.
-    func maximizedHoverBars(on placement: Placement) -> Set<ShelfBar> {
-        guard !tilingOffHidesShelf(on: placement.id),
+    func maximizedHoverBars(on placement: PlacementID) -> Set<ShelfBar> {
+        guard !tilingOffHidesShelf(on: placement),
             screenMaximizes(on: placement)
         else { return [] }
-        let space = state.workspaces.activeSpace(on: placement.id)
-        return tiler.settings.onScreen(placement.key.description)
+        let space = state.workspaces.activeSpace(on: placement)
+        return tiler.settings.onScreen(areaKey(of: placement))
             .maximizedHoverBars(in: shownMode(of: space))
+    }
+
+    /// The key `placement`'s bars resolve under: its area's stored
+    /// key, else — a screen with no placement record yet — the
+    /// screen's fingerprint, as `settings(on:)` reads it.
+    func areaKey(of placement: PlacementID) -> String? {
+        state.workspaces[placement: placement]?.key.description
+            ?? screenFingerprint(of: placement.display)
     }
 
     /// Whether `display` shows a maximized window: a Maximize over

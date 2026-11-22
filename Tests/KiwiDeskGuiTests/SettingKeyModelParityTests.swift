@@ -41,6 +41,8 @@ struct SettingKeyModelParityTests {
         settings.track.override["1"] = TrackOverride()
         settings.spaceBarStyle.edgeOverride["S:1x1"] = .left
         settings.appBarStyle.edgeOverride["S:1x1"] = .left
+        settings.spaceBarStyle.visibilityOverride["S:1x1"] = .hidden
+        settings.appBarStyle.visibilityOverride["S:1x1"] = .hidden
         settings.kiwishelf.pocketEdgeOverride["S:1x1"] = .left
         settings.displayAreas["S:1x1"] = ScreenSplit.whole(
             width: 1,

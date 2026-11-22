@@ -85,14 +85,17 @@ struct SettingsRevertRegisterTests {
             }
             let id = spelled(key.id)
             // A master writes exactly its followers, and beside a
-            // follower bar edge the per-screen map the doors clear
-            // with it.
+            // follower bar edge or Show the per-screen map the doors
+            // clear with it (#3517 ruling 32).
             if let followers = SettingKey.masterWrites[key] {
                 let maps = followers.filter {
                     $0.hasSuffix(".edge") || $0.hasSuffix(".pocketEdge")
                 }
                 .map { $0 + "Override" }
-                #expect(Set(writer.paths) == Set(followers + maps))
+                #expect(
+                    Set(writer.paths)
+                        == Set(followers + maps + showMaps(followers))
+                )
                 continue
             }
             #expect(
@@ -104,5 +107,17 @@ struct SettingsRevertRegisterTests {
                 Comment(rawValue: "\(key.id) ← \(writer.paths)")
             )
         }
+    }
+
+    /// The per-screen Show maps a bar Show follower clears with it.
+    private func showMaps(_ followers: [String]) -> [String] {
+        var maps: [String] = []
+        if followers.contains("settings.spaceBarStyle.visibility") {
+            maps.append("settings.spaceBarStyle.visibilityOverride")
+        }
+        if followers.contains(where: { $0.hasSuffix(".appBar.visibility") }) {
+            maps.append("settings.appBarStyle.visibilityOverride")
+        }
+        return maps
     }
 }

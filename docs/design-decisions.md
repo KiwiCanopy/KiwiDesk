@@ -21020,6 +21020,33 @@ Per screen rows of its own beside each bar's, and the separate
 Pocket edge row is gone: two rows writing one value would let the
 master and the row disagree about which was the pocket's edge.
 
+*Amended: a bar's Show may differ per screen and per area.*
+([#3517](https://github.com/KiwiCanopy/KiwiDesk/issues/3517),
+rulings 30 and 32, owner 2026-11-22.) A screen split into areas shows a
+Space in each, and a reference area that keeps one window still
+wants no bars over it while its neighbour keeps them. So "nothing
+else does" no longer holds for the bars' Show: each bar's
+visibility takes the same sparse shape as its edge —
+`space_bar.visibility_override` and `app_bar.visibility_override`,
+keyed by the area's key, which on an unsplit screen is its
+fingerprint — resolved in the one per-screen step, so an area
+whose bars are Hidden draws and reserves nothing. Thickness,
+margins and the rest stay one value, as before.
+
+The Space Bar keeps one visibility, so an area given the bar's own
+value stores nothing, as a screen given its bar's edge does. The
+App Bar's visibility is each layout's own, so there is no bar
+value to follow: an area's entry replaces it in every layout that
+carries an App Bar and gives none to a layout without one, and the
+row's Per layout choice is the "no entry" state. A screen-less
+`space_bar.set_visibility`, and a pick of the Show master, the
+Space Bar's Show or a layout's App Bar Show in Settings, clear the
+matching bar's entries, as a pick of a bar's edge writes every
+level below it: one rule for every row in the drawer. Settings writes them in the same Per screen rows as the
+edge — a Show menu beside each edge picker, a row per area on a
+split screen — so an area's bars have one home; a forgotten screen
+setup drops them with its edges.
+
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
 edges (`top` / `bottom` / `left` / `right`, default top) and the

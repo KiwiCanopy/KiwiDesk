@@ -105,6 +105,7 @@ struct AppBarCommandParityTests {
         .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
         .visibility(.auto),
+        .screenVisibility(.hidden, screen: "S:1x1#1"),
     ]
 
     @Test("Each command sets one matching field on style and bar")
