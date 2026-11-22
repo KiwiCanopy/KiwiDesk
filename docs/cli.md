@@ -28,14 +28,19 @@ executable; the cask only links it onto your `PATH`. Do that once
 yourself:
 
 ```sh
+APP=/Applications/KiwiDesk.app
 sudo mkdir -p /usr/local/bin
-sudo ln -sf /Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk \
-  /usr/local/bin/kiwidesk
+sudo ln -sf "$APP/Contents/MacOS/KiwiDesk" /usr/local/bin/kiwidesk
 ```
 
-The `mkdir` is there because `/usr/local/bin` may not exist on a
-Mac that has never had Homebrew. Link, never copy: a copy fails
-its signature check.
+Set `APP` to wherever the app is, such as
+`~/Applications/KiwiDesk.app`. The `mkdir` is there because
+`/usr/local/bin` may not exist on a Mac that has never had
+Homebrew. Link, never copy: a copy fails its signature check.
+
+The link points at the app where it was. If you move the app,
+the shell answers `command not found: kiwidesk`: run the lines
+again with the new `APP`.
 
 A directory you own works without `sudo` as long as your shell
 already searches it; `~/.local/bin` is **not** on the macOS
