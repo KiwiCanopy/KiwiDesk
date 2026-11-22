@@ -54,7 +54,7 @@ struct GlyphSizeSpaceBarTests {
         roundness: CGFloat = 50
     ) -> SpaceBarManager.Bar {
         SpaceBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             items: (1...spaces).map { n in
                 SpaceBarOverlay.Item(
                     space: SpaceID(String(n)),

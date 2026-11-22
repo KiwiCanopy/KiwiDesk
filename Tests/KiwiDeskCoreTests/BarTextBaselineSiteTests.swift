@@ -46,7 +46,7 @@ struct BarTextBaselineSiteTests {
         style.showFrontApp = true
         let strip = CGRect(x: 0, y: 0, width: 1440, height: 60)
         let bar = SpaceBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             items: [
                 SpaceBarOverlay.Item(
                     space: SpaceID("1"),

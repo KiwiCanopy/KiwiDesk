@@ -50,7 +50,13 @@ struct ShelfRevealPairTests {
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
-        return (core, ShelfManager.Key(display: display.id, edge: .top))
+        return (
+            core,
+            ShelfManager.Key(
+                placement: PlacementID(display: display.id, area: 0),
+                edge: .top
+            )
+        )
     }
 
     private func spec(

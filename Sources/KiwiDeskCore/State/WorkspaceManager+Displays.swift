@@ -32,11 +32,15 @@ extension WorkspaceManager {
         _ space: SpaceID,
         to display: DisplayID
     ) {
-        assign(
-            space,
-            to: leadPlacement(of: display)
-                ?? PlacementID(display: display, area: 0)
-        )
+        assign(space, to: placementOrWhole(of: display))
+    }
+
+    /// `display`'s area 0, or — for a screen with no placement
+    /// record yet (before any screen is tracked, a fixture) — the
+    /// whole screen as area 0: the one fallback a door may take
+    /// after `leadPlacement(of:)` answered nil (state-and-layout.md).
+    public func placementOrWhole(of display: DisplayID) -> PlacementID {
+        leadPlacement(of: display) ?? PlacementID(display: display, area: 0)
     }
 
     public mutating func assign(

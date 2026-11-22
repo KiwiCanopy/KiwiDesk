@@ -15,12 +15,12 @@ extension KiwiCore {
                 announce: true
             )
         } else if let space = state.workspaces.activeSpace,
-            let display = state.workspaces.display(of: space),
-            let drawn = shelves.drawnStrip(on: display, preferring: .space)
+            let placement = state.workspaces.placement(of: space),
+            let drawn = shelves.drawnStrip(on: placement, preferring: .space)
         {
             flashRefusalPill(
                 near: drawn.strip,
-                on: display,
+                on: placement.display,
                 edge: drawn.edge,
                 text: text,
                 symbol: symbol,

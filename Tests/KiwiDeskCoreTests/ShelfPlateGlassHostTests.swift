@@ -26,7 +26,7 @@ struct ShelfPlateGlassHostTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: look,
@@ -63,7 +63,7 @@ struct ShelfPlateGlassHostTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: look,

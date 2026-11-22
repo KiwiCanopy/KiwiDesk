@@ -54,7 +54,7 @@ struct GlassHandBackTests {
         style.liquidGlass = true
         style.backgroundStyle = boxed ? .boxed : .plain
         return AppBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             space: SpaceID("1"),
             items: [appBarItem(1, text: "One"), appBarItem(2, text: "Two")],
             activeIndex: 0,

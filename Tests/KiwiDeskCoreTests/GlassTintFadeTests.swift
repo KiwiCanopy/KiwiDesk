@@ -102,7 +102,7 @@ struct GlassTintFadeTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: edge,
                 strip: Self.strip(edge),
                 shelf: shelf,
@@ -131,7 +131,7 @@ struct GlassTintFadeTests {
         style.liquidGlass = true
         style.backgroundStyle = .boxed
         bar = SpaceBarManager.Bar(
-            display: bar.display,
+            placement: PlacementID(display: bar.display, area: 0),
             items: bar.items,
             frontApp: bar.frontApp,
             frontWindow: bar.frontWindow,
@@ -168,7 +168,7 @@ struct GlassTintFadeTests {
         style.liquidGlass = true
         style.backgroundStyle = .boxed
         let bar = AppBarManager.Bar(
-            display: painted.display,
+            placement: PlacementID(display: painted.display, area: 0),
             space: painted.space,
             items: painted.items,
             activeIndex: painted.activeIndex,

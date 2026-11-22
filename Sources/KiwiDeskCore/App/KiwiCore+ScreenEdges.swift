@@ -49,6 +49,42 @@ extension KiwiCore {
             ? shown.hidingEveryBarForMaximize() : shown
     }
 
+    /// The settings one area's shelf reads (#3517 ruling 30): each
+    /// bar's edge and visibility as that area has them, keyed by
+    /// its `ScreenAreaKey`, then the tiling-off and maximize hides
+    /// of the Space it shows — `shelfSettings(on:)` for an area,
+    /// which a split screen's bars take. On an unsplit screen the
+    /// two answer alike.
+    func shelfSettings(on placement: Placement) -> TilingSettings {
+        let shown = tiler.settings.onScreen(placement.key.description)
+        if tilingOffHidesShelf(on: placement.id) {
+            return shown.hidingEveryBar()
+        }
+        return screenMaximizes(on: placement)
+            ? shown.hidingEveryBarForMaximize() : shown
+    }
+
+    /// Whether `placement` shows a maximized window, the area's
+    /// `screenMaximizes(on:)`.
+    func screenMaximizes(on placement: Placement) -> Bool {
+        let space = state.workspaces.activeSpace(on: placement.id)
+        return showsMaximized(space, on: placement.display)
+            || tiler.settings.onScreen(placement.key.description)
+                .maximizesWindows(in: shownMode(of: space))
+    }
+
+    /// The bars a pointer at their edge brings in over the window
+    /// `placement` shows maximized, the area's
+    /// `maximizedHoverBars(on:)`.
+    func maximizedHoverBars(on placement: Placement) -> Set<ShelfBar> {
+        guard !tilingOffHidesShelf(on: placement.id),
+            screenMaximizes(on: placement)
+        else { return [] }
+        let space = state.workspaces.activeSpace(on: placement.id)
+        return tiler.settings.onScreen(placement.key.description)
+            .maximizedHoverBars(in: shownMode(of: space))
+    }
+
     /// Whether `display` shows a maximized window: a Maximize over
     /// the shelf (`showsMaximized`, the command, a Height or Width
     /// reaching a strip, KiwiVision's fill) or a Monocle that
@@ -56,7 +92,10 @@ extension KiwiCore {
     /// predicate the shelf, its bands and the overflow marks ask
     /// (#3346).
     func screenMaximizes(on display: DisplayID) -> Bool {
-        showsMaximized(on: display)
+        showsMaximized(
+            state.workspaces.activeSpace(on: display),
+            on: display
+        )
             || settings(on: display).maximizesWindows(
                 in: shownMode(on: display)
             )
@@ -102,14 +141,24 @@ extension KiwiCore {
     var shelfReservations: [ShelfReservation] {
         // The bounds' own read, so the skip and the bounds agree.
         let pocketAtRest = tiler.settings.pocketRests
-        let screens: [String?] =
-            [nil] + state.workspaces.allDisplays.map(\.fingerprint)
+        // Every area of a split screen too, its key what its bounds
+        // resolve under; the Pocket rests in the lead area (#3517).
+        let screens: [(key: String?, pocket: Bool)] =
+            [(nil, true)]
+            + state.workspaces.allDisplays.flatMap { display in
+                let areas = state.workspaces.placements(of: display.id)
+                let lead = state.workspaces.leadPlacement(of: display.id)
+                return [(display.fingerprint, true)]
+                    + areas.filter { $0.id != lead }.map {
+                        ($0.key.description, false)
+                    }
+            }
         return screens.flatMap { screen in
             LayoutMode.allCases.map {
                 tiler.settings.shelfReservation(
                     in: $0,
-                    on: screen,
-                    pocketAtRest: pocketAtRest
+                    on: screen.key,
+                    pocketAtRest: pocketAtRest && screen.pocket
                 )
             }
         }

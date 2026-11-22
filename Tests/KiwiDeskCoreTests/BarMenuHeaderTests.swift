@@ -80,7 +80,7 @@ struct BarMenuHeaderTests {
         )
         manager.sync([
             SpaceBarManager.Bar(
-                display: display,
+                placement: PlacementID(display: display, area: 0),
                 items: [
                     SpaceBarOverlay.Item(
                         space: SpaceID("1"),

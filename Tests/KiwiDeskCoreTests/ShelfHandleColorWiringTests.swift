@@ -31,7 +31,10 @@ struct ShelfHandleColorWiringTests {
         pinRevealLength()
         core.updateBars()
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display.id, edge: .bottom),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display.id, area: 0),
+                edge: .bottom
+            ),
             bar: .space
         )
         if filling {

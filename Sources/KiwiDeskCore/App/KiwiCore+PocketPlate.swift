@@ -24,8 +24,13 @@ extension KiwiCore {
     /// The layout `display`'s shown Space is laid out in, or bsp
     /// where it shows none.
     func shownMode(on display: DisplayID) -> LayoutMode {
-        state.workspaces.currentSpace(on: display)
-            .flatMap { state.workspaces[$0]?.mode } ?? .bsp
+        shownMode(of: state.workspaces.currentSpace(on: display))
+    }
+
+    /// The layout `shown` — a screen's or an area's shown Space —
+    /// is laid out in, or bsp where it is nil.
+    func shownMode(of shown: SpaceID?) -> LayoutMode {
+        shown.flatMap { state.workspaces[$0]?.mode } ?? .bsp
     }
 
     /// Whether the pocket stands on `display` this pass: it stands

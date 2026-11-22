@@ -225,13 +225,15 @@ public final class TilingEngine {
     }
 
     /// The area a Space lays out in — its rect in its screen's own
-    /// points, top-left origin — and its stored key, nil where its
-    /// screen is not split (#3517); wired by `KiwiCore` from the
-    /// placement list. An unsplit screen keeps every bound exactly
-    /// as it was.
-    var spaceArea: @MainActor (SpaceID) -> (rect: CGRect, key: String)? = {
-        _ in nil
-    }
+    /// points, top-left origin — its stored key, and whether it is
+    /// its screen's lead area (area 0, where the Pocket rests), nil
+    /// where its screen is not split (#3517); wired by `KiwiCore`
+    /// from the placement list. An unsplit screen keeps every bound
+    /// exactly as it was.
+    var spaceArea:
+        @MainActor (SpaceID) -> (rect: CGRect, key: String, lead: Bool)? = {
+            _ in nil
+        }
 
     /// A screen's whole frame in AX coordinates, the origin an
     /// area's rect is laid from; pinned by tests that split a
@@ -310,7 +312,7 @@ public final class TilingEngine {
         of screen: NSScreen,
         in settings: TilingSettings? = nil
     ) -> String? {
-        (settings ?? self.settings).hasScreenEdges
+        (settings ?? self.settings).hasScreenEntries
             ? screenFingerprint(screen) : nil
     }
 

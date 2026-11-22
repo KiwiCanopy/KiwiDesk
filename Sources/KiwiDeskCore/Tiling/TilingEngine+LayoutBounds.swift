@@ -33,7 +33,9 @@ extension TilingEngine {
             from: visibleBounds(screen, for: space.id),
             mode: space.mode,
             on: area?.key ?? fingerprint(of: screen),
-            pocketAtRest: settings.pocketRests
+            // The Pocket rests in a split screen's lead area alone,
+            // where the shelf draws it (#3517, bars.md).
+            pocketAtRest: settings.pocketRests && (area?.lead ?? true)
         )
     }
 

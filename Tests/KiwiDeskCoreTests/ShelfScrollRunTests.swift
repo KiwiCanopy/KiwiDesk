@@ -172,7 +172,7 @@ struct ShelfScrollRunTests {
         strip.size.width = 400
         manager.sync([
             SpaceBarManager.Bar(
-                display: base.display,
+                placement: PlacementID(display: base.display, area: 0),
                 items: base.items,
                 frontApp: front,
                 frontWindow: base.frontWindow,
@@ -199,7 +199,7 @@ struct ShelfScrollRunTests {
         front.title = String(repeating: "Another long title ", count: 40)
         manager.sync([
             SpaceBarManager.Bar(
-                display: base.display,
+                placement: PlacementID(display: base.display, area: 0),
                 items: base.items,
                 frontApp: front,
                 frontWindow: base.frontWindow,

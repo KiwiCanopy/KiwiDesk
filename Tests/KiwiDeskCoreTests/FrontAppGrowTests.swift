@@ -31,7 +31,7 @@ struct FrontAppGrowTests {
         }
         manager.sync([
             SpaceBarManager.Bar(
-                display: base.display,
+                placement: PlacementID(display: base.display, area: 0),
                 items: base.items,
                 frontApp: app,
                 frontWindow: base.frontWindow,

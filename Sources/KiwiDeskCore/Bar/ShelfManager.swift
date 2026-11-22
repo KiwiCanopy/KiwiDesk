@@ -1,6 +1,7 @@
 import AppKit
 
-/// One `ShelfOverlay` per display and edge (#1517, #1731): one
+/// One `ShelfOverlay` per area and edge (#1517, #1731, #3517 —
+/// an unsplit screen is its one area): one
 /// while the bars share an edge, placing both sections on the one
 /// plate they share, and one per bar while they are split. Synced
 /// after both bars in `updateBars`, and re-laid whenever a section
@@ -8,10 +9,10 @@ import AppKit
 /// trails what the section drew.
 @MainActor
 final class ShelfManager {
-    /// One shelf: its display, its edge, its strip and each shown
+    /// One shelf: its area, its edge, its strip and each shown
     /// section's overlay and slot, in AX coordinates.
     struct Shelf {
-        let display: DisplayID
+        let placement: PlacementID
         let edge: AppBarEdge
         let strip: CGRect
         let shelf: KiwiShelf
@@ -38,10 +39,12 @@ final class ShelfManager {
         _ in
     }
 
-    /// Which shelf an overlay draws: a display's, on one edge.
+    /// Which shelf an overlay draws: an area's, on one edge.
     struct Key: Hashable {
-        let display: DisplayID
+        let placement: PlacementID
         let edge: AppBarEdge
+        /// The physical screen the area is part of.
+        var display: DisplayID { placement.display }
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
@@ -109,26 +112,26 @@ final class ShelfManager {
     }
     private var last: [Key: Shelf] = [:]
 
-    /// The shown shelf on `display` that carries `bar`, if any, in
-    /// AX coordinates (#2567).
+    /// The shown shelf of `placement` that carries `bar`, if any,
+    /// in AX coordinates (#2567).
     func drawnStrip(
-        on display: DisplayID,
+        on placement: PlacementID,
         carrying bar: ShelfBar
     ) -> (strip: CGRect, edge: AppBarEdge)? {
         last.values.first {
-            $0.display == display
+            $0.placement == placement
                 && (bar == .space ? $0.space != nil : $0.app != nil)
         }
         .map { ($0.strip, $0.edge) }
     }
 
-    /// The strip last laid on `display` carrying `bar`, else any on
-    /// that display, in AX coordinates (#761).
+    /// The strip last laid on `placement` carrying `bar`, else any
+    /// on that area, in AX coordinates (#761).
     func drawnStrip(
-        on display: DisplayID,
+        on placement: PlacementID,
         preferring bar: ShelfBar
     ) -> (strip: CGRect, edge: AppBarEdge)? {
-        let shown = last.values.filter { $0.display == display }
+        let shown = last.values.filter { $0.placement == placement }
         let carrying = shown.first {
             bar == .space ? $0.space != nil : $0.app != nil
         }
@@ -174,7 +177,7 @@ final class ShelfManager {
     }
 
     private static func key(_ shelf: Shelf) -> Key {
-        Key(display: shelf.display, edge: shelf.edge)
+        Key(placement: shelf.placement, edge: shelf.edge)
     }
 
     /// Re-lays one shelf from what its sections drew.
@@ -250,11 +253,17 @@ final class ShelfManager {
         peek.syncToAnchor()
     }
 
-    /// The displays with a shelf still fading out: a bar manager
-    /// spares their overlays, whose roots that fade still draws
-    /// (#1838).
+    /// The displays with a shelf still fading out: the pocket's
+    /// plate spares their overlays, whose roots that fade still
+    /// draws (#1838).
     var leavingDisplays: Set<DisplayID> {
-        Set(overlays.filter { $0.value.isLeaving }.map(\.key.display))
+        Set(leavingPlacements.map(\.display))
+    }
+
+    /// The areas with a shelf still fading out, which a bar manager
+    /// spares the same way (#3517).
+    var leavingPlacements: Set<PlacementID> {
+        Set(overlays.filter { $0.value.isLeaving }.map(\.key.placement))
     }
 
     /// Drops a shelf that has left the screen, unless a plan wants
@@ -272,17 +281,22 @@ final class ShelfManager {
             overlays.values.filter(\.isVisible).count
         }
 
-        /// The display's shelf on `edge`, or its one shelf when
-        /// `edge` is nil and it has exactly one.
+        /// The display's first area's shelf on `edge`, or its one
+        /// shelf when `edge` is nil and it has exactly one.
         func overlayForTesting(
             _ display: DisplayID,
             edge: AppBarEdge? = nil
         ) -> ShelfOverlay? {
-            if let edge {
-                return overlays[Key(display: display, edge: edge)]
-            }
             let mine = overlays.filter { $0.key.display == display }
+            if let edge {
+                return mine.filter { $0.key.edge == edge }
+                    .min { $0.key.placement.area < $1.key.placement.area }?
+                    .value
+            }
             return mine.count == 1 ? mine.first?.value : nil
         }
+
+        /// Every area's shelf, keyed as drawn.
+        var overlaysForTesting: [Key: ShelfOverlay] { overlays }
     #endif
 }

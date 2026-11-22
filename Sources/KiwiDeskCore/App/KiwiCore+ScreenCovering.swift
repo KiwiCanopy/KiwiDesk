@@ -115,7 +115,13 @@ extension KiwiCore {
     /// over the shelf: a full Maximize always, a Height or Width one
     /// where its drawn frame reaches into the shelf's strip (#3062).
     func showsMaximized(on display: DisplayID) -> Bool {
-        guard let id = state.workspaces.activeSpace(on: display),
+        showsMaximized(state.workspaces.activeSpace(on: display), on: display)
+    }
+
+    /// Whether `shown`, the Space a screen or one of its areas
+    /// shows on `display`, shows a maximized window there (#3517).
+    func showsMaximized(_ shown: SpaceID?, on display: DisplayID) -> Bool {
+        guard let id = shown,
             let space = state.workspaces[id],
             let window = state.maximizedWindow(of: space)
         else { return false }
@@ -145,10 +151,12 @@ extension KiwiCore {
         var carved = tiler.settings
         carved.spaceBarStyle.reserve = true
         carved.appBarStyle.reserve = true
+        // The Space's own area where its screen is split (#3517).
         return carved.layoutBounds(
-            from: tiler.visibleBounds(screen),
+            from: tiler.visibleBounds(screen, for: space.id),
             mode: space.mode,
-            on: tiler.fingerprint(of: screen),
+            on: tiler.spaceArea(space.id)?.key
+                ?? tiler.fingerprint(of: screen),
             pocketAtRest: carved.pocketRests
         )
     }

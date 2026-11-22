@@ -25,7 +25,7 @@ struct ShelfFollowTests {
             )
         }
         bar = SpaceBarManager.Bar(
-            display: bar.display,
+            placement: PlacementID(display: bar.display, area: 0),
             items: items,
             frontApp: bar.frontApp,
             frontWindow: bar.frontWindow,
@@ -84,7 +84,7 @@ struct ShelfFollowTests {
             items: (1...60).map { appBarItem(UInt32($0), text: "W\($0)") }
         )
         return AppBarManager.Bar(
-            display: bar.display,
+            placement: PlacementID(display: bar.display, area: 0),
             space: bar.space,
             items: bar.items,
             activeIndex: active - 1,
@@ -125,7 +125,7 @@ struct ShelfFollowTests {
         var strip = narrow.strip
         strip.size.width /= 3
         narrow = SpaceBarManager.Bar(
-            display: narrow.display,
+            placement: PlacementID(display: narrow.display, area: 0),
             items: narrow.items,
             frontApp: narrow.frontApp,
             frontWindow: narrow.frontWindow,
@@ -150,7 +150,7 @@ struct ShelfFollowTests {
         shelves.holdingRelayout {
             shelves.sync([
                 .init(
-                    display: barTitleDisplay,
+                    placement: PlacementID(display: barTitleDisplay, area: 0),
                     edge: .top,
                     strip: barTitleStrip,
                     shelf: KiwiShelf(),
@@ -162,7 +162,12 @@ struct ShelfFollowTests {
         }
         #expect(!shelves.holdsRelayout)
         #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
-        shelves.relayout(.init(display: barTitleDisplay, edge: .top))
+        shelves.relayout(
+            .init(
+                placement: PlacementID(display: barTitleDisplay, area: 0),
+                edge: .top
+            )
+        )
         #expect(shelves.overlayForTesting(barTitleDisplay) != nil)
     }
 }

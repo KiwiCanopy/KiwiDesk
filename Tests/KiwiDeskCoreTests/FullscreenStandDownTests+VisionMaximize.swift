@@ -157,7 +157,7 @@ extension FullscreenStandDownTests {
         #expect(resting?.risen == false)
         let bar = ShelfRevealer.Key(
             shelf: ShelfManager.Key(
-                display: display,
+                placement: PlacementID(display: display, area: 0),
                 edge: core.tiler.settings.spaceBarStyle.edge
             ),
             bar: .space

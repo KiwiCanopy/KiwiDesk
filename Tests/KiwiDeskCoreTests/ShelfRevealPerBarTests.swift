@@ -80,7 +80,10 @@ struct ShelfRevealPerBarTests {
     @Test("a band-less target opens on its shortcut alone")
     func bandlessOpensOnTheShortcut() {
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: DisplayID(1), area: 0),
+                edge: .top
+            ),
             bar: .app
         )
         let revealer = ShelfRevealer()
@@ -110,7 +113,10 @@ struct ShelfRevealPerBarTests {
     @Test("a timed pin on a hidden bar never strands it shown")
     func bandlessPinEnds() {
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: DisplayID(1), area: 0),
+                edge: .top
+            ),
             bar: .space
         )
         let revealer = ShelfRevealer()
@@ -252,7 +258,10 @@ struct ShelfRevealPerBarTests {
             makeCore(space: .hidden, app: .hidden)
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let shelf = ShelfManager.Key(display: display, edge: .top)
+        let shelf = ShelfManager.Key(
+            placement: PlacementID(display: display, area: 0),
+            edge: .top
+        )
         #expect(core.spaceBars.shownStrips.isEmpty)
         for bar in [ShelfBar.space, .app] {
             #expect(

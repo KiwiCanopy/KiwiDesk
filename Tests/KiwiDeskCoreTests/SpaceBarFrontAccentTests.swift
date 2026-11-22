@@ -28,7 +28,7 @@ struct SpaceBarFrontAccentTests {
         let manager = SpaceBarManager()
         manager.sync([
             SpaceBarManager.Bar(
-                display: base.display,
+                placement: PlacementID(display: base.display, area: 0),
                 items: base.items,
                 frontApp: base.frontApp,
                 frontWindow: base.frontWindow,

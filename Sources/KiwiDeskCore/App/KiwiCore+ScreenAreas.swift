@@ -29,14 +29,21 @@ extension KiwiCore {
         )
     }
 
-    /// `space`'s area — its rect in its screen's own points — and
-    /// stored key, nil where its screen is not split.
-    func splitArea(of space: SpaceID) -> (rect: CGRect, key: String)? {
+    /// `space`'s area — its rect in its screen's own points — its
+    /// stored key and whether it leads its screen, nil where its
+    /// screen is not split.
+    func splitArea(
+        of space: SpaceID
+    ) -> (rect: CGRect, key: String, lead: Bool)? {
         guard let id = state.workspaces.placement(of: space),
             state.workspaces.placements(of: id.display).count > 1,
             let placement = state.workspaces[placement: id]
         else { return nil }
-        return (placement.area.rect, placement.key.description)
+        return (
+            placement.area.rect,
+            placement.key.description,
+            id == state.workspaces.leadPlacement(of: id.display)
+        )
     }
 
     /// The AX frames of every area of every split screen, each

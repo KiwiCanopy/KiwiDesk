@@ -131,7 +131,10 @@ struct ShelfRevealStyleTests {
         #expect(overlay.revealPath.kind == .grow)
         // The mark keeps time with the grow.
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display, edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display, area: 0),
+                edge: .top
+            ),
             bar: .space
         )
         #expect(

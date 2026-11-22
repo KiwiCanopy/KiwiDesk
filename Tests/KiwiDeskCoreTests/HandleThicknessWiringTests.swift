@@ -39,7 +39,10 @@ struct HandleThicknessWiringTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, display) = try core(thickness: CGFloat(thickness))
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display.id, edge: .bottom),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display.id, area: 0),
+                edge: .bottom
+            ),
             bar: .space
         )
         let spec = try #require(

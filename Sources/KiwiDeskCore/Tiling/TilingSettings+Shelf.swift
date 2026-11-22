@@ -13,20 +13,22 @@ extension TilingSettings {
             || !kiwishelf.pocketEdgeOverride.isEmpty
     }
 
-    /// These settings as `screen` (a `Display.fingerprint`) shows
-    /// them: each bar's `edge` and the pocket's resolved for that
-    /// screen — its own where it has one, else the bar's or the
-    /// pocket's (#1948, #3376). The ONE
+    /// These settings as `screen` (a `Display.fingerprint`, or an
+    /// area's `ScreenAreaKey`) shows them: each bar's `edge` and the
+    /// pocket's resolved for that screen — its own where it has one,
+    /// else the bar's or the pocket's (#1948, #3376) — and each
+    /// bar's visibility (#3517). The ONE
     /// per-screen step, taken before `barEdges(space:app:)` folds
     /// the edges, so the reservation and the live plan read one
     /// answer; nil keeps each bar's own edge. The copy holds no
     /// entry, so resolving it again changes nothing.
     public func onScreen(_ screen: String?) -> TilingSettings {
-        guard hasScreenEdges else { return self }
+        guard hasScreenEntries else { return self }
         var out = self
         out.spaceBarStyle.setEdge(spaceBarStyle.edge(on: screen))
         out.appBarStyle.setEdge(appBarStyle.edge(on: screen))
         out.kiwishelf = kiwishelf.onScreen(screen)
+        out.resolveVisibilities(on: screen)
         return out
     }
 
@@ -94,12 +96,12 @@ extension TilingSettings {
     }
 
     /// These settings as each screen they can draw on shows them
-    /// (#1948): the bars' own edges, then every screen with an edge
-    /// of its own. A reader asking whether a setting acts on SOME
-    /// screen asks each; the set errs toward "acts", never toward
-    /// a wrong grey.
+    /// (#1948): the bars' own edges, then every screen or area with
+    /// an edge or a visibility of its own (#3517). A reader asking
+    /// whether a setting acts on SOME screen asks each; the set errs
+    /// toward "acts", never toward a wrong grey.
     public var screenVariants: [TilingSettings] {
-        [onScreen(nil)] + edgeScreens.map { onScreen($0) }
+        [onScreen(nil)] + screenKeys.map { onScreen($0) }
     }
 
     /// Every screen a bar or the pocket holds an edge of its own

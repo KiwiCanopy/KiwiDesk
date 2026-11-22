@@ -168,7 +168,7 @@ struct BarFontSiteTests {
             )
             style.showFrontApp = true
             return SpaceBarManager.Bar(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 items: [
                     SpaceBarOverlay.Item(
                         space: SpaceID("1"),

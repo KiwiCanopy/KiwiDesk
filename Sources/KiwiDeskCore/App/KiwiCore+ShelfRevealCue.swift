@@ -24,8 +24,12 @@ extension KiwiCore {
     /// looks on pressing its key (owner, #2567): beside the shelf
     /// carrying that bar, else at that bar's own edge of the screen —
     /// never on a window, never beside the other bar's shelf.
-    func cueRevealRefusal(_ refusal: RevealRefusal, display: DisplayID) {
-        guard let place = refusalPlace(of: refusal.bar, on: display)
+    func cueRevealRefusal(
+        _ refusal: RevealRefusal,
+        placement: Placement
+    ) {
+        let display = placement.display
+        guard let place = refusalPlace(of: refusal.bar, on: placement)
         else { return }
         soundIfDrawn(
             flashRefusalPill(
@@ -40,30 +44,40 @@ extension KiwiCore {
     }
 
     /// The strip a refusal's pill stands beside, AX coordinates: the
-    /// shelf carrying `bar`, else a zero-depth strip along `bar`'s
-    /// edge of the screen's visible frame.
+    /// shelf of `placement` carrying `bar`, else a zero-depth strip
+    /// along `bar`'s edge of the area's frame (#3517).
     func refusalPlace(
         of bar: ShelfBar,
-        on display: DisplayID
+        on placement: Placement
     ) -> (strip: CGRect, edge: AppBarEdge)? {
-        if let shelf = shelves.drawnStrip(on: display, carrying: bar) {
+        if let shelf = shelves.drawnStrip(on: placement.id, carrying: bar) {
             return shelf
         }
-        guard let screen = screen(for: display) else { return nil }
+        guard let screen = screen(for: placement.display) else { return nil }
         let settings = tiler.settings
-        let fingerprint = screenFingerprint(of: display)
+        let key = placement.key.description
         let edge =
             bar == .app
-            ? settings.appBarStyle.edge(on: fingerprint)
-            : settings.spaceBarStyle.edge(on: fingerprint)
-        return (refusalStrip(of: screen, edge: edge), edge)
+            ? settings.appBarStyle.edge(on: key)
+            : settings.spaceBarStyle.edge(on: key)
+        // Chrome is drawn on a REAL screen (`VisibleBoundsRoutingTests`).
+        let visible = shelfFrame(
+            of: placement,
+            visible: GeometryUtils.axVisibleFrame(of: screen),
+            on: screen
+        )
+        return (refusalStrip(in: visible, edge: edge), edge)
     }
 
     /// A zero-depth strip along `edge` of `screen`'s visible frame, AX
     /// coordinates: where a pill stands with no shelf beside it.
     func refusalStrip(of screen: NSScreen, edge: AppBarEdge) -> CGRect {
         // Chrome is drawn on a REAL screen (`VisibleBoundsRoutingTests`).
-        let visible = GeometryUtils.axVisibleFrame(of: screen)
+        refusalStrip(in: GeometryUtils.axVisibleFrame(of: screen), edge: edge)
+    }
+
+    /// A zero-depth strip along `edge` of `visible`, AX coordinates.
+    func refusalStrip(in visible: CGRect, edge: AppBarEdge) -> CGRect {
         switch edge {
         case .top:
             return CGRect(

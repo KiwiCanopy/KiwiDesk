@@ -15,6 +15,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// on its shortcut (#761); `hidden` replaces the retired on/off
     /// switch.
     public var visibility: ShelfVisibility = .always
+    /// An area's own visibility, keyed by its `ScreenAreaKey`
+    /// (#3517); an area with none uses `visibility`.
+    public var visibilityOverride: [String: ShelfVisibility] = [:]
     /// The screen edge the bar sits on (top). The App Bar on the
     /// same edge shares one shelf with it; on another, each bar
     /// is its own (#1731).

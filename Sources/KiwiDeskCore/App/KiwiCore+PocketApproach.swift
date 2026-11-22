@@ -9,8 +9,9 @@ extension KiwiCore {
     /// The revealer's key for the pocket handle on `display`.
     func pocketApproachKey(on display: DisplayID) -> ShelfRevealer.Key {
         .pocket(
+            // The Pocket rests in the screen's lead area (#3517).
             on: ShelfManager.Key(
-                display: display,
+                placement: state.workspaces.placementOrWhole(of: display),
                 edge: shelf(on: display).pocketEdge
             )
         )

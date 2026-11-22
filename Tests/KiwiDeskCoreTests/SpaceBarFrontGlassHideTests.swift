@@ -18,7 +18,7 @@ struct SpaceBarFrontGlassHideTests {
         style.shelf.backgroundStyle = .boxed
         style.shelf.liquidGlass = true
         return SpaceBarManager.Bar(
-            display: base.display,
+            placement: PlacementID(display: base.display, area: 0),
             items: base.items,
             frontApp: base.frontApp,
             frontWindow: base.frontWindow,

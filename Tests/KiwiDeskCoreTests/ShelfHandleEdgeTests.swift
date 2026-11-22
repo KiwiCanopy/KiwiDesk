@@ -227,8 +227,8 @@ struct ShelfHandleEdgeTests {
             var hiding = KiwiCore.HidingShelves()
             hiding.file(
                 [plan],
-                display: DisplayID(1),
-                screen: screen,
+                placement: PlacementID(display: DisplayID(1), area: 0),
+                frame: screen.frame,
                 items: nil,
                 screens: screens,
                 reveal: ShelfRevealer(),

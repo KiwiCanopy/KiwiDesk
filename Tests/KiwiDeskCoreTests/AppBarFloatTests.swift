@@ -100,7 +100,11 @@ struct AppBarFloatTests {
             ).first
         )
         let bar = try #require(
-            core.placedBar(app, display: DisplayID(7), plan: plan)
+            core.placedBar(
+                app,
+                placement: PlacementID(display: DisplayID(7), area: 0),
+                plan: plan
+            )
         )
         #expect(bar.activeIndex == 2)
     }

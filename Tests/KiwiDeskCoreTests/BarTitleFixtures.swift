@@ -97,7 +97,7 @@ func paintedAppBar(
     // would change what `sync` is handed per host.
     style.liquidGlass = false
     return AppBarManager.Bar(
-        display: barTitleDisplay,
+        placement: PlacementID(display: barTitleDisplay, area: 0),
         space: SpaceID("1"),
         items: items,
         activeIndex: 0,
@@ -125,7 +125,7 @@ func paintedSpaceBar(
     style.liquidGlass = glass
     style.backgroundStyle = .plain
     return SpaceBarManager.Bar(
-        display: barTitleDisplay,
+        placement: PlacementID(display: barTitleDisplay, area: 0),
         items: (1...max(spaces, 1)).map { n in
             SpaceBarOverlay.Item(
                 space: SpaceID(String(n)),

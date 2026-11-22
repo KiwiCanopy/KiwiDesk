@@ -209,7 +209,7 @@ func collapsedBar(
         style.liquidGlass = true
     }
     return SpaceBarManager.Bar(
-        display: barTitleDisplay,
+        placement: PlacementID(display: barTitleDisplay, area: 0),
         items: items,
         frontApp: nil,
         frontWindow: nil,

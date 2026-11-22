@@ -39,7 +39,7 @@ struct SpaceBarStuckHoverTests {
         shelves.holdingRelayout {
             spaceBars.sync([
                 SpaceBarManager.Bar(
-                    display: barTitleDisplay,
+                    placement: PlacementID(display: barTitleDisplay, area: 0),
                     items: items,
                     strip: strip,
                     style: style,
@@ -53,7 +53,7 @@ struct SpaceBarStuckHoverTests {
         }
         shelves.sync([
             .init(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),

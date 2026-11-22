@@ -209,7 +209,7 @@ struct ShelfBorderDrawingTests {
         style.shelf = shelf
         style.bar.activeIndicator = indicator
         let bar = SpaceBarManager.Bar(
-            display: base.display,
+            placement: PlacementID(display: base.display, area: 0),
             items: base.items,
             frontApp: base.frontApp,
             frontWindow: base.frontWindow,
