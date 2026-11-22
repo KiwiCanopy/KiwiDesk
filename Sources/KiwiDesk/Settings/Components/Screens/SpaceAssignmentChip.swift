@@ -207,13 +207,7 @@ struct SpaceAssignmentChip: View {
         .disabled(kind == .main)
         // Every screen, and every area of a split one (#3517), but
         // the one the Space is pinned to.
-        let elsewhere = displays.flatMap { display in
-            ScreensFamilyRows.areas(
-                of: display,
-                in: model.config.settings.displayAreas
-            ).map(\.key)
-        }
-        .filter { $0 != currentKey }
+        let elsewhere = model.areaKeys.filter { $0 != currentKey }
         if !elsewhere.isEmpty {
             Divider()
             ForEach(elsewhere, id: \.self) { key in
@@ -231,7 +225,8 @@ struct SpaceAssignmentChip: View {
     }
 
     private var currentKey: String? {
-        kind == .main ? nil : model.config.spacePins[space]
+        kind == .main
+            ? nil : model.config.spacePins[space].map(model.resolvedPin)
     }
 
     private func clear() {

@@ -14,13 +14,22 @@ public enum ScreenAreaPosition: Hashable, Sendable {
 }
 
 extension ScreenSplit {
-    /// The axis this split's areas run along, nil while it is
-    /// whole. 5.1.0 splits run one way (`mixedAxes`), so the areas'
-    /// shared top tells side by side from stacked.
+    /// The axis this split's areas run along, read off its cuts
+    /// (ruling 20); nil while whole or where the cuts run both ways.
+    /// The lengths, names and percents below read the one run a
+    /// 5.1.0 split has (`mixedAxes`); nested splits (#3541) owe them
+    /// per run.
     public var axis: ScreenAreaCut.Axis? {
-        guard areas.count > 1 else { return nil }
-        let tops = Set(areas.map(\.y))
-        return tops.count == 1 ? .sideBySide : .stacked
+        guard areas.count > 1,
+            let cuts = ScreenAreaCuts.cuts(
+                of: areas,
+                width: extent.width,
+                height: extent.height
+            ),
+            let first = cuts.first?.axis,
+            cuts.allSatisfy({ $0.axis == first })
+        else { return nil }
+        return first
     }
 
     /// Each area's positional default, by id: Left / Right,

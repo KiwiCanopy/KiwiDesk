@@ -20,7 +20,7 @@ struct SpaceScreenMenu: View {
                 choice in
                 Text(choice.title(in: model)).tag(choice)
             }
-            ForEach(model.displays, id: \.id) { display in
+            ForEach(firstOfEachScreen, id: \.id) { display in
                 let areas = offered.filter {
                     $0.isArea(of: display, in: model)
                 }
@@ -45,6 +45,12 @@ struct SpaceScreenMenu: View {
         .accessibilityValue(
             model.screenChoice(of: space).title(in: model)
         )
+    }
+
+    /// One section per fingerprint: twins share their area keys.
+    private var firstOfEachScreen: [Display] {
+        var seen = Set<String>()
+        return model.displays.filter { seen.insert($0.fingerprint).inserted }
     }
 
     private var binding: Binding<SpaceScreenChoice> {

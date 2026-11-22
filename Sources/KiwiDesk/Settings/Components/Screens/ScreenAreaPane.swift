@@ -21,8 +21,8 @@ struct ScreenAreaPane: View {
     let givesWay: Bool
     @Binding var selection: ScreenSelection?
     let act: (ScreenAreaAction) -> Void
-    /// The card's word that a Space is dragged over it.
-    @Binding var cardTargeted: Bool
+    /// Tells the card a dragged Space came over this pane or left.
+    let onTargeted: (Bool) -> Void
     @State private var targeted = false
     @State private var showingOverflow = false
     @State private var hovering = false
@@ -59,10 +59,25 @@ struct ScreenAreaPane: View {
             pin(items)
         } isTargeted: { inside in
             targeted = inside
-            cardTargeted = inside
+            onTargeted(inside)
         }
         .onTapGesture { toggleSelection() }
-        .help(readout)
+        // A pane is a stop on the keyboard path: Space or Return
+        // selects it, as a click does, and its menu takes ⌃. there.
+        .focusable()
+        .onKeyPress(.space) {
+            toggleSelection()
+            return .handled
+        }
+        .onKeyPress(.return) {
+            toggleSelection()
+            return .handled
+        }
+        // The full name too: a narrow first area truncates it.
+        .help(
+            isSplit
+                ? model.areaName(area, on: display) + "\n" + readout : readout
+        )
         .accessibilityElement(children: .contain)
         .accessibilityLabel(model.areaName(area, on: display))
         .accessibilityValue(readout)
@@ -187,11 +202,17 @@ struct ScreenAreaPane: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(
-            L(
-                "monitor_card.more_spaces.axlabel",
-                "%1$d more Spaces on this screen",
-                count
-            )
+            isSplit
+                ? L(
+                    "monitor_card.more_spaces.area.axlabel",
+                    "%1$d more Spaces in this area",
+                    count
+                )
+                : L(
+                    "monitor_card.more_spaces.axlabel",
+                    "%1$d more Spaces on this screen",
+                    count
+                )
         )
         .popover(isPresented: $showingOverflow) {
             WrapChips(all) { entry in
@@ -225,10 +246,14 @@ struct ScreenAreaPane: View {
         }
     }
 
+    /// What the pane holds and shows. Areas have no shown Space of
+    /// their own yet (#3517 ruling 30), so only the first area —
+    /// where a whole screen's shown Space lands — says which.
     private var readout: String {
         ScreenReadout.sentence(
             held: rows.held(on: key, isMain: isMain),
-            showing: model.showingSpace(on: display.id)
+            showing: (area ?? 0) == 0
+                ? model.showingSpace(on: display.id) : nil
         )
     }
 

@@ -69,11 +69,12 @@ extension SettingsModel {
         switch resolved {
         case .pinned(let display):
             let key = ScreenAreaKey(parsing: pin ?? "")
-            let kept =
-                config.settings.displayAreas[display.fingerprint]?
-                .areas.contains { $0.id == key.areaID } == true
+            let area = areaSplit(of: display)?.landing(key) ?? 0
             return .pinned(
-                kept ? key.description : display.fingerprint
+                ScreenAreaKey(
+                    fingerprint: display.fingerprint,
+                    areaID: area
+                ).description
             )
         case .pinnedAbsent(intent: let pin, fallback: _):
             return .pinned(pin)

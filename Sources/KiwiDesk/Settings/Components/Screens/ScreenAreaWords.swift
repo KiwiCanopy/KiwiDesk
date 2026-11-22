@@ -41,20 +41,23 @@ struct ScreenSelection: Hashable {
 }
 
 extension SettingsModel {
-    /// `display`'s split in the draft, nil while it is whole.
+    /// `display`'s split in the draft as Core would lay it out
+    /// (`ScreenSplit.effective`), nil while it is whole.
     func areaSplit(of display: Display) -> ScreenSplit? {
-        config.settings.displayAreas[display.fingerprint]
-            .flatMap { $0.isWhole ? nil : $0 }
+        ScreenSplit.effective(
+            config.settings.displayAreas[display.fingerprint],
+            width: Int(display.frame.width),
+            height: Int(display.frame.height)
+        )
     }
 
-    /// `display`'s split as the editor acts on it: the stored one,
-    /// else the whole screen as one area 0.
+    /// `display`'s split as the editor acts on it: the split in
+    /// effect, else the whole screen as one area 0, keeping the
+    /// stored next id (ruling 21).
     func editableSplit(of display: Display) -> ScreenSplit {
-        config.settings.displayAreas[display.fingerprint]
-            ?? ScreenSplit.whole(
-                width: Int(display.frame.width),
-                height: Int(display.frame.height)
-            )
+        let stored = config.settings.displayAreas[display.fingerprint]
+        return areaSplit(of: display)
+            ?? ScreenSplit.whole(of: display, after: stored)
     }
 
     /// Area `id`'s own label: the user's name, else its position.
@@ -77,11 +80,41 @@ extension SettingsModel {
         return ScreenAreaWords.composed(screen: screen, area: area)
     }
 
+    /// Every connected screen's area keys — a whole screen's bare
+    /// fingerprint — in screen order, once each: twins share a
+    /// fingerprint and so their keys (#3496).
+    var areaKeys: [String] {
+        var seen = Set<String>()
+        return displays.flatMap { display in
+            ScreensFamilyRows.areas(
+                of: display,
+                in: config.settings.displayAreas
+            ).map(\.key)
+        }
+        .filter { seen.insert($0).inserted }
+    }
+
+    /// A stored pin as the picture places it: on a connected screen,
+    /// the area it names while the split holds it, else area 0
+    /// (ruling 22, `ScreenSplit.landing`); a disconnected pin as is.
+    func resolvedPin(_ pin: String) -> String {
+        let key = ScreenAreaKey(parsing: pin)
+        guard
+            let display = displays.first(where: {
+                $0.fingerprint == key.fingerprint
+            })
+        else { return pin }
+        return ScreenAreaKey(
+            fingerprint: key.fingerprint,
+            areaID: areaSplit(of: display)?.landing(key) ?? 0
+        ).description
+    }
+
     /// The words for a stored Screen pin: a connected screen's, its
     /// area's where the key names one that exists; nil where no
     /// one connected screen carries the fingerprint.
     func pinWords(_ pin: String) -> String? {
-        let key = ScreenAreaKey(parsing: pin)
+        let key = ScreenAreaKey(parsing: resolvedPin(pin))
         let found = displays.filter {
             $0.fingerprint == key.fingerprint
         }

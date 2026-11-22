@@ -23,9 +23,10 @@ public struct MonitorSet: Codable, Sendable, Equatable {
     ) {
         self.monitors = monitors.sorted()
         // A pin to a monitor outside the set is meaningless;
-        // drop it so integrity stays structural.
+        // drop it so integrity stays structural. A pin may name an
+        // area of a monitor (#3517): its screen is the key's.
         self.spaceMonitorMap = spaceMonitorMap.filter {
-            monitors.contains($0.value)
+            monitors.contains(ScreenAreaKey(parsing: $0.value).fingerprint)
         }
     }
 

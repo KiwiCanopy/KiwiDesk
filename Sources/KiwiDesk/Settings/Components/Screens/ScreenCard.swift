@@ -67,9 +67,11 @@ struct ScreenCard: View {
     /// deselects (#3042). A drag in flight answers with its wash.
     private var risen: Bool { hovering && isEnabled && !targeted }
 
-    /// A Space dragged over the card: each pane owns its own drop,
-    /// so the card asks whether the pointer carries one.
-    @State private var targeted = false
+    /// The panes a dragged Space is over: each owns its own drop,
+    /// and one's enter may come before another's exit.
+    @State private var targetedPanes: Set<Int> = []
+
+    private var targeted: Bool { !targetedPanes.isEmpty }
 
     private struct Pane {
         let id: Int
@@ -108,7 +110,13 @@ struct ScreenCard: View {
                 == ScreenSelection(display: display.id, area: pane.id),
             selection: $selection,
             act: act,
-            cardTargeted: $targeted
+            onTargeted: { inside in
+                if inside {
+                    targetedPanes.insert(pane.id)
+                } else {
+                    targetedPanes.remove(pane.id)
+                }
+            }
         )
         .offset(x: pane.rect.minX, y: pane.rect.minY)
     }
@@ -130,16 +138,16 @@ struct ScreenCard: View {
 
     /// Card points per screen point along each axis.
     private func scale(_ split: ScreenSplit) -> CGSize {
-        let width = CGFloat(split.areas.map { $0.x + $0.w }.max() ?? 1)
-        let height = CGFloat(split.areas.map { $0.y + $0.h }.max() ?? 1)
+        let width = CGFloat(max(split.extent.width, 1))
+        let height = CGFloat(max(split.extent.height, 1))
         return CGSize(width: size.width / width, height: size.height / height)
     }
 
     /// Each divider is handed the STORED cut, which its drag starts
     /// from, and drawn where the drag in flight has it.
     @ViewBuilder private func dividers(_ stored: ScreenSplit) -> some View {
-        let width = stored.areas.map { $0.x + $0.w }.max() ?? 0
-        let height = stored.areas.map { $0.y + $0.h }.max() ?? 0
+        let width = stored.extent.width
+        let height = stored.extent.height
         let cuts =
             ScreenAreaCuts.cuts(of: stored.areas, width: width, height: height)
             ?? []
@@ -185,8 +193,8 @@ struct ScreenCard: View {
         if let drag, let split,
             let cut = ScreenAreaCuts.cuts(
                 of: split.areas,
-                width: split.areas.map { $0.x + $0.w }.max() ?? 0,
-                height: split.areas.map { $0.y + $0.h }.max() ?? 0
+                width: split.extent.width,
+                height: split.extent.height
             )?[safe: drag.cut]
         {
             let side = cut.axis == .sideBySide
@@ -203,8 +211,8 @@ struct ScreenCard: View {
                         length: side ? area.w : area.h,
                         snap: drag.snap,
                         total: side
-                            ? split.areas.map { $0.x + $0.w }.max() ?? 0
-                            : split.areas.map { $0.y + $0.h }.max() ?? 0
+                            ? split.extent.width
+                            : split.extent.height
                     )
                     .position(x: rect.midX, y: rect.midY)
                 }

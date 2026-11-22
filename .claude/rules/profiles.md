@@ -2305,6 +2305,17 @@ one value, never another Bool beside it (#1507). The wider rule
 (and why the ±2 pt tolerance makes this matter) is in
 [state-and-layout.md](state-and-layout.md).
 
+## A merge of screen areas rewrites every area key (#3517)
+
+**A new map that stores an area key** — a Screen pin, or a
+per-screen entry keyed as `ScreenAreaKey` writes it — **joins the
+one merge rewrite, `GuiConfig.apply(_:)` and its `TilingSettings`
+half, in the same change**, or a merge strands its entries on an
+id no split holds (ruling 22). `ScreenAreaRemapParityTests` reds a
+String-typed map in `GuiConfig` that is neither rewritten nor
+classified with its reason; its header states what the scan
+cannot see.
+
 ## Vocabulary
 
 One vocabulary across Lua and profile JSON — see

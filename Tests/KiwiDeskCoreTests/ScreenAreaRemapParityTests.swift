@@ -14,19 +14,26 @@ import Testing
 //
 // Stated limitations: a map whose String sits inside a struct
 // element (`[K: SomeStruct]` holding a key in a field) reads as
-// neither and escapes the scan; so does a `Set` or an `Array` of
-// keys. Such a store owes a behavioural test of its own.
+// neither and escapes the scan; so do a `Set` or an `Array` of
+// keys, a map keyed by a typed `ScreenAreaKey`, and an optional
+// map left nil, which reflects no children. Such a store owes a
+// behavioural test of its own. A profile's other monitor sets
+// (`Profile.monitorSets[].spaceMonitorMap`) are outside the draft
+// a merge edits: a pin there naming the vanished area falls back
+// to area 0 through the one resolver (ruling 22).
 
 private let screen = "Wide:3440x1440"
 private let vanished = ScreenAreaKey(fingerprint: screen, areaID: 2)
 private let survivor = ScreenAreaKey(fingerprint: screen, areaID: 1)
 
-/// Labels of String-typed maps that hold no area key, and why.
+/// Reflected paths of String-typed maps that hold no area key, and
+/// why. Keyed by the whole path, so exempting one map never exempts
+/// another of the same name.
 private let notAreaKeyed: [String: String] = [
     "appRules": "keyed by app, valued by Space",
     "titledAppRules": "keyed by app and title, valued by Space",
-    "spaceIcons": "an SF Symbol name per Space",
-    "displayAreas":
+    "settings.spaceIcons": "an SF Symbol name per Space",
+    "settings.displayAreas":
         "keyed by the PHYSICAL screen; a merge rewrites its split",
 ]
 
@@ -43,24 +50,27 @@ private func populated() -> GuiConfig {
     return config
 }
 
-/// (label, description) of every map typed with `String` on
-/// either side, recursing into nested structs.
+/// (path, description) of every map typed with `String` on either
+/// side, recursing into nested structs.
 private func stringMaps(
     _ value: Any,
+    path: String = "",
     depth: Int = 5
 ) -> [(label: String, text: String)] {
     var found: [(String, String)] = []
     for child in Mirror(reflecting: value).children {
         let mirror = Mirror(reflecting: child.value)
         let type = String(describing: type(of: child.value))
+        let name = child.label ?? "?"
+        let here = path.isEmpty ? name : "\(path).\(name)"
         if mirror.displayStyle == .dictionary {
             if type.contains("<String,") || type.hasSuffix(", String>") {
-                found.append((child.label ?? "?", "\(child.value)"))
+                found.append((here, "\(child.value)"))
             }
-        } else if mirror.displayStyle == .struct
-            || mirror.displayStyle == .optional, depth > 1
-        {
-            found += stringMaps(child.value, depth: depth - 1)
+        } else if mirror.displayStyle == .struct, depth > 1 {
+            found += stringMaps(child.value, path: here, depth: depth - 1)
+        } else if mirror.displayStyle == .optional, depth > 1 {
+            found += stringMaps(child.value, path: path, depth: depth - 1)
         }
     }
     return found

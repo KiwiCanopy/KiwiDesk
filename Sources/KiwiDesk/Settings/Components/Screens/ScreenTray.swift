@@ -20,12 +20,10 @@ enum ScreenTray {
         let anchor = cards.first { $0.id == main }
         let tray = anchor.map { anchored in
             // Under the main screen's first area, where follows-main
-            // Spaces land (#3517 ruling 29).
+            // Spaces land (#3517 ruling 29): the area's span across,
+            // the card's own edges for the bands above and below.
             rect(
-                anchoredTo: ScreenArrangement.paneRect(
-                    mainArea,
-                    in: anchored.rect.size
-                ).offsetBy(dx: anchored.rect.minX, dy: anchored.rect.minY),
+                anchoredTo: span(of: anchored.rect, area: mainArea),
                 avoiding: cards.filter { card in
                     card.id != anchored.id
                 }
@@ -76,6 +74,18 @@ enum ScreenTray {
         // Both bands taken: clear the picture entirely.
         let floor = others.map(\.maxY).max() ?? anchor.maxY
         return (band(max(floor, anchor.maxY) + gap), false)
+    }
+
+    /// `card` narrowed to the span `area` (a unit rect) takes
+    /// across it, keeping the card's top and bottom.
+    static func span(of card: CGRect, area: CGRect) -> CGRect {
+        let pane = ScreenArrangement.paneRect(area, in: card.size)
+        return CGRect(
+            x: card.minX + pane.minX,
+            y: card.minY,
+            width: pane.width,
+            height: card.height
+        )
     }
 
     /// How far the tray is drawn inside the screen it hangs off,

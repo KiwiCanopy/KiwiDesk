@@ -61,9 +61,10 @@ struct ScreenAreaDivider: View {
             height: sideBySide ? nil : Self.hitBand
         )
         .contentShape(Rectangle())
+        // A drag keeps its cursor though the pointer outruns the band.
         .onHover { inside in
             hovering = inside
-            (inside ? cursor : .arrow).set()
+            if !dragging { (inside ? cursor : .arrow).set() }
         }
         .onDisappear { if hovering { NSCursor.arrow.set() } }
         .gesture(dragGesture)
@@ -120,6 +121,7 @@ struct ScreenAreaDivider: View {
                     model.writeAreaSplit(drag.split, on: display)
                 }
                 drag = nil
+                if !hovering { NSCursor.arrow.set() }
             }
     }
 
@@ -127,8 +129,8 @@ struct ScreenAreaDivider: View {
     /// snapped by Core within `snapReach`, then clamped at the floor.
     private func moved(by along: CGFloat) -> AreaDividerDrag {
         let raw = cut.position + Int((along / max(scale, 0.001)).rounded())
-        let extent = split.areas.map { $0.x + $0.w }.max() ?? 0
-        let depth = split.areas.map { $0.y + $0.h }.max() ?? 0
+        let extent = split.extent.width
+        let depth = split.extent.height
         let snapped = split.snapped(
             raw,
             for: cut,

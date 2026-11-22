@@ -52,14 +52,20 @@ struct ScreensPicture: View {
 
     /// Scaled screen stand footer (#758, owner ruling 2026-08-04,
     /// 2026-08-09).
-    private func stand(cardWidth: CGFloat) -> some View {
-        let base = min(
+    /// The stand's base width under a card `cardWidth` wide, which
+    /// `ScreenArrangement.standing` measures a foot by.
+    static func standBase(cardWidth: CGFloat) -> CGFloat {
+        min(
             max(
                 cardWidth * SettingsTheme.screenStandScale,
                 SettingsTheme.screenStandMin
             ),
             SettingsTheme.screenStandMax
         )
+    }
+
+    private func stand(cardWidth: CGFloat) -> some View {
+        let base = Self.standBase(cardWidth: cardWidth)
         let neck = min(
             max(
                 base * SettingsTheme.screenNeckScale,

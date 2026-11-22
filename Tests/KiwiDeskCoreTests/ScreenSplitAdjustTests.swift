@@ -22,6 +22,10 @@ struct ScreenSplitAdjustTests {
         let two = try #require(whole.splitting(0, .stacked))
         #expect(two.axis == .stacked)
         #expect(two.positions == [0: .top, 1: .bottom])
+        let pair = try #require(whole.splitting(0, .sideBySide))
+        #expect(pair.positions == [0: .left, 1: .right])
+        let tall = try #require(two.splitting(1, .stacked))
+        #expect(tall.positions == [0: .top, 1: .middle, 2: .bottom])
         let split = try three()
         #expect(split.positions == [0: .left, 1: .middle, 2: .right])
         let four = try #require(split.splitting(2, .sideBySide))
@@ -98,6 +102,17 @@ struct ScreenSplitAdjustTests {
         #expect(free.snap == nil)
         let snaps = split.snaps(for: cut, width: 3440, height: 1440)
         #expect(snaps.contains { $0.snap == .even && $0.position == 1290 })
+        // A cut past the origin over an odd span: the leading area
+        // takes the odd point, as a split does.
+        let uneven = split.resized([1721, 859, 860], axis: .sideBySide)
+        let second = try #require(
+            ScreenAreaCuts.cuts(of: uneven.areas, width: 3440, height: 1440)?
+                .last
+        )
+        #expect(
+            uneven.snaps(for: second, width: 3440, height: 1440)
+                .contains { $0.snap == .even && $0.position == 2581 }
+        )
     }
 
     @Test func typedSizeMovesExactlyTwoAreas() throws {

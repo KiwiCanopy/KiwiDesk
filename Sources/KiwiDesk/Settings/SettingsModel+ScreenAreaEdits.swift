@@ -54,8 +54,17 @@ extension SettingsModel {
         with other: Int,
         on display: Display
     ) -> Int? {
-        config.mergeAreas(id, other, on: display.fingerprint)?
+        let fingerprint = display.fingerprint
+        let survivor = config.mergeAreas(id, other, on: fingerprint)?
             .survivor.areaID
+        // Merged back to whole where the saved setup had no split:
+        // nothing to keep, so the Save books no row for a no-op.
+        if config.settings.displayAreas[fingerprint]?.isWhole == true,
+            cleanConfig.settings.displayAreas[fingerprint] == nil
+        {
+            config.settings.displayAreas[fingerprint] = nil
+        }
+        return survivor
     }
 
     /// Every area of `display` as long as an even split makes it.
@@ -63,8 +72,8 @@ extension SettingsModel {
         guard let split = areaSplit(of: display) else { return }
         config.settings.displayAreas[display.fingerprint] =
             split.evenedOut(
-                width: Int(display.frame.width),
-                height: Int(display.frame.height)
+                width: split.extent.width,
+                height: split.extent.height
             )
     }
 

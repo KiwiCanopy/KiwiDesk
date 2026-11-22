@@ -12,9 +12,11 @@ struct AreaSizesPopover: View {
     let request: AreaSizesRequest
     /// The area giving way, which its pane wears too.
     @Binding var givingWay: ScreenSelection?
+    /// Whether it types in percent: held by the Screens page, so a
+    /// switch lasts while Settings stays open and is never stored.
+    @Binding var percent: Bool
     let dismiss: () -> Void
     @State private var typed: [Int] = []
-    @State private var percent = false
     @State private var drafts: [Int: String] = [:]
     @FocusState private var focus: Int?
 
@@ -60,6 +62,8 @@ struct AreaSizesPopover: View {
             if let old { commit(old) }
             publishRest()
         }
+        // A draft typed in the other unit is not this unit's number.
+        .onChange(of: percent) { drafts = [:] }
         .onExitCommand(perform: cancel)
         .onDisappear { givingWay = nil }
     }
@@ -160,19 +164,31 @@ struct AreaSizesPopover: View {
         clamped: Bool,
         other: Int
     ) {
-        func now(_ area: Int) -> String {
-            let length =
-                split.areas.first { $0.id == area }.map {
-                    split.axis == .stacked ? $0.h : $0.w
-                } ?? 0
-            return L(
+        func length(_ area: Int) -> Int {
+            split.areas.first { $0.id == area }.map {
+                split.axis == .stacked ? $0.h : $0.w
+            } ?? 0
+        }
+        func name(_ area: Int) -> String {
+            model.areaLabel(area, on: display) ?? ""
+        }
+        // A clamp moved the typed area too, so it is said first.
+        let spoken =
+            clamped
+            ? L(
+                "monitors.sizes.now_pair.ax",
+                "%1$@ is now %2$d points, %3$@ is now %4$d points",
+                name(id),
+                length(id),
+                name(other),
+                length(other)
+            )
+            : L(
                 "monitors.sizes.now.ax",
                 "%1$@ is now %2$d points",
-                model.areaLabel(area, on: display) ?? "",
-                length
+                name(other),
+                length(other)
             )
-        }
-        let spoken = clamped ? now(id) + " " + now(other) : now(other)
         AccessibilityNotification.Announcement(spoken).post()
     }
 

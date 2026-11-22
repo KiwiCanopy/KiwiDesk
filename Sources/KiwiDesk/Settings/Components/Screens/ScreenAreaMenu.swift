@@ -39,6 +39,14 @@ struct AreaMenu: ViewModifier {
             axis in
             Button(ScreenAreaEditing.menuTitle(axis)) {
                 model.splitArea(area ?? 0, on: display, axis)
+                act(
+                    .select(
+                        ScreenSelection(
+                            display: display.id,
+                            area: area ?? 0
+                        )
+                    )
+                )
             }
             .disabled(!model.canSplit(area ?? 0, on: display, axis))
         }

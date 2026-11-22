@@ -86,8 +86,23 @@ extension SettingsValueReadout {
     private static func areaSizes(_ split: ScreenSplit) -> String {
         ScreenArea.readingOrder(split.areas)
             .map { area in
-                let name = area.name.map { " “\($0)”" } ?? ""
-                return "#\(area.id)\(name) \(area.w)×\(area.h)"
+                if let name = area.name {
+                    return L(
+                        "diff.value.screen_area.named",
+                        "#%1$d “%2$@” %3$d×%4$d",
+                        area.id,
+                        name,
+                        area.w,
+                        area.h
+                    )
+                }
+                return L(
+                    "diff.value.screen_area",
+                    "#%1$d %2$d×%3$d",
+                    area.id,
+                    area.w,
+                    area.h
+                )
             }
             .joined(separator: " · ")
     }

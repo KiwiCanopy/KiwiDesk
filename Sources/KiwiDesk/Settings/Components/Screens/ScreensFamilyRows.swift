@@ -87,7 +87,12 @@ struct ScreensFamilyRows {
         of display: Display,
         in splits: [String: ScreenSplit]
     ) -> [(area: ScreenArea, key: String)] {
-        guard let split = splits[display.fingerprint], !split.isWhole
+        guard
+            let split = ScreenSplit.effective(
+                splits[display.fingerprint],
+                width: Int(display.frame.width),
+                height: Int(display.frame.height)
+            )
         else {
             let whole = ScreenArea(
                 id: 0,

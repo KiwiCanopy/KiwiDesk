@@ -12,6 +12,9 @@ struct ScreensSection: View {
     @State var sizesRequest: AreaSizesRequest?
     /// The area giving way while Adjust… is open (#3517 ruling 26).
     @State var givingWay: ScreenSelection?
+    /// Adjust…'s unit: a switch to percent lasts while Settings
+    /// stays open, never stored (ruling 26).
+    @State var sizesInPercent = false
 
     var body: some View {
         let rows = model.screenRows
@@ -164,7 +167,10 @@ struct ScreensSection: View {
                 on: key,
                 isMain: model.mainDisplay?.id == display.id
             ),
-            showing: model.showingSpace(on: display.id)
+            // Only the first area says which Space is showing, as
+            // its pane does (`ScreenAreaPane.readout`).
+            showing: (selection?.area ?? 0) == 0
+                ? model.showingSpace(on: display.id) : nil
         )
     }
 
@@ -184,6 +190,7 @@ struct ScreensSection: View {
                 rename: $renameRequest,
                 sizes: $sizesRequest,
                 givingWay: $givingWay,
+                percent: $sizesInPercent,
                 select: { selection = $0 }
             )
         }

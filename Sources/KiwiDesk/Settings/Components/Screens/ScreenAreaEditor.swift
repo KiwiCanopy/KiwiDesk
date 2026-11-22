@@ -13,7 +13,12 @@ struct ScreenAreaEditor: View {
     @Binding var rename: AreaRenameRequest?
     @Binding var sizes: AreaSizesRequest?
     @Binding var givingWay: ScreenSelection?
+    /// Adjust…'s unit, held by the page while Settings stays open.
+    @Binding var percent: Bool
     let select: (ScreenSelection?) -> Void
+    /// After a Split or Merge removes the button pressed, focus lands
+    /// on the first Split button, always drawn with a selection.
+    @FocusState private var splitFocus: ScreenAreaCut.Axis?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -82,9 +87,11 @@ struct ScreenAreaEditor: View {
         return Button(ScreenAreaEditing.buttonTitle(axis)) {
             model.splitArea(id, on: display, axis)
             select(ScreenSelection(display: display.id, area: id))
+            landFocus()
         }
         .settingsActionButton()
         .disabled(greyed)
+        .focused($splitFocus, equals: axis)
         .help(
             greyed
                 ? ScreenAreaEditing.floorReason(
@@ -127,6 +134,7 @@ struct ScreenAreaEditor: View {
                                         ? nil : kept
                                 )
                             )
+                            landFocus()
                         }
                         .settingsActionButton()
                     }
@@ -159,6 +167,7 @@ struct ScreenAreaEditor: View {
                             display: display,
                             request: request,
                             givingWay: $givingWay,
+                            percent: $percent,
                             dismiss: { sizes = nil }
                         )
                         .settingsPopoverChrome()
@@ -170,6 +179,14 @@ struct ScreenAreaEditor: View {
                     .disabled(split.isEven)
                 }
             }
+        }
+    }
+
+    /// Focus on the first Split button once the row redraws: the
+    /// button pressed may be gone (gui.md ▸ the keyboard path).
+    private func landFocus() {
+        DispatchQueue.main.async {
+            splitFocus = ScreenAreaEditing.axes(of: model, display).first
         }
     }
 

@@ -106,6 +106,11 @@ struct ScreensChromeWiringTests {
                 && card.contains(
                     "lineWidth:edge?SettingsTheme.hoverEdgeStroke"
                         + ":SettingsTheme.screenCardStroke)"
+                )
+                // A split card's outline stays at rest; its panes
+                // take the hover edge (#3517).
+                && card.contains(
+                    "letedge=risen&&model.areaSplit(of:display)==nil"
                 ),
             Comment(
                 rawValue:

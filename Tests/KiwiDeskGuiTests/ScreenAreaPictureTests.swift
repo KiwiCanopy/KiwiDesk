@@ -112,6 +112,29 @@ struct ScreenAreaPictureTests {
         #expect(abs(tray.midX - (card.minX + card.width / 4)) < 1)
     }
 
+    /// Stacked main with a screen above: the tray takes the first
+    /// area's span but the card's edges, so it never lands in Bottom.
+    @Test func stackedTrayClearsTheCard() throws {
+        let main = display(1)
+        let above = display(2, y: 1440)
+        let split = try #require(
+            ScreenSplit.whole(width: 3440, height: 1440)
+                .splitting(0, .stacked)
+        )
+        let layout = ScreenArrangement.layout(
+            displays: [main, above],
+            mainID: main.id,
+            canvas: CGSize(width: 700, height: 300),
+            trayChips: 1,
+            splits: [main.fingerprint: split]
+        )
+        let card = try #require(
+            layout.displays.first { $0.id == main.id }
+        ).rect
+        let tray = try #require(layout.tray)
+        #expect(!tray.intersects(card))
+    }
+
     @MainActor @Test func capsuleNamesTheSnappedFraction() {
         LocalizationManager.shared.select("en")
         #expect(

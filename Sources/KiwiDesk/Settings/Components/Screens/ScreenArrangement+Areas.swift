@@ -14,8 +14,8 @@ extension ScreenArrangement {
         guard let split, !split.isWhole else {
             return [(0, CGRect(x: 0, y: 0, width: 1, height: 1))]
         }
-        let width = CGFloat(split.areas.map { $0.x + $0.w }.max() ?? 1)
-        let height = CGFloat(split.areas.map { $0.y + $0.h }.max() ?? 1)
+        let width = CGFloat(max(split.extent.width, 1))
+        let height = CGFloat(max(split.extent.height, 1))
         return ScreenArea.readingOrder(split.areas).map { area in
             (
                 area.id,
@@ -53,10 +53,13 @@ extension ScreenArrangement {
     static func standing(_ layout: Layout) -> Set<DisplayID> {
         Set(
             layout.displays.filter { drawn in
+                let base = ScreensPicture.standBase(
+                    cardWidth: drawn.rect.width
+                )
                 let foot = CGRect(
-                    x: drawn.rect.midX - SettingsTheme.screenStandMax / 2,
+                    x: drawn.rect.midX - base / 2,
                     y: drawn.rect.maxY,
-                    width: SettingsTheme.screenStandMax,
+                    width: base,
                     height: standDepth
                 )
                 return !layout.displays.contains {

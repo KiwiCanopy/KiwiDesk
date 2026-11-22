@@ -98,11 +98,64 @@ struct ScreenAreaEditTests {
         #expect(model.areaName(1, on: screen).hasSuffix(" – Call"))
         model.renameArea(1, on: screen, to: "")
         #expect(model.areaLabel(1, on: screen) == "Right")
+        model.renameArea(1, on: screen, to: "42")
+        #expect(model.areaLabel(1, on: screen) == "Right")
+    }
+
+    /// The census partition walks areas: an area-pinned Space is
+    /// carded once, and a stale area key reads as area 0 everywhere
+    /// a menu asks (ruling 22).
+    @Test func areaPinsCardOnceAndStaleKeysResolve() throws {
+        let (model, screen) = model()
+        model.splitArea(0, on: screen, .sideBySide)
+        let space = SpaceID("4")
+        model.config.spaces.append(space)
+        let right = ScreenAreaKey(
+            fingerprint: screen.fingerprint,
+            areaID: 1
+        ).description
+        model.place(space, .screen(right))
+        let rows = model.screenRows
+        let carded = rows.cardedSpaces.filter { $0.space == space }
+        #expect(carded.count == 1)
+        // The follows-main tray counts on the main screen's first
+        // area alone (ruling 29).
+        let tray = SpaceID("9")
+        model.config.spaces.append(tray)
+        model.place(tray, .followsMain)
+        let withTray = model.screenRows
+        #expect(
+            withTray.held(on: right, isMain: true)
+                == withTray.chips(on: right).count
+        )
+        #expect(
+            withTray.held(on: screen.fingerprint, isMain: true)
+                == withTray.chips(on: screen.fingerprint).count + 1
+        )
+        model.place(space, .screen(screen.fingerprint + "#9"))
+        #expect(
+            model.screenChoice(of: space) == .screen(screen.fingerprint)
+        )
+        let offered = SpaceScreenChoice.offered(for: space, in: model)
+        #expect(offered.count == Set(offered).count)
+        #expect(offered.count == 4)
+    }
+
+    /// Split then merged back where the saved setup had no split:
+    /// the draft holds no split, so Save books nothing.
+    @Test func mergeBackToWholeLeavesNoSplit() {
+        let (model, screen) = model()
+        model.splitArea(0, on: screen, .sideBySide)
+        model.mergeArea(1, with: 0, on: screen)
+        #expect(
+            model.config.settings.displayAreas[screen.fingerprint] == nil
+        )
     }
 
     /// A re-split that changes only ids, or a rename, must not book
     /// a row whose two sides read alike.
     @Test func readoutShowsIdsAndNames() throws {
+        LocalizationManager.shared.select("en")
         let whole = ScreenSplit.whole(width: 3440, height: 1440)
         let one = try #require(whole.splitting(0, .sideBySide))
         var other = one

@@ -18,7 +18,7 @@ extension SettingsModel {
     /// The draft's placement of `space`.
     func screenChoice(of space: SpaceID) -> SpaceScreenChoice {
         if let pin = config.spacePins[space], !pin.isEmpty {
-            return .screen(pin)
+            return .screen(resolvedPin(pin))
         }
         return config.mainSpaces.contains(space)
             ? .followsMain : .auto
@@ -66,14 +66,7 @@ extension SpaceScreenChoice {
     ) -> [SpaceScreenChoice] {
         var choices: [SpaceScreenChoice] =
             [.auto, .followsMain]
-            + model.displays.flatMap { display in
-                ScreensFamilyRows.areas(
-                    of: display,
-                    in: model.config.settings.displayAreas
-                ).map {
-                    SpaceScreenChoice.screen($0.key)
-                }
-            }
+            + model.areaKeys.map { SpaceScreenChoice.screen($0) }
         let current = model.screenChoice(of: space)
         if !choices.contains(current) { choices.append(current) }
         return choices
