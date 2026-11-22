@@ -187,15 +187,22 @@ struct SidedChordWordsTests {
                     + "SidedChordWords.label(label))"
             )
         )
-        // A recorded single tap's caption speaks it (#3257).
+        // A recorded single tap's caption speaks it (#3257), and
+        // the narrowing caption both chords (#3256): the words ride
+        // the caption to `RecorderCaptionLines`, which speaks them.
         #expect(
             try read(keys + "Recorder/KeyRecorderField+Captions.swift")
-                .contains(".accessibilityLabel(words.spoken)")
+                .contains("spoken: words.spoken)")
         )
-        // The narrowing caption speaks both chords (#3256).
         #expect(
             try read(keys + "Recorder/KeyRecorderField+Narrowing.swift")
-                .contains(".accessibilityLabel(words.spoken)")
+                .contains("spoken: words.spoken,")
+        )
+        let lines = try read(keys + "Recorder/RecorderCaptionLines.swift")
+        // The tap-once line and the narrowing line, each once.
+        #expect(
+            lines.components(separatedBy: ".accessibilityLabel(spoken)")
+                .count == 3
         )
         // A Pocket key's refusal pill speaks it (#2612).
         #expect(
