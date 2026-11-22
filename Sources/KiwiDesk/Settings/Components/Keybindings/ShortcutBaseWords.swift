@@ -26,14 +26,14 @@ enum ShortcutBaseWords {
         )
     }
 
-    /// Under the switch while a key is set: where new shortcuts
-    /// start, the rest behind the `?` (#3433).
+    /// Under the switch while a key is set: what the switch moves,
+    /// the exceptions behind the `?` (#3433, #3547).
     static var caption: String {
         L(
             "shortcuts.base.caption",
-            "Shortcuts KiwiDesk adds later, like a new Desktop's, "
-                + "start there too. Applies to all profiles when you "
-                + "save."
+            "Moves KiwiDesk's ⌃⌥ shortcuts and gestures, and ones it "
+                + "adds later automatically, like a new Desktop's. "
+                + "Applies to all profiles when you save."
         )
     }
 
