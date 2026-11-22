@@ -296,10 +296,11 @@ editing here:
   (`FloatNudgeRenderSpaceTests`). A float's DEFAULT size — the centred
   placement's and `size_floating`'s — is read through the one
   `defaultFloatSize`, over the `floatGrowBounds` of the Space the
-  window renders on, so `float_size` and the derived size mean one
-  thing to both (#3554). A verb that resizes a float on the user's
-  own ask floors it at `plannedMinSize`, fits an aspect-locked app to
-  its ratio and writes it at once, and cues the limit
+  window renders on and floored at its `plannedMinSize` inside it,
+  so `float_size` and the derived size mean one thing to both
+  (#3554); a caller passes no floor of its own. A verb that resizes
+  a float on the user's own ask fits an aspect-locked app to its
+  ratio and writes it at once, and cues the limit
   `FloatPlacement.defaultSize` names; a correcting path never sizes a
   placed float through it, which #3163 forbids
   (`FloatSizeCommandTests`, `FloatSizeSettingTests`).

@@ -1156,7 +1156,8 @@ nudge off becomes `"keep"`, while an `init.lua` call to
 
 :::unreleased
 [`set_float_size`](#set_float_size) replaces that measured size with
-one you choose.
+one you choose. Either size is at least the Floating layout's
+[`set_min_window_size`](#set_min_window_size).
 :::
 
 **Example:**

@@ -43,7 +43,9 @@ extension KiwiCore {
         let returned = endMaximizeBeforeFloatVerb(id)  // #3036
         let base =
             returned ?? tiler.commandedFrame(of: id) ?? target.window.frame
-        let region = floatGrowBounds(on: target.space) ?? target.region
+        guard let region = floatGrowBounds(on: target.space) else {
+            return .fail("no screen to lay the space out on")
+        }
         let ask = asked ?? tiler.settings.floatSize?.size
         // A locked app takes its box whole, fitted to its ratio, as
         // a float resize does (#2973): springing it lands short.
@@ -52,10 +54,6 @@ extension KiwiCore {
             of: id,
             in: region,
             asked: ask,
-            floor: CGSize(
-                width: plannedMinSize(of: id, axis: "x"),
-                height: plannedMinSize(of: id, axis: "y")
-            ),
             ratio: lockedRatio
         )
         cueFloatSizeTruncation(id, answer)

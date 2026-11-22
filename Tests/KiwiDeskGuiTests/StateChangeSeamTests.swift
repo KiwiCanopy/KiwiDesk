@@ -73,6 +73,8 @@ struct StateChangeSeamTests {
                     "KiwiCore+Retile.swift": 1,
                     "KiwiCore+FloatPlacement.swift": 1,
                     "KiwiCore+FloatMove.swift": 1,
+                    // `size_floating`'s own write (#3554).
+                    "KiwiCore+FloatSize.swift": 1,
                     "KiwiCore+MaximizeFloatReturn.swift": 1,
                 ]
         )
