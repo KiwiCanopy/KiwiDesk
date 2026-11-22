@@ -19,27 +19,30 @@ extension KiwiCore {
         if field == "visibility", args.count < 2 {
             return .fail(Self.appBarVisibilityNeedsAScreen)
         }
-        let given: [JSONValue]
+        let calls: [[JSONValue]]
         switch screenResolvedBarArgs(field: field, args) {
-        case .success(let resolved): given = resolved
+        case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }
-        switch AppBarCommandSetting.parse(field: field, args: given)
-        {
-        case .success(let setting):
-            if case .screenEdge(let edge, let screen) = setting {
-                tiler.settings.appBarStyle.setEdge(
-                    edge,
-                    on: screen,
-                    among: liveScreenEdgeScope
-                )
-            } else {
-                setting.apply(to: &tiler.settings.appBarStyle)
+        // A physical screen names each of its areas (#3517).
+        for given in calls {
+            switch AppBarCommandSetting.parse(field: field, args: given)
+            {
+            case .success(let setting):
+                if case .screenEdge(let edge, let screen) = setting {
+                    tiler.settings.appBarStyle.setEdge(
+                        edge,
+                        on: screen,
+                        among: liveScreenEdgeScope
+                    )
+                } else {
+                    setting.apply(to: &tiler.settings.appBarStyle)
+                }
+            case .failure(let error):
+                return .fail(error.message)
             }
-            return .ok()
-        case .failure(let error):
-            return .fail(error.message)
         }
+        return .ok()
     }
 
     /// `space_bar.set_*` (#293) — the Space Bar is global-only,
@@ -54,29 +57,29 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("space_bar.set_".count)
         )
-        let given: [JSONValue]
+        let calls: [[JSONValue]]
         switch screenResolvedBarArgs(field: field, args) {
-        case .success(let resolved): given = resolved
+        case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }
-        switch SpaceBarCommandSetting.parse(
-            field: field,
-            args: given
-        ) {
-        case .success(let setting):
-            if case .screenEdge(let edge, let screen) = setting {
-                tiler.settings.spaceBarStyle.setEdge(
-                    edge,
-                    on: screen,
-                    among: liveScreenEdgeScope
-                )
-            } else {
-                setting.apply(to: &tiler.settings.spaceBarStyle)
+        for given in calls {
+            switch SpaceBarCommandSetting.parse(field: field, args: given)
+            {
+            case .success(let setting):
+                if case .screenEdge(let edge, let screen) = setting {
+                    tiler.settings.spaceBarStyle.setEdge(
+                        edge,
+                        on: screen,
+                        among: liveScreenEdgeScope
+                    )
+                } else {
+                    setting.apply(to: &tiler.settings.spaceBarStyle)
+                }
+            case .failure(let error):
+                return .fail(error.message)
             }
-            return .ok()
-        case .failure(let error):
-            return .fail(error.message)
         }
+        return .ok()
     }
 
     /// `kiwishelf.set_*` (#1517) — the shelf both bars sit on.
@@ -90,33 +93,33 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("kiwishelf.set_".count)
         )
-        let given: [JSONValue]
+        let calls: [[JSONValue]]
         switch screenResolvedEdgeArgs(
             field: field,
             screenField: "pocket_edge",
             args
         ) {
-        case .success(let resolved): given = resolved
+        case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }
-        switch KiwiShelfCommandSetting.parse(
-            field: field,
-            args: given
-        ) {
-        case .success(let setting):
-            if case .pocketScreenEdge(let edge, let screen) = setting {
-                tiler.settings.kiwishelf.pocketEdges.setEdge(
-                    edge,
-                    on: screen,
-                    among: liveScreenEdgeScope
-                )
-            } else {
-                setting.apply(to: &tiler.settings.kiwishelf)
+        for given in calls {
+            switch KiwiShelfCommandSetting.parse(field: field, args: given)
+            {
+            case .success(let setting):
+                if case .pocketScreenEdge(let edge, let screen) = setting {
+                    tiler.settings.kiwishelf.pocketEdges.setEdge(
+                        edge,
+                        on: screen,
+                        among: liveScreenEdgeScope
+                    )
+                } else {
+                    setting.apply(to: &tiler.settings.kiwishelf)
+                }
+            case .failure(let error):
+                return .fail(error.message)
             }
-            return .ok()
-        case .failure(let error):
-            return .fail(error.message)
         }
+        return .ok()
     }
 
     /// Applies a layout's `*.set_app_bar_<field>` override.

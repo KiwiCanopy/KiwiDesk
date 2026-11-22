@@ -93,9 +93,11 @@ struct AreaBarVisibilityVerbTests {
             "app_bar.set_visibility",
             args: [.string("hidden"), .number(1)]
         )
+        // A physical screen writes each of its areas.
         #expect(
-            core.tiler.settings.appBarStyle.visibilityOverride
-                == [wide.fingerprint: .hidden]
+            core.tiler.settings.appBarStyle.visibilityOverride == [
+                wide.fingerprint: .hidden, "\(wide.fingerprint)#1": .hidden,
+            ]
         )
     }
 

@@ -4386,13 +4386,15 @@ screen's own untouched. The edges are stored per profile, under
 fingerprint.
 
 :::unreleased
-**Per area:** on a screen split into areas, the screen argument
-may also name one area — its key, `fingerprint#id`, or its own
-name — and the edge is that area's alone. An area with no edge of
-its own uses its screen's, then the bar's; setting the screen's
-own edge keeps each of its other areas where it was. The areas
-are judged with the screens, so the edges collapse only once
-every area sits on one edge.
+**Per area:** on a screen split into areas, each area has its own
+edge. A screen named by number or by name sets every area of it;
+its fingerprint names its first area alone, and an area is named
+by its key, `fingerprint#id`, or its own name. An area with no
+edge of its own uses the bar's. The areas are judged with the
+screens, so the edges collapse only once every area sits on one
+edge. Splitting an area in Settings gives the new area the edges
+and visibilities of the area it came from; areas a
+`set_display_areas` list creates start at the bars' own.
 :::
 
 ```lua

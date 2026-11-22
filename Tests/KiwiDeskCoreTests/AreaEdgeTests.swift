@@ -4,10 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A bar's edge differs per area (#3517 rulings 7, 22, 30): one
-/// lookup model — an area's own entry, else its screen's, else the
-/// bar's — written so no write moves an area it did not name, by
-/// Settings and by `set_edge`'s screen argument alike.
+/// A bar's edge differs per area (#3517 rulings 7, 14, 16, 22, 30):
+/// reads are exact — an entry applies to its own key, the bare
+/// fingerprint being area 0's — and the fan-out is the write's: a
+/// physical screen named by number or name writes every area of it,
+/// a fingerprint or area key writes that one area.
 @Suite("Area edges (#3517)")
 @MainActor
 struct AreaEdgeTests {
@@ -52,15 +53,15 @@ struct AreaEdgeTests {
         )
     }
 
-    @Test("an area's edge falls back to its screen's, then the bar's")
-    func lookupFallsBack() {
+    @Test("an area's edge is its own entry, else the bar's")
+    func lookupIsExact() {
         var style = SpaceBarStyle()
         style.setEdge(.top)
         style.edgeOverride = [fp: .left]
-        #expect(style.edge(on: "\(fp)#1") == .left)
+        #expect(style.edge(on: fp) == .left)
+        #expect(style.edge(on: "\(fp)#1") == .top)
         style.edgeOverride["\(fp)#1"] = .bottom
         #expect(style.edge(on: "\(fp)#1") == .bottom)
-        #expect(style.edge(on: "Other:100x100#1") == .top)
     }
 
     @Test("setting area 1 leaves areas 0 and 2 where they were")
@@ -77,21 +78,37 @@ struct AreaEdgeTests {
         #expect(style.edge(on: "\(fp)#2") == .top)
     }
 
-    @Test("setting a screen's own key pins its other areas")
-    func screenKeyPinsTheAreas() throws {
+    @Test("a fingerprint writes area 0 alone")
+    func fingerprintWritesAreaZero() throws {
         let core = try core()
-        core.execute(
-            "space_bar.set_edge",
-            args: [.string("bottom"), .string("\(fp)#1")]
-        )
         core.execute(
             "space_bar.set_edge",
             args: [.string("left"), .string(fp)]
         )
         let style = core.tiler.settings.spaceBarStyle
-        #expect(style.edge(on: fp) == .left)
-        #expect(style.edge(on: "\(fp)#1") == .bottom)
+        #expect(style.edgeOverride == [fp: .left])
+        #expect(style.edge(on: "\(fp)#1") == .top)
         #expect(style.edge(on: "\(fp)#2") == .top)
+    }
+
+    @Test("a physical screen, by number or name, writes every area")
+    func physicalScreenWritesEveryArea() throws {
+        for screen in [JSONValue.number(1), .string("Wide")] {
+            let core = try core()
+            core.execute(
+                "space_bar.set_edge",
+                args: [.string("bottom"), .string("Other:100x100")]
+            )
+            let set = core.execute(
+                "space_bar.set_edge",
+                args: [.string("bottom"), screen]
+            )
+            #expect(set.isSuccess, "\(screen)")
+            let style = core.tiler.settings.spaceBarStyle
+            for key in [fp, "\(fp)#1", "\(fp)#2"] {
+                #expect(style.edge(on: key) == .bottom, "\(screen) \(key)")
+            }
+        }
     }
 
     @Test("entries collapse only once every area agrees")
@@ -113,24 +130,5 @@ struct AreaEdgeTests {
         style = core.tiler.settings.spaceBarStyle
         #expect(style.edge == .bottom)
         #expect(style.edgeOverride.isEmpty)
-    }
-
-    /// An area key stores nothing where it asks for its screen's
-    /// edge; a screen key's own entry is kept on a repeat write of
-    /// the same edge, and its next write pins the area where it was.
-    @Test("each key stores only what it would not inherit")
-    func keysStoreOnlyTheirOwn() {
-        let scope = ScreenEdgeScope(
-            screens: [fp, "\(fp)#1", "\(fp)#2", "Other:100x100"]
-        )
-        var style = SpaceBarStyle()
-        style.setEdge(.top)
-        style.setEdge(.left, on: fp, among: scope)
-        style.setEdge(.left, on: "\(fp)#1", among: scope)
-        #expect(style.edgeOverride["\(fp)#1"] == nil)
-        style.setEdge(.bottom, on: fp, among: scope)
-        style.setEdge(.bottom, on: fp, among: scope)
-        #expect(style.edgeOverride[fp] == .bottom)
-        #expect(style.edge(on: "\(fp)#1") == .left)
     }
 }

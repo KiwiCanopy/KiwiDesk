@@ -23,18 +23,21 @@ extension SettingsModel {
             .splitting(id, axis, floor: areaFloor(axis)) != nil
     }
 
-    /// Halves area `id` (ruling 23): the leading half keeps the id,
-    /// so the selection and every pin stay on it.
+    /// Halves area `id` (ruling 23) through Core's one door, which
+    /// gives the new half the parent's bar values: the leading half
+    /// keeps the id, so the selection and every pin stay on it.
     func splitArea(
         _ id: Int,
         on display: Display,
         _ axis: ScreenAreaCut.Axis
     ) {
-        guard
-            let next = editableSplit(of: display)
-                .splitting(id, axis, floor: areaFloor(axis))
-        else { return }
-        config.settings.displayAreas[display.fingerprint] = next
+        config.splitArea(
+            id,
+            axis,
+            floor: areaFloor(axis),
+            of: editableSplit(of: display),
+            on: display.fingerprint
+        )
     }
 
     /// The areas `id` shares a full edge with, in reading order.

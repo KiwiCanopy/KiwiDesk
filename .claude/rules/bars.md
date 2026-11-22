@@ -198,13 +198,25 @@ twice, was a question the user answered twice. The argument is
   caller collapses by hand (`BarEdgeWriteCensusTests` ▸
   `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
   `screenEdgeScope(monitorSets:splits:)` (`BarEdgeWriteCensusTests`
-  ▸ `scopeHasOneHome`). **An edge is per area with one lookup
-  (#3517 rulings 7, 22, 30)**: `edge(on:)` reads an area's entry,
-  then its screen's, then the bar's; a write of a screen's own key
-  pins each of its other areas in scope first, so no write moves
-  an area it did not name; and a verb's screen argument resolves
-  through the one `KiwiCore.areaKey(named:)`, `set_edge`'s and
-  `set_visibility`'s alike (`AreaEdgeTests`). **Write the pocket's edge through the same
+  ▸ `scopeHasOneHome`). **A per-area map is read exactly and
+  fanned out on write (#3517 rulings 7, 14, 16, 22, 30)** — every
+  `edge_override`, `pocket_edge_override` and `visibility_override`:
+  an entry applies to its own key alone, the bare fingerprint being
+  area 0's and never "the whole screen", and a key with no entry
+  takes the bar's own value (each layout's, for the App Bar); give
+  no read a fallback chain, no write a sibling pin, and no map a
+  sentinel, absent being the one "follow the default" value. A
+  verb's screen argument resolves through the one
+  `KiwiCore.areaKeys(named:)`: a physical screen, by number or
+  connected name, writes every area it lays out in, and a
+  fingerprint, an area key or an area name writes that one key
+  (`AreaEdgeTests`). A merge moves the absorbed area's entries onto
+  the survivor through `GuiConfig.apply(_ remap:)`
+  (`ScreenAreaRemapParityTests`), and a split copies the parent
+  area's entries to the minted key through `GuiConfig.apply(_
+  copy:)` (`ScreenAreaSplitCopyParityTests`); a new area-keyed map
+  joins both. A split a script lists through `set_display_areas`
+  has no parent, so its new areas start at the defaults. **Write the pocket's edge through the same
   doors (#3376)**, on `KiwiShelf.pocketEdges`, and read a
   display's pocket edge through `KiwiCore.shelf(on:)` or
   `settings(on:)`, never `tiler.settings.kiwishelf.pocketEdge`,

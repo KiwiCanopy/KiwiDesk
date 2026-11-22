@@ -21023,17 +21023,22 @@ master and the row disagree about which was the pocket's edge.
 :::unreleased
 *Amended: a bar's edge and Show may differ per area.*
 ([#3517](https://github.com/KiwiCanopy/KiwiDesk/issues/3517),
-rulings 7, 22, 30 and 32, owner 2026-11-22.) A screen split into
-areas shows a Space in each, so each area has its own bars, and a
-reference area that keeps one window still wants no bars over it
-while its neighbour keeps them. So the per-screen maps are keyed by
-the area: an unsplit screen and a split screen's first area by the
-bare fingerprint, every other area by `fingerprint#id`. An area's
-edge falls back to its screen's, then the bar's, so an edge set
-before the split, or by a script naming the screen, still reaches
-every area; a write of a screen's own key first pins each of its
-other areas where it was, and the collapse judges every area, so no
-write moves an area it did not name. "Nothing else does" no longer
+rulings 7, 14, 16, 22, 30 and 32, owner 2026-11-22.) A screen split
+into areas shows a Space in each, so each area has its own bars,
+and a reference area that keeps one window still wants no bars over
+it while its neighbour keeps them. So the per-screen maps are keyed
+by the area: an unsplit screen and a split screen's first area by
+the bare fingerprint, every other area by `fingerprint#id`. Reads
+are exact — an entry is its own area's, and an area with none takes
+the bar's value — and the fan-out is the write's: a verb naming a
+physical screen writes every area of it, while a fingerprint or an
+area key writes one. A read that fell back from an area to its
+screen was tried and cost a sibling pin on every write, a pin on
+every merge and a stored "per layout" for the App Bar, each a rule
+of its own; exact reads need none. A merge moves the absorbed
+area's entries onto the survivor, and a split copies the parent's
+to the new area, so splitting a screen whose bars sit at the bottom
+keeps them there. "Nothing else does" no longer
 holds for the bars' Show: each bar's visibility takes the same
 sparse shape — `space_bar.visibility_override` and
 `app_bar.visibility_override` — resolved in the one per-screen

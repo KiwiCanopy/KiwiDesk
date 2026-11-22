@@ -1,15 +1,17 @@
 import Foundation
 
-/// A bar verb's screen argument (#1948, #3517): `set_edge` names a
-/// physical screen, stored by fingerprint; `set_visibility` names a
-/// screen or one of its areas, stored by `ScreenAreaKey`.
+/// A bar verb's screen argument (#1948, #3517 rulings 16, 22): it
+/// names a physical screen, which writes every area of it, or one
+/// area, written alone; reads are exact, so the fan-out is the
+/// write's (bars.md).
 extension KiwiCore {
-    /// `args` with the verb's screen resolved: `set_edge`'s through
-    /// `screenResolvedEdgeArgs`, `set_visibility`'s to an area key.
+    /// `args` once per key the verb's screen names: `set_edge`'s
+    /// through `screenResolvedEdgeArgs`, `set_visibility`'s here.
+    /// A call with no screen is itself, once.
     func screenResolvedBarArgs(
         field: String,
         _ args: [JSONValue]
-    ) -> Result<[JSONValue], AppBarSettingError> {
+    ) -> Result<[[JSONValue]], AppBarSettingError> {
         guard field == "visibility" else {
             return screenResolvedEdgeArgs(
                 field: field,
@@ -17,61 +19,70 @@ extension KiwiCore {
                 args
             )
         }
-        guard args.count > 1 else { return .success(args) }
+        guard args.count > 1 else { return .success([args]) }
         if case .failure(let error) = BarSettingChoice.value(
             args,
             ShelfVisibility.self
         ) {
             return .failure(error)
         }
-        guard let key = areaKey(named: args[1]) else {
+        guard let keys = areaKeys(named: args[1]) else {
             return .failure(
                 AppBarSettingError(stringLiteral: Self.unknownArea)
             )
         }
-        var resolved = args
-        resolved[1] = .string(key)
-        return .success(resolved)
+        return .success(keys.map { Self.args(args, screen: $0) })
     }
 
-    /// The stored key a screen-or-area argument names, in ruling
-    /// 16's order: a number names a physical screen, as Desktop
-    /// bindings count them, its lead area keyed by the bare
-    /// fingerprint; then a fingerprint or an area key — on a
+    /// `args` with its screen argument replaced by `key`.
+    static func args(_ args: [JSONValue], screen key: String) -> [JSONValue] {
+        var resolved = args
+        resolved[1] = .string(key)
+        return resolved
+    }
+
+    /// The stored keys a screen-or-area argument names, in ruling
+    /// 16's order. A physical screen — a number, as Desktop bindings
+    /// count them, or a connected screen's name — names every area
+    /// it lays out in, its lead area keyed by the bare fingerprint.
+    /// A fingerprint or an area key names that one key: on a
     /// connected screen through the one `placement(keyed:on:)`, so
     /// an area that is gone falls back to the screen's lead area
-    /// (ruling 22), and stored as given for a screen not connected;
-    /// then a screen's name; then an area's own name, refused where
-    /// two share it.
-    func areaKey(named arg: JSONValue) -> String? {
+    /// (ruling 22), and as given for a screen not connected. Last,
+    /// an area's own name, refused where two share it.
+    func areaKeys(named arg: JSONValue) -> [String]? {
         let displays = connectedDisplays()
-        let fingerprint = { (id: DisplayID) in
-            displays.first { $0.id == id }?.fingerprint
+        let ws = state.workspaces
+        let screenKeys = { (id: DisplayID) -> [String]? in
+            guard
+                let fingerprint = displays.first(where: { $0.id == id })?
+                    .fingerprint
+            else { return nil }
+            let areas = ws.placements(of: id).map(\.key.description)
+            return areas.isEmpty ? [fingerprint] : areas
         }
         if arg.intValue != nil {
-            return resolveDisplayArg(arg, among: displays)
-                .flatMap(fingerprint)
+            return resolveDisplayArg(arg, among: displays).flatMap(screenKeys)
         }
         guard let raw = arg.stringValue else { return nil }
         let key = ScreenAreaKey(parsing: raw)
         if Self.isFingerprint(key.fingerprint) {
-            let ws = state.workspaces
             guard
                 let screen = ws.allDisplays.first(where: {
                     $0.fingerprint == key.fingerprint
                 })
-            else { return key.description }
-            return ws.placement(keyed: key, on: screen.id)
-                .flatMap { ws[placement: $0]?.key.description }
-                ?? key.fingerprint
+            else { return [key.description] }
+            return [
+                ws.placement(keyed: key, on: screen.id)
+                    .flatMap { ws[placement: $0]?.key.description }
+                    ?? key.fingerprint
+            ]
         }
         if let id = resolveDisplayArg(arg, among: displays) {
-            return fingerprint(id)
+            return screenKeys(id)
         }
-        let named = state.workspaces.allPlacements.filter {
-            $0.area.name == raw
-        }
-        return named.count == 1 ? named[0].key.description : nil
+        let named = ws.allPlacements.filter { $0.area.name == raw }
+        return named.count == 1 ? [named[0].key.description] : nil
     }
 
     /// The refusal of a screen argument that names no screen or

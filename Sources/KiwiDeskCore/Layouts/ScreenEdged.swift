@@ -6,9 +6,10 @@ import Foundation
 /// `space_bar.edge_override` / `app_bar.edge_override` /
 /// `kiwishelf.pocket_edge_override` map, keyed by `ScreenAreaKey`
 /// (#3517 rulings 7, 14): an unsplit screen and a split screen's
-/// area 0 by the bare `Display.fingerprint`, which is also the
-/// fallback of that screen's other areas; a key with no entry uses
-/// the bar's `edge`.
+/// area 0 by the bare `Display.fingerprint`. Reads are exact: an
+/// entry applies to its own key alone, and a key with no entry uses
+/// the bar's `edge`; a verb naming a physical screen writes each of
+/// its areas (`KiwiCore.areaKeys(named:)`).
 ///
 /// Write a bar's edge only through the `setEdge` doors below. A
 /// verb's or Settings' write of a screen's edge equal to the
@@ -41,13 +42,10 @@ public struct ScreenEdgeScope: Sendable, Equatable {
 
 extension ScreenEdged {
     /// The edge this bar sits on on `screen`, a screen's or an
-    /// area's key: its own, else its screen's, else the bar's. Nil
-    /// asks for the bar's own edge.
+    /// area's key: its own, else the bar's. Nil asks for the bar's
+    /// own edge.
     public func edge(on screen: String?) -> AppBarEdge {
-        guard let screen else { return edge }
-        return edgeOverride[screen]
-            ?? edgeOverride[ScreenAreaKey(parsing: screen).fingerprint]
-            ?? edge
+        screen.flatMap { edgeOverride[$0] } ?? edge
     }
 
     /// Whether some screen draws an edge other than the bar's —
@@ -66,32 +64,17 @@ extension ScreenEdged {
         edgeOverride = [:]
     }
 
-    /// One screen's or area's edge (#1948, #3517). The edge it
-    /// would inherit stores nothing for it, and a write of a
-    /// screen's own key first pins each area of it in `scope` that
-    /// would move with it. Once every key of `scope` and of the
-    /// entries DRAWS one edge (`edge(on:)`), the entries collapse
-    /// into the bar's edge, which moves nothing; a key drawing
-    /// another edge keeps them apart.
+    /// One screen's or area's edge (#1948, #3517). The bar's own
+    /// edge stores nothing for that key. Once every key of `scope`
+    /// and of the entries DRAWS one edge (`edge(on:)`), the entries
+    /// collapse into the bar's edge, which moves nothing; a key
+    /// drawing another edge keeps them apart.
     public mutating func setEdge(
         _ edge: AppBarEdge,
         on screen: String,
         among scope: ScreenEdgeScope
     ) {
-        let key = ScreenAreaKey(parsing: screen)
-        if key.description == key.fingerprint {
-            for area in scope.screens
-            where area != screen && edgeOverride[area] == nil
-                && ScreenAreaKey(parsing: area).fingerprint == screen
-                && self.edge(on: area) != edge
-            {
-                edgeOverride[area] = self.edge(on: area)
-            }
-        }
-        let inherited =
-            key.description == key.fingerprint
-            ? self.edge : self.edge(on: key.fingerprint)
-        edgeOverride[screen] = edge == inherited ? nil : edge
+        edgeOverride[screen] = edge == self.edge ? nil : edge
         // The written screen is judged too, entry or none.
         let judged = scope.screens.union(edgeOverride.keys)
             .union([screen])
@@ -125,6 +108,12 @@ extension ScreenEdged {
             return
         }
         if edgeOverride[new] == nil { edgeOverride[new] = moved }
+    }
+
+    /// A split's minted area given the parent area's entry (#3517),
+    /// so the split moves no bar. No other screen moves.
+    public mutating func copyScreen(_ parent: String, to minted: String) {
+        if let edge = edgeOverride[parent] { edgeOverride[minted] = edge }
     }
 }
 

@@ -178,13 +178,18 @@ struct AreaShelfDriverTests {
             makeCore({ $0.splitting(0, .sideBySide) }) {
                 $0.kiwishelf.pocketVisibility = .always
                 $0.kiwishelf.pocketEdges.setEdge(.bottom)
+                // The right area's own edge: read for the screen,
+                // its strip would be the screen's top one.
+                let screen = $0.displayAreas.keys.first ?? ""
+                $0.spaceBarStyle.edgeOverride["\(screen)#1"] = .left
             }
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         for (i, area) in areas.enumerated() {
             let rect = frame(of: area, in: core, on: screen)
             let strips = core.reservedStrips(forSpace: SpaceID(i + 1))
-            let bars = strips.filter { $0.edge == .top }
+            let edge: AppBarEdge = i == 0 ? .top : .left
+            let bars = strips.filter { $0.edge == edge }
             #expect(bars.count == 1, "\(area.id)")
             #expect(
                 bars.allSatisfy {

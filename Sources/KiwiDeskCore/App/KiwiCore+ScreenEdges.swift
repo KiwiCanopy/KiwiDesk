@@ -232,18 +232,18 @@ extension KiwiCore {
     }
 
     /// `screenField`'s arguments — a bar's `edge` (#1948), the
-    /// shelf's `pocket_edge` (#3376) — with the optional screen or
-    /// area resolved to the key it is stored under through the one
-    /// `areaKey(named:)` (#3517 rulings 7, 16, 22), the edge checked
-    /// first so a bad edge answers as one. Other fields pass
-    /// through.
+    /// shelf's `pocket_edge` (#3376) — once per key the optional
+    /// screen names through the one `areaKeys(named:)` (#3517
+    /// rulings 7, 16, 22), the edge checked first so a bad edge
+    /// answers as one. Other fields, and a call with no screen,
+    /// pass through once.
     func screenResolvedEdgeArgs(
         field: String,
         screenField: String,
         _ args: [JSONValue]
-    ) -> Result<[JSONValue], AppBarSettingError> {
+    ) -> Result<[[JSONValue]], AppBarSettingError> {
         guard field == screenField, args.count > 1 else {
-            return .success(args)
+            return .success([args])
         }
         if case .failure(let error) = BarSettingChoice.value(
             args,
@@ -251,14 +251,12 @@ extension KiwiCore {
         ) {
             return .failure(error)
         }
-        guard let key = areaKey(named: args[1]) else {
+        guard let keys = areaKeys(named: args[1]) else {
             return .failure(
                 AppBarSettingError(stringLiteral: Self.unknownScreen)
             )
         }
-        var resolved = args
-        resolved[1] = .string(key)
-        return .success(resolved)
+        return .success(keys.map { Self.args(args, screen: $0) })
     }
 
     /// The refusal of a screen argument that names no screen.

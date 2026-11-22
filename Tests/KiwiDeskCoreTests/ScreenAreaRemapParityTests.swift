@@ -49,6 +49,8 @@ private func populated() -> GuiConfig {
     config.settings.spaceBarStyle.edgeOverride[key] = .bottom
     config.settings.appBarStyle.edgeOverride[key] = .left
     config.settings.kiwishelf.pocketEdgeOverride[key] = .right
+    config.settings.spaceBarStyle.visibilityOverride[key] = .hidden
+    config.settings.appBarStyle.visibilityOverride[key] = .auto
     config.appWide = AppWideSettings()
     config.look = LookBody(
         style: ["space_bar.edge_override": .object([key: .string("top")])],
@@ -151,5 +153,80 @@ struct ScreenAreaRemapParityTests {
         #expect(config.settings.displayAreas[screen]?.areas.count == 2)
         let refused = config.mergeAreas(0, 9, on: screen)
         #expect(refused == nil)
+    }
+}
+
+/// Reflected area-keyed maps a split does not copy, and why.
+private let notCopied: [String: String] = [
+    "spacePins": "a pin stays on the half that keeps the id"
+]
+
+// Forget-proof guard for a split's copy (#3517): `apply(_ copy:)`
+// hand-lists every per-area bar map, and the same reflection scan
+// as the merge's requires each area-keyed map to give the minted
+// area the parent's entry, or to be named in `notCopied`. The
+// merge suite's stated limitations bound this scan too.
+@Suite("Screen area split copy parity (#3517)")
+struct ScreenAreaSplitCopyParityTests {
+    @Test("a split's apply copies every per-area bar map")
+    func applyCopiesEveryMap() {
+        var config = populated()
+        let minted = ScreenAreaKey(fingerprint: screen, areaID: 7)
+        config.apply(ScreenAreaCopy(parent: vanished, minted: minted))
+        let maps = stringMaps(config).filter {
+            notAreaKeyed[$0.label] == nil && notCopied[$0.label] == nil
+        }
+        #expect(maps.count >= 5, "the scan found the maps")
+        for map in maps {
+            #expect(map.text.contains("\"\(vanished)\""), "\(map.label)")
+            #expect(map.text.contains("\"\(minted)\""), "\(map.label)")
+        }
+        #expect(config.spacePins[SpaceID("1")] == vanished.description)
+        let labels = Set(stringMaps(config).map(\.label))
+        for label in notCopied.keys {
+            #expect(labels.contains(label), "\(label) is gone")
+        }
+    }
+
+    @Test("splitArea splits and copies through one door")
+    func splitTakesTheDoor() throws {
+        var config = GuiConfig()
+        let whole = ScreenSplit.whole(width: 3440, height: 1440)
+        let parent = ScreenAreaKey(fingerprint: screen, areaID: 0)
+        config.settings.appBarStyle.edgeOverride[parent.description] =
+            .left
+        let split = config.splitArea(
+            0,
+            .sideBySide,
+            floor: 100,
+            of: whole,
+            on: screen
+        )
+        let copy = try #require(split)
+        let minted = ScreenAreaKey(
+            fingerprint: screen,
+            areaID: whole.nextID
+        )
+        #expect(copy == ScreenAreaCopy(parent: parent, minted: minted))
+        #expect(config.settings.displayAreas[screen]?.areas.count == 2)
+        #expect(
+            config.settings.appBarStyle.edgeOverride[minted.description]
+                == .left
+        )
+    }
+
+    @Test("a split under the floor changes nothing")
+    func floorRefuses() {
+        var config = GuiConfig()
+        let whole = ScreenSplit.whole(width: 3440, height: 1440)
+        let refused = config.splitArea(
+            0,
+            .sideBySide,
+            floor: 10_000,
+            of: whole,
+            on: screen
+        )
+        #expect(refused == nil)
+        #expect(config.settings.displayAreas.isEmpty)
     }
 }
