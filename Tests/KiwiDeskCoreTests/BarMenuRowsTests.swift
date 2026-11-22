@@ -203,7 +203,9 @@ struct BarMenuRowsTests {
         core.execute("set_mode", args: [.string("1"), .string("grid")])
         let layout = try submenu(core.barMenuRows(.space(one))[0])
         #expect(layout.allSatisfy { $0.subtitle == nil })
-        #expect(!layout.contains { $0.title.hasPrefix("Keep in Profile") })
+        // Structural, not by wording: only the layout rows, no Keep.
+        #expect(layout.count == LayoutMode.allCases.count)
+        #expect(!layout.contains { $0.isSeparator })
     }
 
     @Test("the divider's reset is greyed at the default")
