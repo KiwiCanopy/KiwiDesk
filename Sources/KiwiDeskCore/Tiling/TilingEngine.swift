@@ -218,6 +218,30 @@ public final class TilingEngine {
         }
     }
 
+    /// The area a Space lays out in — its rect in its screen's own
+    /// points, top-left origin — and its stored key, nil where its
+    /// screen is not split (#3517); wired by `KiwiCore` from the
+    /// placement list. An unsplit screen keeps every bound exactly
+    /// as it was.
+    var spaceArea: @MainActor (SpaceID) -> (rect: CGRect, key: String)? = {
+        _ in nil
+    }
+
+    /// A screen's whole frame in AX coordinates, the origin an
+    /// area's rect is laid from; pinned by tests that split a
+    /// screen, since the live flip reads the host's main screen.
+    var screenFrameAX: @MainActor (NSScreen) -> CGRect = {
+        GeometryUtils.flip(
+            $0.frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
+    }
+
+    /// The AX frames of every area of every SPLIT screen (#3517),
+    /// for the neighbour scan's edge flags; empty while no screen
+    /// is split.
+    var splitAreaBounds: @MainActor () -> [CGRect] = { [] }
+
     /// Every screen's AX visible frame by its display, for the focus
     /// keys' screen hop (#2493); `allScreenBounds`' sibling, pinned
     /// the same way.

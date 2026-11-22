@@ -24,6 +24,25 @@ public struct ScreenNeighbors: Sendable, Equatable {
         self.bottom = bottom
     }
 
+    /// Neighbors around an area of a split screen (#3517 ruling 31):
+    /// the edge flags read the area among every area and unsplit
+    /// screen, while the park corner is scored over the PHYSICAL
+    /// screens alone, so an area's inner edge never moves a park
+    /// (ruling 6).
+    public static func detect(
+        around area: CGRect,
+        among areas: [CGRect],
+        parkingOn screen: CGRect,
+        among screens: [CGRect]
+    ) -> ScreenNeighbors {
+        var found = detect(around: area, among: areas)
+        found.parkCorner = TilingEngine.optimalHideCorner(
+            for: screen,
+            among: screens
+        )
+        return found
+    }
+
     /// Detects screen neighbors around screen in AX visible frame coordinates
     /// (#410, #878), and scores its park corner (#3335).
     public static func detect(

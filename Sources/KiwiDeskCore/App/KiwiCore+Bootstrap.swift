@@ -237,6 +237,7 @@ extension KiwiCore {
                 self?.screenFingerprint(of: $0)
             }
         }
+        wireScreenAreas()  // #3517
         // The drawn stack side reads the one flip door (#2771).
         tiler.stackFlip = { [weak self] space in
             self?.stackFlip(of: space)

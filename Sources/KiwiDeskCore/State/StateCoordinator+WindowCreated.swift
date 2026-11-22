@@ -45,6 +45,8 @@ extension StateCoordinator {
         // Screen wins on multi-monitor Desktop moves (#1010).
         let arrival = arrivalDisplay
         arrivalDisplay = nil
+        let arrivalArea = arrivalPlacement
+        arrivalPlacement = nil
         let owed = returningFocus
         returningFocus = nil
         let focus = arrivalFocus
@@ -65,7 +67,8 @@ extension StateCoordinator {
         let preferred = arrivalScreenHome(
             of: windows[window.id],
             remembered: remembered,
-            arrival: arrival
+            arrival: arrival,
+            area: arrivalArea
         )
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
@@ -235,7 +238,8 @@ extension StateCoordinator {
     private func arrivalScreenHome(
         of window: ManagedWindow?,
         remembered: SpaceMemory?,
-        arrival: DisplayID?
+        arrival: DisplayID?,
+        area: PlacementID? = nil
     ) -> SpaceID? {
         guard let window,
             case .departed(let home)? = remembered
@@ -243,7 +247,8 @@ extension StateCoordinator {
         return screenHome(
             of: window,
             leaving: home,
-            landingOn: arrival
+            landingOn: arrival,
+            in: area
         )
     }
 }
