@@ -2,8 +2,8 @@
 
 enum ScreensKey: String, CaseIterable, Hashable {
     case spacePins = "config.spacePins[space]"
-    /// A screen's split into areas (#3517), edited on the selected
-    /// screen in the arrangement picture.
+    /// A screen's split into areas (#3517), stored per profile;
+    /// diffed and reverted here before its editor exists.
     case displayAreas = "settings.displayAreas[screen]"
     case mainSpaces = "config.mainSpaces"
     case orphanPinClear = "(action) monitors.orphan_pin.clear"

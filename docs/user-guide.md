@@ -30,7 +30,7 @@ Out of the box, macOS lets **Tab reach text fields and lists
 only**. Turn on **System Settings ▸ Keyboard ▸ Keyboard
 navigation** and Tab reaches every control.
 
-Opening an area from the keyboard puts focus on the page, so the
+Opening a section from the keyboard puts focus on the page, so the
 next Tab reaches its first control; opening it with the mouse
 takes no focus, as anywhere on macOS. Shift-Tab reaches the
 **← Home** chip; **⌘[** or Escape goes back. **⌘K** puts the

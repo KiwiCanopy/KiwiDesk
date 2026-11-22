@@ -505,7 +505,7 @@ synonym:
   which is layout-agnostic and so covers bsp and track where
   neither layout has zones of its own. Do not coin *region* or
   *area* for that third sense: *area* names a screen's split
-  (below), and the reason `zone` was struck off the
+  (the **area** entry), and the reason `zone` was struck off the
   Space-rename candidates is that it already meant two things
   (`docs/design-decisions.md`).
 - **style** — names WHERE or HOW something is drawn, not what
