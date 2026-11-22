@@ -29,7 +29,7 @@ extension KiwiCore {
             }
             filter = SpaceID(name)
         }
-        let shown = shownSpaceIDs()
+        let shown = state.workspaces.visibleSpaces
         let placements = shownPlacements(shown)
         let listed = listedWindowOrder().compactMap { id in
             state.windows[id].map { window in

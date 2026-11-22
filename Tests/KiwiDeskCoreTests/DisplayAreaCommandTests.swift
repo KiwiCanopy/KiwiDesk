@@ -179,12 +179,20 @@ struct DisplayAreaCommandTests {
     @Test func verbsRefuseWhileSplitsAreOff() {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
-        let reply = core.execute(
+        let split = core.execute(
             "set_display_areas",
-            args: [.number(1), .string("side_by_side"), .number(1720)]
+            args: [
+                .number(1), .string("side_by_side"),
+                .number(1720), .number(1720),
+            ]
         )
-        #expect(!reply.isSuccess)
-        #expect(split(core) == nil)
+        #expect(split.error == KiwiCore.areasOff)
+        #expect(self.split(core) == nil)
+        let name = core.execute(
+            "set_display_area_name",
+            args: [.string(wide.fingerprint), .string("Main")]
+        )
+        #expect(name.error == KiwiCore.areasOff)
     }
 
     @Test func remergedScreenKeepsItsNextID() throws {

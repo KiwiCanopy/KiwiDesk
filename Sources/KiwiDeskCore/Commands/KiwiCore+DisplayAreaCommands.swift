@@ -37,7 +37,6 @@ extension KiwiCore {
         // (ruling 21).
         tiler.settings.displayAreas[screen.fingerprint] =
             split.isWhole && previous == nil ? nil : split
-        syncAreaSplits()
         retile()
         return .ok()
     }
@@ -72,7 +71,6 @@ extension KiwiCore {
         }
         split.areas[at].name = trimmed.isEmpty ? nil : trimmed
         tiler.settings.displayAreas[key.fingerprint] = split
-        syncAreaSplits()
         return .ok()
     }
 

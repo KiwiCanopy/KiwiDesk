@@ -29,6 +29,9 @@ public final class TilingEngine {
             if settings.tiling != oldValue.tiling {
                 onTilingToggleSettings?()
             }
+            if settings.displayAreas != oldValue.displayAreas {
+                onAreaSplits?()
+            }
             if settings != oldValue { onSettingsChange(settings) }
         }
     }
@@ -38,6 +41,9 @@ public final class TilingEngine {
     var onMouseSettings: (@MainActor (MouseSettings) -> Void)?
     /// Told when `settings.tiling` changes: the start mirror (#3008).
     var onTilingToggleSettings: (@MainActor () -> Void)?
+    /// Told when `settings.displayAreas` changes, at the write and
+    /// so before any pin resolves against the placements (#3517).
+    var onAreaSplits: (@MainActor () -> Void)?
     /// Told when the settings change, by whichever write (#2604).
     var onSettingsChange: @MainActor (TilingSettings) -> Void = { _ in }
 

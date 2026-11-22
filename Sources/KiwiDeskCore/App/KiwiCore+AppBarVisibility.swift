@@ -20,12 +20,6 @@ extension KiwiCore {
         windowPlacements(of: space, floats: floats).mapValues(\.visibility)
     }
 
-    /// The Spaces a screen shows, the active one included — every
-    /// area's on a split screen (#3517), through the one shown set.
-    func shownSpaceIDs() -> Set<SpaceID> {
-        state.workspaces.visibleSpaces
-    }
-
     /// The verdict per window of `space`'s tiled members and
     /// `floats` — the App Bar's, and `list_windows`' for every
     /// layout (#2492; bars.md ▸ the visibility verdict's two
@@ -172,7 +166,7 @@ extension KiwiCore {
     /// Whether `id` is a float an App Bar lists on a Space a screen
     /// shows.
     func appBarListsShownFloat(_ id: WindowID) -> Bool {
-        shownSpaceIDs().contains { shownID in
+        state.workspaces.visibleSpaces.contains { shownID in
             guard let space = state.workspaces[shownID],
                 barHost(for: space) != nil
             else { return false }

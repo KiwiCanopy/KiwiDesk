@@ -137,7 +137,9 @@ extension KiwiCore {
                         state.workspaces.space(of: window)
                     {
                         if !held
-                            || !shownSpaceIDs().contains(destination)
+                            || !state.workspaces.visibleSpaces.contains(
+                                destination
+                            )
                         {
                             followSwitch(
                                 to: destination,

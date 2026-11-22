@@ -14,10 +14,12 @@ extension KiwiCore {
         tiler.splitAreaBounds = { [weak self] in
             self?.splitAreaBounds() ?? []
         }
+        tiler.onAreaSplits = { [weak self] in self?.syncAreaSplits() }
     }
 
     /// The one door from the stored splits to the placement list
-    /// (#3517): the splits `display_areas` holds while
+    /// (#3517), run by every write of `display_areas` through
+    /// `tiler.onAreaSplits`: the stored splits while
     /// `honoursAreaSplits` is raised, none otherwise. Production
     /// keeps it lowered until splits take effect, so a stored
     /// split moves no window; a suite raises it to drive areas.

@@ -61,7 +61,11 @@ struct AreaArgumentTests {
     @Test func everyAreaSpaceReadsShown() throws {
         let (core, _) = try core()
         // Space 2 shows in the non-lead area while 1 is active.
-        #expect(core.shownSpaceIDs() == [SpaceID("1"), SpaceID("2")])
+        #expect(
+            core.state.workspaces.visibleSpaces == [
+                SpaceID("1"), SpaceID("2"),
+            ]
+        )
     }
 
     @Test func pinStoresTheAreaKey() throws {
