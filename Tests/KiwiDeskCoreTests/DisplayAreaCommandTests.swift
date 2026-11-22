@@ -162,10 +162,11 @@ struct DisplayAreaCommandTests {
 
     @Test func splitSurvivesSettingsCoding() throws {
         var settings = TilingSettings()
-        settings.displayAreas[wide.fingerprint] = try #require(
+        let split = try #require(
             ScreenSplit.whole(width: 3440, height: 1440)
                 .splitting(0, .sideBySide)
         )
+        settings.displayAreas[wide.fingerprint] = split
         let data = try JSONEncoder().encode(settings)
         let json = try #require(String(data: data, encoding: .utf8))
         #expect(json.contains("\"display_areas\""))
