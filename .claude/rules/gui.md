@@ -217,8 +217,9 @@ restated `20...80` satisfies on the day it is written.
 - **A screen split's floor, legality and names are Core's the same
   way (#3517)**: the Screens editor greys, stops a divider and
   clamps a typed size at `TilingSettings.areaFloor(along:)`, acts
-  through `ScreenSplit`'s `splitting`, `moving`, `snapped`,
-  `setting` and the one `GuiConfig.mergeAreas` door, reads positions from
+  through `ScreenSplit`'s `moving`, `snapped` and `setting` and the
+  one `GuiConfig.splitArea` and `GuiConfig.mergeAreas` doors, which
+  carry the bar values a split or merge owes, reads positions from
   `ScreenSplit.positions` and refuses a name through
   `ScreenArea.nameProblem` — never arithmetic or a rule of its own
   over a screen frame (`ScreenAreaEditTests`,
