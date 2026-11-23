@@ -20,7 +20,7 @@ struct ShortcutsSheetView: View {
 
     var body: some View {
         if let reference, !reference.isEmpty {
-            let all = Self.sections(reference)
+            let all = Self.sections(reference, needle: needle)
             let flowing = all.filter { !$0.closes }
             let cut = Self.cut(columns, over: flowing)
             let closing = all.filter(\.closes)
@@ -114,8 +114,13 @@ struct ShortcutsSheetView: View {
         var closes = false
     }
 
-    /// The column's sections, in reading order.
-    static func sections(_ reference: ShortcutsReference) -> [Section] {
+    /// The sheet's sections, in reading order. Unavailable shows only
+    /// while `needle` searches and matches it (owner, 2026-11-23):
+    /// an empty query keeps keys that do nothing off the glance.
+    static func sections(
+        _ reference: ShortcutsReference,
+        needle: String = ""
+    ) -> [Section] {
         var out = reference.controls.map {
             Section(title: $0.title, rows: $0.rows)
         }
@@ -146,6 +151,7 @@ struct ShortcutsSheetView: View {
                 dims: true
             )
         )
+        guard !needle.isEmpty else { return out.filter { !$0.rows.isEmpty } }
         out.append(
             Section(
                 title: L(
@@ -173,7 +179,10 @@ struct ShortcutsSheetView: View {
                 .padding(.bottom, Self.titleGap)
             // A filtered row's dimming and hint already say it; the
             // caption is for the whole list.
-            if head == .whole, let caption = section.caption, needle.isEmpty {
+            // Unavailable, shown only under a query, keeps its caption.
+            if head == .whole, let caption = section.caption,
+                needle.isEmpty || section.closes
+            {
                 Text(caption)
                     .font(.caption)
                     .foregroundStyle(.secondary)

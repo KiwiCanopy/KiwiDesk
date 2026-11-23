@@ -69,7 +69,7 @@ extension JumpModel {
             shortcutColumns = .empty
             return
         }
-        let all = ShortcutsSheetView.sections(shown)
+        let all = ShortcutsSheetView.sections(shown, needle: sheet.needle)
         let flowing = all.filter { !$0.closes }
         func planned(
             _ sections: [ShortcutsSheetView.Section],

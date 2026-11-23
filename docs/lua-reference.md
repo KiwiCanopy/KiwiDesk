@@ -8121,8 +8121,9 @@ live glance at the active layer's bindings.
 :::unreleased
 A list too long for one column above the screen's bottom splits
 into as many columns as the screen holds, up to three, read down
-each column in turn, with **Unavailable shortcuts** across the
-whole panel below them. A section may go on in the next column
+each column in turn, the earlier columns never shorter, with
+**Unavailable shortcuts** across the whole panel below them while
+a search matches it. A section may go on in the next column
 under its title again. The panel's width and its columns are set
 when the side opens; typing moves rows between the same columns
 and changes only the height. The columns scroll together.
@@ -8135,6 +8136,11 @@ the fewest keys, then a swipe before other gestures, then the
 fewest fingers — and the rest behind **+N**, which names them on
 hover. Every other gesture is a row under **Gestures**. Typing a
 gesture's name finds its row and brings that badge to the front.
+
+:::unreleased
+Gestures that run the same action share one row under
+**Gestures**, wearing each badge.
+:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every

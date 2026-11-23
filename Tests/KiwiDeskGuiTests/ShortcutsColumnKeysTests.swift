@@ -222,33 +222,10 @@ struct ShortcutsColumnKeysTests {
         #expect(model.sideWidth == JumpPanelRoom.fieldWidth)
     }
 
-    /// The closing section's room counts when the side opens, at
-    /// the width one column draws it: a sheet whose columns fit
-    /// alone takes three once Unavailable stands below them.
-    @Test("the closing section's room decides the count")
-    func closingDecides() {
-        LocalizationManager.shared.select("en")
-        let inset = JumpShortcutsView.kiwiHubInset
-        let single = JumpPanelRoom.fieldWidth - 2 * inset
-        let plain = ShortcutsSheetView.sections(Self.reference).map {
-            ShortcutsSheetView.planned($0, needle: "", width: single).height
-        }
-        let fits =
-            ShortcutsColumnPlan.height(plain)
-            + 2 * JumpShortcutsView.kiwiHubVerticalInset
-        #expect(model(cap: fits).shortcutColumns.columns.count == 1)
-        var away = Self.reference
-        away.desktopAway = Self.rows("Away", 2)
-        let model = model(cap: fits)
-        model.loadShortcuts = { away }
-        model.setScope(.windows)
-        model.setScope(.shortcuts)
-        #expect(model.shortcutColumns.columns.count == 3)
-    }
-
-    /// Unavailable closes the sheet across its width, below the
-    /// columns: the plan cuts the other sections only.
-    @Test("Unavailable stands below the columns")
+    /// Unavailable shows only under a query that matches it, then
+    /// across the sheet's width below the columns, never in the plan
+    /// (owner, 2026-11-23).
+    @Test("Unavailable stands below the columns only while searched")
     func unavailableCloses() {
         LocalizationManager.shared.select("en")
         var reference = Self.reference
@@ -257,17 +234,16 @@ struct ShortcutsColumnKeysTests {
         model.loadShortcuts = { reference }
         model.setScope(.windows)
         model.setScope(.shortcuts)
-        let flowing = ShortcutsSheetView.sections(reference)
-            .filter { !$0.closes }
-        #expect(flowing.count == 3)
-        #expect(
-            ShortcutsSheetView.sections(reference).last?.closes == true
-        )
-        #expect(
-            model.shortcutColumns.columns.joined().allSatisfy {
-                $0.section < flowing.count
-            }
-        )
         #expect(order(model.shortcutColumns).count == 24)
+        #expect(
+            ShortcutsSheetView.sections(reference).allSatisfy { !$0.closes }
+        )
+        model.query = "away"
+        let searched = ShortcutsSheetView.sections(
+            reference,
+            needle: "away"
+        )
+        #expect(searched.last?.closes == true)
+        #expect(model.shortcutColumns.columns.joined().isEmpty)
     }
 }

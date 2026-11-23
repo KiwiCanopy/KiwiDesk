@@ -97,9 +97,11 @@ struct ShortcutsColumnPlanTests {
     }
 
     /// Where several cuts share the shortest tallest column, the
-    /// most even wins: no column ends early beside a long one.
-    @Test("a tie goes to the most even cut")
-    func tieGoesToTheEvenest() {
+    /// most even wins, and among equally even cuts the earlier
+    /// columns hold the extra: heights never rise (owner,
+    /// 2026-11-23).
+    @Test("a tie goes to the evenest cut, extra rows first")
+    func tieFillsEarlierColumns() {
         // A 300 pt one-row section fixes the tallest whatever the cut.
         let tall = Section(header: 272, rows: 1)
         let plan = Plan.balanced(
@@ -110,6 +112,15 @@ struct ShortcutsColumnPlanTests {
         #expect(
             plan.columns.map { $0.map(\.section) } == [[0], [1, 2], [3, 4]]
         )
+    }
+
+    /// Seven rows over three columns: the extra rows go to the
+    /// earlier columns, three, two, two.
+    @Test("an uneven split puts the extra rows first")
+    func extraRowsFirst() {
+        let plan = Plan.balanced([section(7)], into: 3)
+        #expect(plan.columns.map { $0.map(\.rows.count) } == [[3], [2], [2]])
+        #expect(plan.columns.joined().map(\.continued) == [false, true, true])
     }
 
     /// Any section may break at a row; its rows go on at the next

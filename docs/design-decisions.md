@@ -14531,17 +14531,20 @@ reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
 **KiwiHub's Shortcuts side lifts those rows out instead**, into
-an Unavailable shortcuts band after every section, full width
-(owner ruling 2026-10-16, amended for #3570's columns). The
-reason Settings keeps them in place is that Settings is an
-editor: a row stays where its catalog puts it so it can be
-rebound there. The hub is a read-only list of what a key does
-now, so a group that mixes working keys with keys that do
-nothing answers its one question wrongly. The band is not the
-Inactive one, for the first reason above — its caption promises
-the key still fires — and it takes the caption Settings puts
-over the same rows, so both surfaces say the same thing about
-them.
+an Unavailable shortcuts band after every section, full width,
+shown only while a search matches its rows (owner ruling
+2026-10-16, amended 2026-11-23 for #3570). The reason Settings
+keeps them in place is that Settings is an editor: a row stays
+where its catalog puts it so it can be rebound there. The hub is
+a read-only list of what a key does now, so a group that mixes
+working keys with keys that do nothing answers its one question
+wrongly. The band is not the Inactive one, for the first reason
+above — its caption promises the key still fires — and it takes
+the caption Settings puts over the same rows, so both surfaces
+say the same thing about them. With nothing typed the band is
+not drawn: a glance at what the keys do now has no use for keys
+that do nothing here, and a search that names one still finds
+it, below the matching rows that work.
 
 **Config presence expands the surface.** A first-week Settings
 is not a smaller product, it is a smaller *offer*. Anything
@@ -16632,9 +16635,11 @@ only the height follows the results, gliding with its top held as
 Spotlight's does. The fill is column-major and may break at any row,
 the next column repeating the section's title in tertiary ink, at
 the breaks that make the tallest column shortest and, among those,
-the columns most even, so no column ends early beside a long one;
-breaking only before a title left one long section alone at full
-height. Unavailable shortcuts is never split: it closes the sheet
+the columns most even, the extra rows of an uneven split in the
+earlier columns, so heights never rise left to right and no column
+ends early beside a long one; breaking only before a title left one
+long section alone at full height. Unavailable shortcuts is never
+split: shown only while a search matches it, it closes the sheet
 across its whole width below the columns (▸ *KiwiHub's Shortcuts
 side lifts those rows out instead*). VoiceOver reads each column as
 one group, down a column and on to the next, and the full-width
@@ -18185,6 +18190,10 @@ to the front, so a hit never matches a gesture the row hides.
 columns are measured per column of the sheet, and a section with no
 keyboard chord keeps no chord slot and no divider, so its badges
 align to the column's right edge* (`ShortcutSectionChordSlotTests`).
+*Amended (owner, 2026-11-23): gestures that run one command with no
+row of keys to sit on share one Gestures row wearing every badge, as
+a keyed row does, so a command appears once*
+(`ShortcutGestureBadgeTests`).
 :::
 
 **A multi-finger swipe also fires on a quick flick, decided at

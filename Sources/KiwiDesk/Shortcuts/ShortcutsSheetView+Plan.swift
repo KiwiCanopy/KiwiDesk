@@ -17,7 +17,7 @@ extension ShortcutsSheetView {
         width: CGFloat
     ) -> ShortcutsColumnPlan.Section {
         var header = titleLine + titleGap
-        if let caption = section.caption, needle.isEmpty {
+        if let caption = section.caption, needle.isEmpty || section.closes {
             let lines = (CGFloat(caption.count) * captionAdvance / width)
                 .rounded(.up)
             header += partSpacing + lines * captionLine + captionGap

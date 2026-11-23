@@ -1,8 +1,9 @@
 import CoreGraphics
 
 /// The balanced fill (#3570 ▸ Ruling 5): the column-major cut, at
-/// any row, whose tallest column is shortest, ties going to the most
-/// even cut, so no column is left short while another runs on.
+/// any row, whose tallest column is shortest; among those the most
+/// even, and among those the one whose extra rows sit in the earlier
+/// columns, so heights never rise left to right (owner, 2026-11-23).
 extension ShortcutsColumnPlan {
     /// One row of a section: the cut breaks between any two.
     private struct Unit {
@@ -59,6 +60,9 @@ extension ShortcutsColumnPlan {
                 run[start][end] = height
             }
         }
+        // best[k][i]: the first i units cut into k columns, least
+        // tallest, then most even; on a whole tie the later start, so
+        // an extra row stays in the earlier column.
         typealias Cost = (tallest: CGFloat, squares: CGFloat)
         let none: Cost = (.infinity, .infinity)
         var best = [[Cost]](
@@ -82,7 +86,7 @@ extension ShortcutsColumnPlan {
                     let held = best[column][end]
                     if cost.tallest < held.tallest
                         || (cost.tallest == held.tallest
-                            && cost.squares < held.squares)
+                            && cost.squares <= held.squares)
                     {
                         best[column][end] = cost
                         from[column][end] = start
