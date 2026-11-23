@@ -18,8 +18,11 @@ extension KiwiCore {
         in snapshot: DesktopSnapshot
     ) {
         rememberDeparture(of: active, leaving: leaving)
-        // The screen the Desktop left lives on, from the reading.
-        let left = snapshot.space(for: leaving)?.displayUUID
+        // The screen the Desktop left lives on, read by its stamp:
+        // a number re-read in this reading may name another one.
+        let left =
+            leaving.isIdentity
+            ? snapshot.space(for: leaving)?.displayUUID : nil
         if let screen = display(forUUID: left ?? snapshot.mainUUID) {
             rememberAreaSpaces(on: screen, leaving: leaving)
         }
@@ -52,6 +55,15 @@ extension KiwiCore {
             in: snapshot,
             except: state.workspaces.placement(of: target)
         )
+    }
+
+    /// Whether `key` names an area of its screen's stored split —
+    /// connected or not, so an unplugged screen's memory stays live
+    /// for its return. An unsplit screen holds no area here.
+    func isStoredArea(_ key: String) -> Bool {
+        let area = ScreenAreaKey(parsing: key)
+        return state.workspaces.areaSplits[area.fingerprint]?.areas
+            .contains { $0.id == area.areaID } ?? false
     }
 
     /// Moves the areas' memory a merge absorbed onto its survivor,

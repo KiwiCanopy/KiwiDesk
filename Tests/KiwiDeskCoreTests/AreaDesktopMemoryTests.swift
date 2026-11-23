@@ -128,7 +128,9 @@ struct AreaDesktopMemoryTests {
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
         let other = try #require(authoritySnapshot().key(of: 11))
-        core.desktopMemory.areaSpaces[other] = ["x": SpaceID(6)]
+        core.desktopMemory.areaSpaces[other] = [
+            try leftKey(core, areas): SpaceID(6)
+        ]
         _ = swipe(core, from: 20, to: 21)
         #expect(shown(core, areas[1]) == SpaceID(5))
         #expect(shown(core, areas[0]) == SpaceID(3))
@@ -137,16 +139,62 @@ struct AreaDesktopMemoryTests {
     @Test("another Desktop's area Space is taken for the cursor")
     func cursorSkipsAreaMemory() throws {
         defer { resetAuthorityOverrides() }
-        let (core, _) = makeCore()
+        let (core, areas) = makeCore()
         let snapshot = authoritySnapshot()
         let other = try #require(snapshot.key(of: 11))
         let arriving = try #require(snapshot.key(of: 21))
-        core.desktopMemory.areaSpaces[other] = ["x": SpaceID(6)]
+        core.desktopMemory.areaSpaces[other] = [
+            try leftKey(core, areas): SpaceID(6),
+            "Gone#1": SpaceID(5),
+        ]
         let taken = core.spacesShownElsewhere(
             excluding: arriving,
             in: snapshot
         )
         #expect(taken.contains(SpaceID(6)))
+        // A screen no longer split leaves its entries dormant.
+        #expect(!taken.contains(SpaceID(5)))
+    }
+
+    /// The memory is judged on the stored split, never on what is
+    /// connected: an unplugged split screen keeps its entries in
+    /// use and gets them back on its return.
+    @Test("an absent split screen keeps its areas' memory")
+    func absentScreenKeepsItsMemory() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        core.state.workspaces.show(SpaceID(7), on: areas[1])
+        let snapshot = swipe(core, from: 20, to: 21)
+        let left = try #require(snapshot.key(of: 20))
+        let filed = try #require(core.desktopMemory.areaSpaces[left])
+        let removed = core.state.workspaces.removeDisplay(DisplayID(2))
+        let wide = try #require(removed)
+        #expect(core.desktopMemory.areaSpaces[left] == filed)
+        let other = try #require(snapshot.key(of: 11))
+        #expect(
+            core.spacesShownElsewhere(excluding: other, in: snapshot)
+                .contains(SpaceID(7))
+        )
+        core.state.workspaces.upsertDisplay(wide)
+        let back = core.state.workspaces.placements(of: wide.id)
+            .map(\.id)
+        let homes = [(6, 0), (3, 0), (4, 1), (5, 1), (7, 1)]
+        for (space, area) in homes {
+            core.state.workspaces.assign(SpaceID(space), to: back[area])
+        }
+        _ = swipe(core, from: 21, to: 20)
+        #expect(shown(core, back[1]) == SpaceID(7))
+    }
+
+    private func leftKey(
+        _ core: KiwiCore,
+        _ areas: [PlacementID]
+    ) throws -> String {
+        let first = try #require(areas.first)
+        return try #require(
+            core.state.workspaces[placement: first]?.key.description
+        )
     }
 
     @Test("an unsplit screen files no area memory")
@@ -166,8 +214,19 @@ struct AreaDesktopMemoryTests {
         defer { resetAuthorityOverrides() }
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
-        let snapshot = authoritySnapshot()
+        var topology = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 21
+        )
+        topology[2] = authoritySpace(
+            20,
+            display: "UUID-B",
+            identity: DesktopIdentity(raw: "LEFT-B")
+        )
+        NativeSpaces.spacesOverride = topology
+        let snapshot = NativeSpaces.desktopSnapshot()
         let left = try #require(snapshot.key(of: 20))
+        try #require(left.isIdentity)
         core.rememberDeparture(
             of: SpaceID(1),
             leaving: left,
@@ -187,10 +246,11 @@ struct AreaDesktopMemoryTests {
         let key = try #require(
             core.state.workspaces[placement: areas[1]]?.key.description
         )
-        core.desktopMemory.areaSpaces[arriving] = [key: SpaceID(5)]
+        core.desktopMemory.areaSpaces[arriving] = [key: SpaceID(7)]
         core.activateArriving(SpaceID(6), on: arriving, in: snapshot)
         #expect(core.state.workspaces.activeSpace == SpaceID(6))
-        #expect(shown(core, areas[1]) == SpaceID(5))
+        // The memory's 7, where a free pick would take 5.
+        #expect(shown(core, areas[1]) == SpaceID(7))
     }
 
     @Test("a merge moves the live areas' memory to the survivor")

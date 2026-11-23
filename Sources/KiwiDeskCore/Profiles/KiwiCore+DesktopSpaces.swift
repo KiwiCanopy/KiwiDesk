@@ -174,10 +174,14 @@ extension KiwiCore {
         where key != desktop && present.contains(key) {
             taken.insert(space)
         }
-        // A split screen's other areas are in use too (#3517).
+        // A split screen's other areas are in use too (#3517); an
+        // entry its screen's stored split no longer holds is
+        // dormant, judged on the split, never on what is connected.
         for (key, shown) in desktopMemory.areaSpaces
         where key != desktop && present.contains(key) {
-            taken.formUnion(shown.values)
+            taken.formUnion(
+                shown.filter { isStoredArea($0.key) }.values
+            )
         }
         return taken
     }
