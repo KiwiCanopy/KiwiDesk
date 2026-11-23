@@ -5858,9 +5858,8 @@ Out of the box these are bound:
 | `pinch_together4` | ⌃⌥ | The window switcher |
 
 :::unreleased
-⌃⌥ pinch together toggles floating, pairing with ⌃⌥ spread's
-maximize; the Desktop overview keeps ⌃⌥ three-finger swipe up. A
-pinch row you changed keeps its binding.
+⌃⌥ pinch together toggles floating. A pinch row set to another
+action keeps it.
 :::
 
 `hover_move`, the clicks and the side buttons are unbound. In a
