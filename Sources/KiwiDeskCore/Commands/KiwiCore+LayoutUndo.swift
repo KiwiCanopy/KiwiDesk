@@ -121,7 +121,7 @@ extension KiwiCore {
                 setSpaceMode(space, arrangement.mode, keepingSizes: true)
             }
             state.workspaces.withSpace(space) { $0.restore(arrangement) }
-            restoreSessionRatios(arrangement.sizing.ratios, of: space)
+            restoreSessionRatios(arrangement.sessionSizes.ratios, of: space)
             if modeChanged, let restored = state.workspaces[space] {
                 emitLayoutChange(space: restored)
             }

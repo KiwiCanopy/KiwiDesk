@@ -47,6 +47,10 @@ struct RetilePassRoutingTests {
         // The tour's live look (#1720): a paint of the shelf.
         "KiwiDeskCore/App/KiwiCore+ShelfPaint.swift":
             Site(applies: 1, reissues: 0),
+        // An undo or redo of the layout (#3515): a stored
+        // arrangement put back, an explicit apply.
+        "KiwiDeskCore/Commands/KiwiCore+LayoutUndo.swift":
+            Site(applies: 1, reissues: 0),
         // `look.apply` (#1685): a look worn live, an explicit apply.
         "KiwiDeskCore/Commands/KiwiCore+LookCommands.swift":
             Site(applies: 1, reissues: 0),

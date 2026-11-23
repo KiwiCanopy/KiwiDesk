@@ -31,8 +31,8 @@ struct SpaceArrangementParityTests {
     @Test("every Space field is copied or ruled out")
     func fieldsAreMirrored() {
         let space = Space(id: SpaceID("1"))
-        let copied = labels(SpaceArrangement(space, sizing: sizing))
-            .subtracting(["sizing"])
+        let copied = labels(SpaceArrangement(space, sessionSizes: sizing))
+            .subtracting(["sessionSizes"])
         let stored = labels(space)
         #expect(copied.union(Self.ruledOut.keys) == stored)
         #expect(copied.isDisjoint(with: Self.ruledOut.keys))
@@ -52,21 +52,21 @@ struct SpaceArrangementParityTests {
             trackWeights: [b: 1.5]
         )
         source.runSizes = [a: RunSize(share: 0.6, zone: 1)]
-        let saved = SpaceArrangement(source, sizing: sizing)
+        let saved = SpaceArrangement(source, sessionSizes: sizing)
         // `init` copies each field's VALUE, read off `Space` itself.
         let fields = Dictionary(
             uniqueKeysWithValues: Mirror(reflecting: source).children
                 .compactMap { c in c.label.map { ($0, "\(c.value)") } }
         )
         for child in Mirror(reflecting: saved).children
-        where child.label != "sizing" {
+        where child.label != "sessionSizes" {
             let label = child.label ?? "?"
             #expect("\(child.value)" == fields[label], "\(label)")
         }
         var target = Space(id: SpaceID("1"), mode: .track, windows: [a, b])
         let wrote = target.restore(saved)
         #expect(wrote)
-        let restored = SpaceArrangement(target, sizing: sizing)
+        let restored = SpaceArrangement(target, sessionSizes: sizing)
         #expect(restored == saved)
     }
 }

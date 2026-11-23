@@ -15,7 +15,7 @@ struct LayoutUndoStacksTests {
         let space = Space(id: SpaceID("x"), windows: ids.map(WindowID.init))
         return SpaceArrangement(
             space,
-            sizing: SpaceSizing(
+            sessionSizes: SpaceSizing(
                 key: SessionSizingKey(desktop: nil, arrangement: nil),
                 ratios: SessionRatios()
             )

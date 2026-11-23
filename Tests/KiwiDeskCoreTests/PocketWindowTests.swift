@@ -318,6 +318,7 @@ struct PocketWindowTests {
                 + DefaultKeybindings.rows(ofGeneration: 12)
                 + DefaultKeybindings.rows(ofGeneration: 13)
                 + DefaultKeybindings.rows(ofGeneration: 14)
+                + DefaultKeybindings.rows(ofGeneration: 15)
         )
     }
 }

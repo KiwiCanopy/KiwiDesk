@@ -24,9 +24,9 @@ public struct SpaceArrangement: Sendable, Equatable {
     public var trackWeights: [WindowID: Double]
     /// A step taken under another Desktop or arrangement has
     /// another key, so it never matches after a switch or apply.
-    public var sizing: SpaceSizing
+    public var sessionSizes: SpaceSizing
 
-    public init(_ space: Space, sizing: SpaceSizing) {
+    public init(_ space: Space, sessionSizes: SpaceSizing) {
         mode = space.mode
         windows = space.windows
         stackWeights = space.stackWeights
@@ -34,7 +34,7 @@ public struct SpaceArrangement: Sendable, Equatable {
         trackBreaks = space.trackBreaks
         handedBreaks = space.handedBreaks
         trackWeights = space.trackWeights
-        self.sizing = sizing
+        self.sessionSizes = sessionSizes
     }
 }
 

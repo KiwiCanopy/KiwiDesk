@@ -171,7 +171,7 @@ struct LayoutUndoEdgeTests {
         func arrangement(_ desktop: UInt64?) -> SpaceArrangement {
             SpaceArrangement(
                 space,
-                sizing: SpaceSizing(
+                sessionSizes: SpaceSizing(
                     key: SessionSizingKey(
                         desktop: desktop.map { SkyLight.SpaceID($0) },
                         arrangement: nil

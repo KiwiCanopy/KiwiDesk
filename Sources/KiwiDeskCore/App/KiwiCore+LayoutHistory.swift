@@ -79,11 +79,11 @@ extension KiwiCore {
 
     /// Every Space's arrangement now.
     func layoutArrangements() -> [SpaceID: SpaceArrangement] {
-        let sizing = sessionSizingOfEverySpace()
+        let sizes = sessionSizingOfEverySpace()
         var out: [SpaceID: SpaceArrangement] = [:]
         for space in state.workspaces.allSpaces {
-            guard let sized = sizing[space.id] else { continue }
-            out[space.id] = SpaceArrangement(space, sizing: sized)
+            guard let sized = sizes[space.id] else { continue }
+            out[space.id] = SpaceArrangement(space, sessionSizes: sized)
         }
         return out
     }
@@ -228,7 +228,7 @@ extension KiwiCore {
         guard (1...2).contains(before.count),
             Set(before.keys) == Set(after.keys),
             before.allSatisfy({
-                after[$0.key]?.sizing.key == $0.value.sizing.key
+                after[$0.key]?.sessionSizes.key == $0.value.sessionSizes.key
             })
         else { return false }
         func members(_ side: [SpaceID: SpaceArrangement]) -> [WindowID] {
