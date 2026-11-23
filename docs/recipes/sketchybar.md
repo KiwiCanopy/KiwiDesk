@@ -543,6 +543,140 @@ Moving a Space to another screen sends `space_change`, which
 redraws the bar.
 :::
 
+:::unreleased
+### Screens split into areas
+
+A screen [split into areas](../lua-reference.md#set_display_areas)
+shows one Space per area, and SketchyBar still draws one bar for
+the whole screen. With the Multiple screens changes, that bar
+brightens each area's Space but lists the Spaces in `space_names`
+order, so two areas' Spaces mix. These changes build on those and
+group them: each area's Spaces sit together, in the areas' order
+across the screen, with a gap between areas. A screen that is not
+split keeps one group, as above.
+
+Each [`get_state`](../lua-reference.md#get_state) Space carries
+`area`, and `list_monitors` lists each split screen's `areas`. An
+area key holds the screen's name and a colon, so the filter writes
+the area's place on its screen instead: 0 for the left or top area,
+and for every Space on a screen that is not split. When
+`list_monitors` fails, or a release has no `areas`, every place is
+0 and each screen keeps one group.
+
+First, read `list_monitors` beside `get_state`, and write that
+place after `display`. Replace the `io.popen` call in
+`update_spaces()`:
+
+```lua
+    local handle = io.popen(
+        kiwidesk_cmd("get_state") .. " 2>/dev/null | "
+            .. JQ .. " -r --arg mon \"$("
+            .. kiwidesk_cmd("list_monitors") .. " 2>/dev/null)\" "
+            .. "'(($mon | fromjson? // []) "
+            .. "| map((.areas // []) | sort_by(.y, .x)"
+            .. " | to_entries | map({key: .value.key, value: .key}))"
+            .. " | add // [] | from_entries) as $place"
+            .. " | .active_space, \"---SPACES---\", "
+            .. "(.spaces[] | \"\\(.id):\\(.focused):"
+            .. "\\(.shown):\\(.display):"
+            .. "\\($place[.area // \"\"] // 0):"
+            .. "\\(.windows | join(\",\"))\"), "
+            .. "\"---WINDOWS---\", "
+            .. "(.windows[] | \"\\(.id):\\(.app):"
+            .. "\\(.floating)\")' 2>/dev/null"
+    )
+```
+
+Second, parse the place into each Space:
+
+```lua
+        local id, focused_win, shown, display, area, windows_str =
+            line:match(
+                "([^:]+):([^:]*):(%a+):([^:]*):(%d+):(.*)")
+        if id then
+            -- (window_ids as before)
+            spaces[id] = {
+                focused = tonumber(focused_win),
+                shown = (shown == "true"),
+                display = tonumber(display),
+                area = tonumber(area),
+                windows = window_ids
+            }
+        end
+```
+
+Third, add this function above `update_spaces()`. It orders the
+items by screen, then area, then their place in `space_names`, and
+puts the gap before each area's first Space. The gap replaces the
+Space item's own left padding, so set `SPACE_PADDING` to the
+`padding_left` your config gives it. The function moves the items
+only when the grouping changes:
+
+```lua
+local SKETCHYBAR = "/opt/homebrew/bin/sketchybar"
+local SPACE_PADDING = 0
+local AREA_GAP = 12
+local last_order = ""
+
+local function group_by_area(spaces, arrangement)
+    local order = {}
+    for i, key in ipairs(space_names) do
+        local w = spaces[key]
+        order[i] = {
+            key = key,
+            index = i,
+            -- A Space on no screen goes last.
+            screen = (w and arrangement[w.display]) or math.huge,
+            area = (w and w.area) or 0,
+        }
+    end
+    table.sort(order, function(a, b)
+        if a.screen ~= b.screen then return a.screen < b.screen end
+        if a.area ~= b.area then return a.area < b.area end
+        return a.index < b.index
+    end)
+
+    local names, gaps = {}, {}
+    for i, s in ipairs(order) do
+        local prev = order[i - 1]
+        local new_area = prev ~= nil and prev.screen == s.screen
+            and prev.area ~= s.area
+        gaps[i] = new_area and "|" or ""
+        table.insert(names, spaces_store[s.key].item.name)
+        for _, win_item in ipairs(spaces_store[s.key].win_items) do
+            table.insert(names, win_item.name)
+        end
+    end
+
+    local joined = table.concat(names, " ")
+    local grouping = joined .. table.concat(gaps, ",")
+    if grouping == last_order then return end
+    for i, s in ipairs(order) do
+        spaces_store[s.key].item:set({
+            padding_left = SPACE_PADDING
+                + (gaps[i] ~= "" and AREA_GAP or 0)
+        })
+    end
+    -- Remembered only once the reorder ran, so a failed one retries.
+    if os.execute(SKETCHYBAR .. " --reorder " .. joined) then
+        last_order = grouping
+    end
+end
+```
+
+Last, call it at the end of `update_spaces()`, after the loop that
+updates each Space:
+
+```lua
+    group_by_area(spaces, arrangement)
+```
+
+Moving a Space to another area sends `space_change`, which redraws
+the bar. Splitting a screen or making it whole again can send no event,
+and then the bar regroups on the next one; run
+`sketchybar --trigger kiwidesk_update` to regroup it at once.
+:::
+
 ### Cold-start race condition
 
 If sketchybar loads items conditionally (e.g., only when
