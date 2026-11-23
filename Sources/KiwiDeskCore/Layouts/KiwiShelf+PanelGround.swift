@@ -59,8 +59,9 @@ extension KiwiShelf {
     }
 
     /// The one answer for every panel that wears the Fill.
-    /// `glassDrawn` is the caller's read of KiwiHub's leaf as drawn
-    /// — `LiquidGlassGate.rendered(glass:)` in Core, `PanelGlass`
+    /// `glassDrawn` is the surface's own glass leaf as drawn —
+    /// KiwiHub's, or the drag ghost's (#3583) —
+    /// `LiquidGlassGate.rendered(glass:)` in Core, `PanelGlass`
     /// under the live Reduce transparency in the GUI — so the
     /// decision stays pure.
     public func panelGround(

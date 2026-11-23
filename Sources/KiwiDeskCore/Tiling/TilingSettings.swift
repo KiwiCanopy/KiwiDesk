@@ -75,9 +75,9 @@ public struct TilingSettings: Sendable, Equatable {
     public var dragGhost = DragVisual.ghostDefault
     /// The drag drop zone's switch (`drag.drop_zone`).
     public var dragDropZone = DragVisual.dropZoneDefault
-    /// Liquid Glass on the drop zone (#1620, #2797), written by the
-    /// one Liquid Glass row beside the shelf's and the panel's
-    /// (#1307); the ghost is an outline and wears none.
+    /// Liquid Glass on the drag ghost's plate (#1620, #3583),
+    /// written by the one Liquid Glass row beside the shelf's and
+    /// the panel's (#1307); the drop zone draws none.
     public var dragLiquidGlass = true
     /// Per-trigger animation settings (`animations.*`).
     public var animations = AnimationSettings()

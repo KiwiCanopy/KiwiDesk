@@ -32,9 +32,7 @@ public struct BorderStyle: Sendable, Equatable {
     /// Focused ring colour (#578: shifted ~12° off the brand hue
     /// to escape the moss cast while clearing the 3:1 floor both
     /// ways; docs/lua-reference.md mirrors the default — change
-    /// both). The drag ghost deliberately is NOT this family
-    /// (#511: it must separate from the drop-zone amber under
-    /// red-green vision loss) — do not re-converge them.
+    /// both). The drag drop zone wears it too (#3583).
     public var focusedColor = "#4A9816"
     public var unfocusedEnabled = false
     public var unfocusedColor = "#8E8E93CC"

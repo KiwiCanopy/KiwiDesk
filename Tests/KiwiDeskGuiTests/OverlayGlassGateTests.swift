@@ -136,11 +136,10 @@ struct OverlayGlassGateTests {
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
-        "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
         "Borders/OverflowMarkView.swift": "OverlayGlassGateTests",
         "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
-        "Animation/BriefPocketViews.swift": "OverlayGlassGateTests",
+        "Bar/SwitchPlateView.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",
     ]

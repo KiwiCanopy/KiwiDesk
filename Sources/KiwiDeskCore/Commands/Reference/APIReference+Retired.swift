@@ -159,8 +159,8 @@ extension APIReference {
         "a Stack zone or Track track scrolls the windows that "
         + "do not fit"
     private static let dragLookIsFixed =
-        "the drag markers' look is fixed: an untinted drop zone and "
-        + "a two-tone ghost outline"
+        "the drag markers' look is fixed: the drop zone wears the "
+        + "focus border colour and the ghost KiwiShelf's plate"
     private static let appBarDrawsBoth =
         "the App Bar always draws each item's icon and title"
 

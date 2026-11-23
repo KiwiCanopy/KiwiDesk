@@ -233,10 +233,12 @@ struct FrostPlateTests {
 
     @Test("The brief pocket's material plate wears the Fill")
     func pocketPlateWearsIt() throws {
-        let plate = BriefPocketPlateView(
-            glass: false,
-            tint: nil,
-            frost: try fill("#14201CB3", opaque: true),
+        let plate = SwitchPlateView(
+            SwitchPlateView.Ground(
+                glass: false,
+                tint: nil,
+                frost: try fill("#14201CB3", opaque: true)
+            ),
             image: nil
         )
         let materials = Self.materials(in: plate)

@@ -19,7 +19,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// AI ▸ Ready-made prompts (#1685).
     case readyMadePrompts
     /// Colors & glass' first role group (#1857): the hue the
-    /// active Space, the focus border and the drag ghost share.
+    /// active Space, the focus border and the drag drop zone share.
     case accent
     case appBar
     case borders

@@ -15,14 +15,9 @@ public final class DragMarkerView: NSView {
         case ghost
     }
 
-    private(set) var glass: NSView?
-    private(set) var material: NSVisualEffectView?
-    let tint = GlassBackdrop()
-    /// What the hosted glass and material were made for: each is
-    /// minted again only when it changes, since a drag draws per
-    /// pointer move.
-    private var glassRegular: Bool?
-    private var materialFill: FrostFill??
+    /// The ghost's plate, made again only when its ground changes,
+    /// since a drag draws per pointer move.
+    private(set) var plate: SwitchPlateView?
     private var preview: PreviewInput?
     private var gateToken: NSObjectProtocol?
 
@@ -128,79 +123,46 @@ public final class DragMarkerView: NSView {
             ink.withAlphaComponent(Self.washAlpha).cgColor
         layer.borderWidth = Self.edgeWidth
         layer.borderColor = ink.withAlphaComponent(Self.edgeAlpha).cgColor
-        glass?.isHidden = true
-        material?.isHidden = true
+        plate?.isHidden = true
     }
 
-    /// Paints the ghost as a Space-switch plate on the ground Core
-    /// answers for the shelf and `drawsGlass` (already through the
-    /// gate): the composition `SpaceSlideOverlay`'s `plateView`
-    /// makes, with no icon. A tinted plate's panel wears the
+    /// Paints the ghost as a Space-switch plate without its icon, on
+    /// the ground Core answers for the shelf and `drawsGlass`
+    /// (already through the gate). A tinted plate's panel wears the
     /// key-window rim (#2569).
     func renderGhost(_ look: DragMarkerLook, glass drawsGlass: Bool) {
         guard let layer else { return }
-        let radius = look.cornerRadius
-        layer.cornerRadius = radius
         layer.borderWidth = 0
         layer.backgroundColor = NSColor.clear.cgColor
         let ground = LiquidGlassGate.panelGround(
             look.shelf,
             glass: drawsGlass
         )
-        let fill = look.shelf.glassFill(on: ground)
-        (window as? ActiveGlassPanel)?.wearsActiveLook = fill != nil
-        if drawsGlass, let plate = glassView(regular: fill == nil) {
-            material?.isHidden = true
-            plate.isHidden = false
-            GlassPlate.update(plate, frame: bounds, cornerRadius: radius)
-            let host = window?.effectiveAppearance ?? effectiveAppearance
-            guard let fill else {
-                GlassTint.followPick(plate, host: host)
-                return
-            }
-            GlassTint.apply(
-                tint,
-                in: plate,
-                cornerRadius: radius,
-                fill: fill,
-                edge: .top,
-                host: host
-            )
-            return
-        }
-        glass?.isHidden = true
-        let frost = materialView(fill: ground.frost)
-        frost.isHidden = false
-        frost.frame = bounds
-        frost.layer?.cornerRadius = radius
+        let wanted = SwitchPlateView.Ground(
+            glass: drawsGlass,
+            tint: look.shelf.glassFill(on: ground),
+            frost: ground.frost
+        )
+        (window as? ActiveGlassPanel)?.wearsActiveLook = wanted.tint != nil
+        let shown = plateView(wanted)
+        shown.isHidden = false
+        shown.place(
+            bounds,
+            cornerRadius: look.cornerRadius,
+            iconSide: 0,
+            host: window?.effectiveAppearance ?? effectiveAppearance
+        )
     }
 
-    /// The ghost's glass, minted again when its variant changes;
-    /// nil below macOS 26.
-    private func glassView(regular: Bool) -> NSView? {
-        if let glass, glassRegular == regular { return glass }
-        glass?.removeFromSuperview()
-        glass = nil
-        guard let plate = GlassPlate.make(regular: regular) else {
-            return nil
-        }
-        plate.autoresizingMask = [.width, .height]
-        addSubview(plate, positioned: .below, relativeTo: nil)
-        glass = plate
-        glassRegular = regular
-        return plate
-    }
-
-    /// The ghost's material, wearing `fill` flat as a plate's does
-    /// (`FrostPlate`), minted again when the Fill changes.
-    private func materialView(fill: FrostFill?) -> NSVisualEffectView {
-        if let material, materialFill == .some(fill) { return material }
-        material?.removeFromSuperview()
-        let view = FrostPlate.make(content: NSView(), fill: fill)
-        view.autoresizingMask = [.width, .height]
-        addSubview(view, positioned: .below, relativeTo: nil)
-        material = view
-        materialFill = .some(fill)
-        return view
+    /// The ghost's plate on `ground`, made again when it differs.
+    private func plateView(
+        _ ground: SwitchPlateView.Ground
+    ) -> SwitchPlateView {
+        if let plate, plate.ground == ground { return plate }
+        plate?.removeFromSuperview()
+        let made = SwitchPlateView(ground, image: nil)
+        addSubview(made)
+        plate = made
+        return made
     }
 }

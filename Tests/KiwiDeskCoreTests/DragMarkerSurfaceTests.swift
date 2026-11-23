@@ -25,15 +25,20 @@ struct DragMarkerSurfaceTests {
     private static let slot = CGRect(x: 200, y: 200, width: 300, height: 200)
     private static let focus = "#564AB6"
 
-    private static func look(tinted: Bool = true) -> DragMarkerLook {
+    private static func look(
+        tinted: Bool = true,
+        fill: String = "#1A1A2EA5",
+        focus: String = DragMarkerSurfaceTests.focus,
+        glass: Bool = true
+    ) -> DragMarkerLook {
         var shelf = KiwiShelf()
-        shelf.fillColor = "#1A1A2EA5"
+        shelf.fillColor = fill
         shelf.tintHubAndPlates = tinted
         return DragMarkerLook(
             cornerRadius: 8,
             focusColor: focus,
             shelf: shelf,
-            storedGlass: true
+            storedGlass: glass
         )
     }
 
@@ -89,8 +94,39 @@ struct DragMarkerSurfaceTests {
             #expect(layer.borderWidth == DragMarkerView.edgeWidth)
             #expect(Self.rgb(layer.borderColor) == ink)
             #expect(layer.borderColor?.alpha == DragMarkerView.edgeAlpha)
-            #expect(view.glass == nil, "the drop zone hosts glass")
-            #expect(view.material == nil, "the drop zone hosts a blur")
+            #expect(view.plate == nil, "the drop zone hosts a plate")
+            #expect(layer.cornerRadius == Self.look().cornerRadius)
+            // A wash, never a plate: the window beneath stays seen.
+            #expect(DragMarkerView.washAlpha < 0.5)
+        }
+    }
+
+    /// The focus colour's own alpha is dropped, and a colourless one
+    /// falls back to the system accent rather than drawing nothing.
+    @Test("The drop zone sets its own alpha on any focus colour")
+    func dropZoneOwnsItsAlpha() throws {
+        try Self.withOverlay { overlay, id in
+            for hex in ["#564AB680", ""] {
+                overlay.showDropZone(
+                    at: Self.slot,
+                    look: Self.look(focus: hex),
+                    beneath: id
+                )
+                let layer = try #require(overlay.dropZone?.view.layer)
+                #expect(
+                    layer.backgroundColor?.alpha == DragMarkerView.washAlpha,
+                    "\(hex)"
+                )
+                #expect(
+                    layer.borderColor?.alpha == DragMarkerView.edgeAlpha,
+                    "\(hex)"
+                )
+            }
+            let accent = Self.rgb(NSColor.controlAccentColor.cgColor)
+            #expect(
+                Self.rgb(overlay.dropZone?.view.layer?.backgroundColor)
+                    == accent
+            )
         }
     }
 
@@ -111,13 +147,25 @@ struct DragMarkerSurfaceTests {
     func ghostWearsTheFill() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         try Self.withOverlay { overlay, id in
+            // Untinted first, so the rim the tint turns on is seen
+            // turning on rather than read off the panel's default.
+            overlay.showGhost(
+                at: Self.slot,
+                look: Self.look(tinted: false),
+                beneath: id
+            )
             overlay.showGhost(at: Self.slot, look: Self.look(), beneath: id)
             let marker = try #require(overlay.ghost)
-            let glass = try #require(marker.glass, "no glass hosted")
-            #expect(!glass.isHidden)
+            let plate = try #require(marker.plate)
+            let glass = try #require(plate.glass, "no glass hosted")
+            #expect(!plate.isHidden && !glass.isHidden)
             #expect(glass.alphaValue == 1, "the ghost's glass is thinned")
-            #expect(marker.tint.gradient?.colors?.count == 2)
-            #expect(marker.view.material?.isHidden ?? true)
+            #expect(plate.tint.gradient?.colors?.count == 2)
+            #expect(plate.material == nil)
+            if #available(macOS 26, *) {
+                let style = (glass as? NSGlassEffectView)?.style
+                #expect(style == .clear, "the tinted plate is regular")
+            }
             let panel = try #require(marker.panel as? ActiveGlassPanel)
             #expect(panel.wearsActiveLook)
         }
@@ -127,15 +175,25 @@ struct DragMarkerSurfaceTests {
     func untintedGhostIsPlainGlass() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         try Self.withOverlay { overlay, id in
+            // Tinted first: a plate the toggle leaves behind would
+            // keep its Fill.
+            overlay.showGhost(at: Self.slot, look: Self.look(), beneath: id)
+            let tinted = try #require(overlay.ghost?.plate)
             overlay.showGhost(
                 at: Self.slot,
                 look: Self.look(tinted: false),
                 beneath: id
             )
             let marker = try #require(overlay.ghost)
-            let glass = try #require(marker.glass)
-            #expect(!glass.isHidden)
-            #expect(marker.tint.gradient?.colors == nil, "a tint drawn")
+            let plate = try #require(marker.plate)
+            #expect(plate !== tinted, "the tinted plate was kept")
+            #expect(tinted.superview == nil)
+            let glass = try #require(plate.glass)
+            if #available(macOS 26, *) {
+                let style = (glass as? NSGlassEffectView)?.style
+                #expect(style == .regular, "the untinted plate is clear")
+            }
+            #expect(plate.tint.gradient?.colors == nil, "a tint drawn")
             let panel = try #require(marker.panel as? ActiveGlassPanel)
             #expect(!panel.wearsActiveLook)
         }
@@ -147,11 +205,45 @@ struct DragMarkerSurfaceTests {
         LiquidGlassGate.override = { true }
         try Self.withOverlay { overlay, id in
             overlay.showGhost(at: Self.slot, look: Self.look(), beneath: id)
-            let marker = try #require(overlay.ghost)
-            let material = try #require(marker.view.material)
-            #expect(!material.isHidden)
-            #expect(marker.glass?.isHidden ?? true)
-            #expect(FrostPlate.washColour(of: material) != nil)
+            let first = try #require(overlay.ghost?.plate)
+            overlay.showGhost(
+                at: Self.slot,
+                look: Self.look(fill: "#AA3355CC"),
+                beneath: id
+            )
+            let plate = try #require(overlay.ghost?.plate)
+            #expect(plate !== first, "a new Fill kept the old material")
+            let material = try #require(plate.material)
+            #expect(plate.glass == nil)
+            let wash = try #require(FrostPlate.washColour(of: material))
+            #expect(
+                Self.rgb(wash.cgColor)
+                    == Self.rgb(NSColor(kiwiHex: "#AA3355").cgColor)
+            )
+        }
+    }
+
+    @Test("With its glass leaf off the ghost is the material")
+    func glassLeafOffIsTheMaterial() throws {
+        try Self.withOverlay { overlay, id in
+            overlay.showGhost(
+                at: Self.slot,
+                look: Self.look(glass: false),
+                beneath: id
+            )
+            let plate = try #require(overlay.ghost?.plate)
+            #expect(plate.material != nil)
+            #expect(plate.glass == nil)
+        }
+    }
+
+    @Test("A ghost drawn again on one ground keeps its plate")
+    func sameGroundKeepsThePlate() throws {
+        try Self.withOverlay { overlay, id in
+            overlay.showGhost(at: Self.slot, look: Self.look(), beneath: id)
+            let first = try #require(overlay.ghost?.plate)
+            overlay.showGhost(at: Self.slot, look: Self.look(), beneath: id)
+            #expect(overlay.ghost?.plate === first)
         }
     }
 

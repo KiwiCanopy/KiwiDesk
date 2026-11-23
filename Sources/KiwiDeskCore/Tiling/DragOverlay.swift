@@ -13,8 +13,7 @@ public final class DragOverlay {
     final class Marker {
         let panel: NSPanel
         let view = DragMarkerView()
-        var glass: NSView? { view.glass }
-        var tint: GlassBackdrop { view.tint }
+        var plate: SwitchPlateView? { view.plate }
 
         init(panel: NSPanel) {
             self.panel = panel

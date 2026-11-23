@@ -80,8 +80,13 @@ struct HostedEnginePictureTests {
             guard source.contains("NSViewRepresentable") else { continue }
             for type in Self.hostedTypes(in: source) {
                 let core = try Self.coreSources(declaring: type)
+                // A view drawing glass through the shared plate view
+                // counts as one minting it (#3583).
                 guard
-                    core.contains(where: { $0.contains("GlassPlate.make(") })
+                    core.contains(where: {
+                        $0.contains("GlassPlate.make(")
+                            || $0.contains("SwitchPlateView(")
+                    })
                 else { continue }
                 hosted.insert(type)
                 #expect(

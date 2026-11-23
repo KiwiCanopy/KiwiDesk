@@ -1034,13 +1034,16 @@ stays physical. Obligations:
   hosts glass, so a new host reds until it has a gate. The drag
   ghost and the sticky mark host
   glass the same way and take the same rule where each is
-  rendered — `DragMarkerView.render`, the one door the drag and its
-  Settings picture share, and `updateStickyMarks`, which the flip
-  re-runs — handing the gate the stored leaf once
+  rendered — the ghost through `DragMarkerView.render`, which the
+  drag and its Settings picture both take, and `updateStickyMarks`,
+  which the flip re-runs — handing the gate the stored leaf once
   (`OverlayGlassGateTests` ▸ `overlaysTakeTheGate`,
-  `OverlayGlassTests` ▸ `gateStandsDown`). Their stood-down look is
-  see-through, never made opaque — the ghost's material, the mark's
-  badge (`docs/design-decisions.md` ▸ Reduce transparency).
+  `OverlayGlassTests` ▸ `gateStandsDown`). Each stands down to its
+  own off state: the mark's badge, see-through and never made
+  opaque; the ghost's plate material, which wears the Fill at full
+  alpha as the Space-switch plates do (`DragMarkerSurfaceTests` ▸
+  `ghostStandsDownToTheMaterial`, `docs/design-decisions.md` ▸
+  Reduce transparency).
 - **Every rule a bar draws takes its geometry and ink from
   `BarDivider`** — the in-item rule, the layer and front-app
   breaks and the section divider: the boundary between two bars
@@ -2044,13 +2047,11 @@ Obligations:
   — and retire it only after a device sitting through those paths
   shows it never changes a frame (owner, 2026-11-14); retiring it
   re-runs the follow's per-switch cost measure above.
-- **A glass surface is thinned only by a ruling, and only on its
-  own view's opacity.** No surface is thinned: the drop zone, the
-  one that was, draws no glass since #3583, and the ghost's plate
-  draws at full opacity (`DragMarkerSurfaceTests` ▸
-  `ghostWearsTheFill`). A thinned surface argues its own entry in
-  `docs/design-decisions.md` first, since the `maxAlpha` premise —
-  a floor on how much refraction survives — does not hold for it.
+- **Draw a glass surface at its view's full opacity; a thinned
+  one is a ruling argued in `docs/design-decisions.md` first**,
+  since the `maxAlpha` premise — a floor on how much refraction
+  survives — does not hold for it. The drag ghost's plate is held
+  to full opacity (`DragMarkerSurfaceTests` ▸ `ghostWearsTheFill`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

@@ -19301,7 +19301,8 @@ don't assume from tone.
   is the cost.
 - **Drag ghost / drop zone:** no colour of their own (#2797); since
   #3583 they borrow the look's — the drop zone the focus border
-  colour, the ghost the shelf's Fill. Origin and target still
+  colour, the ghost the shelf's Fill while "Tint KiwiHub and
+  plates" is on. Origin and target still
   separate by material, so no colour-vision floor holds the pair
   (▸ Drag markers separate by material, not hue).
 
@@ -19444,8 +19445,8 @@ bars keep 84°; only the ring leaves it.
 **The drag pair needs no colour-vision floor (#2797).** Origin
 and target were once the only two overlays on screen at once
 that had to separate by hue, and #511 held them to the accents'
-floor. They now separate by material and lightness (▸ Drag
-markers separate by material, not hue), which every viewer
+floor. They now separate by material (▸ Drag markers separate
+by material, not hue, amended by #3583), which every viewer
 reads, so the floor and its guard retired with the hues.
 
 The optional **glow** inverts this trade for the
@@ -19762,7 +19763,8 @@ the user's choice" from the old #444/#493 record and revert this.
 
 **[Principle]**
 
-**Drag markers separate by material, not hue (#2797).** A drag
+**Drag markers separate by material, not hue (#2797; the look is
+amended below by #3583).** A drag
 answers one question — where will this window land — so the
 target is the marker on by default: an untinted frosted plate
 over the slot. With Liquid Glass it is the glass, thinned, with a
@@ -19790,8 +19792,8 @@ desk the thinned glass read as a dirty grey wash: glass faded to
 one, and a 50 % white rim and a 22 % grey both composite to
 mid-grey on a dark desk. Judged over real windows in a live-drag
 prototype, the drop zone became a flat wash of the look's focus
-border colour at 25 % with a 1 pt line of it at 80 %, with no glass
-or blur, so the window a drop swaps with stays sharp beneath it;
+border colour with a 1 pt line of it (`DragMarkerView.washAlpha`,
+`edgeAlpha`), with no glass or blur, so the window a drop swaps with stays sharp beneath it;
 it draws the same under Reduce transparency. The ghost became the
 plate a Space switch slides a window as, without its icon: the
 shelf's Fill on clear glass with the key-window rim while "Tint
@@ -19806,8 +19808,9 @@ nothing new is stored; the pair separates by material — a dense
 plate where the window was, a thin wash where it will land — which
 every viewer reads, so it still needs no colour-vision floor.
 Accepted: under the dragged window, which wears the focus ring, the
-drop zone repeats the ring's colour, and a palette whose focus
-colour sits near the Space Bar's green brings that hue beside it.
+drop zone repeats the ring's colour, and it shares the Accent hue
+with the Space Bar's active Space beside it wherever a palette
+paints that group as one.
 Set aside: a neutral plate with no hue for the drop zone (the
 designer's pick), clear glass over the target (it lenses the window
 beneath, the reason the glass was thinned on 2026-09-25), and clear
@@ -19928,10 +19931,11 @@ question once, in a card above the sections that draw the
 strokes.
 
 **The drag markers keep the corner style alone (#2797).** Their
-lines are part of a fixed design — the ghost's two-tone outline,
-the drop zone's 1 pt hairline rim — that no setting reaches, so no second answer
-exists to disagree with the ring's, and the width question is the
-ring's alone. The corner style still reaches them, because a
+lines are part of a fixed design — the drop zone's 1 pt line, the
+ghost's plate edge — whose width no setting reaches, so no second
+answer exists to disagree with the ring's, and the width question
+is the ring's alone. Since #3583 the drop zone's line takes the
+ring's colour too, which is the look's, not a setting of its own. The corner style still reaches them, because a
 marker traces the slot a window will fill and the window's corners
 are the border's.
 
@@ -22790,13 +22794,16 @@ above, and a row reading On over glass the machine is not
 drawing leaves a flip that changes nothing on screen with no
 in-app word why.
 
-**The drag markers and the sticky mark stay see-through under it,
-never made opaque** (#1620, #1621, #2797). A marker exists to be
-seen through: an opaque drop zone would hide the window a drop
-swaps with. So under the setting the drop zone draws flat grey at
-about 22 % with its rim in place of the frosted plate, the
-ghost's outline draws as always, and the mark draws its glyph,
-in its colour, on a neutral `.hudWindow` plate.
+**The drop zone and the sticky mark stay see-through under it,
+never made opaque** (#1620, #1621, #2797, #3583). A marker exists
+to be seen through: an opaque drop zone would hide the window a
+drop swaps with. So under the setting the drop zone keeps its wash
+of the focus colour, which draws no glass, and the mark draws its
+glyph, in its colour, on a neutral `.hudWindow` plate. The drag
+ghost is the exception: it lies over the slot the window left, so
+an opaque plate hides nothing there, and it stands down as the
+Space-switch plates do, the Fill at full alpha over the material
+(▸ Drag markers separate by material, not hue).
 
 **The panel's key did not merge with the bars'**: separate
 leaves, one row, through `SettingKey.masterWrites`. The bars
@@ -22876,15 +22883,6 @@ wallpaper. The cap this replaced held every stop at 3:1 and so
 took nearly all the lift from the default green ring, which is
 the one most people see; it traded the look the owner approved
 at the sitting for a guarantee the band already gives.
-
-**The drop zone's glass is thinned (owner, device 2026-09-25).**
-It lies over the window a drop would swap with, which should stay
-readable through it; `.clear` is already the material's lightest
-style, so the view's own opacity is the one public strength left,
-and the blur material takes the same opacity where glass is off.
-Retired by #3583: the thinned glass read as a grey wash, and the
-drop zone now draws no glass (▸ Drag markers separate by
-material, not hue).
 
 **Every drag marker sits at the normal level, ordered directly
 beneath the window being dragged and re-ordered there on every
@@ -23005,10 +23003,11 @@ the rim, since they are KiwiShelf's look. The plates wear it
 only while they wear the Fill on glass (▸ the shortcuts panel
 entry),
 whose off state is today's look. The panels that answer are
-`GlassActiveAppearance.classes`, so the sticky mark, the drag
-ghost and drop zone, the hidden shelf's handle and the boot
-notice keep the inactive look: a surface joins only with its own
-argument here.
+`GlassActiveAppearance.classes`, so the sticky mark, the hidden
+shelf's handle and the boot notice keep the inactive look: a
+surface joins only with its own argument here. The drag ghost
+joins as the plates do, only while it wears the Fill on glass
+(#3583, ▸ Drag markers separate by material, not hue).
 
 The window mark joins, frosted, always (#2831, owner device check
 2026-10-31): untinted clear glass without the rim read as a grey
