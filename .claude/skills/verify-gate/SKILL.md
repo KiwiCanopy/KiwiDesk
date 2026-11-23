@@ -57,6 +57,16 @@ suite a change runs locally:
   test's name out of CI's log, fix it locally, rerun the filtered
   suites plus the suite that went red, and push again. Mutation
   proving (`scripts/mutate`) stays local: CI does not run it.
+- **A CI red is a flake candidate only** when the failing suite is
+  one the diff does not touch and it passes `--filter`ed locally.
+  A red in a touched suite is the change's own: fix it, no rerun.
+  A candidate gets one `gh run rerun <id> --failed`, never a loop.
+  If the rerun is green, file the flake through the `file-issue`
+  skill the same turn, quoting the decisive log line and naming
+  which shape of `tests.md`'s wall-clock bullet it matches (an
+  age read against the wall clock is the usual CI-only cause).
+  An armed auto-merge lands the PR on that green rerun, with the
+  flake issue still open; that is intended.
 - **Run step 2 whole, locally,** when no PR gates the push
   (`scripts/release.sh`, a direct push), when CI is unavailable,
   or when a late red would be expensive — for example right
