@@ -125,15 +125,35 @@ struct DesktopsStateTests {
         #expect(state.place == DesktopsPlace(screen: 1, desktop: 0, line: 0))
     }
 
-    @Test("↑↓ walk lines and screens; a held key stops at an end")
+    @Test("↑↓ walk a screen's column; a held key stops at an end")
     func verticalSteps() {
         var state = Self.state(Self.overview())
         _ = state.press(.step(1), repeated: false)
         #expect(state.place == DesktopsPlace(screen: 1, desktop: 0, line: 1))
-        _ = state.press(.step(1), repeated: true)
-        #expect(state.place?.line == 1)
+        // On down into the next Desktop of the same screen.
         _ = state.press(.step(1), repeated: false)
+        #expect(state.place == DesktopsPlace(screen: 1, desktop: 1, line: 0))
+        _ = state.press(.step(1), repeated: false)
+        #expect(state.place == DesktopsPlace(screen: 1, desktop: 1, line: 1))
+        _ = state.press(.step(1), repeated: true)
+        #expect(state.place == DesktopsPlace(screen: 1, desktop: 1, line: 1))
+        // A fresh press wraps inside the column, never to a screen.
+        _ = state.press(.step(1), repeated: false)
+        #expect(state.place == DesktopsPlace(screen: 1, desktop: 0, line: 0))
+    }
+
+    @Test("← → step between screens, keeping Desktop and line")
+    func sideSteps() {
+        var state = Self.state(Self.overview())
+        _ = state.press(.step(3), repeated: false)
+        #expect(state.place == DesktopsPlace(screen: 1, desktop: 1, line: 1))
+        // The other screen has one Desktop of one line: clamped.
+        _ = state.press(.side(-1), repeated: false)
         #expect(state.place == DesktopsPlace(screen: 0, desktop: 0, line: 0))
+        _ = state.press(.side(-1), repeated: true)
+        #expect(state.place?.screen == 0)
+        _ = state.press(.side(-1), repeated: false)
+        #expect(state.place == DesktopsPlace(screen: 1, desktop: 0, line: 0))
     }
 
     @Test("⌘↓ opens on the last-focused window, scrolled into view")
@@ -159,7 +179,7 @@ struct DesktopsStateTests {
     @Test("↩ jumps, ⇧↩ moves yours there, ⌃↩ also follows")
     func placePicks() {
         var state = Self.state(Self.overview())
-        _ = state.press(.side(1), repeated: false)
+        _ = state.press(.step(2), repeated: false)
         let target = state.target(state.place!)!
         #expect(target.desktop.label == 2)
         #expect(
@@ -203,7 +223,7 @@ struct DesktopsStateTests {
     @Test("a window on a hidden Desktop is picked up (#3171)")
     func hiddenWindowPicks() {
         var state = Self.state(Self.overview())
-        _ = state.press(.side(1), repeated: false)
+        _ = state.press(.step(2), repeated: false)
         _ = state.press(.openSpace, repeated: false)
         #expect(state.press(.pickUp, repeated: false) == .moved)
         #expect(state.carried == [WindowID(20)])

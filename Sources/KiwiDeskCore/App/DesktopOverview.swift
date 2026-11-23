@@ -62,6 +62,10 @@ public struct DesktopOverview: Sendable, Equatable {
         /// The profile its binding names, nil where none is bound.
         public let profile: String?
         public let spaces: [SpaceLine]
+        /// On a split screen, its areas' groups of `spaces` in
+        /// reading order (#3572); empty on an unsplit one. The
+        /// unfiled line, where there is one, stays last, in none.
+        public let areas: [Area]
 
         public init(
             native: SkyLight.SpaceID,
@@ -70,7 +74,8 @@ public struct DesktopOverview: Sendable, Equatable {
             isShown: Bool,
             holdsLive: Bool = false,
             profile: String?,
-            spaces: [SpaceLine]
+            spaces: [SpaceLine],
+            areas: [Area] = []
         ) {
             self.native = native
             self.label = label
@@ -79,6 +84,7 @@ public struct DesktopOverview: Sendable, Equatable {
             self.holdsLive = holdsLive
             self.profile = profile
             self.spaces = spaces
+            self.areas = areas
         }
     }
 

@@ -588,8 +588,12 @@ editing here:
   register therefore names no Jump site
   (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`;
   `JumpFocusTests` holds each stand-down arm). **KiwiHub's "here"
-  is the Space its screen shows, read through the one
-  `moveHereSpace(on:)`** by its list's rows and its Move here alike,
+  is the Space the area under the pointer shows, read through the
+  one `moveHereSpace(in:)` over the `PlacementID` `jumpArea()`
+  answers** (#3572) by its list's rows, its Move here, its Layout
+  line and its Desktops side alike, never a `DisplayID` read,
+  which names a split screen's first area
+  (`JumpHereAreaTests`, `JumpMoveHereTargetWiringTests`);
   and an arm makes that Space active through
   `enterMoveHereSpace` only once its move is dispatched, so a
   refusal switches nothing and the arrival pays in the active

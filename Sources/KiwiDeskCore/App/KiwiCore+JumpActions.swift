@@ -20,19 +20,19 @@ extension KiwiCore {
         }
     }
 
-    /// Moves `target` into the Space `display` shows — the screen
-    /// KiwiHub opened on, read at the pick — else the active Space,
-    /// and focuses it at its arrival (#2791). Returns false, cued,
-    /// where it cannot move. A hidden app has no window to move
-    /// yet: it is unhidden, and the window it brings back focused
-    /// is moved here at its report.
+    /// Moves `target` into the Space `area` shows — the area
+    /// KiwiHub opened over, read at the pick (#3572) — else the
+    /// active Space, and focuses it at its arrival (#2791). Returns
+    /// false, cued, where it cannot move. A hidden app has no
+    /// window to move yet: it is unhidden, and the window it brings
+    /// back focused is moved here at its report.
     @discardableResult
     public func moveHere(
         _ target: JumpEntry.Target,
-        on display: DisplayID? = nil
+        on area: PlacementID? = nil
     ) -> Bool {
         withUserMotion {
-            guard let active = moveHereSpace(on: display) else {
+            guard let active = moveHereSpace(in: area) else {
                 jump(to: target)
                 return true
             }
@@ -235,10 +235,18 @@ extension KiwiCore {
         return true
     }
 
-    /// The Space a Move here from `display` files into: the one
-    /// that screen shows, else the active one (#2791). The panel's
-    /// list reads it too, so a row's "moves here" names the Space
-    /// the pick lands in.
+    /// The Space a Move here from `area` files into: the one that
+    /// area shows, else the active one (#2791, #3572). KiwiHub's
+    /// list, its Layout line and its Desktops side read it too, so
+    /// every "here" names the Space the pick lands in.
+    func moveHereSpace(in area: PlacementID?) -> SpaceID? {
+        area.flatMap { state.workspaces.activeSpace(on: $0) }
+            ?? state.workspaces.activeSpace
+    }
+
+    /// The Space a filing onto `display` takes: the active Space
+    /// where it lays out there, else the first area's (#2791). A
+    /// Desktop move's away filing reads it; KiwiHub reads the area.
     func moveHereSpace(on display: DisplayID?) -> SpaceID? {
         display.flatMap { state.workspaces.activeSpace(on: $0) }
             ?? state.workspaces.activeSpace

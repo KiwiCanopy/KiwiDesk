@@ -51,9 +51,9 @@ final class JumpPanelController: NSObject {
     /// The Space the View side's Layout line acts on, read with the screen
     /// the panel opens on so the two never disagree.
     var pickerSpace: SpaceID?
-    /// The screen the panel opened on: its list's "here" and Move
-    /// here's target are the Space it shows (#2791).
-    private(set) var hubDisplay: DisplayID?
+    /// The area the panel opened over: its list's "here" and Move
+    /// here's target are the Space it shows (#2791, #3572).
+    private(set) var hubArea: PlacementID?
     /// The field row's centre and top this opening placed it at,
     /// which every refit holds (#3570).
     private(set) var anchor = CGPoint.zero
@@ -89,14 +89,16 @@ final class JumpPanelController: NSObject {
     func show(_ scope: JumpScope = .windows, lastApp: Bool = false) {
         let screen = PanelHandBack.screenUnderPointer()
         pickerSpace = core.layoutPickerSpace()
-        hubDisplay = core.jumpDisplay()
+        hubArea = core.jumpArea()
+        // Centred over the area under the pointer (#3572).
         let visible =
-            screen?.visibleFrame ?? Self.fallbackVisible
+            hubArea.flatMap(core.visibleFrame(of:))
+            ?? screen?.visibleFrame ?? Self.fallbackVisible
         let area = Self.clearArea(
             visible: visible,
             shelves: core.shelfFrames()
         )
-        let snapshot = core.jumpSnapshot(on: hubDisplay)
+        let snapshot = core.jumpSnapshot(on: hubArea)
         let room = Self.room(visible: visible, area: area)
         let width = room.fieldWidth
         let model = JumpModel(
@@ -185,10 +187,10 @@ final class JumpPanelController: NSObject {
         jumpLog.log("KiwiDesk: jump pick \(named, privacy: .public)")
         switch pick {
         case .jump: core.jump(to: entry.target)
-        case .moveHere: core.moveHere(entry.target, on: hubDisplay)
+        case .moveHere: core.moveHere(entry.target, on: hubArea)
         // After the dismiss, so the swap verb's #292 preflight reads
         // the app the panel handed back.
-        case .swapHere: core.swapHere(entry.target, on: hubDisplay)
+        case .swapHere: core.swapHere(entry.target, on: hubArea)
         }
     }
 
@@ -290,10 +292,10 @@ final class JumpPanelController: NSObject {
         model.onDeadKey = { NSSound.beep() }
         // Core answers at the press, from the panel's screen.
         model.swapRefusal = { [weak self] entry in
-            self?.core.swapRefusal(entry.target, on: self?.hubDisplay)
+            self?.core.swapRefusal(entry.target, on: self?.hubArea)
         }
         model.moveRefusal = { [weak self] entry in
-            self?.core.moveHereRefusal(entry.target, on: self?.hubDisplay)
+            self?.core.moveHereRefusal(entry.target, on: self?.hubArea)
         }
         model.onClose = { [weak self] in
             self?.close()

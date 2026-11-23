@@ -11,7 +11,7 @@ extension DesktopsText {
         if let id = state.window, let window = state.overview.window(id) {
             return spoken(window, picked: state.carried.contains(id))
         }
-        return spoken(line, on: desktop)
+        return spoken(line, at: place.line, on: desktop)
     }
 
     static func spoken(
@@ -57,12 +57,23 @@ extension DesktopsText {
             )
     }
 
+    /// A line, its area named on a split screen (#3572 ruling 2):
+    /// "Space 3, shown, Right, Desktop 1, windows: 3".
     static func spoken(
         _ line: DesktopOverview.SpaceLine,
+        at index: Int,
         on desktop: DesktopOverview.Desktop
     ) -> String {
         let name = line.space.map(space) ?? unfiled
-        let card = self.desktop(desktop.label)
+        let card =
+            desktop.area(of: index).map {
+                L(
+                    "desktop_overview.ax.area_desktop",
+                    "%1$@, %2$@",
+                    area($0),
+                    self.desktop(desktop.label)
+                )
+            } ?? self.desktop(desktop.label)
         let count = line.windows.count
         guard line.isShown else {
             return L(

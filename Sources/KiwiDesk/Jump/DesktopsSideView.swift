@@ -2,11 +2,12 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiHub's Desktops side (#1229): one row per screen in physical
-/// order, the screen's name as its header, its Desktops as columns
-/// split by dividers, sharing the row's width down to a floor past
-/// which the row scrolls sideways; past two rows the side scrolls
-/// down (#3164).
+/// KiwiHub's Desktops side (#1229, #3570 ruling 4): one column per
+/// screen in physical left-to-right order, the screen's name as its
+/// header, its Desktops stacked downward. The columns share the
+/// panel's width down to a floor past which the row of screens
+/// scrolls sideways, never wrapping; past the height cap each
+/// column scrolls down.
 struct DesktopsSideView: View {
     let state: DesktopsState
     let icons: [pid_t: NSImage]
@@ -22,16 +23,24 @@ struct DesktopsSideView: View {
     private var geometry: DesktopsGeometry { state.geometry }
 
     var body: some View {
-        FadingColumn(
+        ViewLine(
             selected: state.place.map { DesktopsScrollID.screen($0.screen) },
-            ids: state.overview.screens.indices.map(DesktopsScrollID.screen),
-            inset: DesktopsGeometry.sidePadding
+            inset: DesktopsGeometry.rowInset
         ) {
-            VStack(alignment: .leading, spacing: DesktopsGeometry.rowGap) {
+            HStack(alignment: .top, spacing: 0) {
                 ForEach(state.overview.screens.indices, id: \.self) {
-                    row($0, geometry).id(DesktopsScrollID.screen($0))
+                    screen in
+                    if screen > 0 {
+                        PanelDivider(
+                            axis: .vertical,
+                            length: geometry.height
+                                - 2 * DesktopsGeometry.sidePadding
+                        )
+                    }
+                    column(screen).id(DesktopsScrollID.screen(screen))
                 }
             }
+            .padding(.vertical, DesktopsGeometry.sidePadding)
         }
         .frame(height: geometry.height)
         .desktopTitleHints()
@@ -41,47 +50,73 @@ struct DesktopsSideView: View {
         )
     }
 
-    private func row(
-        _ screen: Int,
-        _ geometry: DesktopsGeometry
-    ) -> some View {
+    private func column(_ screen: Int) -> some View {
         let row = state.overview.screens[screen]
-        let selected = state.place.flatMap {
-            $0.screen == screen
-                ? DesktopsScrollID.desktop($0.screen, $0.desktop) : nil
-        }
         return VStack(alignment: .leading, spacing: DesktopsGeometry.headerGap)
         {
             header(row)
-            ViewLine(selected: selected, inset: DesktopsGeometry.rowInset) {
-                HStack(spacing: 0) {
+            // The selected line stays clear of the column's fade.
+            FadingColumn(
+                selected: selected(in: screen),
+                ids: ids(of: screen)
+            ) {
+                VStack(
+                    alignment: .leading,
+                    spacing: DesktopsGeometry.desktopGap
+                ) {
                     ForEach(row.desktops.indices, id: \.self) { index in
-                        if index > 0 {
-                            PanelDivider(
-                                axis: .vertical,
-                                length: geometry.column(screen)
-                            )
-                        }
-                        DesktopCardView(
-                            state: state,
-                            screen: screen,
-                            index: index,
-                            geometry: geometry,
-                            width: geometry.columns[screen],
-                            icons: icons,
-                            onPlace: onPlace,
-                            onWindow: onWindow,
-                            onMore: onMore,
-                            onDrop: onDrop,
-                            pointer: pointer
-                        )
-                        .id(DesktopsScrollID.desktop(screen, index))
+                        card(screen, index)
+                            .id(DesktopsScrollID.desktop(screen, index))
                     }
                 }
             }
+            .frame(height: geometry.body, alignment: .top)
         }
+        .frame(width: geometry.columns[screen], alignment: .top)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Self.title(row))
+    }
+
+    private func card(_ screen: Int, _ index: Int) -> some View {
+        DesktopCardView(
+            state: state,
+            screen: screen,
+            index: index,
+            geometry: geometry,
+            width: geometry.columns[screen],
+            icons: icons,
+            onPlace: onPlace,
+            onWindow: onWindow,
+            onMore: onMore,
+            onDrop: onDrop,
+            pointer: pointer
+        )
+    }
+
+    /// The selected line's scroll id, where it is in this column.
+    private func selected(in screen: Int) -> DesktopsScrollID? {
+        guard let place = state.place, place.screen == screen else {
+            return nil
+        }
+        return .line(place)
+    }
+
+    /// A column's scroll ids top to bottom: each Desktop's title,
+    /// then its lines, so a reveal upward shows the title too.
+    private func ids(of screen: Int) -> [DesktopsScrollID] {
+        let desktops = state.overview.screens[screen].desktops
+        return desktops.indices.flatMap { desktop -> [DesktopsScrollID] in
+            [.desktop(screen, desktop)]
+                + desktops[desktop].spaces.indices.map {
+                    .line(
+                        DesktopsPlace(
+                            screen: screen,
+                            desktop: desktop,
+                            line: $0
+                        )
+                    )
+                }
+        }
     }
 
     /// The screen's name, its position added where a twin shares it.
@@ -89,6 +124,9 @@ struct DesktopsSideView: View {
         ScreenLabel.named(row.name, at: row.position)  // #3496
     }
 
+    /// The column's header: the screen's name, and "main" on the
+    /// screen with the menu bar. No "here": the starting selection
+    /// says where KiwiHub opened (#3572 ruling 4).
     private func header(_ row: DesktopOverview.Screen) -> some View {
         HStack(spacing: 6) {
             Image(systemName: "display")
@@ -97,8 +135,8 @@ struct DesktopsSideView: View {
             Text(Self.title(row))
                 .font(.caption.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
-            if let caption = caption(row) {
-                Text(caption)
+            if row.isMain {
+                Text(DesktopsText.main)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -106,19 +144,11 @@ struct DesktopsSideView: View {
         .foregroundStyle(.secondary)
         .lineLimit(1)
         .frame(height: DesktopsGeometry.headerHeight)
-        .padding(.horizontal, DesktopsGeometry.rowInset)
-    }
-
-    /// "main", "here" or both, the row header's one caption.
-    private func caption(_ row: DesktopOverview.Screen) -> String? {
-        let words =
-            (row.isMain ? [DesktopsText.main] : [])
-            + (row.isHere ? [DesktopsText.here] : [])
-        return words.isEmpty ? nil : words.joined(separator: " · ")
+        .padding(.horizontal, DesktopsGeometry.columnInset + 4)
     }
 }
 
-/// The Desktops side's scroll ids, one space for its three nested
+/// The Desktops side's scroll ids, one space for its nested
 /// scrolls: a reveal resolves a bare index in whichever scroll
 /// holds it, and nudged another (#3164).
 enum DesktopsScrollID: Hashable {

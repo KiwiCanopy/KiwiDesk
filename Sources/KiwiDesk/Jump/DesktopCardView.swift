@@ -2,16 +2,18 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// One Desktop's column on the Desktops side (#1229): its title
-/// line — "Desktop N", ✓ while its screen shows it, the bound
+/// One Desktop's card in its screen's column (#1229, #3570): its
+/// title line — "Desktop N", ✓ while its screen shows it, the bound
 /// profile on the right — and one line per Space, on the panel's
-/// own ground (#3164). A row's columns share one width.
+/// own ground (#3164). On a split screen the lines are grouped
+/// under each area's name, the unfiled line last under none
+/// (#3572).
 struct DesktopCardView: View {
     let state: DesktopsState
     let screen: Int
     let index: Int
     let geometry: DesktopsGeometry
-    /// The column's width (`DesktopsGeometry.columns`).
+    /// The screen column's width (`DesktopsGeometry.columns`).
     let width: CGFloat
     let icons: [pid_t: NSImage]
     let onPlace: (DesktopsPlace, Int, NSEvent.ModifierFlags, Bool) -> Void
@@ -29,19 +31,7 @@ struct DesktopCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DesktopsGeometry.titleGap) {
             title
-            // A column cut short by the cap keeps the selected line
-            // clear of its fade.
-            FadingColumn(
-                selected: selectedLine.map(lineID),
-                ids: desktop.spaces.indices.map(lineID)
-            ) {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(desktop.spaces.indices, id: \.self) {
-                        line($0).id(lineID($0))
-                    }
-                }
-            }
-            .frame(height: geometry.lines[screen], alignment: .top)
+            lines
         }
         .padding(.horizontal, DesktopsGeometry.columnInset)
         .frame(width: width, alignment: .top)
@@ -50,12 +40,43 @@ struct DesktopCardView: View {
         .accessibilityLabel(DesktopsText.desktop(desktop.label))
     }
 
-    /// The selected line, where the selection is in this column.
-    private var selectedLine: Int? {
-        guard let place = state.place, place.screen == screen,
-            place.desktop == index
-        else { return nil }
-        return place.line
+    /// The lines, each area's under its header (#3572 ruling 2),
+    /// then those in no area.
+    private var lines: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(desktop.areas.indices, id: \.self) { index in
+                group(desktop.areas[index])
+            }
+            ForEach(loose, id: \.self) { line($0).id(lineID($0)) }
+        }
+    }
+
+    /// The lines no area holds: every line on an unsplit screen,
+    /// the unfiled line on a split one.
+    private var loose: [Int] {
+        desktop.spaces.indices.filter { desktop.area(of: $0) == nil }
+    }
+
+    /// One area's group: its name, then its lines. The header is no
+    /// keyboard stop; VoiceOver hears the name on the group and on
+    /// each line, never on the header too.
+    private func group(_ area: DesktopOverview.Area) -> some View {
+        VStack(alignment: .leading, spacing: DesktopsGeometry.areaGap) {
+            Text(DesktopsText.area(area))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .padding(.horizontal, 4)
+                .frame(height: DesktopsGeometry.areaHeight)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(area.lines), id: \.self) {
+                    line($0).id(lineID($0))
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(DesktopsText.area(area))
     }
 
     private func lineID(_ line: Int) -> DesktopsScrollID {
@@ -80,10 +101,10 @@ struct DesktopCardView: View {
         .desktop(screen: screen, index: index)
     }
 
-    /// The column's hover (#3484, ruling C2): a thin selection ring
-    /// round the whole column while the pointer is on its title,
-    /// the title itself staying plain; the fill stays the
-    /// selection's alone (#1173).
+    /// The card's hover (#3484, ruling C2): a thin selection ring
+    /// round the whole card while the pointer is on its title, the
+    /// title itself staying plain; the fill stays the selection's
+    /// alone (#1173).
     @ViewBuilder private var ring: some View {
         if pointer.lifts(titleTarget, selected: false) {
             RoundedRectangle(cornerRadius: 8)
@@ -92,8 +113,8 @@ struct DesktopCardView: View {
         }
     }
 
-    /// The title, a button to its Desktop (#3209): the column's
-    /// ring under the pointer, and `.help` as a second cue.
+    /// The title, a button to its Desktop (#3209): the card's ring
+    /// under the pointer, and `.help` as a second cue.
     private var title: some View {
         HStack(spacing: 4) {
             Text(DesktopsText.desktop(desktop.label))
@@ -129,16 +150,20 @@ struct DesktopCardView: View {
     }
 
     /// The title is ↩ on the Desktop it names (#3209): it jumps
-    /// there; during a carry it drops on the line the Desktop shows.
+    /// there; during a carry it drops on the line the Desktop shows
+    /// in the area KiwiHub opened over, else in its first (#3572).
     private func click() {
         let click = DesktopsClick.of(NSApp.currentEvent)
         self.click(count: click.count, modifiers: click.modifiers)
     }
 
     private func click(count: Int, modifiers: NSEvent.ModifierFlags) {
-        let line = desktop.spaces.firstIndex(where: \.isShown) ?? 0
         onPlace(
-            DesktopsPlace(screen: screen, desktop: index, line: line),
+            DesktopsPlace(
+                screen: screen,
+                desktop: index,
+                line: desktop.landingLine
+            ),
             count,
             modifiers,
             false

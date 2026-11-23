@@ -9,12 +9,14 @@ import AppKit
 /// instead (#3168, `docs/design-decisions.md`). Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
-    /// `display` is the screen the panel opened on: "here" is the
+    /// `area` is the area the panel opened over: "here" is the
     /// Space Move here would file into from it (#2791), and a row
     /// on any other screen names that screen (#2792).
-    public func jumpSnapshot(on display: DisplayID? = nil) -> JumpSnapshot {
-        let here = moveHereSpace(on: display)
-        let hub = display ?? here.flatMap { state.workspaces.display(of: $0) }
+    public func jumpSnapshot(on area: PlacementID? = nil) -> JumpSnapshot {
+        let here = moveHereSpace(in: area)
+        let hub =
+            area?.display
+            ?? here.flatMap { state.workspaces.display(of: $0) }
         let entries = jumpEntries(here: here, hub: hub)
         let yours = jumpYours(here: here, hub: hub)
         return JumpSnapshot(

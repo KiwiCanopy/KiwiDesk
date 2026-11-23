@@ -10,8 +10,9 @@ import AppKit
 /// lists that screen's live Spaces. Read once when the side opens;
 /// the panel keeps the reading.
 extension KiwiCore {
-    /// `display` is the screen KiwiHub opened on, its row's "here".
-    public func desktopOverview(on display: DisplayID?) -> DesktopOverview {
+    /// `area` is the area KiwiHub opened over: its screen's row and
+    /// its area group are "here" (#3572).
+    public func desktopOverview(on area: PlacementID?) -> DesktopOverview {
         let snapshot = desktopMemory.readDesktops()
         let byUUID = displaysByUUID()
         let main = PositionalDisplays.liveMainID
@@ -24,9 +25,10 @@ extension KiwiCore {
                     display: screen.id,
                     name: screen.name,
                     isMain: screen.id == main,
-                    isHere: screen.id == display,
+                    isHere: screen.id == area?.display,
                     desktops: overviewDesktops(
                         on: screen.id,
+                        grouping: overviewGrouping(on: screen.id, here: area),
                         uuid: uuid,
                         in: snapshot,
                         shared: sharedDesktops(in: snapshot)
@@ -57,6 +59,7 @@ extension KiwiCore {
     /// one shared set; without SkyLight, the one Desktop it shows.
     private func overviewDesktops(
         on display: DisplayID,
+        grouping: OverviewGrouping,
         uuid: String?,
         in snapshot: DesktopSnapshot,
         shared: Bool
@@ -79,11 +82,12 @@ extension KiwiCore {
                     isShown: true,
                     profile: nil,
                     spaces: shownLines(
-                        on: display,
+                        grouping.spaces,
                         adding: fullScreen,
                         in: snapshot,
                         shared: shared
-                    )
+                    ),
+                    areas: grouping.areas
                 )
             ]
         }
@@ -99,18 +103,19 @@ extension KiwiCore {
                 profile: boundProfileLabel(of: native.id, in: snapshot),
                 spaces: shown
                     ? shownLines(
-                        on: display,
+                        grouping.spaces,
                         adding: fullScreen,
                         in: snapshot,
                         shared: shared
                     )
                     : hiddenLines(
-                        on: display,
+                        grouping.spaces,
                         native: native,
                         in: snapshot,
                         shared: shared,
                         live: holds ? fullScreen : nil
-                    )
+                    ),
+                areas: grouping.areas
             )
         }
     }
@@ -129,17 +134,16 @@ extension KiwiCore {
         return pick.profile.name
     }
 
-    /// The Spaces of a screen on the Desktop it shows, with the
+    /// A screen's `spaces` on the Desktop it shows, with the
     /// screen's away full-screen windows on their Spaces' lines.
     private func shownLines(
-        on display: DisplayID,
+        _ spaces: [SpaceID],
         adding fullScreen: [AwayWindow],
         in snapshot: DesktopSnapshot,
         shared: Bool
     ) -> [DesktopOverview.SpaceLine] {
         // Shown in any of the screen's areas (#3517).
         let shown = state.workspaces.visibleSpaces
-        let spaces = state.workspaces.spaces(on: display)
         let lines = spaces.map { id in
             overviewLine(
                 id,
@@ -170,7 +174,7 @@ extension KiwiCore {
     /// front takes `live`, the screen's away full-screen windows,
     /// and lists its live members first (#3486).
     private func hiddenLines(
-        on display: DisplayID,
+        _ spaces: [SpaceID],
         native: NativeSpace,
         in snapshot: DesktopSnapshot,
         shared: Bool,
@@ -181,14 +185,15 @@ extension KiwiCore {
                 $0.nativeSpace == native.id ? $0 : nil
             }
         }
-        let returning = rememberedVirtualSpace(of: native.id, in: snapshot)
+        // Each area's, on a split screen (#3572).
+        let returning = returningSpaces(of: native.id, in: snapshot)
         // A shown Desktop's Spaces, in any area (#3517).
         let shown = state.workspaces.visibleSpaces
-        let spaces = state.workspaces.spaces(on: display)
         let lines = spaces.map { id in
             overviewLine(
                 id,
-                isShown: live == nil ? id == returning : shown.contains(id),
+                isShown: live == nil
+                    ? returning.contains(id) : shown.contains(id),
                 // The ledger's own reader, in the rank they return in.
                 windows: (live == nil ? [] : liveMembers(of: id))
                     + awayWindows(

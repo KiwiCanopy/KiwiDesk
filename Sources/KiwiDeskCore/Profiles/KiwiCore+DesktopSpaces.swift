@@ -70,6 +70,17 @@ extension KiwiCore {
             .compactMap { self.desktopMemory.virtualSpaces[$0] }.first
     }
 
+    /// The Space each area of a split screen returns to on a
+    /// Desktop, by area key, under either of its keys — a read, for
+    /// the Desktops side's hidden cards (#3572).
+    func rememberedAreaSpaces(
+        of native: SkyLight.SpaceID,
+        in snapshot: DesktopSnapshot
+    ) -> [String: SpaceID] {
+        snapshot.keys(of: native).lazy
+            .compactMap { self.desktopMemory.areaSpaces[$0] }.first ?? [:]
+    }
+
     /// Records the Space the Desktop being left was showing.
     func rememberVirtualSpace(
         _ space: SpaceID,

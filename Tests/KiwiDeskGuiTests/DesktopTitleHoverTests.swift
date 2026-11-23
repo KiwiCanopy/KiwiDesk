@@ -37,7 +37,7 @@ struct DesktopTitleHoverTests {
         let body = try run(
             source,
             from: "varbody:someView{",
-            to: "privatevarselectedLine"
+            to: "privatevarlines"
         )
         #expect(
             body.contains(

@@ -16978,25 +16978,33 @@ worth a fourth, and the switch makes the room by drawing titles
 only. Its VoiceOver noun is "Desktop overview" and
 its Shortcuts row "Show Desktop overview".
 
-One row per screen in physical order, left to right read top to
-bottom, the screen's name as the row header; the current screen is
-marked, never moved, so a row is always in the same place and the
-side reads like the desk itself. Each row holds that screen's
-Desktops as columns on the panel's own ground, each headed by its
-title and split from the next by a divider. A column lists the
-screen's Spaces, one line each, empty ones included, and a line
-lists its windows as app icons, as many as its width holds, with
-"+n" counts off each edge. The selected line is the only fill
-(#3164): a plate under each Desktop wore the hover ink, so every
-card read as hovered and a selection was a lift on a lift. A
-row's columns share its width equally down to a floor, past which
-the row scrolls sideways, so a screen with fewer Desktops gets
-wider lines rather than empty room. One line height serves the
-whole side: the tallest, within a readable range, at which two
-screen rows stand whole under the panel's cap (`DesktopsGeometry`
-holds the numbers). A row stands as tall as its own deepest
-Desktop and never grows with window count, because icons squeezed
-below a readable size answer nothing.
+One column per screen in physical order, left to right read top to
+bottom, the screen's name as the column header (#3570 ruling 4,
+amending the row per screen); its Desktops stack downward, each
+headed by its title, on the panel's own ground. No screen is
+marked "here" (#3572 ruling 4): the starting selection already
+lands on the shown Space of the area KiwiHub opened over, so a
+caption would say it twice. "main" stays, since nothing else
+names the screen with the menu bar. A screen is never moved, so a
+column is always in the same place and the side reads like the
+desk itself. A Desktop lists the screen's Spaces, one line each,
+empty ones included, and a line lists its windows as app icons,
+as many as its column's width holds, with "+n" counts off each
+edge. The selected line is the only fill (#3164): a plate under
+each Desktop wore the hover ink, so every card read as hovered
+and a selection was a lift on a lift. The side asks the panel for
+one narrowest column per screen, so the panel widens a screen at
+a time up to its limit; past it the row of screens scrolls
+sideways and never wraps, since a wrapped screen would sit where
+no screen is (owner). Past the height limit each column scrolls
+down. A column of its own per screen makes ↑↓ one screen's
+Desktops and ← → the neighbouring screen, which is how the desk
+is laid out; a row per screen put Desktops side by side and sent
+↓ to another screen. One line height serves the whole side: the
+tallest, within a readable range, at which the tallest column
+stands whole under the panel's cap (`DesktopsGeometry` holds the
+numbers). A line never grows with window count, because icons
+squeezed below a readable size answer nothing.
 KiwiDesk keeps no Space set per Desktop (state-and-layout.md), so
 every Desktop of a screen lists that screen's live Spaces: a
 hidden Desktop's windows come from the away ledger, each in the
@@ -17043,6 +17051,41 @@ the target line, so a sort goes on; Drop & follow switches the
 screen and closes it (#3165). Inside a Space ↑ ↓ take the places'
 route (#3169): a line with windows is re-entered on the slot the
 selection left, an empty one selected.
+
+:::unreleased
+**KiwiHub on a split screen reads "here" per area (#3572, owner
+ruling with the ui-designer 2026-11-23).** An area is where a
+user's Spaces live once a screen is split (#3517), so "here" read
+per screen sent Move here, its away filing and the Layout line to
+the screen's first area whatever the user was looking at. KiwiHub
+opens over the area under the pointer, centred in that area at
+Spotlight's height within it, and that area is "here" for both
+sides through one `moveHereSpace(in:)`, so a row's "moves here"
+and the Layout line name the Space a pick lands in. The pointer
+is the reading because the panel opens where the user looks: the
+focus may sit in another area or on another screen, and the
+pointer is the one place both sides agree on. An area narrower
+than the panel keeps the panel's minimum width and lets it spill
+past the area's edge, since a panel squeezed to a narrow area's
+width cannot hold its field row.
+
+On the Desktops side a split screen adds no columns (#3517 ruling
+11): each Desktop groups its Space lines under the area's name, in
+reading order, Left → Right, Top → Bottom. A column per area
+would put one screen's Desktops in several places and break the
+column-per-screen reading the side is built on. The header is the
+area name alone, because the screen's name heads the column above
+it. Each group marks its own shown Space, since every area shows
+one; the Desktop's ✓ is unchanged. A header is no keyboard stop,
+so ↑↓ walk the lines across groups as one list, and VoiceOver
+names the area on each line ("Space 3, shown, Right, Desktop 1,
+windows: 3") with each group a container labelled with its name,
+so a line read alone still says where it is. The unfiled line
+stays last in its Desktop under no header, because its windows
+belong to no area yet. A click on a Desktop's title lands on the
+shown line of the "here" area, else on the first area's, the same
+line the panel opens on.
+:::
 
 **A KiwiHub list wraps on a fresh press and stops on a held key
 (#2897, owner ruling 2026-11-01).** This reverses #1875's

@@ -239,7 +239,7 @@ struct JumpStripShownTests {
         // strip's latch (#3483).
         #expect(
             controller.contains(
-                "letsnapshot=core.jumpSnapshot(on:hubDisplay)"
+                "letsnapshot=core.jumpSnapshot(on:hubArea)"
             )
         )
         #expect(controller.contains("letmodel=JumpModel(snapshot:snapshot,"))

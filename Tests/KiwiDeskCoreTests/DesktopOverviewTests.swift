@@ -89,7 +89,7 @@ struct DesktopOverviewTests {
     func screensInPhysicalOrder() {
         let core = makeCore()
         defer { reset() }
-        let overview = core.desktopOverview(on: DisplayID(1))
+        let overview = core.desktopOverview(on: core.hub(1))
         #expect(overview.screens.map(\.name) == ["DELL", "Built-in"])
         #expect(overview.screens.map(\.isMain) == [false, true])
         #expect(overview.screens.map(\.isHere) == [false, true])
@@ -121,7 +121,7 @@ struct DesktopOverviewTests {
     func desktopsPerScreen() {
         let core = makeCore()
         defer { reset() }
-        let screens = core.desktopOverview(on: DisplayID(1)).screens
+        let screens = core.desktopOverview(on: core.hub(1)).screens
         let dell = screens[0].desktops
         #expect(dell.map(\.native) == [20, 21])
         #expect(dell.map(\.label) == [3, 4])
@@ -136,7 +136,7 @@ struct DesktopOverviewTests {
         defer { reset() }
         track(core, 1, in: "1")
         track(core, 2, in: "1", fullScreen: true)
-        let desktop = core.desktopOverview(on: DisplayID(1))
+        let desktop = core.desktopOverview(on: core.hub(1))
             .screens[1].desktops[0]
         #expect(desktop.spaces.map(\.space) == ["1", "2"])
         #expect(desktop.spaces.map(\.isShown) == [true, false])
@@ -154,7 +154,7 @@ struct DesktopOverviewTests {
         away(core, 8, on: 11, in: nil)
         away(core, 9, on: 11, in: "1", up: false)
         away(core, 6, on: 10, in: "1")
-        let desktop = core.desktopOverview(on: DisplayID(1))
+        let desktop = core.desktopOverview(on: core.hub(1))
             .screens[1].desktops[1]
         #expect(desktop.spaces.map(\.space) == ["1", "2", nil])
         #expect(desktop.spaces[0].windows.isEmpty)
@@ -171,8 +171,20 @@ struct DesktopOverviewTests {
         defer { reset() }
         away(core, 7, on: 11, in: "2")
         core.desktopMemory.honoredFocus["2"] = [11: WindowID(7)]
-        let line = core.desktopOverview(on: DisplayID(1))
+        let line = core.desktopOverview(on: core.hub(1))
             .screens[1].desktops[1].spaces[1]
         #expect(line.lastFocused == WindowID(7))
+    }
+}
+
+extension KiwiCore {
+    /// The area a test opens KiwiHub over on display `id`: its
+    /// first area, the whole screen while it is not split (#3572).
+    fileprivate func hub(_ id: UInt32) -> PlacementID {
+        hubArea(DisplayID(id))
+    }
+
+    fileprivate func hubArea(_ display: DisplayID) -> PlacementID {
+        state.workspaces.placementOrWhole(of: display)
     }
 }

@@ -18,7 +18,12 @@ enum DesktopsText {
     static var shown: String { L("desktop_overview.card.shown", "shown") }
 
     static var main: String { L("desktop_overview.screen.main", "main") }
-    static var here: String { L("desktop_overview.screen.here", "here") }
+
+    /// An area group's header and its name to VoiceOver (#3572): the
+    /// user's name, else its position.
+    static func area(_ area: DesktopOverview.Area) -> String {
+        area.name ?? area.position.map(ScreenAreaWords.position) ?? ""
+    }
 
     static func desktop(_ number: Int) -> String {
         L("desktop_overview.card.title", "Desktop %1$d", number)

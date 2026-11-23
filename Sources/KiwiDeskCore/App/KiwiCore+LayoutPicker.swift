@@ -1,27 +1,43 @@
 import AppKit
 
-/// KiwiHub's View side (#762, #2229, #2309): its Layout line,
-/// acting on the Space the pointer's screen shows —
-/// on a desk of several screens the pointer is the one unambiguous
-/// "this screen".
+/// KiwiHub's "here" (#762, #2229, #2309, #3572): the area under the
+/// pointer — on a desk of several screens, or a screen split into
+/// areas, the pointer is the one unambiguous "here". Both sides
+/// read it: the View side's Layout line and the Windows side's
+/// rows and Move here.
 extension KiwiCore {
-    /// The Space the Layout line acts on: the one shown on the
-    /// screen under the pointer.
+    /// The Space the Layout line acts on: the one shown in the area
+    /// under the pointer.
     public func layoutPickerSpace() -> SpaceID? {
-        spaceUnderPointer(shelves.contextMenus.pointer())
+        moveHereSpace(in: jumpArea())
     }
 
-    /// The screen under the pointer: the one KiwiHub opens on, and
-    /// whose shown Space its Move here files into (#2791).
-    public func jumpDisplay() -> DisplayID? {
-        displayUnderPointer(shelves.contextMenus.pointer())
+    /// The area under the pointer — an unsplit screen's one area —
+    /// that KiwiHub opens over and files Move here into (#2791,
+    /// #3572); nil off every screen.
+    public func jumpArea() -> PlacementID? {
+        let point = shelves.contextMenus.pointer()
+        guard let display = displayUnderPointer(point) else { return nil }
+        return pointerPlacement(
+            atAX: GeometryUtils.axPoint(point),
+            on: display
+        )
     }
 
-    /// The Space shown on the screen holding `point` (Cocoa), else
-    /// the active one — KiwiHub's one "here", which its Windows
-    /// side's Move here reads too, so the panel's sides agree.
-    func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
-        moveHereSpace(on: displayUnderPointer(point))
+    /// `area`'s usable rect in Cocoa coordinates: the area clipped
+    /// to its screen's visible frame, which KiwiHub centres in
+    /// (#3572 ruling 1); nil for a screen no longer connected.
+    public func visibleFrame(of area: PlacementID) -> CGRect? {
+        guard let screen = TilingEngine.screen(for: area.display) else {
+            return nil
+        }
+        guard let placement = state.workspaces[placement: area],
+            state.workspaces.placements(of: area.display).count > 1
+        else { return GeometryUtils.visibleFrame(of: screen) }
+        return GeometryUtils.flip(
+            tiler.areaFrame(placement.area.rect, on: screen),
+            primaryHeight: GeometryUtils.primaryHeight
+        )
     }
 
     /// The screen holding `point` (Cocoa), nil off every screen.

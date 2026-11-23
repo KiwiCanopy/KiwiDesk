@@ -12,7 +12,7 @@ extension JumpPanelController {
             guard let self else {
                 return DesktopOverview(screens: [], yours: nil)
             }
-            return self.core.desktopOverview(on: self.hubDisplay)
+            return self.core.desktopOverview(on: self.hubArea)
         }
         model.loadIcons = { Self.icons(for: $0) }
         model.onDesktopsAction = { [weak self, weak model] action in
@@ -95,7 +95,7 @@ extension JumpPanelController {
     /// What Core refuses for `action` now, in the panel's words.
     private func refusal(of action: DesktopsAction) -> String? {
         // The panel's screen, as the pick below reads it.
-        let hub = hubDisplay
+        let hub = hubArea
         switch action {
         case .moveWindowHere(let id):
             return core.moveHereRefusal(.window(id), on: hub)
@@ -181,9 +181,9 @@ extension JumpPanelController {
         case .jumpWindow(let id):
             core.jump(to: .window(id))
         case .moveWindowHere(let id):
-            _ = core.moveHere(.window(id), on: hubDisplay)
+            _ = core.moveHere(.window(id), on: hubArea)
         case .swapWindowHere(let id):
-            core.swapHere(.window(id), on: hubDisplay)
+            core.swapHere(.window(id), on: hubArea)
         case .drop(let ids, let target, let follow):
             return move(ids, to: target, follow: follow)
         }

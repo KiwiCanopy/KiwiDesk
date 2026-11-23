@@ -106,12 +106,12 @@ struct JumpRefusalRowTests {
         #expect(source.contains("model.onDeadKey={NSSound.beep()}"))
         #expect(
             source.contains(
-                "self?.core.swapRefusal(entry.target,on:self?.hubDisplay)"
+                "self?.core.swapRefusal(entry.target,on:self?.hubArea)"
             )
         )
         #expect(
             source.contains(
-                "self?.core.moveHereRefusal(entry.target,on:self?.hubDisplay)"
+                "self?.core.moveHereRefusal(entry.target,on:self?.hubArea)"
             )
         )
         // Every Windows pick passes the one door (`JumpModel.pick`).
