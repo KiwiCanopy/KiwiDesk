@@ -90,6 +90,7 @@ extension KiwiCore {
 
     /// Runs `body` as one act named `label`. Not `undoable` — a
     /// config load — the step it is part of only clears.
+    @discardableResult
     func recordingLayoutStep<T>(
         _ label: String,
         undoable: Bool = true,
