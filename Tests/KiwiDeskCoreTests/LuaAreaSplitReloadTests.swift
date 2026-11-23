@@ -85,15 +85,13 @@ struct LuaAreaSplitReloadTests {
 
     /// A profile's split, as a Settings Save stores it, survives a
     /// reload of an `init.lua` that never mentions areas.
+    /// The profile here holds the very split Lua made, so only the
+    /// profile's re-apply keeps it.
     @Test func profileSplitStays() throws {
         let core = try core()
-        try load(core, "-- no areas")
-        let halves = try #require(
-            ScreenSplit.whole(width: 3440, height: 1440)
-                .splitting(0, .sideBySide)
-        )
-        var profile = core.buildProfile(name: "desk", modes: nil)
-        profile.settings.displayAreas[wide.fingerprint] = halves
+        try load(core, split)
+        let profile = core.buildProfile(name: "desk", modes: nil)
+        try #require(profile.settings.displayAreas[wide.fingerprint] != nil)
         _ = try core.saveProfile(profile)
         core.apply(profile: profile, cause: .explicit)
         try #require(areas(core) == 2)
@@ -112,5 +110,41 @@ struct LuaAreaSplitReloadTests {
         let pin = ScreenAreaKey(parsing: core.spacePins["2"] ?? "")
         #expect(pin.fingerprint == wide.fingerprint)
         #expect(pin.areaID == 0)
+    }
+
+    /// A reload whose `init.lua` fails runs none of it, so it
+    /// takes no split away.
+    @Test func failedLoadKeepsTheSplit() throws {
+        let core = try core()
+        try load(core, split)
+        try load(core, "this is not lua (")
+        #expect(areas(core) == 2)
+        try load(core, "-- no areas")
+        #expect(areas(core) == 1)
+    }
+
+    /// Naming an area of Lua's split leaves the split Lua's.
+    @Test func renamedSplitStillGoes() throws {
+        let core = try core()
+        try load(core, split)
+        let reply = core.execute(
+            "set_display_area_name",
+            args: [.string("\(wide.fingerprint)#1"), .string("Calls")]
+        )
+        try #require(reply.isSuccess)
+        try load(core, "-- no areas")
+        #expect(areas(core) == 1)
+    }
+
+    /// A name the load gives its own split keeps the split Lua's.
+    @Test func splitNamedInTheLoadStillGoes() throws {
+        let core = try core()
+        let name =
+            "KiwiDesk.set_display_area_name(\"\(wide.fingerprint)#1\", "
+            + "\"Calls\")"
+        try load(core, split + "\n" + name)
+        try #require(areas(core) == 2)
+        try load(core, "-- no areas")
+        #expect(areas(core) == 1)
     }
 }

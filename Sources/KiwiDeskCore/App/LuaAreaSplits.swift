@@ -18,6 +18,15 @@ struct LuaAreaSplits {
         written = [:]
     }
 
+    /// Ends a load whose `init.lua` failed: it resets nothing,
+    /// and what it did split joins the last load's record.
+    mutating func abandonLoad() {
+        guard declared != nil else { return }
+        lastLoad.merge(written) { $1 }
+        declared = nil
+        written = [:]
+    }
+
     /// Records a `set_display_areas` write while a load runs;
     /// `stored` is what the screen holds after it.
     mutating func note(_ fingerprint: String, _ stored: ScreenSplit?) {
@@ -26,12 +35,19 @@ struct LuaAreaSplits {
         written[fingerprint] = stored
     }
 
-    /// Follows a load's own `set_display_area_name` onto a split
-    /// it declared, so the name does not hide the split from the
-    /// next load's reset.
-    mutating func rename(_ fingerprint: String, _ stored: ScreenSplit) {
-        guard declared?.contains(fingerprint) == true else { return }
-        written[fingerprint] = stored
+    /// Follows a `set_display_area_name` onto a split Lua made —
+    /// the running load's, or the last one's while `old` is still
+    /// what it left — so a name never takes the split from Lua.
+    mutating func rename(
+        _ fingerprint: String,
+        from old: ScreenSplit,
+        to stored: ScreenSplit
+    ) {
+        if declared?.contains(fingerprint) == true {
+            written[fingerprint] = stored
+        } else if lastLoad[fingerprint] == old {
+            lastLoad[fingerprint] = stored
+        }
     }
 
     /// Ends the load and returns the screens to make whole: each

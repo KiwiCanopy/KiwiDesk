@@ -116,12 +116,14 @@ extension KiwiCore {
         // a guarded unknown call is non-fatal, so it must land
         // here as an issue to stay visible (#39).
         var typos: [ConfigIssue] = []
+        luaAreaSplits.beginLoad()  // settled at the tail (#3573)
         initDeclaredSpaces = recordingSpaceReferences {
             typos = recordingTypoIssues {
                 if case .failure(let error) = fresh.runFile(
                     configURL
                 ) {
                     onLog("init.lua error: \(error)")
+                    luaAreaSplits.abandonLoad()
                     issues.append(
                         ConfigIssue(
                             source: "init.lua",
@@ -266,8 +268,6 @@ extension KiwiCore {
         tiler.settings.tiling.startOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
-        // Its splits reset at the load's tail, never here (#3573).
-        luaAreaSplits.beginLoad()
         // Read while `init.lua`'s last Spaces still count (#1790).
         let temporaries = Set(liveTemporarySpaces)
         initDeclaredSpaces = []
