@@ -85,6 +85,8 @@ struct JumpPanelCeilingTests {
             rootView: LocaleScopedRoot { view }
                 .environmentObject(LocalizationManager.shared)
         )
+        // Measured as the panel's own host is (#3570).
+        host.sizingOptions = JumpPanelController.hostingSizing
         return (model, host.fittingSize)
     }
 
@@ -98,6 +100,22 @@ struct JumpPanelCeilingTests {
                 .rounded(.up)
             #expect(height > JumpPanelView.fieldHeight, "\(scope)")
             #expect(height <= ceiling, "\(scope) stands \(height) pt")
+        }
+    }
+
+    /// The panel's host keeps no window size of its own and still
+    /// reports a size to open at: an empty option set read zero and
+    /// opened KiwiHub at no size (owner, 2026-11-23).
+    @Test("the panel's host reports a size to open at")
+    func hostReportsASize() {
+        LocalizationManager.shared.select("en")
+        let options = JumpPanelController.hostingSizing
+        #expect(!options.contains(.minSize))
+        #expect(!options.contains(.maxSize))
+        for scope in JumpScope.allCases {
+            let size = rendered(scope, sheet: Self.tallSheet).1
+            #expect(size.width >= JumpPanelRoom.fieldWidth, "\(scope)")
+            #expect(size.height > JumpPanelView.fieldHeight, "\(scope)")
         }
     }
 

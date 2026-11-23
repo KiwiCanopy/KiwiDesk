@@ -129,9 +129,7 @@ final class JumpPanelController: NSObject {
             rootView: LocaleScopedRoot { root }
                 .environmentObject(LocalizationManager.shared)
         )
-        // Only `refit` sizes the panel, once per change: AppKit would
-        // grow the window to a new minimum ahead of it (#3570).
-        hosting.sizingOptions = []
+        hosting.sizingOptions = Self.hostingSizing
         // A field editor left by the last opening would keep the
         // keys from the new content's field.
         panel.makeFirstResponder(nil)

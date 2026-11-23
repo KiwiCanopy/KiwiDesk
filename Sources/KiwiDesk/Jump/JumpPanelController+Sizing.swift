@@ -103,6 +103,13 @@ extension JumpPanelController {
         }
     }
 
+    /// What KiwiHub's hosting view manages: its intrinsic size alone,
+    /// which `fittingSize` reads, never the window's min and max
+    /// size, with which AppKit grew the window ahead of the refit, a
+    /// second jump per change (#3570). An empty set reads a zero
+    /// `fittingSize`, which opens the panel at no size at all.
+    static let hostingSizing: NSHostingSizingOptions = [.intrinsicContentSize]
+
     /// A refit's glide, in seconds.
     static let glide: TimeInterval = 0.18
 
