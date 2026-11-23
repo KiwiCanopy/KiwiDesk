@@ -106,7 +106,7 @@ struct HandleThicknessTests {
         settings.kiwishelf.handleThickness = 3
         let profile = Profile(
             name: "Work",
-            monitorSets: [],
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
             spaceModes: [:],
             settings: settings
         )
