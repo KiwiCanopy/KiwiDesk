@@ -13,6 +13,21 @@ extension KiwiCore {
     func resolveSpaceDisplays(
         mainID: DisplayID = PositionalDisplays.liveMainID
     ) {
+        resolveSpaceDisplays(
+            of: state.workspaces.allSpaces.map(\.id),
+            mainID: mainID
+        )
+    }
+
+    /// The resolve for `spaces` alone, then the heal and the float
+    /// re-anchor as the total one runs them. A door that changes
+    /// no screen — a pin, a delete, a retire — places only what it
+    /// touched, so a `move_space_to_display` holds until a screen
+    /// change re-resolves every Space (#3578).
+    func resolveSpaceDisplays(
+        of spaces: [SpaceID],
+        mainID: DisplayID = PositionalDisplays.liveMainID
+    ) {
         let displays = state.workspaces.allDisplays
         // The one unresolvable state; resolve() below can then
         // never return nil.
@@ -26,18 +41,18 @@ extension KiwiCore {
                 }
             }
         )
-        for space in state.workspaces.allSpaces {
+        for space in spaces where state.workspaces[space] != nil {
             guard
                 let display = resolvedDisplay(
-                    of: space.id,
+                    of: space,
                     displays: displays,
                     mainID: mainID,
                     assignment: assignment
                 )
             else { continue }
             state.workspaces.assign(
-                space.id,
-                to: areaPlacement(of: space.id, on: display)
+                space,
+                to: areaPlacement(of: space, on: display)
             )
         }
         // A display the resolve left with no space is healed
@@ -48,7 +63,7 @@ extension KiwiCore {
         healEmptyDisplays(mainID: mainID)
         // Every space-relocation path funnels through this
         // resolve — monitor re-dock, profile apply, config
-        // reload, pin displacement — so the cross-display float
+        // reload, a pin, a heal — so the cross-display float
         // re-anchor lives HERE (#444 review), not per verb. A
         // first-ever assignment (`previous == nil`, boot) is not
         // a relocation.

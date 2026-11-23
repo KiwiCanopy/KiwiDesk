@@ -44,9 +44,10 @@ extension KiwiCore {
             refusal = failed
         }
         // Give the new space a display (auto / main) so it can be
-        // shown, then apply — a failed file write included, since
-        // the Space is live either way.
-        resolveSpaceDisplays()
+        // shown, touching no other Space (#3578), then apply — a
+        // failed file write included, since the Space is live
+        // either way.
+        placeUnplacedSpaces()
         retile(pass: .apply)
         emitSpaceChange()
         return refusal.map { .fail($0.description) } ?? .ok()
@@ -121,7 +122,9 @@ extension KiwiCore {
         {
             refusal = failed
         }
-        resolveSpaceDisplays()
+        // Only a screen the delete emptied is owed anything: the
+        // heal, never a re-resolve of a hand-moved Space (#3578).
+        resolveSpaceDisplays(of: [])
         // The rehomed windows now belong to `target`, whose
         // display just settled above: floats from the deleted
         // space's display re-anchor; `target`'s own floats

@@ -746,8 +746,9 @@ screen's fingerprint (as printed by `list_monitors`) or name.
 
 **Does:** moves the whole space to that screen **now** and
 shows it there (each screen shows one space at a time). A
-later screen change (dock/undock) re-resolves placement from
-the pins; `pin_space_to_display` makes it stick. Creates the
+later screen change (dock/undock), profile load, config reload
+or Settings Save puts it back where its pin or automatic
+placement says; `pin_space_to_display` makes it stick. Creates the
 space if it does not exist. Floating members are re-anchored
 onto the new screen, keeping their relative position.
 

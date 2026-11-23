@@ -2,9 +2,10 @@ import Foundation
 import Testing
 
 /// The empty-display heal has two homes and one ledger (#1175):
-/// `healEmptyDisplays` is reached from the tail of the total
-/// resolve and from `move_space_to_display`, the one relocation
-/// that bypasses the resolve on purpose; `healedSpaces` is
+/// `healEmptyDisplays` is reached from the tail of the resolve,
+/// total or scoped (#3578), and from `move_space_to_display`,
+/// the one relocation that bypasses the resolve on purpose;
+/// `healedSpaces` is
 /// written by the heal file and cleared by the #634 reset, and
 /// nowhere else. A third caller is a relocation the rule file
 /// did not know about, and a third writer is a second answer to
