@@ -14351,8 +14351,8 @@ and the consumer drops an empty chord whatever a file holds (owner,
 
 The slots are stored sparsely, in `gui.json` over the seeds and in a
 profile over that, a missing slot inheriting and `null` meaning None.
-So a seed a later release adds — #1229's ⌃⌥ + pinch together for the
-Desktop overview — reaches an install that never touched that slot
+So a seed a later release adds — #1229's Desktop overview seed —
+reaches an install that never touched that slot
 with no top-up generation, and the cost is the mirror: changing a
 shipped seed changes it for everyone who kept it, which makes each
 such change a ruling. The key is additive, so it takes no format
@@ -14360,6 +14360,23 @@ bump: an older build ignores it, and its Save drops it. The map itself
 decodes strictly, so a slot a later release adds is a name this build
 refuses, and adding one bumps `GuiConfig.currentFormat` and
 `Profile.currentFormat`.
+
+**Amended (#3587, owner 2026-11-23): ⌃⌥ pinch together toggles
+floating.** The pinch seed moves from the Desktop overview to
+`toggle_floating`, so the overview keeps one seed, ⌃⌥ three-finger
+swipe up, the Mission Control gesture, and pinch and spread are the
+two window-state toggles: spread maximizes, pinch floats, and each
+undoes itself, so a stray pinch is undone by the same gesture. The
+four-finger pinch stays the window switcher and the four-finger
+spread stays unbound. The cost: pinch reads as zoom-out on macOS,
+which made the overview its natural reading; the owner chose the
+pair over that reading and over a duplicate seed. The change is the
+mirror cost stated above — it reaches everyone who kept the seed,
+including a user who picked the overview for pinch in Settings,
+since a row equal to its seed is stored as nothing — and owes no
+`ConfigMigration`, since a kept seed is no stored value. A row set
+to another action keeps it, and so does a ⌃⌥ pinch row the
+Shortcuts use switch left on ⌃⌥, stored as the overview.
 
 *Amended (#3199): the slots are keys of the one binding list*
 (▸ Shortcuts, *Mouse and trackpad gestures are one list of
