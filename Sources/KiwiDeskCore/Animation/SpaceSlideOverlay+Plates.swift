@@ -73,33 +73,20 @@ extension SpaceSlideOverlay {
             view.imageScaling = .scaleProportionallyUpOrDown
             content.addSubview(view)
         }
-        let radius = SpaceSlidePlan.cornerRadius
-        if current.glass,
-            let glass = GlassPlate.make(regular: current.tint == nil)
-        {
-            GlassPlate.update(glass, frame: rect, cornerRadius: radius)
-            GlassPlate.setContent(glass, content)
-            // Tinted, the Fill pins the variant as on the bars.
-            guard let tint = current.tint else {
-                GlassTint.followPick(
-                    glass,
-                    host: current.panel.effectiveAppearance
-                )
-                return glass
-            }
-            GlassTint.apply(
-                GlassBackdrop(),
-                in: glass,
-                cornerRadius: radius,
-                fill: tint,
-                edge: .top,
-                host: current.panel.effectiveAppearance
-            )
-            return glass
-        }
-        let material = FrostPlate.make(content: content, fill: current.frost)
-        material.frame = rect
-        material.layer?.cornerRadius = radius
-        return material
+        let ground = SwitchPlateView.Ground(
+            glass: current.glass,
+            tint: current.tint,
+            frost: current.frost
+        )
+        let surface = SwitchPlateView.surface(ground, content: content)
+        SwitchPlateView.dress(
+            surface,
+            on: ground,
+            tint: GlassBackdrop(),
+            frame: rect,
+            cornerRadius: SpaceSlidePlan.cornerRadius,
+            host: current.panel.effectiveAppearance
+        )
+        return surface
     }
 }

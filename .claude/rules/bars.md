@@ -1030,9 +1030,9 @@ stays physical. Obligations:
   Reduce-transparency obligation below cannot see it — this suite
   holds its gate. **Every Core glass host names the suite that
   gates it** in `OverlayGlassGateTests` ▸ `everyGlassHostIsGated`,
-  derived from `GlassPlate.make(` callers — the one copy of who
-  hosts glass, so a new host reds until it has a gate. The drag
-  ghost and the sticky mark host
+  derived from `GlassPlate.make(` and `SwitchPlateView` callers —
+  the one copy of who hosts glass, so a new host reds until it
+  has a gate. The drag ghost and the sticky mark host
   glass the same way and take the same rule where each is
   rendered — the ghost through `DragMarkerView.render`, which the
   drag and its Settings picture both take, and `updateStickyMarks`,

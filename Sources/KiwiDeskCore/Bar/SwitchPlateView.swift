@@ -4,9 +4,11 @@ import AppKit
 /// Glass, tinted as "Tint KiwiHub and plates" says, or the material
 /// where glass stands down, with an optional icon at its centre. The
 /// plate that flies into the pocket and out (#2680) and the drag
-/// ghost (#3583) draw through it, so both stay the slide's plate
-/// (`SpaceSlideOverlay`'s `plateView`). Its ground is fixed at init;
-/// a holder whose ground changes makes a new one.
+/// ghost (#3583) draw through it. The slide's plates (#1956) are
+/// minted fresh as direct members of a pile's glass container, so
+/// they take only the two statics — `surface` and `dress` — which
+/// hold every decision a plate's look makes. Its ground is fixed at
+/// init; a holder whose ground changes makes a new one.
 @MainActor
 final class SwitchPlateView: NSView {
     /// What the plate draws on: Liquid Glass or not, the Fill it
@@ -16,14 +18,36 @@ final class SwitchPlateView: NSView {
         let glass: Bool
         let tint: GlassFill?
         let frost: FrostFill?
+
+        init(glass: Bool, tint: GlassFill?, frost: FrostFill?) {
+            self.glass = glass
+            self.tint = tint
+            self.frost = frost
+        }
+
+        /// The ground a plate wears for `shelf`, `glass` being the
+        /// surface's own leaf already through the gate (#2569).
+        @MainActor
+        init(shelf: KiwiShelf, glass: Bool) {
+            let ground = LiquidGlassGate.panelGround(shelf, glass: glass)
+            self.init(
+                glass: glass,
+                tint: shelf.glassFill(on: ground),
+                frost: ground.frost
+            )
+        }
     }
 
     let ground: Ground
     private let content = NSView()
     private let icon: NSImageView?
     let tint = GlassBackdrop()
-    private(set) var glass: NSView?
-    private(set) var material: NSVisualEffectView?
+    private let plate: NSView
+
+    /// The plate's glass, nil where it draws the material.
+    var glass: NSView? { GlassPlate.isGlass(plate) ? plate : nil }
+    /// The plate's material, nil where it draws glass.
+    var material: NSVisualEffectView? { plate as? NSVisualEffectView }
 
     override var isFlipped: Bool { true }
 
@@ -35,20 +59,11 @@ final class SwitchPlateView: NSView {
             view.imageScaling = .scaleProportionallyUpOrDown
             return view
         }
+        if let icon { content.addSubview(icon) }
+        plate = Self.surface(ground, content: content)
         super.init(frame: .zero)
         wantsLayer = true
-        if let icon { content.addSubview(icon) }
-        if ground.glass,
-            let made = GlassPlate.make(regular: ground.tint == nil)
-        {
-            glass = made
-            addSubview(made)
-            GlassPlate.setContent(made, content)
-        } else {
-            let view = FrostPlate.make(content: content, fill: ground.frost)
-            material = view
-            addSubview(view)
-        }
+        addSubview(plate)
         setAccessibilityElement(false)
     }
 
@@ -72,24 +87,57 @@ final class SwitchPlateView: NSView {
             width: side,
             height: side
         )
-        if let glass {
-            GlassPlate.update(glass, frame: bounds, cornerRadius: radius)
-            if let fill = ground.tint {
-                GlassTint.apply(
-                    tint,
-                    in: glass,
-                    cornerRadius: radius,
-                    fill: fill,
-                    edge: .top,
-                    host: host
-                )
-            } else {
-                GlassTint.followPick(glass, host: host)
-            }
+        Self.dress(
+            plate,
+            on: ground,
+            tint: tint,
+            frame: bounds,
+            cornerRadius: radius,
+            host: host
+        )
+    }
+
+    /// A plate's surface on `ground`, hosting `content`: `.clear`
+    /// glass under a Fill, `.regular` glass without one, else the
+    /// material wearing the Fill flat (`FrostPlate`).
+    static func surface(_ ground: Ground, content: NSView) -> NSView {
+        if ground.glass,
+            let glass = GlassPlate.make(regular: ground.tint == nil)
+        {
+            GlassPlate.setContent(glass, content)
+            return glass
         }
-        if let material {
-            material.frame = bounds
-            material.layer?.cornerRadius = radius
+        return FrostPlate.make(content: content, fill: ground.frost)
+    }
+
+    /// Frames a `surface` at `frame` with `cornerRadius`, the Fill
+    /// fading from the top through `tint`, or the glass following
+    /// the Appearance pick where it wears none.
+    static func dress(
+        _ surface: NSView,
+        on ground: Ground,
+        tint: GlassBackdrop,
+        frame: CGRect,
+        cornerRadius radius: CGFloat,
+        host: NSAppearance
+    ) {
+        guard GlassPlate.isGlass(surface) else {
+            surface.frame = frame
+            surface.layer?.cornerRadius = radius
+            return
         }
+        GlassPlate.update(surface, frame: frame, cornerRadius: radius)
+        guard let fill = ground.tint else {
+            GlassTint.followPick(surface, host: host)
+            return
+        }
+        GlassTint.apply(
+            tint,
+            in: surface,
+            cornerRadius: radius,
+            fill: fill,
+            edge: .top,
+            host: host
+        )
     }
 }

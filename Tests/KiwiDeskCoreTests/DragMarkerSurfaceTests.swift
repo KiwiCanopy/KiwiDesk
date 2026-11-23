@@ -106,7 +106,7 @@ struct DragMarkerSurfaceTests {
     @Test("The drop zone sets its own alpha on any focus colour")
     func dropZoneOwnsItsAlpha() throws {
         try Self.withOverlay { overlay, id in
-            for hex in ["#564AB680", ""] {
+            for hex in ["#564AB680", "#564AB600", ""] {
                 overlay.showDropZone(
                     at: Self.slot,
                     look: Self.look(focus: hex),
@@ -121,12 +121,16 @@ struct DragMarkerSurfaceTests {
                     layer.borderColor?.alpha == DragMarkerView.edgeAlpha,
                     "\(hex)"
                 )
+                // A colour with no alpha is no colour: the accent.
+                if hex != "#564AB680" {
+                    let accent = NSColor.controlAccentColor.cgColor
+                    #expect(
+                        Self.rgb(layer.backgroundColor)
+                            == Self.rgb(accent),
+                        "\(hex)"
+                    )
+                }
             }
-            let accent = Self.rgb(NSColor.controlAccentColor.cgColor)
-            #expect(
-                Self.rgb(overlay.dropZone?.view.layer?.backgroundColor)
-                    == accent
-            )
         }
     }
 
@@ -154,6 +158,10 @@ struct DragMarkerSurfaceTests {
                 look: Self.look(tinted: false),
                 beneath: id
             )
+            let untinted = try #require(
+                overlay.ghost?.panel as? ActiveGlassPanel
+            )
+            #expect(!untinted.wearsActiveLook)
             overlay.showGhost(at: Self.slot, look: Self.look(), beneath: id)
             let marker = try #require(overlay.ghost)
             let plate = try #require(marker.plate)

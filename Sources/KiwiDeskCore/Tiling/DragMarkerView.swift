@@ -105,12 +105,11 @@ public final class DragMarkerView: NSView {
         redrawPreview()
     }
 
-    /// The focus colour at full alpha; the drop zone sets its own.
+    /// The focus colour, the system accent where it has none; the
+    /// drop zone sets its own alphas on it.
     static func focusInk(_ hex: String) -> NSColor {
-        let color =
-            KiwiShelf.hasColour(hex)
+        KiwiShelf.hasColour(hex)
             ? NSColor(kiwiHex: hex) : NSColor.controlAccentColor
-        return color.withAlphaComponent(1)
     }
 
     /// Paints the drop zone: the wash on the layer, the hairline as
@@ -134,14 +133,9 @@ public final class DragMarkerView: NSView {
         guard let layer else { return }
         layer.borderWidth = 0
         layer.backgroundColor = NSColor.clear.cgColor
-        let ground = LiquidGlassGate.panelGround(
-            look.shelf,
-            glass: drawsGlass
-        )
         let wanted = SwitchPlateView.Ground(
-            glass: drawsGlass,
-            tint: look.shelf.glassFill(on: ground),
-            frost: ground.frost
+            shelf: look.shelf,
+            glass: drawsGlass
         )
         (window as? ActiveGlassPanel)?.wearsActiveLook = wanted.tint != nil
         let shown = plateView(wanted)
