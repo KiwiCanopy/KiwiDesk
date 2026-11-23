@@ -72,7 +72,7 @@ public struct KiwiShelf: Sendable, Equatable {
     public var highlightWidth: CGFloat = 2
     /// An Auto bar's handle and the Pocket's tab, deep (pt, #3451);
     /// a drawing reads `resolvedHandleThickness`.
-    public var handleThickness: CGFloat = 3
+    public var handleThickness: CGFloat = 5
     /// Spacing between items in pt — one rhythm for both bars.
     public var itemGap: CGFloat = 6
     /// How large an item's content draws across the shelf, in pt

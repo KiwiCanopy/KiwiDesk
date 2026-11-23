@@ -6,18 +6,19 @@ import Testing
 
 /// `kiwishelf.handle_thickness` (#3451): how deep an Auto bar's
 /// handle and the Pocket's tab draw, whole points in 2–6, a look
-/// style path; clamped at decode and set, and absent reading 3.
+/// style path; clamped at decode and set, and absent reading 5
+/// (#3586).
 @Suite("KiwiShelf handle thickness (#3451)")
 @MainActor
 struct HandleThicknessTests {
-    @Test("An absent field reads the shipped 3 pt")
+    @Test("An absent field reads the shipped 5 pt")
     func absentReadsTheDefault() throws {
         let shelf = try JSONDecoder().decode(
             KiwiShelf.self,
             from: Data("{}".utf8)
         )
-        #expect(shelf.handleThickness == 3)
-        #expect(ShelfHandleSpec.depth(of: shelf) == 3)
+        #expect(shelf.handleThickness == 5)
+        #expect(ShelfHandleSpec.depth(of: shelf) == 5)
     }
 
     @Test(
@@ -67,8 +68,8 @@ struct HandleThicknessTests {
         let screen = CGSize(width: 1512, height: 982)
         let looks = LookCatalog.bundled(sizes: [screen])
         let picks: [String: Double] = [
-            "Glass": 3, "Classic": 2, "Tiler": 2, "Pill": 3,
-            "Taskbar": 4, "Sakura": 3,
+            "Glass": 5, "Classic": 4, "Tiler": 4, "Pill": 5,
+            "Taskbar": 6, "Sakura": 5,
         ]
         for look in looks {
             let value = look.style["kiwishelf.handle_thickness"]
