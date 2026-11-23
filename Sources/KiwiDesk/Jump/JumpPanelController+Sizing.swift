@@ -91,16 +91,15 @@ extension JumpPanelController {
             of: content.fittingSize,
             under: anchor
         )
-        guard animated, !presence.reduceMotion else {
-            panel.setFrame(frame, display: true)
-            return
-        }
-        // The animator glides without blocking the run loop, so a
-        // keystroke's glide never holds the next one (#3570).
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = Self.glide
-            panel.animator().setFrame(frame, display: true)
-        }
+        // AppKit's own animated resize lays the content out at every
+        // step, so the field row rides the edges; the window's
+        // animator only moves the frame, and the content slid in
+        // from its bottom edge (#3570, owner on device 2026-11-23).
+        panel.setFrame(
+            frame,
+            display: true,
+            animate: animated && !presence.reduceMotion
+        )
     }
 
     /// What KiwiHub's hosting view manages: its intrinsic size alone,
@@ -109,9 +108,6 @@ extension JumpPanelController {
     /// second jump per change (#3570). An empty set reads a zero
     /// `fittingSize`, which opens the panel at no size at all.
     static let hostingSizing: NSHostingSizingOptions = [.intrinsicContentSize]
-
-    /// A refit's glide, in seconds.
-    static let glide: TimeInterval = 0.18
 
     /// Each app's icon, read once per opening.
     static func icons(

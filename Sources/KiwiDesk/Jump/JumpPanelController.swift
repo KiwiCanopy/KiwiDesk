@@ -312,11 +312,11 @@ final class JumpPanelController: NSObject {
         }
         // The next turn: the hosting view has not re-laid the new
         // results out in the setter's own.
-        // The Shortcuts side's height follows its results, gliding
-        // with its top held (#3570 ▸ Ruling 5).
-        model.onResultsChange = { [weak self, weak model] in
-            let glides = model?.scope == .shortcuts
-            DispatchQueue.main.async { self?.refit(animated: glides) }
+        // The height follows the results at once, its top held: an
+        // animated resize holds the run loop, which would hold the
+        // next keystroke (#3570).
+        model.onResultsChange = { [weak self] in
+            DispatchQueue.main.async { self?.refit() }
         }
         model.onStripToggle = { [weak self] in
             DispatchQueue.main.async { self?.refit(animated: true) }

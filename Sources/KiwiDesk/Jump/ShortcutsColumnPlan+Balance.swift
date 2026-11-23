@@ -1,9 +1,9 @@
 import CoreGraphics
 
 /// The balanced fill (#3570 ▸ Ruling 5): the column-major cut, at
-/// any row, whose tallest column is shortest; among those the most
-/// even, and among those the one whose extra rows sit in the earlier
-/// columns, so heights never rise left to right (owner, 2026-11-23).
+/// any row, whose heights never rise left to right, the first column
+/// the longest (owner, 2026-11-23); among those the least tallest,
+/// then the most even, then the one with more in earlier columns.
 extension ShortcutsColumnPlan {
     /// One row of a section: the cut breaks between any two.
     private struct Unit {
@@ -29,8 +29,8 @@ extension ShortcutsColumnPlan {
         return (columns, tallest ?? 0)
     }
 
-    /// The units' runs: `count` contiguous ranges whose tallest is
-    /// least, then whose heights' squares sum least.
+    /// The units' runs: `count` contiguous ranges, ordered tallest
+    /// first where any cut allows it.
     private static func cut(
         _ units: [Unit],
         _ sections: [Section],
@@ -60,9 +60,63 @@ extension ShortcutsColumnPlan {
                 run[start][end] = height
             }
         }
-        // best[k][i]: the first i units cut into k columns, least
-        // tallest, then most even; on a whole tie the later start, so
-        // an extra row stays in the earlier column.
+        if let ordered = ordered(run, total: total, into: count) {
+            return ordered
+        }
+        return evenest(run, total: total, into: count)
+    }
+
+    /// The cut whose heights never rise left to right, least tallest
+    /// first, then most even, then with the most in the earlier
+    /// columns; nil where no cut keeps that order. Every cut is
+    /// tried: three columns at most keep it cheap.
+    private static func ordered(
+        _ run: [[CGFloat]],
+        total: Int,
+        into count: Int
+    ) -> [Range<Int>]? {
+        typealias Key = (tallest: CGFloat, squares: CGFloat, ends: [Int])
+        var best: Key?
+        func better(_ key: Key, than held: Key) -> Bool {
+            if key.tallest != held.tallest {
+                return key.tallest < held.tallest
+            }
+            if key.squares != held.squares {
+                return key.squares < held.squares
+            }
+            return key.ends.lexicographicallyPrecedes(held.ends, by: >)
+        }
+        func walk(_ start: Int, _ ends: [Int], _ heights: [CGFloat]) {
+            let left = count - ends.count
+            guard left > 0 else {
+                let key: Key = (
+                    heights.max() ?? 0,
+                    heights.reduce(0) { $0 + $1 * $1 },
+                    ends
+                )
+                if best.map({ better(key, than: $0) }) ?? true { best = key }
+                return
+            }
+            let last = left == 1 ? total : total - left + 1
+            let first = left == 1 ? total : start + 1
+            for end in first...last {
+                let height = run[start][end]
+                if let previous = heights.last, height > previous { continue }
+                walk(end, ends + [end], heights + [height])
+            }
+        }
+        walk(0, [], [])
+        guard let ends = best?.ends else { return nil }
+        return zip([0] + ends, ends).map { $0..<$1 }
+    }
+
+    /// The least-tallest, most even cut, for a sheet no ordered cut
+    /// fits.
+    private static func evenest(
+        _ run: [[CGFloat]],
+        total: Int,
+        into count: Int
+    ) -> [Range<Int>] {
         typealias Cost = (tallest: CGFloat, squares: CGFloat)
         let none: Cost = (.infinity, .infinity)
         var best = [[Cost]](

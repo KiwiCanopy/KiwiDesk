@@ -91,9 +91,12 @@ struct ShortcutsColumnPlanTests {
             [section(2), section(2), section(6)],
             into: 2
         )
-        // 74 + 16 + 74 = 164 over 186, never 74 over 276.
-        #expect(tall.columns.map { $0.map(\.section) } == [[0, 1], [2]])
-        #expect(tall.tallest == 186)
+        // 164 over 186 would rise: the first column takes the long
+        // section's first row, 226 over 158.
+        #expect(
+            tall.columns.map { $0.map(\.section) } == [[0, 1, 2], [2]]
+        )
+        #expect(tall.tallest == 226)
     }
 
     /// Where several cuts share the shortest tallest column, the
@@ -112,6 +115,24 @@ struct ShortcutsColumnPlanTests {
         #expect(
             plan.columns.map { $0.map(\.section) } == [[0], [1, 2], [3, 4]]
         )
+    }
+
+    /// The owner's sheet (2026-11-23): its last column held four
+    /// titles and ran longest. Heights never rise left to right.
+    @Test("the first column is the longest, heights never rising")
+    func heightsNeverRise() {
+        let sections = [5, 3, 1, 15, 1, 2, 1, 9].map { section($0) }
+        let plan = Plan.balanced(sections, into: 3)
+        let heights = plan.columns.map { pieces -> CGFloat in
+            pieces.enumerated().reduce(0) { sum, entry in
+                let (index, piece) = entry
+                return sum + (index == 0 ? 0 : Plan.sectionGap) + 18
+                    + CGFloat(piece.rows.count) * 28
+            }
+        }
+        #expect(heights.count == 3)
+        #expect(heights == heights.sorted(by: >), "\(heights)")
+        #expect(plan.tallest == heights.first)
     }
 
     /// Seven rows over three columns: the extra rows go to the

@@ -137,7 +137,9 @@ struct JumpPanelView: View {
         }
     }
 
-    /// One scope at a time, cross-faded in place.
+    /// One scope at a time, cross-faded in place, each at its own
+    /// side's width, centred: the window's edges glide to it, and no
+    /// side is laid out at another's width meanwhile (#3570).
     @ViewBuilder private var scopeContent: some View {
         ZStack(alignment: .top) {
             if model.scope == .windows {
@@ -149,6 +151,7 @@ struct JumpPanelView: View {
                     }
                     results
                 }
+                .frame(width: model.sideWidth(for: .windows))
                 .transition(.opacity)
             } else if model.scope == .shortcuts, let sheet = model.shortcuts {
                 JumpShortcutsView(
@@ -158,6 +161,7 @@ struct JumpPanelView: View {
                     maxHeight: model.sheetCap,
                     fades: true
                 )
+                .frame(width: model.sideWidth(for: .shortcuts))
                 .transition(.opacity)
             } else if model.scope == .desktops, let state = model.desktops {
                 DesktopsSideView(
@@ -189,6 +193,7 @@ struct JumpPanelView: View {
                     )
                 )
                 .environment(\.desktopsSwell, model.desktopsSwell)
+                .frame(width: model.sideWidth(for: .desktops))
                 .transition(.opacity)
             } else if let view = model.view {
                 JumpViewSide(
@@ -202,6 +207,7 @@ struct JumpPanelView: View {
                     },
                     onHoverEnd: { model.endHover(.item($0)) }
                 )
+                .frame(width: model.sideWidth(for: .view))
                 .transition(.opacity)
             }
         }
