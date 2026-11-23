@@ -46,7 +46,8 @@ struct WorkspaceMapSealTests {
         "spacePlacement": [
             "State/WorkspaceManager.swift": 5,
             "State/WorkspaceManager+Displays.swift": 11,
-            "State/WorkspaceManager+Placements.swift": 6,
+            // `activeSpace(inAreaOf:on:)`, the area's own read.
+            "State/WorkspaceManager+Placements.swift": 7,
         ],
         "secondaryShown": [
             "State/WorkspaceManager.swift": 5,

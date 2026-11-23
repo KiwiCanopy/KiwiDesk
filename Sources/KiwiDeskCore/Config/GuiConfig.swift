@@ -51,7 +51,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// each Desktop (#3517 ruling 17), keyed by the Desktop, then by
     /// the area's `ScreenAreaKey`: `desktopSpaces`' twin, with its
     /// identity-only encoding and its `machine.json` home. A merge
-    /// rewrites its area keys (`apply(_ remap:)`).
+    /// rewrites its area keys (`apply(_ remap:)`); a write stamps
+    /// the session's copy over it, whose read follows a merge by
+    /// where each Space lays out (`KiwiCore+DesktopAreaSpaces`).
     public var desktopAreaSpaces: [DesktopKey: [String: SpaceID]] = [:]
     /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]

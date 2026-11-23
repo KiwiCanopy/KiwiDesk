@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// The Desktop memory of a split screen's areas (#3517 ruling 17).
@@ -17,8 +18,87 @@ extension KiwiCore {
         in snapshot: DesktopSnapshot
     ) {
         rememberDeparture(of: active, leaving: leaving)
-        if let main = display(forUUID: snapshot.mainUUID) {
-            rememberAreaSpaces(on: main, leaving: leaving)
+        // The screen the Desktop left lives on, from the reading.
+        let left = snapshot.space(for: leaving)?.displayUUID
+        if let screen = display(forUUID: left ?? snapshot.mainUUID) {
+            rememberAreaSpaces(on: screen, leaving: leaving)
+        }
+    }
+
+    /// A secondary screen's departure: the Space it showed under
+    /// the Desktop's cursor, then each of its areas.
+    func rememberLeaving(
+        _ display: DisplayID,
+        leaving desktop: DesktopKey
+    ) {
+        if let shown = state.workspaces.activeSpace(on: display) {
+            rememberVirtualSpace(shown, leaving: desktop)
+        }
+        rememberAreaSpaces(on: display, leaving: desktop)
+    }
+
+    /// A secondary screen's arrival: shows the Space the Desktop
+    /// shows, then switches the screen's other areas with it.
+    func showArriving(
+        _ target: SpaceID,
+        on display: DisplayID,
+        as desktop: DesktopKey,
+        in snapshot: DesktopSnapshot
+    ) {
+        state.workspaces.show(target, on: display)
+        showAreaSpaces(
+            on: display,
+            arriving: desktop,
+            in: snapshot,
+            except: state.workspaces.placement(of: target)
+        )
+    }
+
+    /// Moves the areas' memory a merge absorbed onto its survivor,
+    /// read off the splits before and after the change: an area id
+    /// the new split lacks went into the area now covering its
+    /// middle. A screen left unsplit keeps its entries dormant.
+    func remapAreaSpaces(
+        from old: [String: ScreenSplit],
+        to new: [String: ScreenSplit]
+    ) {
+        for remap in Self.areaRemaps(from: old, to: new) {
+            for (desktop, var shown) in desktopMemory.areaSpaces {
+                remap.move(in: &shown)
+                desktopMemory.areaSpaces[desktop] = shown
+            }
+        }
+    }
+
+    /// The merges between two sets of splits, by screen.
+    static func areaRemaps(
+        from old: [String: ScreenSplit],
+        to new: [String: ScreenSplit]
+    ) -> [ScreenAreaRemap] {
+        old.sorted { $0.key < $1.key }.flatMap { fingerprint, before in
+            guard let after = new[fingerprint] else {
+                return [ScreenAreaRemap]()
+            }
+            let kept = Set(after.areas.map(\.id))
+            return before.areas.filter { !kept.contains($0.id) }
+                .compactMap { area -> ScreenAreaRemap? in
+                    let middle = CGPoint(x: area.rect.midX, y: area.rect.midY)
+                    guard
+                        let survivor = after.areas.first(where: {
+                            $0.rect.contains(middle)
+                        })
+                    else { return nil }
+                    return ScreenAreaRemap(
+                        vanished: ScreenAreaKey(
+                            fingerprint: fingerprint,
+                            areaID: area.id
+                        ),
+                        survivor: ScreenAreaKey(
+                            fingerprint: fingerprint,
+                            areaID: survivor.id
+                        )
+                    )
+                }
         }
     }
 
@@ -72,11 +152,6 @@ extension KiwiCore {
         let areas = state.workspaces.placements(of: display)
         guard areas.count > 1 else { return }
         var taken = spacesShownElsewhere(excluding: desktop, in: snapshot)
-        let present = snapshot.presentKeys
-        for (key, shown) in desktopMemory.areaSpaces
-        where key != desktop && present.contains(key) {
-            taken.formUnion(shown.values)
-        }
         for area in areas where area.id != lead {
             guard
                 let target = areaSpaceTarget(
@@ -91,8 +166,13 @@ extension KiwiCore {
     }
 
     /// The Space `area` shows on `desktop`: the one filed under its
-    /// own key, else one filed under a key the one resolver lands in
-    /// this area (an area merged away, ruling 22), else a free one.
+    /// own key, else any filed Space that now lays out in this area,
+    /// else a free one. A filed Space wins over `taken`, as the
+    /// cursor's does. The middle step is how a merge reaches this
+    /// memory (ruling 22): the merged-away area's Space follows its
+    /// pin into the survivor, and an area id is never minted twice
+    /// (ruling 21), so a stale key names no other area; the next
+    /// departure files the Desktop afresh.
     private func areaSpaceTarget(
         for desktop: DesktopKey,
         in area: Placement,
@@ -105,14 +185,10 @@ extension KiwiCore {
         {
             return own
         }
-        let landed = filed.sorted { $0.key < $1.key }.first {
+        let moved = filed.sorted { $0.key < $1.key }.first {
             candidates.contains($0.value)
-                && state.workspaces.placement(
-                    keyed: ScreenAreaKey(parsing: $0.key),
-                    on: area.display
-                ) == area.id
         }
-        if let landed { return landed.value }
+        if let moved { return moved.value }
         let declared = currentDeclaredSpaces()
         return candidates.first {
             !taken.contains($0) && (declared?.contains($0) ?? true)

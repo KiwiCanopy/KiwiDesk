@@ -42,10 +42,10 @@ extension KiwiCore {
         guard let display = state.workspaces.display(of: target)
         else { return nil }
         // The Space the target's own area shows (#3517 ruling 8).
-        let leaving =
-            state.workspaces.placement(of: target).map {
-                state.workspaces.activeSpace(on: $0)
-            } ?? state.workspaces.activeSpace(on: display)
+        let leaving = state.workspaces.activeSpace(
+            inAreaOf: target,
+            on: display
+        )
         guard leaving != target else { return nil }
         return SpaceSlideIntent(
             display: display,
@@ -166,12 +166,12 @@ extension KiwiCore {
     /// Space — a Desktop switch, a drop, a crossing — asked at the
     /// head of every retile, so no activation door needs its own.
     func endSpaceSlideIfOvertaken() {
-        guard let play = spaceSlide.play else { return }
-        let shown =
-            state.workspaces.placement(of: play.space).map {
-                state.workspaces.activeSpace(on: $0)
-            } ?? state.workspaces.activeSpace(on: play.display)
-        guard shown != play.space else { return }
+        guard let play = spaceSlide.play,
+            state.workspaces.activeSpace(
+                inAreaOf: play.space,
+                on: play.display
+            ) != play.space
+        else { return }
         endSpaceSlide()
     }
 

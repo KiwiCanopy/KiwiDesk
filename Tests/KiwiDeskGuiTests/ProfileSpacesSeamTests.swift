@@ -56,7 +56,7 @@ struct ProfileSpacesSeamTests {
         // reaching the map themselves.
         "virtualSpaces": [
             "Profiles/DesktopMemory.swift": 1,
-            "Profiles/KiwiCore+DesktopSpaces.swift": 7,
+            "Profiles/KiwiCore+DesktopSpaces.swift": 6,
             "Profiles/KiwiCore+DesktopSpacePersistence.swift": 5,
             "App/KiwiCore+AwayWindows.swift": 1,
         ],
@@ -142,20 +142,21 @@ struct ProfileSpacesSeamTests {
         // refused store — pass green, which is the fail-open a
         // negative clause must not have.
         let allowed: [String: (Int, String)] = [
-            "Profiles/DesktopMemory.swift": (1, "the Space CURSOR"),
+            "Profiles/DesktopMemory.swift":
+                (2, "the Space CURSOR, and each area's (#3517)"),
             "App/KiwiCore.swift": (1, "the profile BINDINGS"),
             "Config/GuiConfig.swift":
-                (2, "both, as the store composes them"),
+                (3, "all three, as the store composes them"),
             // The cursor's own file on this Mac (#2324).
             "Config/MachineConfig.swift":
-                (1, "the cursor, persisted in machine.json"),
+                (2, "both cursors, persisted in machine.json"),
             // The bindings' own file and the backup field (#2324).
             "Config/DesktopBindingsFile.swift":
                 (1, "the profile BINDINGS, persisted in bindings.json"),
             "Config/SetupBundle.swift":
                 (1, "the BINDINGS a backup carries"),
             "Config/GuiConfigStore.swift":
-                (1, "the cursor's write-time stamp"),
+                (2, "both cursors' write-time stamps"),
             "Profiles/KiwiCore+DesktopBindings.swift":
                 (2, "the shared re-key's moves and drops"),
             // A query's accumulator (#1438): the screen name per

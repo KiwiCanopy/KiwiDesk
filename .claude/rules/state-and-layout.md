@@ -212,7 +212,9 @@ editing here:
   files each area's shown Space under the Desktop left through
   `rememberAreaSpaces` and moves every other area of the screen
   through `showAreaSpaces`, beside the cursor's own target, so a
-  new switch arm takes both doors (`AreaDesktopMemoryTests`).
+  new switch arm takes both doors (`AreaDesktopMemoryTests`,
+  `AreaDesktopSwitchSeamTests`). A merge reaches the live memory
+  through `remapAreaSpaces` at the one split feed.
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through

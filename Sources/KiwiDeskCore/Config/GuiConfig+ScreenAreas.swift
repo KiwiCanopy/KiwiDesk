@@ -12,6 +12,16 @@ public struct ScreenAreaRemap: Equatable, Sendable {
         ScreenAreaKey(parsing: key) == vanished
             ? survivor.description : key
     }
+
+    /// Moves `map`'s vanished entry onto the survivor, which keeps
+    /// its own entry where it has one.
+    public func move<Value>(in map: inout [String: Value]) {
+        guard let moved = map.removeValue(forKey: vanished.description)
+        else { return }
+        if map[survivor.description] == nil {
+            map[survivor.description] = moved
+        }
+    }
 }
 
 extension GuiConfig {
@@ -52,13 +62,8 @@ extension GuiConfig {
         for (space, pin) in spacePins {
             spacePins[space] = remap.rewrite(pin)
         }
-        let old = remap.vanished.description
-        let new = remap.survivor.description
         for (desktop, var shown) in desktopAreaSpaces {
-            guard let moved = shown.removeValue(forKey: old) else {
-                continue
-            }
-            if shown[new] == nil { shown[new] = moved }
+            remap.move(in: &shown)
             desktopAreaSpaces[desktop] = shown
         }
         settings.apply(remap)
