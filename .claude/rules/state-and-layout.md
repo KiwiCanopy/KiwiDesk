@@ -208,6 +208,11 @@ editing here:
   `KiwiCore.laidOutSplits(_:)`, the same gate, so nothing judges or
   names an area nothing lays out (`AreaEdgeTests`); retiring the
   flag retires that door with it. Which readers take it is review's.
+  A Desktop stays the physical screen's (ruling 17): a switch
+  files each area's shown Space under the Desktop left through
+  `rememberAreaSpaces` and moves every other area of the screen
+  through `showAreaSpaces`, beside the cursor's own target, so a
+  new switch arm takes both doors (`AreaDesktopMemoryTests`).
 - Layout algorithms are **pure functions** over that flat array —
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through

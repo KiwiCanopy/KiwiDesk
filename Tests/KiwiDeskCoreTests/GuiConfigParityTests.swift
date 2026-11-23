@@ -35,7 +35,8 @@ struct GuiConfigParityTests {
         // pill on every Desktop swipe. It is stamped at the write
         // instead (`GuiConfigStore.liveDesktopSpaces`), which is
         // why no caller has to carry it, and rides `machine.json`
-        // (`GuiConfig.machineLocalFields`, `MachineConfig`).
+        // (`GuiConfig.machineLocalFields`, `MachineConfig`), and
+        // so does its areas' twin `desktopAreaSpaces` (#3517).
         // `appWide` (#1741) is stamped the same way
         // (`GuiConfigStore.liveAppWide`)
         // and read by `applyStructuredConfig`; so is the shared
@@ -48,7 +49,8 @@ struct GuiConfigParityTests {
                 "format", "settings", "spaces", "spaceModes",
                 "appRules", "titledAppRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
-                "profileBindings", "desktopSpaces", "layers",
+                "profileBindings", "desktopSpaces",
+                "desktopAreaSpaces", "layers",
                 "scrollGesture", "gesture",
                 "appWide", "look",
                 "spaceHistory",

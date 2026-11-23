@@ -216,12 +216,12 @@ extension KiwiCore {
                 continue
             }
             if let left = diff.previous[uuid],
-                let leaving = snapshot.key(of: left),
-                let shown = state.workspaces.activeSpace(
-                    on: display
-                )
+                let leaving = snapshot.key(of: left)
             {
-                rememberVirtualSpace(shown, leaving: leaving)
+                if let shown = state.workspaces.activeSpace(on: display) {
+                    rememberVirtualSpace(shown, leaving: leaving)
+                }
+                rememberAreaSpaces(on: display, leaving: leaving)
             }
             guard let arriving = snapshot.currentKey(on: uuid),
                 let target = virtualSpaceTarget(
@@ -231,6 +231,12 @@ extension KiwiCore {
                 )
             else { continue }
             state.workspaces.show(target, on: display)
+            showAreaSpaces(
+                on: display,
+                arriving: arriving,
+                in: snapshot,
+                except: state.workspaces.placement(of: target)
+            )
         }
     }
 
@@ -267,19 +273,32 @@ extension KiwiCore {
         // Desktop, and gating the cursor's re-key on the map's
         // early return is how it was missed the first time.
         rekeyLastDesktop(in: snapshot)
-        let result = Self.keyMoves(
-            in: desktopMemory.virtualSpaces,
-            snapshot: snapshot
+        desktopMemory.virtualSpaces = Self.rekeyed(
+            desktopMemory.virtualSpaces,
+            in: snapshot
         )
+        // The areas' memory is a third holder (#3517).
+        desktopMemory.areaSpaces = Self.rekeyed(
+            desktopMemory.areaSpaces,
+            in: snapshot
+        )
+    }
+
+    /// `map` with each key moved or dropped by `keyMoves`.
+    private static func rekeyed<Value>(
+        _ map: [DesktopKey: Value],
+        in snapshot: DesktopSnapshot
+    ) -> [DesktopKey: Value] {
+        let result = keyMoves(in: map, snapshot: snapshot)
         guard !result.moves.isEmpty || !result.drops.isEmpty
-        else { return }
-        var out = desktopMemory.virtualSpaces
+        else { return map }
+        var out = map
         for key in result.drops { out[key] = nil }
         for (from, to) in result.moves {
             out[to] = out[from]
             out[from] = nil
         }
-        desktopMemory.virtualSpaces = out
+        return out
     }
 
     /// The other holder of a `DesktopKey` across snapshots.

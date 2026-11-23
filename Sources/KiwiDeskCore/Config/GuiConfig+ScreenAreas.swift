@@ -45,11 +45,21 @@ extension GuiConfig {
     }
 
     /// Rewrites every field that stores an area key: the Screen
-    /// pins and the per-screen maps in the settings
-    /// (`ScreenAreaRemapParityTests` finds them by reflection).
+    /// pins, the areas' Desktop memory and the per-screen maps in
+    /// the settings (`ScreenAreaRemapParityTests` finds them by
+    /// reflection).
     public mutating func apply(_ remap: ScreenAreaRemap) {
         for (space, pin) in spacePins {
             spacePins[space] = remap.rewrite(pin)
+        }
+        let old = remap.vanished.description
+        let new = remap.survivor.description
+        for (desktop, var shown) in desktopAreaSpaces {
+            guard let moved = shown.removeValue(forKey: old) else {
+                continue
+            }
+            if shown[new] == nil { shown[new] = moved }
+            desktopAreaSpaces[desktop] = shown
         }
         settings.apply(remap)
         look?.apply(remap)

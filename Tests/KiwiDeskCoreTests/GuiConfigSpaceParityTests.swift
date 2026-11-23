@@ -10,8 +10,8 @@ import Testing
 /// a Space as a VALUE and stay out: `appRules` and
 /// `titledAppRules`, global by ruling (another profile may declare
 /// the Space; only the rename moves it, `TitledAppRuleStoreTests`),
-/// and `desktopSpaces`, which the draft never holds
-/// (`GuiConfig.undraftedFields`).
+/// and `desktopSpaces` with its areas' twin `desktopAreaSpaces`,
+/// which the draft never holds (`GuiConfig.undraftedFields`).
 @Suite("GuiConfig Space field parity (#792)")
 struct GuiConfigSpaceParityTests {
     private let probe = SpaceID("parityProbe")
@@ -34,6 +34,7 @@ struct GuiConfigSpaceParityTests {
             guard let label = child.label, label != "settings",
                 label != "appRules", label != "titledAppRules",
                 label != "desktopSpaces",
+                label != "desktopAreaSpaces",
                 String(describing: type(of: child.value))
                     .contains("SpaceID")
             else { return nil }

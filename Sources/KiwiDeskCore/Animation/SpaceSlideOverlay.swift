@@ -122,8 +122,10 @@ final class SpaceSlideOverlay {
     func press(_ press: Press) -> Pressed {
         let now = clock()
         var dropped = false
+        // Another area of the same screen is another page (#3517).
         if let play,
             play.display != press.display || play.axis != press.axis
+                || play.screen != press.screen
         {
             end()
             dropped = true

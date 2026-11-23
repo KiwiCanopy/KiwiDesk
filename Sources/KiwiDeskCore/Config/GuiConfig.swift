@@ -47,6 +47,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// collision into a PERSISTED map"). Stored in
     /// `machine.json`, never `gui.json` (`machineLocalFields`).
     public var desktopSpaces: [DesktopKey: SpaceID] = [:]
+    /// The Space each area of a split screen was last showing on
+    /// each Desktop (#3517 ruling 17), keyed by the Desktop, then by
+    /// the area's `ScreenAreaKey`: `desktopSpaces`' twin, with its
+    /// identity-only encoding and its `machine.json` home. A merge
+    /// rewrites its area keys (`apply(_ remap:)`).
+    public var desktopAreaSpaces: [DesktopKey: [String: SpaceID]] = [:]
     /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
     /// The scroll gestures' global base (#1656); a profile
@@ -97,12 +103,14 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Desktop memory (#1230): it changes every time you swipe a
     /// Desktop, so counting it as a config change would light the
     /// save pill constantly, and it is stamped at the write
-    /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted.
+    /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted,
+    /// as its area twin `desktopAreaSpaces` is (#3517).
     /// `appWide` (#1741) and the shared `look` (#1752) are
     /// stamped the same way, and `shortcutOffer` (#2324) is the
     /// top-ups' bookkeeping, merged at the write.
     public static let undraftedFields: Set<String> = [
-        "format", "desktopSpaces", "appWide", "look", "shortcutOffer",
+        "format", "desktopSpaces", "desktopAreaSpaces", "appWide",
+        "look", "shortcutOffer",
     ]
 
     /// Fields `gui.json` never carries: they mean something on
@@ -110,7 +118,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// which `GuiConfigStore` composes in at a load and splits out
     /// at a save. The encoder and decoder below skip them.
     public static let machineLocalFields: Set<String> = [
-        "desktopSpaces", "profileBindings",
+        "desktopSpaces", "desktopAreaSpaces", "profileBindings",
     ]
 
     public init() {}

@@ -152,7 +152,7 @@ extension KiwiCore {
         if let leaving = lastDesktop, leaving != key,
             let active = state.workspaces.activeSpace
         {
-            rememberDeparture(of: active, leaving: leaving)
+            rememberDeparture(of: active, leaving: leaving, in: snapshot)
         }
         lastDesktop = key
         desktopMemory.lastDesktopSpace = snapshot.mainCurrentSpace
@@ -190,7 +190,7 @@ extension KiwiCore {
                     in: snapshot
                 )
             {
-                state.workspaces.activate(target)
+                activateArriving(target, on: key, in: snapshot)
                 oweReturningFocus(
                     for: target,
                     native: snapshot.mainCurrentSpace
