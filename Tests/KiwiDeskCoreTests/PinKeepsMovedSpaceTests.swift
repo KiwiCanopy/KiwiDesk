@@ -51,12 +51,19 @@ struct PinKeepsMovedSpaceTests {
         )
     }
 
-    /// The control: a screen change is the one re-resolve the doc
-    /// names, and it still sends the moved Space back.
+    /// The control: a screen change re-resolves every Space and
+    /// sends the moved one back. The DELL stays connected through
+    /// it, so only the resolve can move Space 2, never an unplug
+    /// dropping its placement.
     @Test("a screen change still re-resolves the moved Space")
     func screenChangeReresolves() throws {
         let core = try movedToDell()
-        core.handle(.displaysChanged([desk.builtIn]))
+        let third = Display(
+            id: DisplayID(5),
+            name: "THIRD",
+            frame: CGRect(x: 300, y: 0, width: 100, height: 100)
+        )
+        core.handle(.displaysChanged([desk.builtIn, desk.dell, third]))
         core.handle(.displaysChanged([desk.builtIn, desk.dell]))
         #expect(
             core.state.workspaces.display(of: moved) == desk.builtIn.id
@@ -76,6 +83,34 @@ struct PinKeepsMovedSpaceTests {
         let core = try movedToDell()
         #expect(core.execute("delete_space", args: [.string("4")]).isSuccess)
         #expect(core.state.workspaces.display(of: moved) == desk.dell.id)
+    }
+
+    @Test("an emptied temporary Space's retire leaves the move alone")
+    func retireKeepsTheMove() throws {
+        let core = try movedToDell()
+        let fresh = SpaceID(12)
+        core.execute("focus_space", args: [.string(fresh.raw)])
+        try #require(core.isTemporary(fresh))
+        core.execute("focus_space", args: [.string("1")])
+        try #require(core.state.workspaces[fresh] == nil)
+        #expect(core.state.workspaces.display(of: moved) == desk.dell.id)
+    }
+
+    /// A retire and an undeclared Space in one pass: the retire's
+    /// heal does not stand in for the #1994 placement.
+    @Test("a retiring pass still places an unplaced Space")
+    func retirePassPlacesTheUnplaced() throws {
+        let core = try desk.docked()
+        let fresh = SpaceID(12)
+        core.execute("focus_space", args: [.string(fresh.raw)])
+        try #require(core.isTemporary(fresh))
+        core.state.workspaces.activate(SpaceID(1))
+        let unplaced = SpaceID(9)
+        core.state.workspaces.ensureSpace(unplaced)
+        try #require(core.state.workspaces.display(of: unplaced) == nil)
+        core.retile()
+        try #require(core.state.workspaces[fresh] == nil)
+        #expect(core.state.workspaces.display(of: unplaced) != nil)
     }
 
     /// The area form: a move into the DELL's right area holds while

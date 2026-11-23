@@ -1,8 +1,8 @@
 import Foundation
 
 /// The empty-display heal (#1175): a connected screen is never
-/// left with zero spaces. Reached from the tail of the total
-/// resolve and from the one relocation that bypasses it on
+/// left with zero spaces. Reached from the tail of the resolve,
+/// total or scoped, and from the one relocation that bypasses it on
 /// purpose (`move_space_to_display`); `EmptyDisplayHealSeamTests`
 /// pins both call sites and the ledger's writers.
 extension KiwiCore {

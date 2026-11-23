@@ -1377,8 +1377,8 @@ it — by `healEmptyDisplays`. Heal, never refuse; the argument is
 `docs/design-decisions.md` ▸ Profiles ▸ *A screen left with no
 space is healed*. The obligations:
 
-- **A relocation ends in the heal.** The total resolve carries
-  it at its tail, before relocation is judged for the float
+- **A relocation ends in the heal.** The resolve, total or
+  scoped (#3578), carries it at its tail, before relocation is judged for the float
   re-anchor, so a reused seed the precedence sent to main and
   the heal sent back has not moved (`EmptyDisplayHealSeamTests`
   ▸ `healPrecedesTheReanchor` holds the order, since no unit
@@ -1437,9 +1437,8 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
 
 - **Place only the unplaced.** `placeUnplacedSpaces` assigns
   each Space with no screen through the resolve's own
-  `SpacePlacement` precedence and touches no other Space — a
-  full `resolveSpaceDisplays` there would revert
-  `move_space_to_display`'s session move on any filing
+  `SpacePlacement` precedence and touches no other Space — the
+  scoped door the #3578 section below requires
   (`UndeclaredSpaceDisplayTests` ▸ `placementKeepsAHandMove`).
   Adding a Space empties no screen and relocates none, so it
   owes neither the heal nor the float re-anchor.
@@ -1462,7 +1461,7 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   `stickyGateKnowsTheLanding`), so a refused move still creates
   nothing.
 
-## A hand move holds until a screen change (#3578)
+## A hand move holds through a door that changes no screen (#3578)
 
 **A door that changes no screen places only the Spaces it
 touched**, through `resolveSpaceDisplays(of:)` — a pin its pinned
@@ -1471,10 +1470,13 @@ re-anchor still running — or `placeUnplacedSpaces` for a Space it
 created. The total `resolveSpaceDisplays()` re-places every Space
 from the pins, which reverts `move_space_to_display`, so it is
 for a screen change, a profile apply, a config or Settings apply,
-boot and the #634 reset; a new caller is one of those or takes
-the scoped door (`PinKeepsMovedSpaceTests` ▸
-`pinOfAnotherSpaceKeepsTheMove`, `deleteKeepsTheMove`;
-`screenChangeReresolves` is the control).
+a screen setup's claim, boot and the #634 reset; a new caller is
+one of those or takes the scoped door, and joins
+`SpaceResolveCallerSeamTests`' census with its reason
+(`PinKeepsMovedSpaceTests` ▸ `pinOfAnotherSpaceKeepsTheMove`,
+`deleteKeepsTheMove`, `retireKeepsTheMove`;
+`PinKeepsMovedSpaceTests` ▸ `screenChangeReresolves` is the
+control).
 
 ## A screen-count change settles before it chooses (#1612)
 

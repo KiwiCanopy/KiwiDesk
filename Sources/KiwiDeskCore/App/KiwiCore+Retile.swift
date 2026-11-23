@@ -46,12 +46,14 @@ extension KiwiCore {
         noteSpaceVisits()  // #1655: a Space shown without an event
         let heldRetired = retireEmptiedHeldSpaces()
         var spacesChanged = false
-        if retireEmptiedTemporarySpaces() || heldRetired {
-            resolveSpaceDisplays(of: [])  // the heal alone (#3578)
-            spacesChanged = true
-        } else if placeUnplacedSpaces() {
-            // A Space some door created by an undeclared id takes
-            // its screen here, every other placement left (#1994).
+        let spaceRetired = retireEmptiedTemporarySpaces() || heldRetired
+        // A Space some door created by an undeclared id takes its
+        // screen here, every other placement left (#1994).
+        if placeUnplacedSpaces() { spacesChanged = true }
+        if spaceRetired {
+            // A retire owes the heal alone, never a re-resolve of a
+            // hand-moved Space (#3578).
+            resolveSpaceDisplays(of: [])
             spacesChanged = true
         }
         if sortTemporarySpaces() { spacesChanged = true }
