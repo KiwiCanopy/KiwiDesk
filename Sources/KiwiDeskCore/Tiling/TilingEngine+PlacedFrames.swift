@@ -36,6 +36,21 @@ extension TilingEngine {
         return visibleFrames(state: state, placed: true)
     }
 
+    /// The slots over a state that is not live — a what-if read
+    /// like `placedFrames(state:recording: false)`: the monocle
+    /// hold the layout input records is put back.
+    func calculatedFrames(
+        state: StateCoordinator,
+        recording: Bool
+    ) -> [WindowID: CGRect] {
+        guard !recording else {
+            return visibleFrames(state: state, placed: false)
+        }
+        let held = monocleShownMembers
+        defer { monocleShownMembers = held }
+        return visibleFrames(state: state, placed: false)
+    }
+
     /// One loop for both sets: every visible space laid out on
     /// its own screen, unioned.
     func visibleFrames(

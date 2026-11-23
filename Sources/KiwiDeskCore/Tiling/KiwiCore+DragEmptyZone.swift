@@ -1,28 +1,24 @@
-import AppKit
 import CoreGraphics
 
 /// The drop zone over an EMPTY Space's placement (#3582): another
 /// area of a split screen, or another screen, showing a Space with
-/// no tiled window has no slot to swap with, so the zone marks the
-/// slot the dragged window takes there instead.
+/// no tiled window of its own has no slot to swap with, so the zone
+/// marks the slot the dragged window takes there instead.
 extension KiwiCore {
-    /// The slot `id` takes when dropped at the cursor, nil unless
-    /// the drop files it, tiled, into an empty Space it will lead.
-    /// The destination is the drop-commit's own (`dropDestination`,
-    /// #492), and every stand-down is a case the drop does not land
-    /// as the zone would say: a floating-mode Space, a screen on a
-    /// native full-screen or system Space (#670), a sticky the move
-    /// gate refuses (#445).
+    /// The slot `id` takes when dropped at the cursor into an empty
+    /// Space, read off a copy of the state with the drop's filing
+    /// written in, nil where the drop files it nowhere tiled. The
+    /// destination is the drop-commit's (`crossDropDestination`),
+    /// and a sticky the move gate refuses snaps back (#445). A
+    /// screen on a native full-screen or system Space (#670) shows
+    /// no zone, since the Space it files into is not on screen.
     func emptyPlacementDropZone(
         _ id: WindowID,
         from origin: Space
     ) -> CGRect? {
-        guard
-            let destID = dropDestination(),
-            destID != origin.id,
+        guard let destID = crossDropDestination(from: origin),
             let dest = state.workspaces[destID],
-            state.placementMode(of: dest) != .floating,
-            state.effectiveTiledMembers(of: dest).isEmpty,
+            state.localTiledMembers(of: dest).isEmpty,
             stickyMoveBlock(id, to: destID) == nil
         else { return nil }
         if let display = state.workspaces.display(of: destID),
@@ -30,31 +26,26 @@ extension KiwiCore {
         {
             return nil
         }
-        return tiler.loneSlot(of: id, in: dest, state: state)
+        // The drop-commit's filing into an empty Space, which its
+        // track rule cannot place otherwise; the activation brings
+        // a global sticky along, as the drop does.
+        var probe = state
+        probe.workspaces.add(id, to: destID)
+        probe.workspaces.focus(id, in: destID)
+        probe.workspaces.activate(destID)
+        return tiler.calculatedFrames(state: probe, recording: false)[id]
     }
-}
 
-extension TilingEngine {
-    /// The slot `id` takes as `space`'s one tiled window, laid out
-    /// on that Space's screen through its own layout input — the
-    /// bounds of its area on a split screen (#3517). A what-if read:
-    /// the monocle hold the input records is put back.
-    func loneSlot(
-        of id: WindowID,
+    /// After a live crossing (#504) the window is its new Space's
+    /// lone tiled member, so its own slot is where the drop lands.
+    func crossedLoneSlot(
+        _ id: WindowID,
         in space: Space,
-        state: StateCoordinator
+        slots: [WindowID: CGRect]
     ) -> CGRect? {
-        guard let screen = Self.screen(for: space.id, in: state)
+        guard dragCrossing.hasCrossed(id),
+            state.effectiveTiledMembers(of: space) == [id]
         else { return nil }
-        let held = monocleShownMembers
-        defer { monocleShownMembers = held }
-        var input = layoutInput(state: state, space: space, screen: screen)
-        input.context.focused = id
-        input.context.sizeBounds = sizeBounds(for: [id])
-        return LayoutEngine.calculate(
-            mode: input.space.mode,
-            windows: [id],
-            context: input.context
-        )[id]
+        return slots[id]
     }
 }

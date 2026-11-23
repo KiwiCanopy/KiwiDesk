@@ -29,7 +29,8 @@ public final class DragOverlay {
 
     private(set) var ghost: Marker?
     private(set) var dropZone: Marker?
-    /// The AX frame the drop zone was last shown at.
+    /// The AX frame the drop zone shows at, nil while hidden; read
+    /// by tests, which see no panel geometry.
     private(set) var dropZoneFrame: CGRect?
 
     public init() {}
@@ -80,6 +81,7 @@ public final class DragOverlay {
     }
 
     public func hideDropZone() {
+        dropZoneFrame = nil
         if let panel = dropZone?.panel, panel.isVisible {
             panel.orderOut(nil)
         }

@@ -94,10 +94,7 @@ extension KiwiCore {
         onto target: WindowID?,
         from origin: Space
     ) -> Bool {
-        guard
-            let destID = dropDestination(),
-            destID != origin.id,
-            state.workspaces[destID] != nil
+        guard let destID = crossDropDestination(from: origin)
         else { return false }
         // A sticky window that can't cross displays snaps back
         // instead — the same gate a keyboard / Space-Bar move
@@ -177,6 +174,17 @@ extension KiwiCore {
         // (#463) can't leave the destination showing the wrong key
         // window.
         scheduleSpaceSettle(destID, priorFrontmost: priorFrontmost)
+    }
+
+    /// The Space a drop at the cursor files the window into when
+    /// it is not `origin`: the one destination the drop-commit and
+    /// the live drop zone over an empty placement share (#3582).
+    func crossDropDestination(from origin: Space) -> SpaceID? {
+        guard let destID = dropDestination(),
+            destID != origin.id,
+            state.workspaces[destID] != nil
+        else { return nil }
+        return destID
     }
 
     /// The Space shown under the drop's cursor — its area's on a

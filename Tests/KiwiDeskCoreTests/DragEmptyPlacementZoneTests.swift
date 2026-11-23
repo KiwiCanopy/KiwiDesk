@@ -143,4 +143,101 @@ struct DragEmptyPlacementZoneTests {
         _ = try drag(core, to: cursor(CGPoint(x: 3000, y: 700)))
         #expect(!core.dragOverlay.isDropZoneVisible)
     }
+
+    /// A global sticky the move gate refuses snaps back, so the
+    /// zone promises no move.
+    @Test func refusedStickyShowsNone() throws {
+        let core = try #require(splitCore())
+        core.state.setSticky(WindowID(1), .global)
+        _ = try drag(core, to: cursor(CGPoint(x: 3000, y: 700)))
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    /// A tiled global sticky follows the activation the drop makes,
+    /// so the zone is the slot the window keeps beside it.
+    @Test func globalStickyJoinsTheDrop() throws {
+        let core = try #require(splitCore())
+        core.state.setSticky(WindowID(2), .global)
+        let home = try drag(core, to: cursor(CGPoint(x: 3000, y: 700)))
+        let zone = try #require(core.dragOverlay.dropZoneFrame)
+        let landed = drop(core, home: home)
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+        #expect(landed == zone)
+        let sticky = core.tiler.calculatedFrames(state: core.state)[
+            WindowID(2)
+        ]
+        #expect(sticky.map { $0.minX >= 1720 } == true)
+    }
+
+    /// A screen on a full-screen Space shows no zone: the Space a
+    /// drop files into is not on screen.
+    @Test func fullScreenScreenShowsNone() throws {
+        let core = try #require(splitCore())
+        core.desktopMemory.readDisplayUUID = { _ in "FS" }
+        core.desktopMemory.shownUserSpaces = ["FS": false]
+        _ = try drag(core, to: cursor(CGPoint(x: 3000, y: 700)))
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    /// The live crossing (#504) files the window first; the zone
+    /// stays on the slot it took.
+    @Test func crossingKeepsTheZone() throws {
+        guard let screen = ScreenList.all.first,
+            let id = screen.kiwiDisplayID
+        else { return }
+        let other = DisplayID(900_612)
+        let core = pinned(makeTestCore(), id: id)
+        core.state.workspaces.assign(SpaceID("1"), to: id)
+        core.state.workspaces.assign(SpaceID("2"), to: other)
+        core.state.workspaces.activate(SpaceID("1"))
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.dragCrossing.displayAt = { $0.x < 5000 ? id : other }
+        let point = CGPoint(x: 6000, y: 300)
+        let home = try drag(core, to: point)
+        let zone = try #require(core.dragOverlay.dropZoneFrame)
+        core.dragCrossing.onCross(WindowID(1), other)
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+        core.handleDragMove(
+            WindowID(1),
+            start: home,
+            frame: home.offsetBy(dx: 80, dy: 0)
+        )
+        #expect(core.dragOverlay.dropZoneFrame == zone)
+    }
+
+    /// Every layout the empty Space can wear lands the window on
+    /// the zone, so a new layout is held without a case of its own.
+    @Test func everyLayoutLandsOnTheZone() throws {
+        for mode in LayoutMode.allCases where mode != .floating {
+            let core = try #require(splitCore())
+            core.state.workspaces.withSpace(SpaceID("2")) {
+                $0.mode = mode
+            }
+            let home = try drag(
+                core,
+                to: cursor(CGPoint(x: 3000, y: 700))
+            )
+            let zone = core.dragOverlay.dropZoneFrame
+            #expect(zone != nil, "\(mode)")
+            #expect(drop(core, home: home) == zone, "\(mode)")
+        }
+    }
+
+    /// An occupied area's gap is no empty placement: the zone stays
+    /// off where no slot is under the pointer.
+    @Test func occupiedAreaGapShowsNone() throws {
+        let core = try #require(splitCore())
+        core.execute("set_gap_global", args: [.number(40)])
+        core.state.workspaces.activate(SpaceID("2"))
+        addWindow(core, 3)
+        core.state.workspaces.activate(SpaceID("1"))
+        let slot = try #require(core.shownSlots()[WindowID(3)])
+        let gap = GeometryUtils.axPoint(
+            CGPoint(x: slot.minX - 10, y: slot.midY)
+        )
+        #expect(slot.minX - 10 > 1720)
+        _ = try drag(core, to: gap)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
 }

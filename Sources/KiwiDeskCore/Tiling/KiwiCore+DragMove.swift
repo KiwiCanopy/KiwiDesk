@@ -191,10 +191,14 @@ extension KiwiCore {
         // An empty Space's placement has no slot to swap with, so
         // the zone marks the slot the drop gives it there (#3582).
         let zone =
-            honestTarget.flatMap { slots[$0] }
-            ?? (target == nil
-                ? emptyPlacementDropZone(id, from: space) : nil)
-        if settings.dragDropZone.enabled, let targetSlot = zone {
+            settings.dragDropZone.enabled
+            ? honestTarget.flatMap { slots[$0] }
+                ?? (target == nil
+                    ? emptyPlacementDropZone(id, from: space)
+                        ?? crossedLoneSlot(id, in: space, slots: slots)
+                    : nil)
+            : nil
+        if let targetSlot = zone {
             dragOverlay.showDropZone(
                 at: targetSlot,
                 cornerRadius: corner,
