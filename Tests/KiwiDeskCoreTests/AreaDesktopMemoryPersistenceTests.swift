@@ -92,6 +92,19 @@ struct AreaDesktopMemoryPersistenceTests {
         )
     }
 
+    @Test("the core's store stamps the session's areas' memory")
+    func coreStampsTheStore() {
+        let core = makeTestCore()
+        core.adoptPersistedDesktopSpaces(
+            [:],
+            areas: [.identity(stamp): shown]
+        )
+        #expect(
+            core.guiConfigStore.liveDesktopAreaSpaces
+                == [.identity(stamp): shown]
+        )
+    }
+
     @Test("structured rules hand the stored map to the adoption")
     func structuredRulesAdopt() {
         let core = makeTestCore()

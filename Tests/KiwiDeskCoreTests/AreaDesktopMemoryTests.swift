@@ -15,7 +15,7 @@ import Testing
 struct AreaDesktopMemoryTests {
     /// Display A unsplit with Space 1; display B split side by side,
     /// Spaces 6 and 3 in its left area (in that order, 3 shown) and
-    /// Spaces 4 and 5 in its right.
+    /// Spaces 4, 5 and 7 in its right.
     private func makeCore() -> (KiwiCore, [PlacementID]) {
         let core = makeAuthorityCore()
         let wide = Display(
@@ -34,7 +34,7 @@ struct AreaDesktopMemoryTests {
             .map(\.id)
         core.state.workspaces.ensureSpace(SpaceID(1))
         core.state.workspaces.assign(SpaceID(1), to: DisplayID(1))
-        let homes = [(6, 0), (3, 0), (4, 1), (5, 1)]
+        let homes = [(6, 0), (3, 0), (4, 1), (5, 1), (7, 1)]
         for (space, area) in homes where areas.count > area {
             core.state.workspaces.ensureSpace(SpaceID(space))
             core.state.workspaces.assign(SpaceID(space), to: areas[area])
@@ -89,17 +89,35 @@ struct AreaDesktopMemoryTests {
         defer { resetAuthorityOverrides() }
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
-        core.state.workspaces.show(SpaceID(4), on: areas[1])
+        core.state.workspaces.show(SpaceID(7), on: areas[1])
         _ = swipe(core, from: 20, to: 21)
         // A fresh Desktop takes a free Space in each area: the
         // cursor's pick the left, the area's own the right.
         #expect(shown(core, areas[0]) == SpaceID(6))
-        #expect(shown(core, areas[1]) == SpaceID(5))
-        _ = swipe(core, from: 21, to: 20)
         #expect(shown(core, areas[1]) == SpaceID(4))
+        _ = swipe(core, from: 21, to: 20)
+        // The memory's 7, where a free pick would take 5.
+        #expect(shown(core, areas[1]) == SpaceID(7))
         #expect(shown(core, areas[0]) == SpaceID(3))
         // The other screen never moved.
         #expect(core.state.workspaces.activeSpace == SpaceID(1))
+    }
+
+    /// An area's own entry outranks one filed under another key.
+    @Test("an area's own key outranks a moved entry")
+    func ownKeyOutranks() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        let arriving = try #require(authoritySnapshot().key(of: 21))
+        let own = try #require(
+            core.state.workspaces[placement: areas[1]]?.key.description
+        )
+        core.desktopMemory.areaSpaces[arriving] = [
+            own: SpaceID(7), "": SpaceID(5),
+        ]
+        _ = swipe(core, from: 20, to: 21)
+        #expect(shown(core, areas[1]) == SpaceID(7))
     }
 
     /// Space 6 is another present Desktop's, so the left area has
