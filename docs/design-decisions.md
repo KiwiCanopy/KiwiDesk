@@ -16594,29 +16594,39 @@ them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
 
 :::unreleased
-*Amended (#3570, owner with ui-designer, 2026-11-23): the fixed 720
-pt width becomes a fixed 720 pt field row, and the one ceiling
-becomes a ceiling per side.* What the fixed width protected was the
-field and the side switch staying under the eye on ⇥, and the field
-row alone carries that: it stays 720 pt wide, centred, at
-`topFraction`, and on ⇥ only the panel's outer edges and its footer
-glide, so nothing the user reads or aims at moves. Windows and View
-keep 720 pt and the 488 pt ceiling, since a ranked list and three
-lines of chips gain nothing from width and a glance should stay
-compact. Desktops and Shortcuts are overviews — a screen per column,
-every bound key — and at 720 × 488 both scrolled on any real desk,
-which hides the very thing they exist to show; so both run down to
-48 pt above the area's bottom before they scroll, and Shortcuts
-takes the width its columns ask, from 720 pt up to the area less 96
-pt each side — a limit the Desktops side shares once its screens
-stand as columns (#3570 ▸ Ruling 4). What keeps them a panel rather
-than a window is everything but the size: the fixed field row, the
-margins, no title bar, no resizing or dragging, and Esc. The panel
-is never lifted: a lifted panel moves the field, which is the one
-thing the width rule existed to hold. Every limit is measured on the
-rect the panel opens in — a screen's clear area, or a screen area's
-(#3572) — never on `NSScreen` directly (`JumpPanelRoom`,
-`JumpPanelRoomTests`).
+*Amended (#3570, owner with ui-designer, 2026-11-23; field row by
+Amendment 4): the fixed 720 pt width becomes a field row that rides
+the panel's edges, and the one ceiling becomes a ceiling per side.*
+The search field is pinned to the panel's leading edge and the side
+switch to its trailing edge, each at the rows' inset, the space
+between them stretching: on a 720 pt side that is the old row, and
+on a wide side the search field lines up with the first column,
+where a 720 pt row held in the middle of a wider panel lined up with
+nothing below it. Nothing in the row moves on its own: both ends
+take their place from the panel's frame, in the same glide as its
+width or the same single step under Reduce Motion, so the row never
+runs a motion the frame does not. ⇥ keeps the field itself, its
+focus and its caret, while the glide runs — a field rebuilt or
+re-focused mid-glide loses the place the user was typing in — and
+still clears the query, one per side (#2229); the selected tab
+changes on the key press, before the panel moves, and a click during
+the glide lands on the tab under the pointer. VoiceOver reads the
+search field, then the side switch. Windows and View keep 720 pt and
+the 488 pt ceiling, since a ranked list and three lines of chips
+gain nothing from width and a glance should stay compact. Desktops
+and Shortcuts are overviews — a screen per column, every bound key —
+and at 720 × 488 both scrolled on any real desk, which hides the
+very thing they exist to show; so both run down to 48 pt above the
+area's bottom before they scroll, and Shortcuts takes the width its
+columns ask, from 720 pt up to the area less 96 pt each side — a
+limit the Desktops side shares once its screens stand as columns
+(#3570 ▸ Ruling 4). What keeps them a panel rather than a window is
+everything but the size: the margins, no title bar, no resizing or
+dragging, and Esc. The panel is never lifted: its top, where the
+field stands, holds at `topFraction` on every side. Every limit is
+measured on the rect the panel opens in — a screen's clear area, or
+a screen area's (#3572) — never on `NSScreen` directly
+(`JumpPanelRoom`, `JumpPanelRoomTests`, `JumpFieldRowTests`).
 
 *Amended (#3570, owner and ui-designer, 2026-11-23): the one-column
 sheet becomes column-major columns.* One column still reads best
