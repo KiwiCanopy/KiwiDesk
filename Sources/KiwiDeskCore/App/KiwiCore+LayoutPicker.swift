@@ -1,12 +1,12 @@
 import AppKit
 
 /// KiwiHub's View side (#762, #2229, #2309): its Layout line,
-/// acting on the Space the pointer's screen shows —
-/// on a desk of several screens the pointer is the one unambiguous
-/// "this screen".
+/// acting on the Space shown under the pointer — its area's on a
+/// split screen (#3517) — since on a desk of several screens the
+/// pointer is the one unambiguous "here".
 extension KiwiCore {
-    /// The Space the Layout line acts on: the one shown on the
-    /// screen under the pointer.
+    /// The Space the Layout line acts on: the one shown under the
+    /// pointer.
     public func layoutPickerSpace() -> SpaceID? {
         spaceUnderPointer(shelves.contextMenus.pointer())
     }

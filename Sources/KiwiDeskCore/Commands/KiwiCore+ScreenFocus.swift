@@ -13,7 +13,7 @@ extension KiwiCore {
     func lastScreen() -> PlacementID? {
         guard let here = focusedPlacement else { return nil }
         let live = state.workspaces.allPlacements.map(\.id)
-        if let visited = spaceHistory.screens.first(where: {
+        if let visited = spaceHistory.areas.first(where: {
             $0 != here && live.contains($0)
         }) {
             return visited

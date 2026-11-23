@@ -57,8 +57,8 @@ extension StateCoordinator {
     }
 
     /// The single space a sticky window renders on currently (#445).
-    /// Global follows the focused space; display follows its home
-    /// monitor's active space.
+    /// Global follows the focused space; display follows the space
+    /// its home space's own area shows (#3517).
     ///
     /// The focused space is DERIVED here rather than taken as an
     /// argument (#1225). Every caller wanted the one active space,
@@ -73,13 +73,10 @@ extension StateCoordinator {
         case .global:
             return workspaces.activeSpace
         case .display:
-            guard let display = homeDisplay(of: window.id),
-                let home = workspaces.space(of: window.id)
-            else {
+            guard let area = homeArea(of: window.id) else {
                 return workspaces.activeSpace
             }
-            // Its home Space's own area on a split screen (#3517).
-            return workspaces.activeSpace(inAreaOf: home, on: display)
+            return workspaces.activeSpace(on: area)
         }
     }
 
@@ -90,13 +87,22 @@ extension StateCoordinator {
         stickyRenderSpace(of: window) ?? workspaces.space(of: window.id)
     }
 
-    /// Display assigned to a window's home space (#445) — the one
-    /// primitive the "home display = display of home space"
-    /// invariant rests on, shared so `stickyRenderSpace`,
-    /// `stickyExemptFromStash` and the move guard cannot drift.
+    /// Display assigned to a window's home space (#445); the move
+    /// guard's screen half. `homeArea(of:)` below is the area the
+    /// render, the stash exemption and the guard share, so they
+    /// cannot drift (#3517).
     func homeDisplay(of window: WindowID) -> DisplayID? {
         workspaces.space(of: window)
             .flatMap { workspaces.display(of: $0) }
+    }
+
+    /// The area a window's home space lays out in — a screen's one
+    /// area where it is not split (#3517): what a screen-sticky
+    /// window renders in, is exempt from the stash in and moves
+    /// out of.
+    func homeArea(of window: WindowID) -> PlacementID? {
+        workspaces.space(of: window)
+            .flatMap { workspaces.placement(of: $0) }
     }
 
     /// Whether the stash parks `window` while `space` is not shown —
@@ -125,9 +131,9 @@ extension StateCoordinator {
         case .global:
             return true
         case .display:
-            guard let homeDisplay = homeDisplay(of: window.id)
-            else { return true }
-            return workspaces.display(of: space) == homeDisplay
+            // Its home area, as it renders (#3517).
+            guard let home = homeArea(of: window.id) else { return true }
+            return workspaces.placement(of: space) == home
         }
     }
 

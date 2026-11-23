@@ -11,7 +11,7 @@ struct SpaceHistoryState {
     /// The areas the focus arrived in — a screen's one area where it
     /// is not split — newest first, for `focus_display_last`
     /// (#2512, #3517); session-only, and no setting governs it.
-    var screens: [PlacementID] = []
+    var areas: [PlacementID] = []
 
     var kind: SpaceHistoryKind { profileOverride ?? base }
 }
@@ -41,9 +41,9 @@ extension KiwiCore {
         if let active = state.workspaces.activeSpace {
             spaceHistory.trails.visit(active, under: .allScreens)
         }
-        if let here = focusedPlacement, spaceHistory.screens.first != here {
-            spaceHistory.screens.removeAll { $0 == here }
-            spaceHistory.screens.insert(here, at: 0)
+        if let here = focusedPlacement, spaceHistory.areas.first != here {
+            spaceHistory.areas.removeAll { $0 == here }
+            spaceHistory.areas.insert(here, at: 0)
         }
     }
 
