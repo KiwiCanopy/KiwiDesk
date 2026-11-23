@@ -69,13 +69,13 @@ struct LayoutUndoDoorTests {
         let core = makeCore()
         let start = order(core)
         let frame = startDrag(core)
-        #expect(core.layoutHistory.gestures[WindowID(1)] != nil)
+        #expect(core.layoutHistory.owners.contains(.gesture(WindowID(1))))
         // The drop's own reorder, made inside the open bracket.
         core.state.workspaces.withSpace(one) {
             $0.move(WindowID(1), to: 2)
         }
         core.drag.onDragEnd(WindowID(1), frame, frame)
-        #expect(core.layoutHistory.gestures.isEmpty)
+        #expect(core.layoutHistory.owners.isEmpty)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(core) == start)
     }
@@ -86,7 +86,7 @@ struct LayoutUndoDoorTests {
         _ = startDrag(core)
         core.execute("swap", args: [.string("right")])
         core.cancelDrag(WindowID(1))
-        #expect(core.layoutHistory.gestures.isEmpty)
+        #expect(core.layoutHistory.owners.isEmpty)
         #expect(!core.execute("undo_layout").isSuccess)
     }
 

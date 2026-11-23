@@ -4366,13 +4366,14 @@ of a layout's size adjustments (`.claude/rules/config-vocabulary.md`
 per Space (#3515).** A step stores every Space it touched before
 and after, its sizes read through the session layer and filed
 under its Desktop and arrangement key. Undo acts only while those
-Spaces still equal the step's after, so any change no bracket saw
-— a window opening, a Desktop switch, a profile apply, a tab
-rekey, a config load — fails the comparison and clears the
-history by itself, and a step whose own key changed is never
-recorded. No clear is hooked into those paths, and a new path
-that changes an arrangement needs none; a new user act that
-should be undoable opens a bracket. Undo refuses rather than
+Spaces still equal the step's after, so a change no bracket saw —
+a window opening or closing, a Desktop switch, a profile apply, a
+tab rekey — fails the comparison and clears the history by
+itself, and a step whose own key changed is never recorded. None
+of those paths carries a clear; the two that do clear explicitly
+are a config load, which runs as a bracket that may not be undone,
+and a Space renumbered or dropped, whose steps name an id that is
+gone. A new user act that should be undoable opens a bracket. Undo refuses rather than
 skipping past the change, because reverting under a state the
 step never saw would write an arrangement nobody had. The history
 is per Space because `⌃⌥Z` should take back what is in front of

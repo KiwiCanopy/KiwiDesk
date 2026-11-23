@@ -29,7 +29,9 @@ editing here:
   end (#1655).** One keyed by `SpaceID` rekeys where a held Space
   is renumbered (`moveMembers`) and forgets in the one Space drop,
   `forwardWindows(of:to:)`; the Space history's trails are the
-  instance (`SpaceDropHookNeedleTests`). A verb walking that
+  instance (`SpaceDropHookNeedleTests`). The one ruled exception
+  is the layout undo stacks, which clear at both instead (the
+  bullet below). A verb walking that
   history resolves its trail, shown Space and reachability through
   the one `spaceHistoryWalk()`, and a toggle reads the trail's
   `left`, never the entry behind the cursor (#3206,
@@ -40,12 +42,10 @@ editing here:
   holds the return; a rekey added there is review's, since the
   apply's wholesale settings replace would hide it).
 - **A user act that changes a Space's arrangement runs inside a
-  layout undo bracket (#3515).** `execute`, a key's fire and its
-  glide, a drag from its first move to its end and the App Bar
-  reorder open one (`recordingLayoutStep`, or the gesture and glide
-  brackets in `KiwiCore+LayoutHistory`); a new door that rearranges
-  without `execute` opens one too, or its change reads as
-  unrecorded and clears that Space's history. A rewrite no user
+  layout undo bracket (#3515)** — `recordingLayoutStep`, or the
+  gesture and glide brackets in `KiwiCore+LayoutHistory`. A door
+  that rearranges without `execute` opens one, or its change reads
+  as unrecorded and clears that Space's history. A rewrite no user
   chose — a config load — takes `undoable: false`, which clears
   rather than records. The undo stacks are a per-Space store that
   CLEARS at `moveMembers` and `forwardWindows(of:to:)` rather than

@@ -67,12 +67,12 @@ struct LayoutUndoEdgeTests {
         let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
         core.drag.isMousePressed = { true }
         core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
-        #expect(!core.layoutHistory.gestures.isEmpty)
+        #expect(!core.layoutHistory.owners.isEmpty)
         // The coordinator's own cancel, not `cancelDrag`'s.
         core.drag.cancel(WindowID(1))
         let start = order(core)
         swap(core)
-        #expect(core.layoutHistory.gestures.isEmpty)
+        #expect(core.layoutHistory.owners.isEmpty)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(core) == start)
     }
@@ -85,7 +85,7 @@ struct LayoutUndoEdgeTests {
         core.keys.holdGlide.isGliding = false
         let start = order(core)
         swap(core)
-        #expect(core.layoutHistory.glide == nil)
+        #expect(core.layoutHistory.owners.isEmpty)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(core) == start)
     }
@@ -110,7 +110,7 @@ struct LayoutUndoEdgeTests {
         #expect(pressed != start)
         // The glide, through its own wiring: frames, then the end.
         core.keys.holdGlide.isGliding = true
-        now = now.addingTimeInterval(0.5)
+        now = now.addingTimeInterval(KiwiCore.layoutUndoQuietGap + 0.5)
         #expect(core.keys.holdGlide.applyGlideStep("resize", grow, 1))
         #expect(core.keys.holdGlide.applyGlideStep("resize", grow, 1))
         now = now.addingTimeInterval(3)
@@ -124,26 +124,34 @@ struct LayoutUndoEdgeTests {
     }
 
     @Test("a config load inside a step clears it")
-    func configLoadClears() {
+    func configLoadClears() throws {
         let core = makeCore()
         // Control: the same step without the load is undoable.
         core.recordingLayoutStep("key a") { swap(core) }
         #expect(core.execute("undo_layout").isSuccess)
+        // A load whose change alone would be undoable: the step
+        // clears because a config load ran inside it.
+        try writeStackConfig(core)
         core.recordingLayoutStep("key b") {
             swap(core)
             core.loadConfig()
         }
+        #expect(core.state.workspaces[one]?.mode == .stack)
         #expect(!core.execute("undo_layout").isSuccess)
     }
 
-    @Test("a config load alone records nothing undoable")
-    func configLoadRecordsNothing() throws {
-        let core = makeCore()
+    private func writeStackConfig(_ core: KiwiCore) throws {
         try "KiwiDesk.set_mode(\"1\", \"stack\")\n".write(
             to: core.configDirectory.appendingPathComponent("init.lua"),
             atomically: true,
             encoding: .utf8
         )
+    }
+
+    @Test("a config load alone records nothing undoable")
+    func configLoadRecordsNothing() throws {
+        let core = makeCore()
+        try writeStackConfig(core)
         core.loadConfig()
         #expect(core.state.workspaces[one]?.mode == .stack)
         #expect(
@@ -191,5 +199,79 @@ struct LayoutUndoEdgeTests {
         core.state.windows.setFullscreen(WindowID(1), true)
         #expect(!core.execute("undo_layout").isSuccess)
         #expect(core.state.workspaces.space(of: WindowID(1)) == two)
+    }
+
+    @Test("a glide that ends inside a command records once it unwinds")
+    func glideEndingInsideACommand() {
+        let core = makeCore()
+        let start = order(core)
+        core.keys.holdGlide.isGliding = true
+        core.beginLayoutGlide()
+        core.recordingLayoutStep("frame") {
+            swap(core)
+            // A refusal cue mid-frame ends the hold here.
+            core.keys.holdGlide.isGliding = false
+            core.endLayoutGlide()
+            core.execute("set_mode", args: [.string("stack")])
+        }
+        #expect(core.layoutHistory.pending == nil)
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(order(core) == start)
+        #expect(core.state.workspaces[one]?.mode == .bsp)
+        #expect(
+            core.layoutHistory.history.candidate(.undo, of: one) == .empty
+        )
+    }
+
+    @Test("a new press during a hold is a step of its own")
+    func pressEndsTheHold() {
+        let core = makeCore()
+        core.keys.holdGlide.isGliding = true
+        core.beginLayoutGlide()
+        swap(core)
+        core.keys.firePress(id: nil, label: "key s") {
+            core.execute("set_mode", args: [.string("stack")])
+        }
+        core.keys.holdGlide.isGliding = false
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(core.state.workspaces[one]?.mode == .bsp)
+        let left = core.layoutHistory.history.candidate(.undo, of: one)
+        guard case .ready = left else {
+            Issue.record("the hold's swap was merged into the press")
+            return
+        }
+    }
+
+    @Test("an undo inside an abandoned drag leaves the next step")
+    func abandonedDragLeavesNothing() {
+        let core = makeCore()
+        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
+        core.drag.isMousePressed = { true }
+        core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
+        _ = core.execute("undo_layout")
+        core.cancelDrag(WindowID(1))
+        #expect(core.layoutHistory.pending == nil)
+        let start = order(core)
+        swap(core)
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(order(core) == start)
+    }
+
+    @Test("a drop runs inside its drag's step after the gesture ends")
+    func dropRunsInsideTheStep() {
+        let core = makeCore()
+        let start = order(core)
+        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
+        core.drag.isMousePressed = { true }
+        core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
+        // The coordinator forgets the gesture before its drop runs.
+        core.drag.cancel(WindowID(1))
+        core.endLayoutGesture(WindowID(1)) {
+            swap(core)
+            core.execute("set_mode", args: [.string("stack")])
+        }
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(order(core) == start)
+        #expect(core.state.workspaces[one]?.mode == .bsp)
     }
 }

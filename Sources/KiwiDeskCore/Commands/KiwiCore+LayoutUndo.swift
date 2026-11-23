@@ -2,10 +2,9 @@ import Foundation
 
 /// `undo_layout` and `redo_layout` (#3515): take the active
 /// Space's last step back, or again. A step acts only while every
-/// Space it names still equals the state it left and every window
-/// it moves back may move; otherwise the change in between went
-/// unrecorded, so those Spaces' history is cleared and the press
-/// refuses.
+/// Space it names still equals the state it left and the move verb
+/// takes every window back; otherwise those Spaces' history is
+/// cleared and the press refuses.
 extension KiwiCore {
     static let undoLayoutCommand = "undo_layout"
     static let redoLayoutCommand = "redo_layout"
@@ -22,7 +21,7 @@ extension KiwiCore {
             return .fail("no active space")
         }
         // An enclosing bracket must not record this as a new step.
-        if layoutHistory.isOpen { layoutHistory.tookStep = true }
+        noteLayoutStepTaken()
         let word = stack == .undo ? "undo" : "redo"
         switch layoutHistory.history.candidate(stack, of: active) {
         case .empty:
@@ -43,8 +42,12 @@ extension KiwiCore {
                         + "history cleared"
                 )
             }
-            guard !movesRefused(to) else {
+            // The move verb decides; a window it refused leaves its
+            // Space's members wrong, and nothing else is written.
+            moveBack(to)
+            guard membersMatch(to) else {
                 step.spaces.forEach { layoutHistory.history.clear($0) }
+                retile(animated: true)
                 return refuseLayoutStep(
                     "a window this step moves back cannot change "
                         + "Space now; history cleared"
@@ -62,41 +65,39 @@ extension KiwiCore {
         return .fail(reason)
     }
 
-    /// Whether a window `target` files elsewhere may not go back:
-    /// the move verb's own refusals, asked before anything is
-    /// written.
-    private func movesRefused(
-        _ target: [SpaceID: SpaceArrangement]
-    ) -> Bool {
-        target.contains { space, arrangement in
-            arrangement.windows.contains { window in
-                guard state.workspaces.space(of: window) != space
-                else { return false }
-                return spaceMoveBlock(window) != nil
-                    || stickyMoveRefused(window, to: space)
-            }
-        }
-    }
-
-    /// Writes `target` back over `current`: a window that moved
-    /// between Spaces goes back through the move verb first, then
-    /// each Space takes its mode, order and sizes, in one pass that
-    /// names any Maximize the reorder ended.
-    private func restoreArrangements(
-        _ target: [SpaceID: SpaceArrangement],
-        from current: [SpaceID: SpaceArrangement]
-    ) {
+    /// Files each window `target` names back into its Space
+    /// through the move verb, which owns every refusal.
+    private func moveBack(_ target: [SpaceID: SpaceArrangement]) {
         for (space, arrangement) in target {
             for window in arrangement.windows
             where state.workspaces.space(of: window) != space {
                 moveWindow(window, to: space, follow: false)
             }
         }
+    }
+
+    /// Whether every Space `target` names holds its members now.
+    private func membersMatch(
+        _ target: [SpaceID: SpaceArrangement]
+    ) -> Bool {
+        target.allSatisfy { space, arrangement in
+            state.workspaces[space].map {
+                Set($0.windows) == Set(arrangement.windows)
+            } ?? false
+        }
+    }
+
+    /// Writes `target` back over `current`, its members already
+    /// home: each Space takes its mode, order and sizes, in one pass
+    /// that names any Maximize the reorder ended.
+    private func restoreArrangements(
+        _ target: [SpaceID: SpaceArrangement],
+        from current: [SpaceID: SpaceArrangement]
+    ) {
         var ended: Set<WindowID> = []
         for (space, arrangement) in target {
-            guard let live = state.workspaces[space],
-                Set(live.windows) == Set(arrangement.windows)
-            else { continue }
+            // `membersMatch` held for every Space before this runs.
+            guard let live = state.workspaces[space] else { continue }
             if let filled = state.handMaximizedWindow(of: live) {
                 ended.insert(filled)
             }
