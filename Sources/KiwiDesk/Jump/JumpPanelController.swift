@@ -54,6 +54,9 @@ final class JumpPanelController: NSObject {
     /// The screen the panel opened on: its list's "here" and Move
     /// here's target are the Space it shows (#2791).
     private(set) var hubDisplay: DisplayID?
+    /// The field row's centre and top this opening placed it at,
+    /// which every refit holds (#3570).
+    private(set) var anchor = CGPoint.zero
 
     /// A scope's own shortcut (#2229).
     func toggle(_ scope: JumpScope = .windows) {
@@ -88,20 +91,19 @@ final class JumpPanelController: NSObject {
         pickerSpace = core.layoutPickerSpace()
         hubDisplay = core.jumpDisplay()
         let visible =
-            screen?.visibleFrame
-            ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
+            screen?.visibleFrame ?? Self.fallbackVisible
         let area = Self.clearArea(
             visible: visible,
             shelves: core.shelfFrames()
         )
         let snapshot = core.jumpSnapshot(on: hubDisplay)
-        let width = Self.width(visibleWidth: area.width)
+        let room = Self.room(visible: visible, area: area)
+        let width = room.fieldWidth
         let model = JumpModel(
             snapshot: snapshot,
             icons: Self.icons(for: snapshot),
             rowCap: Self.rowCap,
-            sheetCap: Self.sheetCap(visible: visible, area: area),
-            panelWidth: width,
+            room: room,
             modifiers: NSEvent.modifierFlags
         )
         // The chord that opened the panel is still held (#3168).
@@ -127,6 +129,7 @@ final class JumpPanelController: NSObject {
             rootView: LocaleScopedRoot { root }
                 .environmentObject(LocalizationManager.shared)
         )
+        hosting.sizingOptions = Self.hostingSizing
         // A field editor left by the last opening would keep the
         // keys from the new content's field.
         panel.makeFirstResponder(nil)
@@ -135,16 +138,11 @@ final class JumpPanelController: NSObject {
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
         if screen != nil {
-            panel.setFrameOrigin(
-                Self.origin(
-                    size: panel.frame.size,
-                    visible: visible,
-                    area: area
-                )
-            )
+            panel.setFrameOrigin(room.origin(of: panel.frame.size))
         } else {
             panel.center()
         }
+        anchor = CGPoint(x: panel.frame.midX, y: panel.frame.maxY)
         let front = PanelHandBack.frontmostBundleID()
         let rows = snapshot.entries.count
         jumpLog.log(
@@ -161,6 +159,8 @@ final class JumpPanelController: NSObject {
     func settingsChanged(_ settings: TilingSettings) {
         guard !presence.leaving else { return }
         currentModel?.settings = settings
+        // The panel sizes only through its refit (#3570).
+        DispatchQueue.main.async { [weak self] in self?.refit() }
     }
 
     /// Closes the panel. No close arms the dismiss distrust: the
@@ -312,6 +312,9 @@ final class JumpPanelController: NSObject {
         }
         // The next turn: the hosting view has not re-laid the new
         // results out in the setter's own.
+        // The height follows the results at once, its top held: an
+        // animated resize holds the run loop, which would hold the
+        // next keystroke (#3570).
         model.onResultsChange = { [weak self] in
             DispatchQueue.main.async { self?.refit() }
         }

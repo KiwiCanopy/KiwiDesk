@@ -2321,7 +2321,9 @@ a new container on that line joins `KeySequenceIndentTests` ▸
 amended by #3424): the badges against a divider, the chords at the
 list's widest, so every section's divider sits at one x. A list
 with no gesture keeps no badge column, and a list laid out in
-side-by-side visual columns sizes each visual column instead. A new
+side-by-side visual columns sizes each visual column instead, and
+a section with no chord keeps no chord slot or divider
+(`ShortcutSectionChordSlotTests`). A new
 host of such a list applies it, and
 a row with no columns in its environment is a lone row, such as the
 hint panel's branch rows (`ShortcutGestureColumnsTests` ▸
@@ -2358,6 +2360,22 @@ Desktop list included — takes the same door
 `controllerPassesTheRepeat`); the argument is
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
+
+## KiwiHub sizes in the rect it fits (#3570)
+
+**A KiwiHub width, height or place is asked of `JumpPanelRoom`,
+built from the rect the panel fits — a screen's clear area or a
+screen area's (#3572) — never of `NSScreen` beside it**, and a
+side's size rule is `JumpPanelRoom.fit(of:)`, never a scope test
+of its own (`JumpPanelRoomTests`). A refit sizes around the field
+row's opening anchor, never the frame's left edge, so the panel's
+top never moves on ⇥ (`JumpPanelShapeTests` ▸ `refitHoldsTheAnchor`),
+and the field row rides the panel's edges with no animation of its
+own (`JumpFieldRowTests`);
+a side's rendered width and height stay inside its own limits
+(`JumpPanelCeilingTests`). A metric the Shortcuts column plan
+estimates is read from `ShortcutsSheetView`'s statics the drawing
+uses, never a literal beside them (`ShortcutsSheetEstimateTests`).
 
 ## A KiwiHub scroll settles after the entrance (#3203)
 

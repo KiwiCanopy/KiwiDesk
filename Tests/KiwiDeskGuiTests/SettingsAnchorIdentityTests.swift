@@ -125,7 +125,7 @@ struct SettingsAnchorIdentityTests {
         // Scroll identity: Jump to window scrolls its selected
         // row into view (#1875). Not a Settings destination, so
         // nothing there is a reveal target.
-        "JumpPanelView.swift": 1,
+        "JumpPanelView+List.swift": 1,
         // Scroll identity: Add binding scrolls the Shortcuts page
         // to its end, past the floating save pill (#2688), and a
         // segment pick to its top (#3184). Not reveal targets —

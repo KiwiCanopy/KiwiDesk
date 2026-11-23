@@ -252,7 +252,7 @@ struct JumpStaleModifierTests {
         #expect(row.contains("JumpPick.of(pickModifiers())"))
         #expect(!row.contains("JumpPick.of(NSEvent.modifierFlags)"))
         #expect(
-            try squash("JumpPanelView.swift").contains(
+            try squash("JumpPanelView+List.swift").contains(
                 "pickModifiers:{model.pickModifiers(NSEvent.modifierFlags)}"
             )
         )

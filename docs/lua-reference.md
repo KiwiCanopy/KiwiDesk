@@ -5856,8 +5856,13 @@ Out of the box these are bound:
 | `swipe4` | ⌃⌥ | `display` |
 | `rotate` | ⌃⌥ | `layout` |
 | `spread` | ⌃⌥ | Toggle maximized ([`toggle_maximized`](#toggle_maximized)) |
-| `pinch_together` | ⌃⌥ | The Desktop overview |
+| `pinch_together` | ⌃⌥ | Toggle floating ([`toggle_floating`](#toggle_floating)) |
 | `pinch_together4` | ⌃⌥ | The window switcher |
+
+:::unreleased
+⌃⌥ pinch together toggles floating. A pinch row set to another
+action keeps it.
+:::
 
 `hover_move`, the clicks and the side buttons are unbound. In a
 setup the Settings app manages, with Settings ▸ Shortcuts ▸
@@ -8120,6 +8125,17 @@ live glance at the active layer's bindings.
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
 
+:::unreleased
+A list too long for one column above the screen's bottom splits
+into as many columns as the screen holds, up to three, read down
+each column in turn, the earlier columns never shorter, with
+**Unavailable shortcuts** across the whole panel below them while
+a search matches it. A section may go on in the next column
+under its title again. The panel's width and its columns are set
+when the side opens; typing moves rows between the same columns
+and changes only the height. The columns scroll together.
+:::
+
 The panel also lists every bound [gesture](#gesture-actions), once
 each. A gesture whose action has a row is a badge on that row: the
 most specific first — a trackpad gesture before a mouse one, then
@@ -8127,6 +8143,11 @@ the fewest keys, then a swipe before other gestures, then the
 fewest fingers — and the rest behind **+N**, which names them on
 hover. Every other gesture is a row under **Gestures**. Typing a
 gesture's name finds its row and brings that badge to the front.
+
+:::unreleased
+Gestures that run the same action share one row under
+**Gestures**, wearing each badge.
+:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every
@@ -8194,7 +8215,7 @@ A modifier still held from the shortcut that opened KiwiHub, or
 from a step of `kiwihub.show_last_app`, counts for nothing until
 you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 
-The `"view"` side is the **view picker**, three lines in one
+The `"view"` side is the **view picker**, up to three lines in one
 panel, the current item on each marked ✓.
 
 - **Layout** — a tile per layout for the Space shown on the screen
@@ -8216,6 +8237,12 @@ panel, the current item on each marked ✓.
   KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
   Lua-owned setup greys it.
 
+:::unreleased
+The **Profile** line, **Save as New Profile…** with it, shows only
+while two or more profiles are saved; **↑** and **↓** then step from
+Layout to KiwiVision.
+:::
+
 Keys on this side:
 
 - **←** and **→**, or moving the mouse over an item, move along a
@@ -8223,7 +8250,7 @@ Keys on this side:
   clamped to a shorter line. A line longer than the panel scrolls
   sideways.
 
-- Typing narrows all three lines, dimming the rest, and selects
+- Typing narrows every line, dimming the rest, and selects
   the first match.
 - **Return** applies the selected item and closes KiwiHub.
   **⌘1** … **⌘9** apply the line's items by position, counted

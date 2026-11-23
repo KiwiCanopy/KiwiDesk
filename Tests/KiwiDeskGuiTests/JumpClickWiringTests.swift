@@ -17,7 +17,9 @@ struct JumpClickWiringTests {
 
     @Test("a click takes the select-then-act doors")
     func clicksSelectFirst() throws {
-        let panel = try Self.squashed("JumpPanelView.swift")
+        let panel =
+            try Self.squashed("JumpPanelView.swift")
+            + Self.squashed("JumpPanelView+List.swift")
         #expect(
             panel.contains(
                 "onActivate:{pickinmodel.clickRow(index,pick:pick)}"
@@ -40,7 +42,9 @@ struct JumpClickWiringTests {
 
     @Test("the lift is handed the item's real selection")
     func liftReadsTheSelection() throws {
-        let panel = try Self.squashed("JumpPanelView.swift")
+        let panel =
+            try Self.squashed("JumpPanelView.swift")
+            + Self.squashed("JumpPanelView+List.swift")
         #expect(
             panel.contains(
                 "isLifted:JumpHover.lifts(.row(index),hover:model.hover,"
@@ -109,7 +113,9 @@ struct JumpClickWiringTests {
                 "\(file)"
             )
         }
-        let panel = try Self.squashed("JumpPanelView.swift")
+        let panel =
+            try Self.squashed("JumpPanelView.swift")
+            + Self.squashed("JumpPanelView+List.swift")
         #expect(panel.contains("onHoverEnd:{model.endHover(.row(index))}"))
         #expect(panel.contains("onHoverEnd:{model.endHover(.item($0))}"))
         let side = try Self.squashed("JumpViewSide.swift")

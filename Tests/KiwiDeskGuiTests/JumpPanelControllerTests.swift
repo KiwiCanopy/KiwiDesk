@@ -11,40 +11,23 @@ import Testing
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
-    @Test("the panel keeps its width, narrowed on a small screen")
-    func width() {
-        let full = JumpPanelView.width
-        #expect(JumpPanelController.width(visibleWidth: 3000) == full)
-        // A narrow screen keeps the panel clear of both edges.
-        let narrow = JumpPanelController.width(visibleWidth: 600)
-        #expect(narrow < 600 && narrow < full)
-    }
-
     /// Spotlight's height rather than the screen's middle (owner
     /// eyeball, 2026-10-13): the top sits a quarter down and stays
-    /// there for every panel height that fits.
+    /// there for every panel height, never lifted (#3570).
     @Test("the panel's top sits at Spotlight's height")
     func origin() {
         let visible = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        let room = JumpPanelController.room(visible: visible, area: visible)
         let top: CGFloat =
             visible.maxY - visible.height
             * JumpPanelController.topFraction
-        for height: CGFloat in [200, 400] {
-            let size = CGSize(width: 640, height: height)
-            let origin = JumpPanelController.origin(
-                size: size,
-                visible: visible
+        for height: CGFloat in [200, 400, 900] {
+            let origin = room.origin(
+                of: CGSize(width: 640, height: height)
             )
             #expect(origin.x == 480)
             #expect(origin.y + height == top)
         }
-        // A panel taller than the room below that top is lifted
-        // rather than run off the screen.
-        let tall = JumpPanelController.origin(
-            size: CGSize(width: 640, height: 900),
-            visible: visible
-        )
-        #expect(tall.y == visible.minY)
     }
 
     /// A scope's own shortcut (#2229): closes where it shows,

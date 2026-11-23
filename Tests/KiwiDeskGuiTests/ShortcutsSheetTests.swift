@@ -53,8 +53,7 @@ struct ShortcutsSheetTests {
         #expect(sheet.shown?.controls.map(\.title) == ["Focus"])
         LocalizationManager.shared.select("en")
         let shown = try! #require(sheet.shown)
-        let view = ShortcutsSheetView(reference: shown, needle: "above")
-        #expect(view.sections(shown).map(\.title) == ["Focus"])
+        #expect(ShortcutsSheetView.sections(shown).map(\.title) == ["Focus"])
     }
 
     @Test("an empty query shows the whole sheet")
@@ -71,20 +70,29 @@ struct ShortcutsSheetTests {
         #expect(ShortcutsSheet.matchRange(of: "", in: "Safari") == nil)
     }
 
+    /// Unavailable shows only under a query that matches it (owner,
+    /// 2026-11-23).
     @Test("the column reads Controls, Apps, Personal, Inactive, Unavailable")
     func sectionOrder() {
         LocalizationManager.shared.select("en")
-        let view = ShortcutsSheetView(reference: Self.reference, needle: "")
-        let titles = view.sections(Self.reference).map(\.title)
+        let titles = ShortcutsSheetView.sections(Self.reference).map(\.title)
         #expect(
             titles == [
                 "Focus", "Move windows", "Apps", "Personal",
-                "Inactive shortcuts", "Unavailable shortcuts",
+                "Inactive shortcuts",
             ]
         )
+        var sheet = ShortcutsSheet(reference: Self.reference)
+        sheet.setQuery("go to")
+        let searched = ShortcutsSheetView.sections(
+            try! #require(sheet.shown),
+            needle: sheet.needle
+        )
+        #expect(searched.map(\.title).last == "Unavailable shortcuts")
+        #expect(searched.last?.closes == true)
         // Only Inactive dims as a section; an unavailable row
         // dims itself.
-        let dimmed = view.sections(Self.reference).filter(\.dims)
+        let dimmed = ShortcutsSheetView.sections(Self.reference).filter(\.dims)
         #expect(dimmed.map(\.title) == ["Inactive shortcuts"])
     }
 

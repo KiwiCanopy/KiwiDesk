@@ -20,9 +20,14 @@ struct KeySequenceHintPlacementTests {
     @Test("The panel stands at KiwiHub's place, never re-centred")
     func kiwiHubsPlace() throws {
         let draw = try Self.source("Shortcuts/KeySequenceHintController.swift")
-        #expect(draw.contains("origin:JumpPanelController.origin("))
+        #expect(draw.contains("letroom=JumpPanelController.room("))
+        #expect(draw.contains("origin:room.origin(of:size)"))
         #expect(draw.contains("JumpPanelController.clearArea("))
-        #expect(draw.contains("sheetCap:JumpPanelController.sheetCap("))
+        #expect(
+            draw.contains(
+                "sheetCap:JumpPanelController.sheetCap(in:room,.compact)"
+            )
+        )
         // Never re-centred, under any spelling.
         let body = try #require(
             SourceScan.declarationBody(
