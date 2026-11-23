@@ -99,6 +99,8 @@ extension SnapshotStoreCensusTests {
             (.behind, "paid at the retile after the drop (#1827)"),
         "spaceHistory.trails.trails[].visits":
             (.behind, "the Space history starts fresh, by ruling (#1655)"),
+        "spaceHistory.areas":
+            (.behind, "the focus-last list starts fresh, as the history does"),
         "state.profilePartitioning.byArrangement[]":
             (
                 .always,
