@@ -46,22 +46,30 @@ extension KiwiCore {
         return OverviewGrouping(spaces: spaces, areas: areas)
     }
 
-    /// The Spaces a hidden Desktop of `display` returns to: its
-    /// cursor's, and on a split screen each other area's as the
-    /// switch will show it (`areaSpaceTargets`, #3517 ruling 17).
+    /// The Spaces a hidden Desktop of `display` returns to, as the
+    /// switch resolves them: the screen's cursor target
+    /// (`virtualSpaceTarget`), and on a split screen each other
+    /// area's (`areaSpaceTargets`, #3517 ruling 17).
     func returningSpaces(
         of native: SkyLight.SpaceID,
         on display: DisplayID,
         in snapshot: DesktopSnapshot
     ) -> Set<SpaceID> {
-        let cursor = rememberedVirtualSpace(of: native, in: snapshot)
-        var spaces = Set(cursor.map { [$0] } ?? [])
-        guard let desktop = snapshot.key(of: native) else { return spaces }
+        guard let desktop = snapshot.key(of: native) else {
+            let cursor = rememberedVirtualSpace(of: native, in: snapshot)
+            return Set(cursor.map { [$0] } ?? [])
+        }
+        let lead = virtualSpaceTarget(
+            for: desktop,
+            among: state.workspaces.spaces(on: display),
+            in: snapshot
+        )
+        var spaces = Set(lead.map { [$0] } ?? [])
         for (_, space) in areaSpaceTargets(
             on: display,
             arriving: desktop,
             in: snapshot,
-            except: cursor.flatMap { state.workspaces.placement(of: $0) }
+            except: lead.flatMap { state.workspaces.placement(of: $0) }
         ) {
             spaces.insert(space)
         }

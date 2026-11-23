@@ -75,6 +75,25 @@ struct JumpHereAreaTests {
         #expect(core.jumpArea() == nil)
     }
 
+    /// An unsplit screen's area is its AX visible frame, flipped to
+    /// Cocoa; the split path reads a real screen and is not driven.
+    @Test("an unsplit area's frame is its screen's, in Cocoa")
+    func unsplitFrameIsFlipped() throws {
+        let (core, _) = makeCore()
+        let rect = CGRect(x: 0, y: 25, width: 100, height: 75)
+        core.tiler.displayFrames = { [(DisplayID(1), rect)] }
+        let lead = try #require(
+            core.state.workspaces.leadPlacement(of: DisplayID(1))
+        )
+        #expect(
+            core.visibleFrame(of: lead)
+                == GeometryUtils.flip(
+                    rect,
+                    primaryHeight: GeometryUtils.primaryHeight
+                )
+        )
+    }
+
     @Test("Move here from the right area files into its Space")
     func moveHereFilesIntoTheArea() throws {
         let (core, areas) = makeCore()

@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import KiwiDeskCore
 import Testing
@@ -261,33 +262,6 @@ struct DesktopsGeometryTests {
         #expect(last.offset(place) == 3)
     }
 
-    @Test("the model hands the state the side's slots")
-    func modelWiresTheSlots() {
-        let model = JumpModel(
-            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
-            icons: [:],
-            rowCap: 9,
-            sheetCap: Self.cap,
-            panelWidth: 600
-        )
-        model.loadDesktops = { T.overview() }
-        model.setScope(.desktops)
-        let expected = G(
-            overview: T.overview(),
-            width: 600,
-            cap: Self.cap
-        ).slots
-        #expect(model.desktops?.geometry.slots == expected)
-        #expect(
-            expected
-                != G(
-                    overview: T.overview(),
-                    width: JumpPanelView.width,
-                    cap: Self.cap
-                ).slots
-        )
-    }
-
     @Test("one geometry, from the panel's width, reaches the side")
     func widthIsWired() throws {
         let jump = URL(fileURLWithPath: #filePath)
@@ -331,7 +305,13 @@ struct DesktopsGeometryTests {
         let model = try read("JumpModel+Desktops.swift")
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")
-        #expect(model.contains("width:panelWidth,cap:sheetCap"))
+        #expect(
+            model.contains(
+                "content:DesktopsGeometry.preferredWidth(of:overview))"
+                    + "letgeometry=DesktopsGeometry("
+                    + "overview:overview,width:width,cap:sheetCap)"
+            )
+        )
         #expect(model.contains("geometry:geometry)"))
     }
 }

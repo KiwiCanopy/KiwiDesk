@@ -129,6 +129,20 @@ struct DesktopOverviewAreaTests {
         )
     }
 
+    /// Nothing filed: the switch takes a free Space for the lead
+    /// area and a free one for the other, and the card marks those.
+    @Test("a first visit marks the switch's free Spaces")
+    func firstVisitFollowsTheSwitch() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        let screen = try split(core.desktopOverview(on: areas[0]))
+        let card = try #require(screen.desktops.first { !$0.isShown })
+        #expect(
+            card.spaces.map(\.isShown) == [true, false, false, true]
+        )
+    }
+
     @Test("area ranges run in order and cover all but unfiled")
     func rangesCoverTheLines() throws {
         defer { resetAuthorityOverrides() }
