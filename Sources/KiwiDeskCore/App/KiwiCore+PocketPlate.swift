@@ -21,10 +21,15 @@ extension KiwiCore {
         shelfSettings(on: display).pocketRests(in: shownMode(on: display))
     }
 
-    /// The layout `display`'s shown Space is laid out in, or bsp
-    /// where it shows none.
+    /// The layout `display`'s lead area shows — where the Pocket
+    /// rests (#3517) — or bsp where it shows none.
     func shownMode(on display: DisplayID) -> LayoutMode {
-        shownMode(of: state.workspaces.currentSpace(on: display))
+        let workspaces = state.workspaces
+        return shownMode(
+            of: workspaces.leadPlacement(of: display).flatMap {
+                workspaces.activeSpace(on: $0)
+            } ?? workspaces.activeSpace(on: display)
+        )
     }
 
     /// The layout `shown` — a screen's or an area's shown Space —

@@ -91,10 +91,8 @@ extension KiwiCore {
         for id: SpaceID
     ) -> (live: LayoutMode, drifted: Bool, keepArmed: Bool)? {
         guard let space = state.workspaces[id] else { return nil }
-        let shown = state.workspaces.allDisplays.compactMap {
-            state.workspaces.activeSpace(on: $0.id)
-        }
-        let spaces = Array(Set(shown + [id]))
+        // Every area's shown Space (#3517).
+        let spaces = Array(state.workspaces.visibleSpaces.union([id]))
         let saved = savedModes(for: spaces)
         let drifted = { (space: SpaceID) in
             LayoutModeRows.drifted(

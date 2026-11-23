@@ -767,6 +767,60 @@ A screen this pin leaves with no space is seeded one — see
 KiwiDesk.pin_space_to_display("mail", 2)
 ```
 
+### set_display_areas
+
+:::unreleased
+**Expects:** a screen reference (same forms as
+`move_space_to_display`), then either nothing, or a direction —
+`"side_by_side"` or `"stacked"` — and one size in points per area,
+or, from Lua, a list of rects `{x=, y=, w=, h=}` in the screen's
+own points, each optionally with an `id` and a `name`.
+
+**Does:** splits one screen into areas, each with its own Spaces,
+its own App Bar and Space Bar and its own shown Space; with no
+sizes the screen is whole again. The sizes or rects must cover the
+screen exactly, with no gap or overlap, every cut running one
+direction, and no area under 100 points. An area keeps its id
+for good: a split keeps the id on the leading half, and a merge
+keeps area 0 when either side holds it. The split is stored per
+profile, beside the bars' per-screen edges.
+
+Once a screen is split, a screen argument —
+`move_space_to_display`, `pin_space_to_display` and the bars'
+per-screen edge and visibility verbs — also takes an area key, as
+`list_monitors` prints it in `areas[].key`, or an area's own name.
+A number or a screen's name names its first area, and for the bars'
+verbs every area of that screen. `focus_display` and
+`move_to_display` with a direction reach the nearest area that way.
+A macOS Desktop switch switches all of a screen's areas together.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.set_display_areas(1, "side_by_side", 1147, 1146, 1147)
+KiwiDesk.set_display_areas(1)                -- whole again
+```
+
+### set_display_area_name
+
+:::unreleased
+**Expects:** an area key, as `list_monitors` prints it in
+`areas[].key`, then a name.
+
+**Does:** names that area. Settings and the Space's Screen menu
+show the name in place of its position (Left, Middle, Right, Top,
+Bottom, or Area 1 onwards from four areas); an empty name goes
+back to the position. A name made only of digits, or one another
+area or screen already has, is refused.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.set_display_area_name("DELL U3423WE:3440x1440#1", "Calls")
+```
+
 ### create_space
 
 **Expects:** a space identifier, optionally a layout mode
@@ -10505,6 +10559,14 @@ included, from these two queries. A bar re-reads them on
 `space_change`, `desktop_change` and `monitor_change`.
 :::
 
+:::unreleased
+On a screen [split into areas](#set_display_areas) each space
+object also has `area`, the key of the area it sits in, as
+`list_monitors` prints it in `areas[].key`; `null` on a screen that
+is not split. Each area shows its own Space, so several Spaces with
+one `display` can be `shown` at once.
+:::
+
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
 [flip](#stacktoggle_stack_position) included.
@@ -10690,6 +10752,15 @@ its shown Space lays windows out in.
 It also reports `space_id`, the Space that screen shows (`null`
 while it shows none), the Space [`get_state`](#get_state) marks
 `shown` on that `display`.
+:::
+
+:::unreleased
+On a screen [split into areas](#set_display_areas), `areas` lists
+each area in reading order with its `key`, `name` (`null` for none
+given), `x`, `y`, `w` and `h` in the screen's own points, and
+`space_id`, the Space that area shows; the screen's own `space_id`
+is its first area's, or the focused Space where that sits in
+another area. On a screen that is not split, `areas` is empty.
 :::
 
 Each `list_windows` entry also carries `app`, `pid`, `index` (the

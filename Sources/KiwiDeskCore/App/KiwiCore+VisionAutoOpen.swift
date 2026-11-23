@@ -79,8 +79,9 @@ extension KiwiCore {
             AppWideSettings.sameLens($0, owed.lens)
         }
         let space = state.workspaces.space(of: window.id)
+        // Shown in its own area (#3517).
         let shown =
-            space.flatMap { state.workspaces.display(of: $0) }
+            space.flatMap { state.workspaces.placement(of: $0) }
             .map { state.workspaces.activeSpace(on: $0) == space }
             ?? (space == state.workspaces.activeSpace)
         guard focusedWindowID == owed.focus, !clicked, lensOn == true,

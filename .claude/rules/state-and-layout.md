@@ -200,14 +200,17 @@ editing here:
   back to area 0 (`AreaPinResolveTests`, `AreaArgumentTests`,
   `PlacementIdentityTests`). Stored splits reach the placement
   list through `syncAreaSplits` alone, which every write of
-  `display_areas` runs through `TilingEngine.onAreaSplits`, never
-  a call beside a settings install, and which feeds none while
-  `honoursAreaSplits` is lowered (`AreaSplitSyncTests`). A per-area
-  reader beside the placement list — a write's scope, a Settings
-  row — reads stored splits through the one
-  `KiwiCore.laidOutSplits(_:)`, the same gate, so nothing judges or
-  names an area nothing lays out (`AreaEdgeTests`); retiring the
-  flag retires that door with it. Which readers take it is review's.
+  `display_areas` runs through `TilingEngine.onAreaSplits` — a
+  config load and a profile apply included, since each installs
+  the settings whole — never a call beside a settings install
+  (`AreaSplitSyncTests`). A per-area reader beside the placement
+  list — a write's scope, a Settings row — reads the stored splits
+  it is handed (`AreaEdgeTests`). A reader asking which Space a
+  screen shows names the placement it means: the area a window,
+  the pointer or a bar sits in through `PlacementID`, the screen's
+  lead area through `leadPlacement(of:)` — the menu-bar Space mark
+  and the Pocket — and a `DisplayID` read only for a question about
+  the whole physical screen; which reader is which is review's.
   A Desktop stays the physical screen's (ruling 17): a switch
   files each area's shown Space under the Desktop left through
   `rememberAreaSpaces` and moves every other area of the screen

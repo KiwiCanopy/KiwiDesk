@@ -24,7 +24,7 @@ struct SpaceHistoryState {
 /// with the row-end bump the ⌃⌥⌘ + scroll step makes (#1519), and
 /// the order step wraps unless Wrap focus is Off (#2592).
 extension KiwiCore {
-    /// Records what every screen shows now, and what the focused
+    /// Records what every area shows now, and what the focused
     /// screen shows, as visits. Every arrival — a key, a click, a
     /// move-and-follow, a Desktop switch activating a bound
     /// profile's Space — reaches `emitSpaceChange` or a retile,
@@ -32,10 +32,10 @@ extension KiwiCore {
     func noteSpaceVisits() {
         let screens = state.workspaces.allDisplays.map(\.id)
         spaceHistory.trails.keepScreens(Set(screens))
-        for screen in screens {
-            guard let shown = state.workspaces.activeSpace(on: screen)
+        for area in state.workspaces.allPlacements.map(\.id) {
+            guard let shown = state.workspaces.activeSpace(on: area)
             else { continue }
-            spaceHistory.trails.visit(shown, under: .screen(screen))
+            spaceHistory.trails.visit(shown, under: .area(area))
         }
         if let active = state.workspaces.activeSpace {
             spaceHistory.trails.visit(active, under: .allScreens)
@@ -65,14 +65,16 @@ extension KiwiCore {
         shown: SpaceID?,
         reachable: (SpaceID) -> Bool
     )? {
-        let screen = focusedScreen
         let perScreen = spaceHistory.kind == .perScreen
         let key: SpaceHistory.Key
         let shown: SpaceID?
+        let area =
+            focusedPlacement
+            ?? focusedScreen.map(state.workspaces.placementOrWhole)
         if perScreen {
-            guard let screen else { return nil }
-            key = .screen(screen)
-            shown = state.workspaces.activeSpace(on: screen)
+            guard let area else { return nil }
+            key = .area(area)
+            shown = state.workspaces.activeSpace(on: area)
         } else {
             key = .allScreens
             shown = state.workspaces.activeSpace
@@ -80,15 +82,15 @@ extension KiwiCore {
         let workspaces = state.workspaces
         let reachable: (SpaceID) -> Bool = { space in
             workspaces[space] != nil
-                && (!perScreen || workspaces.display(of: space) == screen)
+                && (!perScreen || workspaces.placement(of: space) == area)
         }
         return (key, shown, reachable)
     }
 
     /// One step back (−1) or forward (+1) through the history the
     /// setting names: a cursor, never a visit. An entry whose
-    /// Space is gone — or, per screen, now lives on another
-    /// screen — is skipped.
+    /// Space is gone — or, per screen, now lives in another area
+    /// or screen — is skipped.
     func focusSpaceInHistory(by direction: Int) -> CommandResponse {
         noteSpaceVisits()
         guard let walk = spaceHistoryWalk() else {
@@ -135,14 +137,16 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The previous (−1) or next (+1) Space in the focused
-    /// screen's order — the Space Bar's, as the scroll step reads
-    /// it.
+    /// The previous (−1) or next (+1) Space in the focused area's
+    /// order — its Space Bar's, as the scroll step reads it.
     func focusSpaceInOrder(by step: Int) -> CommandResponse {
-        guard let screen = focusedScreen else {
+        guard
+            let area = focusedPlacement
+                ?? focusedScreen.map(state.workspaces.placementOrWhole)
+        else {
             return .fail("no focused screen")
         }
-        guard stepSpace(on: screen, by: step, warp: true, scrolled: false)
+        guard stepSpace(on: area, by: step, warp: true, scrolled: false)
         else {
             return .fail(
                 "no \(step < 0 ? "previous" : "next") Space on "
@@ -154,9 +158,9 @@ extension KiwiCore {
 
     /// The row-end bump on the shown Space's focus, toward the
     /// step; an empty Space has no ring and says nothing.
-    func bumpAtSpaceEnd(_ step: Int, on screen: DisplayID? = nil) {
+    func bumpAtSpaceEnd(_ step: Int, on area: PlacementID? = nil) {
         let shown =
-            screen.flatMap { state.workspaces.activeSpace(on: $0) }
+            area.flatMap { state.workspaces.activeSpace(on: $0) }
             ?? state.workspaces.activeSpace
         guard let space = shown.flatMap({ state.workspaces[$0] }),
             let focused = state.focusAnchor(of: space)

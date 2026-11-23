@@ -5,15 +5,10 @@ import AppKit
 /// `wireScrollPan` installs, never by the core.
 @MainActor
 final class ScrollPanSession {
-    /// The Space shown on the screen under a point (AX space) —
-    /// the whole screen, menu bar and Dock strip included.
-    /// Live by default; a suite states its own.
-    var spaceAt: @MainActor (CGPoint, StateCoordinator) -> SpaceID? = {
-        point,
-        state in
-        GeometryUtils.display(at: point)
-            .flatMap(state.workspaces.activeSpace(on:))
-    }
+    /// The Space shown under a point (AX space) — its area's on a
+    /// split screen, menu bar and Dock strip included. Nil reads it
+    /// live (`KiwiCore.shownSpace(atAX:)`); a suite states its own.
+    var spaceAt: (@MainActor (CGPoint, StateCoordinator) -> SpaceID?)?
 
     fileprivate var space: SpaceID?
     fileprivate var meter = ScrollStepMeter(longSwipes: false, length: 1)
@@ -85,7 +80,9 @@ extension KiwiCore {
             longSwipes: resolved.longSwipes,
             length: resolved.stepLength
         )
-        guard let id = session.spaceAt(location, state),
+        guard
+            let id = session.spaceAt.map({ $0(location, state) })
+                ?? shownSpace(atAX: location),
             state.workspaces[id] != nil
         else { return }
         if id != state.workspaces.activeSpace {

@@ -18,8 +18,8 @@ extension KiwiCore {
     ///
     /// `cocoaPoint` is the press location in Cocoa screen
     /// coordinates (the space `NSScreen.frame`/`visibleFrame`
-    /// live in). A no-op on a single monitor, and whenever the
-    /// clicked display is already the focused one.
+    /// live in). A no-op on a single unsplit monitor, and whenever
+    /// the clicked area already shows the active Space (#3517).
     func followDisplayUnderClick(at cocoaPoint: CGPoint) {
         // A native desktop (Mission Control) transition re-reports
         // clicks against windows being re-tracked; don't flip the
@@ -41,20 +41,25 @@ extension KiwiCore {
             }),
             let display = screen.kiwiDisplayID
         else { return }
-        guard display != focusedScreen else { return }
+        // A split screen's other area is a target too (#3517).
+        guard
+            display != focusedScreen
+                || state.workspaces.placements(of: display).count > 1
+        else { return }
+        let axPoint = GeometryUtils.axPoint(cocoaPoint)
         // An auto-hidden Dock reserves no visible frame, so a Dock
         // click passes the check above: ask what was hit instead.
         guard
             !Self.pressHitsDock(
-                at: GeometryUtils.axPoint(cocoaPoint),
+                at: axPoint,
                 in: frontStack()
             )
         else { return }
-        // Move focus to that display's shown space. Nothing to do
-        // if the display has no assigned space, or its space is
-        // already the active one (single-display collapse).
+        // Move focus to the shown space of the area clicked. Nothing
+        // to do if it has no assigned space, or its space is already
+        // the active one (single-display collapse).
         guard
-            let target = state.workspaces.activeSpace(on: display),
+            let target = shownSpace(atAX: axPoint, on: display),
             target != state.workspaces.activeSpace
         else { return }
         // A bare desktop click deliberately leaves key focus on the

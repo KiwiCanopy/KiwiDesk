@@ -31,7 +31,6 @@ struct AreaEdgeTests {
 
     private func core() throws -> KiwiCore {
         let core = makeTestCore()
-        core.honoursAreaSplits = true
         core.state.workspaces.upsertDisplay(wide)
         var settings = core.tiler.settings
         settings.displayAreas = [fp: try threeAreas()]

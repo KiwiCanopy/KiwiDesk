@@ -263,14 +263,11 @@ struct ScreenAreaPane: View {
         }
     }
 
-    /// What the pane holds and shows. Areas have no shown Space of
-    /// their own yet (#3517 ruling 30), so only the first area —
-    /// where a whole screen's shown Space lands — says which.
+    /// What the pane holds and the Space its area shows (#3517).
     private var readout: String {
         ScreenReadout.sentence(
             held: rows.held(on: key, isMain: isMain),
-            showing: (area ?? 0) == 0
-                ? model.showingSpace(on: display.id) : nil
+            showing: model.showingSpace(inArea: key, on: display.id)
         )
     }
 

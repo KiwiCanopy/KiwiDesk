@@ -24,8 +24,6 @@ struct ScreenShowRowsTests {
     private func model(split: Bool) throws -> SettingsModel {
         let model = makeTestModel()
         let core = model.core
-        // Areas count only while splits take effect (#3517).
-        core.honoursAreaSplits = true
         for display in core.state.workspaces.allDisplays {
             core.state.workspaces.removeDisplay(display.id)
         }

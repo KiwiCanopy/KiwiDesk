@@ -130,11 +130,9 @@ extension KiwiCore {
         return state.workspaces.sortInPlace(Set(liveTemporarySpaces))
     }
 
-    /// Whether any screen shows `id` now.
+    /// Whether any area of any screen shows `id` now (#3517).
     private func isShown(_ id: SpaceID) -> Bool {
-        state.workspaces.allDisplays.contains {
-            state.workspaces.currentSpace(on: $0.id) == id
-        }
+        state.workspaces.visibleSpaces.contains(id)
     }
 
     /// Another Space on `id`'s screen, if it is not the last one.

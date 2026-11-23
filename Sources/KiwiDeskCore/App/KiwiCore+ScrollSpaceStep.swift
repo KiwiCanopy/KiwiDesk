@@ -11,7 +11,8 @@ final class ScrollSpaceStepSession {
         GeometryUtils.display(at: $0)
     }
 
-    fileprivate var display: DisplayID?
+    /// The area the gesture steps, fixed at its start (#3517).
+    fileprivate var placement: PlacementID?
     fileprivate var meter = ScrollSpaceStepSession.makeMeter()
 
     /// One per swipe or notch: no long swipes (#1519 ruling).
@@ -35,40 +36,43 @@ extension KiwiCore {
         session: ScrollSpaceStepSession
     ) {
         if event.kind == .began {
-            session.display = session.displayAt(event.location)
+            session.placement = session.displayAt(event.location).map {
+                pointerPlacement(atAX: event.location, on: $0)
+            }
             session.meter = ScrollSpaceStepSession.makeMeter()
         }
         let steps = session.meter.feed(event)
-        if event.kind == .ended { session.display = nil }
-        guard steps != 0, let display = session.display else { return }
+        if event.kind == .ended { session.placement = nil }
+        guard steps != 0, let placement = session.placement else { return }
         // Content follows the fingers: moving it back brings the
         // NEXT Space in, so a step runs against the delta's sign.
         stepSpace(
-            on: display,
+            on: placement,
             by: steps > 0 ? -1 : 1,
             warp: false,
             scrolled: true
         )
     }
 
-    /// The neighbour of the Space `display` shows, in that
-    /// screen's order — the Space Bar's, empty Spaces included
+    /// The neighbour of the Space `placement` shows, in that
+    /// area's order — its Space Bar's, empty Spaces included
     /// where `hide_empty` leaves them off the bar, which is a
     /// display setting and never changes reach (#1519 ruling).
     /// The one step the gesture and `focus_space_previous` /
     /// `_next` (#1655) share. Past an end it wraps round that
-    /// screen's order unless Wrap focus is Off, never onto another
-    /// screen (#2592); false where it stops, which bumps. `scrolled`
-    /// is required: this step is the one both inputs share (#2971).
+    /// area's order unless Wrap focus is Off, never onto another
+    /// area or screen (#2592, #3517); false where it stops, which
+    /// bumps. `scrolled` is required: this step is the one both
+    /// inputs share (#2971).
     @discardableResult
     func stepSpace(
-        on display: DisplayID,
+        on placement: PlacementID,
         by step: Int,
         warp: Bool,
         scrolled: Bool
     ) -> Bool {
-        let order = state.workspaces.spaces(on: display)
-        guard let shown = state.workspaces.activeSpace(on: display),
+        let order = state.workspaces.spaces(on: placement)
+        guard let shown = state.workspaces.activeSpace(on: placement),
             let index = order.firstIndex(of: shown)
         else { return false }
         var next = index + step
@@ -76,7 +80,7 @@ extension KiwiCore {
             guard focusWrap.mode.withinScreen == .thisScreen,
                 order.count > 1
             else {
-                bumpAtSpaceEnd(step, on: display)
+                bumpAtSpaceEnd(step, on: placement)
                 return false
             }
             next = (next % order.count + order.count) % order.count

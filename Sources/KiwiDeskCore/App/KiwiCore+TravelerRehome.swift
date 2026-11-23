@@ -19,7 +19,8 @@ extension KiwiCore {
                 let space = state.workspaces[spaceID],
                 let screen = TilingEngine.screen(for: display)
             else { continue }
-            let destination = tiler.visibleBounds(screen)
+            // The area the Space lays out in (#3517).
+            let destination = tiler.visibleBounds(screen, for: spaceID)
             let members = Set(space.windows)
             let travelers =
                 state

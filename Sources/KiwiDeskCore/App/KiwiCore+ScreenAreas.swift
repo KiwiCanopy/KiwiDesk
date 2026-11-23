@@ -19,25 +19,13 @@ extension KiwiCore {
 
     /// The one door from the stored splits to the placement list
     /// (#3517), run by every write of `display_areas` through
-    /// `tiler.onAreaSplits`: the stored splits while
-    /// `honoursAreaSplits` is raised, none otherwise. Production
-    /// keeps it lowered until splits take effect, so a stored
-    /// split moves no window; a suite raises it to drive areas.
+    /// `tiler.onAreaSplits` — a config load and a profile apply
+    /// included, since each installs the settings whole.
     func syncAreaSplits() {
-        let splits = laidOutSplits(tiler.settings.displayAreas)
+        let splits = tiler.settings.displayAreas
         // The live Desktop memory follows a merge (ruling 22).
         remapAreaSpaces(from: state.workspaces.areaSplits, to: splits)
         state.workspaces.setAreaSplits(splits)
-    }
-
-    /// `stored` as the placement list lays it out: the splits while
-    /// `honoursAreaSplits` is raised, none otherwise — the one gate
-    /// a per-area reader beside the placement list takes, so no
-    /// write judges or names an area nothing lays out.
-    public func laidOutSplits(
-        _ stored: [String: ScreenSplit]
-    ) -> [String: ScreenSplit] {
-        honoursAreaSplits ? stored : [:]
     }
 
     /// `space`'s area — its rect in its screen's own points — its

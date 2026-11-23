@@ -76,6 +76,10 @@ extension KiwiCore {
                 "display": state.workspaces.display(of: space.id)
                     .map { .number(Double($0.raw)) } ?? .null,
                 "shown": .bool(shown.contains(space.id)),
+                // Its area's key on a split screen, `list_monitors`'
+                // `areas[].key` (#3517); null on an unsplit one.
+                "area": areaKey(of: space.id).map(JSONValue.string)
+                    ?? .null,
                 "mode": .string(space.mode.rawValue),
                 "windows": .array(
                     space.windows.map {

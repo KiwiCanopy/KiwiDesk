@@ -12,7 +12,6 @@ extension KiwiCore {
     /// w=, h=, id=, name=}, …})` takes the rects whole. The sizes or
     /// rects must tile the screen exactly.
     func setDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
-        guard honoursAreaSplits else { return .fail(Self.areasOff) }
         guard let screen = splitScreen(args.first) else {
             return .fail("unknown screen: \(args.first?.stringValue ?? "")")
         }
@@ -45,7 +44,6 @@ extension KiwiCore {
     /// names (as `list_monitors` prints it); an empty name clears
     /// it back to the positional default.
     func setDisplayAreaName(_ args: [JSONValue]) -> CommandResponse {
-        guard honoursAreaSplits else { return .fail(Self.areasOff) }
         guard let raw = args.first?.stringValue,
             let name = args.dropFirst().first?.stringValue
         else { return .fail("expected an area and a name") }
@@ -73,9 +71,6 @@ extension KiwiCore {
         tiler.settings.displayAreas[key.fingerprint] = split
         return .ok()
     }
-
-    /// The refusal while splits take no effect (`syncAreaSplits`).
-    static let areasOff = "screen areas are not available in this build"
 
     /// The screen a split names: a connected screen by number,
     /// fingerprint or name, else a fingerprint whose size it reads.
@@ -207,8 +202,21 @@ extension KiwiCore {
                     "y": .number(Double(area.y)),
                     "w": .number(Double(area.w)),
                     "h": .number(Double(area.h)),
+                    // The Space this area shows (#3549, #3517).
+                    "space_id": state.workspaces.activeSpace(
+                        on: placement.id
+                    ).map { .string($0.raw) } ?? .null,
                 ])
             }
         )
+    }
+
+    /// The key of the area `space` lays out in, where its screen is
+    /// split (#3517); nil on an unsplit screen or for no placement.
+    func areaKey(of space: SpaceID) -> String? {
+        guard let id = state.workspaces.placement(of: space),
+            state.workspaces.placements(of: id.display).count > 1
+        else { return nil }
+        return state.workspaces[placement: id]?.key.description
     }
 }
