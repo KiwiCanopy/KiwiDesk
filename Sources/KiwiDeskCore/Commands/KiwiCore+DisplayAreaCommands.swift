@@ -31,28 +31,11 @@ extension KiwiCore {
         ) {
             return .fail(Self.message(for: problem))
         }
-        // A merged-away area's keys move to the survivor in the same
-        // write as the split, as a Settings merge's do (ruling 22).
-        var settings = tiler.settings
-        let remaps =
-            previous.map {
-                Self.areaRemaps(
-                    from: [screen.fingerprint: $0],
-                    to: [screen.fingerprint: split]
-                )
-            } ?? []
-        for remap in remaps {
-            settings.apply(remap)
-            for (space, pin) in spacePins {
-                spacePins[space] = remap.rewrite(pin)
-            }
-        }
-        // A whole split stays stored once one existed, so its next id
-        // outlives the merge and a later split mints none reused
-        // (ruling 21).
-        settings.displayAreas[screen.fingerprint] =
-            split.isWhole && previous == nil ? nil : split
-        tiler.settings = settings
+        storeSplit(split, on: screen.fingerprint)
+        luaAreaSplits.note(
+            screen.fingerprint,
+            tiler.settings.displayAreas[screen.fingerprint]
+        )
         retile()
         return .ok()
     }
@@ -86,12 +69,40 @@ extension KiwiCore {
         }
         split.areas[at].name = trimmed.isEmpty ? nil : trimmed
         tiler.settings.displayAreas[key.fingerprint] = split
+        luaAreaSplits.rename(key.fingerprint, split)
         return .ok()
+    }
+
+    /// Stores `split` for the screen `fingerprint` names. A
+    /// merged-away area's keys move to the survivor in the same
+    /// write as the split, as a Settings merge's do (ruling 22).
+    func storeSplit(_ split: ScreenSplit, on fingerprint: String) {
+        let previous = tiler.settings.displayAreas[fingerprint]
+        var settings = tiler.settings
+        let remaps =
+            previous.map {
+                Self.areaRemaps(
+                    from: [fingerprint: $0],
+                    to: [fingerprint: split]
+                )
+            } ?? []
+        for remap in remaps {
+            settings.apply(remap)
+            for (space, pin) in spacePins {
+                spacePins[space] = remap.rewrite(pin)
+            }
+        }
+        // A whole split stays stored once one existed, so its next id
+        // outlives the merge and a later split mints none reused
+        // (ruling 21).
+        settings.displayAreas[fingerprint] =
+            split.isWhole && previous == nil ? nil : split
+        tiler.settings = settings
     }
 
     /// The screen a split names: a connected screen by number,
     /// fingerprint or name, else a fingerprint whose size it reads.
-    private func splitScreen(
+    func splitScreen(
         _ arg: JSONValue?
     ) -> (fingerprint: String, width: Int, height: Int)? {
         if let id = resolveDisplayArg(arg),

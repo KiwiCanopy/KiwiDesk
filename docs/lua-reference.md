@@ -808,7 +808,10 @@ area 0 first, and gives each area past them a new id; with fewer
 sizes the last ids go. A rect without an `id` takes 0 when it is
 the top-left one and no rect names 0, else a new id. An id is never
 given out twice on one screen. The split is stored per profile
-under `display_areas`, keyed by fingerprint.
+under `display_areas`, keyed by fingerprint. A split `init.lua`
+makes lasts while the file makes it: once a reload no longer
+calls `set_display_areas` for that screen, the screen is whole
+again, and a split made in Settings stays.
 
 Once a screen is split, a screen argument —
 `move_space_to_display`, `pin_space_to_display` and the bars'

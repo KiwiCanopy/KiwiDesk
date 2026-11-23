@@ -308,14 +308,16 @@ extension KiwiCore {
     /// Re-applies the active profile (or recomposes the active
     /// Standard) after a config reload, so the Lua base state
     /// never clobbers profile-owned tiling. No-op in the plain
-    /// transient state.
-    func reapplyActiveProfileState() {
+    /// transient state; true when it replaced the settings.
+    @discardableResult
+    func reapplyActiveProfileState() -> Bool {
         if let name = profiles.currentName,
             let profile = try? profiles.read(name: name)
         {
             // Explicit: reloads follow a config/profile edit
             // whose deltas may sit inside the tolerance.
             apply(profile: profile, cause: .reapply)
+            return true
         } else if profiles.currentStandard != nil,
             let composed = composeMonitorChangeFallback(
                 displays: state.workspaces.allDisplays
@@ -327,6 +329,8 @@ extension KiwiCore {
             // workflow Standard (#485). `apply` adopts its placement
             // and files what it recomposed (#1509).
             apply(composed: composed, forceRetile: true)
+            return true
         }
+        return false
     }
 }

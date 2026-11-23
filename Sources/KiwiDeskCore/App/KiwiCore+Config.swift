@@ -132,9 +132,8 @@ extension KiwiCore {
             }
         }
         issues.append(contentsOf: typos)
-        // A sidecar that exists but no longer decodes means
-        // the visual editor (and the structured loader) can't
-        // see the user's rules — half-loaded, must be visible.
+        // A sidecar that no longer decodes hides the user's rules
+        // from the editor and the loader: half-loaded, so shown.
         if guiConfigStore.exists, !guiConfigIsNewer,
             guiConfigStore.load() == nil
         {
@@ -164,9 +163,9 @@ extension KiwiCore {
         }
         // Lua declarations are only the global base. Put the
         // active profile's tiling and sparse behavior overrides
-        // back on top before the native-Space binding gets the
-        // final say below.
-        reapplyActiveProfileState()
+        // back on top, then drop a split init.lua stopped
+        // declaring, before the native-Space binding's final say.
+        settleLuaAreaSplits(kept: !reapplyActiveProfileState())
         // The current Desktop may carry a binding that
         // the config just (re)declared. Window-rule reconcile
         // stays deferred until this final profile wins. A
@@ -182,9 +181,8 @@ extension KiwiCore {
             cause: .event
         )
         defersWindowRuleReconcile = false
-        // The rule owner/profile just changed: re-sync every app
-        // once against the FINAL effective rules. Without this,
-        // verdicts stay stale until an unrelated AX event (#164).
+        // Re-sync every app once against the FINAL effective
+        // rules, or verdicts stay stale until an AX event (#164).
         eventLoop.reconcileAll()
         // Author the starter setup's "Starter" profile (modes,
         // pins, tuning). It reads displays from NSScreen itself
@@ -268,6 +266,8 @@ extension KiwiCore {
         tiler.settings.tiling.startOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
+        // Its splits reset at the load's tail, never here (#3573).
+        luaAreaSplits.beginLoad()
         // Read while `init.lua`'s last Spaces still count (#1790).
         let temporaries = Set(liveTemporarySpaces)
         initDeclaredSpaces = []

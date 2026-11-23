@@ -289,8 +289,7 @@ public final class KiwiCore {
     public internal(set) var desktopBindings: [DesktopKey: DesktopBinding] =
         [:]
 
-    /// Log line consumer (GUI console later; syslog now) — the
-    /// sink every Core seam is wired to forward *into*.
+    /// Log line consumer — the sink every Core seam forwards into.
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     /// Problems from the last config load (#68), empty when it
@@ -303,6 +302,8 @@ public final class KiwiCore {
     /// The Spaces the last `init.lua` run asked for (#1509) —
     /// `delete_space` names the script as a re-creator from it.
     var initDeclaredSpaces: Set<SpaceID> = []
+    /// The splits `init.lua` left stored (#3573, `LuaAreaSplits`).
+    var luaAreaSplits = LuaAreaSplits()
     /// Typo-guard hits from the init.lua chunk currently
     /// running (#39). Armed exclusively by
     /// `recordingTypoIssues`; nil gates runtime hits (a typo
