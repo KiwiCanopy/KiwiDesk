@@ -3459,8 +3459,10 @@ kiwishelf.set_highlight_width(3)
 
 ### kiwishelf.set_handle_thickness
 
-**Expects:** points, 2–6 (default `3`); a value is rounded to a
+:::unreleased
+**Expects:** points, 2–6 (default `5`); a value is rounded to a
 whole point and kept within the range.
+:::
 
 **Does:** sets how thick an Auto bar's handle and the Pocket's tab
 draw at the screen edge. The handle stays flush on the edge and

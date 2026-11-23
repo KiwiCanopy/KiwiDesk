@@ -34,7 +34,7 @@ struct HandleThicknessWiringTests {
         return (core, display)
     }
 
-    @Test("an Auto bar's handle is the shelf's depth", arguments: [2, 5])
+    @Test("an Auto bar's handle is the shelf's depth", arguments: [2, 4])
     func barHandle(thickness: Int) throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, display) = try core(thickness: CGFloat(thickness))
