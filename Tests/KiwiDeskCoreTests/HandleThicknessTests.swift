@@ -115,6 +115,7 @@ struct HandleThicknessTests {
                 with: JSONEncoder().encode(profile)
             ) as? [String: Any]
         )
+        // 5.0's stamp: a later step reaching this shape bumps past it.
         root["format"] = 41
         let data = try JSONSerialization.data(withJSONObject: root)
         let out = ConfigMigration.migrated(data) ?? data
@@ -122,7 +123,10 @@ struct HandleThicknessTests {
         #expect(read.settings.kiwishelf.handleThickness == 3)
         #expect(glass.match(read.settings) == .none)
         glass.apply(to: &read.settings)
-        #expect(read.settings.kiwishelf.handleThickness == 5)
+        let pick = glass.style["kiwishelf.handle_thickness"]
+        #expect(
+            pick == .number(Double(read.settings.kiwishelf.handleThickness))
+        )
         #expect(glass.match(read.settings) == .applied)
     }
 }
