@@ -166,13 +166,9 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
-        let corner = settings.windowStroke.cornerRadius
+        let look = settings.dragMarkerLook
         if settings.dragGhost.enabled {
-            dragOverlay.showGhost(
-                at: slot,
-                cornerRadius: corner,
-                beneath: id.raw
-            )
+            dragOverlay.showGhost(at: slot, look: look, beneath: id.raw)
         }
         // Target the slot under the CURSOR, not the dragged
         // frame's center: the drop-zone must reach the
@@ -201,10 +197,7 @@ extension KiwiCore {
         if let targetSlot = zone {
             dragOverlay.showDropZone(
                 at: targetSlot,
-                cornerRadius: corner,
-                surface: LiquidGlassGate.rendered(
-                    frost: settings.dragLiquidGlass
-                ),
+                look: look,
                 beneath: id.raw
             )
         } else {

@@ -795,7 +795,7 @@ every lens with why it cannot turn on.
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_drop_zone_enabled` | true\|false (default `true`) |
 | | `drag.set_ghost_enabled` | true\|false (default `false`) |
-| | `drag.set_liquid_glass` | true\|false (default `true`) — the drop zone's glass |
+| | `drag.set_liquid_glass` | true\|false (default `true`) — the ghost's glass |
 | Stack | `stack.promote` / `stack.demote` | — |
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |

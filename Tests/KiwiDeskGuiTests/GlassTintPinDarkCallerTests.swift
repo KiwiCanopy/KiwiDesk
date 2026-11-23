@@ -29,6 +29,8 @@ struct GlassTintPinDarkCallerTests {
             "the slide's plates: no Fill, KiwiHub's glass",
         "Animation/BriefPocketViews.swift":
             "the brief pocket's plate: the slide's, untinted",
+        "Tiling/DragMarkerView.swift":
+            "the drag ghost: the slide's plate, untinted (#3583)",
     ]
 
     /// The files that may call `pinFrost`, each with its reason —

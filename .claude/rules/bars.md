@@ -1032,15 +1032,15 @@ stays physical. Obligations:
   gates it** in `OverlayGlassGateTests` ▸ `everyGlassHostIsGated`,
   derived from `GlassPlate.make(` callers — the one copy of who
   hosts glass, so a new host reds until it has a gate. The drag
-  drop zone and the sticky mark host
+  ghost and the sticky mark host
   glass the same way and take the same rule where each is
-  rendered — `handleDragMove` when the drop zone shows,
-  `updateStickyMarks`, which the flip re-runs — handing the gate
-  the stored leaf once (`OverlayGlassGateTests` ▸
-  `overlaysTakeTheGate`, `OverlayGlassTests` ▸ `gateStandsDown`).
-  Their stood-down look is see-through, never made opaque — the
-  drop zone's flat grey plate, the mark's badge
-  (`docs/design-decisions.md` ▸ Reduce transparency).
+  rendered — `DragMarkerView.render`, the one door the drag and its
+  Settings picture share, and `updateStickyMarks`, which the flip
+  re-runs — handing the gate the stored leaf once
+  (`OverlayGlassGateTests` ▸ `overlaysTakeTheGate`,
+  `OverlayGlassTests` ▸ `gateStandsDown`). Their stood-down look is
+  see-through, never made opaque — the ghost's material, the mark's
+  badge (`docs/design-decisions.md` ▸ Reduce transparency).
 - **Every rule a bar draws takes its geometry and ink from
   `BarDivider`** — the in-item rule, the layer and front-app
   breaks and the section divider: the boundary between two bars
@@ -1931,7 +1931,7 @@ Obligations:
   outside `GlassPlate`, in either Sources tree).
 - **Build the fade in `GlassTint.apply`, from an edge every call
   site hands it — never a default** (#1622). A surface on no
-  screen edge — the drag drop zone, the sticky mark — hands `.top`
+  screen edge — the drag ghost, the sticky mark — hands `.top`
   by ruling, a fade downward (#1620, #1621). The
   backdrop is a `GlassBackdrop`, whose BACKING layer is the
   gradient so it rides the plate glide; a sublayer would jump to
@@ -1946,10 +1946,8 @@ Obligations:
   surface's Fill carries the floor its ink needs as `minShare`,
   minted by `readingGlassFill` and never a share typed at a call
   site. An EMPTY Fill is no colour there —
-  clear glass, nothing pinned — which the drop zone, untinted
-  since #2797, and the sticky mark's Automatic both hand it
-  (`DragMarkerSurfaceTests` ▸ `dropZoneIsUntintedGlass`,
-  `OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
+  clear glass, nothing pinned — which the sticky mark's Automatic
+  hands it (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
   whether a Fill has a colour through the one
   `KiwiShelf.hasColour` — empty, unparseable and zero alpha are
   one state (#2569) — and paint a solid Fill through
@@ -2047,13 +2045,12 @@ Obligations:
   shows it never changes a frame (owner, 2026-11-14); retiring it
   re-runs the follow's per-switch cost measure above.
 - **A glass surface is thinned only by a ruling, and only on its
-  own view's opacity.** The drop zone's glass sits at
-  `DragMarkerView.glassOpacity` so the window a drop swaps with stays
-  readable (owner, device 2026-09-25); there the
-  `maxAlpha` premise — a floor on how much refraction survives —
-  does not hold, by that ruling. A second thinned surface argues
-  its own entry in `docs/design-decisions.md` first
-  (`DragMarkerSurfaceTests` ▸ `dropZoneIsUntintedGlass`).
+  own view's opacity.** No surface is thinned: the drop zone, the
+  one that was, draws no glass since #3583, and the ghost's plate
+  draws at full opacity (`DragMarkerSurfaceTests` ▸
+  `ghostWearsTheFill`). A thinned surface argues its own entry in
+  `docs/design-decisions.md` first, since the `maxAlpha` premise —
+  a floor on how much refraction survives — does not hold for it.
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

@@ -103,23 +103,28 @@ struct WindowStrokeTests {
     }
 
     /// Both drag render paths hand the markers the border's
-    /// corners — the engine's and the Settings picture's (#2797).
+    /// corners, through the one `dragMarkerLook` — the engine's and
+    /// the Settings picture's (#2797, #3583).
     @Test("the drag paths hand over the border's stroke")
     func dragPathsReadTheStroke() async throws {
         for (path, needle, count) in [
             (
+                "Sources/KiwiDeskCore/Tiling/DragMarkerLook.swift",
+                "cornerRadius: windowStroke.cornerRadius", 1
+            ),
+            (
                 "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
-                "settings.windowStroke.cornerRadius", 1
+                "settings.dragMarkerLook", 1
             ),
             // Both markers are handed that read.
             (
                 "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
-                "cornerRadius: corner,", 2
+                "look: look", 2
             ),
             (
                 "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"
                     + "GapsBordersPanelPreview.swift",
-                "cornerRadius: settings.windowStroke.cornerRadius,", 2
+                "look: settings.dragMarkerLook", 2
             ),
         ] {
             // Code only: a needle kept alive in a comment beside a

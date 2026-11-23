@@ -19299,10 +19299,11 @@ don't assume from tone.
   migration on next launch is neither. It also means a retune can
   look like nothing happened to anyone with saved profiles; that
   is the cost.
-- **Drag ghost / drop zone:** no colour of their own (#2797).
-  Origin and target separate by material and lightness, so no
-  colour-vision floor holds the pair (▸ Drag markers separate by
-  material, not hue).
+- **Drag ghost / drop zone:** no colour of their own (#2797); since
+  #3583 they borrow the look's — the drop zone the focus border
+  colour, the ghost the shelf's Fill. Origin and target still
+  separate by material, so no colour-vision floor holds the pair
+  (▸ Drag markers separate by material, not hue).
 
 **The unfocused ring's grey sits at 85–90 % alpha with its
 LIGHTNESS set per palette** (#1384), so that the ring composites
@@ -19781,6 +19782,39 @@ plates with app icons, since two windows of one app read alike
 and the target hides the window it would swap with; outlines
 only; a single tinted target; a thumbnail carry; and a live swap
 preview, which writes to another app over AX mid-drag.
+
+**Amended (#3583, owner, 2026-11-23): the drop zone is a wash of
+the focus colour, the ghost a Space-switch plate.** On the owner's
+desk the thinned glass read as a dirty grey wash: glass faded to
+0.6 shows the window beneath twice, a sharp copy under a blurred
+one, and a 50 % white rim and a 22 % grey both composite to
+mid-grey on a dark desk. Judged over real windows in a live-drag
+prototype, the drop zone became a flat wash of the look's focus
+border colour at 25 % with a 1 pt line of it at 80 %, with no glass
+or blur, so the window a drop swaps with stays sharp beneath it;
+it draws the same under Reduce transparency. The ghost became the
+plate a Space switch slides a window as, without its icon: the
+shelf's Fill on clear glass with the key-window rim while "Tint
+KiwiHub and plates" is on, untinted glass with it off, the material
+wearing the Fill flat where glass cannot draw — so KiwiDesk has one
+plate look, and the ghost changes with it. The ghost lies over a
+slot the window has left, so the plate's density hides nothing
+there; the drop zone lies over a window, which is why it takes no
+plate. The colour each marker wears is the look's, never one of
+the marker's own, so a palette or a look still changes both and
+nothing new is stored; the pair separates by material — a dense
+plate where the window was, a thin wash where it will land — which
+every viewer reads, so it still needs no colour-vision floor.
+Accepted: under the dragged window, which wears the focus ring, the
+drop zone repeats the ring's colour, and a palette whose focus
+colour sits near the Space Bar's green brings that hue beside it.
+Set aside: a neutral plate with no hue for the drop zone (the
+designer's pick), clear glass over the target (it lenses the window
+beneath, the reason the glass was thinned on 2026-09-25), and clear
+glass tinted 50 % with the focus colour for the ghost, for one plate
+look. This retires the drop zone's thinned glass (bars.md ▸ A glass
+surface is thinned only by a ruling); `drag.set_liquid_glass` now
+draws the ghost's glass.
 
 **The ghost's off reaches fresh setups only.** `DragVisual`
 encodes whole, so a saved profile states `enabled: true` and
@@ -22848,6 +22882,9 @@ It lies over the window a drop would swap with, which should stay
 readable through it; `.clear` is already the material's lightest
 style, so the view's own opacity is the one public strength left,
 and the blur material takes the same opacity where glass is off.
+Retired by #3583: the thinned glass read as a grey wash, and the
+drop zone now draws no glass (▸ Drag markers separate by
+material, not hue).
 
 **Every drag marker sits at the normal level, ordered directly
 beneath the window being dragged and re-ordered there on every

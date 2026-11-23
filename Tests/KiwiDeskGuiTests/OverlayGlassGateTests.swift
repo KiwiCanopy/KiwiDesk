@@ -18,14 +18,11 @@ struct OverlayGlassGateTests {
     /// and the stored leaf it hands the gate.
     private static let renders = [
         (
-            file: "Tiling/KiwiCore+DragMove.swift",
-            function: "func handleDragMove(",
-            stored: "frost: settings.dragLiquidGlass"
-        ),
-        (
+            // The drag's panels and the Settings picture both
+            // render through this one door (#3583).
             file: "Tiling/DragMarkerView.swift",
-            function: "func redrawPreview(",
-            stored: "frost: input.storedGlass"
+            function: "func render(",
+            stored: "glass: look.storedGlass"
         ),
         (
             file: "App/KiwiCore+StickyMarks.swift",
