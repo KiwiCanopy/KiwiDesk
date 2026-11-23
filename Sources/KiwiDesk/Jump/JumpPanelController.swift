@@ -129,6 +129,9 @@ final class JumpPanelController: NSObject {
             rootView: LocaleScopedRoot { root }
                 .environmentObject(LocalizationManager.shared)
         )
+        // Only `refit` sizes the panel, once per change: AppKit would
+        // grow the window to a new minimum ahead of it (#3570).
+        hosting.sizingOptions = []
         // A field editor left by the last opening would keep the
         // keys from the new content's field.
         panel.makeFirstResponder(nil)
@@ -309,8 +312,11 @@ final class JumpPanelController: NSObject {
         }
         // The next turn: the hosting view has not re-laid the new
         // results out in the setter's own.
-        model.onResultsChange = { [weak self] in
-            DispatchQueue.main.async { self?.refit() }
+        // The Shortcuts side's height follows its results, gliding
+        // with its top held (#3570 ▸ Ruling 5).
+        model.onResultsChange = { [weak self, weak model] in
+            let glides = model?.scope == .shortcuts
+            DispatchQueue.main.async { self?.refit(animated: glides) }
         }
         model.onStripToggle = { [weak self] in
             DispatchQueue.main.async { self?.refit(animated: true) }

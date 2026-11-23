@@ -25,7 +25,8 @@ extension ShortcutsSheetView {
         return ShortcutsColumnPlan.Section(
             header: header,
             rows: section.rows.count,
-            pitch: partSpacing + rowHeight
+            pitch: partSpacing + rowHeight,
+            continued: titleLine + titleGap
         )
     }
 }

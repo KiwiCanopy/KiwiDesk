@@ -227,29 +227,39 @@ struct ShortcutGestureColumnsTests {
             ).filter { !$0.isWhitespace }
         }
         let sheet = try flat("ShortcutsSheetView.swift")
-        // On each visual column's stack, after its sections'
+        // On each visual column's stack, after its pieces'
         // `ForEach` closes: inside it, each section would fold its
         // own width (#3424); over the whole sheet, a column would
-        // take another's widest (#3570).
+        // take another's widest (#3570). The full-width closing
+        // section sizes its own.
         let column = try #require(
             sheet.range(of: "privatefunccolumn(").map {
-                String(sheet[$0.lowerBound...].prefix(600))
+                String(sheet[$0.lowerBound...].prefix(700))
             }
         )
-        #expect(column.contains("letrows=sections[range].flatMap(\\.rows)"))
         #expect(
             column.contains(
-                "first:index==range.lowerBound)}}"
-                    + ".modifier(ShortcutPanelColumns(badges:rows"
-                    + ".contains{!$0.gestures.isEmpty},chords:rows"
-                    + ".contains{!$0.combo.isEmpty}))"
+                "letrows=pieces.flatMap{Array(sections[$0.section]"
+                    + ".rows[$0.rows])}"
             )
         )
-        #expect(sheet.contains("column(sections,range)"))
+        #expect(
+            column.contains(
+                "ShortcutsColumnPlan.sectionGap)}}"
+                    + ".modifier(Self.chordColumns(rows))"
+            )
+        )
+        #expect(
+            sheet.contains(
+                "ShortcutPanelColumns(badges:rows.contains{!$0.gestures"
+                    + ".isEmpty},chords:rows.contains{!$0.combo.isEmpty})"
+            )
+        )
+        #expect(sheet.contains(".modifier(Self.chordColumns(section.rows))"))
         // VoiceOver reads a column whole before the next (#3570).
         #expect(
             sheet.contains(
-                "column(sections,range).frame(maxWidth:.infinity,"
+                "column(flowing,pieces).frame(maxWidth:.infinity,"
                     + "alignment:.leading)"
                     + ".accessibilityElement(children:.contain)"
             )

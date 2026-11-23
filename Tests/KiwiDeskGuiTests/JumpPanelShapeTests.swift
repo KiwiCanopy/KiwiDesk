@@ -237,6 +237,11 @@ struct JumpPanelShapeTests {
             "letwidth=room.fieldWidth",
             "setFrameOrigin(room.origin(of:panel.frame.size))",
             "anchor=CGPoint(x:panel.frame.midX,y:panel.frame.maxY)",
+            // One resize per keystroke, the Shortcuts height gliding
+            // (#3570 ▸ Ruling 5).
+            "hosting.sizingOptions=[]",
+            "letglides=model?.scope==.shortcuts"
+                + "DispatchQueue.main.async{self?.refit(animated:glides)}",
         ] {
             #expect(controller.contains(needle), "\(needle)")
         }

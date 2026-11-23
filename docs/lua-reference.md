@@ -8120,8 +8120,12 @@ live glance at the active layer's bindings.
 
 :::unreleased
 A list too long for one column above the screen's bottom splits
-into up to three columns, each section kept whole, read down each
-column in turn; the columns scroll together.
+into up to three columns, read down each column in turn, with
+**Unavailable shortcuts** across the whole panel below them. The
+panel's width and its columns are set when the side opens; typing
+moves rows between the same columns and changes only the height.
+A long section may go on in the next column under its title again.
+The columns scroll together.
 :::
 
 The panel also lists every bound [gesture](#gesture-actions), once

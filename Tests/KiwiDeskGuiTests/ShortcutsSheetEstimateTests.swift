@@ -66,7 +66,8 @@ struct ShortcutsSheetEstimateTests {
         for count in [1, 8] {
             let (drawn, planned) = try heights(
                 reference(controls: count),
-                width: ShortcutsColumnPlan.columnWidth
+                width: ShortcutsColumnPlan.columnPitch
+                    - ShortcutsSheetView.columnGap
             )
             #expect(abs(drawn - planned) <= 4, "\(count): \(drawn) \(planned)")
         }
@@ -77,7 +78,10 @@ struct ShortcutsSheetEstimateTests {
     @Test("a captioned section is planned no shorter than it draws")
     func captionMatches() throws {
         LocalizationManager.shared.select("en")
-        for width: CGFloat in [ShortcutsColumnPlan.columnWidth, 688] {
+        for width: CGFloat in [
+            ShortcutsColumnPlan.columnPitch - ShortcutsSheetView.columnGap,
+            688,
+        ] {
             let (drawn, planned) = try heights(
                 reference(inactive: 3),
                 width: width

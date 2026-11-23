@@ -21,7 +21,8 @@ extension JumpModel {
         switch scope {
         case .windows, .view: return room.fieldWidth
         case .shortcuts:
-            return shortcutColumns.width(
+            return ShortcutsColumnPlan.width(
+                columns: shortcutCount ?? 1,
                 inset: JumpShortcutsView.kiwiHubInset,
                 gap: ShortcutsSheetView.columnGap
             )

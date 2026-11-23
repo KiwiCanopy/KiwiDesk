@@ -3,39 +3,71 @@ import SwiftUI
 
 /// The shortcuts sheet (#326, #820) as the key panel's Shortcuts
 /// side draws it (#2246): titled sections — each Controls group,
-/// then Apps, Custom, Inactive and Unavailable last — in one column,
-/// or in the column-major columns KiwiHub's plan cuts them into
-/// (#3570 ▸ Ruling 5). Section titles are the one heading level,
-/// and a section the query empties is dropped.
+/// then Apps, Custom and Inactive — in one column or in the
+/// column-major columns KiwiHub's plan cuts them into (#3570 ▸
+/// Ruling 5), and Unavailable last, across the whole sheet below
+/// them. Section titles are the one heading level, and a section the
+/// query empties is dropped.
 struct ShortcutsSheetView: View {
     /// What the sheet shows; nil where `init.lua` owns the
     /// shortcuts.
     let reference: ShortcutsReference?
     /// The typed query, drawn bold in each row's name.
     let needle: String
-    /// Each column's sections, as ranges into `sections`; one
-    /// column where there is one or none.
-    var columns: [Range<Int>] = []
+    /// Each column's pieces of the column sections; empty draws one
+    /// column of them whole.
+    var columns: [[ShortcutsColumnPlan.Piece]] = []
 
     var body: some View {
         if let reference, !reference.isEmpty {
-            let sections = Self.sections(reference)
-            // A plan cut for another sheet draws one column.
-            let fits = columns.last?.upperBound == sections.count
-            let cut =
-                columns.count > 1 && fits ? columns : [0..<sections.count]
-            HStack(alignment: .top, spacing: Self.columnGap) {
-                ForEach(Array(cut.enumerated()), id: \.offset) { _, range in
-                    column(sections, range)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        // VoiceOver reads a column whole before the next.
-                        .accessibilityElement(children: .contain)
+            let all = Self.sections(reference)
+            let flowing = all.filter { !$0.closes }
+            let cut = Self.cut(columns, over: flowing)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top, spacing: Self.columnGap) {
+                    ForEach(Array(cut.enumerated()), id: \.offset) {
+                        _,
+                        pieces in
+                        column(flowing, pieces)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            // VoiceOver reads a column whole before the
+                            // next.
+                            .accessibilityElement(children: .contain)
+                    }
+                }
+                ForEach(all.filter(\.closes), id: \.title) { section in
+                    sectionView(section, rows: section.rows, title: .whole)
+                        .padding(
+                            .top,
+                            flowing.isEmpty
+                                ? 0 : ShortcutsColumnPlan.sectionGap
+                        )
+                        .modifier(Self.chordColumns(section.rows))
                 }
             }
             .environment(\.shortcutMatch, needle)
         } else {
             placeholder
         }
+    }
+
+    /// `columns`, where it cuts exactly `flowing`'s rows; else one
+    /// column of them whole, as a plan made for another sheet would
+    /// draw nothing true.
+    static func cut(
+        _ columns: [[ShortcutsColumnPlan.Piece]],
+        over flowing: [Section]
+    ) -> [[ShortcutsColumnPlan.Piece]] {
+        let drawn = columns.joined().reduce(0) { $0 + $1.rows.count }
+        let whole = flowing.enumerated().map {
+            ShortcutsColumnPlan.Piece(section: $0, rows: 0..<$1.rows.count)
+        }
+        let fits = columns.joined().allSatisfy {
+            flowing.indices.contains($0.section)
+                && $0.rows.upperBound <= flowing[$0.section].rows.count
+        }
+        let rows = flowing.reduce(0) { $0 + $1.rows.count }
+        return !columns.isEmpty && fits && drawn == rows ? columns : [whole]
     }
 
     /// The room between two columns.
@@ -48,26 +80,38 @@ struct ShortcutsSheetView: View {
     static let titleGap: CGFloat = 2
     static let captionGap: CGFloat = 4
 
-    /// One column, its chords sized to its own widest (#3424).
-    private func column(_ sections: [Section], _ range: Range<Int>)
-        -> some View
-    {
-        let rows = sections[range].flatMap(\.rows)
-        return VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(range), id: \.self) { index in
-                sectionView(
-                    sections[index],
-                    first: index == range.lowerBound
-                )
-            }
-        }
-        .modifier(
-            ShortcutPanelColumns(
-                badges: rows.contains { !$0.gestures.isEmpty },
-                chords: rows.contains { !$0.combo.isEmpty }
-            )
+    /// A run of rows' chord column, sized to its own widest (#3424).
+    static func chordColumns(_ rows: [ShortcutRow]) -> ShortcutPanelColumns {
+        ShortcutPanelColumns(
+            badges: rows.contains { !$0.gestures.isEmpty },
+            chords: rows.contains { !$0.combo.isEmpty }
         )
     }
+
+    /// One column's pieces.
+    private func column(
+        _ sections: [Section],
+        _ pieces: [ShortcutsColumnPlan.Piece]
+    ) -> some View {
+        let rows = pieces.flatMap { Array(sections[$0.section].rows[$0.rows]) }
+        return VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(pieces.enumerated()), id: \.offset) { index, piece in
+                let section = sections[piece.section]
+                sectionView(
+                    section,
+                    rows: Array(section.rows[piece.rows]),
+                    title: piece.continued ? .continued : .whole
+                )
+                .padding(.top, index == 0 ? 0 : ShortcutsColumnPlan.sectionGap)
+            }
+        }
+        .modifier(Self.chordColumns(rows))
+    }
+
+    /// How a piece draws its section's head: whole, or the title
+    /// alone in tertiary ink over rows continued from the column
+    /// before.
+    enum Head { case whole, continued }
 
     /// One titled run of rows.
     struct Section {
@@ -78,6 +122,9 @@ struct ShortcutsSheetView: View {
         /// Whether the section dims its rows; an unavailable row
         /// dims itself.
         var dims = false
+        /// Whether it closes the sheet across its whole width, below
+        /// the columns (#3570 ▸ Ruling 5).
+        var closes = false
     }
 
     /// The column's sections, in reading order.
@@ -119,34 +166,38 @@ struct ShortcutsSheetView: View {
                     "Unavailable shortcuts"
                 ),
                 rows: reference.desktopAway,
-                caption: KeybindingCatalog.desktopAwayCaption
+                caption: KeybindingCatalog.desktopAwayCaption,
+                closes: true
             )
         )
         return out.filter { !$0.rows.isEmpty }
     }
 
-    private func sectionView(_ section: Section, first: Bool) -> some View {
+    private func sectionView(
+        _ section: Section,
+        rows: [ShortcutRow],
+        title head: Head
+    ) -> some View {
         VStack(alignment: .leading, spacing: Self.partSpacing) {
             Text(section.title)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(head == .whole ? .secondary : .tertiary)
                 .accessibilityAddTraits(.isHeader)
                 .padding(.bottom, Self.titleGap)
             // A filtered row's dimming and hint already say it; the
             // caption is for the whole list.
-            if let caption = section.caption, needle.isEmpty {
+            if head == .whole, let caption = section.caption, needle.isEmpty {
                 Text(caption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.bottom, Self.captionGap)
             }
-            ForEach(section.rows) { row in
+            ForEach(rows) { row in
                 ShortcutRowView(row: row)
                     .frame(height: Self.rowHeight)
             }
             .opacity(section.dims ? 0.6 : 1)
         }
-        .padding(.top, first ? 0 : ShortcutsColumnPlan.sectionGap)
     }
 
     /// Settings' own section says the same thing and then adds

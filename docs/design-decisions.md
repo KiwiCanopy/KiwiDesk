@@ -16617,22 +16617,31 @@ rect the panel opens in — a screen's clear area, or a screen area's
 *Amended (#3570): the one-column sheet becomes column-major
 columns.* One column still reads best while it fits, so the sheet
 stays one column until a single column would scroll past one
-screenful; then it cuts into columns about 400 pt wide, at most
-three — three side by side is already a page to scan, and a fourth
-would be read as a grid with no order. The columns are column-major
-and break only before a section title, so a section is never split
-and VoiceOver, which reads each column as one group, keeps one
-reading order, down a column and on to the next; the cut is as even
-as the section boundaries allow, so a filtered sheet rarely scrolls.
-A label in a column gets about 376 pt, more than half the field row,
-and a sheet that fits keeps the one column at full width, so a long
-translation pays only on a sheet that would otherwise scroll. The
-keys stay a reference sheet's (ui-designer, 2026-11-23): ↑ ↓ and the
-Page keys scroll the one shared scroll view, ← → stay with the
-field's text, and nothing is selected. A highlighted row on a Mac
-promises that ↩ acts, the other sides carry a selection only because
-they act on it, and VoiceOver already moves row by row, so a read
-cursor added for column-hopping would teach the wrong thing
+screenful; then it takes the fewest columns that fit, at a 460 pt
+pitch and at most three — the pitch is what a row with two chords
+needs to keep its whole label, so a chord is never stacked or a
+label cut, and three side by side is already a page to scan. The
+width and the column count are set when the side opens, on ⇥ or its
+shortcut, and typing never changes either: a panel that narrows and
+regrows under each keystroke moves the very rows being read, so the
+filtered rows rebalance across the same columns, and only the height
+follows the results, gliding with its top held as Spotlight's does.
+The fill is column-major and breaks only before a section title, at
+the breaks that make the tallest column shortest, the most even cut
+winning a tie, so no column ends early beside a long one. A section
+taller than 1.25 × the even share may break at a row, and the next
+column repeats its title in tertiary ink, because one long section
+left whole would leave its column alone at full height. Unavailable
+shortcuts closes the sheet across its whole width below the columns,
+since it lists keys for Desktops not shown and belongs to no
+column's run. VoiceOver reads each column as one group, down a
+column and on to the next, and the full-width section last. The keys
+stay a reference sheet's (ui-designer, 2026-11-23): ↑ ↓ and the Page
+keys scroll the one shared scroll view, ← → stay with the field's
+text, and nothing is selected. A highlighted row on a Mac promises
+that ↩ acts, the other sides carry a selection only because they act
+on it, and VoiceOver already moves row by row, so a read cursor
+added for column-hopping would teach the wrong thing
 (`ShortcutsColumnPlanTests`, `ShortcutsColumnKeysTests`).
 :::
 

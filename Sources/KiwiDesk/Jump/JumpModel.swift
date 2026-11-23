@@ -20,6 +20,9 @@ final class JumpModel: ObservableObject {
     /// How the sheet lays out in the room the panel opened in
     /// (#3570 ▸ Ruling 5).
     @Published var shortcutColumns = ShortcutsColumnPlan.empty
+    /// The Shortcuts side's column count, set by the first plan
+    /// after the side opens and held while typing; nil until then.
+    var shortcutCount: Int?
     /// The scroll the Shortcuts side's keys last asked for.
     @Published var sheetScroll = SheetScroll()
     /// The Desktops side's reading and selection, read fresh on
@@ -247,6 +250,8 @@ final class JumpModel: ObservableObject {
         naming = nil
         if scope == .view { view = loadView() }
         if scope == .shortcuts {
+            // Each entry sets the width and the columns afresh.
+            shortcutCount = nil
             shortcuts = ShortcutsSheet(reference: loadShortcuts())
         }
         // ⇥ or a side switch discards a carry (#1229).

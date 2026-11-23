@@ -143,7 +143,7 @@ struct ShortcutsInactiveBandTests {
             // inactive one dims. How much is a tuning, so the
             // needle stops before the value.
             ".opacity(section.dims?",
-            "ifletcaption=section.caption",
+            "ifhead==.whole,letcaption=section.caption",
             "Text(caption)",
         ] {
             #expect(

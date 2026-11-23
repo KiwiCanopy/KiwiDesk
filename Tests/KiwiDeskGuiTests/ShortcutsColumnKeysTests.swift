@@ -54,38 +54,47 @@ struct ShortcutsColumnKeysTests {
         return model
     }
 
-    @Test("a sheet that fits keeps one column at the field's width")
-    func fitsInOneColumn() {
-        let model = model(cap: 2000)
-        #expect(model.shortcutColumns.columns == [0..<3])
-        #expect(model.sideWidth == JumpPanelRoom.fieldWidth)
+    /// Rows in reading order, as `section × 100 + row`.
+    private func order(_ plan: ShortcutsColumnPlan) -> [Int] {
+        plan.columns.joined().flatMap { piece in
+            piece.rows.map { piece.section * 100 + $0 }
+        }
     }
 
-    /// Three 400 pt columns, their gaps and the sheet's inset,
-    /// inside the default 1440 pt room's 1248 pt.
-    @Test("a sheet past the room cuts into columns and widens")
-    func tallSheetTakesColumns() {
-        let model = model(cap: 300)
-        let plan = model.shortcutColumns
-        #expect(plan.columns == [0..<1, 1..<2, 2..<3])
-        let width = plan.width(
+    private var twoWide: CGFloat {
+        ShortcutsColumnPlan.width(
+            columns: 2,
             inset: JumpShortcutsView.kiwiHubInset,
             gap: ShortcutsSheetView.columnGap
         )
-        #expect(model.sideWidth == width)
-        #expect(width > 3 * ShortcutsColumnPlan.columnWidth)
-        #expect(width <= model.room.widest)
+    }
+
+    @Test("a sheet that fits keeps one column at the field's width")
+    func fitsInOneColumn() {
+        let model = model(cap: 2000)
+        #expect(model.shortcutColumns.columns.count == 1)
+        #expect(model.sideWidth == JumpPanelRoom.fieldWidth)
+    }
+
+    /// Two 460 pt columns, the gap and the sheet's inset: the most
+    /// the default 1440 pt room's 1248 pt holds.
+    @Test("a sheet past the room cuts into columns and widens")
+    func tallSheetTakesColumns() {
+        let model = model(cap: 300)
+        #expect(model.shortcutColumns.columns.count == 2)
+        #expect(model.sideWidth == twoWide)
+        #expect(twoWide <= model.room.widest)
         // A side switch keeps the room: Windows stays compact.
         #expect(model.sideWidth(for: .windows) == JumpPanelRoom.fieldWidth)
     }
 
-    /// The plan is judged inside the scroll's vertical inset: three
-    /// 242 pt sections fit two columns (500 pt) in a 510 pt sheet's
-    /// room only without it.
-    @Test("the columns fit inside the sheet's inset")
+    /// The count is judged inside the scroll's vertical inset: the
+    /// three 242 pt sections, 758 pt as one column, fit a 782 pt
+    /// sheet's room but not a 770 pt one's.
+    @Test("the count fits inside the sheet's inset")
     func capLeavesTheInset() {
-        #expect(model(cap: 510).shortcutColumns.columns.count == 3)
-        #expect(model(cap: 560).shortcutColumns.columns.count == 2)
+        #expect(model(cap: 782).shortcutColumns.columns.count == 1)
+        #expect(model(cap: 770).shortcutColumns.columns.count == 2)
     }
 
     /// The model takes its caps from the room the controller hands
@@ -130,7 +139,7 @@ struct ShortcutsColumnKeysTests {
         let heights = sections.map {
             ShortcutsSheetView.planned($0, needle: "", width: wide).height
         }
-        let tall = ShortcutsColumnPlan.height(heights, 0..<heights.count)
+        let tall = ShortcutsColumnPlan.height(heights)
         let model = JumpModel(
             snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
             icons: [:],
@@ -139,7 +148,7 @@ struct ShortcutsColumnKeysTests {
         )
         model.loadShortcuts = { captioned }
         model.setScope(.shortcuts)
-        #expect(model.shortcutColumns.columns == [0..<2])
+        #expect(model.shortcutColumns.columns.count == 1)
     }
 
     @Test("↑ ↓ and the Page keys scroll the one shared scroll view")
@@ -171,15 +180,70 @@ struct ShortcutsColumnKeysTests {
         }
     }
 
-    @Test("a typed query re-cuts the columns")
-    func queryRecuts() {
+    /// Typing never changes the width or the count: the filtered
+    /// rows rebalance across the same columns (ui-designer,
+    /// 2026-11-23), here one 8-row section split across both.
+    @Test("typing keeps the width and the columns")
+    func typingKeepsTheShape() {
         let model = model(cap: 300)
         model.query = "app"
-        #expect(model.shortcutColumns.columns == [0..<1])
-        #expect(model.sideWidth == JumpPanelRoom.fieldWidth)
+        let plan = model.shortcutColumns
+        #expect(plan.columns.count == 2)
+        #expect(plan.columns.allSatisfy { !$0.isEmpty })
+        #expect(order(plan) == (0..<8).map { $0 })
+        #expect(plan.columns[1].first?.continued == true)
+        #expect(model.sideWidth == twoWide)
         model.query = "nothing matches this"
         #expect(model.shortcutColumns.columns.isEmpty)
+        #expect(model.sideWidth == twoWide)
         model.query = ""
-        #expect(model.shortcutColumns.columns.count == 3)
+        #expect(model.shortcutColumns.columns.count == 2)
+    }
+
+    /// ⇥ away and back sets the shape afresh for what the side
+    /// shows then.
+    @Test("each entry sets the shape afresh")
+    func entrySetsTheShape() {
+        let model = model(cap: 300)
+        #expect(model.sideWidth == twoWide)
+        model.loadShortcuts = {
+            ShortcutsReference(
+                layerName: KeyLayer.defaultName,
+                controls: [],
+                inactive: [],
+                desktopAway: [],
+                apps: Self.rows("App", 2),
+                custom: []
+            )
+        }
+        model.setScope(.windows)
+        model.setScope(.shortcuts)
+        #expect(model.shortcutColumns.columns.count == 1)
+        #expect(model.sideWidth == JumpPanelRoom.fieldWidth)
+    }
+
+    /// Unavailable closes the sheet across its width, below the
+    /// columns: the plan cuts the other sections only.
+    @Test("Unavailable stands below the columns")
+    func unavailableCloses() {
+        LocalizationManager.shared.select("en")
+        var reference = Self.reference
+        reference.desktopAway = Self.rows("Away", 3)
+        let model = model(cap: 300)
+        model.loadShortcuts = { reference }
+        model.setScope(.windows)
+        model.setScope(.shortcuts)
+        let flowing = ShortcutsSheetView.sections(reference)
+            .filter { !$0.closes }
+        #expect(flowing.count == 3)
+        #expect(
+            ShortcutsSheetView.sections(reference).last?.closes == true
+        )
+        #expect(
+            model.shortcutColumns.columns.joined().allSatisfy {
+                $0.section < flowing.count
+            }
+        )
+        #expect(order(model.shortcutColumns).count == 24)
     }
 }
