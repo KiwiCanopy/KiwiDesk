@@ -35,7 +35,17 @@ struct JumpPanelView: View {
         VStack(spacing: 0) { side }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(JumpScope.panelName)
-            .frame(maxHeight: .infinity, alignment: .top)
+            // The side cross-fades as one stack; the field row moves
+            // only when the window's frame does, which the refit
+            // changes after this fade (#3570).
+            .animation(
+                reduceMotion
+                    ? nil : .easeInOut(duration: Self.scopeFade),
+                value: model.scope
+            )
+            // minHeight 0: a side taller than the window overflows
+            // down, never centred up past the top (#3570).
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
             .panelContentFade(presence)
             // The side's own width, which the window glides to on ⇥;
             // the field row rides the window's edges, so it moves
@@ -59,22 +69,15 @@ struct JumpPanelView: View {
 
     private var side: some View {
         VStack(spacing: 0) {
-            // No animation of its own: the field row takes its x from
-            // the window's frame alone (#3570 ▸ Amendment 4).
             field
-            Group {
-                namingCaption
-                PanelDivider()
-                scopeContent
-                PanelDivider()
-                footer
-            }
-            // Only what is below the field cross-fades on ⇥.
-            .animation(
-                reduceMotion
-                    ? nil : .easeInOut(duration: Self.scopeFade),
-                value: model.scope
-            )
+            namingCaption
+            PanelDivider()
+            // The side keeps its own width but lays out in the
+            // window's, so the field row spans the window as it is,
+            // never the side's width ahead of the glide (#3570).
+            scopeContent.frame(minWidth: 0, maxWidth: .infinity)
+            PanelDivider()
+            footer
         }
         // The side's own name, which its shortcut row shows (#2245).
         .accessibilityElement(children: .contain)
@@ -118,11 +121,10 @@ struct JumpPanelView: View {
         .frame(height: Self.fieldHeight)
         .onAppear { fieldFocused = true }
         .onChange(of: model.fieldFocusRequests) { fieldFocused = true }
-        // A click on the switch may take the focus; ⇥ never does, so
-        // a field that has it keeps it, its caret where it was.
-        .onChange(of: model.scope) {
-            if !fieldFocused { fieldFocused = true }
-        }
+        // A click on the switch may take the focus back; on ⇥ the
+        // field already has it, so the write changes nothing and the
+        // caret stays.
+        .onChange(of: model.scope) { fieldFocused = true }
         .onChange(of: model.fieldSelectAllRequests) { selectFieldText() }
     }
 
