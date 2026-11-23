@@ -46,6 +46,8 @@ private func populated() -> GuiConfig {
     var config = GuiConfig()
     let key = vanished.description
     config.spacePins[SpaceID("1")] = key
+    let desktop = DesktopKey.identity(DesktopIdentity(raw: "probe"))
+    config.desktopAreaSpaces[desktop] = [key: SpaceID("1")]
     config.settings.spaceBarStyle.edgeOverride[key] = .bottom
     config.settings.appBarStyle.edgeOverride[key] = .left
     config.settings.kiwishelf.pocketEdgeOverride[key] = .right
@@ -158,7 +160,8 @@ struct ScreenAreaRemapParityTests {
 
 /// Reflected area-keyed maps a split does not copy, and why.
 private let notCopied: [String: String] = [
-    "spacePins": "a pin stays on the half that keeps the id"
+    "spacePins": "a pin stays on the half that keeps the id",
+    "desktopAreaSpaces": "a new area starts empty (ruling 23)",
 ]
 
 // Forget-proof guard for a split's copy (#3517): `apply(_ copy:)`

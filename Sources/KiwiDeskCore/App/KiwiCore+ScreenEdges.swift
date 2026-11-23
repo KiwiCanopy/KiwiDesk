@@ -23,6 +23,12 @@ extension KiwiCore {
         tiler.settings.onScreen(screenFingerprint(of: display))
     }
 
+    /// The settings as one area has them (#3517): `settings(on:)`
+    /// keyed by the area's `ScreenAreaKey`.
+    func settings(on placement: PlacementID) -> TilingSettings {
+        tiler.settings.onScreen(areaKey(of: placement))
+    }
+
     /// The shelf as `display` shows it: the pocket's edge resolved
     /// for that screen (#3376). The pocket's readers of a display's
     /// edge take this, or `settings(on:)`, never

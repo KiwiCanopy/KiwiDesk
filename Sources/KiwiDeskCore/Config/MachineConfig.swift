@@ -13,24 +13,30 @@ public struct MachineConfig: Codable, Equatable, Sendable {
     public var format = MachineConfig.currentFormat
     /// `GuiConfig.desktopSpaces`.
     public var desktopSpaces: [DesktopKey: SpaceID] = [:]
+    /// `GuiConfig.desktopAreaSpaces` (#3517), a key an older build
+    /// skips and its write drops: a split it cannot lay out.
+    public var desktopAreaSpaces: [DesktopKey: [String: SpaceID]] = [:]
 
     public init() {}
 
     /// The machine-local leaves of `config`.
     public init(of config: GuiConfig) {
         desktopSpaces = config.desktopSpaces
+        desktopAreaSpaces = config.desktopAreaSpaces
     }
 
     /// `config` carrying these leaves.
     public func applied(to config: GuiConfig) -> GuiConfig {
         var config = config
         config.desktopSpaces = desktopSpaces
+        config.desktopAreaSpaces = desktopAreaSpaces
         return config
     }
 
     enum CodingKeys: String, CodingKey, CaseIterable {
         case format
         case desktopSpaces = "desktop_spaces"
+        case desktopAreaSpaces = "desktop_area_spaces"
     }
 
     public init(from decoder: Decoder) throws {
@@ -51,6 +57,11 @@ public struct MachineConfig: Codable, Equatable, Sendable {
                 [DesktopKey: SpaceID].self,
                 forKey: .desktopSpaces
             ) ?? [:]
+        desktopAreaSpaces =
+            try container.decodeIfPresent(
+                [DesktopKey: [String: SpaceID]].self,
+                forKey: .desktopAreaSpaces
+            ) ?? [:]
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -62,6 +73,10 @@ public struct MachineConfig: Codable, Equatable, Sendable {
             desktopSpaces.filter { $0.key.isIdentity },
             forKey: .desktopSpaces
         )
+        let areas = desktopAreaSpaces.filter { $0.key.isIdentity }
+        if !areas.isEmpty {
+            try container.encode(areas, forKey: .desktopAreaSpaces)
+        }
     }
 }
 

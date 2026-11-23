@@ -23,6 +23,7 @@ extension KiwiCore {
         // the save it feeds, and most callers hand back a config
         // they loaded earlier.
         store.liveDesktopSpaces = persistedDesktopSpaces()
+        store.liveDesktopAreaSpaces = persistedDesktopAreaSpaces()
         store.liveAppWide = appWideStamp
         store.liveLook = sharedLook
         return store

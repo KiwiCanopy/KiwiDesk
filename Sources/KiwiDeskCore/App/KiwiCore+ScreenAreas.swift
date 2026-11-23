@@ -24,9 +24,10 @@ extension KiwiCore {
     /// keeps it lowered until splits take effect, so a stored
     /// split moves no window; a suite raises it to drive areas.
     func syncAreaSplits() {
-        state.workspaces.setAreaSplits(
-            laidOutSplits(tiler.settings.displayAreas)
-        )
+        let splits = laidOutSplits(tiler.settings.displayAreas)
+        // The live Desktop memory follows a merge (ruling 22).
+        remapAreaSpaces(from: state.workspaces.areaSplits, to: splits)
+        state.workspaces.setAreaSplits(splits)
     }
 
     /// `stored` as the placement list lays it out: the splits while

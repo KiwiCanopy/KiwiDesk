@@ -28,13 +28,20 @@ extension KiwiCore {
         return desktopMemory.virtualSpaces
     }
 
+    /// The areas' Desktop memory as the file should carry it
+    /// (#3517), under `persistedDesktopSpaces`' one gate.
+    func persistedDesktopAreaSpaces() -> [DesktopKey: [String: SpaceID]]? {
+        persistedDesktopSpaces() == nil ? nil : desktopMemory.areaSpaces
+    }
+
     /// Seeds the memory from a loaded config (#1230).
     ///
     /// MERGED, live winning: a reload mid-session must not
     /// discard the `.number` entries this session learned, which
     /// the file never carries.
     func adoptPersistedDesktopSpaces(
-        _ stored: [DesktopKey: SpaceID]
+        _ stored: [DesktopKey: SpaceID],
+        areas: [DesktopKey: [String: SpaceID]] = [:]
     ) {
         desktopMemory.spaceMemoryAdopted = true
         // REPLACE once established, never merge. A merge returns
@@ -50,9 +57,16 @@ extension KiwiCore {
             {
                 desktopMemory.virtualSpaces[key] = space
             }
+            for (key, shown) in areas
+            where desktopMemory.areaSpaces[key] == nil
+                && key.isIdentity == false
+            {
+                desktopMemory.areaSpaces[key] = shown
+            }
             return
         }
         desktopMemory.virtualSpaces = stored
+        desktopMemory.areaSpaces = areas
         desktopMemory.spaceMemoryEstablished = true
     }
 
@@ -63,6 +77,7 @@ extension KiwiCore {
     /// only an established memory is stamped into a write.
     func forgetDesktopSpaceMemory() {
         desktopMemory.virtualSpaces = [:]
+        desktopMemory.areaSpaces = [:]
         desktopMemory.spaceMemoryEstablished = true
         desktopMemory.spaceMemoryAdopted = true
     }

@@ -34,6 +34,9 @@ import Foundation
 /// per-native-Desktop debt, `virtualSpaces` a one-`SpaceID`
 /// cursor, and `stackFlips` (#2771) a choice the user made on one
 /// Desktop. Five records, four subjects, no duplication.
+/// `areaSpaces` (#3517) is the cursor per area of a split screen:
+/// written as the Desktop is left, read as it returns, so it is a
+/// cursor's kind, never the refused contents store.
 ///
 /// **The obligation that falls out:** a new per-`Space` field is
 /// keyed by `WindowID` or it is SHARED across Desktops — read
@@ -171,6 +174,15 @@ extension KiwiCore {
         where key != desktop && present.contains(key) {
             taken.insert(space)
         }
+        // A split screen's other areas are in use too (#3517); an
+        // entry its screen's stored split no longer holds is
+        // dormant, judged on the split, never on what is connected.
+        for (key, shown) in desktopMemory.areaSpaces
+        where key != desktop && present.contains(key) {
+            taken.formUnion(
+                shown.filter { isStoredArea($0.key) }.values
+            )
+        }
         return taken
     }
 
@@ -216,12 +228,9 @@ extension KiwiCore {
                 continue
             }
             if let left = diff.previous[uuid],
-                let leaving = snapshot.key(of: left),
-                let shown = state.workspaces.activeSpace(
-                    on: display
-                )
+                let leaving = snapshot.key(of: left)
             {
-                rememberVirtualSpace(shown, leaving: leaving)
+                rememberLeaving(display, leaving: leaving)
             }
             guard let arriving = snapshot.currentKey(on: uuid),
                 let target = virtualSpaceTarget(
@@ -230,7 +239,7 @@ extension KiwiCore {
                     in: snapshot
                 )
             else { continue }
-            state.workspaces.show(target, on: display)
+            showArriving(target, on: display, as: arriving, in: snapshot)
         }
     }
 
@@ -267,19 +276,32 @@ extension KiwiCore {
         // Desktop, and gating the cursor's re-key on the map's
         // early return is how it was missed the first time.
         rekeyLastDesktop(in: snapshot)
-        let result = Self.keyMoves(
-            in: desktopMemory.virtualSpaces,
-            snapshot: snapshot
+        desktopMemory.virtualSpaces = Self.rekeyed(
+            desktopMemory.virtualSpaces,
+            in: snapshot
         )
+        // The areas' memory is a third holder (#3517).
+        desktopMemory.areaSpaces = Self.rekeyed(
+            desktopMemory.areaSpaces,
+            in: snapshot
+        )
+    }
+
+    /// `map` with each key moved or dropped by `keyMoves`.
+    private static func rekeyed<Value>(
+        _ map: [DesktopKey: Value],
+        in snapshot: DesktopSnapshot
+    ) -> [DesktopKey: Value] {
+        let result = keyMoves(in: map, snapshot: snapshot)
         guard !result.moves.isEmpty || !result.drops.isEmpty
-        else { return }
-        var out = desktopMemory.virtualSpaces
+        else { return map }
+        var out = map
         for key in result.drops { out[key] = nil }
         for (from, to) in result.moves {
             out[to] = out[from]
             out[from] = nil
         }
-        desktopMemory.virtualSpaces = out
+        return out
     }
 
     /// The other holder of a `DesktopKey` across snapshots.

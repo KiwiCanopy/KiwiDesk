@@ -34,6 +34,9 @@ public struct GuiConfigStore {
     /// map unclearable through its own write path, so a discard
     /// left the file's copy standing for the next boot to adopt.
     public var liveDesktopSpaces: [DesktopKey: SpaceID]?
+    /// The areas' Desktop memory (#3517), stamped with
+    /// `liveDesktopSpaces` and nil exactly where it is.
+    public var liveDesktopAreaSpaces: [DesktopKey: [String: SpaceID]]?
 
     /// The live app-wide settings (#1741), stamped the same way
     /// and for the same reason. nil while the crossing is owed, so
@@ -110,6 +113,9 @@ public struct GuiConfigStore {
         if let liveDesktopSpaces {
             config.desktopSpaces = liveDesktopSpaces
         }
+        if let liveDesktopAreaSpaces {
+            config.desktopAreaSpaces = liveDesktopAreaSpaces
+        }
         if let liveAppWide {
             config.appWide = liveAppWide
         }
@@ -148,6 +154,9 @@ public struct GuiConfigStore {
         guard let liveDesktopSpaces else { return }
         var stored = machine.load()
         stored.desktopSpaces = liveDesktopSpaces
+        if let liveDesktopAreaSpaces {
+            stored.desktopAreaSpaces = liveDesktopAreaSpaces
+        }
         try machine.save(stored, backups: migrationBackups)
     }
 

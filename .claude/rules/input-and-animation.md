@@ -1157,7 +1157,12 @@ editing here:
   once per screen and never move it during a play — what moves
   is a layer timed from the press, through `BarMotion`'s
   censused members (`BarMotionSeamTests`); the panel half is
-  review's, since no fixture orders a panel in. And play only
+  review's, since no fixture orders a panel in. On a split screen
+  the slide is its target's area's (#3517 ruling 8): the Space it
+  leaves is the one that area shows, its page is
+  `slidePage`'s, its axis that area's Space Bar edge, and a press in
+  another area drops the play (`AreaSpaceSlideTests`,
+  `SpaceSlideBurstTests` ▸ `otherAreaDrops`). And play only
   for navigation that passes a `SpaceSlideIntent`, read before
   the switch activates (`SpaceSlideSwitchTests` ▸
   `onlyNavigationPlays` holds the display follow; boot, wake and

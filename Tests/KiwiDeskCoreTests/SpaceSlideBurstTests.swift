@@ -26,12 +26,13 @@ struct SpaceSlideBurstTests {
 
     private func press(
         _ overlay: SpaceSlideOverlay,
-        display: DisplayID = DisplayID(1)
+        display: DisplayID = DisplayID(1),
+        screen: CGRect = CGRect(x: 0, y: 0, width: 1000, height: 800)
     ) -> SpaceSlideOverlay.Pressed {
         overlay.press(
             SpaceSlideOverlay.Press(
                 display: display,
-                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+                screen: screen,
                 axis: .horizontal,
                 direction: 1,
                 outgoing: [],
@@ -109,6 +110,19 @@ struct SpaceSlideBurstTests {
         #expect(!press(overlay).dropped)
         #expect(!press(overlay).dropped)
         #expect(press(overlay, display: DisplayID(2)).dropped)
+    }
+
+    /// A split screen's other area is another page on the same
+    /// panel (#3517 ruling 8): its press drops the play too.
+    @Test("a press in another area says it dropped the play")
+    func otherAreaDrops() {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        let right = CGRect(x: 500, y: 0, width: 500, height: 800)
+        #expect(!press(overlay).dropped)
+        #expect(press(overlay, screen: right).dropped)
+        #expect(overlay.play?.screen == right)
     }
 
     @Test("a long burst keeps a bounded strip")

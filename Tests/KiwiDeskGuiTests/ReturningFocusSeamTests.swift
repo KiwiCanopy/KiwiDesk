@@ -67,8 +67,13 @@ struct ReturningFocusSeamTests {
         // DEPARTURE from report-time memory, owed after the
         // follow's precedence, paid by the settle alone.
         (
-            "rememberDeparture(of: active, leaving: leaving)",
+            "rememberDeparture(of: active, leaving: leaving, in: snapshot)",
             "KiwiCore+Desktops.swift"
+        ),
+        // ...which files the cursor and the areas (#3517).
+        (
+            "rememberDeparture(of: active, leaving: leaving)",
+            "KiwiCore+DesktopAreaSpaces.swift"
         ),
         ("oweStickyReturn(native: native)", memoryFile),
         ("payStickyReturn(stickyOwed)", "KiwiCore+DesktopSettle.swift"),
@@ -146,7 +151,9 @@ struct ReturningFocusSeamTests {
 
     /// The owe runs in the switch handler's ARRIVAL arm, once,
     /// after the arriving space is activated — the one place that
-    /// knows both the target and the Desktop number.
+    /// knows both the target and the Desktop number. The
+    /// activation is `activateArriving`, which also switches the
+    /// screen's other areas (#3517).
     @Test("the owe runs once, in the arrival arm")
     func theOweRunsInTheArrivalArm() throws {
         let source = try SourceScan.strippedSource(
@@ -160,7 +167,7 @@ struct ReturningFocusSeamTests {
                 in: source
             ),
             let activate = handler.range(
-                of: "state.workspaces.activate(target)"
+                of: "activateArriving(target"
             ),
             let owe = handler.range(of: "oweReturningFocus(")
         else {

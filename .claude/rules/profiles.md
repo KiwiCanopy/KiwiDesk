@@ -417,7 +417,8 @@ change here:
 ## A Desktop is keyed by its stamp, never by its number (#1147)
 
 Durable per-Desktop state — `profile_bindings` and the Space
-memory today, a whole Space set under #1230 — is filed under
+memory today, with its split areas' twin `desktop_area_spaces`
+(#3517), a whole Space set under #1230 — is filed under
 `DesktopKey`: the identity KiwiDesk stamps into the Desktop's own
 WindowServer record where it carries one, its Mission Control
 number where it does not. **The number is a projection**, kept on

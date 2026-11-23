@@ -14,6 +14,13 @@ final class DesktopMemory {
     /// means nothing without saying whose numbering it is, and
     /// an identity means the same thing on every arrangement.
     var virtualSpaces: [DesktopKey: SpaceID] = [:]
+    /// The Space each area of a split screen showed on each Desktop
+    /// (#3517 ruling 17), keyed by the Desktop, then by the area's
+    /// `ScreenAreaKey`. `virtualSpaces` stays the Desktop's own
+    /// cursor; this map is filed and read beside it in
+    /// `KiwiCore+DesktopAreaSpaces.swift`, and shares its re-key,
+    /// its discard and its persistence.
+    var areaSpaces: [DesktopKey: [String: SpaceID]] = [:]
 
     /// Whether the map above is the session's own answer yet
     /// (#1230). It becomes durable through `gui.json`, and every

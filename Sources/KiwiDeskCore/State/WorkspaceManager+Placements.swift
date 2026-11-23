@@ -51,6 +51,18 @@ extension WorkspaceManager {
         return spaces(on: placement).first
     }
 
+    /// The space `space`'s own area shows (#3517): its placement's,
+    /// else `display`'s where `space` has none, as a removed one.
+    public func activeSpace(
+        inAreaOf space: SpaceID,
+        on display: DisplayID
+    ) -> SpaceID? {
+        guard let placement = spacePlacement[space] else {
+            return activeSpace(on: display)
+        }
+        return activeSpace(on: placement)
+    }
+
     /// All spaces currently visible across placements.
     public var visibleSpaces: Set<SpaceID> {
         var result: Set<SpaceID> = []

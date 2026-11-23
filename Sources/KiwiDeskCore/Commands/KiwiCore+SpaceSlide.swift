@@ -41,7 +41,11 @@ extension KiwiCore {
     ) -> SpaceSlideIntent? {
         guard let display = state.workspaces.display(of: target)
         else { return nil }
-        let leaving = state.workspaces.activeSpace(on: display)
+        // The Space the target's own area shows (#3517 ruling 8).
+        let leaving = state.workspaces.activeSpace(
+            inAreaOf: target,
+            on: display
+        )
         guard leaving != target else { return nil }
         return SpaceSlideIntent(
             display: display,
@@ -79,10 +83,7 @@ extension KiwiCore {
         // The one stack read, at the press: parking moves frames
         // and never restacks, so it answers both directions.
         let stack = spaceSlide.stackOrder()
-        let page = GeometryUtils.flip(
-            screen.frame,
-            primaryHeight: GeometryUtils.primaryHeight
-        )
+        let page = slidePage(of: target, on: screen)
         // A window the switch filed into the target while it is
         // still on screen — a follow's moved window, a launch's
         // new one — goes with the user: neither covered nor held.
@@ -100,8 +101,11 @@ extension KiwiCore {
         let pressed = spaceSlide.press(
             SpaceSlideOverlay.Press(
                 display: intent.display,
-                screen: screen.frame,
-                axis: spaceSlideAxis(on: intent.display),
+                screen: GeometryUtils.flip(
+                    page,
+                    primaryHeight: GeometryUtils.primaryHeight
+                ),
+                axis: spaceSlideAxis(of: target, on: intent.display),
                 direction: intent.direction(
                     to: target,
                     order: state.workspaces.order
@@ -163,7 +167,10 @@ extension KiwiCore {
     /// head of every retile, so no activation door needs its own.
     func endSpaceSlideIfOvertaken() {
         guard let play = spaceSlide.play,
-            state.workspaces.activeSpace(on: play.display) != play.space
+            state.workspaces.activeSpace(
+                inAreaOf: play.space,
+                on: play.display
+            ) != play.space
         else { return }
         endSpaceSlide()
     }

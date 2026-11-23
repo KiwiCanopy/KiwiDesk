@@ -54,7 +54,7 @@ extension KiwiCore {
             return shelf
         }
         guard let screen = screen(for: placement.display) else { return nil }
-        let settings = tiler.settings.onScreen(areaKey(of: placement))
+        let settings = self.settings(on: placement)
         let edge =
             bar == .app
             ? settings.appBarStyle.edge : settings.spaceBarStyle.edge
