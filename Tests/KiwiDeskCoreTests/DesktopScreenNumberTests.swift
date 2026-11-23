@@ -82,7 +82,7 @@ struct DesktopScreenNumberTests {
     private func row(_ core: KiwiCore, _ id: UInt32, on hub: DisplayID)
         -> JumpEntry?
     {
-        core.jumpSnapshot(on: hub).entries.first {
+        core.jumpSnapshot(on: core.hubArea(hub)).entries.first {
             $0.target == .window(WindowID(id))
         }
     }
@@ -178,5 +178,17 @@ struct DesktopScreenNumberTests {
             authorityDisplay(2, "Studio (2)", x: 100)
         )
         #expect(core.screenLabel(of: DisplayID(2))?.twinPosition == nil)
+    }
+}
+
+extension KiwiCore {
+    /// The area a test opens KiwiHub over on display `id`: its
+    /// first area, the whole screen while it is not split (#3572).
+    fileprivate func hub(_ id: UInt32) -> PlacementID {
+        hubArea(DisplayID(id))
+    }
+
+    fileprivate func hubArea(_ display: DisplayID) -> PlacementID {
+        state.workspaces.placementOrWhole(of: display)
     }
 }

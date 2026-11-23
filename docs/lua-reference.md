@@ -8159,6 +8159,14 @@ app. Typing narrows the list by app name, then by title. While a
 lens's apps come first and every other app's follow under **Other
 apps**, while you type too. Moving the mouse over a row selects it.
 
+:::unreleased
+On a screen split into areas, KiwiHub opens centred over the area
+under the pointer, and that area is "here" on every side: Move here
+files into the Space it shows, Swap here's "yours" is that Space's
+focused window, and the View side's Layout line acts on that Space.
+An unsplit screen is one area.
+:::
+
 A window in the [pocket](#pocket) is listed after the hidden apps,
 under **Pocket**.
 
@@ -8304,6 +8312,19 @@ panel has the keyboard.
   front of their Space and the rest dim.
 - **Escape** steps back: the picked windows, the open Space, the
   typing, then KiwiHub.
+
+:::unreleased
+The overview lays each screen out as a column instead, left to
+right, its Desktops stacked downward; past the panel's width the
+columns scroll sideways, and past its height each column scrolls
+down. **↑** **↓** walk one screen's Desktops, **←** **→** step to
+the neighbouring screen, and **⌘1**–**⌘9** go to that Desktop of
+the selected screen. On a screen split into areas, each Desktop
+lists its Spaces under each area's name, each area marking the
+Space it shows, with **Not in a Space yet** last; clicking a
+Desktop's title goes to the Space shown in the area KiwiHub opened
+over, else in the first area.
+:::
 
 **Tab** reaches it from View, and **⇧Tab** from Windows.
 

@@ -208,9 +208,15 @@ extension JumpModel {
 
     /// The side's state over `overview`, sized from the panel.
     private func state(of overview: DesktopOverview) -> DesktopsState {
+        // The width the panel grants the side for this overview's
+        // columns (#3570 ▸ Ruling 4), read before the state exists.
+        let width = room.width(
+            JumpPanelRoom.fit(of: .desktops),
+            content: DesktopsGeometry.preferredWidth(of: overview)
+        )
         let geometry = DesktopsGeometry(
             overview: overview,
-            width: panelWidth,
+            width: width,
             cap: sheetCap
         )
         return DesktopsState(overview: overview, geometry: geometry)

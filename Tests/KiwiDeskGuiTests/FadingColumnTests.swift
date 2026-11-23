@@ -6,8 +6,8 @@ import Testing
 
 /// A vertical KiwiHub list fades its top or bottom edge only while
 /// items lie past it, and a keyboard reveal lands clear of the
-/// fade (#3164, owner 2026-11-11): the Desktops side's screen rows
-/// and each Desktop's Space lines.
+/// fade (#3164, owner 2026-11-11): the Desktops side's screen
+/// columns (#3570).
 @Suite("KiwiHub column fade (#3164)")
 struct FadingColumnTests {
     @Test("a vertical list fades only where items lie past it")
@@ -57,27 +57,30 @@ struct FadingColumnTests {
             )
             .filter { !$0.isWhitespace }
         }
+        // The row of screen columns scrolls sideways; each column
+        // fades down through its Desktops' titles and lines.
         let side = try read("DesktopsSideView.swift")
         #expect(
             side.contains(
-                "FadingColumn(selected:state.place.map"
+                "ViewLine(selected:state.place.map"
                     + "{DesktopsScrollID.screen($0.screen)},"
-                    + "ids:state.overview.screens.indices"
-                    + ".map(DesktopsScrollID.screen),"
-                    + "inset:DesktopsGeometry.sidePadding)"
+                    + "inset:DesktopsGeometry.rowInset)"
             )
         )
         #expect(
-            side.contains("row($0,geometry).id(DesktopsScrollID.screen($0))")
+            side.contains(
+                "column(screen).id(DesktopsScrollID.screen(screen))"
+            )
+        )
+        #expect(
+            side.contains(
+                "FadingColumn(selected:selected(in:screen),"
+                    + "ids:ids(of:screen))"
+            )
         )
         #expect(side.contains(".id(DesktopsScrollID.desktop(screen,index))"))
         let card = try read("DesktopCardView.swift")
-        #expect(
-            card.contains(
-                "FadingColumn(selected:selectedLine.map(lineID),"
-                    + "ids:desktop.spaces.indices.map(lineID))"
-            )
-        )
+        #expect(card.occurrences(of: "FadingColumn(") == 0)
         #expect(card.contains("line($0).id(lineID($0))"))
         for source in [side, card] {
             #expect(source.occurrences(of: "ScrollView(") == 0)

@@ -2,7 +2,7 @@ import Foundation
 import KiwiDeskCore
 
 /// A Space line on the Desktops side, by its indices into the
-/// overview: screen row, Desktop card, line (#1229).
+/// overview: screen column, Desktop card, line (#1229).
 struct DesktopsPlace: Hashable {
     var screen: Int
     var desktop: Int
@@ -16,8 +16,8 @@ struct DesktopsPlace: Hashable {
 struct DesktopsState: Equatable {
     let overview: DesktopOverview
     /// The side's sizes for this overview (#3164): its icon slots
-    /// per screen row, which the keys scroll by, and what the side
-    /// draws.
+    /// per screen column, which the keys scroll by, and what the
+    /// side draws.
     let geometry: DesktopsGeometry
     private(set) var place: DesktopsPlace?
     /// The selected window: non-nil while inside a Space.
@@ -31,7 +31,7 @@ struct DesktopsState: Equatable {
     var isInside: Bool { window != nil }
     var isCarrying: Bool { !carried.isEmpty }
 
-    /// Opens on the Space line the KiwiHub screen shows.
+    /// Opens on the Space line the KiwiHub area shows (#3572).
     init(overview: DesktopOverview, geometry: DesktopsGeometry) {
         self.overview = overview
         self.geometry = geometry
@@ -51,10 +51,12 @@ struct DesktopsState: Equatable {
         let desktop =
             desktops.firstIndex(where: \.isShown)
             ?? desktops.firstIndex(where: \.holdsLive) ?? 0
-        let lines = desktops[desktop].spaces
-        guard !lines.isEmpty else { return nil }
-        let line = lines.firstIndex(where: \.isShown) ?? 0
-        return DesktopsPlace(screen: screen, desktop: desktop, line: line)
+        guard !desktops[desktop].spaces.isEmpty else { return nil }
+        return DesktopsPlace(
+            screen: screen,
+            desktop: desktop,
+            line: desktops[desktop].landingLine
+        )
     }
 
     // MARK: Reading

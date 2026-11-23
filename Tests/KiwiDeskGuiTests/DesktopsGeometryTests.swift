@@ -1,16 +1,19 @@
+import CoreGraphics
 import Foundation
 import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
 
-/// The Desktops side's derived sizes (#3164 ▸ Ruling and
-/// amendment): the line height from 36 down to 30 pt fitting every
-/// screen row under the cap, columns sharing each row's width over
-/// a 224 pt floor, icons at the line less 8 and slots following the
-/// width; and the state and the side reading one answer. Main
-/// actor for `JumpPanelView.width`; pure arithmetic, no AppKit.
-@Suite("Desktops side geometry (#3164)")
+/// The Desktops side's derived sizes (#3164, #3570 ruling 4): one
+/// column per screen, its Desktops stacked; the line height from 36
+/// down to 30 pt fitting the tallest column under the cap; the
+/// columns sharing the panel's width over a 224 pt floor, and the
+/// side asking one narrowest column per screen; icons at the line
+/// less 8 and slots following the width; and the state and the side
+/// reading one answer. Main actor for `JumpPanelView.width`; pure
+/// arithmetic, no AppKit.
+@Suite("Desktops side geometry (#3164, #3570)")
 @MainActor
 struct DesktopsGeometryTests {
     typealias G = DesktopsGeometry
@@ -38,6 +41,21 @@ struct DesktopsGeometryTests {
         )
     }
 
+    /// An area group over `lines` of a split screen's Desktop.
+    static func area(
+        _ id: Int,
+        lines: Range<Int>,
+        here: Bool = false
+    ) -> DesktopOverview.Area {
+        DesktopOverview.Area(
+            key: ScreenAreaKey(fingerprint: "Wide:3440x1440", areaID: id),
+            name: nil,
+            position: id == 0 ? .left : .right,
+            isHere: here,
+            lines: lines
+        )
+    }
+
     static func geometry(
         _ screens: [DesktopOverview.Screen],
         width: CGFloat = JumpPanelView.width,
@@ -54,101 +72,143 @@ struct DesktopsGeometryTests {
     func lineHeight() {
         let one = Self.geometry([Self.screen(1, desktops: 1, spaces: 4)])
         #expect(one.line == G.tallestLine)
-        // Two screens, four Spaces deep: each row's share of the cap
-        // over four lines, rounded down, inside 30...36.
-        let two = Self.geometry([
-            Self.screen(1, desktops: 2, spaces: 4),
+        // Three Desktops of three lines stacked in one column: the
+        // budget less three titles and two gaps, over nine lines.
+        let screens = [
+            Self.screen(1, desktops: 3, spaces: 3),
             Self.screen(2, desktops: 1, spaces: 2),
-        ])
-        let share = (Self.cap - G.chrome(rows: 2)) / 2
-        let fit = (share / 4).rounded(.down)
+        ]
+        let two = Self.geometry(screens)
+        let budget = Self.cap - G.chrome
+        let fixed = 3 * (G.titleHeight + G.titleGap) + 2 * G.desktopGap
+        let fit = ((budget - fixed) / 9).rounded(.down)
         #expect(fit < G.tallestLine && fit > G.shortestLine)
-        #expect(fit == 35)
         #expect(two.line == fit)
-        #expect(two.lines == [4 * fit, 2 * fit])
+        #expect(two.stacks[0] == fixed + 9 * fit)
+        #expect(two.stacks[1] == G.titleHeight + G.titleGap + 2 * fit)
+        #expect(two.height == G.chrome + two.stacks[0])
         #expect(two.height <= Self.cap)
         #expect(
-            Self.geometry(
-                [
-                    Self.screen(1, desktops: 2, spaces: 4),
-                    Self.screen(2, desktops: 1, spaces: 2),
-                ],
-                cap: two.height - 1
-            ).line < 35
+            Self.geometry(screens, cap: two.height - 1).line < fit
         )
     }
 
-    @Test("below 30 pt the column scrolls; past two screens the side")
+    @Test("below 30 pt the column scrolls down")
     func scrollsBelowTheFloor() {
         let deep = Self.geometry([
-            Self.screen(1, desktops: 1, spaces: 8),
+            Self.screen(1, desktops: 1, spaces: 12),
             Self.screen(2, desktops: 1, spaces: 1),
         ])
         #expect(deep.line == G.shortestLine)
-        #expect(deep.lines[0] < 8 * G.shortestLine)
-        #expect(deep.lines[1] == G.shortestLine)
-        #expect(deep.height <= Self.cap)
-        // A third screen sizes lines as two do, and the side scrolls.
-        let three = Self.geometry([
-            Self.screen(1, desktops: 1, spaces: 4),
-            Self.screen(2, desktops: 1, spaces: 4),
-            Self.screen(3, desktops: 1, spaces: 4),
-        ])
-        let two = Self.geometry([
-            Self.screen(1, desktops: 1, spaces: 4),
-            Self.screen(2, desktops: 1, spaces: 4),
-        ])
-        #expect(three.line == two.line)
-        #expect(three.height == Self.cap)
+        #expect(deep.height == Self.cap)
+        #expect(deep.body == Self.cap - G.chrome)
+        #expect(deep.stacks[0] > deep.body)
+        // More screens never shorten the line: they add columns.
+        let five = Self.geometry(
+            (1...5).map { Self.screen($0, desktops: 1, spaces: 4) }
+        )
+        #expect(five.line == G.tallestLine)
     }
 
-    @Test("columns share each row's width, never under 224 pt")
-    func columnsFillTheRow() {
-        let g = Self.geometry([
-            Self.screen(1, desktops: 1, spaces: 2),
-            Self.screen(2, desktops: 2, spaces: 2),
-            Self.screen(3, desktops: 3, spaces: 2),
-            Self.screen(4, desktops: 5, spaces: 2),
-        ])
+    @Test("an area adds its header and gap to its Desktop (#3572)")
+    func areasCountTheirHeaders() {
+        let plain = T.desktop(
+            1,
+            shown: true,
+            [T.line("1", []), T.line("2", [])]
+        )
+        let split = DesktopOverview.Desktop(
+            native: 1,
+            label: 1,
+            number: 1,
+            isShown: true,
+            profile: nil,
+            spaces: plain.spaces,
+            areas: [
+                Self.area(0, lines: 0..<1),
+                Self.area(1, lines: 1..<2),
+            ]
+        )
+        let header = G.areaHeight + G.areaGap
+        #expect(
+            G.card(of: split, line: 30) == G.card(of: plain, line: 30)
+                + 2 * header
+        )
+        #expect(G.areaHeight == 16)
+    }
+
+    @Test("one column per screen, sharing the width over 224 pt")
+    func columnsFillTheWidth() {
         let room = JumpPanelView.width - 2 * G.rowInset
         #expect(room == 688)
-        #expect(g.columns == [688, 343, 228, G.narrowestColumn])
-        // A narrower panel shares its own width.
-        let narrow = Self.geometry(
-            [Self.screen(1, desktops: 2, spaces: 2)],
-            width: 600
+        let two = Self.geometry([
+            Self.screen(1, desktops: 1, spaces: 2),
+            Self.screen(2, desktops: 5, spaces: 2),
+        ])
+        let half = ((room - G.divider) / 2).rounded(.down)
+        #expect(two.columns == [half, half])
+        // Four screens outgrow the panel: every column at the floor,
+        // so the row of screens scrolls sideways.
+        let four = Self.geometry(
+            (1...4).map { Self.screen($0, desktops: 2, spaces: 2) }
         )
-        let share = (600 - 2 * G.rowInset - G.divider) / 2
-        #expect(narrow.columns == [share.rounded(.down)])
+        #expect(four.columns == Array(repeating: G.narrowestColumn, count: 4))
+        let drawn = four.columns.reduce(0, +) + 3 * G.divider
+        #expect(drawn > room)
+    }
+
+    @Test("the side asks one narrowest column per screen")
+    func preferredWidth() {
+        func asked(_ count: UInt32) -> CGFloat {
+            G.preferredWidth(
+                of: DesktopOverview(
+                    screens: (1...count).map {
+                        Self.screen($0, desktops: 1, spaces: 1)
+                    },
+                    yours: nil
+                )
+            )
+        }
+        #expect(asked(1) == 2 * G.rowInset + G.narrowestColumn)
+        // Each screen adds a column and its divider, whatever its
+        // Desktops.
+        #expect(asked(4) - asked(3) == G.narrowestColumn + G.divider)
+        // Granted, the columns stand at the floor exactly.
+        let overview = DesktopOverview(
+            screens: (1...5).map { Self.screen($0, desktops: 3, spaces: 2) },
+            yours: nil
+        )
+        let granted = G(
+            overview: overview,
+            width: G.preferredWidth(of: overview),
+            cap: Self.cap
+        )
+        #expect(granted.columns.allSatisfy { $0 == G.narrowestColumn })
     }
 
     @Test("icons follow the line; slots follow the width")
     func iconsAndSlots() {
         let g = Self.geometry([
             Self.screen(1, desktops: 1, spaces: 2),
-            Self.screen(2, desktops: 4, spaces: 2),
+            Self.screen(2, desktops: 2, spaces: 2),
         ])
         #expect(g.line == 36)
         #expect(g.icon == 28)
         let short = Self.geometry([
-            Self.screen(1, desktops: 1, spaces: 8),
+            Self.screen(1, desktops: 1, spaces: 12),
             Self.screen(2, desktops: 1, spaces: 8),
         ])
         #expect(short.icon == 22)
         // The floor of 22 holds by construction at the shortest line.
         #expect(G.shortestLine - 8 == 22)
         #expect(g.slots.count == 2)
-        #expect(g.slots[0] > g.slots[1])
         #expect(g.slots.allSatisfy { $0 >= 1 })
-        // At 28 pt icons: 688, 343, 228 and 224 pt columns.
-        let rows = Self.geometry([
-            Self.screen(1, desktops: 1, spaces: 2),
-            Self.screen(2, desktops: 2, spaces: 2),
-            Self.screen(3, desktops: 3, spaces: 2),
-            Self.screen(4, desktops: 5, spaces: 2),
-        ])
-        #expect(rows.icon == 28)
-        #expect(rows.slots == [19, 7, 3, 3])
+        // At 28 pt icons: two 343 pt columns, four at 224 pt.
+        #expect(g.slots == [7, 7])
+        let four = Self.geometry(
+            (1...4).map { Self.screen($0, desktops: 1, spaces: 2) }
+        )
+        #expect(four.slots == [3, 3, 3, 3])
     }
 
     @Test("a line's slots are its screen's")
@@ -159,7 +219,7 @@ struct DesktopsGeometryTests {
         #expect(place.screen == 1)
         let slots = state.geometry.slots
         #expect(slots[1] == 5)
-        #expect(slots[0] > slots[1])
+        #expect(slots[0] == slots[1])
         #expect(state.slots(place) == slots[1])
         // Seven windows on the line, five shown: two after.
         #expect(state.hidden(place).after == 2)
@@ -200,33 +260,6 @@ struct DesktopsGeometryTests {
         var last = narrow
         last.select(window: windows[6].id, in: place)
         #expect(last.offset(place) == 3)
-    }
-
-    @Test("the model hands the state the side's slots")
-    func modelWiresTheSlots() {
-        let model = JumpModel(
-            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
-            icons: [:],
-            rowCap: 9,
-            sheetCap: Self.cap,
-            panelWidth: 600
-        )
-        model.loadDesktops = { T.overview() }
-        model.setScope(.desktops)
-        let expected = G(
-            overview: T.overview(),
-            width: 600,
-            cap: Self.cap
-        ).slots
-        #expect(model.desktops?.geometry.slots == expected)
-        #expect(
-            expected
-                != G(
-                    overview: T.overview(),
-                    width: JumpPanelView.width,
-                    cap: Self.cap
-                ).slots
-        )
     }
 
     @Test("one geometry, from the panel's width, reaches the side")
@@ -272,7 +305,13 @@ struct DesktopsGeometryTests {
         let model = try read("JumpModel+Desktops.swift")
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")
-        #expect(model.contains("width:panelWidth,cap:sheetCap"))
+        #expect(
+            model.contains(
+                "content:DesktopsGeometry.preferredWidth(of:overview))"
+                    + "letgeometry=DesktopsGeometry("
+                    + "overview:overview,width:width,cap:sheetCap)"
+            )
+        )
         #expect(model.contains("geometry:geometry)"))
     }
 }

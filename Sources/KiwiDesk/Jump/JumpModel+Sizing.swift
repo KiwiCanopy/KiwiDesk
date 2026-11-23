@@ -30,7 +30,10 @@ extension JumpModel {
         }
     }
 
-    /// The Desktops side's own width: the field row's until its
-    /// screen columns report theirs (#3570 ▸ Ruling 4).
-    var desktopsContentWidth: CGFloat { room.fieldWidth }
+    /// The Desktops side's own width: one narrowest column per
+    /// screen (#3570 ▸ Ruling 4), the field row's before it loads.
+    var desktopsContentWidth: CGFloat {
+        desktops.map { DesktopsGeometry.preferredWidth(of: $0.overview) }
+            ?? room.fieldWidth
+    }
 }

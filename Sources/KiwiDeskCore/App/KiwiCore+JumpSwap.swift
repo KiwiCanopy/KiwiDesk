@@ -8,18 +8,18 @@ import Foundation
 extension KiwiCore {
     /// Swaps `target`'s window with yours through the public swap
     /// verbs, so a refusal is the verb's own and the change report
-    /// fires. `display` is the screen KiwiHub opened on.
+    /// fires. `area` is the area KiwiHub opened over (#3572).
     public func swapHere(
         _ target: JumpEntry.Target,
-        on display: DisplayID? = nil
+        on area: PlacementID? = nil
     ) {
         withUserMotion {
             guard case .window(let id) = target, state.windows[id] != nil
             else {
-                refuseJumpSwap(target, on: display)
+                refuseJumpSwap(target, on: area)
                 return
             }
-            let here = moveHereSpace(on: display)
+            let here = moveHereSpace(in: area)
             // `swap_here`'s implied window is the active Space's
             // focus (#292), so another screen's is named instead,
             // and the switch to it follows the trade.
@@ -56,9 +56,9 @@ extension KiwiCore {
     /// the focused window, where the user is looking.
     private func refuseJumpSwap(
         _ target: JumpEntry.Target,
-        on display: DisplayID?
+        on area: PlacementID?
     ) {
-        let refusal = jumpSwapRefusal(target, on: display)
+        let refusal = jumpSwapRefusal(target, on: area)
         guard let focused = focusedWindowID else {
             onLog("\(refusal.logReason): \(target)")
             return
@@ -70,9 +70,9 @@ extension KiwiCore {
     /// row is drawn by (`swapRefusal`), so the two never disagree.
     private func jumpSwapRefusal(
         _ target: JumpEntry.Target,
-        on display: DisplayID?
+        on area: PlacementID?
     ) -> WindowActionRefusal {
-        switch swapRefusal(target, on: display) {
+        switch swapRefusal(target, on: area) {
         case .hiddenApp: .cannotSwapHiddenApp
         case .minimized: .cannotSwapMinimized
         case .otherDesktop: .cannotSwapHiddenDesktop
@@ -81,7 +81,7 @@ extension KiwiCore {
         case .yoursFullScreen:
             .cannotSwapFullScreen(
                 window: jumpSwapPartner(
-                    in: moveHereSpace(on: display)
+                    in: moveHereSpace(in: area)
                 ).map(windowTitle) ?? ""
             )
         case nil, .floating, .sticky, .pocketed, .unfiled, .yours,

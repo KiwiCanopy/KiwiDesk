@@ -127,7 +127,7 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         track(core, 2, in: "2")
-        #expect(core.moveHere(.window(WindowID(2)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(2)), on: core.hub(2)))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
         #expect(core.state.workspaces.activeSpace == "5")
         #expect(core.state.workspaces.lastFocused == WindowID(2))
@@ -143,7 +143,7 @@ struct JumpMoveHereScreenTests {
         fullscreen.isFullscreen = true
         core.state.apply(.windowCreated(fullscreen))
         core.state.workspaces.add(WindowID(3), to: "2")
-        #expect(!core.moveHere(.window(WindowID(3)), on: DisplayID(2)))
+        #expect(!core.moveHere(.window(WindowID(3)), on: core.hub(2)))
         #expect(core.state.workspaces.activeSpace == "1")
         #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
     }
@@ -158,7 +158,7 @@ struct JumpMoveHereScreenTests {
         core.state.workspaces.show("6", on: DisplayID(2))
         track(core, 1, in: "1")
         track(core, 2, in: "2")
-        #expect(core.moveHere(.window(WindowID(2)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(2)), on: core.hub(2)))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "6")
         #expect(core.state.workspaces.activeSpace == "6")
     }
@@ -173,7 +173,7 @@ struct JumpMoveHereScreenTests {
         core.state.workspaces.focus(WindowID(1), in: "1")
         track(core, 2, in: "1")
         track(core, 3, in: "5")
-        let snapshot = core.jumpSnapshot(on: DisplayID(2))
+        let snapshot = core.jumpSnapshot(on: core.hub(2))
         #expect(snapshot.here == "5")
         let moves = Dictionary(
             uniqueKeysWithValues: snapshot.entries.map {
@@ -195,7 +195,7 @@ struct JumpMoveHereScreenTests {
         core.state.apply(.windowFocused(WindowID(1)))
         #expect(core.execute("pocket").isSuccess)
         #expect(core.state.pocketPhase(of: WindowID(1)) == .pocketed)
-        #expect(core.moveHere(.window(WindowID(1)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(1)), on: core.hub(2)))
         #expect(core.state.workspaces.space(of: WindowID(1)) == "5")
         #expect(core.state.workspaces.activeSpace == "5")
     }
@@ -209,7 +209,7 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         park(core)
-        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(7)), on: core.hub(2)))
         #expect(Bridge.moves.map(\.1) == [20])
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("5"))
         #expect(core.jump.owed?.space == "5")
@@ -230,11 +230,11 @@ struct JumpMoveHereScreenTests {
         track(core, 3, in: "5")
         core.state.workspaces.focus(WindowID(3), in: "5")
         track(core, 2, in: "2")
-        let row = core.jumpSnapshot(on: DisplayID(2)).entries.first {
+        let row = core.jumpSnapshot(on: core.hub(2)).entries.first {
             $0.target == .window(WindowID(2))
         }
         #expect(row?.swapsHere == true)
-        core.swapHere(.window(WindowID(2)), on: DisplayID(2))
+        core.swapHere(.window(WindowID(2)), on: core.hub(2))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
         #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
         #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
@@ -251,10 +251,22 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         track(core, 2, in: "2")
-        #expect(core.jumpSnapshot(on: DisplayID(2)).swapsInHere == false)
-        core.swapHere(.window(WindowID(2)), on: DisplayID(2))
+        #expect(core.jumpSnapshot(on: core.hub(2)).swapsInHere == false)
+        core.swapHere(.window(WindowID(2)), on: core.hub(2))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
         #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
         #expect(core.state.workspaces.activeSpace == "1")
+    }
+}
+
+extension KiwiCore {
+    /// The area a test opens KiwiHub over on display `id`: its
+    /// first area, the whole screen while it is not split (#3572).
+    fileprivate func hub(_ id: UInt32) -> PlacementID {
+        hubArea(DisplayID(id))
+    }
+
+    fileprivate func hubArea(_ display: DisplayID) -> PlacementID {
+        state.workspaces.placementOrWhole(of: display)
     }
 }

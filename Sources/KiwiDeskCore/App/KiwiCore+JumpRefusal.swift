@@ -6,13 +6,13 @@ import Foundation
 /// and the verb never disagree. A slice that admits a row kind this
 /// one refuses drops its case here, where both read it.
 extension KiwiCore {
-    /// Why Swap here from `display` would not trade `target`, read
+    /// Why Swap here from `area` would not trade `target`, read
     /// now; nil where it trades or where only the verb can tell.
     public func swapRefusal(
         _ target: JumpEntry.Target,
-        on display: DisplayID? = nil
+        on area: PlacementID? = nil
     ) -> JumpSwapBlock? {
-        let partner = jumpSwapPartner(in: moveHereSpace(on: display))
+        let partner = jumpSwapPartner(in: moveHereSpace(in: area))
         // A row the verb cannot see answers yours first; a tracked
         // row takes the verb's one verdict, as its row does.
         let yours = yoursSwapBlock(partner)
@@ -32,10 +32,10 @@ extension KiwiCore {
         return jumpSwapBlock(id, partner: partner)
     }
 
-    /// Why Move here from `display` would refuse `target`, read now.
+    /// Why Move here from `area` would refuse `target`, read now.
     public func moveHereRefusal(
         _ target: JumpEntry.Target,
-        on display: DisplayID? = nil
+        on area: PlacementID? = nil
     ) -> JumpMoveBlock? {
         guard case .window(let id) = target else { return nil }
         if let away = state.awayWindows[id] {
@@ -43,7 +43,7 @@ extension KiwiCore {
             return awayIsFullScreen(away, in: desktops) ? .fullScreen : nil
         }
         guard let window = state.windows[id],
-            let here = moveHereSpace(on: display)
+            let here = moveHereSpace(in: area)
         else { return nil }
         return jumpMoveBlock(window, into: here)
     }
