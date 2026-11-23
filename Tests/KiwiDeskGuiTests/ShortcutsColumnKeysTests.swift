@@ -88,6 +88,60 @@ struct ShortcutsColumnKeysTests {
         #expect(model(cap: 560).shortcutColumns.columns.count == 2)
     }
 
+    /// The model takes its caps from the room the controller hands
+    /// it: a growing side's, never the compact ceiling.
+    @Test("the model's caps come from its room")
+    func capsFromTheRoom() {
+        let room = JumpPanelController.room(
+            visible: CGRect(x: 0, y: 0, width: 1600, height: 1000),
+            area: CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        )
+        let model = JumpModel(
+            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
+            icons: [:],
+            rowCap: 9,
+            room: room
+        )
+        #expect(
+            model.sheetCap == JumpPanelController.sheetCap(in: room, .grows)
+        )
+        #expect(model.panelWidth == room.fieldWidth)
+    }
+
+    /// One column is judged at the field row's wrap: a captioned
+    /// sheet that fits one wide column stays whole, though its
+    /// caption would wrap taller in a narrow one.
+    @Test("one column is judged at the field row's width")
+    func singleAtTheFieldWidth() throws {
+        LocalizationManager.shared.select("en")
+        let captioned = ShortcutsReference(
+            layerName: KeyLayer.defaultName,
+            controls: [
+                ShortcutSubgroup(title: "Focus", rows: Self.rows("Focus", 4))
+            ],
+            inactive: Self.rows("Gone", 4),
+            desktopAway: [],
+            apps: [],
+            custom: []
+        )
+        let wide =
+            JumpPanelRoom.fieldWidth - 2 * JumpShortcutsView.kiwiHubInset
+        let sections = ShortcutsSheetView.sections(captioned)
+        let heights = sections.map {
+            ShortcutsSheetView.planned($0, needle: "", width: wide).height
+        }
+        let tall = ShortcutsColumnPlan.height(heights, 0..<heights.count)
+        let model = JumpModel(
+            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
+            icons: [:],
+            rowCap: 9,
+            sheetCap: tall + 2 * JumpShortcutsView.kiwiHubVerticalInset
+        )
+        model.loadShortcuts = { captioned }
+        model.setScope(.shortcuts)
+        #expect(model.shortcutColumns.columns == [0..<2])
+    }
+
     @Test("↑ ↓ and the Page keys scroll the one shared scroll view")
     func keysScroll() {
         let model = model(cap: 300)
