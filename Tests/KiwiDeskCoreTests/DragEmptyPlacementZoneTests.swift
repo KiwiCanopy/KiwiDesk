@@ -181,7 +181,8 @@ struct DragEmptyPlacementZoneTests {
 
     /// The live crossing (#504) files the window first; the zone
     /// stays on the slot it took.
-    @Test func crossingKeepsTheZone() throws {
+    @Test(arguments: [false, true])
+    func crossingKeepsTheZone(withSticky: Bool) throws {
         guard let screen = ScreenList.all.first,
             let id = screen.kiwiDisplayID
         else { return }
@@ -193,6 +194,8 @@ struct DragEmptyPlacementZoneTests {
         addWindow(core, 1)
         addWindow(core, 2)
         core.dragCrossing.displayAt = { $0.x < 5000 ? id : other }
+        // A global sticky tile follows the crossing's activation.
+        if withSticky { core.state.setSticky(WindowID(2), .global) }
         let point = CGPoint(x: 6000, y: 300)
         let home = try drag(core, to: point)
         let zone = try #require(core.dragOverlay.dropZoneFrame)
@@ -239,5 +242,56 @@ struct DragEmptyPlacementZoneTests {
         #expect(slot.minX - 10 > 1720)
         _ = try drag(core, to: gap)
         #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    /// After a crossing, a pointer back in a gap of the screen it
+    /// left drops the window there, so the zone leaves the slot the
+    /// crossing gave it.
+    @Test func crossingBackShowsNone() throws {
+        guard let screen = ScreenList.all.first,
+            let id = screen.kiwiDisplayID
+        else { return }
+        let other = DisplayID(900_613)
+        let core = pinned(makeTestCore(), id: id)
+        core.execute("set_gap_global", args: [.number(40)])
+        core.state.workspaces.assign(SpaceID("1"), to: id)
+        core.state.workspaces.assign(SpaceID("2"), to: other)
+        core.state.workspaces.activate(SpaceID("1"))
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.dragCrossing.displayAt = { $0.x < 5000 ? id : other }
+        let home = try drag(core, to: CGPoint(x: 6000, y: 300))
+        core.dragCrossing.onCross(WindowID(1), other)
+        let gap = GeometryUtils.axPoint(CGPoint(x: 10, y: 700))
+        core.drag.cursorLocation = { gap }
+        core.handleDragMove(
+            WindowID(1),
+            start: home,
+            frame: home.offsetBy(dx: 80, dy: 0)
+        )
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    /// A drop zone turned off stays off beside a shown ghost.
+    @Test func zoneOffShowsNone() throws {
+        let core = try #require(splitCore())
+        core.tiler.settings.dragGhost.enabled = true
+        core.tiler.settings.dragDropZone.enabled = false
+        _ = try drag(core, to: cursor(CGPoint(x: 3000, y: 700)))
+        #expect(core.dragOverlay.isGhostVisible)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    /// The probe is a what-if read: the monocle hold it lays out
+    /// for an empty Monocle Space is not left in the live engine.
+    @Test func probeLeavesTheMonocleHold() throws {
+        let core = try #require(splitCore())
+        core.state.workspaces.withSpace(SpaceID("2")) {
+            $0.mode = .monocle
+        }
+        let before = core.tiler.monocleShownMembers
+        _ = try drag(core, to: cursor(CGPoint(x: 3000, y: 700)))
+        #expect(core.dragOverlay.isDropZoneVisible)
+        #expect(core.tiler.monocleShownMembers == before)
     }
 }

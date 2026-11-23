@@ -37,14 +37,17 @@ extension KiwiCore {
     }
 
     /// After a live crossing (#504) the window is its new Space's
-    /// lone tiled member, so its own slot is where the drop lands.
+    /// one tiled member of its own — the emptiness the zone above
+    /// asks — so its own slot is where a drop the pointer keeps on
+    /// that Space lands.
     func crossedLoneSlot(
         _ id: WindowID,
         in space: Space,
         slots: [WindowID: CGRect]
     ) -> CGRect? {
         guard dragCrossing.hasCrossed(id),
-            state.effectiveTiledMembers(of: space) == [id]
+            state.localTiledMembers(of: space) == [id],
+            crossDropDestination(from: space) == nil
         else { return nil }
         return slots[id]
     }

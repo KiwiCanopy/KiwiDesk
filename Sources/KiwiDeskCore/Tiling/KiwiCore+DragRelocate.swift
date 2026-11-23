@@ -45,6 +45,10 @@ import Foundation
 /// diverge: relocate and crossing share `insertDropped`; spring
 /// and moveWindow share `addFocusedToSpace` (which insertDropped
 /// also routes through for track / empty destinations).
+/// The live drop zone over an empty Space (#3582,
+/// `emptyPlacementDropZone`) writes a copy of the drop-commit's
+/// filing into a probe state: a write added to the commit that the
+/// layout reads joins that probe too.
 extension KiwiCore {
     /// The window the live drop-zone highlight should mark, or nil
     /// to suppress it. Suppresses over a **cross-display track**
