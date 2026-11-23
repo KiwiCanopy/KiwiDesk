@@ -9,8 +9,7 @@ import Testing
 /// drivers (#3517 ruling 30): a Space Bar listing that area's
 /// Spaces with its shown one active, its shelf inside the area, a
 /// stacked lower area's top bar on its own top edge, and the Pocket
-/// resting and reserving in the lead area alone. A test core raises
-/// `honoursAreaSplits`, which production keeps lowered. Needs a host
+/// resting and reserving in the lead area alone. Needs a host
 /// screen, whose own frames every expectation is measured against.
 @Suite(
     "Area shelf drivers (#3517)",
@@ -35,7 +34,6 @@ struct AreaShelfDriverTests {
             )
         else { return nil }
         let core = makeTestCore()
-        core.honoursAreaSplits = true
         core.tiler.visibleBounds = { _ in
             GeometryUtils.axVisibleFrame(of: screen)
         }

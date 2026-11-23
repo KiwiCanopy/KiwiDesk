@@ -1026,6 +1026,21 @@ kiwidesk get_state | jq '.spaces | group_by(.display)
 ```
 :::
 
+:::unreleased
+`set_display_areas` (Navigation) takes a screen, then `side_by_side`
+or `stacked` and one size in points per area, and splits that
+screen into areas; with the screen alone it makes it whole again
+(`kiwidesk set_display_areas 1 side_by_side 1720 1720`).
+`set_display_area_name` takes an area key and a name ("" clears
+it). On a split screen `move_space_to_display` and
+`pin_space_to_display` also take an area key or an area's name,
+`get_state`'s space objects carry `area`, the key of the area each
+sits in, and `list_monitors`' entries `areas`, one per area with its
+key, name, rect and `space_id`. See
+[set_display_areas](lua-reference.md#set_display_areas) and
+[get_state](lua-reference.md#get_state).
+:::
+
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
 argument, a window `id` from `get_state`: they then act on that

@@ -118,7 +118,6 @@ struct AreaBarVisibilityTests {
             ).splitting(0, .sideBySide)
         else { return }
         let core = makeTestCore()
-        core.honoursAreaSplits = true
         core.tiler.visibleBounds = { _ in
             GeometryUtils.axVisibleFrame(of: screen)
         }

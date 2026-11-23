@@ -112,13 +112,27 @@ struct SpaceHistoryTests {
         #expect(list.first == visits[5])
     }
 
-    @Test("a disconnected screen's trail goes")
-    func keepScreens() {
+    @Test("a gone area's trail goes")
+    func keepAreas() {
         var history = SpaceHistory()
-        history.visit("1", under: .screen(DisplayID(1)))
-        history.visit("7", under: .screen(DisplayID(2)))
-        history.keepScreens([DisplayID(1)])
-        #expect(history.entries(under: .screen(DisplayID(2))).list == [])
-        #expect(history.entries(under: .screen(DisplayID(1))).list == ["1"])
+        history.visit(
+            "1",
+            under: .area(PlacementID(display: DisplayID(1), area: 0))
+        )
+        history.visit(
+            "7",
+            under: .area(PlacementID(display: DisplayID(2), area: 0))
+        )
+        history.keepAreas([PlacementID(display: DisplayID(1), area: 0)])
+        #expect(
+            history.entries(
+                under: .area(PlacementID(display: DisplayID(2), area: 0))
+            ).list == []
+        )
+        #expect(
+            history.entries(
+                under: .area(PlacementID(display: DisplayID(1), area: 0))
+            ).list == ["1"]
+        )
     }
 }

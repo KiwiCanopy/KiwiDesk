@@ -137,12 +137,13 @@ extension KiwiCore {
         in snapshot: DesktopSnapshot,
         shared: Bool
     ) -> [DesktopOverview.SpaceLine] {
-        let active = state.workspaces.activeSpace(on: display)
+        // Shown in any of the screen's areas (#3517).
+        let shown = state.workspaces.visibleSpaces
         let spaces = state.workspaces.spaces(on: display)
         let lines = spaces.map { id in
             overviewLine(
                 id,
-                isShown: id == active,
+                isShown: shown.contains(id),
                 windows: liveMembers(of: id)
                     + awayWindows(fullScreen, in: id, snapshot),
                 lastFocused: state.workspaces[id]
@@ -181,12 +182,13 @@ extension KiwiCore {
             }
         }
         let returning = rememberedVirtualSpace(of: native.id, in: snapshot)
-        let active = state.workspaces.activeSpace(on: display)
+        // A shown Desktop's Spaces, in any area (#3517).
+        let shown = state.workspaces.visibleSpaces
         let spaces = state.workspaces.spaces(on: display)
         let lines = spaces.map { id in
             overviewLine(
                 id,
-                isShown: id == (live == nil ? returning : active),
+                isShown: live == nil ? id == returning : shown.contains(id),
                 // The ledger's own reader, in the rank they return in.
                 windows: (live == nil ? [] : liveMembers(of: id))
                     + awayWindows(

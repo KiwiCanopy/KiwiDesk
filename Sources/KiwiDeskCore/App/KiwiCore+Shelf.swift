@@ -73,7 +73,7 @@ extension KiwiCore {
         var standingDown: Set<DisplayID> = []
         // The overflow marks sit on windows a maximize covers, so
         // they stand down there too (#2448, #3346).
-        var marksStandingDown: Set<DisplayID> = []
+        var marksStandingDown: Set<PlacementID> = []
         var hiding = HidingShelves()
         // The pocket's slot on each screen's bar edge (#2678).
         var pocketSlots: [DisplayID: CGRect] = [:]
@@ -93,8 +93,10 @@ extension KiwiCore {
             // bars Hidden through `shown` (#3346).
             let down = shelfStandsDown(on: display.id)
             if down { standingDown.insert(display.id) }
-            if down || screenMaximizes(on: display.id) {
-                marksStandingDown.insert(display.id)
+            // Per area: a Maximize covers its own area alone (#3517).
+            for area in state.workspaces.placements(of: display.id)
+            where down || screenMaximizes(on: area.id) {
+                marksStandingDown.insert(area.id)
             }
             guard let screen = screen(for: display.id) else { continue }
             // Chrome is drawn on a REAL screen, so the shelf is

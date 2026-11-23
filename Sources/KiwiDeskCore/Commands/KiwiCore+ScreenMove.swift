@@ -33,32 +33,10 @@ extension KiwiCore {
         return moveToScreen(target, follow: follow)
     }
 
-    /// Files the focused window into the Space `display` shows. A
-    /// screen on a native full-screen or system Space takes no
-    /// window, since that Space hides whatever is filed under it.
-    private func moveToScreen(
-        _ display: DisplayID,
-        follow: Bool
-    ) -> CommandResponse {
-        guard let window = focusedWindowID else {
-            return .fail("no focused window")
-        }
-        // Ahead of the screen's verdict, so the window's own
-        // refusal names it; `moveToSpace` asks again (#3119).
-        if let refusal = spaceMoveRefusal(window) { return refusal }
-        guard screenShowsUserSpace(on: display) else {
-            let refusal = WindowActionRefusal.screenShowsFullScreen
-            cueWindowAction(refusal, on: window)
-            return .fail(refusal.logReason)
-        }
-        guard let shown = state.workspaces.activeSpace(on: display) else {
-            return .fail("no Space on that screen")
-        }
-        return moveToSpace(window, shown, follow: follow)
-    }
-
     /// Files the focused window into the Space an area shows
-    /// (#3517), as `moveToScreen(_:follow:)` above.
+    /// (#3517). A screen on a native full-screen or system Space
+    /// takes no window, since that Space hides whatever is filed
+    /// under it.
     private func moveToScreen(
         _ area: PlacementID,
         follow: Bool
@@ -66,6 +44,8 @@ extension KiwiCore {
         guard let window = focusedWindowID else {
             return .fail("no focused window")
         }
+        // Ahead of the screen's verdict, so the window's own
+        // refusal names it; `moveToSpace` asks again (#3119).
         if let refusal = spaceMoveRefusal(window) { return refusal }
         guard screenShowsUserSpace(on: area.display) else {
             let refusal = WindowActionRefusal.screenShowsFullScreen

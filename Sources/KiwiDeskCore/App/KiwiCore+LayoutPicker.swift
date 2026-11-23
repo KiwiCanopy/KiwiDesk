@@ -18,7 +18,8 @@ extension KiwiCore {
     }
 
     /// The Space shown on the screen holding `point` (Cocoa), else
-    /// the active one.
+    /// the active one — KiwiHub's one "here", which its Windows
+    /// side's Move here reads too, so the panel's sides agree.
     func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
         moveHereSpace(on: displayUnderPointer(point))
     }
@@ -91,10 +92,8 @@ extension KiwiCore {
         for id: SpaceID
     ) -> (live: LayoutMode, drifted: Bool, keepArmed: Bool)? {
         guard let space = state.workspaces[id] else { return nil }
-        let shown = state.workspaces.allDisplays.compactMap {
-            state.workspaces.activeSpace(on: $0.id)
-        }
-        let spaces = Array(Set(shown + [id]))
+        // Every area's shown Space (#3517).
+        let spaces = Array(state.workspaces.visibleSpaces.union([id]))
         let saved = savedModes(for: spaces)
         let drifted = { (space: SpaceID) in
             LayoutModeRows.drifted(

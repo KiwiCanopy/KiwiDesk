@@ -35,7 +35,9 @@ extension KiwiCore {
         let display = intent.display
         guard drawnSpaceTransition(for: intent) == .show,
             !cueHooks.spaceBarPicking,
-            let space = state.workspaces.activeSpace(on: display),
+            let space = intent.leaving.flatMap({
+                state.workspaces.activeSpace(inAreaOf: $0, on: display)
+            }) ?? state.workspaces.activeSpace(on: display),
             let mode = state.workspaces[space]?.mode,
             !shelfStandsDown(on: display)
         else { return }

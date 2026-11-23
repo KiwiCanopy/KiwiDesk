@@ -20,9 +20,19 @@ extension FullscreenStandDownTests {
         core.setAppWide(persisting: false) {
             $0.spaceScrollTransition = .show
         }
-        core.stepSpace(on: display, by: 1, warp: false, scrolled: true)
+        core.stepSpace(
+            on: core.state.workspaces.placementOrWhole(of: display),
+            by: 1,
+            warp: false,
+            scrolled: true
+        )
         #expect(box.cues.map(\.space) == ["2"])
-        core.stepSpace(on: display, by: -1, warp: false, scrolled: false)
+        core.stepSpace(
+            on: core.state.workspaces.placementOrWhole(of: display),
+            by: -1,
+            warp: false,
+            scrolled: false
+        )
         #expect(box.cues.map(\.space) == ["2"])
     }
 
@@ -39,7 +49,12 @@ extension FullscreenStandDownTests {
             makeSpaceCueCore(transition: .none)
         )
         #expect(core.appWide.spaceScrollTransition == .slide)
-        core.stepSpace(on: display, by: 1, warp: false, scrolled: true)
+        core.stepSpace(
+            on: core.state.workspaces.placementOrWhole(of: display),
+            by: 1,
+            warp: false,
+            scrolled: true
+        )
         #expect(box.cues.map(\.space) == ["2"])
     }
 }

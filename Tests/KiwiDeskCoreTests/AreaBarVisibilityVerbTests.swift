@@ -21,7 +21,6 @@ struct AreaBarVisibilityVerbTests {
 
     private func core(split: Bool) throws -> KiwiCore {
         let core = makeTestCore()
-        core.honoursAreaSplits = true
         core.state.workspaces.upsertDisplay(wide)
         guard split else { return core }
         var settings = core.tiler.settings

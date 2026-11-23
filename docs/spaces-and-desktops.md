@@ -137,6 +137,15 @@ screens, two Spaces are on show at once. The Spaces no screen is
 showing are parked (see [Parking is not a Desktop
 move](#parking-is-not-a-desktop-move)).
 
+:::unreleased
+A screen can be split into side-by-side or stacked areas
+([`set_display_areas`](lua-reference.md#set_display_areas)). Each
+area has its own Spaces and shows one of them at a time, so a
+screen split in three shows three Spaces at once. A Desktop still
+belongs to the whole screen: switching it switches every area of
+that screen together.
+:::
+
 ## Every Desktop keeps its own Space, and its own windows
 
 Every Desktop remembers which Space it was on. Switch away and

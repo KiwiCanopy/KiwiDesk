@@ -56,7 +56,7 @@ extension SettingsModel {
     func areaKeys(of fingerprint: String) -> [String] {
         ScreenSplit.areaKeys(
             of: fingerprint,
-            in: core.laidOutSplits(config.settings.displayAreas)
+            in: config.settings.displayAreas
         )
     }
 
@@ -101,7 +101,7 @@ extension SettingsModel {
                 name: Self.perScreenName(
                     screen: Display.fingerprintParts(area.fingerprint).name,
                     key: key,
-                    splits: core.laidOutSplits(config.settings.displayAreas)
+                    splits: config.settings.displayAreas
                 ),
                 count: count,
                 present: connected.contains(area.fingerprint)

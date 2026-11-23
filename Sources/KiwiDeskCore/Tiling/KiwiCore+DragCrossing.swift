@@ -75,7 +75,10 @@ extension KiwiCore {
             origin.windows.contains(id),
             state.placementMode(of: origin) != .floating,
             state.windows[id]?.isFloating == false,
-            let destID = state.workspaces.activeSpace(on: display),
+            let destID = shownSpace(
+                atAX: GeometryUtils.axPoint(drag.cursorLocation()),
+                on: display
+            ),
             destID != originID,
             let dest = state.workspaces[destID],
             // A floating-mode destination has no layout to make

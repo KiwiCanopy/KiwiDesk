@@ -1,16 +1,17 @@
 import Foundation
 
 /// The Spaces visited, as a browser keeps pages (#1655): one trail
-/// per screen and one across every screen, both recorded always so
+/// per area — a screen's one area where it is not split (#3517) —
+/// and one across every screen, both recorded always so
 /// switching `space_history` loses nothing. A visit pushes and
 /// clears the forward half; Back and Forward move a cursor and
 /// never push. Pure and actor-free; `KiwiCore+SpaceHistory` owns
 /// the one instance and feeds it. Session-only by ruling: an
 /// in-place restart starts it fresh (`SnapshotStoreCensusTests`).
 public struct SpaceHistory: Sendable, Equatable {
-    /// Which trail: a screen's own, or the one across all screens.
+    /// Which trail: an area's own, or the one across all screens.
     public enum Key: Hashable, Sendable {
-        case screen(DisplayID)
+        case area(PlacementID)
         case allScreens
     }
 
@@ -140,11 +141,12 @@ public struct SpaceHistory: Sendable, Equatable {
         }
     }
 
-    /// Drops the trails of screens no longer connected.
-    public mutating func keepScreens(_ screens: Set<DisplayID>) {
+    /// Drops the trails of areas no screen lays out any more — a
+    /// screen unplugged, an area merged away.
+    public mutating func keepAreas(_ areas: Set<PlacementID>) {
         trails = trails.filter { key, _ in
-            guard case .screen(let id) = key else { return true }
-            return screens.contains(id)
+            guard case .area(let id) = key else { return true }
+            return areas.contains(id)
         }
     }
 

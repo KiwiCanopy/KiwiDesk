@@ -195,6 +195,14 @@ extension KiwiCore {
             let toDisplay =
                 display ?? state.workspaces.display(of: target)
             guard fromDisplay == toDisplay else { return nil }
+            // On a split screen it is sticky to its home area, as it
+            // renders (#3517): another area of the screen is a move.
+            if let from = state.homeArea(of: window),
+                let to = state.workspaces.placement(of: target),
+                to.display == from.display, to != from
+            {
+                return nil
+            }
             // On a single monitor "display" and "global" coincide —
             // there is no other display to move to — so the negative
             // "another space" copy is the honest one, not the

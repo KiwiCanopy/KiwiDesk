@@ -86,6 +86,19 @@ extension SettingsModel {
         core.state.workspaces.activeSpace(on: display)
     }
 
+    /// The Space the area `key` names shows on `display` (#3517),
+    /// its screen's where the key names no live area.
+    func showingSpace(inArea key: String, on display: DisplayID) -> SpaceID? {
+        let workspaces = core.state.workspaces
+        guard
+            let area = workspaces.placement(
+                keyed: ScreenAreaKey(parsing: key),
+                on: display
+            )
+        else { return workspaces.activeSpace(on: display) }
+        return workspaces.activeSpace(on: area)
+    }
+
     /// Resolves human-readable screen name from fingerprint.
     func screenName(_ fingerprint: String) -> String {
         displays.first {

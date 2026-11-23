@@ -6,18 +6,19 @@ import Foundation
 /// the arrival in the Space history; neither changes which Space a
 /// screen shows.
 extension KiwiCore {
-    /// The screen the focus was on before this one: the newest
-    /// visit to a connected screen other than this one, or — with
-    /// exactly two screens and nothing recorded — the other one.
-    func lastScreen() -> DisplayID? {
-        guard let here = focusedScreen else { return nil }
-        let connected = state.workspaces.allDisplays.map(\.id)
-        if let visited = spaceHistory.screens.first(where: {
-            $0 != here && connected.contains($0)
+    /// The area the focus was in before this one — a screen's one
+    /// area where it is not split (#3517): the newest visit to a
+    /// laid-out area other than this one, or — with exactly two
+    /// areas and nothing recorded — the other one.
+    func lastScreen() -> PlacementID? {
+        guard let here = focusedPlacement else { return nil }
+        let live = state.workspaces.allPlacements.map(\.id)
+        if let visited = spaceHistory.areas.first(where: {
+            $0 != here && live.contains($0)
         }) {
             return visited
         }
-        let others = connected.filter { $0 != here }
+        let others = live.filter { $0 != here }
         return others.count == 1 ? others.first : nil
     }
 
@@ -61,17 +62,6 @@ extension KiwiCore {
             band: frame,
             among: screens.filter { $0.id != here }
         ).first
-    }
-
-    /// Switches to the Space `display` shows. An empty one still
-    /// takes the focused screen there, so the next press acts from
-    /// it.
-    private func focusScreen(_ display: DisplayID) -> CommandResponse {
-        guard let shown = state.workspaces.activeSpace(on: display) else {
-            return .fail("no Space on that screen")
-        }
-        switchSpace(to: shown, warp: true)
-        return .ok()
     }
 
     /// Switches to the Space an area shows (#3517).

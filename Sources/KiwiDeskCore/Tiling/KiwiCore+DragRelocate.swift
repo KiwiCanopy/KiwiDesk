@@ -179,15 +179,17 @@ extension KiwiCore {
         scheduleSpaceSettle(destID, priorFrontmost: priorFrontmost)
     }
 
-    /// The active Space of the display under the drop's cursor —
-    /// the lookup the float re-file and the drop-commit relocate
-    /// share, so the flag the re-file writes is for the Space the
-    /// window lands in. The live crossing asks it of a display it
-    /// already holds; the resolution is its (#504), injected so
-    /// drag tests can fake a topology.
+    /// The Space shown under the drop's cursor — its area's on a
+    /// split screen (#3517) — the lookup the float re-file and the
+    /// drop-commit relocate share, so the flag the re-file writes
+    /// is for the Space the window lands in. The live crossing asks
+    /// it of a display it already holds; the resolution is its
+    /// (#504), injected so drag tests can fake a topology.
     func dropDestination() -> SpaceID? {
-        dragCrossing.displayAt(drag.cursorLocation()).flatMap {
-            state.workspaces.activeSpace(on: $0)
+        // The crossing's seam reads Cocoa; the area rects are AX.
+        let cursor = drag.cursorLocation()
+        return dragCrossing.displayAt(cursor).flatMap {
+            shownSpace(atAX: GeometryUtils.axPoint(cursor), on: $0)
         }
     }
 

@@ -217,11 +217,10 @@ extension KiwiCore {
         let screens = Set(monitorSets.flatMap(\.monitors)).union(
             connectedDisplays().map(\.fingerprint)
         )
-        let laidOut = laidOutSplits(splits)
         return ScreenEdgeScope(
             screens: screens.union(
                 screens.flatMap {
-                    ScreenSplit.areaKeys(of: $0, in: laidOut)
+                    ScreenSplit.areaKeys(of: $0, in: splits)
                 }
             )
         )

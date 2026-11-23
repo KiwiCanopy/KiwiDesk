@@ -7,7 +7,7 @@ import Testing
 /// Every write of `display_areas` reaches the placement list
 /// (#3517): a whole-settings install — a profile apply, a Settings
 /// Save, a revert — as much as the area verbs, through the one
-/// `tiler.onAreaSplits` door, and none while splits are off.
+/// `tiler.onAreaSplits` door.
 @Suite("Area split sync")
 @MainActor
 struct AreaSplitSyncTests {
@@ -26,7 +26,6 @@ struct AreaSplitSyncTests {
 
     @Test func settingsInstallFeedsThePlacements() throws {
         let core = makeTestCore()
-        core.honoursAreaSplits = true
         core.state.workspaces.upsertDisplay(wide)
         var settings = core.tiler.settings
         settings.displayAreas = [wide.fingerprint: try split()]
@@ -37,10 +36,14 @@ struct AreaSplitSyncTests {
         #expect(core.state.workspaces.placements(of: wide.id).count == 1)
     }
 
-    @Test func nothingIsFedWhileSplitsAreOff() throws {
+    /// A load installs the settings before the boot scan reports a
+    /// screen, so the split waits for its screen (#3517 L19).
+    @Test func splitLoadedBeforeItsScreenLaysOut() throws {
         let core = makeTestCore()
+        var settings = core.tiler.settings
+        settings.displayAreas = [wide.fingerprint: try split()]
+        core.tiler.settings = settings
         core.state.workspaces.upsertDisplay(wide)
-        core.tiler.settings.displayAreas = [wide.fingerprint: try split()]
-        #expect(core.state.workspaces.placements(of: wide.id).count == 1)
+        #expect(core.state.workspaces.placements(of: wide.id).count == 2)
     }
 }

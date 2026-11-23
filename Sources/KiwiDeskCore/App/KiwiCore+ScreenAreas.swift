@@ -19,25 +19,35 @@ extension KiwiCore {
 
     /// The one door from the stored splits to the placement list
     /// (#3517), run by every write of `display_areas` through
-    /// `tiler.onAreaSplits`: the stored splits while
-    /// `honoursAreaSplits` is raised, none otherwise. Production
-    /// keeps it lowered until splits take effect, so a stored
-    /// split moves no window; a suite raises it to drive areas.
+    /// `tiler.onAreaSplits` — a config load and a profile apply
+    /// included, since each installs the settings whole.
     func syncAreaSplits() {
-        let splits = laidOutSplits(tiler.settings.displayAreas)
+        let splits = tiler.settings.displayAreas
+        let remaps = Self.areaRemaps(
+            from: state.workspaces.areaSplits,
+            to: splits
+        )
         // The live Desktop memory follows a merge (ruling 22).
         remapAreaSpaces(from: state.workspaces.areaSplits, to: splits)
+        let workspaces = state.workspaces
+        let before = workspaces.allSpaces.compactMap { space in
+            workspaces.placement(of: space.id)
+                .flatMap { workspaces[placement: $0] }
+                .map { (space.id, $0.key) }
+        }
         state.workspaces.setAreaSplits(splits)
-    }
-
-    /// `stored` as the placement list lays it out: the splits while
-    /// `honoursAreaSplits` is raised, none otherwise — the one gate
-    /// a per-area reader beside the placement list takes, so no
-    /// write judges or names an area nothing lays out.
-    public func laidOutSplits(
-        _ stored: [String: ScreenSplit]
-    ) -> [String: ScreenSplit] {
-        honoursAreaSplits ? stored : [:]
+        // A merged-away area's Spaces go to the survivor the
+        // memory and the pins take, never area 0 by default.
+        for (space, key) in before {
+            guard let remap = remaps.first(where: { $0.vanished == key }),
+                let display = state.workspaces.display(of: space),
+                let survivor = state.workspaces.placement(
+                    keyed: remap.survivor,
+                    on: display
+                )
+            else { continue }
+            state.workspaces.assign(space, to: survivor)
+        }
     }
 
     /// `space`'s area — its rect in its screen's own points — its

@@ -45,7 +45,10 @@ extension KiwiCore {
                 display.frame,
                 primaryHeight: primary
             )
-            let shown = state.workspaces.currentSpace(on: display.id)
+            // Its first area's Space, so a split screen answers one
+            // Space whatever has focus (#3517); `areas[]` has each.
+            let shown = state.workspaces.leadPlacement(of: display.id)
+                .flatMap { state.workspaces.activeSpace(on: $0) }
                 .flatMap { state.workspaces[$0] }
             let laid = TilingEngine.screen(for: display.id).flatMap {
                 screen in
@@ -57,8 +60,8 @@ extension KiwiCore {
                 "frame": Self.json(rect: frame),
                 "layout_frame": laid.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
-                // The Space this screen shows: `get_state`'s
-                // `shown` Space whose `display` is this id (#3549).
+                // The Space its first area shows, `get_state`'s
+                // `shown` Space there (#3549, #3517).
                 "space_id": shown.map { .string($0.id.raw) } ?? .null,
                 "areas": areasJSON(of: display),
             ])
@@ -76,6 +79,10 @@ extension KiwiCore {
                 "display": state.workspaces.display(of: space.id)
                     .map { .number(Double($0.raw)) } ?? .null,
                 "shown": .bool(shown.contains(space.id)),
+                // Its area's key on a split screen, `list_monitors`'
+                // `areas[].key` (#3517); null on an unsplit one.
+                "area": splitArea(of: space.id).map { .string($0.key) }
+                    ?? .null,
                 "mode": .string(space.mode.rawValue),
                 "windows": .array(
                     space.windows.map {
