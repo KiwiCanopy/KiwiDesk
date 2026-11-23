@@ -126,9 +126,12 @@ struct ShelfHandleDrawTests {
 
     @Test("the pocket's tab brightens in place on hover")
     func tabBrightens() throws {
+        // The rows below read a 3 pt tab's core.
+        var shelf = KiwiShelf()
+        shelf.handleThickness = 3
         let size = CGSize(
             width: 40,
-            height: PocketHandleView.restDepth(of: KiwiShelf())
+            height: PocketHandleView.restDepth(of: shelf)
         )
         // The tab's core row, mid-tab, in a draw `hovered` or not, of
         // an empty pocket unless `holds` (#3384).
@@ -140,7 +143,7 @@ struct ShelfHandleDrawTests {
             view.appearance = NSAppearance(named: .darkAqua)
             view.holds = holds
             view.wear(
-                KiwiShelf(),
+                shelf,
                 markHex: "#FF0000",
                 edge: .bottom,
                 kiwisOut: out,
@@ -160,7 +163,7 @@ struct ShelfHandleDrawTests {
         let view = PocketHandleView(frame: CGRect(origin: .zero, size: size))
         view.appearance = NSAppearance(named: .darkAqua)
         view.wear(
-            KiwiShelf(),
+            shelf,
             markHex: "#FF0000",
             edge: .bottom,
             kiwisOut: false

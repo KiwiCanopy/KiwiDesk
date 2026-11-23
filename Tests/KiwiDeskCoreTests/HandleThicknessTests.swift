@@ -6,18 +6,19 @@ import Testing
 
 /// `kiwishelf.handle_thickness` (#3451): how deep an Auto bar's
 /// handle and the Pocket's tab draw, whole points in 2–6, a look
-/// style path; clamped at decode and set, and absent reading 3.
+/// style path; clamped at decode and set, and absent reading 5
+/// (#3586).
 @Suite("KiwiShelf handle thickness (#3451)")
 @MainActor
 struct HandleThicknessTests {
-    @Test("An absent field reads the shipped 3 pt")
+    @Test("An absent field reads the shipped 5 pt")
     func absentReadsTheDefault() throws {
         let shelf = try JSONDecoder().decode(
             KiwiShelf.self,
             from: Data("{}".utf8)
         )
-        #expect(shelf.handleThickness == 3)
-        #expect(ShelfHandleSpec.depth(of: shelf) == 3)
+        #expect(shelf.handleThickness == 5)
+        #expect(ShelfHandleSpec.depth(of: shelf) == 5)
     }
 
     @Test(
@@ -67,8 +68,8 @@ struct HandleThicknessTests {
         let screen = CGSize(width: 1512, height: 982)
         let looks = LookCatalog.bundled(sizes: [screen])
         let picks: [String: Double] = [
-            "Glass": 3, "Classic": 2, "Tiler": 2, "Pill": 3,
-            "Taskbar": 4, "Sakura": 3,
+            "Glass": 5, "Classic": 4, "Tiler": 4, "Pill": 5,
+            "Taskbar": 6, "Sakura": 5,
         ]
         for look in looks {
             let value = look.style["kiwishelf.handle_thickness"]
@@ -91,5 +92,41 @@ struct HandleThicknessTests {
         )
         #expect(frame.height == 5)
         #expect(frame.maxY == 900)
+    }
+
+    /// No crossing moves a stored thickness (#3586 ▸ Ruling): a
+    /// profile 5.0 wrote wearing Glass keeps its 3 pt, marks no
+    /// look until Glass is applied again, and then marks it.
+    @Test("A stored thickness stays through the crossing")
+    func storedThicknessStays() throws {
+        let screen = CGSize(width: 1512, height: 982)
+        let glass = LookCatalog.defaultLook(sizes: [screen])
+        var settings = StarterSetup.settings(sizes: [screen])
+        glass.apply(to: &settings)
+        settings.kiwishelf.handleThickness = 3
+        let profile = Profile(
+            name: "Work",
+            monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+            spaceModes: [:],
+            settings: settings
+        )
+        var root = try #require(
+            JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(profile)
+            ) as? [String: Any]
+        )
+        // 5.0's stamp: a later step reaching this shape bumps past it.
+        root["format"] = 41
+        let data = try JSONSerialization.data(withJSONObject: root)
+        let out = ConfigMigration.migrated(data) ?? data
+        var read = try JSONDecoder().decode(Profile.self, from: out)
+        #expect(read.settings.kiwishelf.handleThickness == 3)
+        #expect(glass.match(read.settings) == .none)
+        glass.apply(to: &read.settings)
+        let pick = glass.style["kiwishelf.handle_thickness"]
+        #expect(
+            pick == .number(Double(read.settings.kiwishelf.handleThickness))
+        )
+        #expect(glass.match(read.settings) == .applied)
     }
 }
