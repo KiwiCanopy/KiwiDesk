@@ -184,7 +184,11 @@ retiring the 2026-08-30 merge queue): bring the branch onto current
 `main` (`git rebase origin/main` or a merge from it), let CI go
 green on that head, then squash-merge (`gh pr merge <n> --squash`,
 or `--auto` to land it the moment CI reports). Never merge
-directly.
+directly. Rebase immediately before a PR's first push, and push a
+finished lane, not its work in progress; a fix for a red is pushed
+as usual. Whoever lands a PR runs `gh pr update-branch` only while
+its `mergeStateStatus` reads `BEHIND`, never on a branch already
+up to date.
 
 **File issues through the `file-issue` skill**
 ([.claude/skills/file-issue](.claude/skills/file-issue/SKILL.md)).
