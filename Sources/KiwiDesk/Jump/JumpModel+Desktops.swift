@@ -211,7 +211,7 @@ extension JumpModel {
         // The width the panel grants the side for this overview's
         // columns (#3570 ▸ Ruling 4), read before the state exists.
         let width = room.width(
-            JumpPanelRoom.sizing(of: .desktops),
+            JumpPanelRoom.fit(of: .desktops),
             content: DesktopsGeometry.preferredWidth(of: overview)
         )
         let geometry = DesktopsGeometry(
