@@ -254,7 +254,10 @@ extension KiwiCore {
                 of: managed,
                 leaving: from,
                 landingOn: display,
-                in: state.workspaces.leadPlacement(of: display)
+                // The area its frame sits in, as the fold reads it
+                // (#3517 ruling 5), else the screen's lead area.
+                in: areaPlacement(holding: arrivalFrame(of: managed))
+                    ?? state.workspaces.leadPlacement(of: display)
             )
         else { return }
         onLog(

@@ -47,20 +47,21 @@ extension KiwiCore {
                 || state.workspaces.placements(of: display).count > 1
         else { return }
         let axPoint = GeometryUtils.axPoint(cocoaPoint)
-        // An auto-hidden Dock reserves no visible frame, so a Dock
-        // click passes the check above: ask what was hit instead.
-        guard
-            !Self.pressHitsDock(
-                at: axPoint,
-                in: frontStack()
-            )
-        else { return }
         // Move focus to the shown space of the area clicked. Nothing
         // to do if it has no assigned space, or its space is already
         // the active one (single-display collapse).
         guard
             let target = shownSpace(atAX: axPoint, on: display),
             target != state.workspaces.activeSpace
+        else { return }
+        // An auto-hidden Dock reserves no visible frame, so a Dock
+        // click passes the check above: ask what was hit instead —
+        // after the cheap checks, since it reads the window list.
+        guard
+            !Self.pressHitsDock(
+                at: axPoint,
+                in: frontStack()
+            )
         else { return }
         // A bare desktop click deliberately leaves key focus on the
         // desktop, so no window is raised — forcing one forward

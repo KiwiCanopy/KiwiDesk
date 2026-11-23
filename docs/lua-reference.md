@@ -339,6 +339,13 @@ focused window's ring bumps toward the step, as at the end of a
 row, and nothing switches. A screen with one Space stops there
 too. A wrap slides in the key's direction.
 
+:::unreleased
+On a screen [split into areas](#set_display_areas) each area has
+its own Space order: the key steps the area the focused window is
+in, the gesture the area under the pointer, and a wrap stays in
+that area.
+:::
+
 Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
 gets them through **Default shortcuts ▸ Restore…**.
 
@@ -431,6 +438,13 @@ focused window's ring bumps and the command fails with `no other screen`;
 `focus_display` at an edge bumps toward it and fails with
 `no screen <direction> of focus`. Each visit also counts in the
 [Space history](#focus_space_back--focus_space_forward).
+
+:::unreleased
+On a screen [split into areas](#set_display_areas) each area
+counts as a screen here: `focus_display_last` returns to the area
+you were last in, and `focus_display` reaches the nearest area in
+that direction.
+:::
 
 `focus_display_last` is **Go to last screen** under Settings ▸
 Shortcuts ▸ Built-in ▸ Focus, with no default chord; `focus_display` is
@@ -737,6 +751,12 @@ the pins; `pin_space_to_display` makes it stick. Creates the
 space if it does not exist. Floating members are re-anchored
 onto the new screen, keeping their relative position.
 
+:::unreleased
+On a screen [split into areas](#set_display_areas) each area
+shows one Space at a time, and the screen reference also takes
+an area key or an area's name.
+:::
+
 **Example:**
 
 ```lua
@@ -780,18 +800,24 @@ own points, each optionally with an `id` and a `name`.
 its own App Bar and Space Bar and its own shown Space; with no
 sizes the screen is whole again. The sizes or rects must cover the
 screen exactly, with no gap or overlap, every cut running one
-direction, and no area under 100 points. An area keeps its id
-for good: a split keeps the id on the leading half, and a merge
-keeps area 0 when either side holds it. The split is stored per
-profile, beside the bars' per-screen edges.
+direction, and no area under 100 points. The top-left area is
+area 0: a rect list that gives id 0 to another area is refused.
+
+The sizes form keeps the screen's previous ids in reading order,
+area 0 first, and gives each area past them a new id; with fewer
+sizes the last ids go. A rect without an `id` takes 0 when it is
+the top-left one and no rect names 0, else a new id. An id is never
+given out twice on one screen. The split is stored per profile
+under `display_areas`, keyed by fingerprint.
 
 Once a screen is split, a screen argument —
 `move_space_to_display`, `pin_space_to_display` and the bars'
 per-screen edge and visibility verbs — also takes an area key, as
 `list_monitors` prints it in `areas[].key`, or an area's own name.
-A number or a screen's name names its first area, and for the bars'
-verbs every area of that screen. `focus_display` and
-`move_to_display` with a direction reach the nearest area that way.
+A number or a screen's name names its first area; what it names
+for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
+**Per area**. The screen verbs' directions and last screen reach
+areas too ([`focus_display`](#focus_display_last--focus_display)).
 A macOS Desktop switch switches all of a screen's areas together.
 :::
 
@@ -1382,6 +1408,12 @@ walk. `per_screen` keeps one history per screen and steps the
 screen the focused window is on; `all_screens` keeps one history
 across every screen, so going back may move you to another
 screen. With one screen the two are the same.
+
+:::unreleased
+On a screen [split into areas](#set_display_areas), `per_screen`
+keeps one history per area and steps the area the focused window
+is in.
+:::
 
 [`focus_space_last`](#focus_space_last) reads the same history.
 
@@ -6996,6 +7028,11 @@ shows on another — visible on every space of that one screen,
 not on other screens. Moving it to a space on another screen re-homes
 it there. Overrides global sticky if the window already had it.
 
+:::unreleased
+On a screen [split into areas](#set_display_areas) the window
+draws in the area its home space lays out in.
+:::
+
 **Example:**
 
 ```lua
@@ -10552,9 +10589,9 @@ Each space object also has `display`, the `list_monitors` id of
 the screen it sits on, `nil` for a Space on no screen, and `shown`:
 whether KiwiDesk shows it on that screen now. The active Space is
 always `shown`, even with no screen, and a native full-screen Space
-in front leaves `shown` true. A Space whose `shown` is true and
-whose `display` is D is the one `list_monitors` names as D's
-`space_id`, so a bar can draw each screen's Spaces, empty ones
+in front leaves `shown` true. On a screen that is not split, the
+Space whose `shown` is true and whose `display` is D is the one
+`list_monitors` names as D's `space_id`, so a bar can draw each screen's Spaces, empty ones
 included, from these two queries. A bar re-reads them on
 `space_change`, `desktop_change` and `monitor_change`.
 :::
@@ -10564,7 +10601,8 @@ On a screen [split into areas](#set_display_areas) each space
 object also has `area`, the key of the area it sits in, as
 `list_monitors` prints it in `areas[].key`; `null` on a screen that
 is not split. Each area shows its own Space, so several Spaces with
-one `display` can be `shown` at once.
+one `display` can be `shown` at once; the one with a given `area`
+is that area's `areas[].space_id` in `list_monitors`.
 :::
 
 A Stack space object also has `stack_position`: the side its stack
@@ -10750,17 +10788,18 @@ its shown Space lays windows out in.
 
 :::unreleased
 It also reports `space_id`, the Space that screen shows (`null`
-while it shows none), the Space [`get_state`](#get_state) marks
-`shown` on that `display`.
+while it shows none) — on a screen that is not split, the Space
+[`get_state`](#get_state) marks `shown` on that `display`.
 :::
 
 :::unreleased
 On a screen [split into areas](#set_display_areas), `areas` lists
 each area in reading order with its `key`, `name` (`null` for none
 given), `x`, `y`, `w` and `h` in the screen's own points, and
-`space_id`, the Space that area shows; the screen's own `space_id`
-is its first area's, or the focused Space where that sits in
-another area. On a screen that is not split, `areas` is empty.
+`space_id`, the Space that area shows. The screen's own `space_id`
+is always its first area's, `areas[0].space_id`, whichever area
+has the focus, and `layout_frame` is that Space's. On a screen that
+is not split, `areas` is empty.
 :::
 
 Each `list_windows` entry also carries `app`, `pid`, `index` (the

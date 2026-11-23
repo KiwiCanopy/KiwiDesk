@@ -73,10 +73,13 @@ extension StateCoordinator {
         case .global:
             return workspaces.activeSpace
         case .display:
-            guard let display = homeDisplay(of: window.id) else {
+            guard let display = homeDisplay(of: window.id),
+                let home = workspaces.space(of: window.id)
+            else {
                 return workspaces.activeSpace
             }
-            return workspaces.activeSpace(on: display)
+            // Its home Space's own area on a split screen (#3517).
+            return workspaces.activeSpace(inAreaOf: home, on: display)
         }
     }
 

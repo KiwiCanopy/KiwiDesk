@@ -23,9 +23,31 @@ extension KiwiCore {
     /// included, since each installs the settings whole.
     func syncAreaSplits() {
         let splits = tiler.settings.displayAreas
+        let remaps = Self.areaRemaps(
+            from: state.workspaces.areaSplits,
+            to: splits
+        )
         // The live Desktop memory follows a merge (ruling 22).
         remapAreaSpaces(from: state.workspaces.areaSplits, to: splits)
+        let workspaces = state.workspaces
+        let before = workspaces.allSpaces.compactMap { space in
+            workspaces.placement(of: space.id)
+                .flatMap { workspaces[placement: $0] }
+                .map { (space.id, $0.key) }
+        }
         state.workspaces.setAreaSplits(splits)
+        // A merged-away area's Spaces go to the survivor the
+        // memory and the pins take, never area 0 by default.
+        for (space, key) in before {
+            guard let remap = remaps.first(where: { $0.vanished == key }),
+                let display = state.workspaces.display(of: space),
+                let survivor = state.workspaces.placement(
+                    keyed: remap.survivor,
+                    on: display
+                )
+            else { continue }
+            state.workspaces.assign(space, to: survivor)
+        }
     }
 
     /// `space`'s area — its rect in its screen's own points — its

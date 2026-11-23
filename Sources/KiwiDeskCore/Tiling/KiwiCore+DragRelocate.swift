@@ -183,13 +183,13 @@ extension KiwiCore {
     /// split screen (#3517) — the lookup the float re-file and the
     /// drop-commit relocate share, so the flag the re-file writes
     /// is for the Space the window lands in. The live crossing asks
-    /// it of a display it
-    /// already holds; the resolution is its (#504), injected so
-    /// drag tests can fake a topology.
+    /// it of a display it already holds; the resolution is its
+    /// (#504), injected so drag tests can fake a topology.
     func dropDestination() -> SpaceID? {
+        // The crossing's seam reads Cocoa; the area rects are AX.
         let cursor = drag.cursorLocation()
         return dragCrossing.displayAt(cursor).flatMap {
-            shownSpace(atAX: cursor, on: $0)
+            shownSpace(atAX: GeometryUtils.axPoint(cursor), on: $0)
         }
     }
 

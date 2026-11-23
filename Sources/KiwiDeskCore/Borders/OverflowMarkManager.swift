@@ -24,9 +24,10 @@ public final class OverflowMarkManager {
 
     /// The hover peek the marks feed (#1946), the bars' one.
     var peek: BarPeek?
-    /// The displays whose shelf the last bar pass stood down; a mark
-    /// wears the shelf's look and stands down with it (#2235).
-    var standingDown: Set<DisplayID> = []
+    /// The areas the last bar pass stood the marks down in — the
+    /// shelf's stand-down, or a Maximize there; a mark wears the
+    /// shelf's look and stands down with it (#2235, #3517).
+    var standingDown: Set<PlacementID> = []
     /// VoiceOver's press: the window menu of a mark's windows.
     var openMenu: @MainActor (OverflowMark, NSView) -> Void = { _, _ in }
 

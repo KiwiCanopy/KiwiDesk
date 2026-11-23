@@ -17,10 +17,14 @@ extension KiwiCore {
         displayUnderPointer(shelves.contextMenus.pointer())
     }
 
-    /// The Space shown on the screen holding `point` (Cocoa), else
-    /// the active one.
+    /// The Space shown where `point` (Cocoa) is — its area's on a
+    /// split screen (#3517) — else the active one.
     func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
-        moveHereSpace(on: displayUnderPointer(point))
+        guard let display = displayUnderPointer(point) else {
+            return moveHereSpace(on: nil)
+        }
+        return shownSpace(atAX: GeometryUtils.axPoint(point), on: display)
+            ?? moveHereSpace(on: display)
     }
 
     /// The screen holding `point` (Cocoa), nil off every screen.

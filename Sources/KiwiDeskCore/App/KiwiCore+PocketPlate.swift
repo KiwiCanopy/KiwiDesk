@@ -25,11 +25,12 @@ extension KiwiCore {
     /// rests (#3517) — or bsp where it shows none.
     func shownMode(on display: DisplayID) -> LayoutMode {
         let workspaces = state.workspaces
-        return shownMode(
-            of: workspaces.leadPlacement(of: display).flatMap {
-                workspaces.activeSpace(on: $0)
-            } ?? workspaces.activeSpace(on: display)
-        )
+        // A screen with no placement record yet (a fixture) reads
+        // the screen, the one fallback after `leadPlacement`.
+        guard let lead = workspaces.leadPlacement(of: display) else {
+            return shownMode(of: workspaces.activeSpace(on: display))
+        }
+        return shownMode(of: workspaces.activeSpace(on: lead))
     }
 
     /// The layout `shown` — a screen's or an area's shown Space —

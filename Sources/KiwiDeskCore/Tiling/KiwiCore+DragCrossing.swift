@@ -76,7 +76,7 @@ extension KiwiCore {
             state.placementMode(of: origin) != .floating,
             state.windows[id]?.isFloating == false,
             let destID = shownSpace(
-                atAX: drag.cursorLocation(),
+                atAX: GeometryUtils.axPoint(drag.cursorLocation()),
                 on: display
             ),
             destID != originID,

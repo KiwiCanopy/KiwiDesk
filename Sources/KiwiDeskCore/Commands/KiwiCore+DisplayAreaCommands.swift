@@ -210,13 +210,4 @@ extension KiwiCore {
             }
         )
     }
-
-    /// The key of the area `space` lays out in, where its screen is
-    /// split (#3517); nil on an unsplit screen or for no placement.
-    func areaKey(of space: SpaceID) -> String? {
-        guard let id = state.workspaces.placement(of: space),
-            state.workspaces.placements(of: id.display).count > 1
-        else { return nil }
-        return state.workspaces[placement: id]?.key.description
-    }
 }

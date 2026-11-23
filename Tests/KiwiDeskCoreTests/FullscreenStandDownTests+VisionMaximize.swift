@@ -181,12 +181,13 @@ extension FullscreenStandDownTests {
         let (core, display) = try #require(
             makeMaximizeCore(isUser: true)
         )
+        let area = core.state.workspaces.placementOrWhole(of: display)
         // Control: unmaximized, nothing stands down.
         core.updateBars()
-        #expect(!core.overflowMarks.standingDown.contains(display))
+        #expect(!core.overflowMarks.standingDown.contains(area))
         #expect(core.execute("toggle_maximized").isSuccess)
         core.updateBars()
-        #expect(core.overflowMarks.standingDown.contains(display))
+        #expect(core.overflowMarks.standingDown.contains(area))
         #expect(!core.shelfStandsDown(on: display))
     }
 }

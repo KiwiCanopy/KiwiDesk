@@ -141,11 +141,12 @@ public struct SpaceHistory: Sendable, Equatable {
         }
     }
 
-    /// Drops the trails of screens no longer connected.
-    public mutating func keepScreens(_ screens: Set<DisplayID>) {
+    /// Drops the trails of areas no screen lays out any more — a
+    /// screen unplugged, an area merged away.
+    public mutating func keepAreas(_ areas: Set<PlacementID>) {
         trails = trails.filter { key, _ in
             guard case .area(let id) = key else { return true }
-            return screens.contains(id.display)
+            return areas.contains(id)
         }
     }
 

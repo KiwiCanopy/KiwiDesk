@@ -15,21 +15,42 @@ extension KiwiCore {
     ) -> PlacementID? {
         let areas = state.workspaces.placements(of: display)
         guard areas.count > 1,
-            let screen = TilingEngine.screen(for: display)
+            let screen = state.workspaces.allDisplays.first(where: {
+                $0.id == display
+            })
         else { return nil }
-        let whole = tiler.screenFrameAX(screen)
-        let rects = areas.map { area in
-            (
-                area.id,
-                area.area.rect.offsetBy(dx: whole.minX, dy: whole.minY)
-            )
-        }
+        // The screen's own frame from state, flipped to AX, so a
+        // suite's screens answer as a real one does.
+        let whole = GeometryUtils.flip(
+            screen.frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
+        return Self.area(
+            at: point,
+            among: areas.map { area in
+                (
+                    area.id,
+                    area.area.rect.offsetBy(
+                        dx: whole.minX,
+                        dy: whole.minY
+                    )
+                )
+            }
+        )
+    }
+
+    /// The rect `point` falls in, else the nearest — pure, so the
+    /// rule is tested apart from any screen.
+    static func area(
+        at point: CGPoint,
+        among rects: [(PlacementID, CGRect)]
+    ) -> PlacementID? {
         if let hit = rects.first(where: { $0.1.contains(point) }) {
             return hit.0
         }
         return rects.min {
-            Self.distance(from: point, to: $0.1)
-                < Self.distance(from: point, to: $1.1)
+            distance(from: point, to: $0.1)
+                < distance(from: point, to: $1.1)
         }?.0
     }
 

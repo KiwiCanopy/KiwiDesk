@@ -31,7 +31,7 @@ extension KiwiCore {
         return tiler.runCovers.values
             .filter { cover in
                 guard shown.contains(cover.space) else { return false }
-                return state.workspaces.display(of: cover.space)
+                return state.workspaces.placement(of: cover.space)
                     .map { !down.contains($0) } ?? true
             }
             .sorted { $0.space.description < $1.space.description }

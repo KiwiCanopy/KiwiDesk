@@ -8,10 +8,10 @@ struct SpaceHistoryState {
     var base = SpaceHistoryKind.defaultKind
     /// The live profile's sparse override; nil follows the base.
     var profileOverride: SpaceHistoryKind?
-    /// The screens the focus arrived on, newest first, for
-    /// `focus_display_last` (#2512); session-only, and no setting
-    /// governs it.
-    var screens: [DisplayID] = []
+    /// The areas the focus arrived in — a screen's one area where it
+    /// is not split — newest first, for `focus_display_last`
+    /// (#2512, #3517); session-only, and no setting governs it.
+    var screens: [PlacementID] = []
 
     var kind: SpaceHistoryKind { profileOverride ?? base }
 }
@@ -30,8 +30,9 @@ extension KiwiCore {
     /// profile's Space — reaches `emitSpaceChange` or a retile,
     /// which both call this, so no path names itself here.
     func noteSpaceVisits() {
-        let screens = state.workspaces.allDisplays.map(\.id)
-        spaceHistory.trails.keepScreens(Set(screens))
+        spaceHistory.trails.keepAreas(
+            Set(state.workspaces.allPlacements.map(\.id))
+        )
         for area in state.workspaces.allPlacements.map(\.id) {
             guard let shown = state.workspaces.activeSpace(on: area)
             else { continue }
@@ -40,7 +41,7 @@ extension KiwiCore {
         if let active = state.workspaces.activeSpace {
             spaceHistory.trails.visit(active, under: .allScreens)
         }
-        if let here = focusedScreen, spaceHistory.screens.first != here {
+        if let here = focusedPlacement, spaceHistory.screens.first != here {
             spaceHistory.screens.removeAll { $0 == here }
             spaceHistory.screens.insert(here, at: 0)
         }
