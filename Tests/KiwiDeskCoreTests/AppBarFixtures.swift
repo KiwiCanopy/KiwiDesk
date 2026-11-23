@@ -50,7 +50,7 @@ enum AppBarFixtures {
         shelf.border = true
         shelf.borderWidth = 3
         shelf.highlightWidth = 4
-        shelf.handleThickness = 5
+        shelf.handleThickness = 4
         shelf.itemGap = 3
         shelf.glyphSize = 24
         shelf.fontSize = 15

@@ -75,7 +75,7 @@ struct KiwiShelfCommandParityTests {
             .innerMargin(6), .backgroundStyle(.boxed),
             .liquidGlass(false), .backgroundFit(.full),
             .cornerRoundness(5), .border(true), .borderWidth(3),
-            .highlightWidth(4), .handleThickness(5), .itemGap(3),
+            .highlightWidth(4), .handleThickness(4), .itemGap(3),
             .glyphSize(24),
             .fontSize(15), .fontFamily("Menlo"), .fontWeight(540),
             .iconSource(.appFont), .dimFactor(0.3),

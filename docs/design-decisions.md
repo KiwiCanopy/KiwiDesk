@@ -20478,19 +20478,25 @@ Dock stays shown for as long as the pointer stays there. So:
   grow origin's included. Refused: a Lua-only knob, since the
   owner wants it to travel with a look, and a palette key, since
   palettes carry colour alone.
+
 :::unreleased
+
 - *Thicker by default* (owner, 2026-11-23, #3586), amending the
   bullet above: **the default and every bundled look's pick rise
   by 2 points** — Glass, Pill and Sakura 5, Classic and Tiler 4,
   Taskbar 6, the range's ceiling, so the range stays. Tiler's
-  handle now fills its 4-point outer gap, which #3451 left
-  unpromised. **No crossing moves a stored thickness:** a stored
-  value cannot tell a look's stamp from a user's pick, and the
-  owner would rather leave a 5.0 set on its old handle — reading
-  as its look with a difference until the look is applied again —
-  than move a choice. Refused: adding 2 to every stored 2–4, and
-  matching each set against the 5.0 bundled looks.
+  4-point handle now spans its whole 4-point outer gap; accepted,
+  since a handle reserves nothing. **No crossing moves a stored
+  thickness:** a stored value cannot tell a look's stamp from a
+  user's pick, and the owner would rather leave a profile saved
+  under 5.0 on its old handle than move a choice. Look matching is
+  whole-styling, so such a profile, and the shared look its
+  followers wear, mark no look as worn until a look is applied
+  again. Refused: adding 2 to every stored 2–4, and matching each
+  profile against the 5.0 bundled looks.
+
 :::
+
 - *Easier to see at rest* (owner, 2026-11-19, #3514, after rounds
   with native prototypes on their own wallpapers), amending the
   strengths above: **the fill is the ink itself, the rest is the
