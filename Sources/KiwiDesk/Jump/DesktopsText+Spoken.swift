@@ -66,11 +66,11 @@ extension DesktopsText {
     ) -> String {
         let name = line.space.map(space) ?? unfiled
         let card =
-            desktop.area(of: index).map {
+            desktop.area(of: index).flatMap(area).map {
                 L(
                     "desktop_overview.ax.area_desktop",
                     "%1$@, %2$@",
-                    area($0),
+                    $0,
                     self.desktop(desktop.label)
                 )
             } ?? self.desktop(desktop.label)

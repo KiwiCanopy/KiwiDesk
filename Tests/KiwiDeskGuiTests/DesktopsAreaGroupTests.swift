@@ -137,7 +137,7 @@ struct DesktopsAreaGroupTests {
         #expect(
             source.contains(
                 ".accessibilityElement(children:.contain)"
-                    + ".accessibilityLabel(DesktopsText.area(area))"
+                    + ".accessibilityLabel(DesktopsText.area(area)??\"\")"
             )
         )
         // A title click lands where the start does.

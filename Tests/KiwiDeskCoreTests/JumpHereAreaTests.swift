@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import Testing
@@ -47,9 +48,31 @@ struct JumpHereAreaTests {
         #expect(core.moveHereSpace(in: areas[1]) == SpaceID(4))
         // The screen's own read answers its first area, which is
         // what a right-area Move here used to file into.
-        #expect(core.moveHereSpace(on: DisplayID(2)) == SpaceID(3))
+        #expect(core.awayFilingSpace(on: DisplayID(2)) == SpaceID(3))
         // No area: the active Space.
         #expect(core.moveHereSpace(in: nil) == SpaceID(1))
+    }
+
+    /// The pointer read in Cocoa points, judged on the screens
+    /// state holds, so no host screen decides it.
+    @Test("the pointer's area is KiwiHub's area")
+    func pointerPicksTheArea() throws {
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        core.shelves.contextMenus.pointer = { NSPoint(x: 3000, y: 700) }
+        #expect(core.jumpArea() == areas[1])
+        core.shelves.contextMenus.pointer = { NSPoint(x: 400, y: 700) }
+        #expect(core.jumpArea() == areas[0])
+        #expect(core.layoutPickerSpace(in: core.jumpArea()) == SpaceID(3))
+        core.shelves.contextMenus.pointer = { NSPoint(x: 50, y: 50) }
+        #expect(
+            core.jumpArea()
+                == core.state.workspaces.leadPlacement(
+                    of: DisplayID(1)
+                )
+        )
+        core.shelves.contextMenus.pointer = { NSPoint(x: -9000, y: 0) }
+        #expect(core.jumpArea() == nil)
     }
 
     @Test("Move here from the right area files into its Space")

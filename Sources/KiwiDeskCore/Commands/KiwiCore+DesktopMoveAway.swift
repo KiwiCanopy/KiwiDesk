@@ -95,7 +95,7 @@ extension KiwiCore {
             away.id,
             named: explicit,
             home: target.isCurrent
-                ? moveHereSpace(on: screenHolding(away.id)) : nil
+                ? awayFilingSpace(on: screenHolding(away.id)) : nil
         )
         onLog(
             "move_to_desktop: away w\(away.id.raw) filed under space "
@@ -197,6 +197,6 @@ extension KiwiCore {
             let home = state.workspaces.display(of: filed),
             home != screen
         else { return filed }
-        return moveHereSpace(on: screen)
+        return awayFilingSpace(on: screen)
     }
 }

@@ -48,8 +48,8 @@ final class JumpPanelController: NSObject {
     /// Why window management is held (#2050), if it is; the View
     /// side greys its chips meanwhile (#2309 ruling 9).
     var hold: () -> CoreHold = { .running }
-    /// The Space the View side's Layout line acts on, read with the screen
-    /// the panel opens on so the two never disagree.
+    /// The Space the View side's Layout line acts on, read from the
+    /// area the panel opens over so the two never disagree.
     var pickerSpace: SpaceID?
     /// The area the panel opened over: its list's "here" and Move
     /// here's target are the Space it shows (#2791, #3572).
@@ -88,8 +88,8 @@ final class JumpPanelController: NSObject {
     /// window used last (#3135).
     func show(_ scope: JumpScope = .windows, lastApp: Bool = false) {
         let screen = PanelHandBack.screenUnderPointer()
-        pickerSpace = core.layoutPickerSpace()
         hubArea = core.jumpArea()
+        pickerSpace = core.layoutPickerSpace(in: hubArea)
         // Centred over the area under the pointer (#3572).
         let visible =
             hubArea.flatMap(core.visibleFrame(of:))
@@ -290,7 +290,7 @@ final class JumpPanelController: NSObject {
         // A ↩ chord that picks nothing: the system beep, never
         // the refusal sound (#2931 ▸ Ruling 4).
         model.onDeadKey = { NSSound.beep() }
-        // Core answers at the press, from the panel's screen.
+        // Core answers at the press, from the panel's area.
         model.swapRefusal = { [weak self] entry in
             self?.core.swapRefusal(entry.target, on: self?.hubArea)
         }

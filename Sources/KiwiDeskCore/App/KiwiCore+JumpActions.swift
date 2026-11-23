@@ -244,10 +244,12 @@ extension KiwiCore {
             ?? state.workspaces.activeSpace
     }
 
-    /// The Space a filing onto `display` takes: the active Space
-    /// where it lays out there, else the first area's (#2791). A
-    /// Desktop move's away filing reads it; KiwiHub reads the area.
-    func moveHereSpace(on display: DisplayID?) -> SpaceID? {
+    /// The Space an away window filed onto `display`'s shown Desktop
+    /// takes: the active Space where it lays out there, else the
+    /// screen's first area's (#2791). It reads the screen, never an
+    /// area: a split screen's away filing is not KiwiHub's "here",
+    /// which is `moveHereSpace(in:)`.
+    func awayFilingSpace(on display: DisplayID?) -> SpaceID? {
         display.flatMap { state.workspaces.activeSpace(on: $0) }
             ?? state.workspaces.activeSpace
     }

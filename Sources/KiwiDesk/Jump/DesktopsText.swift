@@ -20,9 +20,9 @@ enum DesktopsText {
     static var main: String { L("desktop_overview.screen.main", "main") }
 
     /// An area group's header and its name to VoiceOver (#3572): the
-    /// user's name, else its position.
-    static func area(_ area: DesktopOverview.Area) -> String {
-        area.name ?? area.position.map(ScreenAreaWords.position) ?? ""
+    /// user's name, else its position; nil where it has neither.
+    static func area(_ area: DesktopOverview.Area) -> String? {
+        area.name ?? area.position.map(ScreenAreaWords.position)
     }
 
     static func desktop(_ number: Int) -> String {

@@ -64,7 +64,9 @@ public struct DesktopOverview: Sendable, Equatable {
         public let spaces: [SpaceLine]
         /// On a split screen, its areas' groups of `spaces` in
         /// reading order (#3572); empty on an unsplit one. The
-        /// unfiled line, where there is one, stays last, in none.
+        /// contract readers rely on: the ranges are contiguous, in
+        /// order from line 0, and cover every line but the unfiled
+        /// one, which stays last in none.
         public let areas: [Area]
 
         public init(

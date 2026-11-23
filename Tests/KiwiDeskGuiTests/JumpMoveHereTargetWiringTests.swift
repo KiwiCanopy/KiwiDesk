@@ -32,7 +32,22 @@ struct JumpMoveHereTargetWiringTests {
                 "Sources/KiwiDeskCore/App/KiwiCore+LayoutPicker.swift"
             )
         )
-        #expect(picker.contains("moveHereSpace(in:jumpArea())"))
+        #expect(picker.contains("moveHereSpace(in:area)"))
+        // The Desktops side reads the overview over the same area.
+        let desktops = try Self.squashed(
+            root.appendingPathComponent(
+                "Sources/KiwiDesk/Jump/JumpPanelController+Desktops.swift"
+            )
+        )
+        #expect(
+            desktops.contains("core.desktopOverview(on:self.hubArea)")
+        )
+        #expect(
+            controller.contains(
+                "hubArea=core.jumpArea()"
+                    + "pickerSpace=core.layoutPickerSpace(in:hubArea)"
+            )
+        )
         #expect(
             controller.occurrences(of: "core.jumpSnapshot(on:hubArea)")
                 == 1

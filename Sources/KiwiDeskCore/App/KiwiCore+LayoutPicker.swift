@@ -6,46 +6,40 @@ import AppKit
 /// read it: the View side's Layout line and the Windows side's
 /// rows and Move here.
 extension KiwiCore {
-    /// The Space the Layout line acts on: the one shown in the area
-    /// under the pointer.
-    public func layoutPickerSpace() -> SpaceID? {
-        moveHereSpace(in: jumpArea())
+    /// The Space the Layout line acts on: the one `area` shows —
+    /// KiwiHub's "here", read once as the panel opens.
+    public func layoutPickerSpace(in area: PlacementID?) -> SpaceID? {
+        moveHereSpace(in: area)
     }
 
     /// The area under the pointer — an unsplit screen's one area —
     /// that KiwiHub opens over and files Move here into (#2791,
-    /// #3572); nil off every screen.
+    /// #3572); nil off every screen. Judged on the screens state
+    /// holds, as every area reader is.
     public func jumpArea() -> PlacementID? {
         let point = shelves.contextMenus.pointer()
-        guard let display = displayUnderPointer(point) else { return nil }
+        let screens = state.workspaces.allDisplays.map {
+            (frame: $0.frame, id: $0.id)
+        }
+        guard let display = Self.display(at: point, among: screens) else {
+            return nil
+        }
         return pointerPlacement(
             atAX: GeometryUtils.axPoint(point),
             on: display
         )
     }
 
-    /// `area`'s usable rect in Cocoa coordinates: the area clipped
-    /// to its screen's visible frame, which KiwiHub centres in
-    /// (#3572 ruling 1); nil for a screen no longer connected.
+    /// `area`'s usable rect in Cocoa coordinates, from the one
+    /// per-placement frame reader (`placementFrames`), which KiwiHub
+    /// centres in (#3572 ruling 1); nil for a screen not connected.
     public func visibleFrame(of area: PlacementID) -> CGRect? {
-        guard let screen = TilingEngine.screen(for: area.display) else {
-            return nil
+        placementFrames().first { $0.id == area }.map {
+            GeometryUtils.flip(
+                $0.frame,
+                primaryHeight: GeometryUtils.primaryHeight
+            )
         }
-        guard let placement = state.workspaces[placement: area],
-            state.workspaces.placements(of: area.display).count > 1
-        else { return GeometryUtils.visibleFrame(of: screen) }
-        return GeometryUtils.flip(
-            tiler.areaFrame(placement.area.rect, on: screen),
-            primaryHeight: GeometryUtils.primaryHeight
-        )
-    }
-
-    /// The screen holding `point` (Cocoa), nil off every screen.
-    func displayUnderPointer(_ point: NSPoint) -> DisplayID? {
-        let screens = ScreenList.all.compactMap { screen in
-            screen.kiwiDisplayID.map { (frame: screen.frame, id: $0) }
-        }
-        return Self.display(at: point, among: screens)
     }
 
     /// Which of `screens` holds `point`, through the one lookup

@@ -105,6 +105,57 @@ struct DesktopOverviewAreaTests {
         )
     }
 
+    /// The switch moves the cursor's area to the cursor and every
+    /// other area to its own target (`areaSpaceTargets`), so an
+    /// entry filed for the cursor's area is not what returns.
+    @Test("a hidden card marks what the switch will show")
+    func hiddenFollowsTheSwitch() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        let hidden = try #require(authoritySnapshot().key(of: 21))
+        let keys = areas.compactMap {
+            core.state.workspaces[placement: $0]?.key.description
+        }
+        try #require(keys.count == 2)
+        core.desktopMemory.virtualSpaces[hidden] = SpaceID(5)
+        core.desktopMemory.areaSpaces[hidden] = [
+            keys[0]: SpaceID(6), keys[1]: SpaceID(4),
+        ]
+        let screen = try split(core.desktopOverview(on: areas[0]))
+        let card = try #require(screen.desktops.first { !$0.isShown })
+        #expect(
+            card.spaces.map(\.isShown) == [true, false, false, true]
+        )
+    }
+
+    @Test("area ranges run in order and cover all but unfiled")
+    func rangesCoverTheLines() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        var entry = AwayWindow(
+            id: WindowID(41),
+            pid: 900_300,
+            appName: "A",
+            appBundleID: nil,
+            nativeSpace: 21
+        )
+        entry.isUp = true
+        core.state.awayWindows[WindowID(41)] = entry
+        let screen = try split(core.desktopOverview(on: areas[0]))
+        for desktop in screen.desktops {
+            var next = 0
+            for area in desktop.areas {
+                #expect(area.lines.lowerBound == next)
+                next = area.lines.upperBound
+            }
+            let unfiled = desktop.spaces.last?.space == nil ? 1 : 0
+            #expect(next == desktop.spaces.count - unfiled)
+        }
+        #expect(screen.desktops.contains { $0.spaces.last?.space == nil })
+    }
+
     @Test("a Desktop pick lands on the here area's shown line")
     func landingLine() throws {
         defer { resetAuthorityOverrides() }

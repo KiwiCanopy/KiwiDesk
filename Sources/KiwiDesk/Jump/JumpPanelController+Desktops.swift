@@ -94,7 +94,7 @@ extension JumpPanelController {
 
     /// What Core refuses for `action` now, in the panel's words.
     private func refusal(of action: DesktopsAction) -> String? {
-        // The panel's screen, as the pick below reads it.
+        // The panel's area, as the pick below reads it.
         let hub = hubArea
         switch action {
         case .moveWindowHere(let id):

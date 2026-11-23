@@ -110,6 +110,7 @@ extension KiwiCore {
                     )
                     : hiddenLines(
                         grouping.spaces,
+                        on: display,
                         native: native,
                         in: snapshot,
                         shared: shared,
@@ -175,6 +176,7 @@ extension KiwiCore {
     /// and lists its live members first (#3486).
     private func hiddenLines(
         _ spaces: [SpaceID],
+        on display: DisplayID,
         native: NativeSpace,
         in snapshot: DesktopSnapshot,
         shared: Bool,
@@ -186,7 +188,11 @@ extension KiwiCore {
             }
         }
         // Each area's, on a split screen (#3572).
-        let returning = returningSpaces(of: native.id, in: snapshot)
+        let returning = returningSpaces(
+            of: native.id,
+            on: display,
+            in: snapshot
+        )
         // A shown Desktop's Spaces, in any area (#3517).
         let shown = state.workspaces.visibleSpaces
         let lines = spaces.map { id in

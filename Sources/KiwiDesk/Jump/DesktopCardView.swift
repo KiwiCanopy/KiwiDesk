@@ -62,7 +62,7 @@ struct DesktopCardView: View {
     /// each line, never on the header too.
     private func group(_ area: DesktopOverview.Area) -> some View {
         VStack(alignment: .leading, spacing: DesktopsGeometry.areaGap) {
-            Text(DesktopsText.area(area))
+            Text(DesktopsText.area(area) ?? "")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -76,7 +76,7 @@ struct DesktopCardView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(DesktopsText.area(area))
+        .accessibilityLabel(DesktopsText.area(area) ?? "")
     }
 
     private func lineID(_ line: Int) -> DesktopsScrollID {
