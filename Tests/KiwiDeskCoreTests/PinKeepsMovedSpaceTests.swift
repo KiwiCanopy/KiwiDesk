@@ -4,9 +4,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A `move_space_to_display` holds until a screen change
-/// re-resolves placement (#3578): a pin of ANOTHER Space, a
-/// `create_space` or a `delete_space` places only what it touched.
+/// A `move_space_to_display` holds through a door that changes no
+/// screen (#3578): a pin of ANOTHER Space, a `create_space`, a
+/// `delete_space` or a retire places only what it touched.
 /// `HeldSpaceDesk`'s docked desk: Spaces 1–2 on the built-in, 3–4
 /// pinned to the DELL.
 @Suite("A pin keeps a hand-moved Space (#3578)", .serialized)

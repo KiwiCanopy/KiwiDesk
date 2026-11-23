@@ -1378,8 +1378,8 @@ it — by `healEmptyDisplays`. Heal, never refuse; the argument is
 space is healed*. The obligations:
 
 - **A relocation ends in the heal.** The resolve, total or
-  scoped (#3578), carries it at its tail, before relocation is judged for the float
-  re-anchor, so a reused seed the precedence sent to main and
+  scoped (#3578), carries it at its tail, before relocation is
+  judged for the float re-anchor, so a reused seed the precedence sent to main and
   the heal sent back has not moved (`EmptyDisplayHealSeamTests`
   ▸ `healPrecedesTheReanchor` holds the order, since no unit
   fixture can observe the re-anchor); `move_space_to_display`,
