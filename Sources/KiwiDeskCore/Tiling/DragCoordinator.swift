@@ -17,10 +17,6 @@ public final class DragCoordinator {
         @MainActor (WindowID, _ start: CGRect, _ frame: CGRect)
             -> Void = { _, _, _ in }
 
-    /// A gesture ended with no drop to follow — a cancel, or a
-    /// settle with no frame — so its undo bracket closes (#3515).
-    public var onDragAbandon: @MainActor (WindowID) -> Void = { _ in }
-
     /// Filters out internal animation moves.
     public var isAnimating: @MainActor (WindowID) -> Bool = {
         _ in false
@@ -131,7 +127,6 @@ public final class DragCoordinator {
         latestFrames[id] = nil
         startFrames[id] = nil
         lateOpened.remove(id)
-        onDragAbandon(id)
     }
 
     private func settle(_ id: WindowID) {
@@ -143,7 +138,6 @@ public final class DragCoordinator {
         guard let frame = latestFrames[id] else {
             startFrames[id] = nil
             lateOpened.remove(id)
-            onDragAbandon(id)
             return
         }
         let start = startFrames[id] ?? frame

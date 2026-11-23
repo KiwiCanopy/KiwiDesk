@@ -55,12 +55,20 @@ struct LayoutUndoDoorTests {
         #expect(order(core) == start)
     }
 
+    /// Opens a real coordinator gesture on window 1, its first move
+    /// reaching `onDragMove` through `windowMoved`.
+    private func startDrag(_ core: KiwiCore) -> CGRect {
+        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
+        core.drag.isMousePressed = { true }
+        core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
+        return frame
+    }
+
     @Test("a drag opens at its first move and records at its drop")
     func dragBracketIsWired() {
         let core = makeCore()
         let start = order(core)
-        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
-        core.drag.onDragMove(WindowID(1), frame, frame)
+        let frame = startDrag(core)
         #expect(core.layoutHistory.gestures[WindowID(1)] != nil)
         // The drop's own reorder, made inside the open bracket.
         core.state.workspaces.withSpace(one) {
@@ -75,8 +83,7 @@ struct LayoutUndoDoorTests {
     @Test("a command inside an open drag is the drag's step")
     func dragSwallowsNested() {
         let core = makeCore()
-        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
-        core.drag.onDragMove(WindowID(1), frame, frame)
+        _ = startDrag(core)
         core.execute("swap", args: [.string("right")])
         core.cancelDrag(WindowID(1))
         #expect(core.layoutHistory.gestures.isEmpty)

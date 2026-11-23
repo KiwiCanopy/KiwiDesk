@@ -114,6 +114,9 @@ struct LayoutUndoTests {
         #expect(core.execute("swap", args: [.string("right")]).isSuccess)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(core.execute("set_mode", args: [.string("stack")]).isSuccess)
+        #expect(
+            core.layoutHistory.history.candidate(.redo, of: one) == .empty
+        )
         #expect(!core.execute("redo_layout").isSuccess)
     }
 
@@ -150,6 +153,11 @@ struct LayoutUndoTests {
         let three = SpaceID("3")
         core.state.workspaces.ensureSpace(three)
         #expect(core.execute("swap", args: [.string("right")]).isSuccess)
+        let recorded = core.layoutHistory.history.candidate(.undo, of: one)
+        guard case .ready = recorded else {
+            Issue.record("the swap recorded no step")
+            return
+        }
         core.recordingLayoutStep("open") {
             core.state.apply(
                 .windowCreated(

@@ -65,49 +65,90 @@ struct LayoutUndoEdgeTests {
     func cancelledDragHeals() {
         let core = makeCore()
         let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
-        core.drag.onDragMove(WindowID(1), frame, frame)
+        core.drag.isMousePressed = { true }
+        core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
         #expect(!core.layoutHistory.gestures.isEmpty)
+        // The coordinator's own cancel, not `cancelDrag`'s.
         core.drag.cancel(WindowID(1))
-        #expect(core.layoutHistory.gestures.isEmpty)
         let start = order(core)
         swap(core)
+        #expect(core.layoutHistory.gestures.isEmpty)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(core) == start)
     }
 
-    @Test("a held key's press and glide are one step")
-    func glideMergesIntoThePress() {
+    @Test("a glide whose end was missed leaves recording on")
+    func missedGlideHeals() {
         let core = makeCore()
-        let mode = { core.state.workspaces[one]?.mode }
-        core.keys.firePress(id: nil, label: "key r") {
-            core.execute("set_mode", args: [.string("stack")])
-        }
         core.keys.holdGlide.isGliding = true
         core.beginLayoutGlide()
-        core.execute("set_mode", args: [.string("grid")])
-        core.execute("set_mode", args: [.string("track")])
         core.keys.holdGlide.isGliding = false
-        core.endLayoutGlide()
-        #expect(mode() == .track)
+        let start = order(core)
+        swap(core)
+        #expect(core.layoutHistory.glide == nil)
         #expect(core.execute("undo_layout").isSuccess)
-        #expect(mode() == .bsp)
+        #expect(order(core) == start)
+    }
+
+    private func ratio(_ core: KiwiCore) -> Double? {
+        core.sessionRatios(of: one).splitRatioH
+    }
+
+    @Test("a held key's press and its glide are one step")
+    func glideMergesIntoThePress() {
+        let core = makeCore()
+        let start = ratio(core)
+        let grow: [JSONValue] = [.string("x"), .number(50)]
+        // Past the quiet gap from press to the glide's end: the hold
+        // merges by the press's stamp, never by its end.
+        var now = Date(timeIntervalSince1970: 1000)
+        core.wallClock = { now }
+        core.keys.firePress(id: nil, label: "key r") {
+            #expect(core.execute("resize", args: grow).isSuccess)
+        }
+        let pressed = ratio(core)
+        #expect(pressed != start)
+        // The glide, through its own wiring: frames, then the end.
+        core.keys.holdGlide.isGliding = true
+        now = now.addingTimeInterval(0.5)
+        #expect(core.keys.holdGlide.applyGlideStep("resize", grow, 1))
+        #expect(core.keys.holdGlide.applyGlideStep("resize", grow, 1))
+        now = now.addingTimeInterval(3)
+        core.keys.holdGlide.cancelRun()
+        #expect(ratio(core) != pressed)
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(ratio(core) == start)
         #expect(
             core.layoutHistory.history.candidate(.undo, of: one) == .empty
         )
     }
 
-    @Test("a config load clears, even inside a command's step")
+    @Test("a config load inside a step clears it")
     func configLoadClears() {
         let core = makeCore()
-        core.recordingLayoutStep("config", undoable: false) {
+        // Control: the same step without the load is undoable.
+        core.recordingLayoutStep("key a") { swap(core) }
+        #expect(core.execute("undo_layout").isSuccess)
+        core.recordingLayoutStep("key b") {
             swap(core)
+            core.loadConfig()
         }
         #expect(!core.execute("undo_layout").isSuccess)
-        core.recordingLayoutStep("reload_config") {
-            swap(core, "left")
-            core.recordingLayoutStep("config", undoable: false) {}
-        }
-        #expect(!core.execute("undo_layout").isSuccess)
+    }
+
+    @Test("a config load alone records nothing undoable")
+    func configLoadRecordsNothing() throws {
+        let core = makeCore()
+        try "KiwiDesk.set_mode(\"1\", \"stack\")\n".write(
+            to: core.configDirectory.appendingPathComponent("init.lua"),
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        #expect(core.state.workspaces[one]?.mode == .stack)
+        #expect(
+            core.layoutHistory.history.candidate(.undo, of: one) == .empty
+        )
     }
 
     @Test("a step across a sizing key change is not undoable")
@@ -142,6 +183,11 @@ struct LayoutUndoEdgeTests {
                 args: [.string("2"), .number(1)]
             ).isSuccess
         )
+        let recorded = core.layoutHistory.history.candidate(.undo, of: two)
+        guard case .ready = recorded else {
+            Issue.record("the move recorded no step")
+            return
+        }
         core.state.windows.setFullscreen(WindowID(1), true)
         #expect(!core.execute("undo_layout").isSuccess)
         #expect(core.state.workspaces.space(of: WindowID(1)) == two)

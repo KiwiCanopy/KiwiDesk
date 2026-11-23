@@ -36,13 +36,18 @@ extension KiwiCore {
             let from = stack == .undo ? step.after : step.before
             let to = stack == .undo ? step.before : step.after
             let now = layoutArrangements()
-            guard from.allSatisfy({ now[$0.key] == $0.value }),
-                !movesRefused(to)
-            else {
+            guard from.allSatisfy({ now[$0.key] == $0.value }) else {
                 step.spaces.forEach { layoutHistory.history.clear($0) }
                 return refuseLayoutStep(
                     "this Space changed since its last step; "
                         + "history cleared"
+                )
+            }
+            guard !movesRefused(to) else {
+                step.spaces.forEach { layoutHistory.history.clear($0) }
+                return refuseLayoutStep(
+                    "a window this step moves back cannot change "
+                        + "Space now; history cleared"
                 )
             }
             layoutHistory.history.take(step, from: stack)
@@ -89,9 +94,10 @@ extension KiwiCore {
         }
         var ended: Set<WindowID> = []
         for (space, arrangement) in target {
-            if let filled = state.workspaces[space].flatMap(
-                state.maximizedWindow(of:)
-            ) {
+            guard let live = state.workspaces[space],
+                Set(live.windows) == Set(arrangement.windows)
+            else { continue }
+            if let filled = state.handMaximizedWindow(of: live) {
                 ended.insert(filled)
             }
             let modeChanged = current[space]?.mode != arrangement.mode
@@ -104,11 +110,9 @@ extension KiwiCore {
                 emitLayoutChange(space: restored)
             }
         }
-        if ended.isEmpty {
-            retile(animated: true, pass: .apply)
-        } else {
-            retileEndingMaximize(ended)
-        }
+        // A Maximize the reorder ended is named on the pass (#2676);
+        // slots move, so nothing is promised spring-sized (#593).
+        retile(animated: true, pass: .apply, stateChange: ended)
         // A reorder can change which windows overlap (#153).
         if !scheduleScrollingZOrderRestoreIfOverflowing() {
             scheduleTrackZOrderRestoreIfOverflowing()

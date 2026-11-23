@@ -53,6 +53,16 @@ struct SpaceArrangementParityTests {
         )
         source.runSizes = [a: RunSize(share: 0.6, zone: 1)]
         let saved = SpaceArrangement(source, sizing: sizing)
+        // `init` copies each field's VALUE, read off `Space` itself.
+        let fields = Dictionary(
+            uniqueKeysWithValues: Mirror(reflecting: source).children
+                .compactMap { c in c.label.map { ($0, "\(c.value)") } }
+        )
+        for child in Mirror(reflecting: saved).children
+        where child.label != "sizing" {
+            let label = child.label ?? "?"
+            #expect("\(child.value)" == fields[label], "\(label)")
+        }
         var target = Space(id: SpaceID("1"), mode: .track, windows: [a, b])
         let wrote = target.restore(saved)
         #expect(wrote)

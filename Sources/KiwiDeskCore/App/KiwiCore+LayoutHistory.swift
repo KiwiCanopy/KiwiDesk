@@ -18,9 +18,16 @@ final class LayoutHistoryLedger {
     var gestures: [WindowID: Open] = [:]
     /// The held key's glide, from its first frame to its end.
     var glide: Open?
-    /// The last key fire's label, which its glide records under so
-    /// the hold merges into the press.
-    var lastFireLabel = ""
+    /// The last key fire's label and the moment its bracket opened,
+    /// which its glide records under so the hold merges into the
+    /// press whatever the key-repeat delay.
+    var lastFire = (label: "", at: Date.distantPast)
+    /// The glide ended inside a bracket — a refusal cue mid-frame —
+    /// so it records once that bracket unwinds.
+    var glideEnded = false
+    /// The drag whose drop is running; its bracket stays open
+    /// though the coordinator already forgot the gesture.
+    var dropping: WindowID?
     /// An undo or redo ran inside the open bracket: its change is
     /// the stacks' own, so the bracket records nothing.
     var tookStep = false
@@ -50,7 +57,9 @@ extension KiwiCore {
     func wireLayoutUndoScope() {
         keys.fireScope = { [weak self] label, fire in
             guard let self else { return fire() }
-            self.layoutHistory.lastFireLabel = label
+            // A new press ends the hold before it: two acts, two steps.
+            self.endLayoutGlide()
+            self.layoutHistory.lastFire = (label, self.wallClock())
             self.recordingLayoutStep(label, fire)
         }
     }
@@ -76,38 +85,59 @@ extension KiwiCore {
         _ body: () -> T
     ) -> T {
         let ledger = layoutHistory
-        // A glide whose end was missed must not hold every later
-        // step nested.
-        if ledger.glide != nil, !keys.holdGlide.isGliding {
-            ledger.glide = nil
-        }
+        healOpenBrackets()
         guard !ledger.isOpen else {
             if !undoable { ledger.tainted = true }
             ledger.depth += 1
-            defer { ledger.depth -= 1 }
-            return body()
+            let result = body()
+            ledger.depth -= 1
+            if ledger.depth == 0, ledger.glideEnded { endLayoutGlide() }
+            return result
         }
         let open = LayoutHistoryLedger.Open(
             label: label,
             at: wallClock(),
-            before: layoutArrangements()
+            before: openingSnapshot()
         )
         ledger.depth = 1
-        ledger.tookStep = false
-        ledger.tainted = false
-        defer { ledger.depth = 0 }
         let result = body()
+        ledger.depth = 0
         commitLayoutStep(open, undoable: undoable)
         return result
+    }
+
+    /// The snapshot an outermost bracket opens with, the flags a
+    /// previous bracket may have left behind cleared.
+    private func openingSnapshot() -> [SpaceID: SpaceArrangement] {
+        layoutHistory.tookStep = false
+        layoutHistory.tainted = false
+        return layoutArrangements()
+    }
+
+    /// Drops a bracket whose end was missed — a glide no longer
+    /// running, a drag the coordinator forgot with no drop running
+    /// — which would otherwise hold every later step nested.
+    private func healOpenBrackets() {
+        let ledger = layoutHistory
+        if ledger.glide != nil, !keys.holdGlide.isGliding,
+            ledger.depth == 0
+        {
+            ledger.glide = nil
+            ledger.glideEnded = false
+        }
+        ledger.gestures = ledger.gestures.filter { id, _ in
+            id == ledger.dropping || drag.hasGesture(id)
+        }
     }
 
     /// Opens `window`'s drag bracket at its first move.
     func beginLayoutGesture(_ window: WindowID) {
         guard layoutHistory.gestures[window] == nil else { return }
+        let fresh = !layoutHistory.isOpen
         layoutHistory.gestures[window] = .init(
             label: "drag",
             at: wallClock(),
-            before: layoutArrangements()
+            before: fresh ? openingSnapshot() : layoutArrangements()
         )
     }
 
@@ -121,7 +151,8 @@ extension KiwiCore {
 
     /// Drops `window`'s drag bracket on an end no drop follows;
     /// whatever it changed reads as unrecorded, so the next undo
-    /// refuses.
+    /// refuses. A gesture the coordinator drops on its own is
+    /// healed at the next bracket instead.
     func abandonLayoutGesture(_ window: WindowID) {
         layoutHistory.gestures[window] = nil
     }
@@ -131,17 +162,25 @@ extension KiwiCore {
     func beginLayoutGlide() {
         let ledger = layoutHistory
         guard ledger.glide == nil else { return }
+        let fresh = !ledger.isOpen
         ledger.glide = .init(
-            label: ledger.lastFireLabel,
-            at: wallClock(),
-            before: layoutArrangements()
+            label: ledger.lastFire.label,
+            at: ledger.lastFire.at,
+            before: fresh ? openingSnapshot() : layoutArrangements()
         )
     }
 
-    /// Closes the glide bracket when the hold ends.
+    /// Closes the glide bracket when the hold ends — once the
+    /// command a refusal ended it inside has unwound.
     func endLayoutGlide() {
-        guard let open = layoutHistory.glide else { return }
-        layoutHistory.glide = nil
+        let ledger = layoutHistory
+        guard let open = ledger.glide else { return }
+        guard ledger.depth == 0 else {
+            ledger.glideEnded = true
+            return
+        }
+        ledger.glide = nil
+        ledger.glideEnded = false
         commitLayoutStep(open, undoable: true)
     }
 

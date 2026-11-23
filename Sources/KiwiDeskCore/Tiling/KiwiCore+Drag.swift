@@ -23,13 +23,14 @@ extension KiwiCore {
             }
         }
         drag.onDragEnd = { [weak self] id, start, frame in
+            // The coordinator forgot the gesture; its bracket stays
+            // open through the drop (#3515).
+            self?.layoutHistory.dropping = id
             self?.withUserMotion {
                 self?.handleDragEnd(id, start: start, frame: frame)
             }
+            self?.layoutHistory.dropping = nil
             self?.endLayoutGesture(id)
-        }
-        drag.onDragAbandon = { [weak self] id in
-            self?.abandonLayoutGesture(id)
         }
         drag.isMousePressed = { [weak self] in
             self?.mouse.leftButtonHeld == true
