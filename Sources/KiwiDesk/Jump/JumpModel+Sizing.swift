@@ -21,8 +21,10 @@ extension JumpModel {
         switch scope {
         case .windows, .view: return room.fieldWidth
         case .shortcuts:
-            let inset = JumpShortcutsView.kiwiHubInset
-            return shortcutColumns.width(inset: inset)
+            return shortcutColumns.width(
+                inset: JumpShortcutsView.kiwiHubInset,
+                gap: ShortcutsSheetView.columnGap
+            )
         case .desktops: return desktopsContentWidth
         }
     }

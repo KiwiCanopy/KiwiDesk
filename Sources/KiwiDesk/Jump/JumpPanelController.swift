@@ -54,6 +54,9 @@ final class JumpPanelController: NSObject {
     /// The screen the panel opened on: its list's "here" and Move
     /// here's target are the Space it shows (#2791).
     private(set) var hubDisplay: DisplayID?
+    /// The field row's centre and top this opening placed it at,
+    /// which every refit holds (#3570).
+    private(set) var anchor = CGPoint.zero
 
     /// A scope's own shortcut (#2229).
     func toggle(_ scope: JumpScope = .windows) {
@@ -88,8 +91,7 @@ final class JumpPanelController: NSObject {
         pickerSpace = core.layoutPickerSpace()
         hubDisplay = core.jumpDisplay()
         let visible =
-            screen?.visibleFrame
-            ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
+            screen?.visibleFrame ?? Self.fallbackVisible
         let area = Self.clearArea(
             visible: visible,
             shelves: core.shelfFrames()
@@ -101,8 +103,6 @@ final class JumpPanelController: NSObject {
             snapshot: snapshot,
             icons: Self.icons(for: snapshot),
             rowCap: Self.rowCap,
-            sheetCap: Self.sheetCap(in: room),
-            panelWidth: width,
             room: room,
             modifiers: NSEvent.modifierFlags
         )
@@ -141,6 +141,7 @@ final class JumpPanelController: NSObject {
         } else {
             panel.center()
         }
+        anchor = CGPoint(x: panel.frame.midX, y: panel.frame.maxY)
         let front = PanelHandBack.frontmostBundleID()
         let rows = snapshot.entries.count
         jumpLog.log(

@@ -16526,7 +16526,9 @@ title on one line, and the openers are listed elsewhere too: on
 the Simple page, in the welcome tour and in the shortcut recorder.
 So the chord that links a key to its side above is shown on
 demand rather than printed. The panel's ceiling rises from 452 to
-488 pt on every side, for the Desktops side's two screen rows.
+488 pt on every side, for the Desktops side's two screen rows — a
+ceiling for Windows and View alone since #3570 (▸ the shortcuts
+sheet entry's amendment).
 
 **The key panel never takes activation, so there is none to
 hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
@@ -16588,27 +16590,29 @@ them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
 
 :::unreleased
-*Amended (#3570, owner with ui-designer, 2026-11-23): the fixed
-720 pt width becomes a fixed 720 pt field row, and the one ceiling
+*Amended (#3570, owner with ui-designer, 2026-11-23): the fixed 720
+pt width becomes a fixed 720 pt field row, and the one ceiling
 becomes a ceiling per side.* What the fixed width protected was the
 field and the side switch staying under the eye on ⇥, and the field
 row alone carries that: it stays 720 pt wide, centred, at
 `topFraction`, and on ⇥ only the panel's outer edges and its footer
 glide, so nothing the user reads or aims at moves. Windows and View
-keep 720 × 488, since a ranked list and three lines of chips gain
-nothing from width and a glance should stay compact. Desktops and
-Shortcuts are overviews — a screen per column, every bound key —
-and at 720 × 488 both scrolled on any real desk, which hides the
-very thing they exist to show; so they take the width their content
-asks, from 720 pt up to the area less 96 pt each side, and run down
-to 48 pt above its bottom before they scroll. What keeps them a
-panel rather than a window is everything but the size: the fixed
-field row, the margins, no title bar, no resizing or dragging, and
-Esc. The panel is never lifted: a lifted panel moves the field,
-which is the one thing the width rule existed to hold. Every limit
-is measured on the rect the panel opens in — a screen's clear area,
-or a screen area's (#3572) — never on `NSScreen` directly
-(`JumpPanelRoom`, `JumpPanelRoomTests`).
+keep 720 pt and the 488 pt ceiling, since a ranked list and three
+lines of chips gain nothing from width and a glance should stay
+compact. Desktops and Shortcuts are overviews — a screen per column,
+every bound key — and at 720 × 488 both scrolled on any real desk,
+which hides the very thing they exist to show; so both run down to
+48 pt above the area's bottom before they scroll, and Shortcuts
+takes the width its columns ask, from 720 pt up to the area less 96
+pt each side — a limit the Desktops side shares once its screens
+stand as columns (#3570 ▸ Ruling 4). What keeps them a panel rather
+than a window is everything but the size: the fixed field row, the
+margins, no title bar, no resizing or dragging, and Esc. The panel
+is never lifted: a lifted panel moves the field, which is the one
+thing the width rule existed to hold. Every limit is measured on the
+rect the panel opens in — a screen's clear area, or a screen area's
+(#3572) — never on `NSScreen` directly (`JumpPanelRoom`,
+`JumpPanelRoomTests`).
 
 *Amended (#3570): the one-column sheet becomes column-major
 columns.* One column still reads best while it fits, so the sheet
@@ -16617,15 +16621,18 @@ screenful; then it cuts into columns about 400 pt wide, at most
 three — three side by side is already a page to scan, and a fourth
 would be read as a grid with no order. The columns are column-major
 and break only before a section title, so a section is never split
-and VoiceOver keeps one reading order, down a column and on to the
-next; the cut is as even as the section boundaries allow, so a
-filtered sheet rarely scrolls. The keys stay a reference sheet's
-(ui-designer, 2026-11-23): ↑ ↓ and the Page keys scroll the one
-shared scroll view, ← → stay with the field's text, and nothing is
-selected. A highlighted row on a Mac promises that ↩ acts, the
-other sides carry a selection only because they act on it, and
-VoiceOver already moves row by row, so a read cursor added for
-column-hopping would teach the wrong thing
+and VoiceOver, which reads each column as one group, keeps one
+reading order, down a column and on to the next; the cut is as even
+as the section boundaries allow, so a filtered sheet rarely scrolls.
+A label in a column gets about 376 pt, more than half the field row,
+and a sheet that fits keeps the one column at full width, so a long
+translation pays only on a sheet that would otherwise scroll. The
+keys stay a reference sheet's (ui-designer, 2026-11-23): ↑ ↓ and the
+Page keys scroll the one shared scroll view, ← → stay with the
+field's text, and nothing is selected. A highlighted row on a Mac
+promises that ↩ acts, the other sides carry a selection only because
+they act on it, and VoiceOver already moves row by row, so a read
+cursor added for column-hopping would teach the wrong thing
 (`ShortcutsColumnPlanTests`, `ShortcutsColumnKeysTests`).
 :::
 
@@ -16877,8 +16884,8 @@ side for its search alone. The layout, the profile and KiwiVision
 are the three things a user changes through the day, and a status
 menu can reach them only with the pointer, so the third side
 widened to hold all three and took the name View. It stayed one
-side rather than becoming a fourth: the side switch shares a row
-with the search field in a panel of fixed width, and the three
+side rather than becoming a fourth: the side switch shares the
+fixed field row with the search field, and the three
 answer one question, how the desk looks now.
 
 Each group is one line that never wraps, so ↑ and ↓ always mean

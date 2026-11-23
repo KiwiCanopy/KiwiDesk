@@ -68,20 +68,25 @@ extension JumpModel {
             return
         }
         let inset = JumpShortcutsView.kiwiHubInset
-        let view = ShortcutsSheetView(reference: shown, needle: sheet.needle)
-        let sections = view.sections(shown).map {
-            ShortcutsSheetView.planned(
-                $0,
-                needle: sheet.needle,
-                width: ShortcutsColumnPlan.columnWidth
-            )
+        let gap = ShortcutsSheetView.columnGap
+        let sections = ShortcutsSheetView.sections(shown)
+        func planned(at width: CGFloat) -> [ShortcutsColumnPlan.Section] {
+            sections.map {
+                ShortcutsSheetView.planned(
+                    $0,
+                    needle: sheet.needle,
+                    width: width
+                )
+            }
         }
         shortcutColumns = ShortcutsColumnPlan(
-            sections: sections,
+            single: planned(at: room.fieldWidth - 2 * inset),
+            split: planned(at: ShortcutsColumnPlan.columnWidth),
             cap: sheetCap - 2 * JumpShortcutsView.kiwiHubVerticalInset,
             columns: ShortcutsColumnPlan.columnsFitting(
                 room.widest,
-                inset: inset
+                inset: inset,
+                gap: gap
             )
         )
     }

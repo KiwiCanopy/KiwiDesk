@@ -20,10 +20,7 @@ struct DesktopsSideCeilingTests {
             snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
             icons: [:],
             rowCap: JumpPanelController.rowCap,
-            sheetCap: JumpPanelController.sheetCap(
-                visible: visible,
-                area: visible
-            )
+            room: JumpPanelController.room(visible: visible, area: visible)
         )
         model.loadDesktops = { DesktopsStateTests.overview() }
         model.setScope(.desktops)
@@ -55,6 +52,8 @@ struct DesktopsSideCeilingTests {
             height >= whole.height + JumpPanelView.fieldHeight,
             "\(height)"
         )
-        #expect(height <= JumpPanelController.maxPanelHeight, "\(height)")
+        // A growing side: down to 48 pt above the area (#3570).
+        let room = JumpPanelController.room(visible: visible, area: visible)
+        #expect(height <= room.height(.grows), "\(height)")
     }
 }

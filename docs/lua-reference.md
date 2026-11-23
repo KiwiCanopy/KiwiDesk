@@ -8198,7 +8198,7 @@ A modifier still held from the shortcut that opened KiwiHub, or
 from a step of `kiwihub.show_last_app`, counts for nothing until
 you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 
-The `"view"` side is the **view picker**, three lines in one
+The `"view"` side is the **view picker**, up to three lines in one
 panel, the current item on each marked ✓.
 
 - **Layout** — a tile per layout for the Space shown on the screen
@@ -8221,8 +8221,9 @@ panel, the current item on each marked ✓.
   Lua-owned setup greys it.
 
 :::unreleased
-The **Profile** line shows only while two or more profiles are
-saved; **↑** and **↓** then step from Layout to KiwiVision.
+The **Profile** line, **Save as New Profile…** with it, shows only
+while two or more profiles are saved; **↑** and **↓** then step from
+Layout to KiwiVision.
 :::
 
 Keys on this side:
@@ -8232,7 +8233,7 @@ Keys on this side:
   clamped to a shorter line. A line longer than the panel scrolls
   sideways.
 
-- Typing narrows all three lines, dimming the rest, and selects
+- Typing narrows every line, dimming the rest, and selects
   the first match.
 - **Return** applies the selected item and closes KiwiHub.
   **⌘1** … **⌘9** apply the line's items by position, counted

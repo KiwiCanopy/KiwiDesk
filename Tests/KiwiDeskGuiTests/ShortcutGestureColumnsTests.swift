@@ -246,6 +246,14 @@ struct ShortcutGestureColumnsTests {
             )
         )
         #expect(sheet.contains("column(sections,range)"))
+        // VoiceOver reads a column whole before the next (#3570).
+        #expect(
+            sheet.contains(
+                "column(sections,range).frame(maxWidth:.infinity,"
+                    + "alignment:.leading)"
+                    + ".accessibilityElement(children:.contain)"
+            )
+        )
         // Once in the app: no section or host sizes its own.
         let app = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")

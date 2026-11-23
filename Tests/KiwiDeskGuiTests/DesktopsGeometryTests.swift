@@ -268,7 +268,7 @@ struct DesktopsGeometryTests {
         #expect(built == ["Jump/JumpModel+Desktops.swift": 1])
         let controller = try read("JumpPanelController.swift")
             .replacingOccurrences(of: " ", with: "")
-        #expect(controller.contains("panelWidth:width,"))
+        #expect(controller.contains("room:room,"))
         let model = try read("JumpModel+Desktops.swift")
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")

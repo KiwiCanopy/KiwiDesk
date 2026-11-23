@@ -61,20 +61,31 @@ struct ShortcutsColumnKeysTests {
         #expect(model.sideWidth == JumpPanelRoom.fieldWidth)
     }
 
-    /// Three 400 pt columns and the sheet's inset, inside the
-    /// default 1440 pt room's 1248 pt.
+    /// Three 400 pt columns, their gaps and the sheet's inset,
+    /// inside the default 1440 pt room's 1248 pt.
     @Test("a sheet past the room cuts into columns and widens")
     func tallSheetTakesColumns() {
         let model = model(cap: 300)
         let plan = model.shortcutColumns
         #expect(plan.columns == [0..<1, 1..<2, 2..<3])
-        let inset = JumpShortcutsView.kiwiHubInset
-        #expect(model.sideWidth == plan.width(inset: inset))
-        #expect(
-            model.sideWidth == 3 * ShortcutsColumnPlan.columnWidth + 32
+        let width = plan.width(
+            inset: JumpShortcutsView.kiwiHubInset,
+            gap: ShortcutsSheetView.columnGap
         )
+        #expect(model.sideWidth == width)
+        #expect(width > 3 * ShortcutsColumnPlan.columnWidth)
+        #expect(width <= model.room.widest)
         // A side switch keeps the room: Windows stays compact.
         #expect(model.sideWidth(for: .windows) == JumpPanelRoom.fieldWidth)
+    }
+
+    /// The plan is judged inside the scroll's vertical inset: three
+    /// 242 pt sections fit two columns (500 pt) in a 510 pt sheet's
+    /// room only without it.
+    @Test("the columns fit inside the sheet's inset")
+    func capLeavesTheInset() {
+        #expect(model(cap: 510).shortcutColumns.columns.count == 3)
+        #expect(model(cap: 560).shortcutColumns.columns.count == 2)
     }
 
     @Test("↑ ↓ and the Page keys scroll the one shared scroll view")

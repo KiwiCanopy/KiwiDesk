@@ -125,10 +125,8 @@ struct ShortcutGroupFilingTests {
             own("alt+b", desc: "Own", group: "Mine"),
             own("alt+c", desc: "Loose"),
         ])
-        let titles = ShortcutsSheetView(reference: built, needle: "").sections(
-            built
-        )
-        .map(\.title)
+        let titles = ShortcutsSheetView.sections(built)
+            .map(\.title)
         let apps = titles.firstIndex(of: L("shortcuts.panel.apps", "Apps"))
         let mine = titles.firstIndex(of: "Mine")
         let custom = titles.firstIndex(

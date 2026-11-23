@@ -87,12 +87,12 @@ struct JumpPanelRoom: Equatable {
         CGPoint(x: area.midX - size.width / 2, y: top - size.height)
     }
 
-    /// `frame` refitted to `size`: its centre across and its top
-    /// held, so the field row stays where it is.
-    static func refitted(_ frame: CGRect, to size: CGSize) -> CGRect {
+    /// A panel `size` big whose top edge's midpoint is `anchor`:
+    /// the field row's place, held across every refit.
+    static func frame(of size: CGSize, under anchor: CGPoint) -> CGRect {
         CGRect(
-            x: frame.midX - size.width / 2,
-            y: frame.maxY - size.height,
+            x: anchor.x - size.width / 2,
+            y: anchor.y - size.height,
             width: size.width,
             height: size.height
         )

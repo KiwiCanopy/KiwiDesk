@@ -15,11 +15,11 @@ struct ShortcutsColumnPlan: Equatable {
         /// The title, and the caption under it if any.
         var header: CGFloat
         var rows: Int
+        /// A row's height and the stack's spacing above it; the
+        /// sheet hands its own (`ShortcutsSheetView.planned`).
+        var pitch: CGFloat = 28
 
-        var height: CGFloat { header + CGFloat(rows) * Self.rowPitch }
-
-        /// A row's height and the stack's spacing above it.
-        static let rowPitch: CGFloat = 28
+        var height: CGFloat { header + CGFloat(rows) * pitch }
     }
 
     /// Each column's sections, as ranges into the section list.
@@ -33,24 +33,44 @@ struct ShortcutsColumnPlan: Equatable {
     /// No sheet drawn.
     static let empty = ShortcutsColumnPlan(columns: [])
 
-    /// The width the side's content asks for, its `inset` on each
-    /// side; 0 for one column, which takes the field row's width.
-    func width(inset: CGFloat) -> CGFloat {
-        guard columns.count > 1 else { return 0 }
-        return CGFloat(columns.count) * Self.columnWidth + 2 * inset
+    /// The width the side's content asks for: a `columnWidth` pitch
+    /// per column, `gap` of it between each two and none after the
+    /// last, and `inset` on each side; 0 for one column, which takes
+    /// the field row's width.
+    func width(inset: CGFloat, gap: CGFloat) -> CGFloat {
+        let count = CGFloat(columns.count)
+        guard count > 1 else { return 0 }
+        return count * Self.columnWidth - gap + 2 * inset
     }
 
-    /// How many columns fit `room` points less `inset` each side.
-    static func columnsFitting(_ room: CGFloat, inset: CGFloat) -> Int {
-        let fit = Int((room - 2 * inset) / columnWidth)
+    /// How many columns at that pitch fit `room` points less `inset`
+    /// each side.
+    static func columnsFitting(
+        _ room: CGFloat,
+        inset: CGFloat,
+        gap: CGFloat
+    ) -> Int {
+        let fit = Int((room - 2 * inset + gap) / columnWidth)
         return min(max(fit, 1), maxColumns)
     }
 
-    /// The plan for `sections` under a sheet `cap` tall, in at most
-    /// `columns` columns.
-    init(sections: [Section], cap: CGFloat, columns limit: Int) {
+    /// The plan under a sheet `cap` tall, in at most `columns`
+    /// columns. `single` is the sections as one column draws them
+    /// and `split` as a narrower column does, so a caption's wrap is
+    /// judged at the width it would draw at.
+    init(
+        single: [Section],
+        split: [Section],
+        cap: CGFloat,
+        columns limit: Int
+    ) {
+        let whole = Self.height(single.map(\.height), 0..<single.count)
+        guard single.count == split.count, whole > cap else {
+            columns = single.isEmpty ? [] : [0..<single.count]
+            return
+        }
         columns = Self.partition(
-            sections.map(\.height),
+            split.map(\.height),
             cap: cap,
             limit: limit
         )

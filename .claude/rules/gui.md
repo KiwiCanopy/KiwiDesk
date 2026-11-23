@@ -2359,6 +2359,20 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
+## KiwiHub sizes in the rect it fits (#3570)
+
+**A KiwiHub width, height or place is asked of `JumpPanelRoom`,
+built from the rect the panel fits — a screen's clear area or a
+screen area's (#3572) — never of `NSScreen` beside it**, and a
+side's size rule is `JumpPanelRoom.sizing(of:)`, never a scope test
+of its own (`JumpPanelRoomTests`). A refit sizes around the field
+row's opening anchor, never the frame's left edge, so the field row
+never moves on ⇥ (`JumpPanelShapeTests` ▸ `refitHoldsTheAnchor`);
+a side's rendered width and height stay inside its own limits
+(`JumpPanelCeilingTests`). A metric the Shortcuts column plan
+estimates is read from `ShortcutsSheetView`'s statics the drawing
+uses, never a literal beside them (`ShortcutsSheetEstimateTests`).
+
 ## A KiwiHub scroll settles after the entrance (#3203)
 
 **A scroll under `.panelEntrance` whose edge fade spares it less

@@ -42,21 +42,15 @@ extension JumpPanelController {
         return area
     }
 
-    /// The key sequence hint panel's tallest sheet: a compact
-    /// side's panel less the field and the footer row (#2246).
-    static func sheetCap(visible: CGRect, area: CGRect) -> CGFloat {
-        let room = room(visible: visible, area: area)
-        return max(room.height(.compact) - shortcutsChrome, 200)
+    /// The tallest sheet between the field and the footer row on a
+    /// `sizing` side: a compact side's 488 pt ceiling, or a growing
+    /// side's run to 48 pt above the area's bottom (#2246, #3570).
+    static func sheetCap(
+        in room: JumpPanelRoom,
+        _ sizing: JumpPanelRoom.Sizing
+    ) -> CGFloat {
+        max(room.height(sizing) - shortcutsChrome, 200)
     }
-
-    /// A growing side's tallest content between the field and the
-    /// footer row: down to 48 pt above the area's bottom (#3570).
-    static func sheetCap(in room: JumpPanelRoom) -> CGFloat {
-        max(room.height(.grows) - shortcutsChrome, 200)
-    }
-
-    /// The tallest a compact side stands (#2309, #3570).
-    static let maxPanelHeight = JumpPanelRoom.compactHeight
 
     /// What the Shortcuts side draws besides its sheet: the field,
     /// the footer row and their two dividers.
@@ -75,23 +69,27 @@ extension JumpPanelController {
     /// whether it scales or holds a fixed offset is unmeasured.
     static let topFraction: CGFloat = 0.257
 
+    /// The visible frame assumed when no screen is under the pointer.
+    static let fallbackVisible = CGRect(x: 0, y: 0, width: 1440, height: 900)
+
     /// The room the panel fits on `visible`, cut to `area`.
     static func room(visible: CGRect, area: CGRect) -> JumpPanelRoom {
         JumpPanelRoom(visible: visible, area: area, topFraction: topFraction)
     }
 
-    /// Fits the panel to its side, holding its centre across and
-    /// its top, so the field row never moves; a side switch glides
-    /// the outer edges there (#2229, #3570), at once under Reduce
-    /// Motion.
+    /// Fits the panel to its side around `anchor`, the field row's
+    /// centre and top as the opening placed them, so the field row
+    /// never moves whatever AppKit did to the frame meanwhile; a
+    /// side switch glides the outer edges there (#2229, #3570), at
+    /// once under Reduce Motion.
     func refit(animated: Bool = false) {
         guard let panel, panel.isVisible,
             let content = panel.contentView
         else { return }
         content.layoutSubtreeIfNeeded()
-        let frame = JumpPanelRoom.refitted(
-            panel.frame,
-            to: content.fittingSize
+        let frame = JumpPanelRoom.frame(
+            of: content.fittingSize,
+            under: anchor
         )
         panel.setFrame(
             frame,

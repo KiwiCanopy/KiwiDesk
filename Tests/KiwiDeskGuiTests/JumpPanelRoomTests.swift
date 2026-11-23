@@ -71,7 +71,7 @@ struct JumpPanelRoomTests {
 
     /// The field sits at the same line on every side: the origin
     /// takes the top, never a lift, and a refit holds the centre.
-    @Test("the panel stands centred under its top, never lifted")
+    @Test("the panel stands centred under its anchor, never lifted")
     func originAndRefit() {
         let area = CGRect(x: 1440, y: 0, width: 1000, height: 900)
         let room = Room(visible: area, area: area, topFraction: 0.25)
@@ -82,9 +82,13 @@ struct JumpPanelRoomTests {
             origin: origin,
             size: CGSize(width: 720, height: 800)
         )
-        let wide = Room.refitted(frame, to: CGSize(width: 900, height: 300))
-        #expect(wide.midX == frame.midX)
-        #expect(wide.maxY == frame.maxY)
+        let anchor = CGPoint(x: frame.midX, y: frame.maxY)
+        let wide = Room.frame(
+            of: CGSize(width: 900, height: 300),
+            under: anchor
+        )
+        #expect(wide.midX == anchor.x)
+        #expect(wide.maxY == anchor.y)
         #expect(wide.size == CGSize(width: 900, height: 300))
     }
 }

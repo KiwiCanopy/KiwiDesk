@@ -114,16 +114,16 @@ final class JumpModel: ObservableObject {
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
     let rowCap: Int
-    /// The tallest a growing side's content stands between the
-    /// field and the footer, from the room the panel opens in
-    /// (`JumpPanelController.sheetCap(in:)`).
-    let sheetCap: CGFloat
-    /// The field row's width there, every side's least width
-    /// (`JumpPanelRoom.fieldWidth`).
-    let panelWidth: CGFloat
     /// Where the panel opens: each side's width and height limits
     /// (#3570).
     let room: JumpPanelRoom
+    /// The tallest a growing side's content stands between the
+    /// field and the footer: `JumpPanelController.sheetCap(in:_:)`
+    /// over `room` unless a test pins it.
+    let sheetCap: CGFloat
+    /// The field row's width, every side's least width:
+    /// `room.fieldWidth` unless a test pins it.
+    let panelWidth: CGFloat
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
     /// A pick Core refuses at the press: what VoiceOver hears. The
@@ -183,9 +183,12 @@ final class JumpModel: ObservableObject {
         snapshot: JumpSnapshot,
         icons: [pid_t: NSImage],
         rowCap: Int,
-        sheetCap: CGFloat = 400,
-        panelWidth: CGFloat = JumpPanelView.width,
-        room: JumpPanelRoom? = nil,
+        room: JumpPanelRoom = JumpPanelController.room(
+            visible: JumpPanelController.fallbackVisible,
+            area: JumpPanelController.fallbackVisible
+        ),
+        sheetCap: CGFloat? = nil,
+        panelWidth: CGFloat? = nil,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -193,15 +196,10 @@ final class JumpModel: ObservableObject {
         lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
-        self.sheetCap = sheetCap
-        self.panelWidth = panelWidth
-        self.room =
-            room
-            ?? JumpPanelRoom(
-                visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
-                area: CGRect(x: 0, y: 0, width: 1440, height: 900),
-                topFraction: JumpPanelController.topFraction
-            )
+        self.room = room
+        self.sheetCap =
+            sheetCap ?? JumpPanelController.sheetCap(in: room, .grows)
+        self.panelWidth = panelWidth ?? room.fieldWidth
         noteModifiers(modifiers)
     }
 

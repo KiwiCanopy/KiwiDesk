@@ -19,24 +19,17 @@ struct ShortcutsSheetView: View {
 
     var body: some View {
         if let reference, !reference.isEmpty {
-            let sections = sections(reference)
+            let sections = Self.sections(reference)
             // A plan cut for another sheet draws one column.
             let fits = columns.last?.upperBound == sections.count
             let cut =
                 columns.count > 1 && fits ? columns : [0..<sections.count]
-            HStack(alignment: .top, spacing: 0) {
+            HStack(alignment: .top, spacing: Self.columnGap) {
                 ForEach(Array(cut.enumerated()), id: \.offset) { _, range in
                     column(sections, range)
-                        .frame(
-                            maxWidth: cut.count > 1
-                                ? ShortcutsColumnPlan.columnWidth
-                                    - Self.columnGap : .infinity,
-                            alignment: .leading
-                        )
-                        .frame(
-                            maxWidth: .infinity,
-                            alignment: .leading
-                        )
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        // VoiceOver reads a column whole before the next.
+                        .accessibilityElement(children: .contain)
                 }
             }
             .environment(\.shortcutMatch, needle)
@@ -45,9 +38,15 @@ struct ShortcutsSheetView: View {
         }
     }
 
-    /// The room between two columns, taken from the left one's
-    /// 400 pt.
+    /// The room between two columns.
     static let columnGap: CGFloat = 24
+    /// A row's height, and the stack's spacing between a section's
+    /// parts; the column plan's estimate reads both.
+    static let rowHeight: CGFloat = 26
+    static let partSpacing: CGFloat = 2
+    /// The room under a section's title and under its caption.
+    static let titleGap: CGFloat = 2
+    static let captionGap: CGFloat = 4
 
     /// One column, its chords sized to its own widest (#3424).
     private func column(_ sections: [Section], _ range: Range<Int>)
@@ -82,7 +81,7 @@ struct ShortcutsSheetView: View {
     }
 
     /// The column's sections, in reading order.
-    func sections(_ reference: ShortcutsReference) -> [Section] {
+    static func sections(_ reference: ShortcutsReference) -> [Section] {
         var out = reference.controls.map {
             Section(title: $0.title, rows: $0.rows)
         }
@@ -127,23 +126,23 @@ struct ShortcutsSheetView: View {
     }
 
     private func sectionView(_ section: Section, first: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Self.partSpacing) {
             Text(section.title)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.bottom, 2)
+                .padding(.bottom, Self.titleGap)
             // A filtered row's dimming and hint already say it; the
             // caption is for the whole list.
             if let caption = section.caption, needle.isEmpty {
                 Text(caption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, Self.captionGap)
             }
             ForEach(section.rows) { row in
                 ShortcutRowView(row: row)
-                    .frame(height: 26)
+                    .frame(height: Self.rowHeight)
             }
             .opacity(section.dims ? 0.6 : 1)
         }
@@ -153,7 +152,7 @@ struct ShortcutsSheetView: View {
     /// Settings' own section says the same thing and then adds
     /// "rebind or remove them here" — which this sheet cannot
     /// offer, so the two captions are different strings.
-    private var inactiveCaption: String {
+    private static var inactiveCaption: String {
         L(
             "shortcuts.panel.inactive.caption",
             "These target Spaces that are not in the current "
