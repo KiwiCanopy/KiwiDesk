@@ -84,6 +84,26 @@ extension DefaultKeybindings {
         )
     }
 
+    /// Undo and redo the arrangement on `⌃⌥Z` and `⌃⌥⇧Z` (#3515),
+    /// Z as ⌘Z; `⇧` reverses its twin as ⌘⇧Z does. Free in
+    /// `SystemShortcuts.map` and the seed (read 2026-11-22).
+    public static func layoutUndoRows() -> [KeyBinding] {
+        [
+            KeyBinding(
+                combo: "control+option+z",
+                lua: "KiwiDesk.undo_layout()",
+                kind: .navigation,
+                label: "Undo layout change"
+            ),
+            KeyBinding(
+                combo: "control+option+shift+z",
+                lua: "KiwiDesk.redo_layout()",
+                kind: .navigation,
+                label: "Redo layout change"
+            ),
+        ]
+    }
+
     /// Maximize on `⌃⌥M` (#2448), M for maximize: the focused
     /// tiled window fills its screen. Free in the seed,
     /// `SystemShortcuts.map` and macOS's symbolic hotkeys

@@ -297,6 +297,18 @@
           "lua" : "KiwiDesk.reset_layout_sizing()"
         },
         {
+          "combo" : "control+option+z",
+          "kind" : "navigation",
+          "label" : "Undo layout change",
+          "lua" : "KiwiDesk.undo_layout()"
+        },
+        {
+          "combo" : "control+option+shift+z",
+          "kind" : "navigation",
+          "label" : "Redo layout change",
+          "lua" : "KiwiDesk.redo_layout()"
+        },
+        {
           "combo" : "control+option+m",
           "kind" : "navigation",
           "label" : "Maximize",

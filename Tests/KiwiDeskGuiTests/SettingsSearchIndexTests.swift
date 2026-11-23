@@ -249,7 +249,8 @@ struct SettingsSearchIndexTests {
                 // 18 #2448: Maximize. 19 #2493: Wrap focus.
                 // 16 #2654: in cards. 17 #2675. 18 #2974. 19 #3008.
                 // 22 #3089: the three Tiling off rows, at rest.
-                .shortcuts: 22,
+                // 24 #3515: Undo and Redo layout change, at rest.
+                .shortcuts: 24,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census

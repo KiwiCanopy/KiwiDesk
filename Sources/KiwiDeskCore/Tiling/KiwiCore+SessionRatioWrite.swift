@@ -24,8 +24,16 @@ extension KiwiCore {
     /// shows — else the one shared entry (no SkyLight, a screen no
     /// switch has filed yet, ruling 3) — and its `sizingOwner`.
     private func sizingKey(of space: SpaceID) -> SessionSizingKey {
+        sizingKey(of: space, shown: shownDesktop(of: space))
+    }
+
+    /// `sizingKey(of:)` with the Desktop already read.
+    private func sizingKey(
+        of space: SpaceID,
+        shown: ShownDesktop
+    ) -> SessionSizingKey {
         let owner = sizingOwner(of: space)
-        guard case .shown(let desktop) = shownDesktop(of: space) else {
+        guard case .shown(let desktop) = shown else {
             return SessionSizingKey(desktop: nil, arrangement: owner)
         }
         return SessionSizingKey(desktop: desktop, arrangement: owner)
@@ -55,6 +63,32 @@ extension KiwiCore {
         setSizes(at: key) {
             $0[space] = ratios == SessionRatios() ? nil : ratios
         }
+    }
+
+    /// Every Space's sizes and the key they are filed under, each
+    /// screen's Desktop read once: the layout undo snapshot (#3515),
+    /// which covers every Space on every command.
+    func sessionSizingOfEverySpace() -> [SpaceID: SpaceSizing] {
+        var shown: [DisplayID?: ShownDesktop] = [:]
+        var out: [SpaceID: SpaceSizing] = [:]
+        for space in state.workspaces.allSpaces {
+            let display = state.workspaces.display(of: space.id)
+            let desktop =
+                shown[display] ?? shownDesktop(onDisplay: display)
+            shown[display] = desktop
+            let key = sizingKey(of: space.id, shown: desktop)
+            out[space.id] = SpaceSizing(
+                key: key,
+                ratios: sizes(at: key)[space.id] ?? SessionRatios()
+            )
+        }
+        return out
+    }
+
+    /// Puts back sizes a layout undo recorded (#3515), on the
+    /// Desktop shown now — the one its step was validated against.
+    func restoreSessionRatios(_ ratios: SessionRatios, of space: SpaceID) {
+        withSessionRatios(of: space) { $0 = ratios }
     }
 
     private func sizes(at key: SessionSizingKey) -> DesktopMemory.SpaceRatios {

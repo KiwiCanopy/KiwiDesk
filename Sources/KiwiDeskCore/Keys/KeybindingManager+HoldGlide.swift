@@ -78,15 +78,17 @@ extension KeybindingManager {
     /// command and never looks anything up, so the question must
     /// be asked here — never re-deriving WHICH binding to act on.
     func pressFire(ref: Int32, combo: KeyCombo, id: UInt32?) {
-        firePress(id: id) { fire(ref: ref, combo: combo) }
+        firePress(id: id, label: "key \(combo)") {
+            fire(ref: ref, combo: combo)
+        }
     }
 
     /// A press's fire scope for the hold engine: the tally begun,
     /// `run`, then the glide armed for a Carbon `id` that survived
     /// it, else cancelled — a tap reports no release.
-    func firePress(id: UInt32?, _ run: () -> Void) {
+    func firePress(id: UInt32?, label: String, _ run: () -> Void) {
         let outer = holdGlide.beginFire()
-        run()
+        fireScope(label, run)
         if let id, activeBindings[id] != nil {
             holdGlide.endFire(id: id)
         } else {

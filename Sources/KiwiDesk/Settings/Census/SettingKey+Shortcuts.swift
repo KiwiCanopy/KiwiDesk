@@ -74,6 +74,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case shrinkHeight = "keybinding.shrink_height"
     /// `reset_layout_sizing` on the active Space (#2303).
     case resetSizes = "keybinding.reset_sizes"
+    /// `undo_layout` and `redo_layout` (#3515).
+    case undoLayout = "keybinding.undo_layout"
+    case redoLayout = "keybinding.redo_layout"
     /// `toggle_maximized` (#2448).
     case maximize = "keybinding.maximize"
     /// `toggle_maximized(axis)` (#3062).
@@ -186,7 +189,8 @@ extension ShortcutsKey {
                 gate: .runtime(.luaOwnsConfig)
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
-            .resetSizes, .maximize, .maximizeHeight, .maximizeWidth,
+            .resetSizes, .undoLayout, .redoLayout, .maximize,
+            .maximizeHeight, .maximizeWidth,
             .toggleFloating, .toggleTiling, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         // Its own card (#2680): its keys; where it sits and when it

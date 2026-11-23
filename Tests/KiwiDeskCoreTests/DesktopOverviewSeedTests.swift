@@ -52,6 +52,8 @@ struct DesktopOverviewSeedTests {
             )
                 == [ShortcutBase.hyper.rebased(row)]
                 + DefaultKeybindings.rows(ofGeneration: 14)
+                + DefaultKeybindings.rows(ofGeneration: 15)
+                .map(ShortcutBase.hyper.rebased)
         )
     }
 
@@ -68,7 +70,9 @@ struct DesktopOverviewSeedTests {
                 existing: [mine],
                 above: 12,
                 base: .standard
-            ) == DefaultKeybindings.rows(ofGeneration: 14)
+            )
+                == DefaultKeybindings.rows(ofGeneration: 14)
+                + DefaultKeybindings.rows(ofGeneration: 15)
         )
     }
 
@@ -85,7 +89,9 @@ struct DesktopOverviewSeedTests {
                 existing: [mine],
                 above: 12,
                 base: .standard
-            ) == DefaultKeybindings.rows(ofGeneration: 14)
+            )
+                == DefaultKeybindings.rows(ofGeneration: 14)
+                + DefaultKeybindings.rows(ofGeneration: 15)
         )
     }
 }

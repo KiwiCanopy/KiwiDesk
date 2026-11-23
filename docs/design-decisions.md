@@ -4361,6 +4361,33 @@ heal, which is the standing exception. The noun is **sizing** — the collective
 of a layout's size adjustments (`.claude/rules/config-vocabulary.md`
 ▸ noun glossary).
 
+:::unreleased
+**Layout undo validates instead of hooking, and keeps a history
+per Space (#3515).** A step stores every Space it touched before
+and after, its sizes read through the session layer and filed
+under its Desktop and arrangement key. Undo acts only while those
+Spaces still equal the step's after, so a change no bracket saw —
+a window opening or closing, a Desktop switch, a profile apply, a
+tab rekey — fails the comparison and clears the history by
+itself, and a step whose own key changed is never recorded. None
+of those paths carries a clear; the two that do clear explicitly
+are a config load, which runs as a bracket that may not be undone,
+and a Space renumbered or dropped, whose steps name an id that is
+gone. A new user act that should be undoable opens a bracket. Undo refuses rather than
+skipping past the change, because reverting under a state the
+step never saw would write an arrangement nobody had. The history
+is per Space because `⌃⌥Z` should take back what is in front of
+you, not a change on another screen; one global history was
+rejected for that and because other Spaces' changes would stand
+in front of yours. A move between Spaces is one linked step on
+both stacks, acted on only from the top of both, and cut from the
+partner when one side drops it. Mouse acts are recorded: a drag's
+before is taken at its first move, since a spring or a display
+crossing moves the window mid-gesture. Focus, the viewport and a
+Maximize stay out, each owned by doors of its own. It never takes
+`⌘Z`, which belongs to the focused app.
+:::
+
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
 ratios are rejected.** With `resize("x")` and `resize("y")`
 writing the *same* scalar (one `splitRatio` for every BSP split,

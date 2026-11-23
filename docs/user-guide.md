@@ -1020,6 +1020,12 @@ with** on the Spaces step, in place of a preset of that name.
 
 **Open Settings** ships on `⌃⌥,` as well.
 
+:::unreleased
+`⌃⌥Z` takes back the last change to the space's arrangement and
+`⌃⌥⇧Z` makes it again
+([`undo_layout`](lua-reference.md#undo_layout)).
+:::
+
 `⌃⌥` moves your focus, `⇧` acts on the window — swaps it or
 sends it to a space — and `⌘` steps through the spaces or sends
 the window and follows. Resizing has its own layer, `⌥⌘`, which

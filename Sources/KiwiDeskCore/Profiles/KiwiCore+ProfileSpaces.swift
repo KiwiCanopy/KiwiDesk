@@ -169,6 +169,7 @@ extension KiwiCore {
         spaceHistory.trails.forget(space)  // #1655
         forgetStackFlips(of: space)  // #2771
         forgetDroppedSessionRatios(of: space)  // #2921
+        layoutHistory.history.clear(space)  // #3515
     }
 
     /// Puts the incoming profile's own windows back in its own

@@ -93,6 +93,8 @@ public enum APIReference {
             ),
             ("set_resize_step", "set_resize_step"),
             ("reset_layout_sizing", "reset_layout_sizing"),
+            ("undo_layout", "undo_layout"),
+            ("redo_layout", "redo_layout"),
             (
                 "set_refusal_sound",
                 "set_refusal_sound"

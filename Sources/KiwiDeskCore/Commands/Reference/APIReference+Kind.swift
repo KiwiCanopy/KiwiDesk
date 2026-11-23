@@ -80,8 +80,16 @@ extension APIReference {
 
     /// The entry's kind: its exception row, else its name's.
     public static func kind(of entry: APIEntry) -> APIKind {
-        kindExceptions[entry.qualifiedName]
-            ?? derivedKind(of: entry.name)
+        kind(ofName: entry.qualifiedName)
+    }
+
+    /// The kind of a command as `execute` is handed it, its
+    /// namespace included: no catalogue walk, so the per-command
+    /// undo bracket can ask it (#3515).
+    static func kind(ofName qualified: String) -> APIKind {
+        let last = qualified.split(separator: ".").last
+        let name = last.map(String.init) ?? qualified
+        return kindExceptions[qualified] ?? derivedKind(of: name)
     }
 
     /// `groups` narrowed to one kind, in their own order; a group

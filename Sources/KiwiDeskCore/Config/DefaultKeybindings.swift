@@ -84,6 +84,7 @@ public enum DefaultKeybindings {
         rows.append(desktopOverviewRow())
         rows.append(kiwiVisionRow())
         rows.append(resetSizesRow())
+        rows.append(contentsOf: layoutUndoRows())
         rows.append(maximizeRow())
         rows.append(contentsOf: directionalMaximizeRows())
         rows.append(toggleTilingRow())

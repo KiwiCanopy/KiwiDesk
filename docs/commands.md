@@ -67,6 +67,8 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`set_mode`](lua-reference.md#set_mode) | Sets a Space's layout mode; omit the Space to set the active one. |
 | [`cycle_mode`](lua-reference.md#cycle_mode) | Moves the focused Space to the next layout in the cycle list, or the previous one. |
 | [`reset_layout_sizing`](lua-reference.md#reset_layout_sizing) | Undoes manual resizes back to the profile: the active Space, one by id, or every one with `all`. |
+| [`undo_layout`](lua-reference.md#undo_layout) | Takes back the active Space's last layout change: a swap, move, resize, layout switch or drag. |
+| [`redo_layout`](lua-reference.md#redo_layout) | Makes the change `undo_layout` took back again. |
 | [`debug_log`](lua-reference.md#debug_log) | Writes a message to the unified log. |
 | [`reload_config`](lua-reference.md#reload_config) | Reloads the configuration file from disk. |
 | [`save_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile) | Saves the current configuration to a profile, which claims the connected screen setup. |

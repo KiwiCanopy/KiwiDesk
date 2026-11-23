@@ -1101,6 +1101,57 @@ KiwiDesk.reset_layout_sizing("mail")
 KiwiDesk.reset_layout_sizing("all")
 ```
 
+### undo_layout
+
+:::unreleased
+**Expects:** nothing.
+
+**Does:** takes back the last change to the active space's
+arrangement — a swap, a move, a resize, a layout change or a
+drag — and puts its windows' order, sizes and layout back. Each
+space keeps its own history of about 20 steps for the session.
+One key press is one step, whatever its binding runs, a held key
+with it; presses of the same key, or calls of the same command,
+less than a second apart are one step too, so a burst of `⌃⌥C`
+comes back to the layout you started on. A window moved to
+another space is one step on both spaces, so undo from either
+one sends it back while it is still the last step on both.
+
+Focus, scrolling, a Maximize and a floating window's position
+and size are not part of it. A change it did not record — a
+window opening or closing, a Desktop switch, a profile load, a
+config reload — makes the next undo fail and clears that space's
+history. A failed or empty undo from a key plays the refusal
+sound when [`set_refusal_sound`](#set_refusal_sound) is on; a
+CLI or Lua caller gets the reason.
+
+`⌃⌥Z` runs it by default, listed as **Undo layout change** under
+Shortcuts ▸ Built-in ▸ Size & float.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.undo_layout()
+```
+
+### redo_layout
+
+:::unreleased
+**Expects:** nothing.
+
+**Does:** makes again the change [`undo_layout`](#undo_layout)
+took back. Any new change to the space clears what redo could
+make again. `⌃⌥⇧Z` runs it by default, listed as **Redo layout
+change**.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.redo_layout()
+```
+
 ### set_swap_skips_cascade
 
 **Expects:** `true` or `false` (default `true`).
@@ -1228,6 +1279,12 @@ window with no overlay — stays silent.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent.
+
+:::unreleased
+A refused or empty [`undo_layout`](#undo_layout) or
+[`redo_layout`](#redo_layout) draws nothing: the sound is its only
+cue.
+:::
 
 A held chord stops silently at a limit: it neither draws nor sounds.
 A fresh press there does both.

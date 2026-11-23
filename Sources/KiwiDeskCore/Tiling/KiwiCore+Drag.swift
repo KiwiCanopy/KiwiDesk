@@ -17,13 +17,17 @@ extension KiwiCore {
                 || self.tiler.didRecentlySetFrame(id)
         }
         drag.onDragMove = { [weak self] id, start, frame in
+            self?.beginLayoutGesture(id)
             self?.withUserMotion {
                 self?.handleDragMove(id, start: start, frame: frame)
             }
         }
         drag.onDragEnd = { [weak self] id, start, frame in
-            self?.withUserMotion {
-                self?.handleDragEnd(id, start: start, frame: frame)
+            // The drop runs inside the drag's undo step (#3515).
+            self?.endLayoutGesture(id) {
+                self?.withUserMotion {
+                    self?.handleDragEnd(id, start: start, frame: frame)
+                }
             }
         }
         drag.isMousePressed = { [weak self] in
