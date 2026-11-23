@@ -43,13 +43,13 @@ extension JumpPanelController {
     }
 
     /// The tallest sheet between the field and the footer row on a
-    /// `sizing` side: a compact side's 488 pt ceiling, or a growing
+    /// `fit` side: a compact side's 488 pt ceiling, or a growing
     /// side's run to 48 pt above the area's bottom (#2246, #3570).
     static func sheetCap(
         in room: JumpPanelRoom,
-        _ sizing: JumpPanelRoom.Sizing
+        _ fit: JumpPanelRoom.Fit
     ) -> CGFloat {
-        max(room.height(sizing) - shortcutsChrome, 200)
+        max(room.height(fit) - shortcutsChrome, 200)
     }
 
     /// What the Shortcuts side draws besides its sheet: the field,

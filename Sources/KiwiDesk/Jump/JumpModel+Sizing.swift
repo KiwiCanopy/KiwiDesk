@@ -10,7 +10,7 @@ extension JumpModel {
 
     func sideWidth(for scope: JumpScope) -> CGFloat {
         room.width(
-            JumpPanelRoom.sizing(of: scope),
+            JumpPanelRoom.fit(of: scope),
             content: contentWidth(for: scope)
         )
     }

@@ -16,7 +16,7 @@ struct JumpPanelRoom: Equatable {
     let top: CGFloat
 
     /// How a side sizes itself.
-    enum Sizing: Equatable {
+    enum Fit: Equatable {
         /// 720 pt wide and at most `compactHeight` tall.
         case compact
         /// As wide and tall as the content asks, up to the room.
@@ -43,7 +43,7 @@ struct JumpPanelRoom: Equatable {
         top = visible.maxY - visible.height * topFraction
     }
 
-    static func sizing(of scope: JumpScope) -> Sizing {
+    static func fit(of scope: JumpScope) -> Fit {
         switch scope {
         case .windows, .view: return .compact
         case .shortcuts, .desktops: return .grows
@@ -63,17 +63,17 @@ struct JumpPanelRoom: Equatable {
 
     /// The panel's width for a side whose content asks for
     /// `content` points: never narrower than the field row.
-    func width(_ sizing: Sizing, content: CGFloat) -> CGFloat {
-        switch sizing {
+    func width(_ fit: Fit, content: CGFloat) -> CGFloat {
+        switch fit {
         case .compact: return fieldWidth
         case .grows: return min(max(content, fieldWidth), widest)
         }
     }
 
     /// The panel's tallest, field to footer.
-    func height(_ sizing: Sizing) -> CGFloat {
+    func height(_ fit: Fit) -> CGFloat {
         let below = top - area.minY
-        switch sizing {
+        switch fit {
         case .compact:
             return max(min(below - Self.narrowMargin, Self.compactHeight), 0)
         case .grows:

@@ -28,7 +28,7 @@ struct JumpPanelRoomTests {
     @Test("Windows and View keep the field row's width")
     func compactWidth() {
         for scope in [JumpScope.windows, .view] {
-            #expect(Room.sizing(of: scope) == .compact)
+            #expect(Room.fit(of: scope) == .compact)
         }
         #expect(room().width(.compact, content: 2000) == 720)
     }
@@ -36,7 +36,7 @@ struct JumpPanelRoomTests {
     @Test("Desktops and Shortcuts take their content's width, clamped")
     func growingWidth() {
         for scope in [JumpScope.desktops, .shortcuts] {
-            #expect(Room.sizing(of: scope) == .grows)
+            #expect(Room.fit(of: scope) == .grows)
         }
         let room = room()
         #expect(room.width(.grows, content: 0) == 720)

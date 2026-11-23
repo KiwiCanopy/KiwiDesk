@@ -94,7 +94,7 @@ struct JumpPanelCeilingTests {
         for scope in JumpScope.allCases {
             let height = rendered(scope, sheet: Self.tallSheet).1.height
             // AppKit rounds the drawn height up to a whole point.
-            let ceiling = room.height(JumpPanelRoom.sizing(of: scope))
+            let ceiling = room.height(JumpPanelRoom.fit(of: scope))
                 .rounded(.up)
             #expect(height > JumpPanelView.fieldHeight, "\(scope)")
             #expect(height <= ceiling, "\(scope) stands \(height) pt")
