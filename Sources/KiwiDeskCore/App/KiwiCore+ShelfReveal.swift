@@ -28,17 +28,20 @@ extension KiwiCore {
         /// from the handle on screen (#2567). AX coordinates.
         var marks: [ShelfManager.Key: BarMotion.RevealMark] = [:]
         /// The pocket handle's band on each display's Auto edge, AX
-        /// along the edge (#2678): where the shown pocket stands.
+        /// along the edge (#2678): where the shown pocket stands —
+        /// in the screen's lead area, the one the Pocket rests in.
         var pocketBands: [DisplayID: ClosedRange<CGFloat>] = [:]
 
         /// Files each hiding bar of `plans` — its target, and its
         /// handle where it hides to one. `hover` names the bars a
         /// maximized window's screen brings in (#3346), which rest
-        /// as a handle there too (#3349 rule 7).
+        /// as a handle there too (#3349 rule 7). `frame` is the
+        /// area's whole frame and `screens` every screen's, a split
+        /// screen's as its areas, Cocoa (#3517).
         @MainActor mutating func file(
             _ plans: [ShelfPlan],
-            display: DisplayID,
-            screen: NSScreen,
+            placement: PlacementID,
+            frame: CGRect,
             items: [SpaceBarOverlay.Item]?,
             screens: [CGRect],
             reveal: ShelfRevealer,
@@ -53,8 +56,11 @@ extension KiwiCore {
                 fileEdge(
                     plan,
                     bars: Set(hiding),
-                    key: ShelfManager.Key(display: display, edge: plan.edge),
-                    screen: screen,
+                    key: ShelfManager.Key(
+                        placement: placement,
+                        edge: plan.edge
+                    ),
+                    frame: frame,
                     items: items,
                     screens: screens,
                     reveal: reveal,
@@ -74,7 +80,7 @@ extension KiwiCore {
             _ plan: ShelfPlan,
             bars: Set<ShelfBar>,
             key: ShelfManager.Key,
-            screen: NSScreen,
+            frame: CGRect,
             items: [SpaceBarOverlay.Item]?,
             screens: [CGRect],
             reveal: ShelfRevealer,
@@ -116,7 +122,7 @@ extension KiwiCore {
                 targets[barKey(bar)] = .hidden(
                     edge: plan.edge,
                     strip: strip,
-                    screen: screen.frame,
+                    screen: frame,
                     section: section(bar)
                 )
             }
@@ -158,12 +164,13 @@ extension KiwiCore {
                     spec,
                     side: side,
                     strip: strip,
-                    screen: screen.frame,
-                    // An edge another screen continues past is a
-                    // crossing: a push there opens nothing (#3349).
+                    screen: frame,
+                    // An edge another screen or area continues past
+                    // is a crossing: a push there opens nothing
+                    // (#3349, #3517).
                     beyond: Self.continues(
                         plan.edge,
-                        of: screen.frame,
+                        of: frame,
                         along: flip(run),
                         among: screens
                     ),

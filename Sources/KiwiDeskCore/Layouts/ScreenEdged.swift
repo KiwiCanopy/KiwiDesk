@@ -4,9 +4,12 @@ import Foundation
 /// Bar's and the App Bar's style, and the pocket's edges
 /// (`PocketEdges`, #3376). `edgeOverride` is the sparse
 /// `space_bar.edge_override` / `app_bar.edge_override` /
-/// `kiwishelf.pocket_edge_override` map, keyed
-/// by `Display.fingerprint` as a Monitor pin is; a screen with no
-/// entry uses the bar's `edge`.
+/// `kiwishelf.pocket_edge_override` map, keyed by `ScreenAreaKey`
+/// (#3517 rulings 7, 14): an unsplit screen and a split screen's
+/// area 0 by the bare `Display.fingerprint`. Reads are exact: an
+/// entry applies to its own key alone, and a key with no entry uses
+/// the bar's `edge`; a verb naming a physical screen writes each of
+/// its areas (`KiwiCore.areaKeys(named:)`).
 ///
 /// Write a bar's edge only through the `setEdge` doors below. A
 /// verb's or Settings' write of a screen's edge equal to the
@@ -22,16 +25,25 @@ public protocol ScreenEdged {
     var edgeOverride: [String: AppBarEdge] { get set }
 }
 
-/// The screens a per-screen edge write judges its collapse over —
-/// made only by `KiwiCore.screenEdgeScope(monitorSets:)`, which
-/// adds the connected screens, so no write can judge fewer.
+/// The screens and areas a per-screen edge write judges its
+/// collapse over — made only by
+/// `KiwiCore.screenEdgeScope(monitorSets:splits:)`, which adds the
+/// connected screens and every area of each, so no write can judge
+/// fewer.
 public struct ScreenEdgeScope: Sendable, Equatable {
     let screens: Set<String>
+
+    /// Whether `key` — a fingerprint, or an area's `ScreenAreaKey`
+    /// — names a screen in scope (#3517).
+    func holds(_ key: String) -> Bool {
+        screens.contains(ScreenAreaKey(parsing: key).fingerprint)
+    }
 }
 
 extension ScreenEdged {
-    /// The edge this bar sits on on `screen` (a fingerprint): its
-    /// own, else the bar's. Nil asks for the bar's own edge.
+    /// The edge this bar sits on on `screen`, a screen's or an
+    /// area's key: its own, else the bar's. Nil asks for the bar's
+    /// own edge.
     public func edge(on screen: String?) -> AppBarEdge {
         screen.flatMap { edgeOverride[$0] } ?? edge
     }
@@ -52,12 +64,11 @@ extension ScreenEdged {
         edgeOverride = [:]
     }
 
-    /// One screen's edge (#1948). The bar's own edge stores
-    /// nothing for that screen. Once every screen of `scope` and
-    /// of the entries DRAWS one edge (`edge(on:)`), the entries
-    /// collapse into the bar's edge, which moves no screen; a
-    /// screen drawing another edge — its own, or the bar's while
-    /// the rest agree on a different one — keeps them apart.
+    /// One screen's or area's edge (#1948, #3517). The bar's own
+    /// edge stores nothing for that key. Once every key of `scope`
+    /// and of the entries DRAWS one edge (`edge(on:)`), the entries
+    /// collapse into the bar's edge, which moves nothing; a key
+    /// drawing another edge keeps them apart.
     public mutating func setEdge(
         _ edge: AppBarEdge,
         on screen: String,
@@ -83,11 +94,10 @@ extension ScreenEdged {
     }
 
     /// Drops the entries of screens outside `scope` — a forgotten
-    /// setup's leftovers (#3324). No screen in scope moves.
+    /// setup's leftovers (#3324). No screen in scope moves; an
+    /// area's entry is judged by its screen (#3517).
     public mutating func keepScreens(in scope: ScreenEdgeScope) {
-        edgeOverride = edgeOverride.filter {
-            scope.screens.contains($0.key)
-        }
+        edgeOverride = edgeOverride.filter { scope.holds($0.key) }
     }
 
     /// A merged-away area's entry moved to the area that absorbed
@@ -99,15 +109,25 @@ extension ScreenEdged {
         }
         if edgeOverride[new] == nil { edgeOverride[new] = moved }
     }
+
+    /// A split's minted area given the parent area's entry (#3517),
+    /// so the split moves no bar. No other screen moves.
+    public mutating func copyScreen(_ parent: String, to minted: String) {
+        if let edge = edgeOverride[parent] { edgeOverride[minted] = edge }
+    }
 }
 
 extension TilingSettings {
-    /// Both bars' and the pocket's per-screen edges kept to
-    /// `scope` (#3324, #3376).
+    /// Both bars' and the pocket's per-screen edges, and both bars'
+    /// per-area visibilities, kept to `scope` (#3324, #3376, #3517).
     public mutating func keepScreenEdges(in scope: ScreenEdgeScope) {
         spaceBarStyle.keepScreens(in: scope)
         appBarStyle.keepScreens(in: scope)
         kiwishelf.pocketEdges.keepScreens(in: scope)
+        spaceBarStyle.visibilityOverride =
+            spaceBarStyle.visibilityOverride.filter { scope.holds($0.key) }
+        appBarStyle.visibilityOverride =
+            appBarStyle.visibilityOverride.filter { scope.holds($0.key) }
     }
 }
 

@@ -256,7 +256,7 @@ struct ShelfDividerDragTests {
         shelves.onMinimum = { reports.append(($0, $1)) }
         shelves.sync([
             .init(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),

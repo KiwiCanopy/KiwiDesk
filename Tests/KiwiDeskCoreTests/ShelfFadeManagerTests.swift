@@ -115,7 +115,7 @@ struct ShelfFadeManagerTests {
         pinShelfGlide()
         let apps = AppBarManager()
         let bar = AppBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             space: SpaceID("1"),
             items: [AppBarOverlay.Item(id: WindowID(1), text: "A", icon: nil)],
             activeIndex: nil,
@@ -128,7 +128,7 @@ struct ShelfFadeManagerTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .bottom,
                 strip: barTitleStrip,
                 shelf: Self.shelf(),
@@ -159,7 +159,7 @@ struct ShelfFadeManagerTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: Self.shelf(),

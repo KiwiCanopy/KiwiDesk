@@ -65,7 +65,7 @@ struct SpaceBarGlyphHoverTests {
         core.shelves.holdingRelayout {
             core.spaceBars.sync([
                 SpaceBarManager.Bar(
-                    display: display,
+                    placement: PlacementID(display: display, area: 0),
                     items: items,
                     strip: barTitleStrip,
                     style: style,
@@ -79,7 +79,7 @@ struct SpaceBarGlyphHoverTests {
         }
         core.shelves.sync([
             .init(
-                display: display,
+                placement: PlacementID(display: display, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),

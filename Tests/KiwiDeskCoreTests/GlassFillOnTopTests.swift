@@ -178,7 +178,7 @@ struct GlassFillOnTopTests {
         var shelf = KiwiShelf()
         shelf.liquidGlass = glass
         return ShelfManager.Shelf(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             edge: .top,
             strip: barTitleStrip,
             shelf: shelf,

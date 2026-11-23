@@ -8,6 +8,7 @@ extension SpaceBarStyle {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case reserve
         case visibility
+        case visibilityOverride = "visibility_override"
         case edge
         case edgeOverride = "edge_override"
         case glyphSpan = "glyph_span"
@@ -42,6 +43,11 @@ extension SpaceBarStyle {
                 ShelfVisibility.self,
                 forKey: .visibility
             ) ?? defaults.visibility
+        visibilityOverride =
+            try container.decodeIfPresent(
+                [String: ShelfVisibility].self,
+                forKey: .visibilityOverride
+            ) ?? defaults.visibilityOverride
         edge =
             try container.decodeIfPresent(
                 AppBarEdge.self,

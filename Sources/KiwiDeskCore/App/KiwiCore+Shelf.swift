@@ -51,7 +51,7 @@ extension KiwiCore {
             syncShelves(
                 fallback.map {
                     ShelfStrip(
-                        display: $0.display,
+                        placement: $0.placement,
                         edge: $0.style.edge,
                         strip: $0.strip,
                         carriesSpace: false,
@@ -60,7 +60,7 @@ extension KiwiCore {
                 },
                 settings: settings
             )
-            retireDepartedBars(live: Set(fallback.map(\.display)))
+            retireDepartedBars(live: Set(fallback.map(\.placement)))
             overflowMarks.standingDown = []
             updateOverflowMarks()
             pocketPlate.standingDown = []
@@ -79,112 +79,134 @@ extension KiwiCore {
         var pocketSlots: [DisplayID: CGRect] = [:]
         // Under Hidden it stands inside its edge's strip (#2793).
         var pocketStrips: [DisplayID: CGRect] = [:]
+        // The neighbours an area's hiding edge is judged against,
+        // read once for the pass (#3349, #3517).
+        let neighbours = shelfNeighbourFrames()
         for display in displays {
-            // Each bar's edge as THIS screen has it (#1948), so
-            // the plan and every style a bar draws carry it, and a
-            // tiling-off Space's Hidden bars (#3151).
-            let shown = shelfSettings(on: display.id)
-            let look = shown.spaceBarLook
             // A fullscreen space hosts the panels by construction
             // (`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so
             // the stand-down (#670, and a presentation in front,
-            // #1787) gates here, read once for both bars: nil
-            // retires each overlay through its manager, keeping
-            // `shownStrips` consistent with the float clamp.
-            // A maximize is no stand-down: it reads the bars Hidden
-            // through `shown` (#3346).
+            // #1787) gates here, read once per screen for every
+            // area's bars: nil retires each overlay through its
+            // manager, keeping `shownStrips` consistent with the
+            // float clamp. A maximize is no stand-down: it reads the
+            // bars Hidden through `shown` (#3346).
             let down = shelfStandsDown(on: display.id)
             if down { standingDown.insert(display.id) }
             if down || screenMaximizes(on: display.id) {
                 marksStandingDown.insert(display.id)
             }
-            let app =
-                down
-                ? nil : appBarContent(on: display.id, settings: shown)
-            let items =
-                down
-                ? nil : spaceBarContent(on: display.id, style: look)
-            guard app != nil || items != nil,
-                let screen = screen(for: display.id)
-            else { continue }
+            guard let screen = screen(for: display.id) else { continue }
             // Chrome is drawn on a REAL screen, so the shelf is
             // measured on its visible frame rather than the
             // engine's `layoutBounds(on:)` seam: one of the
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
-            let reveal = shelves.reveal
-            let hover = maximizedHoverBars(on: display.id)
-            let planned = shelfPlans(
-                visible: GeometryUtils.axVisibleFrame(of: screen),
-                settings: shown,
-                mode: shownMode(on: display.id),
-                spaceItems: items,
-                app: app,
-                pocket: pocketRests(on: display.id),
-                hover: hover,
-                drawn: { reveal.drawn($0, display: display.id) }
-            )
-            hiding.file(
-                planned,
-                display: display.id,
-                screen: screen,
-                items: items,
-                screens: ScreenList.all.map(\.frame),
-                reveal: reveal,
-                hover: hover,
-                settings: shown
-            )
-            let plans = planned.filter(\.drawsAny)
-            if let plan = plans.first(where: { $0.arrangement.pocket != nil }),
-                let slot = plan.arrangement.pocket
-            {
-                pocketSlots[display.id] = plan.segment(slot)
-            }
-            pocketStrips[display.id] = Self.pocketStrip(
-                in: planned,
-                edge: shown.kiwishelf.pocketEdge,
-                hiding: { hiding.marks[$0] != nil },
-                display: display.id
-            )
-            strips += plans.map {
-                ShelfStrip(
-                    display: display.id,
-                    edge: $0.edge,
-                    strip: $0.strip,
-                    carriesSpace: $0.arrangement.space != nil,
-                    carriesApp: $0.arrangement.app != nil,
-                    divider: $0.arrangement.divider,
-                    slides: $0.slides,
-                    mark: hiding.marks[
-                        ShelfManager.Key(display: display.id, edge: $0.edge)
-                    ],
-                    pocketSlot: $0.arrangement.pocket.map($0.segment)
+            let visible = GeometryUtils.axVisibleFrame(of: screen)
+            // The Pocket rests in the screen's lead area alone.
+            let lead = state.workspaces.leadPlacement(of: display.id)
+            // One shelf per area, each for the Space it shows
+            // (#3517 ruling 30); an unsplit screen is one area.
+            // Every published screen has its placement records
+            // (`upsertDisplay` rebuilds them).
+            let areas = state.workspaces.placements(of: display.id)
+            for placement in areas {
+                let id = placement.id
+                // Each bar's edge and visibility as THIS area has
+                // them (#1948), so the plan and every style a bar
+                // draws carry them, and a tiling-off Space's Hidden
+                // bars (#3151).
+                let shown = shelfSettings(on: id)
+                let look = shown.spaceBarLook
+                let app = down ? nil : appBarContent(on: id, settings: shown)
+                let items = down ? nil : spaceBarContent(on: id, style: look)
+                guard app != nil || items != nil else { continue }
+                let carriesPocket = id == lead
+                let reveal = shelves.reveal
+                let hover = maximizedHoverBars(on: id)
+                let planned = shelfPlans(
+                    visible: shelfFrame(
+                        of: placement,
+                        visible: visible,
+                        on: screen
+                    ),
+                    settings: shown,
+                    mode: shownMode(of: state.workspaces.activeSpace(on: id)),
+                    spaceItems: items,
+                    app: app,
+                    pocket: carriesPocket && pocketRests(on: display.id),
+                    hover: hover,
+                    drawn: { reveal.drawn($0, placement: id) }
                 )
-            }
-            if let app,
-                let plan = plans.first(where: { $0.arrangement.app != nil }),
-                let bar = placedBar(app, display: display.id, plan: plan)
-            {
-                appBarsShown.append(bar)
-            }
-            if let items,
-                let plan = plans.first(where: {
-                    $0.arrangement.space != nil
-                }),
-                let bar = placedSpaceBar(
-                    items,
-                    display: display.id,
-                    plan: plan,
-                    // An App Bar on this screen drawn or resting as
-                    // a handle, on any edge, stands the front app
-                    // down; only a Hidden one leaves it room (#3359).
-                    appBarShows: planned.contains {
-                        $0.resting.arrangement.app != nil
-                    },
-                    style: look
+                hiding.file(
+                    planned,
+                    placement: id,
+                    frame: cocoaFrame(of: placement, on: screen),
+                    items: items,
+                    screens: neighbours,
+                    reveal: reveal,
+                    hover: hover,
+                    settings: shown
                 )
-            {
-                spaceBarsShown.append(bar)
+                let plans = planned.filter(\.drawsAny)
+                if carriesPocket {
+                    if let plan = plans.first(where: {
+                        $0.arrangement.pocket != nil
+                    }),
+                        let slot = plan.arrangement.pocket
+                    {
+                        pocketSlots[display.id] = plan.segment(slot)
+                    }
+                    pocketStrips[display.id] = Self.pocketStrip(
+                        in: planned,
+                        edge: shown.kiwishelf.pocketEdge,
+                        hiding: { hiding.marks[$0] != nil },
+                        placement: id
+                    )
+                }
+                strips += plans.map {
+                    ShelfStrip(
+                        placement: id,
+                        edge: $0.edge,
+                        strip: $0.strip,
+                        carriesSpace: $0.arrangement.space != nil,
+                        carriesApp: $0.arrangement.app != nil,
+                        divider: $0.arrangement.divider,
+                        slides: $0.slides,
+                        mark: hiding.marks[
+                            ShelfManager.Key(placement: id, edge: $0.edge)
+                        ],
+                        pocketSlot: $0.arrangement.pocket.map($0.segment)
+                    )
+                }
+                if let app,
+                    let plan = plans.first(where: {
+                        $0.arrangement.app != nil
+                    }),
+                    let bar = placedBar(app, placement: id, plan: plan)
+                {
+                    appBarsShown.append(bar)
+                }
+                if let items,
+                    let plan = plans.first(where: {
+                        $0.arrangement.space != nil
+                    }),
+                    let bar = placedSpaceBar(
+                        items,
+                        placement: id,
+                        plan: plan,
+                        // An App Bar in this area drawn or resting as
+                        // a handle, on any edge, stands the front app
+                        // down; only a Hidden one leaves it room
+                        // (#3359).
+                        appBarShows: planned.contains {
+                            $0.resting.arrangement.app != nil
+                        },
+                        style: look
+                    )
+                {
+                    spaceBarsShown.append(bar)
+                }
             }
         }
         shelves.holdingRelayout {
@@ -205,7 +227,8 @@ extension KiwiCore {
         // hiding edges (#761).
         syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
-        retireDepartedBars(live: Set(displays.map(\.id)))
+        let live = Set(state.workspaces.allPlacements.map(\.id))
+        retireDepartedBars(live: live)
         // KiwiVision stands down where the shelf does, never for a
         // maximize (#2103, #3061, #3346).
         noteVisionStandDown(standingDown)
@@ -215,33 +238,16 @@ extension KiwiCore {
         updateOverflowMarks()
     }
 
-    /// Drops the bar overlays of displays outside `live` — after the
-    /// shelves are synced, so a departed display whose shelf is
-    /// still fading is spared until that fade lands: dropped
-    /// mid-fade, a display re-enumerating inside the glide would
-    /// re-join as a new section (#1838).
-    private func retireDepartedBars(live: Set<DisplayID>) {
-        let keep = live.union(shelves.leavingDisplays)
+    /// Drops the bar overlays of areas outside `live` — after the
+    /// shelves are synced, so a departed area whose shelf is still
+    /// fading is spared until that fade lands: dropped mid-fade, a
+    /// display re-enumerating inside the glide would re-join as a
+    /// new section (#1838). The pocket's plate stands per screen.
+    private func retireDepartedBars(live: Set<PlacementID>) {
+        let keep = live.union(shelves.leavingPlacements)
         appBars.retire(except: keep)
         spaceBars.retire(except: keep)
         pocketPlate.retire(except: keep)
-    }
-
-    /// One shelf to show: its display, edge and strip, which bars
-    /// its plan placed on it, and the divider its arrangement set.
-    struct ShelfStrip {
-        let display: DisplayID
-        let edge: AppBarEdge
-        let strip: CGRect
-        let carriesSpace: Bool
-        let carriesApp: Bool
-        var divider: ShelfArrangement.Divider? = nil
-        /// A shelf revealed onto an empty edge (#761, #2497), and
-        /// the mark at `mark` a grow reveal grows out of.
-        var slides = false
-        var mark: BarMotion.RevealMark? = nil
-        /// The pocket's pinned slot on this strip, AX (#2678).
-        var pocketSlot: CGRect? = nil
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -253,43 +259,27 @@ extension KiwiCore {
         shelves.sync(
             strips.map { shelf in
                 ShelfManager.Shelf(
-                    display: shelf.display,
+                    placement: shelf.placement,
                     edge: shelf.edge,
                     strip: shelf.strip,
                     shelf: settings.kiwishelf,
                     sheen: settings.borderStyle.sheen,
                     space: shelf.carriesSpace
-                        ? spaceBars.shownOverlay(on: shelf.display) : nil,
+                        ? spaceBars.shownOverlay(on: shelf.placement) : nil,
                     app: shelf.carriesApp
-                        ? appBars.shownOverlay(on: shelf.display) : nil,
+                        ? appBars.shownOverlay(on: shelf.placement) : nil,
                     divider: shelf.divider,
                     slides: shelf.slides,
                     mark: shelf.mark,
                     pocket: shelf.pocketSlot.flatMap { slot in
-                        pocketPlate.sectionMount(on: shelf.display).map {
+                        pocketPlate.sectionMount(
+                            on: shelf.placement.display
+                        ).map {
                             ShelfPocketPiece.Mount(view: $0, slot: slot)
                         }
                     }
                 )
             }
         )
-    }
-
-    /// The Space Bar's items on `display` — the layer item
-    /// leading — or nil when it has nothing to show there; built
-    /// whatever the bar's visibility, since a hidden bar's shortcut
-    /// may show it (#761).
-    func spaceBarContent(
-        on display: DisplayID,
-        style: SpaceBarLook
-    ) -> [SpaceBarOverlay.Item]? {
-        var items = spaceBarItems(display: display, style: style)
-        guard !items.isEmpty else { return nil }
-        // After the emptiness guard: a layer never draws a bar
-        // on a screen with no Space item to lead.
-        if let layer = spaceBarLayerItem() {
-            items.insert(layer, at: 0)
-        }
-        return items
     }
 }

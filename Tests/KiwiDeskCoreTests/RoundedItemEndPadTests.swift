@@ -97,7 +97,7 @@ struct RoundedItemEndPadTests {
         let manager = SpaceBarManager()
         manager.sync([
             SpaceBarManager.Bar(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 items: items,
                 frontApp: front,
                 frontWindow: front == nil ? nil : WindowID(1),

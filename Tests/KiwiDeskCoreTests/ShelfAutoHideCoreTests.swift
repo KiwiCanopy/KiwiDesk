@@ -56,7 +56,10 @@ struct ShelfAutoHideCoreTests {
     func hiddenDrawsTheHandle() throws {
         let (core, display) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let key = ShelfManager.Key(display: display, edge: .top)
+        let key = ShelfManager.Key(
+            placement: PlacementID(display: display, area: 0),
+            edge: .top
+        )
         #expect(core.spaceBars.shownStrips.isEmpty)
         #expect(core.shelves.reveal.hasTarget(on: key))
         let handle = try #require(
@@ -78,7 +81,10 @@ struct ShelfAutoHideCoreTests {
     func actionRevealsWithoutARetile() throws {
         let (core, display) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let key = ShelfManager.Key(display: display, edge: .top)
+        let key = ShelfManager.Key(
+            placement: PlacementID(display: display, area: 0),
+            edge: .top
+        )
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         let response = core.execute("space_bar.toggle_reveal", args: [])
@@ -218,7 +224,10 @@ struct ShelfAutoHideCoreTests {
     func handleIgnoresTheMouse() throws {
         let (core, display) = try #require(makeCore(.auto))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let key = ShelfManager.Key(display: display, edge: .top)
+        let key = ShelfManager.Key(
+            placement: PlacementID(display: display, area: 0),
+            edge: .top
+        )
         let panel = try #require(
             core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .space)

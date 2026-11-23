@@ -6,8 +6,11 @@ import Foundation
 extension TilingSettings {
     /// The visibility every element shares — the Space Bar's, each
     /// hosting layout's App Bar and the pocket — or nil while they
-    /// differ: what Settings' Show master selects (#761, #2978).
+    /// differ, a screen or area showing a bar its own way included,
+    /// since the master's pick clears it (#3517 ruling 32): what
+    /// Settings' Show master selects (#761, #2978).
     public var uniformBarVisibility: ShelfVisibility? {
+        guard !hasScreenVisibilities else { return nil }
         let all =
             [spaceBarStyle.visibility] + appBarHosts.map(\.visibility)
             + [kiwishelf.pocketVisibility]
@@ -18,7 +21,9 @@ extension TilingSettings {
     /// stored per bar, per layout and for the pocket, nothing linked
     /// (#761, #2978).
     public mutating func setEveryBarVisibility(_ visibility: ShelfVisibility) {
-        spaceBarStyle.visibility = visibility
+        // A bar-level pick clears each area's own (#3517 ruling 32).
+        spaceBarStyle.setVisibility(visibility)
+        appBarStyle.visibilityOverride = [:]  // no layout may host one
         kiwishelf.pocketVisibility = visibility
         for mode in LayoutMode.allCases {
             setAppBarVisibility(visibility, in: mode)
@@ -26,13 +31,18 @@ extension TilingSettings {
     }
 
     /// `mode`'s App Bar visibility, where the mode hosts one —
-    /// through the one `appBarPath(for:)`.
+    /// through the one `appBarPath(for:)` — which clears every
+    /// area's App Bar value (#3517 ruling 32), as the Space Bar's
+    /// `setVisibility(_:)` clears its own. Its Settings row and
+    /// `<layout>.set_app_bar_visibility` write through it alone
+    /// (`AppBarVisibilityWriteCensusTests`).
     public mutating func setAppBarVisibility(
         _ visibility: ShelfVisibility,
         in mode: LayoutMode
     ) {
         guard let path = Self.appBarPath(for: mode) else { return }
         self[keyPath: path].visibility = visibility
+        appBarStyle.visibilityOverride = [:]
     }
 
     /// `other`'s visibility on every element, nothing else of it — a

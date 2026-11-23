@@ -116,6 +116,32 @@ enum BarsGateHelp {
         )
     }
 
+    /// The Show master's `?` while a screen or area shows a bar its
+    /// own way (#3517 ruling 32).
+    static var visibilityDiffersPerScreen: String {
+        L(
+            "kiwishelf.show.differ_per_screen.help",
+            "Some screens show a bar their own way — see "
+                + "\u{201C}%1$@\u{201D} under %2$@. Choosing here "
+                + "sets every bar and the Pocket on every screen.",
+            L("kiwishelf.edge.per_screen.space_bar", "Per screen"),
+            L("kiwishelf.edge.label", "Position")
+        )
+    }
+
+    /// A bar's own Show row's `?` while a screen or area shows that
+    /// bar its own way (#3517 ruling 32).
+    static var screenShowsDiffer: String {
+        L(
+            "kiwishelf.show.screens_differ.help",
+            "Some screens show this bar their own way — see "
+                + "\u{201C}%1$@\u{201D} under %2$@. Picking here "
+                + "sets it on every screen.",
+            L("kiwishelf.edge.per_screen.space_bar", "Per screen"),
+            L("kiwishelf.edge.label", "Position")
+        )
+    }
+
     /// The Reveal row's note while Grow plays as Unfold on a
     /// Boxed shelf (#2556) — not an `InertReason`: nothing greys.
     static var growPlaysAsUnfold: String {

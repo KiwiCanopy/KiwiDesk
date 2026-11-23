@@ -3973,6 +3973,30 @@ With a screen, the edge is that screen's alone, as
 app_bar.set_edge("right", "LG HDR 4K:3840x2160")
 ```
 
+### app_bar.set_visibility
+
+:::unreleased
+**Expects:** `"always"`, `"auto"` or `"hidden"`, then a screen,
+named as [`space_bar.set_edge`](#space_barset_edge) names one. A
+call without a screen is refused: each layout keeps its own App
+Bar visibility, set with that layout's `set_app_bar_visibility`
+([Per-Layout App Bar Overrides](#per-layout-app-bar-overrides)).
+
+**Does:** sets the App Bar's visibility on that screen in every
+layout that has an App Bar; the values mean what
+[`space_bar.set_visibility`](#space_barset_visibility) says. The
+other screens keep each layout's value. The values are stored per
+profile under `app_bar.visibility_override`, keyed by fingerprint.
+Settings ▸ KiwiShelf writes them in the App Bar's **Per screen**
+rows under **Position** ▸ **Each bar and Pocket**.
+
+**Example:**
+
+```lua
+app_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")
+```
+:::
+
 ### app_bar.set_reserve
 
 **Expects:** boolean (default `true`).
@@ -4106,6 +4130,14 @@ overrides are the same setters prefixed with the layout name:
 
 The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
 no per-layout override either.
+
+:::unreleased
+A screen's own App Bar visibility, set with
+[`app_bar.set_visibility`](#app_barset_visibility), outranks every
+layout's on that screen. A layout's `set_app_bar_visibility` takes
+no screen, refusing one, and clears every screen's own App Bar
+visibility.
+:::
 
 **Example:**
 
@@ -4271,6 +4303,21 @@ place.
 space_bar.set_visibility("auto")
 ```
 
+:::unreleased
+**Per screen:** a second argument names a screen, in the forms
+[`space_bar.set_edge`](#space_barset_edge) takes, and the value is
+that screen's alone. Naming the bar's own value returns a screen
+to it; a call without a screen sets every screen and clears their
+own values. The values are stored per profile under
+`space_bar.visibility_override`, keyed by fingerprint. Settings ▸
+KiwiShelf writes them in the Space Bar's **Per screen** rows under
+**Position** ▸ **Each bar and Pocket**.
+
+```lua
+space_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")
+```
+:::
+
 ### space_bar.toggle_reveal
 
 **Expects:** nothing.
@@ -4337,6 +4384,18 @@ their own edges. A look sets the bars' edges and leaves each
 screen's own untouched. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
 fingerprint.
+
+:::unreleased
+**Per area:** on a screen split into areas, each area has its own
+edge. A screen named by number or by name sets every area of it;
+its fingerprint names its first area alone, and an area is named
+by its key, `fingerprint#id`, or its own name. An area with no
+edge of its own uses the bar's. The areas are judged with the
+screens, so the edges collapse only once every area sits on one
+edge. Splitting an area in Settings gives the new area the edges
+and visibilities of the area it came from; areas a
+`set_display_areas` list creates start at the bars' own.
+:::
 
 ```lua
 space_bar.set_edge("top")
@@ -9616,6 +9675,12 @@ set becomes the default unless the count already has another.
 - It refuses the connected setup (`reason: "connected_setup"`) and
   a setup no profile holds (`reason: "unknown_setup"`). Settings ▸
   Profiles ▸ **Known screen setups** does the same.
+
+:::unreleased
+`forget_monitor_set` also drops the bars' per-screen visibilities
+(`space_bar.visibility_override`, `app_bar.visibility_override`)
+for the screens whose edges it drops.
+:::
 
 **Example:**
 

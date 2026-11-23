@@ -16,8 +16,32 @@ extension KiwiCore {
         // SHOWN, not focused: which Space this screen is
         // displaying. The presence and focus questions below
         // take the one active Space instead (#1214).
-        let current = state.workspaces.currentSpace(on: display)
-        return state.workspaces.spaces(on: display)
+        spaceBarItems(
+            of: state.workspaces.spaces(on: display),
+            current: state.workspaces.currentSpace(on: display),
+            style: style
+        )
+    }
+
+    /// One area's Spaces (#3517 ruling 30), the Space it SHOWS
+    /// drawn active.
+    func spaceBarItems(
+        placement: PlacementID,
+        style: SpaceBarLook
+    ) -> [SpaceBarOverlay.Item] {
+        spaceBarItems(
+            of: state.workspaces.spaces(on: placement),
+            current: state.workspaces.activeSpace(on: placement),
+            style: style
+        )
+    }
+
+    private func spaceBarItems(
+        of spaces: [SpaceID],
+        current: SpaceID?,
+        style: SpaceBarLook
+    ) -> [SpaceBarOverlay.Item] {
+        spaces
             .compactMap { id in
                 guard let space = state.workspaces[id] else {
                     return nil

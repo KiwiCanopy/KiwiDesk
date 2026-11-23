@@ -135,7 +135,7 @@ struct GlassFillFadeTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: shelf,
@@ -162,7 +162,7 @@ struct GlassFillFadeTests {
         style.backgroundStyle = .boxed
         style.fillFade = 0
         bar = SpaceBarManager.Bar(
-            display: bar.display,
+            placement: PlacementID(display: bar.display, area: 0),
             items: bar.items,
             frontApp: bar.frontApp,
             frontWindow: bar.frontWindow,

@@ -224,7 +224,7 @@ struct RoundedItemEndPadChipTests {
         let manager = AppBarManager()
         manager.sync([
             AppBarManager.Bar(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 space: SpaceID("1"),
                 items: (1...3).map {
                     appBarItem(UInt32($0), text: "Downloads")

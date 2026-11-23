@@ -76,7 +76,7 @@ struct SpaceBarGlideWiringTests {
         )
         if dropEmpty {
             second = SpaceBarManager.Bar(
-                display: second.display,
+                placement: PlacementID(display: second.display, area: 0),
                 items: Array(second.items.dropLast()),
                 frontApp: nil,
                 frontWindow: nil,

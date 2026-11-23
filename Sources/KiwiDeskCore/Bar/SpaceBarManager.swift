@@ -3,9 +3,12 @@ import AppKit
 /// Space Bar overlay manager across displays (#293, `AppBarManager`).
 @MainActor
 public final class SpaceBarManager {
-    /// One display's resolved bar configuration.
+    /// One area's resolved bar configuration (#3517): an unsplit
+    /// screen is its one area.
     public struct Bar {
-        public let display: DisplayID
+        public let placement: PlacementID
+        /// The physical screen the area is part of.
+        public var display: DisplayID { placement.display }
         public let items: [SpaceBarOverlay.Item]
         /// Trailing front-app segment app data.
         let frontApp: SpaceBarItemView.App?
@@ -18,7 +21,7 @@ public final class SpaceBarManager {
         let stateMarkColors: StateMarkColors
 
         init(
-            display: DisplayID,
+            placement: PlacementID,
             items: [SpaceBarOverlay.Item],
             frontApp: SpaceBarItemView.App? = nil,
             frontWindow: WindowID? = nil,
@@ -26,7 +29,7 @@ public final class SpaceBarManager {
             style: SpaceBarLook,
             stateMarkColors: StateMarkColors
         ) {
-            self.display = display
+            self.placement = placement
             self.items = items
             self.frontApp = frontApp
             self.frontWindow = frontWindow
@@ -76,7 +79,7 @@ public final class SpaceBarManager {
     /// inside the render or relayout that refresh would nest in.
     var onStripReleased: @MainActor () -> Void = {}
 
-    private var overlays: [DisplayID: SpaceBarOverlay] = [:]
+    private var overlays: [PlacementID: SpaceBarOverlay] = [:]
     /// Active visible bars painted on screen.
     private var shownBars: [Bar] = []
 
@@ -87,18 +90,20 @@ public final class SpaceBarManager {
         Set(shownBars.map(\.display))
     }
 
-    /// Painted strips with display and edge metadata (#242, QA 2026-07-19).
+    /// Painted strips with display, edge and area metadata (#242,
+    /// QA 2026-07-19; #3517).
     public var shownStrips:
         [(
             display: DisplayID, strip: CGRect,
-            edge: AppBarEdge
+            edge: AppBarEdge, placement: PlacementID
         )]
     {
         shownBars.map {
             (
                 display: $0.display,
                 strip: $0.strip,
-                edge: $0.style.edge
+                edge: $0.style.edge,
+                placement: $0.placement
             )
         }
     }
@@ -136,7 +141,7 @@ public final class SpaceBarManager {
         {
             stripHold = nil
         }
-        let wanted = Set(valid.map(\.display))
+        let wanted = Set(valid.map(\.placement))
         // Hidden, never dropped: the section's root keeps its place
         // on its shelf, so a bar coming back is the same section
         // re-shown (#1838).
@@ -145,7 +150,7 @@ public final class SpaceBarManager {
             overlay.hide()
         }
         for bar in valid {
-            overlay(for: bar.display).show(
+            overlay(for: bar.placement).show(
                 items: bar.items,
                 frontApp: bar.frontApp,
                 strip: bar.strip,
@@ -227,38 +232,52 @@ public final class SpaceBarManager {
         overlays.values.forEach { $0.cancelDragAutoScroll() }
     }
 
-    /// Drops the overlays of displays outside `live` — the
-    /// connected ones, and those whose shelf is still fading, which
-    /// the caller adds; a display still live keeps its hidden
-    /// overlay (#1838).
-    public func retire(except live: Set<DisplayID>) {
+    /// Drops the overlays of areas outside `live` — the connected
+    /// ones, and those whose shelf is still fading, which the
+    /// caller adds; an area still live keeps its hidden overlay
+    /// (#1838).
+    public func retire(except live: Set<PlacementID>) {
         for (id, overlay) in overlays where !live.contains(id) {
             overlay.hide()
             overlays[id] = nil
         }
     }
 
-    /// The section a display's shelf places, while it shows
-    /// (#1517).
-    func shownOverlay(on display: DisplayID) -> SpaceBarOverlay? {
-        guard let overlay = overlays[display], overlay.isVisible
+    /// The section an area's shelf places, while it shows (#1517).
+    func shownOverlay(on placement: PlacementID) -> SpaceBarOverlay? {
+        guard let overlay = overlays[placement], overlay.isVisible
         else { return nil }
         return overlay
     }
 
     #if DEBUG
-        /// Test seam: overlay backing a specific display.
+        /// Test seam: the overlay of `display`'s first area that
+        /// has one — on an unsplit screen, its one bar.
         func overlayForTesting(
             _ display: DisplayID
         ) -> SpaceBarOverlay? {
-            overlays[display]
+            overlays.filter { $0.key.display == display }
+                .min { $0.key.area < $1.key.area }?.value
+        }
+
+        /// Test seam: the shown section of `display`'s first area
+        /// that shows one.
+        func shownOverlay(on display: DisplayID) -> SpaceBarOverlay? {
+            overlays.filter { $0.key.display == display }
+                .sorted { $0.key.area < $1.key.area }
+                .first { $0.value.isVisible }?.value
+        }
+
+        /// Test seam: every area's overlay.
+        var overlaysForTesting: [PlacementID: SpaceBarOverlay] {
+            overlays
         }
     #endif
 
     private func overlay(
-        for display: DisplayID
+        for placement: PlacementID
     ) -> SpaceBarOverlay {
-        if let existing = overlays[display] { return existing }
+        if let existing = overlays[placement] { return existing }
         let overlay = SpaceBarOverlay()
         overlay.onSelect = { [weak self] space in
             self?.onSelectSpace(space)
@@ -268,7 +287,7 @@ public final class SpaceBarManager {
         overlay.onStripHover = { [weak self] space, drawn, inside in
             self?.stripHover(space, drawn, inside: inside)
         }
-        overlays[display] = overlay
+        overlays[placement] = overlay
         return overlay
     }
 }

@@ -186,8 +186,8 @@ keeps its place (`StashDepartures`).
 
 A `space_bar.*` or `app_bar.*` write that leaves every layout's
 `shelfReservation(in:on:pocketAtRest:)` — the input
-`layoutBounds` reads — unchanged on every screen runs no pass at
-all: it repaints the bars and re-clamps the floats (#1524).
+`layoutBounds` reads — unchanged on every screen and every area of
+a split one runs no pass at all: it repaints the bars and re-clamps the floats (#1524).
 
 A shelf whose bars are all `auto` reserves nothing and draws only
 when `ShelfManager.reveal` shows it (#761, #3349): `updateBars()`

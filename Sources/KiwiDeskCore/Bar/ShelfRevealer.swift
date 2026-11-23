@@ -141,11 +141,11 @@ final class ShelfRevealer {
         targets.keys.contains { $0.shelf == shelf && !$0.isPocket }
     }
 
-    /// The bars `edge` draws on `display` this pass: those shown at
-    /// rest, and each a reveal shows (#761) — the one answer the
+    /// The bars `edge` draws on `placement` this pass: those shown
+    /// at rest, and each a reveal shows (#761) — the one answer the
     /// live plan takes.
-    func drawn(_ edge: ShelfEdge, display: DisplayID) -> Set<ShelfBar> {
-        let shelf = ShelfManager.Key(display: display, edge: edge.edge)
+    func drawn(_ edge: ShelfEdge, placement: PlacementID) -> Set<ShelfBar> {
+        let shelf = ShelfManager.Key(placement: placement, edge: edge.edge)
         return edge.drawnAtRest.union(
             edge.bars.keys.filter {
                 reveal(of: Key(shelf: shelf, bar: $0)).isShown
@@ -164,7 +164,8 @@ final class ShelfRevealer {
         }
         for key in phases.keys where next[key] == nil {
             let moved = next.keys.contains {
-                $0.bar == key.bar && $0.shelf.display == key.shelf.display
+                $0.bar == key.bar
+                    && $0.shelf.placement == key.shelf.placement
             }
             if moved { forget(key) }
         }

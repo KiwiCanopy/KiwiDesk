@@ -135,14 +135,14 @@ extension KiwiCore {
 
     /// Every space with at least one painted strip: the App
     /// Bars' own spaces, plus the space each Space-Bar-covered
-    /// display is showing (#293: per-display bar, occludes the
-    /// current space).
+    /// area is showing (#293, #3517: a bar per area, occluding
+    /// that area's Space).
     private var spacesWithShownBars: Set<SpaceID> {
         var spaces = Set(appBars.shownStrips.map(\.space))
-        for (display, _, _) in spaceBars.shownStrips {
+        for strip in spaceBars.shownStrips {
             guard
                 let space =
-                    state.workspaces.currentSpace(on: display)
+                    state.workspaces.activeSpace(on: strip.placement)
             else { continue }
             spaces.insert(space)
         }

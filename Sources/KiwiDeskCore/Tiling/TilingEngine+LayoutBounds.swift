@@ -28,12 +28,28 @@ extension TilingEngine {
     /// Much smaller than the strip this fixed, and not a
     /// licence to assume the seam is exact.
     func layoutBounds(on screen: NSScreen, for space: Space) -> CGRect {
-        let area = spaceArea(space.id)
+        let input = shelfInput(for: space.id, on: screen)
         return settings.layoutBounds(
             from: visibleBounds(screen, for: space.id),
             mode: space.mode,
-            on: area?.key ?? fingerprint(of: screen),
-            pocketAtRest: settings.pocketRests
+            on: input.key,
+            pocketAtRest: input.pocketAtRest
+        )
+    }
+
+    /// The key `space`'s shelf reservation resolves under on
+    /// `screen` — its area's where the screen is split, else the
+    /// screen's — and whether the Pocket rests there: in a split
+    /// screen's lead area alone, where the shelf draws it (#3517,
+    /// bars.md). Every carve of a Space's bounds takes it.
+    func shelfInput(
+        for space: SpaceID,
+        on screen: NSScreen
+    ) -> (key: String?, pocketAtRest: Bool) {
+        let area = spaceArea(space)
+        return (
+            area?.key ?? fingerprint(of: screen),
+            settings.pocketRests && (area?.lead ?? true)
         )
     }
 

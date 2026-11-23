@@ -152,11 +152,20 @@ extension KiwiCore {
     /// profile hides the bars for it — `shelfSettings(on:)`'s one
     /// tiling-off read (bars.md).
     func tilingOffHidesShelf(on display: DisplayID) -> Bool {
+        tilingOffHides(state.workspaces.activeSpace(on: display))
+    }
+
+    /// The same read for the Space one area shows (#3517).
+    func tilingOffHidesShelf(on placement: PlacementID) -> Bool {
+        tilingOffHides(state.workspaces.activeSpace(on: placement))
+    }
+
+    private func tilingOffHides(_ shown: SpaceID?) -> Bool {
         guard
             tiler.settings.tiling.offHidesBars(
                 base: appWide.tilingOffHidesBars
             ),
-            let space = state.workspaces.activeSpace(on: display)
+            let space = shown
         else { return false }
         return isTilingOff(space)
     }

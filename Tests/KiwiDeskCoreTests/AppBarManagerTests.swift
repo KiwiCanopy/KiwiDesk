@@ -12,7 +12,7 @@ struct AppBarManagerTests {
         space: String
     ) -> AppBarManager.Bar {
         AppBarManager.Bar(
-            display: DisplayID(display),
+            placement: PlacementID(display: DisplayID(display), area: 0),
             space: SpaceID(space),
             items: [
                 AppBarOverlay.Item(
@@ -63,7 +63,7 @@ struct AppBarManagerTests {
     func degenerateStripNotShown() {
         let manager = AppBarManager()
         let empty = AppBarManager.Bar(
-            display: DisplayID(1),
+            placement: PlacementID(display: DisplayID(1), area: 0),
             space: SpaceID("1"),
             items: [],
             activeIndex: nil,
@@ -84,7 +84,7 @@ struct AppBarManagerTests {
         var style = AppBarLook()
         style.edge = edge
         return AppBarManager.Bar(
-            display: DisplayID(display),
+            placement: PlacementID(display: DisplayID(display), area: 0),
             space: SpaceID(space),
             items: [
                 AppBarOverlay.Item(

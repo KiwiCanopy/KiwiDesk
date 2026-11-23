@@ -19,7 +19,7 @@ struct BarEdgeWriteCensusTests {
 
     /// File → (raw writes it holds, why).
     private static let allowed: [String: (Int, String)] = [
-        "ScreenEdged.swift": (6, "the doors themselves"),
+        "ScreenEdged.swift": (7, "the doors themselves"),
         "ShelfEdge.swift": (1, "`ShelfEdge`'s own field, no bar's"),
         "ShelfRevealer+Target.swift": (
             1, "`ShelfRevealer.Target`'s own field, no bar's (#761)"
@@ -196,8 +196,8 @@ struct BarEdgeWriteCensusTests {
     ])
 
     /// `ScreenEdgeScope`'s memberwise init is module-wide, so its
-    /// one home — `KiwiCore.screenEdgeScope(monitorSets:)`, which
-    /// adds the connected screens — is held here.
+    /// one home — `KiwiCore.screenEdgeScope(monitorSets:splits:)`,
+    /// which adds the connected screens — is held here.
     @Test("a ScreenEdgeScope is built only by screenEdgeScope")
     func scopeHasOneHome() throws {
         let found = try census(

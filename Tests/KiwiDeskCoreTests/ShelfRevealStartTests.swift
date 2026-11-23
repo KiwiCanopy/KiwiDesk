@@ -135,7 +135,10 @@ struct ShelfRevealStartTests {
     @Test("The dwell ends the fill in the reveal's own pass")
     func revealEndsTheHoverInOnePass() {
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: DisplayID(1), area: 0),
+                edge: .top
+            ),
             bar: .space
         )
         let revealer = ShelfRevealer()

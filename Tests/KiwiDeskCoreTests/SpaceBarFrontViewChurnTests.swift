@@ -41,7 +41,7 @@ struct SpaceBarFrontViewChurnTests {
             )
         }
         return SpaceBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             items: items,
             frontApp: SpaceBarItemView.App(
                 name: "Finder",
@@ -153,7 +153,7 @@ struct SpaceBarFrontViewChurnTests {
         )
         let shelves = ShelfManager()
         let shelf = ShelfManager.Shelf(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             edge: .top,
             strip: barTitleStrip,
             shelf: KiwiShelf(),

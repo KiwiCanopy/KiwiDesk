@@ -202,20 +202,23 @@ extension KiwiCore {
     ) -> [(strip: CGRect, edge: AppBarEdge)] {
         let mode = state.workspaces[space]?.mode ?? .bsp
         let display = state.workspaces.display(of: space)
-        let screen = display.flatMap(screenFingerprint(of:))
-        // Through the shelf's door: a tiling-off Space's Hidden bars
-        // and Pocket reserve nothing (#3151).
-        let shown = display.map(shelfSettings(on:)) ?? tiler.settings
+        // Through the shelf's door for the Space's own area: a
+        // tiling-off Space's Hidden bars and Pocket reserve nothing
+        // (#3151), nor an area's Hidden bars (#3517).
+        let placement = state.workspaces.placement(of: space)
+        let screen = placement.flatMap(areaKey(of:))
+        let shown = placement.map(shelfSettings(on:)) ?? tiler.settings
         let reserved = shown.shelfEdges(in: mode, on: screen)
         let bars = paintedStrips(forSpace: space).filter {
             reserved.contains($0.edge)
         }
         // The whole pocket reserves a shelf's strip, so a float keeps
-        // clear of it as of a bar (#2784).
-        guard shown.pocketRests,
+        // clear of it as of a bar (#2784); it rests in the lead area.
+        guard shown.pocketRests, let display,
+            tiler.spaceArea(space)?.lead ?? true,
             shown.pocketRest(in: mode, on: screen) == .mark,
             shown.pocketReservation(in: mode, on: screen) != nil,
-            let display, let mark = pocketMarkFrame(on: display)
+            let mark = pocketMarkFrame(on: display)
         else { return bars }
         return bars + [(mark, shown.kiwishelf.pocketEdge)]
     }
@@ -228,16 +231,15 @@ extension KiwiCore {
         spaceBarStrips(forSpace: space) + appBars.strips(forSpace: space)
     }
 
-    /// The painted Space Bar strips covering `space`. The
-    /// Space Bar is per-display; a space is covered by the
-    /// bar of the display currently showing it.
+    /// The painted Space Bar strips covering `space`. The Space
+    /// Bar is per area (#3517); a space is covered by the bar of
+    /// the area showing it.
     private func spaceBarStrips(
         forSpace space: SpaceID
     ) -> [(strip: CGRect, edge: AppBarEdge)] {
         spaceBars.shownStrips
-            .filter { display, _, _ in
-                state.workspaces.currentSpace(on: display)
-                    == space
+            .filter {
+                state.workspaces.activeSpace(on: $0.placement) == space
             }
             .map { (strip: $0.strip, edge: $0.edge) }
     }

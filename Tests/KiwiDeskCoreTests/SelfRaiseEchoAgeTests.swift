@@ -227,7 +227,7 @@ struct BarStripAbsorptionTests {
         )
         core.appBars.sync([
             AppBarManager.Bar(
-                display: DisplayID(1),
+                placement: PlacementID(display: DisplayID(1), area: 0),
                 space: core.state.workspaces.activeSpace
                     ?? SpaceID("1"),
                 items: [
@@ -287,7 +287,7 @@ struct BarStripAbsorptionTests {
         )
         core.spaceBars.sync([
             SpaceBarManager.Bar(
-                display: DisplayID(1),
+                placement: PlacementID(display: DisplayID(1), area: 0),
                 items: [
                     SpaceBarOverlay.Item(
                         space: core.state.workspaces

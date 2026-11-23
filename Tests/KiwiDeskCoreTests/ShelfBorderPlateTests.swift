@@ -26,7 +26,7 @@ struct ShelfBorderPlateTests {
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
-                display: barTitleDisplay,
+                placement: PlacementID(display: barTitleDisplay, area: 0),
                 edge: .top,
                 strip: barTitleStrip,
                 shelf: shelf,
@@ -100,7 +100,7 @@ struct ShelfBorderPlateTests {
         func sync(_ shelf: KiwiShelf) {
             shelves.sync([
                 ShelfManager.Shelf(
-                    display: barTitleDisplay,
+                    placement: PlacementID(display: barTitleDisplay, area: 0),
                     edge: .top,
                     strip: barTitleStrip,
                     shelf: shelf,

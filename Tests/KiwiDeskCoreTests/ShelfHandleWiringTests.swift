@@ -32,7 +32,10 @@ struct ShelfHandleWiringTests {
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
-        let key = ShelfManager.Key(display: display.id, edge: .top)
+        let key = ShelfManager.Key(
+            placement: PlacementID(display: display.id, area: 0),
+            edge: .top
+        )
         #expect(
             core.shelves.handles.handleForTesting(
                 .init(shelf: key, bar: .app)
@@ -75,7 +78,10 @@ struct ShelfHandleWiringTests {
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display.id, edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display.id, area: 0),
+                edge: .top
+            ),
             bar: .app
         )
         let spec = { core.shelves.handles.handleForTesting(key)?.view.spec }
@@ -141,7 +147,10 @@ struct ShelfHandleWiringTests {
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
-        let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        let shelf = ShelfManager.Key(
+            placement: PlacementID(display: display.id, area: 0),
+            edge: .top
+        )
         let key = ShelfRevealer.Key(shelf: shelf, bar: .app)
         let spec = try #require(
             core.shelves.handles.handleForTesting(key)?.view.spec
@@ -211,7 +220,10 @@ struct ShelfHandleWiringTests {
         #expect(core.maximizedHoverBars(on: display.id) == [.space, .app])
         core.updateBars()
         // Both hover bars rest as handles over the window.
-        let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        let shelf = ShelfManager.Key(
+            placement: PlacementID(display: display.id, area: 0),
+            edge: .top
+        )
         for bar in [ShelfBar.space, .app] {
             #expect(
                 core.shelves.handles.handleForTesting(

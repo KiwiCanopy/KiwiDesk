@@ -4,9 +4,12 @@ import AppKit
 /// #293).
 @MainActor
 public final class AppBarManager {
-    /// Resolved bar configuration and geometry for a single display.
+    /// Resolved bar configuration and geometry for one area
+    /// (#3517): an unsplit screen is its one area.
     public struct Bar {
-        public let display: DisplayID
+        public let placement: PlacementID
+        /// The physical screen the area is part of.
+        public var display: DisplayID { placement.display }
         public let space: SpaceID
         public let items: [AppBarOverlay.Item]
         public let activeIndex: Int?
@@ -19,7 +22,7 @@ public final class AppBarManager {
         public let capAxis: CGFloat
 
         public init(
-            display: DisplayID,
+            placement: PlacementID,
             space: SpaceID,
             items: [AppBarOverlay.Item],
             activeIndex: Int?,
@@ -27,7 +30,7 @@ public final class AppBarManager {
             style: AppBarLook,
             capAxis: CGFloat
         ) {
-            self.display = display
+            self.placement = placement
             self.space = space
             self.items = items
             self.activeIndex = activeIndex
@@ -49,7 +52,7 @@ public final class AppBarManager {
         _ in
     }
 
-    private var overlays: [DisplayID: AppBarOverlay] = [:]
+    private var overlays: [PlacementID: AppBarOverlay] = [:]
     /// The Reduce transparency observer `KiwiCore` wires in
     /// `start()` for BOTH bars (#1374); homed here rather than on
     /// `KiwiCore`, whose file sits at the §2.1 ceiling.
@@ -68,14 +71,14 @@ public final class AppBarManager {
 
     /// Displays currently showing an app bar.
     public var shownDisplays: Set<DisplayID> {
-        Set(overlays.filter { $0.value.isVisible }.keys)
+        Set(overlays.filter { $0.value.isVisible }.keys.map(\.display))
     }
 
-    /// Drops the overlays of displays outside `live` — the
-    /// connected ones, and those whose shelf is still fading, which
-    /// the caller adds; a display still live keeps its hidden
-    /// overlay (#1838).
-    public func retire(except live: Set<DisplayID>) {
+    /// Drops the overlays of areas outside `live` — the connected
+    /// ones, and those whose shelf is still fading, which the
+    /// caller adds; an area still live keeps its hidden overlay
+    /// (#1838).
+    public func retire(except live: Set<PlacementID>) {
         for (id, overlay) in overlays where !live.contains(id) {
             overlay.hide()
             overlays[id] = nil
@@ -129,12 +132,12 @@ public final class AppBarManager {
                 && $0.strip.width >= 1 && $0.strip.height >= 1
         }
         shownBars = valid
-        let wanted = Set(valid.map(\.display))
+        let wanted = Set(valid.map(\.placement))
         for (id, overlay) in overlays where !wanted.contains(id) {
             overlay.hide()
         }
         for bar in valid {
-            let overlay = overlay(for: bar.display)
+            let overlay = overlay(for: bar.placement)
             overlay.show(
                 items: bar.items,
                 activeIndex: bar.activeIndex,
@@ -146,27 +149,42 @@ public final class AppBarManager {
         }
     }
 
-    /// The section a display's shelf places, while it shows
-    /// (#1517).
-    func shownOverlay(on display: DisplayID) -> AppBarOverlay? {
-        guard let overlay = overlays[display], overlay.isVisible
+    /// The section an area's shelf places, while it shows (#1517).
+    func shownOverlay(on placement: PlacementID) -> AppBarOverlay? {
+        guard let overlay = overlays[placement], overlay.isVisible
         else { return nil }
         return overlay
     }
 
     #if DEBUG
+        /// Test seam: the overlay of `display`'s first area that
+        /// has one — on an unsplit screen, its one bar.
         func overlayForTesting(
             _ display: DisplayID
         ) -> AppBarOverlay? {
-            overlays[display]
+            overlays.filter { $0.key.display == display }
+                .min { $0.key.area < $1.key.area }?.value
+        }
+
+        /// Test seam: the shown section of `display`'s first area
+        /// that shows one.
+        func shownOverlay(on display: DisplayID) -> AppBarOverlay? {
+            overlays.filter { $0.key.display == display }
+                .sorted { $0.key.area < $1.key.area }
+                .first { $0.value.isVisible }?.value
+        }
+
+        /// Test seam: every area's overlay.
+        var overlaysForTesting: [PlacementID: AppBarOverlay] {
+            overlays
         }
 
         /// Test seam: bars accepted by last `sync` (`BarTitleRefreshTests`).
         var shownBarsForTesting: [Bar] { shownBars }
     #endif
 
-    private func overlay(for display: DisplayID) -> AppBarOverlay {
-        if let existing = overlays[display] { return existing }
+    private func overlay(for placement: PlacementID) -> AppBarOverlay {
+        if let existing = overlays[placement] { return existing }
         let overlay = AppBarOverlay()
         overlay.itemActions = itemActions
         overlay.contextMenus = contextMenus
@@ -175,11 +193,11 @@ public final class AppBarManager {
         }
         overlay.onMove = { [weak self] from, to in
             guard let self,
-                let space = self.overlays[display]?.lastShown?.space
+                let space = self.overlays[placement]?.lastShown?.space
             else { return }
             self.onMove(space, from, to)
         }
-        overlays[display] = overlay
+        overlays[placement] = overlay
         return overlay
     }
 }

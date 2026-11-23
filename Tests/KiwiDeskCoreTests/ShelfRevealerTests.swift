@@ -25,7 +25,10 @@ struct ShelfRevealerTests {
     }
 
     static let key = ShelfRevealer.Key(
-        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        shelf: ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .top
+        ),
         bar: .space
     )
     /// A top shelf 40 pt deep under a 25 pt menu bar on a

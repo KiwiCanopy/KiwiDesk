@@ -13,7 +13,10 @@ import Testing
 @MainActor
 struct ShelfHandleStripTests {
     private static let key = ShelfRevealer.Key(
-        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        shelf: ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .top
+        ),
         bar: .space
     )
     /// A top shelf 40 pt deep, flush with a 1000 x 800 screen's

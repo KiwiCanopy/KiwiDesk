@@ -71,7 +71,10 @@ struct ShelfAutoHideLifetimeTests {
         let (core, display) = try #require(makeCore())
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         _ = core.execute("space_bar.toggle_reveal", args: [])
-        let key = ShelfManager.Key(display: display, edge: .top)
+        let key = ShelfManager.Key(
+            placement: PlacementID(display: display, area: 0),
+            edge: .top
+        )
         let panel = try #require(
             core.shelves.overlayForTesting(display, edge: .top)?.panel
         )

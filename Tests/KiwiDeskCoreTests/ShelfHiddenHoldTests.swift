@@ -48,7 +48,10 @@ struct ShelfHiddenHoldTests {
         #expect(core.execute("app_bar.toggle_reveal", args: []).isSuccess)
         core.updateBars()
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display.id, edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display.id, area: 0),
+                edge: .top
+            ),
             bar: .app
         )
         let held = try #require(core.shelves.reveal.targets[key]?.section)
@@ -99,7 +102,10 @@ struct ShelfHiddenHoldTests {
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
-        let shelf = ShelfManager.Key(display: display.id, edge: .top)
+        let shelf = ShelfManager.Key(
+            placement: PlacementID(display: display.id, area: 0),
+            edge: .top
+        )
         // Filed as a hidden target, no handle's.
         #expect(
             core.shelves.reveal.targets[.init(shelf: shelf, bar: .app)]

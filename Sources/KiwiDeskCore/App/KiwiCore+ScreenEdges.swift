@@ -43,10 +43,54 @@ extension KiwiCore {
     /// reader of a screen's bar or Pocket visibility takes
     /// (`TilingOffBarsHiddenSeamTests`).
     func shelfSettings(on display: DisplayID) -> TilingSettings {
-        let shown = settings(on: display)
-        if tilingOffHidesShelf(on: display) { return shown.hidingEveryBar() }
-        return screenMaximizes(on: display)
-            ? shown.hidingEveryBarForMaximize() : shown
+        shelfSettings(
+            key: screenFingerprint(of: display),
+            tilingOff: tilingOffHidesShelf(on: display),
+            maximized: screenMaximizes(on: display)
+        )
+    }
+
+    /// The settings one area's shelf reads (#3517 ruling 30):
+    /// `shelfSettings(on:)` for an area, keyed by its
+    /// `ScreenAreaKey` and the Space it shows, which a split
+    /// screen's bars take. On an unsplit screen the two answer
+    /// alike.
+    func shelfSettings(on placement: PlacementID) -> TilingSettings {
+        shelfSettings(
+            key: areaKey(of: placement),
+            tilingOff: tilingOffHidesShelf(on: placement),
+            maximized: screenMaximizes(on: placement)
+        )
+    }
+
+    /// Whether `placement` shows a maximized window, the area's
+    /// `screenMaximizes(on:)`.
+    func screenMaximizes(on placement: PlacementID) -> Bool {
+        maximizes(
+            key: areaKey(of: placement),
+            shown: state.workspaces.activeSpace(on: placement),
+            on: placement.display
+        )
+    }
+
+    /// The bars a pointer at their edge brings in over the window
+    /// `placement` shows maximized, the area's
+    /// `maximizedHoverBars(on:)`.
+    func maximizedHoverBars(on placement: PlacementID) -> Set<ShelfBar> {
+        hoverBars(
+            key: areaKey(of: placement),
+            shown: state.workspaces.activeSpace(on: placement),
+            hidden: tilingOffHidesShelf(on: placement),
+            maximized: screenMaximizes(on: placement)
+        )
+    }
+
+    /// The key `placement`'s bars resolve under: its area's stored
+    /// key, else — a screen with no placement record yet — the
+    /// screen's fingerprint, as `settings(on:)` reads it.
+    func areaKey(of placement: PlacementID) -> String? {
+        state.workspaces[placement: placement]?.key.description
+            ?? screenFingerprint(of: placement.display)
     }
 
     /// Whether `display` shows a maximized window: a Maximize over
@@ -56,10 +100,11 @@ extension KiwiCore {
     /// predicate the shelf, its bands and the overflow marks ask
     /// (#3346).
     func screenMaximizes(on display: DisplayID) -> Bool {
-        showsMaximized(on: display)
-            || settings(on: display).maximizesWindows(
-                in: shownMode(on: display)
-            )
+        maximizes(
+            key: screenFingerprint(of: display),
+            shown: state.workspaces.activeSpace(on: display),
+            on: display
+        )
     }
 
     /// The bars resting at their edge brings in over the window
@@ -68,21 +113,47 @@ extension KiwiCore {
     /// windows" (#3346) — read off the stored bars through
     /// `TilingSettings.maximizedHoverBars(in:)`.
     func maximizedHoverBars(on display: DisplayID) -> Set<ShelfBar> {
-        maximizedStored(on: display).map {
-            $0.settings.maximizedHoverBars(in: $0.mode)
-        } ?? []
+        hoverBars(
+            key: screenFingerprint(of: display),
+            shown: state.workspaces.activeSpace(on: display),
+            hidden: tilingOffHidesShelf(on: display),
+            maximized: screenMaximizes(on: display)
+        )
     }
 
-    /// The stored settings and layout of a screen showing a
-    /// maximized window, nil elsewhere and where the tiling-off tick
-    /// hides the bars, which asks for Hidden.
-    private func maximizedStored(
+    // The one body of each screen and area door above, handed the
+    // key the settings resolve under and the door's own readings
+    // of the Space it shows (#3151, #3346, #3517).
+
+    private func shelfSettings(
+        key: String?,
+        tilingOff: Bool,
+        maximized: Bool
+    ) -> TilingSettings {
+        let shown = tiler.settings.onScreen(key)
+        if tilingOff { return shown.hidingEveryBar() }
+        return maximized ? shown.hidingEveryBarForMaximize() : shown
+    }
+
+    private func maximizes(
+        key: String?,
+        shown space: SpaceID?,
         on display: DisplayID
-    ) -> (settings: TilingSettings, mode: LayoutMode)? {
-        guard !tilingOffHidesShelf(on: display),
-            screenMaximizes(on: display)
-        else { return nil }
-        return (settings(on: display), shownMode(on: display))
+    ) -> Bool {
+        showsMaximized(space, on: display)
+            || tiler.settings.onScreen(key)
+                .maximizesWindows(in: shownMode(of: space))
+    }
+
+    private func hoverBars(
+        key: String?,
+        shown space: SpaceID?,
+        hidden: Bool,
+        maximized: Bool
+    ) -> Set<ShelfBar> {
+        guard !hidden, maximized else { return [] }
+        return tiler.settings.onScreen(key)
+            .maximizedHoverBars(in: shownMode(of: space))
     }
 
     /// The axis a Space switch's plates slide along on `display`:
@@ -102,14 +173,24 @@ extension KiwiCore {
     var shelfReservations: [ShelfReservation] {
         // The bounds' own read, so the skip and the bounds agree.
         let pocketAtRest = tiler.settings.pocketRests
-        let screens: [String?] =
-            [nil] + state.workspaces.allDisplays.map(\.fingerprint)
+        // Every area of a split screen too, its key what its bounds
+        // resolve under; the Pocket rests in the lead area (#3517).
+        let screens: [(key: String?, pocket: Bool)] =
+            [(nil, true)]
+            + state.workspaces.allDisplays.flatMap { display in
+                let areas = state.workspaces.placements(of: display.id)
+                let lead = state.workspaces.leadPlacement(of: display.id)
+                return [(display.fingerprint, true)]
+                    + areas.filter { $0.id != lead }.map {
+                        ($0.key.description, false)
+                    }
+            }
         return screens.flatMap { screen in
             LayoutMode.allCases.map {
                 tiler.settings.shelfReservation(
                     in: $0,
-                    on: screen,
-                    pocketAtRest: pocketAtRest
+                    on: screen.key,
+                    pocketAtRest: pocketAtRest && screen.pocket
                 )
             }
         }
@@ -117,46 +198,52 @@ extension KiwiCore {
 
     /// The ONE scope a per-screen edge write judges its collapse
     /// over (`ScreenEdged.setEdge(_:on:among:)`): the screens of
-    /// `monitorSets` and the connected ones — the write adds the
-    /// entries' own. A writer hands it the monitor sets of the
-    /// profile it writes: the verb the live profile's
+    /// `monitorSets` and the connected ones, each with every area
+    /// `splits` gives it (#3517) — the write adds the entries' own.
+    /// A writer hands it the monitor sets and splits of the profile
+    /// it writes: the verb the live profile's
     /// (`liveScreenEdgeScope`), a Settings writer its draft's,
     /// never an empty list in their place.
     public func screenEdgeScope(
-        monitorSets: [MonitorSet]
+        monitorSets: [MonitorSet],
+        splits: [String: ScreenSplit]
     ) -> ScreenEdgeScope {
-        ScreenEdgeScope(
-            screens: Set(monitorSets.flatMap(\.monitors)).union(
-                connectedDisplays().map(\.fingerprint)
+        let screens = Set(monitorSets.flatMap(\.monitors)).union(
+            connectedDisplays().map(\.fingerprint)
+        )
+        let laidOut = laidOutSplits(splits)
+        return ScreenEdgeScope(
+            screens: screens.union(
+                screens.flatMap {
+                    ScreenSplit.areaKeys(of: $0, in: laidOut)
+                }
             )
         )
     }
 
     /// The scope for a write of the live settings: the adopted
     /// profile's monitor sets, which follow every write of its
-    /// file (`ActiveProfile.refiled(_:)`).
+    /// file (`ActiveProfile.refiled(_:)`), and the live splits.
     var liveScreenEdgeScope: ScreenEdgeScope {
         screenEdgeScope(
-            monitorSets: profiles.active?.monitorSets ?? []
+            monitorSets: profiles.active?.monitorSets ?? [],
+            splits: tiler.settings.displayAreas
         )
     }
 
     /// `screenField`'s arguments — a bar's `edge` (#1948), the
-    /// shelf's `pocket_edge` (#3376) — with the optional screen resolved
-    /// to the fingerprint it is stored under, the edge checked
-    /// first so a bad edge answers as one: a connected screen by
-    /// number, fingerprint or name, as `pin_space_to_display`
-    /// names one — the `NSScreen` list standing in before the
-    /// first display is published, so `init.lua` names a screen
-    /// at boot — else a `Name:WxH` fingerprint stored as given,
-    /// a screen that is not connected. Other fields pass through.
+    /// shelf's `pocket_edge` (#3376) — once per key the optional
+    /// screen names through the one `areaKeys(named:)` (#3517
+    /// rulings 7, 16, 22), the edge checked first so a bad edge
+    /// answers as one. Other fields, and a call with no screen,
+    /// pass through once.
     func screenResolvedEdgeArgs(
         field: String,
         screenField: String,
         _ args: [JSONValue]
-    ) -> Result<[JSONValue], AppBarSettingError> {
+    ) -> Result<[[JSONValue]], AppBarSettingError> {
         guard field == screenField, args.count > 1 else {
-            return .success(args)
+            return .success([args])
         }
         if case .failure(let error) = BarSettingChoice.value(
             args,
@@ -164,24 +251,12 @@ extension KiwiCore {
         ) {
             return .failure(error)
         }
-        let displays = connectedDisplays()
-        let screen: String
-        if let id = resolveDisplayArg(args[1], among: displays),
-            let found = displays.first(where: { $0.id == id })
-        {
-            screen = found.fingerprint
-        } else if let raw = args[1].stringValue,
-            Self.isFingerprint(raw)
-        {
-            screen = raw
-        } else {
+        guard let keys = areaKeys(named: args[1]) else {
             return .failure(
                 AppBarSettingError(stringLiteral: Self.unknownScreen)
             )
         }
-        var resolved = args
-        resolved[1] = .string(screen)
-        return .success(resolved)
+        return .success(keys.map { Self.args(args, screen: $0) })
     }
 
     /// The refusal of a screen argument that names no screen.

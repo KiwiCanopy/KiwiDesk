@@ -152,16 +152,22 @@ extension SettingsRevertRegister {
                 \.autoTracks,
                 key: { SpaceID($0) }
             ),
-        .layoutAppBar(.monocleAppBarVisibility):
+        // A bar's own Show clears its areas' Show (#3517 ruling
+        // 32), so the two go back together.
+        .layoutAppBar(.monocleAppBarVisibility): .all([
             .leaf(\.settings.monocle.appBar.visibility),
+            .leaf(\.settings.appBarStyle.visibilityOverride),
+        ]),
         .layoutAppBar(.monocleAppBarActiveIndicator):
             .leaf(\.settings.monocle.appBar.activeIndicator),
         .layoutAppBar(.monocleAppBarTitleCap):
             .leaf(\.settings.monocle.appBar.titleCap),
         .layoutAppBar(.monocleAppBarGroupAdjacentWindows):
             .leaf(\.settings.monocle.appBar.groupAdjacentWindows),
-        .layoutAppBar(.scrollingAppBarVisibility):
+        .layoutAppBar(.scrollingAppBarVisibility): .all([
             .leaf(\.settings.scrolling.appBar.visibility),
+            .leaf(\.settings.appBarStyle.visibilityOverride),
+        ]),
         .layoutAppBar(.scrollingAppBarActiveIndicator):
             .leaf(\.settings.scrolling.appBar.activeIndicator),
         .layoutAppBar(.scrollingAppBarTitleCap):
@@ -169,8 +175,12 @@ extension SettingsRevertRegister {
         .layoutAppBar(.scrollingAppBarGroupAdjacentWindows):
             .leaf(\.settings.scrolling.appBar.groupAdjacentWindows),
         .spaceBar(.spaceBarReserve): .leaf(\.settings.spaceBarStyle.reserve),
-        .spaceBar(.spaceBarVisibility):
+        // A bar's own Show clears its areas' Show (#3517 ruling
+        // 32), so the two go back together.
+        .spaceBar(.spaceBarVisibility): .all([
             .leaf(\.settings.spaceBarStyle.visibility),
+            .leaf(\.settings.spaceBarStyle.visibilityOverride),
+        ]),
         .spaceBar(.spaceBarActiveIndicator):
             .leaf(\.settings.spaceBarStyle.activeIndicator),
         .spaceBar(.spaceBarHideEmpty):

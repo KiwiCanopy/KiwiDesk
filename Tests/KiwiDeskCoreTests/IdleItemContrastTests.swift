@@ -127,7 +127,7 @@ struct IdleItemContrastTests {
         let manager = SpaceBarManager()
         let painted = paintedSpaceBar(front: nil, spaces: 3)
         let bar = SpaceBarManager.Bar(
-            display: painted.display,
+            placement: PlacementID(display: painted.display, area: 0),
             items: painted.items.map { item in
                 SpaceBarOverlay.Item(
                     space: item.space ?? SpaceID("1"),

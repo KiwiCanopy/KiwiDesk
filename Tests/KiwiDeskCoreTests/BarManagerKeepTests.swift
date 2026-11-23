@@ -15,7 +15,7 @@ struct BarManagerKeepTests {
     func appBarKeeps() throws {
         let apps = AppBarManager()
         let bar = AppBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             space: SpaceID("1"),
             items: [AppBarOverlay.Item(id: WindowID(1), text: "A", icon: nil)],
             activeIndex: nil,

@@ -33,7 +33,7 @@ struct SpaceBarStripHoldTests {
 
     private func bar(_ items: [SpaceBarOverlay.Item]) -> SpaceBarManager.Bar {
         SpaceBarManager.Bar(
-            display: display,
+            placement: PlacementID(display: display, area: 0),
             items: items,
             strip: CGRect(x: 0, y: 0, width: 800, height: 32),
             style: SpaceBarLook(),
@@ -111,7 +111,7 @@ struct SpaceBarStripHoldTests {
         let other = DisplayID(8)
         var second = bar([item(one)])
         second = SpaceBarManager.Bar(
-            display: other,
+            placement: PlacementID(display: other, area: 0),
             items: second.items,
             strip: second.strip,
             style: second.style,

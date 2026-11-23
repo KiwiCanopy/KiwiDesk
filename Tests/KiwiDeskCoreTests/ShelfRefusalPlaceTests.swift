@@ -36,14 +36,17 @@ struct ShelfRefusalPlaceTests {
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
         #expect(core.focusedWindowID == nil)
-        let place = try #require(core.refusalPlace(of: .app, on: display.id))
+        let area = try #require(
+            core.state.workspaces.leadPlacement(of: display.id)
+        )
+        let place = try #require(core.refusalPlace(of: .app, on: area))
         #expect(place.edge == .bottom)
         #expect(place.strip.height == 0)
         let visible = GeometryUtils.axVisibleFrame(of: screen)
         #expect(place.strip.minY == visible.maxY)
         // The Space Bar's refusal stands beside its own shown shelf.
         let spaceBar = try #require(
-            core.refusalPlace(of: .space, on: display.id)
+            core.refusalPlace(of: .space, on: area)
         )
         #expect(spaceBar.edge == .top)
         #expect(spaceBar.strip.height > 0)
@@ -66,9 +69,10 @@ struct ShelfRefusalPlaceTests {
             core.state.workspaces.currentSpace(on: display.id)
         )
         core.state.workspaces.setMode(space, .monocle)
-        #expect(
-            core.emptyRefusal(.app, on: display.id) == .nothingToShow(.app)
+        let area = try #require(
+            core.state.workspaces.leadPlacement(of: display.id)
         )
+        #expect(core.emptyRefusal(.app, on: area) == .nothingToShow(.app))
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -79,7 +83,7 @@ struct ShelfRefusalPlaceTests {
                 )
             )
         )
-        #expect(core.emptyRefusal(.app, on: display.id) == nil)
+        #expect(core.emptyRefusal(.app, on: area) == nil)
     }
 
     /// A shelf stood down for what is in front is why nothing shows,

@@ -98,7 +98,10 @@ struct ShelfKeyRevealHandlesTests {
         core.updateBars()
         return Rig(
             core: core,
-            shelf: ShelfManager.Key(display: display.id, edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display.id, area: 0),
+                edge: .top
+            ),
             timers: timers,
             pointer: pointer
         )

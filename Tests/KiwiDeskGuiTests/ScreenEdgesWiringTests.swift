@@ -42,7 +42,8 @@ struct ScreenEdgesWiringTests {
         // The drawer asks for its own bar, once.
         #expect(
             count(
-                "privatevaroffered:Bool{model.offersScreenEdges(bar)}",
+                "privatevaroffered:Bool{"
+                    + "model.offersScreenEdges(bar,show:show)}",
                 in: drawer
             ) == 1
         )
@@ -59,7 +60,8 @@ struct ScreenEdgesWiringTests {
         )
         #expect(
             count(
-                "ForEach(model.screenEdgeRows(bar)){rowinscreenRow(row)}}"
+                "ForEach(model.screenEdgeRows(bar,show:show)){"
+                    + "rowinscreenRow(row)}}"
                     + ".modifier(GreyOut(active:!offered))",
                 in: drawer
             ) == 1
@@ -99,14 +101,23 @@ struct ScreenEdgesWiringTests {
     @Test("a drawer held open greys its chevron")
     func lockedDrawersGreyTheirChevron() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
-        #expect(count("locked:edgesSplit", in: card) == 1)
+        #expect(count("locked:edgesHeldOpen", in: card) == 1)
+        #expect(
+            count(
+                "varedgesHeldOpen:Bool{edgesSplit"
+                    + "||model.hasScreenShows(.space)"
+                    + "||model.hasScreenShows(.app)}",
+                in: card
+            ) == 1
+        )
         let drawer = try squashed(Self.bars + "Bars/ScreenEdgesDrawer.swift")
         #expect(count("locked:locked", in: drawer) == 1)
         // Held open exactly while its bar's screens differ.
         #expect(
             count(
                 "privatevarlocked:Bool{"
-                    + "model.config.settings[keyPath:bar].screensDiffer}",
+                    + "model.config.settings[keyPath:bar].screensDiffer"
+                    + "||show.map(model.hasScreenShows)==true}",
                 in: drawer
             ) == 1
         )

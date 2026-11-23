@@ -221,7 +221,7 @@ struct SpaceBarGlyphCellTests {
         style.thickness = Self.depth
         style.showFrontApp = true
         let bar = SpaceBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             items: [
                 SpaceBarOverlay.Item(
                     space: SpaceID("1"),

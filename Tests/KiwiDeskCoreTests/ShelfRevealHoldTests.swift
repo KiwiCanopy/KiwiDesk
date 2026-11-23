@@ -12,11 +12,17 @@ import Testing
 @MainActor
 struct ShelfRevealHoldTests {
     private static let key = ShelfRevealer.Key(
-        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        shelf: ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .top
+        ),
         bar: .space
     )
     private static let other = ShelfRevealer.Key(
-        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        shelf: ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .top
+        ),
         bar: .app
     )
     private static let target = ShelfRevealer.Target.along(

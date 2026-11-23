@@ -163,7 +163,10 @@ extension KiwiCore {
             guard ProfileManager.strip(wanted, from: &holder) != nil
             else { continue }
             holder.settings.keepScreenEdges(
-                in: screenEdgeScope(monitorSets: holder.monitorSets)
+                in: screenEdgeScope(
+                    monitorSets: holder.monitorSets,
+                    splits: holder.settings.displayAreas
+                )
             )
             try profiles.write(holder)
             holders.append(holder.name)

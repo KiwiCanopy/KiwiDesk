@@ -50,8 +50,10 @@ enum BarsRowOrder {
     static let kiwishelfEdges: [SettingKey] = [
         .kiwishelf(.spaceBarEdge),
         .kiwishelf(.spaceBarScreenEdge),
+        .kiwishelf(.spaceBarScreenVisibility),
         .kiwishelf(.appBarEdge),
         .kiwishelf(.appBarScreenEdge),
+        .kiwishelf(.appBarScreenVisibility),
         .kiwishelf(.pocketEdge),
         .kiwishelf(.pocketScreenEdge),
         .kiwishelf(.pocketPosition),

@@ -57,7 +57,7 @@ struct BarMenuViewTests {
         )
         manager.sync([
             SpaceBarManager.Bar(
-                display: display,
+                placement: PlacementID(display: display, area: 0),
                 items: [item],
                 strip: CGRect(x: 0, y: 0, width: 800, height: 32),
                 style: SpaceBarLook(),
@@ -218,7 +218,7 @@ struct BarMenuViewTests {
         manager.contextMenus = menus
         manager.sync([
             SpaceBarManager.Bar(
-                display: display,
+                placement: PlacementID(display: display, area: 0),
                 items: [
                     SpaceBarOverlay.Item(
                         space: one,

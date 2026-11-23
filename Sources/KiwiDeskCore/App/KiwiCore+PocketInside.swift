@@ -77,12 +77,14 @@ extension KiwiCore {
         in plans: [ShelfPlan],
         edge: AppBarEdge,
         hiding: (ShelfManager.Key) -> Bool,
-        display: DisplayID
+        placement: PlacementID
     ) -> CGRect? {
         plans.first {
             $0.edge == edge
                 && ($0.drawsAny
-                    || hiding(ShelfManager.Key(display: display, edge: edge)))
+                    || hiding(
+                        ShelfManager.Key(placement: placement, edge: edge)
+                    ))
         }?.strip
     }
 }

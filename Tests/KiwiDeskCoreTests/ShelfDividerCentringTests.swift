@@ -167,7 +167,7 @@ struct ShelfDividerCentringTests {
         let shelves = ShelfManager()
         shelves.sync([
             .init(
-                display: Self.display,
+                placement: PlacementID(display: Self.display, area: 0),
                 edge: c.edge,
                 strip: strip,
                 shelf: shelf,

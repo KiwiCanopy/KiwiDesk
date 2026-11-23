@@ -79,7 +79,10 @@ struct ShelfRevealVerbPairTests {
                     core.execute("\(bar).toggle_reveal", args: []).isSuccess
                 )
             }
-            let shelf = ShelfManager.Key(display: display, edge: .top)
+            let shelf = ShelfManager.Key(
+                placement: PlacementID(display: display, area: 0),
+                edge: .top
+            )
             for bar in [ShelfBar.space, .app] {
                 #expect(
                     core.shelves.reveal.reveal(

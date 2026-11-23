@@ -53,7 +53,10 @@ struct ShelfRevealPinCarryTests {
 
     private func appKey(_ display: DisplayID) -> ShelfRevealer.Key {
         .init(
-            shelf: ShelfManager.Key(display: display, edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display, area: 0),
+                edge: .top
+            ),
             bar: .app
         )
     }
@@ -90,7 +93,10 @@ struct ShelfRevealPinCarryTests {
 
     @Test("a kept pin leaves no sibling standing aside")
     func keptPinYieldsNothing() {
-        let shelf = ShelfManager.Key(display: DisplayID(1), edge: .top)
+        let shelf = ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .top
+        )
         let app = ShelfRevealer.Key(shelf: shelf, bar: .app)
         let space = ShelfRevealer.Key(shelf: shelf, bar: .space)
         let target = ShelfRevealer.Target.hidden(
@@ -120,7 +126,10 @@ struct ShelfRevealPinCarryTests {
     @Test("a timed pin kept off screen ends at its timeout")
     func keptTimedPinEnds() {
         let key = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: DisplayID(1), area: 0),
+                edge: .top
+            ),
             bar: .app
         )
         let target = ShelfRevealer.Target.hidden(
@@ -154,11 +163,17 @@ struct ShelfRevealPinCarryTests {
     func movedBarDropsThePin() {
         let display = DisplayID(1)
         let top = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display, edge: .top),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display, area: 0),
+                edge: .top
+            ),
             bar: .app
         )
         let bottom = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: display, edge: .bottom),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: display, area: 0),
+                edge: .bottom
+            ),
             bar: .app
         )
         let target = ShelfRevealer.Target.hidden(

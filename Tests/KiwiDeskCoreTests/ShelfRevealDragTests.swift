@@ -45,11 +45,17 @@ struct ShelfRevealDragTests {
         height: 800
     )
     private static let space = ShelfRevealer.Key(
-        shelf: ShelfManager.Key(display: DisplayID(1), edge: .top),
+        shelf: ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .top
+        ),
         bar: .space
     )
     private static let app = ShelfRevealer.Key(
-        shelf: ShelfManager.Key(display: DisplayID(1), edge: .bottom),
+        shelf: ShelfManager.Key(
+            placement: PlacementID(display: DisplayID(1), area: 0),
+            edge: .bottom
+        ),
         bar: .app
     )
     /// The Space Bar's shelf flush with the screen's top.

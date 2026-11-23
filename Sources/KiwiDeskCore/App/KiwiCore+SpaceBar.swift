@@ -17,13 +17,13 @@ extension KiwiCore {
         }
     }
 
-    /// One display's bar in the segment the shelf gives it
-    /// (#1517). The front app hides while an App Bar shows or rests
-    /// as a handle on the display, on its edge or another (#1731,
+    /// One area's bar in the segment the shelf gives it (#1517,
+    /// #3517). The front app hides while an App Bar shows or rests
+    /// as a handle in the area, on its edge or another (#1731,
     /// #3359): that bar already names every window.
     func placedSpaceBar(
         _ items: [SpaceBarOverlay.Item],
-        display: DisplayID,
+        placement: PlacementID,
         plan: ShelfPlan,
         appBarShows: Bool,
         style: SpaceBarLook
@@ -33,9 +33,13 @@ extension KiwiCore {
         placed.alignment = slot.alignment
         let front =
             appBarShows
-            ? nil : frontApp(display: display, style: style)
+            ? nil
+            : frontApp(
+                showing: state.workspaces.activeSpace(on: placement),
+                style: style
+            )
         return SpaceBarManager.Bar(
-            display: display,
+            placement: placement,
             items: items,
             frontApp: front?.app,
             frontWindow: front?.window,
@@ -88,13 +92,23 @@ extension KiwiCore {
         display: DisplayID,
         style: SpaceBarLook
     ) -> (window: WindowID, app: SpaceBarItemView.App)? {
+        // SHOWN, not focused (#1214): the segment names what this
+        // screen is displaying, which is the question this read
+        // answers.
+        frontApp(
+            showing: state.workspaces.currentSpace(on: display),
+            style: style
+        )
+    }
+
+    /// The segment for `shown`, the Space a screen or one of its
+    /// areas shows (#3517).
+    func frontApp(
+        showing shown: SpaceID?,
+        style: SpaceBarLook
+    ) -> (window: WindowID, app: SpaceBarItemView.App)? {
         guard style.showFrontApp,
-            // SHOWN, not focused (#1214): the segment names
-            // what this screen is displaying, which is the
-            // question this read answers.
-            let current = state.workspaces.currentSpace(
-                on: display
-            ),
+            let current = shown,
             let space = state.workspaces[current],
             let focused = space.focused
         else { return nil }

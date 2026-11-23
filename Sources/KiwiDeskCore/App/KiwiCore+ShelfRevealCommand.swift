@@ -5,8 +5,8 @@ import AppKit
 /// (#2567).
 extension KiwiCore {
     /// `space_bar.toggle_reveal` / `app_bar.toggle_reveal` (#761):
-    /// shows or hides the bar on the screen the active Space lays
-    /// out on, over the windows, and only that bar. A shelf stood
+    /// shows or hides the bar of the area the active Space lays
+    /// out in (#3517), over the windows, and only that bar. A shelf stood
     /// down for what is in front is refused first (#2775); a bar set
     /// to `always` is refused with a pill on the bar, since it is
     /// already shown; the App Bar is refused where the active
@@ -14,25 +14,27 @@ extension KiwiCore {
     func shelfRevealCommand(_ bar: ShelfBar) -> CommandResponse {
         let name = bar == .space ? "Space Bar" : "App Bar"
         let workspaces = state.workspaces
+        // The area the active Space lays out in (#3517).
         guard let space = workspaces.activeSpace,
-            let display = workspaces.display(of: space)
+            let placement = workspaces.placement(of: space)
         else { return .fail("the \(name) draws on no screen here") }
+        let display = placement.display
         // Asked before the layout and the setting: a window filling
         // the screen is why nothing shows, whatever those say (#2775).
         if shelfStandsDown(on: display) {
-            cueRevealRefusal(.standsDown(bar), display: display)
+            cueRevealRefusal(.standsDown(bar), placement: placement)
             return .fail("bars stay hidden while a window fills the screen")
         }
         let mode = workspaces[space]?.mode ?? .bsp
         // A tiling-off Space's bars read Hidden here (#3151).
-        let settings = shelfSettings(on: display)
+        let settings = shelfSettings(on: placement)
         guard bar == .space || settings.appBarVisibility(in: mode) != nil
         else {
-            cueRevealRefusal(.noAppBarHere, display: display)
+            cueRevealRefusal(.noAppBarHere, placement: placement)
             return .fail("no App Bar in this layout")
         }
         guard settings.revealActionLive(bar, in: mode) else {
-            cueRevealRefusal(.alwaysShown(bar), display: display)
+            cueRevealRefusal(.alwaysShown(bar), placement: placement)
             return .fail("the \(name) is set to always")
         }
         // The edge's own fold answers whether the bar hides here: an
@@ -40,18 +42,18 @@ extension KiwiCore {
         if settings.autoReadsAlways(
             bar,
             in: mode,
-            on: screenFingerprint(of: display)
+            on: areaKey(of: placement)
         ) {
-            cueRevealRefusal(.shownBesideAlways(bar), display: display)
+            cueRevealRefusal(.shownBesideAlways(bar), placement: placement)
             return .fail("the \(name) is shown beside an always bar")
         }
         guard
             let key = shelves.reveal.targets.keys.first(where: {
-                $0.shelf.display == display && $0.bar == bar
+                $0.shelf.placement == placement && $0.bar == bar
             })
         else {
-            if let refusal = emptyRefusal(bar, on: display) {
-                cueRevealRefusal(refusal, display: display)
+            if let refusal = emptyRefusal(bar, on: placement) {
+                cueRevealRefusal(refusal, placement: placement)
             }
             return .fail("the \(name) has nothing to show here")
         }
@@ -66,13 +68,13 @@ extension KiwiCore {
     /// stood down is answered before this is asked (#2775).
     func emptyRefusal(
         _ bar: ShelfBar,
-        on display: DisplayID
+        on placement: PlacementID
     ) -> RevealRefusal? {
         let live = tiler.settings
         let empty =
             bar == .app
-            ? appBarContent(on: display, settings: live) == nil
-            : spaceBarContent(on: display, style: live.spaceBarLook)
+            ? appBarContent(on: placement, settings: live) == nil
+            : spaceBarContent(on: placement, style: live.spaceBarLook)
                 == nil
         return empty ? .nothingToShow(bar) : nil
     }

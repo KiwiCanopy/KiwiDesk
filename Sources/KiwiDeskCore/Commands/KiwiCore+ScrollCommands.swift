@@ -72,7 +72,7 @@ extension KiwiCore {
         return applyBarOverride(
             field: field,
             args,
-            into: &tiler.settings.scrolling.appBar
+            into: .scrolling
         )
     }
 

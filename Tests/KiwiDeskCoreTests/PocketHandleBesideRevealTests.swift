@@ -32,7 +32,10 @@ struct PocketHandleBesideRevealTests {
         core.shelves.reveal.onChange = { [weak core] in core?.updateBars() }
         core.updateBars()
         let bar = ShelfRevealer.Key(
-            shelf: ShelfManager.Key(display: rig.display, edge: .left),
+            shelf: ShelfManager.Key(
+                placement: PlacementID(display: rig.display, area: 0),
+                edge: .left
+            ),
             bar: .space
         )
         return (rig, bar)

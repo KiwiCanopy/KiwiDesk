@@ -39,8 +39,10 @@ extension KiwiCore {
             ).first,
             let bar = placedBar(
                 app,
-                display: screen.kiwiDisplayID
-                    ?? PositionalDisplays.liveMainID,
+                placement: state.workspaces.placementOrWhole(
+                    of: screen.kiwiDisplayID
+                        ?? PositionalDisplays.liveMainID
+                ),
                 plan: plan
             )
         else { return [] }
@@ -50,14 +52,14 @@ extension KiwiCore {
     /// Assembles one display's bar in its shelf segment.
     func placedBar(
         _ app: AppBarContent,
-        display: DisplayID,
+        placement: PlacementID,
         plan: ShelfPlan
     ) -> AppBarManager.Bar? {
         guard let slot = plan.arrangement.app else { return nil }
         var style = app.style
         style.alignment = slot.alignment
         return AppBarManager.Bar(
-            display: display,
+            placement: placement,
             space: app.space.id,
             items: app.items,
             activeIndex: appBarActiveIndex(of: app),

@@ -12,8 +12,11 @@ enum SpaceBarCommandSetting {
     /// screen resolved to its fingerprint. It needs the screens a
     /// write judges, so `apply(to:)` writes nothing for it and
     /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
-    /// among:)` with `screenEdgeScope(monitorSets:)`.
+    /// among:)` with `screenEdgeScope(monitorSets:splits:)`.
     case screenEdge(AppBarEdge, screen: String)
+    /// `set_visibility(value, screen)` — one area's visibility
+    /// (#3517), the screen resolved to its area key.
+    case screenVisibility(ShelfVisibility, screen: String)
     case glyphSpan(Int)
     case glyphGap(CGFloat)
     case groupAdjacentWindows(Bool)
@@ -79,8 +82,11 @@ enum SpaceBarCommandSetting {
                 } ?? .edge(parsed.edge)
             }
         case "visibility":
-            return BarSettingChoice.value(args, ShelfVisibility.self)
-                .map(Self.visibility)
+            return BarSettingChoice.visibility(args).map { parsed in
+                parsed.screen.map {
+                    .screenVisibility(parsed.value, screen: $0)
+                } ?? .visibility(parsed.value)
+            }
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -198,7 +204,9 @@ enum SpaceBarCommandSetting {
     func apply(to style: inout SpaceBarStyle) {
         switch self {
         case .reserve(let value): style.reserve = value
-        case .visibility(let value): style.visibility = value
+        case .visibility(let value): style.setVisibility(value)
+        case .screenVisibility(let value, let screen):
+            style.setVisibility(value, on: screen)
         case .edge(let value): style.setEdge(value)
         case .screenEdge: break
         case .glyphSpan(let value): style.glyphSpan = value

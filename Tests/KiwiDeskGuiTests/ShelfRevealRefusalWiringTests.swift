@@ -31,7 +31,7 @@ struct ShelfRevealRefusalWiringTests {
         let body = try Self.body
         // The empty pill is `emptyRefusal`'s verdict (its behaviour is
         // `ShelfRefusalPlaceTests` ▸ `emptyRefusalAsksTheContent`).
-        #expect(body.contains("emptyRefusal(bar, on: display)"))
+        #expect(body.contains("emptyRefusal(bar, on: placement)"))
         #expect(body.contains("has nothing to show here"))
         // A stood-down shelf is asked first, so its missing target
         // never reads as an empty bar.
@@ -39,7 +39,7 @@ struct ShelfRevealRefusalWiringTests {
             body.range(of: "shelfStandsDown(on: display)")
         )
         let empty = try #require(
-            body.range(of: "emptyRefusal(bar, on: display)")
+            body.range(of: "emptyRefusal(bar, on: placement)")
         )
         #expect(standDown.lowerBound < empty.lowerBound)
     }

@@ -255,11 +255,10 @@ struct ScreenEdgeVerbTests {
     @Test("A layout refuses a screen edge naming app_bar.set_edge")
     func layoutRefusalNamesTheVerb() {
         let core = makeTestCore()
-        var bar = LayoutAppBar()
         let response = core.applyBarOverride(
             field: "edge_override",
             [.string("left")],
-            into: &bar
+            into: .monocle
         )
         #expect(!response.isSuccess)
         #expect(

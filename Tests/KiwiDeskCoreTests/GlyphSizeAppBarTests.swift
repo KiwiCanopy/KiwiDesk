@@ -126,7 +126,7 @@ struct GlyphSizeAppBarTests {
     @Test("A rendered App Bar item keeps the full depth")
     func renderedItemKeepsDepth() throws {
         let bar = AppBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             space: SpaceID("1"),
             items: (1...3).map { appBarItem(UInt32($0), text: "W\($0)") },
             activeIndex: 0,
@@ -149,7 +149,7 @@ struct GlyphSizeAppBarTests {
     func countFollowsContent() throws {
         let look = Self.look()
         let bar = AppBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             space: SpaceID("1"),
             items: (1...60).map { appBarItem(UInt32($0), text: "W\($0)") },
             activeIndex: 0,

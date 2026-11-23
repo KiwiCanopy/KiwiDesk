@@ -43,6 +43,8 @@ struct AnnouncedValueTests {
         // A Space row's scope menu (#3341).
         "AppRuleSpaceRow+Scope.swift": 1,
         "AppRuleFloatRow.swift": 1,
+        // #3517: a Per screen row's Show menu, named for its area.
+        "ScreenEdgesDrawer.swift": 1,
         // A lens app's All windows / Windows titled… menu (#2103).
         "KiwiVisionLensAppsCard.swift": 1,
         // #1393: the trash that asks where a shared rule goes.

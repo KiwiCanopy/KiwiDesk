@@ -102,7 +102,7 @@ struct ReduceTransparencyTests {
         style.backgroundStyle = .boxed
         style.liquidGlass = true
         let bar = AppBarManager.Bar(
-            display: barTitleDisplay,
+            placement: PlacementID(display: barTitleDisplay, area: 0),
             space: SpaceID("1"),
             items: [appBarItem(1, text: "One")],
             activeIndex: 0,
@@ -147,7 +147,10 @@ struct ReduceTransparencyTests {
                 shelf.liquidGlass = true
                 shelves.sync([
                     .init(
-                        display: barTitleDisplay,
+                        placement: PlacementID(
+                            display: barTitleDisplay,
+                            area: 0
+                        ),
                         edge: .top,
                         strip: barTitleStrip,
                         shelf: shelf,
