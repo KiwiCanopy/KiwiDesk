@@ -14548,16 +14548,20 @@ reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
 **KiwiHub's Shortcuts side lifts those rows out instead**, into
-an Unavailable shortcuts band at the end of its column (owner
-ruling 2026-10-16). The reason Settings keeps them in place is
-that Settings is an editor: a row stays where its catalog puts
-it so it can be rebound there. The hub is a read-only list of
-what a key does now, so a group that mixes working keys with
-keys that do nothing answers its one question wrongly. The band
-is not the Inactive one, for the first reason above — its
-caption promises the key still fires — and it takes the caption
-Settings puts over the same rows, so both surfaces say the same
-thing about them.
+an Unavailable shortcuts band after every section, full width,
+shown only while a search matches its rows (owner ruling
+2026-10-16, amended 2026-11-23 for #3570). The reason Settings
+keeps them in place is that Settings is an editor: a row stays
+where its catalog puts it so it can be rebound there. The hub is
+a read-only list of what a key does now, so a group that mixes
+working keys with keys that do nothing answers its one question
+wrongly. The band is not the Inactive one, for the first reason
+above — its caption promises the key still fires — and it takes
+the caption Settings puts over the same rows, so both surfaces
+say the same thing about them. With nothing typed the band is
+not drawn: a glance at what the keys do now has no use for keys
+that do nothing here, and a search that names one still finds
+it, below the matching rows that work.
 
 **Config presence expands the surface.** A first-week Settings
 is not a smaller product, it is a smaller *offer*. Anything
@@ -16543,7 +16547,9 @@ title on one line, and the openers are listed elsewhere too: on
 the Simple page, in the welcome tour and in the shortcut recorder.
 So the chord that links a key to its side above is shown on
 demand rather than printed. The panel's ceiling rises from 452 to
-488 pt on every side, for the Desktops side's two screen rows.
+488 pt on every side, for the Desktops side's two screen rows — a
+ceiling for Windows and View alone since #3570 (▸ the shortcuts
+sheet entry's amendment).
 
 **The key panel never takes activation, so there is none to
 hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
@@ -16603,6 +16609,76 @@ only where → or Tab would accept it, which here they never do.
 and the Windows list past its nine rows, fade the edge that cuts
 them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
+
+:::unreleased
+*Amended (#3570, owner with ui-designer, 2026-11-23; field row by
+Amendment 4): the fixed 720 pt width becomes a field row that rides
+the panel's edges, and the one ceiling becomes a ceiling per side.*
+The search field is pinned to the panel's leading edge and the side
+switch to its trailing edge, each at the rows' inset, the space
+between them stretching: on a 720 pt side that is the old row, and
+on a wide side the search field lines up with the first column,
+where a 720 pt row held in the middle of a wider panel lined up with
+nothing below it. Nothing in the row moves on its own: both ends
+take their place from the panel's frame, in the same glide as its
+width or the same single step under Reduce Motion, so the row never
+runs a motion the frame does not. ⇥ keeps the field itself, its
+focus and its caret, while the glide runs — a field rebuilt or
+re-focused mid-glide loses the place the user was typing in — and
+still clears the query, one per side (#2229); the selected tab
+changes on the key press, before the panel moves, and a click during
+the glide lands on the tab under the pointer. VoiceOver reads the
+search field, then the side switch. Windows and View keep 720 pt and
+the 488 pt ceiling, since a ranked list and three lines of chips
+gain nothing from width and a glance should stay compact. Desktops
+and Shortcuts are overviews — a screen per column, every bound key —
+and at 720 × 488 both scrolled on any real desk, which hides the
+very thing they exist to show; so both run down to 48 pt above the
+area's bottom before they scroll, and Shortcuts takes the width its
+columns ask, from 720 pt up to the area less 96 pt each side — a
+limit the Desktops side shares once its screens stand as columns
+(#3570 ▸ Ruling 4). What keeps them a panel rather than a window is
+everything but the size: the margins, no title bar, no resizing or
+dragging, and Esc. The panel is never lifted: its top, where the
+field stands, holds at `topFraction` on every side. Every limit is
+measured on the rect the panel opens in — a screen's clear area, or
+a screen area's (#3572) — never on `NSScreen` directly
+(`JumpPanelRoom`, `JumpPanelRoomTests`, `JumpFieldRowTests`).
+
+*Amended (#3570, owner and ui-designer, 2026-11-23): the one-column
+sheet becomes column-major columns.* One column still reads best
+while it fits, so the sheet stays one column until a single column
+would scroll past one screenful; then it takes as many columns as
+the area holds at a 400 pt pitch, at most three, so a MacBook's
+panel gets three and a long reference reads as a page rather than a
+scroll. A row keeps its label on one line, cut at its tail before a
+chord is, and each column reserves only the badge and chord widths
+its own rows need, so a column of short chords gives its labels the
+room. The width and the column count are set when the side opens, on
+⇥ or its shortcut, and typing never changes either: a panel that
+narrows and regrows under each keystroke moves the very rows being
+read, so the filtered rows rebalance across the same columns, and
+only the height follows the results, gliding with its top held as
+Spotlight's does. The fill is column-major and may break at any row,
+the next column repeating the section's title in tertiary ink, at
+the breaks that make the tallest column shortest and, among those,
+the columns most even, the extra rows of an uneven split in the
+earlier columns, so heights never rise left to right and no column
+ends early beside a long one; breaking only before a title left one
+long section alone at full height. Unavailable shortcuts is never
+split: shown only while a search matches it, it closes the sheet
+across its whole width below the columns (▸ *KiwiHub's Shortcuts
+side lifts those rows out instead*). VoiceOver reads each column as
+one group, down a column and on to the next, and the full-width
+section last. The keys stay a reference sheet's (ui-designer,
+2026-11-23): ↑ ↓ and the Page keys scroll the one shared scroll
+view, ← → stay with the field's text, and nothing is selected. A
+highlighted row on a Mac promises that ↩ acts, the other sides carry
+a selection only because they act on it, and VoiceOver already moves
+row by row, so a read cursor added for column-hopping would teach
+the wrong thing (`ShortcutsColumnPlanTests`,
+`ShortcutsColumnKeysTests`).
+:::
 
 **An Apps row says its action in its title** (#3448, owner on
 ui-designer's recommendation, 2026-11-18). A key set to gather or
@@ -16852,8 +16928,8 @@ side for its search alone. The layout, the profile and KiwiVision
 are the three things a user changes through the day, and a status
 menu can reach them only with the pointer, so the third side
 widened to hold all three and took the name View. It stayed one
-side rather than becoming a fourth: the side switch shares a row
-with the search field in a panel of fixed width, and the three
+side rather than becoming a fourth: the side switch shares the
+fixed field row with the search field, and the three
 answer one question, how the desk looks now.
 
 Each group is one line that never wraps, so ↑ and ↓ always mean
@@ -16878,6 +16954,16 @@ instead of the side being stepped past, because the other two
 lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
+
+:::unreleased
+*Amended (#3570 ▸ Ruling 6): the Profile line shows only
+with two or more profiles.* With one profile the line offered a
+switch to where the user already is, and a third line to step past
+on every ↓; Save as New Profile… leaves with it, the Settings
+Profiles page being where a second profile is made. The
+look picker stays its own full-screen surface (#3038), never a
+fourth line.
+:::
 
 **The Desktops side is KiwiHub's overview of the whole desk (#1229,
 owner ruling 2026-11-01).** The Space Bar answers what is on the
@@ -18125,6 +18211,17 @@ than one way — two directions running the same action — wears one
 badge, drawn without a direction, since either arrow alone would
 be half the truth. A search that names a gesture brings its badge
 to the front, so a hit never matches a gesture the row hides.
+
+:::unreleased
+*Amended (#3570, ui-designer, 2026-11-23): the badge and chord
+columns are measured per column of the sheet, and a section with no
+keyboard chord keeps no chord slot and no divider, so its badges
+align to the column's right edge* (`ShortcutSectionChordSlotTests`).
+*Amended (owner, 2026-11-23): gestures that run one command with no
+row of keys to sit on share one Gestures row wearing every badge, as
+a keyed row does, so a command appears once*
+(`ShortcutGestureBadgeTests`).
+:::
 
 **A multi-finger swipe also fires on a quick flick, decided at
 the release (#1873).** macOS takes a quick, short swipe as a whole

@@ -68,6 +68,39 @@ struct ShortcutGestureBadgeTests {
         #expect(group.rows.allSatisfy { $0.gestures.count == 1 })
     }
 
+    /// Two gestures that run one command, with no row of keys to
+    /// sit on, make one Gestures row wearing both badges, as a keyed
+    /// row does (owner, 2026-11-23).
+    @Test("a command two gestures reach is one Gestures row")
+    func oneRowPerCommand() throws {
+        let overview = LuaAction(lua: "kiwihub.show(\"desktops\")")
+        let built = build(
+            [
+                GestureKey(.tap4): .run(overview),
+                GestureKey(.swipe4, [.control]): .split(
+                    GestureSplit(axes: [:], arms: [.up: overview])
+                ),
+                GestureKey(.tap3): .run(LuaAction(lua: "kiwivision.toggle()")),
+            ],
+            rows: []
+        )
+        let group = try #require(built.groups.last)
+        #expect(group.rows.count == 2)
+        let merged = try #require(
+            group.rows.first { $0.gestures.count == 2 }
+        )
+        #expect(
+            Set(merged.gestures.map { $0.key.input })
+                == Set([GestureInput.tap4, .swipe4])
+        )
+        #expect(
+            merged.gestures
+                == merged.gestures.sorted(
+                    by: ShortcutGestureBadge.moreSpecific
+                )
+        )
+    }
+
     /// A binding a row badges is held there alone, never also left
     /// for the Gestures group.
     @Test("a badged binding is not left over")

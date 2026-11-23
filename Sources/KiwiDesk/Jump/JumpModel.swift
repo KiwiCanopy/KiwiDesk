@@ -14,7 +14,17 @@ final class JumpModel: ObservableObject {
     @Published var view: ViewPickList?
     /// The Shortcuts side's sheet, read fresh on each entry to it
     /// (#2246).
-    @Published var shortcuts: ShortcutsSheet?
+    @Published var shortcuts: ShortcutsSheet? {
+        didSet { planShortcuts() }
+    }
+    /// How the sheet lays out in the room the panel opened in
+    /// (#3570 ▸ Ruling 5).
+    @Published var shortcutColumns = ShortcutsColumnPlan.empty
+    /// The Shortcuts side's column count, set by the first plan
+    /// after the side opens and held while typing; nil until then.
+    var shortcutCount: Int?
+    /// The scroll the Shortcuts side's keys last asked for.
+    @Published var sheetScroll = SheetScroll()
     /// The Desktops side's reading and selection, read fresh on
     /// each entry to it (#1229).
     @Published var desktops: DesktopsState?
@@ -24,8 +34,6 @@ final class JumpModel: ObservableObject {
     /// and what swells for a beat (#3170).
     @Published var desktopsRefusal: String?
     @Published var desktopsSwell: DesktopsSwell?
-    /// The scroll the Shortcuts side's keys last asked for.
-    @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
     /// ⌥ previews Swap here (#2885).
@@ -109,11 +117,15 @@ final class JumpModel: ObservableObject {
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
     let rowCap: Int
-    /// The tallest the Shortcuts side's sheet stands, from the
-    /// screen it opens on (`JumpPanelController.sheetCap`).
+    /// Where the panel opens: each side's width and height limits
+    /// (#3570).
+    let room: JumpPanelRoom
+    /// The tallest a growing side's content stands between the
+    /// field and the footer: `JumpPanelController.sheetCap(in:_:)`
+    /// over `room` unless a test pins it.
     let sheetCap: CGFloat
-    /// The panel's width on that screen
-    /// (`JumpPanelController.width`).
+    /// The field row's width, every side's least width:
+    /// `room.fieldWidth` unless a test pins it.
     let panelWidth: CGFloat
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
@@ -174,8 +186,12 @@ final class JumpModel: ObservableObject {
         snapshot: JumpSnapshot,
         icons: [pid_t: NSImage],
         rowCap: Int,
-        sheetCap: CGFloat = 400,
-        panelWidth: CGFloat = JumpPanelView.width,
+        room: JumpPanelRoom = JumpPanelController.room(
+            visible: JumpPanelController.fallbackVisible,
+            area: JumpPanelController.fallbackVisible
+        ),
+        sheetCap: CGFloat? = nil,
+        panelWidth: CGFloat? = nil,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -183,8 +199,10 @@ final class JumpModel: ObservableObject {
         lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
-        self.sheetCap = sheetCap
-        self.panelWidth = panelWidth
+        self.room = room
+        self.sheetCap =
+            sheetCap ?? JumpPanelController.sheetCap(in: room, .grows)
+        self.panelWidth = panelWidth ?? room.fieldWidth
         noteModifiers(modifiers)
     }
 
@@ -232,6 +250,8 @@ final class JumpModel: ObservableObject {
         naming = nil
         if scope == .view { view = loadView() }
         if scope == .shortcuts {
+            // Each entry sets the width and the columns afresh.
+            shortcutCount = nil
             shortcuts = ShortcutsSheet(reference: loadShortcuts())
         }
         // ⇥ or a side switch discards a carry (#1229).

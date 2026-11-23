@@ -13,6 +13,8 @@ extension JumpModel {
             fresh.select(selected.pick)
         }
         view = fresh
+        // The panel sizes only through its refit (#3570).
+        onResultsChange()
     }
 
     func setViewQuery(_ query: String) {

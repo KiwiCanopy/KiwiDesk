@@ -83,7 +83,7 @@ struct FadingColumnTests {
             #expect(source.occurrences(of: "ScrollView(") == 0)
         }
         // The Windows list takes the same column (#3249).
-        let panel = try read("JumpPanelView.swift")
+        let panel = try read("JumpPanelView+List.swift")
         #expect(
             panel.contains(
                 "FadingColumn(selected:model.list.selection,"

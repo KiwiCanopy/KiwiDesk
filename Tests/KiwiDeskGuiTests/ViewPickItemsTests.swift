@@ -5,7 +5,8 @@ import Testing
 @testable import KiwiDesk
 
 /// What the View side's lines hold (#2309 rulings 2 and 9, #2359):
-/// the Profile line always, ending in Save as New Profile…, a broken
+/// the Profile line from two profiles on, ending in Save as New
+/// Profile… (#3570 ▸ Ruling 6), a broken
 /// profile greyed with its reason, KiwiVision's current state
 /// marked, and every chip greyed while KiwiDesk boots.
 @Suite("View picker items", .serialized)
@@ -40,10 +41,11 @@ struct ViewPickItemsTests {
         )
     }
 
-    /// The Profile line always shows, ending in Save as New
-    /// Profile… — alone where nothing is saved (#2359 ruling 3,
-    /// amending #2309 ruling 2).
-    @Test("Profile always shows, ending in Save as New Profile…")
+    /// The Profile line ends in Save as New Profile… (#2359 ruling
+    /// 3), and shows only with two or more profiles to switch
+    /// between (#3570 ▸ Ruling 6); ↑ ↓ then step from Layout
+    /// straight to KiwiVision.
+    @Test("Profile shows from two profiles, ending in the save chip")
     func profileLineEndsInTheSaveChip() {
         LocalizationManager.shared.select("en")
         let all = items()[.profile] ?? []
@@ -54,13 +56,23 @@ struct ViewPickItemsTests {
             ]
         )
         #expect(all.last?.name == "Save as New Profile…")
-        let none = items(profiles: (nil, [], []))
-        #expect(none[.profile]?.map(\.pick) == [.newProfile])
-        #expect(
-            ViewPickList(layout: layout, kiwiVisionOn: false, items: none)
-                .lines
-                == [.layout, .profile, .vision]
-        )
+        let two = items(profiles: ("Laptop", ["Laptop", "Studio"], []))
+        #expect(two[.profile]?.count == 3)
+        for few in [[], ["Laptop"]] {
+            let lines = items(profiles: (few.first, few, []))
+            #expect(lines[.profile] == nil, "\(few)")
+            var list = ViewPickList(
+                layout: layout,
+                kiwiVisionOn: false,
+                items: lines
+            )
+            #expect(list.lines == [.layout, .vision])
+            #expect(list.selection?.line == .layout)
+            list.moveLine(1)
+            #expect(list.selection?.line == .vision, "\(few)")
+            list.moveLine(-1)
+            #expect(list.selection?.line == .layout, "\(few)")
+        }
     }
 
     @Test("a broken profile is greyed with its reason")

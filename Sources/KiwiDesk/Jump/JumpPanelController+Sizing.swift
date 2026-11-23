@@ -2,8 +2,9 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiHub's size (#1875 ▸ Panel): one fixed ceiling on every
-/// side, the panel following each side's content beneath it.
+/// KiwiHub's size (#1875 ▸ Panel, #3570): a fixed field row, and
+/// a ceiling per side (`JumpPanelRoom`) the panel follows each
+/// side's content beneath.
 extension JumpPanelController {
     /// The Windows list's room, in rows: nine, the numbered reach,
     /// section headers drawn inside it (#2309).
@@ -14,7 +15,8 @@ extension JumpPanelController {
     /// may stand, read by its width, its place and the Shortcuts
     /// sheet's cap (#2246). `NSScreen.visibleFrame` leaves the shelf
     /// in. A top strip is ignored: the field stands below it at
-    /// `topFraction`.
+    /// `topFraction`. A caller fitting one screen area hands that
+    /// area's rect as `visible` (#3572).
     static func clearArea(
         visible: CGRect,
         shelves: [ShelfFrame]
@@ -40,22 +42,15 @@ extension JumpPanelController {
         return area
     }
 
-    /// The Shortcuts side's tallest sheet: the panel runs from its
-    /// field down to 40 pt above the clear area's bottom, never
-    /// taller than `maxPanelHeight`, less the field and the footer
-    /// row (#2246).
-    static func sheetCap(visible: CGRect, area: CGRect) -> CGFloat {
-        let top = visible.maxY - visible.height * topFraction
-        let below = top - area.minY - 40
-        return max(min(below, maxPanelHeight) - shortcutsChrome, 200)
+    /// The tallest sheet between the field and the footer row on a
+    /// `fit` side: a compact side's 488 pt ceiling, or a growing
+    /// side's run to 48 pt above the area's bottom (#2246, #3570).
+    static func sheetCap(
+        in room: JumpPanelRoom,
+        _ fit: JumpPanelRoom.Fit
+    ) -> CGFloat {
+        max(room.height(fit) - shortcutsChrome, 200)
     }
-
-    /// The tallest the panel stands on any side: compact, as
-    /// Spotlight is, the Shortcuts sheet scrolling past it (#2309).
-    /// Room for the Windows side's nine rows under the footer row;
-    /// raised from 452 for #1229's Desktops side (owner ruling
-    /// 2026-11-01).
-    static let maxPanelHeight: CGFloat = 488
 
     /// What the Shortcuts side draws besides its sheet: the field,
     /// the footer row and their two dividers.
@@ -66,12 +61,6 @@ extension JumpPanelController {
             )
     }
 
-    /// The panel's width: `JumpPanelView.width`, kept 40 pt clear
-    /// of each edge of a narrower screen.
-    static func width(visibleWidth: CGFloat) -> CGFloat {
-        min(JumpPanelView.width, visibleWidth - 80)
-    }
-
     /// Where the panel's top — its field — sits: Spotlight's, so
     /// the field lands where a search field is looked for and the
     /// list grows down from it (#2229). Measured on macOS 27:
@@ -80,42 +69,45 @@ extension JumpPanelController {
     /// whether it scales or holds a fixed offset is unmeasured.
     static let topFraction: CGFloat = 0.257
 
-    /// The panel's origin on `visible`: centred across, its top at
-    /// `topFraction`, and lifted where a tall panel would run past
-    /// the bottom.
-    static func origin(
-        size: CGSize,
-        visible: CGRect,
-        area: CGRect? = nil
-    ) -> CGPoint {
-        let area = area ?? visible
-        let top = visible.maxY - visible.height * topFraction
-        let bottom = max(top - size.height, area.minY)
-        return CGPoint(x: area.midX - size.width / 2, y: bottom)
+    /// The visible frame assumed when no screen is under the pointer.
+    static let fallbackVisible = CGRect(x: 0, y: 0, width: 1440, height: 900)
+
+    /// The room the panel fits on `visible`, cut to `area`.
+    static func room(visible: CGRect, area: CGRect) -> JumpPanelRoom {
+        JumpPanelRoom(visible: visible, area: area, topFraction: topFraction)
     }
 
-    /// Fits the panel to its list, keeping the top edge where it
-    /// is so the field stays under the user's eyes; a scope switch
-    /// glides there (#2229), at once under Reduce Motion.
+    /// Fits the panel to its side around `anchor`, the field row's
+    /// centre and top as the opening placed them, so the field row
+    /// never moves whatever AppKit did to the frame meanwhile; a
+    /// side switch glides the outer edges there (#2229, #3570), at
+    /// once under Reduce Motion.
     func refit(animated: Bool = false) {
         guard let panel, panel.isVisible,
             let content = panel.contentView
         else { return }
         content.layoutSubtreeIfNeeded()
-        let size = content.fittingSize
-        let top = panel.frame.maxY
-        let frame = NSRect(
-            x: panel.frame.minX,
-            y: top - size.height,
-            width: size.width,
-            height: size.height
+        let frame = JumpPanelRoom.frame(
+            of: content.fittingSize,
+            under: anchor
         )
+        // AppKit's own animated resize lays the content out at every
+        // step, so the field row rides the edges; the window's
+        // animator only moves the frame, and the content slid in
+        // from its bottom edge (#3570, owner on device 2026-11-23).
         panel.setFrame(
             frame,
             display: true,
             animate: animated && !presence.reduceMotion
         )
     }
+
+    /// What KiwiHub's hosting view manages: its intrinsic size alone,
+    /// which `fittingSize` reads, never the window's min and max
+    /// size, with which AppKit grew the window ahead of the refit, a
+    /// second jump per change (#3570). An empty set reads a zero
+    /// `fittingSize`, which opens the panel at no size at all.
+    static let hostingSizing: NSHostingSizingOptions = [.intrinsicContentSize]
 
     /// Each app's icon, read once per opening.
     static func icons(

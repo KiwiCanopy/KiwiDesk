@@ -10,8 +10,9 @@ struct SheetScroll: Equatable {
 }
 
 /// The Shortcuts side of the key panel (#2246): its keys, its
-/// query and the scroll its keys drive. Read-only, so ↩ and the
-/// ⌘ numbers do nothing here.
+/// query, the scroll its keys drive and its column plan (#3570 ▸
+/// Ruling 5). A reference sheet: no selection, so ↩ and the ⌘
+/// numbers do nothing here, and ← → stay with the field's text.
 extension JumpModel {
     /// Re-reads the sheet, keeping the query.
     func reloadShortcuts() {
@@ -55,6 +56,59 @@ extension JumpModel {
             serial: sheetScroll.serial + 1,
             lines: lines,
             pages: pages
+        )
+    }
+
+    /// Lays the sheet out again for what it shows now: across the
+    /// column count the side opened with, which the first plan after
+    /// entering sets and typing never changes (#3570 ▸ Ruling 5).
+    func planShortcuts() {
+        guard let sheet = shortcuts, let shown = sheet.shown,
+            !shown.isEmpty
+        else {
+            shortcutColumns = .empty
+            return
+        }
+        let all = ShortcutsSheetView.sections(shown, needle: sheet.needle)
+        let flowing = all.filter { !$0.closes }
+        func planned(
+            _ sections: [ShortcutsSheetView.Section],
+            at width: CGFloat
+        ) -> [ShortcutsColumnPlan.Section] {
+            sections.map {
+                ShortcutsSheetView.planned(
+                    $0,
+                    needle: sheet.needle,
+                    width: width
+                )
+            }
+        }
+        let inset = JumpShortcutsView.kiwiHubInset
+        let column =
+            ShortcutsColumnPlan.columnPitch - ShortcutsSheetView.columnGap
+        // One column is judged as it draws: at the field row's
+        // width, the closing section with it.
+        let single = room.fieldWidth - 2 * inset
+        let count =
+            shortcutCount
+            ?? ShortcutsColumnPlan.count(
+                single: planned(flowing, at: single),
+                closing: planned(all.filter(\.closes), at: single)
+                    .map(\.height).reduce(0, +),
+                cap: sheetCap - 2 * JumpShortcutsView.kiwiHubVerticalInset,
+                limit: ShortcutsColumnPlan.columnsFitting(
+                    room.widest,
+                    inset: inset,
+                    gap: ShortcutsSheetView.columnGap
+                )
+            )
+        shortcutCount = count
+        shortcutColumns = ShortcutsColumnPlan(
+            sections: planned(
+                flowing,
+                at: count > 1 ? column : single
+            ),
+            columns: count
         )
     }
 

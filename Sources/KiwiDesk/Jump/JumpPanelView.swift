@@ -10,18 +10,23 @@ struct JumpPanelView: View {
     @ObservedObject var model: JumpModel
     /// This opening, which the entrance and the fade out read.
     let presence: PanelPresence
-    /// The panel's width on its screen, from the controller.
+    /// The panel's least width on its screen, from the controller:
+    /// a compact side's, and the field row's there (#3570).
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
     @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
-    /// The key panels' scale (#2229 ▸ shared panel style).
-    static let width: CGFloat = 720
+    /// The key panels' scale (#2229 ▸ shared panel style): the
+    /// field row's width (#3570).
+    static let width = JumpPanelRoom.fieldWidth
     static let fieldHeight: CGFloat = 44
     /// The scope switch's cross-fade; the refit waits it out.
     static let scopeFade: TimeInterval = 0.12
     static let headerHeight: CGFloat = 26
+    /// The field row's inset at each end of the panel, the same as a
+    /// row's and the Shortcuts sheet's (#3570 ▸ Amendment 4).
+    static let fieldInset = KeyPanelStyle.selectionInset + JumpRowView.padding
     static let listPadding: CGFloat = 6
 
     var body: some View {
@@ -30,15 +35,26 @@ struct JumpPanelView: View {
         VStack(spacing: 0) { side }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(JumpScope.panelName)
-            // The field stays put; only what is below it changes.
+            // The side cross-fades as one stack; the field row moves
+            // only when the window's frame does, which the refit
+            // changes after this fade (#3570).
             .animation(
                 reduceMotion
                     ? nil : .easeInOut(duration: Self.scopeFade),
                 value: model.scope
             )
-            .frame(maxHeight: .infinity, alignment: .top)
+            // minHeight 0: a side taller than the window overflows
+            // down, never centred up past the top (#3570).
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
             .panelContentFade(presence)
-            .frame(width: width)
+            // The side's own width, which the window glides to on ⇥;
+            // the field row rides the window's edges, so it moves
+            // only with the frame (#3570 ▸ Amendment 4).
+            .frame(
+                minWidth: width,
+                idealWidth: max(model.sideWidth, width),
+                maxWidth: .infinity
+            )
             .tint(SettingsTheme.accent)
             .panelGlassChrome(
                 in: KeyPanelStyle.shape,
@@ -56,7 +72,10 @@ struct JumpPanelView: View {
             field
             namingCaption
             PanelDivider()
-            scopeContent
+            // The side keeps its own width but lays out in the
+            // window's, so the field row spans the window as it is,
+            // never the side's width ahead of the glide (#3570).
+            scopeContent.frame(minWidth: 0, maxWidth: .infinity)
             PanelDivider()
             footer
         }
@@ -94,15 +113,17 @@ struct JumpPanelView: View {
             .accessibilityHint(namingLine ?? "")
             JumpScopeSwitch(model: model)
         }
-        // The glyph keeps the row icons' leading edge: the
-        // selection's inset plus the row's own padding.
-        .padding(
-            .horizontal,
-            KeyPanelStyle.selectionInset + JumpRowView.padding
-        )
+        // The glyph keeps the row icons' leading edge, and the first
+        // column's: the selection's inset plus the row's own padding.
+        // The row spans the panel, the switch at its trailing edge.
+        .padding(.horizontal, Self.fieldInset)
+        .frame(maxWidth: .infinity)
         .frame(height: Self.fieldHeight)
         .onAppear { fieldFocused = true }
         .onChange(of: model.fieldFocusRequests) { fieldFocused = true }
+        // A click on the switch may take the focus back; on ⇥ the
+        // field already has it, so the write changes nothing and the
+        // caret stays.
         .onChange(of: model.scope) { fieldFocused = true }
         .onChange(of: model.fieldSelectAllRequests) { selectFieldText() }
     }
@@ -118,7 +139,9 @@ struct JumpPanelView: View {
         }
     }
 
-    /// One scope at a time, cross-faded in place.
+    /// One scope at a time, cross-faded in place, each at its own
+    /// side's width, centred: the window's edges glide to it, and no
+    /// side is laid out at another's width meanwhile (#3570).
     @ViewBuilder private var scopeContent: some View {
         ZStack(alignment: .top) {
             if model.scope == .windows {
@@ -130,14 +153,17 @@ struct JumpPanelView: View {
                     }
                     results
                 }
+                .frame(width: model.sideWidth(for: .windows))
                 .transition(.opacity)
             } else if model.scope == .shortcuts, let sheet = model.shortcuts {
                 JumpShortcutsView(
                     sheet: sheet,
                     scroll: model.sheetScroll,
+                    plan: model.shortcutColumns,
                     maxHeight: model.sheetCap,
                     fades: true
                 )
+                .frame(width: model.sideWidth(for: .shortcuts))
                 .transition(.opacity)
             } else if model.scope == .desktops, let state = model.desktops {
                 DesktopsSideView(
@@ -169,6 +195,7 @@ struct JumpPanelView: View {
                     )
                 )
                 .environment(\.desktopsSwell, model.desktopsSwell)
+                .frame(width: model.sideWidth(for: .desktops))
                 .transition(.opacity)
             } else if let view = model.view {
                 JumpViewSide(
@@ -182,154 +209,9 @@ struct JumpPanelView: View {
                     },
                     onHoverEnd: { model.endHover(.item($0)) }
                 )
+                .frame(width: model.sideWidth(for: .view))
                 .transition(.opacity)
             }
         }
-    }
-
-    @ViewBuilder private var results: some View {
-        if model.list.drawnRows == 0 {
-            Text(model.emptyText)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .frame(height: JumpRowView.height)
-                .padding(.vertical, Self.listPadding)
-        } else {
-            // Its edges fade where rows run past them, the side's one
-            // cue that it scrolls (#3249).
-            FadingColumn(
-                selected: model.list.selection,
-                ids: Array(model.list.results.indices),
-                inset: Self.listPadding
-            ) {
-                VStack(spacing: 0) {
-                    // Greyed and never a row the keys reach.
-                    if let yours = model.list.yours {
-                        JumpYoursLine(
-                            entry: yours,
-                            icon: model.icons[yours.pid]
-                        )
-                    }
-                    rows
-                }
-                .padding(.horizontal, KeyPanelStyle.selectionInset)
-            }
-            .frame(height: listHeight)
-        }
-    }
-
-    private var rows: some View {
-        let list = model.list
-        let here = JumpRowText.here(of: list.snapshot)
-        let acted = JumpHover.actedRow(
-            hover: model.hover,
-            selection: list.selection
-        )
-        // Eager: a lazy stack left a row below the fold unbuilt, so
-        // the selection's scroll found no row to reach.
-        return VStack(spacing: 0) {
-            ForEach(
-                Array(list.results.enumerated()),
-                id: \.offset
-            ) { index, match in
-                // One scroll target with its header, so a selection
-                // landing on a section's first row brings the header
-                // into view with it.
-                VStack(spacing: 0) {
-                    if let section = list.section(at: index) {
-                        sectionHeader(section)
-                    }
-                    row(
-                        index,
-                        match,
-                        here: here,
-                        acted: acted
-                    )
-                }
-                .id(index)
-            }
-        }
-    }
-
-    private func row(
-        _ index: Int,
-        _ match: JumpSearch.Match,
-        here: JumpRowText.Place?,
-        acted: Int?
-    ) -> some View {
-        let list = model.list
-        let entry = match.entry
-        // A trade inside one Space, or with a window not here, has
-        // no route to here to draw.
-        let snapshot = list.snapshot
-        let trades =
-            entry.swapsHere && snapshot.swapsInHere
-            && entry.space != snapshot.here
-        return JumpRowView(
-            match: match,
-            icon: model.icons[match.entry.pid],
-            isSelected: index == list.selection,
-            isLifted: JumpHover.lifts(
-                .row(index),
-                hover: model.hover,
-                selected: index == list.selection,
-                clickable: true
-            ),
-            ownsShift: index == acted,
-            ownsOption: index == acted,
-            number: JumpList.number(ofRow: index),
-            commandHeld: model.commandHeld,
-            shiftHeld: model.shiftHeld,
-            optionHeld: model.optionHeld,
-            wayHere: entry.movesHere && here != nil ? here : nil,
-            waySwap: trades ? here : nil,
-            refusal: JumpRowRefusal(entry: entry),
-            pulsing: model.refusedRow == index,
-            revealed: model.revealedRow == index,
-            onActivate: { pick in
-                model.clickRow(index, pick: pick)
-            },
-            pickModifiers: { model.pickModifiers(NSEvent.modifierFlags) },
-            onHover: {
-                model.hoverRow(index, pointer: model.currentPointer())
-            },
-            onHoverEnd: { model.endHover(.row(index)) }
-        )
-    }
-
-    private func sectionHeader(_ section: JumpList.Section) -> some View {
-        Text(JumpRowText.header(section))
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .accessibilityAddTraits(.isHeader)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, JumpRowView.padding)
-            .padding(.bottom, 3)
-            .frame(height: Self.headerHeight, alignment: .bottom)
-    }
-
-    /// The list's height: what its rows take, up to `rowCap` rows.
-    private var listHeight: CGFloat {
-        Self.listHeight(
-            rows: model.list.drawnRows,
-            headers: model.list.sectionCount,
-            rowCap: model.rowCap
-        )
-    }
-
-    private static func content(rows: Int, headers: Int) -> CGFloat {
-        CGFloat(rows) * JumpRowView.height
-            + CGFloat(headers) * headerHeight
-    }
-
-    static func listHeight(
-        rows: Int,
-        headers: Int,
-        rowCap: Int
-    ) -> CGFloat {
-        let cap = CGFloat(rowCap) * JumpRowView.height
-        return min(content(rows: rows, headers: headers), cap)
-            + 2 * listPadding
     }
 }
