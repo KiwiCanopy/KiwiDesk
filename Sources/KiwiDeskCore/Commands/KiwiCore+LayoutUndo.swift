@@ -21,7 +21,6 @@ extension KiwiCore {
             return .fail("no active space")
         }
         // An enclosing bracket must not record this as a new step.
-        noteLayoutStepTaken()
         let word = stack == .undo ? "undo" : "redo"
         switch layoutHistory.history.candidate(stack, of: active) {
         case .empty:
@@ -42,10 +41,16 @@ extension KiwiCore {
                         + "history cleared"
                 )
             }
+            // An open step this undo runs inside records nothing.
+            noteLayoutStepTaken()
             // The move verb decides; a window it refused leaves its
-            // Space's members wrong, and nothing else is written.
-            moveBack(to)
+            // Space's members wrong, so the moves that landed go back
+            // and nothing else is written.
+            let moved = moveBack(to)
             guard membersMatch(to) else {
+                for (window, origin) in moved {
+                    moveWindow(window, to: origin, follow: false)
+                }
                 step.spaces.forEach { layoutHistory.history.clear($0) }
                 retile(animated: true)
                 return refuseLayoutStep(
@@ -66,14 +71,24 @@ extension KiwiCore {
     }
 
     /// Files each window `target` names back into its Space
-    /// through the move verb, which owns every refusal.
-    private func moveBack(_ target: [SpaceID: SpaceArrangement]) {
+    /// through the move verb, which owns every refusal, and answers
+    /// the windows that moved with the Space each left.
+    private func moveBack(
+        _ target: [SpaceID: SpaceArrangement]
+    ) -> [(WindowID, SpaceID)] {
+        var moved: [(WindowID, SpaceID)] = []
         for (space, arrangement) in target {
-            for window in arrangement.windows
-            where state.workspaces.space(of: window) != space {
+            for window in arrangement.windows {
+                guard let origin = state.workspaces.space(of: window),
+                    origin != space
+                else { continue }
                 moveWindow(window, to: space, follow: false)
+                if state.workspaces.space(of: window) == space {
+                    moved.append((window, origin))
+                }
             }
         }
+        return moved
     }
 
     /// Whether every Space `target` names holds its members now.

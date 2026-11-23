@@ -33,8 +33,15 @@ final class LayoutHistoryLedger {
     /// The last key fire's label and stamp, which its glide takes,
     /// so the hold merges into the press whatever the repeat delay.
     var lastFire = (label: "", at: Date.distantPast)
+    /// Counts gestures, so two drags or reorders inside the quiet
+    /// gap stay two steps.
+    private var gestureCount = 0
 
-    var isOpen: Bool { pending != nil }
+    /// A label no earlier gesture shared: `base` and a count.
+    func gestureLabel(_ base: String) -> String {
+        gestureCount += 1
+        return "\(base) \(gestureCount)"
+    }
 
     /// Raises the open step's disposition to at least `answer`.
     func raise(_ answer: Disposition) {
@@ -102,7 +109,7 @@ extension KiwiCore {
     func beginLayoutGesture(_ window: WindowID) {
         let owner = LayoutHistoryLedger.Owner.gesture(window)
         guard !layoutHistory.owners.contains(owner) else { return }
-        openStep("drag", at: wallClock())
+        openStep(layoutHistory.gestureLabel("drag"), at: wallClock())
         layoutHistory.owners.insert(owner)
     }
 

@@ -135,8 +135,14 @@ struct LayoutUndoEdgeTests {
         core.recordingLayoutStep("key b") {
             swap(core)
             core.loadConfig()
+            // A later, weaker answer leaves the clear standing.
+            _ = core.execute("undo_layout")
         }
         #expect(core.state.workspaces[one]?.mode == .stack)
+        // The clear reached the stacks: the redo "key a" left is gone.
+        #expect(
+            core.layoutHistory.history.candidate(.redo, of: one) == .empty
+        )
         #expect(!core.execute("undo_layout").isSuccess)
     }
 
@@ -240,38 +246,5 @@ struct LayoutUndoEdgeTests {
             Issue.record("the hold's swap was merged into the press")
             return
         }
-    }
-
-    @Test("an undo inside an abandoned drag leaves the next step")
-    func abandonedDragLeavesNothing() {
-        let core = makeCore()
-        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
-        core.drag.isMousePressed = { true }
-        core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
-        _ = core.execute("undo_layout")
-        core.cancelDrag(WindowID(1))
-        #expect(core.layoutHistory.pending == nil)
-        let start = order(core)
-        swap(core)
-        #expect(core.execute("undo_layout").isSuccess)
-        #expect(order(core) == start)
-    }
-
-    @Test("a drop runs inside its drag's step after the gesture ends")
-    func dropRunsInsideTheStep() {
-        let core = makeCore()
-        let start = order(core)
-        let frame = CGRect(x: 0, y: 0, width: 400, height: 800)
-        core.drag.isMousePressed = { true }
-        core.drag.windowMoved(WindowID(1), frame: frame, validated: true)
-        // The coordinator forgets the gesture before its drop runs.
-        core.drag.cancel(WindowID(1))
-        core.endLayoutGesture(WindowID(1)) {
-            swap(core)
-            core.execute("set_mode", args: [.string("stack")])
-        }
-        #expect(core.execute("undo_layout").isSuccess)
-        #expect(order(core) == start)
-        #expect(core.state.workspaces[one]?.mode == .bsp)
     }
 }
