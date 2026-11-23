@@ -107,6 +107,7 @@ keybinding.open_settings
 keybinding.pocket
 keybinding.pocket_list
 keybinding.pocket_window
+keybinding.redo_layout
 keybinding.reset_sizes
 keybinding.show_shortcuts
 keybinding.shrink_height
@@ -117,6 +118,7 @@ keybinding.toggle_kiwivision
 keybinding.toggle_space_bar
 keybinding.toggle_sticky
 keybinding.toggle_tiling
+keybinding.undo_layout
 profile.isDefault
 settings.animations (master)
 settings.animations.onExpand

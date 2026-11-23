@@ -743,7 +743,7 @@ every lens with why it cannot turn on.
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `undo_layout` | takes back the active space's last arrangement change; fails with the reason when there is none or the space changed since |
 | | `redo_layout` | makes the change `undo_layout` took back again |
-| | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
+| | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill, or to a refused `undo_layout` |
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
 | | `set_space_transition` | `slide` (default) \| `show` \| `none` — how an explicit Space switch other than the scroll step shows itself: the plate slide, a plate naming the Space, or nothing |
 | | `set_space_scroll_transition` | `slide` (default) \| `show` \| `none` — how the scroll Space step shows itself |

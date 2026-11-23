@@ -108,7 +108,7 @@ extension KiwiCore {
     /// floating windows keep their positions in the flat array.
     /// One layout undo step (#3515).
     func moveBarItem(space id: SpaceID, from: Int, to: Int) {
-        recordingLayoutStep("app_bar") {
+        recordingLayoutStep("bar reorder") {
             reorderBarItem(space: id, from: from, to: to)
         }
     }

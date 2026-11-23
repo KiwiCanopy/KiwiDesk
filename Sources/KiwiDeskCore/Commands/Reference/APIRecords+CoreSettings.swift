@@ -63,12 +63,11 @@ extension APIReference {
             .space("space", optional: true)
         ),
         "undo_layout": APIRecord(
-            "Takes back the last change to the active Space's "
-                + "layout: a swap, move, resize or drag."
+            "Takes back the active Space's last layout change: "
+                + "a swap, move, resize, layout switch or drag."
         ),
         "redo_layout": APIRecord(
-            "Makes the arrangement change undo_layout took back "
-                + "again."
+            "Makes the change `undo_layout` took back again."
         ),
         "set_refusal_sound": APIRecord(
             "Also plays an alert sound whenever a blocked "

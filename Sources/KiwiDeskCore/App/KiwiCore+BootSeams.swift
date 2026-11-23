@@ -83,10 +83,6 @@ extension KiwiCore {
         // A key no step holds: the panel stays, and the sound is a
         // panel's refusal, off by default (#1871 ▸ unbound step key).
         keys.beep = { [weak self] in self?.soundPanelRefusal() }
-        keys.fireScope = { [weak self] label, fire in
-            guard let self else { return fire() }
-            self.recordingLayoutStep(label, fire)
-        }
         mouse.onLeftMouseDown = { [weak self] point, origin in
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
             // A click on a window a lens holds clears it (#2103).

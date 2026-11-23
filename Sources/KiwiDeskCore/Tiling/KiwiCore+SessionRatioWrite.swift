@@ -24,8 +24,16 @@ extension KiwiCore {
     /// shows — else the one shared entry (no SkyLight, a screen no
     /// switch has filed yet, ruling 3) — and its `sizingOwner`.
     private func sizingKey(of space: SpaceID) -> SessionSizingKey {
+        sizingKey(of: space, shown: shownDesktop(of: space))
+    }
+
+    /// `sizingKey(of:)` with the Desktop already read.
+    private func sizingKey(
+        of space: SpaceID,
+        shown: ShownDesktop
+    ) -> SessionSizingKey {
         let owner = sizingOwner(of: space)
-        guard case .shown(let desktop) = shownDesktop(of: space) else {
+        guard case .shown(let desktop) = shown else {
             return SessionSizingKey(desktop: nil, arrangement: owner)
         }
         return SessionSizingKey(desktop: desktop, arrangement: owner)
@@ -68,13 +76,7 @@ extension KiwiCore {
             let desktop =
                 shown[display] ?? shownDesktop(onDisplay: display)
             shown[display] = desktop
-            // `sizingKey(of:)`'s rule, with the Desktop read shared.
-            var native: SkyLight.SpaceID?
-            if case .shown(let id) = desktop { native = id }
-            let key = SessionSizingKey(
-                desktop: native,
-                arrangement: sizingOwner(of: space.id)
-            )
+            let key = sizingKey(of: space.id, shown: desktop)
             out[space.id] = SpaceSizing(
                 key: key,
                 ratios: sizes(at: key)[space.id] ?? SessionRatios()

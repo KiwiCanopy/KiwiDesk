@@ -92,6 +92,37 @@ struct LayoutUndoStacksTests {
         stacks.clear(one)
         // Space 2 keeps only the step above the linked one.
         #expect(undoCount(stacks, two) == 1)
+        var after = stacks
+        if case .ready(let top) = after.candidate(.undo, of: two) {
+            after.take(top, from: .undo)
+        }
+        #expect(after.candidate(.undo, of: two) == .empty)
+    }
+
+    @Test("a cut cascades through a linked step below it")
+    func cutCascades() {
+        let three = SpaceID("3")
+        var stacks = LayoutUndoStacks()
+        record(&stacks, [two: ([5], []), three: ([], [5])], label: "far")
+        record(&stacks, [one: ([1], []), two: ([], [1])], label: "m")
+        stacks.clear(one)
+        #expect(stacks.candidate(.undo, of: two) == .empty)
+        #expect(stacks.candidate(.undo, of: three) == .empty)
+    }
+
+    @Test("a new change clears the redo of the Spaces it names")
+    func recordClearsRedo() {
+        var stacks = LayoutUndoStacks()
+        record(&stacks, [one: ([1, 2], [2, 1])])
+        guard case .ready(let step) = stacks.candidate(.undo, of: one)
+        else {
+            Issue.record("no step")
+            return
+        }
+        stacks.take(step, from: .undo)
+        #expect(stacks.candidate(.redo, of: one) == .ready(step))
+        record(&stacks, [one: ([1, 2], [1, 3, 2])], label: "b", at: 5)
+        #expect(stacks.candidate(.redo, of: one) == .empty)
     }
 
     @Test("a linked step not on top of a partner is blocked")

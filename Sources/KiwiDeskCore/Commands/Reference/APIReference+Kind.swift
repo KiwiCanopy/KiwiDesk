@@ -80,8 +80,7 @@ extension APIReference {
 
     /// The entry's kind: its exception row, else its name's.
     public static func kind(of entry: APIEntry) -> APIKind {
-        kindExceptions[entry.qualifiedName]
-            ?? derivedKind(of: entry.name)
+        kind(ofName: entry.qualifiedName)
     }
 
     /// The kind of a command as `execute` is handed it, its

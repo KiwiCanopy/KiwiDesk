@@ -101,10 +101,9 @@ struct LayoutUndoTests {
         #expect(core.layoutHistory.history.candidate(.undo, of: one) == .empty)
     }
 
-    @Test("nothing to undo refuses, and a query records nothing")
+    @Test("nothing to undo or redo refuses")
     func emptyRefuses() {
         let core = makeCore()
-        _ = core.execute("get_state")
         #expect(!core.execute("undo_layout").isSuccess)
         #expect(!core.execute("redo_layout").isSuccess)
     }
@@ -129,11 +128,51 @@ struct LayoutUndoTests {
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(one, core) == start)
         #expect(core.state.workspaces[one]?.mode == .bsp)
+        // One step, not one per command inside it.
+        #expect(
+            core.layoutHistory.history.candidate(.undo, of: one) == .empty
+        )
         core.recordingLayoutStep("key z") {
             core.execute("redo_layout")
         }
         #expect(core.state.workspaces[one]?.mode == .stack)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(core.state.workspaces[one]?.mode == .bsp)
+        // The redo inside "key z" recorded no step of its own.
+        #expect(
+            core.layoutHistory.history.candidate(.undo, of: one) == .empty
+        )
+    }
+
+    @Test("a step that changes members, or three Spaces, only clears")
+    func shapesThatClear() {
+        let core = makeCore()
+        let three = SpaceID("3")
+        core.state.workspaces.ensureSpace(three)
+        #expect(core.execute("swap", args: [.string("right")]).isSuccess)
+        core.recordingLayoutStep("open") {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(id: WindowID(7), pid: 1, appName: "A")
+                )
+            )
+        }
+        #expect(
+            core.layoutHistory.history.candidate(.undo, of: one) == .empty
+        )
+        #expect(core.execute("swap", args: [.string("left")]).isSuccess)
+        core.recordingLayoutStep("spread") {
+            core.state.workspaces.withSpace(one) {
+                $0.move(WindowID(1), to: 2)
+            }
+            core.state.workspaces.add(WindowID(2), to: two)
+            core.state.workspaces.add(WindowID(3), to: three)
+        }
+        for space in [one, two, three] {
+            #expect(
+                core.layoutHistory.history.candidate(.undo, of: space)
+                    == .empty
+            )
+        }
     }
 }

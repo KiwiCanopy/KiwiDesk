@@ -36,6 +36,8 @@ struct LayoutUndoDoorTests {
             )
         }
         core.state.workspaces.focus(WindowID(1), in: one)
+        // The fixture's own `set_mode` is no step under test.
+        core.layoutHistory.history = LayoutUndoStacks()
         return core
     }
 
@@ -87,10 +89,14 @@ struct LayoutUndoDoorTests {
         let start = order(core)
         core.keys.firePress(id: nil, label: "key x") {
             core.execute("swap", args: [.string("right")])
-            core.execute("swap", args: [.string("right")])
+            core.execute("set_mode", args: [.string("stack")])
         }
         #expect(order(core) != start)
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(core) == start)
+        #expect(core.state.workspaces[one]?.mode == .scrolling)
+        #expect(
+            core.layoutHistory.history.candidate(.undo, of: one) == .empty
+        )
     }
 }

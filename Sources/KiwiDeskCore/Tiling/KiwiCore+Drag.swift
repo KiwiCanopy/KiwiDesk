@@ -28,6 +28,9 @@ extension KiwiCore {
             }
             self?.endLayoutGesture(id)
         }
+        drag.onDragAbandon = { [weak self] id in
+            self?.abandonLayoutGesture(id)
+        }
         drag.isMousePressed = { [weak self] in
             self?.mouse.leftButtonHeld == true
         }

@@ -329,5 +329,7 @@ extension KiwiCore {
         rekeyTilingToggles(source, to: target)  // #3008
         rekeyStackFlips(source, to: target)  // #2771
         rekeySessionRatios(source, to: target, under: origin.arrangement)
+        // Its steps name the old id; they cannot validate (#3515).
+        layoutHistory.history.clear(source)
     }
 }

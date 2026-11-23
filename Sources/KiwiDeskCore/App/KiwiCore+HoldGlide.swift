@@ -14,6 +14,8 @@ extension KiwiCore {
         wireGlideFrames()
         wireGlideEnd()
         wireFireBegan()
+        // A fire and its glide are one undo step (#3515).
+        wireLayoutUndoScope()
     }
 
     /// The glide re-issues the PRESS's own command with a scaled
@@ -42,6 +44,7 @@ extension KiwiCore {
             // by the state machine around this call
             // (`HoldGlide.isApplyingGlideStep`), not here, so a
             // re-wiring cannot forget it.
+            self.beginLayoutGlide()  // #3515
             let response = self.execute(
                 command,
                 args: [.string(axis), .number(delta * scale)]
@@ -110,6 +113,7 @@ extension KiwiCore {
     private func wireGlideEnd() {
         keys.holdGlide.onGlideEnd = { [weak self] in
             self?.scheduleTrackZOrderRestoreIfOverflowing()
+            self?.endLayoutGlide()  // #3515
         }
     }
 

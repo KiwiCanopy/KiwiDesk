@@ -3,7 +3,15 @@ import Foundation
 /// init.lua loading and declarative config globals.
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
+    /// A load rewrites Spaces no user act chose, so it clears
+    /// their undo history rather than recording (#3515).
     public func loadConfig() {
+        recordingLayoutStep("config", undoable: false) {
+            loadConfigBody()
+        }
+    }
+
+    private func loadConfigBody() {
         // A load may move who owns the setup, which a lens's reach
         // reads (#2103 ruling 40).
         defer { liveProfileChanged() }

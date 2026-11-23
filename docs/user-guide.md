@@ -1012,7 +1012,6 @@ with** on the Spaces step, in place of a preset of that name.
 | Toggle KiwiVision | `⌃⌥V` |
 | Next / previous layout | `⌃⌥C` / `⌃⌥⇧C` |
 | Reset the space's sizes | `⌃⌥R` |
-| Undo / redo a layout change | `⌃⌥Z` / `⌃⌥⇧Z` |
 | Maximize the window | `⌃⌥M` |
 | Pocket this window | `⌃⌥P` |
 | Show / hide Space Bar, App Bar | `⌃⌥G`, `⌃⌥H` |
