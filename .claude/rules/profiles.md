@@ -2320,6 +2320,14 @@ red a String-typed map in `GuiConfig` that is neither handled nor
 classified with its reason; the first's header states what the
 scan cannot see.
 
+**A verb that writes `display_areas` while `init.lua` runs records
+it in `KiwiCore.luaAreaSplits` (#3573)**, as `set_display_areas`
+and `set_display_area_name` do, and stores a split only through
+`storeSplit`. The load's tail makes whole, once, after the profile
+re-apply, each screen the last load split and this one does not
+name; a write the ledger never saw stays split across every
+reload (`LuaAreaSplitReloadTests`).
+
 ## Vocabulary
 
 One vocabulary across Lua and profile JSON — see
