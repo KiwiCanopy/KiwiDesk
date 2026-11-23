@@ -275,6 +275,40 @@ struct JumpPanelShapeTests {
         #expect(!refit.contains("panel.frame.minX"))
     }
 
+    /// The panel sizes only through its refit, so every path that
+    /// reshapes a side's content asks for one (#3570).
+    @Test("every reshaping path refits")
+    func reshapesRefit() throws {
+        func body(_ file: String, _ after: String) throws -> String {
+            let text = SourceScan.stripComments(
+                try String(
+                    contentsOf: SourceScan.repoRoot(from: #filePath)
+                        .appendingPathComponent(
+                            "Sources/KiwiDesk/Jump/" + file
+                        ),
+                    encoding: .utf8
+                )
+            )
+            return try #require(
+                SourceScan.declarationBody(after: after, in: text)
+            )
+        }
+        for (file, after) in [
+            ("JumpModel+View.swift", "func reloadView()"),
+            ("JumpModel+Desktops.swift", "func reloadDesktops("),
+            ("JumpModel+Desktops.swift", "func refreshDesktops()"),
+        ] {
+            #expect(
+                try body(file, after).contains("onResultsChange()"),
+                "\(after)"
+            )
+        }
+        #expect(
+            try body("JumpPanelController.swift", "func settingsChanged(")
+                .contains("self?.refit()")
+        )
+    }
+
     @Test("the model reads its selection and held modifiers")
     func modelState() {
         let empty = JumpModel(

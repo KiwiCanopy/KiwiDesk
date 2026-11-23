@@ -1,17 +1,16 @@
 import CoreGraphics
 
 /// How the Shortcuts side lays its sections out (#3570 ▸ Ruling 5,
-/// as the ui-designer amended it on 2026-11-23). The column count is
-/// set when the side opens: one column while a single one fits the
-/// sheet's room, else the fewest columns that do, as many as the room
-/// holds at a 460 pt pitch and at most three. Typing never changes
-/// it; the filtered rows are rebalanced across the same columns. The
-/// fill is column-major and breaks only before a section title, at
-/// the breaks that make the tallest column shortest. A section taller
-/// than 1.25 × the even share may break at a row, and the next
-/// column repeats its title. VoiceOver reads down each column, then
-/// on to the next, and ↑ ↓ scroll the one shared scroll view. Pure:
-/// heights are estimated from the parts, never measured.
+/// as the owner and the ui-designer amended it on 2026-11-23). The
+/// column count is set when the side opens: one column while a
+/// single one fits the sheet's room, else as many as the room holds
+/// at a 400 pt pitch, at most three. Typing never changes it; the
+/// filtered rows are rebalanced across the same columns. The fill is
+/// column-major and may break at any row, the next column repeating
+/// the section's title, at the breaks that make the columns most
+/// even. VoiceOver reads down each column, then on to the next, and
+/// ↑ ↓ scroll the one shared scroll view. Pure: heights are
+/// estimated from the parts, never measured.
 struct ShortcutsColumnPlan: Equatable {
     /// One section's estimated parts.
     struct Section: Equatable {
@@ -39,15 +38,11 @@ struct ShortcutsColumnPlan: Equatable {
     /// Each column's pieces, in reading order; empty for no sheet.
     let columns: [[Piece]]
 
-    /// The pitch a column takes, its gap included: room for a row
-    /// with two chords to keep its whole label.
-    static let columnPitch: CGFloat = 460
+    /// The pitch a column takes, its gap included.
+    static let columnPitch: CGFloat = 400
     static let maxColumns = 3
     /// The room above every section but a column's first.
     static let sectionGap: CGFloat = 16
-    /// How much taller than the even share a section may stand
-    /// before it breaks at a row.
-    static let breakShare: CGFloat = 1.25
 
     /// No sheet drawn.
     static let empty = ShortcutsColumnPlan(columns: [])
@@ -84,24 +79,17 @@ struct ShortcutsColumnPlan: Equatable {
 
     /// The column count the side opens with, under a sheet `cap`
     /// tall: one while `single` — the sections as one column draws
-    /// them — fits, else the fewest of the `split` columns up to
-    /// `limit` whose tallest fits, else `limit`. `closing` is the
-    /// full-width section's height below the columns, 0 for none.
+    /// them — fits, else `limit`, the most the room holds. `closing`
+    /// is the full-width section's height below the columns, 0 for
+    /// none.
     static func count(
         single: [Section],
-        split: [Section],
         closing: CGFloat,
         cap: CGFloat,
         limit: Int
     ) -> Int {
         let room = cap - (closing > 0 ? closing + sectionGap : 0)
-        let whole = height(single.map(\.height))
-        guard whole > room, limit >= 2, !split.isEmpty else { return 1 }
-        for count in 2...limit
-        where balanced(split, into: count).tallest <= room {
-            return count
-        }
-        return limit
+        return height(single.map(\.height)) > room ? max(limit, 1) : 1
     }
 
     /// A column of whole sections, one gap between each two.

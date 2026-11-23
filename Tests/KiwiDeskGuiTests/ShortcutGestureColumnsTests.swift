@@ -246,20 +246,37 @@ struct ShortcutGestureColumnsTests {
         #expect(
             column.contains(
                 "ShortcutsColumnPlan.sectionGap)}}"
-                    + ".modifier(Self.chordColumns(rows))"
+                    + ".modifier(Self.chordColumns(sized?rows:nil))"
             )
         )
+        let plan = try flat("ShortcutsSheetView+Plan.swift")
         #expect(
-            sheet.contains(
+            plan.contains(
                 "ShortcutPanelColumns(badges:rows.contains{!$0.gestures"
                     + ".isEmpty},chords:rows.contains{!$0.combo.isEmpty})"
             )
         )
-        #expect(sheet.contains(".modifier(Self.chordColumns(section.rows))"))
+        // Several columns size each their own, the closing section
+        // its own; one column sizes every row as one, so its
+        // dividers share one x.
+        #expect(sheet.contains("letsingle=cut.count==1"))
+        #expect(sheet.contains("column(flowing,pieces,sized:!single)"))
+        #expect(
+            sheet.contains(
+                ".modifier(Self.chordColumns(single?nil:section.rows))"
+            )
+        )
+        #expect(
+            sheet.contains(
+                ".modifier(Self.chordColumns(single?(flowing+closing)"
+                    + ".flatMap(\\.rows):nil))"
+            )
+        )
         // VoiceOver reads a column whole before the next (#3570).
         #expect(
             sheet.contains(
-                "column(flowing,pieces).frame(maxWidth:.infinity,"
+                "column(flowing,pieces,sized:!single)"
+                    + ".frame(maxWidth:.infinity,"
                     + "alignment:.leading)"
                     + ".accessibilityElement(children:.contain)"
             )

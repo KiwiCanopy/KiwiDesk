@@ -91,12 +91,20 @@ extension JumpPanelController {
             of: content.fittingSize,
             under: anchor
         )
-        panel.setFrame(
-            frame,
-            display: true,
-            animate: animated && !presence.reduceMotion
-        )
+        guard animated, !presence.reduceMotion else {
+            panel.setFrame(frame, display: true)
+            return
+        }
+        // The animator glides without blocking the run loop, so a
+        // keystroke's glide never holds the next one (#3570).
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = Self.glide
+            panel.animator().setFrame(frame, display: true)
+        }
     }
+
+    /// A refit's glide, in seconds.
+    static let glide: TimeInterval = 0.18
 
     /// Each app's icon, read once per opening.
     static func icons(

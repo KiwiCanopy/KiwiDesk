@@ -1,11 +1,10 @@
 import CoreGraphics
 
-/// The balanced fill (#3570 ▸ Ruling 5b): the column-major cut whose
-/// tallest column is shortest, ties going to the most even cut, so
-/// no column is left short while another runs on.
+/// The balanced fill (#3570 ▸ Ruling 5): the column-major cut, at
+/// any row, whose tallest column is shortest, ties going to the most
+/// even cut, so no column is left short while another runs on.
 extension ShortcutsColumnPlan {
-    /// A run the cut may not split: a whole section, or one row of a
-    /// section taller than `breakShare` × the even share.
+    /// One row of a section: the cut breaks between any two.
     private struct Unit {
         let section: Int
         let rows: Range<Int>
@@ -19,13 +18,8 @@ extension ShortcutsColumnPlan {
         into count: Int
     ) -> (columns: [[Piece]], tallest: CGFloat) {
         guard !sections.isEmpty else { return ([], 0) }
-        let share = height(sections.map(\.height)) / CGFloat(count)
         let units = sections.enumerated().flatMap { index, section in
-            section.height > breakShare * share
-                ? (0..<section.rows).map {
-                    Unit(section: index, rows: $0..<$0 + 1)
-                }
-                : [Unit(section: index, rows: 0..<section.rows)]
+            (0..<section.rows).map { Unit(section: index, rows: $0..<$0 + 1) }
         }
         let runs = cut(units, sections, into: min(count, units.count))
         var columns = runs.map { pieces(units[$0]) }
@@ -46,9 +40,23 @@ extension ShortcutsColumnPlan {
             repeating: [CGFloat](repeating: 0, count: total + 1),
             count: total + 1
         )
+        // Each run's height grows by one row at a time, so the table
+        // costs one pass per start.
         for start in 0..<total {
+            var height: CGFloat = 0
+            var last: Int?
             for end in (start + 1)...total {
-                run[start][end] = height(of: units[start..<end], sections)
+                let unit = units[end - 1]
+                let section = sections[unit.section]
+                if unit.section != last {
+                    if last != nil { height += sectionGap }
+                    height +=
+                        unit.rows.lowerBound > 0 && end - 1 == start
+                        ? section.continued : section.header
+                    last = unit.section
+                }
+                height += CGFloat(unit.rows.count) * section.pitch
+                run[start][end] = height
             }
         }
         typealias Cost = (tallest: CGFloat, squares: CGFloat)

@@ -23,51 +23,43 @@ struct ShortcutsSheetView: View {
             let all = Self.sections(reference)
             let flowing = all.filter { !$0.closes }
             let cut = Self.cut(columns, over: flowing)
+            let closing = all.filter(\.closes)
+            // One column sizes its chords over every row, the closing
+            // section's too, so all its dividers share one x (#3424).
+            let single = cut.count == 1
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top, spacing: Self.columnGap) {
                     ForEach(Array(cut.enumerated()), id: \.offset) {
                         _,
                         pieces in
-                        column(flowing, pieces)
+                        column(flowing, pieces, sized: !single)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             // VoiceOver reads a column whole before the
                             // next.
                             .accessibilityElement(children: .contain)
                     }
                 }
-                ForEach(all.filter(\.closes), id: \.title) { section in
+                ForEach(closing, id: \.title) { section in
                     sectionView(section, rows: section.rows, title: .whole)
                         .padding(
                             .top,
                             flowing.isEmpty
                                 ? 0 : ShortcutsColumnPlan.sectionGap
                         )
-                        .modifier(Self.chordColumns(section.rows))
+                        .modifier(
+                            Self.chordColumns(single ? nil : section.rows)
+                        )
                 }
             }
+            .modifier(
+                Self.chordColumns(
+                    single ? (flowing + closing).flatMap(\.rows) : nil
+                )
+            )
             .environment(\.shortcutMatch, needle)
         } else {
             placeholder
         }
-    }
-
-    /// `columns`, where it cuts exactly `flowing`'s rows; else one
-    /// column of them whole, as a plan made for another sheet would
-    /// draw nothing true.
-    static func cut(
-        _ columns: [[ShortcutsColumnPlan.Piece]],
-        over flowing: [Section]
-    ) -> [[ShortcutsColumnPlan.Piece]] {
-        let drawn = columns.joined().reduce(0) { $0 + $1.rows.count }
-        let whole = flowing.enumerated().map {
-            ShortcutsColumnPlan.Piece(section: $0, rows: 0..<$1.rows.count)
-        }
-        let fits = columns.joined().allSatisfy {
-            flowing.indices.contains($0.section)
-                && $0.rows.upperBound <= flowing[$0.section].rows.count
-        }
-        let rows = flowing.reduce(0) { $0 + $1.rows.count }
-        return !columns.isEmpty && fits && drawn == rows ? columns : [whole]
     }
 
     /// The room between two columns.
@@ -80,18 +72,13 @@ struct ShortcutsSheetView: View {
     static let titleGap: CGFloat = 2
     static let captionGap: CGFloat = 4
 
-    /// A run of rows' chord column, sized to its own widest (#3424).
-    static func chordColumns(_ rows: [ShortcutRow]) -> ShortcutPanelColumns {
-        ShortcutPanelColumns(
-            badges: rows.contains { !$0.gestures.isEmpty },
-            chords: rows.contains { !$0.combo.isEmpty }
-        )
-    }
-
     /// One column's pieces.
+    /// `sized`: the column measures its own chords; else the sheet
+    /// around it does.
     private func column(
         _ sections: [Section],
-        _ pieces: [ShortcutsColumnPlan.Piece]
+        _ pieces: [ShortcutsColumnPlan.Piece],
+        sized: Bool
     ) -> some View {
         let rows = pieces.flatMap { Array(sections[$0.section].rows[$0.rows]) }
         return VStack(alignment: .leading, spacing: 0) {
@@ -105,7 +92,7 @@ struct ShortcutsSheetView: View {
                 .padding(.top, index == 0 ? 0 : ShortcutsColumnPlan.sectionGap)
             }
         }
-        .modifier(Self.chordColumns(rows))
+        .modifier(Self.chordColumns(sized ? rows : nil))
     }
 
     /// How a piece draws its section's head: whole, or the title
@@ -197,6 +184,11 @@ struct ShortcutsSheetView: View {
                     .frame(height: Self.rowHeight)
             }
             .opacity(section.dims ? 0.6 : 1)
+            // A section with no chord keeps no chord slot and no
+            // divider: its badges sit at the column's edge (#3570).
+            .transformEnvironment(\.shortcutColumns) {
+                $0 = Self.columns($0, keeping: section.rows)
+            }
         }
     }
 

@@ -2321,7 +2321,9 @@ a new container on that line joins `KeySequenceIndentTests` ▸
 amended by #3424): the badges against a divider, the chords at the
 list's widest, so every section's divider sits at one x. A list
 with no gesture keeps no badge column, and a list laid out in
-side-by-side visual columns sizes each visual column instead. A new
+side-by-side visual columns sizes each visual column instead, and
+a section with no chord keeps no chord slot or divider
+(`ShortcutSectionChordSlotTests`). A new
 host of such a list applies it, and
 a row with no columns in its environment is a lone row, such as the
 hint panel's branch rows (`ShortcutGestureColumnsTests` ▸

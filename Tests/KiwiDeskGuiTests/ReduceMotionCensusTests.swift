@@ -136,10 +136,13 @@ struct ReduceMotionCensusTests {
         // it is the one call that moves.
         "LayoutStoryThumbnail.swift: withTransaction":
             "a story's jump to its start frame starts no motion",
-        // #2229: the key panel's height glide names its gate in
-        // the argument itself, `animated && !presence.reduceMotion`.
-        "JumpPanelController+Sizing.swift: animate:":
-            "gated in its own argument",
+        // #2229, #3570: the key panel's glide is a window frame
+        // write, which takes no animation argument; the refit's
+        // guard on `presence.reduceMotion` stands just above it.
+        "JumpPanelController+Sizing.swift: .animator":
+            "gated by the refit's Reduce Motion guard",
+        "JumpPanelController+Sizing.swift: NSAnimation":
+            "the same glide's context, under the same guard",
     ]
 
     @Test("No uncensused way to start motion ships")

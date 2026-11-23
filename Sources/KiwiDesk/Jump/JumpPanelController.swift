@@ -161,6 +161,8 @@ final class JumpPanelController: NSObject {
     func settingsChanged(_ settings: TilingSettings) {
         guard !presence.leaving else { return }
         currentModel?.settings = settings
+        // The panel sizes only through its refit (#3570).
+        DispatchQueue.main.async { [weak self] in self?.refit() }
     }
 
     /// Closes the panel. No close arms the dismiss distrust: the

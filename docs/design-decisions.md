@@ -14531,16 +14531,17 @@ reshuffling rows to the bottom of the page on every undock
 reports a normal state as debris.
 
 **KiwiHub's Shortcuts side lifts those rows out instead**, into
-an Unavailable shortcuts band at the end of its column (owner
-ruling 2026-10-16). The reason Settings keeps them in place is
-that Settings is an editor: a row stays where its catalog puts
-it so it can be rebound there. The hub is a read-only list of
-what a key does now, so a group that mixes working keys with
-keys that do nothing answers its one question wrongly. The band
-is not the Inactive one, for the first reason above — its
-caption promises the key still fires — and it takes the caption
-Settings puts over the same rows, so both surfaces say the same
-thing about them.
+an Unavailable shortcuts band after every section, full width
+(owner ruling 2026-10-16, amended for #3570's columns). The
+reason Settings keeps them in place is that Settings is an
+editor: a row stays where its catalog puts it so it can be
+rebound there. The hub is a read-only list of what a key does
+now, so a group that mixes working keys with keys that do
+nothing answers its one question wrongly. The band is not the
+Inactive one, for the first reason above — its caption promises
+the key still fires — and it takes the caption Settings puts
+over the same rows, so both surfaces say the same thing about
+them.
 
 **Config presence expands the surface.** A first-week Settings
 is not a smaller product, it is a smaller *offer*. Anything
@@ -16614,35 +16615,37 @@ rect the panel opens in — a screen's clear area, or a screen area's
 (#3572) — never on `NSScreen` directly (`JumpPanelRoom`,
 `JumpPanelRoomTests`).
 
-*Amended (#3570): the one-column sheet becomes column-major
-columns.* One column still reads best while it fits, so the sheet
-stays one column until a single column would scroll past one
-screenful; then it takes the fewest columns that fit, at a 460 pt
-pitch and at most three — the pitch is what a row with two chords
-needs to keep its whole label, so a chord is never stacked or a
-label cut, and three side by side is already a page to scan. The
-width and the column count are set when the side opens, on ⇥ or its
-shortcut, and typing never changes either: a panel that narrows and
-regrows under each keystroke moves the very rows being read, so the
-filtered rows rebalance across the same columns, and only the height
-follows the results, gliding with its top held as Spotlight's does.
-The fill is column-major and breaks only before a section title, at
-the breaks that make the tallest column shortest, the most even cut
-winning a tie, so no column ends early beside a long one. A section
-taller than 1.25 × the even share may break at a row, and the next
-column repeats its title in tertiary ink, because one long section
-left whole would leave its column alone at full height. Unavailable
-shortcuts closes the sheet across its whole width below the columns,
-since it lists keys for Desktops not shown and belongs to no
-column's run. VoiceOver reads each column as one group, down a
-column and on to the next, and the full-width section last. The keys
-stay a reference sheet's (ui-designer, 2026-11-23): ↑ ↓ and the Page
-keys scroll the one shared scroll view, ← → stay with the field's
-text, and nothing is selected. A highlighted row on a Mac promises
-that ↩ acts, the other sides carry a selection only because they act
-on it, and VoiceOver already moves row by row, so a read cursor
-added for column-hopping would teach the wrong thing
-(`ShortcutsColumnPlanTests`, `ShortcutsColumnKeysTests`).
+*Amended (#3570, owner and ui-designer, 2026-11-23): the one-column
+sheet becomes column-major columns.* One column still reads best
+while it fits, so the sheet stays one column until a single column
+would scroll past one screenful; then it takes as many columns as
+the area holds at a 400 pt pitch, at most three, so a MacBook's
+panel gets three and a long reference reads as a page rather than a
+scroll. A row keeps its label on one line, cut at its tail before a
+chord is, and each column reserves only the badge and chord widths
+its own rows need, so a column of short chords gives its labels the
+room. The width and the column count are set when the side opens, on
+⇥ or its shortcut, and typing never changes either: a panel that
+narrows and regrows under each keystroke moves the very rows being
+read, so the filtered rows rebalance across the same columns, and
+only the height follows the results, gliding with its top held as
+Spotlight's does. The fill is column-major and may break at any row,
+the next column repeating the section's title in tertiary ink, at
+the breaks that make the tallest column shortest and, among those,
+the columns most even, so no column ends early beside a long one;
+breaking only before a title left one long section alone at full
+height. Unavailable shortcuts is never split: it closes the sheet
+across its whole width below the columns (▸ *KiwiHub's Shortcuts
+side lifts those rows out instead*). VoiceOver reads each column as
+one group, down a column and on to the next, and the full-width
+section last. The keys stay a reference sheet's (ui-designer,
+2026-11-23): ↑ ↓ and the Page keys scroll the one shared scroll
+view, ← → stay with the field's text, and nothing is selected. A
+highlighted row on a Mac promises that ↩ acts, the other sides carry
+a selection only because they act on it, and VoiceOver already moves
+row by row, so a read cursor added for column-hopping would teach
+the wrong thing (`ShortcutsColumnPlanTests`,
+`ShortcutsColumnKeysTests`).
 :::
 
 **An Apps row says its action in its title** (#3448, owner on
@@ -18176,6 +18179,13 @@ than one way — two directions running the same action — wears one
 badge, drawn without a direction, since either arrow alone would
 be half the truth. A search that names a gesture brings its badge
 to the front, so a hit never matches a gesture the row hides.
+
+:::unreleased
+*Amended (#3570, ui-designer, 2026-11-23): the badge and chord
+columns are measured per column of the sheet, and a section with no
+keyboard chord keeps no chord slot and no divider, so its badges
+align to the column's right edge* (`ShortcutSectionChordSlotTests`).
+:::
 
 **A multi-finger swipe also fires on a quick flick, decided at
 the release (#1873).** macOS takes a quick, short swipe as a whole

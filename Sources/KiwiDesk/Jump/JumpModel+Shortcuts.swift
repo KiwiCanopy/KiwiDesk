@@ -86,12 +86,14 @@ extension JumpModel {
         let inset = JumpShortcutsView.kiwiHubInset
         let column =
             ShortcutsColumnPlan.columnPitch - ShortcutsSheetView.columnGap
+        // One column is judged as it draws: at the field row's
+        // width, the closing section with it.
+        let single = room.fieldWidth - 2 * inset
         let count =
             shortcutCount
             ?? ShortcutsColumnPlan.count(
-                single: planned(flowing, at: room.fieldWidth - 2 * inset),
-                split: planned(flowing, at: column),
-                closing: planned(all.filter(\.closes), at: room.widest)
+                single: planned(flowing, at: single),
+                closing: planned(all.filter(\.closes), at: single)
                     .map(\.height).reduce(0, +),
                 cap: sheetCap - 2 * JumpShortcutsView.kiwiHubVerticalInset,
                 limit: ShortcutsColumnPlan.columnsFitting(
@@ -104,7 +106,7 @@ extension JumpModel {
         shortcutColumns = ShortcutsColumnPlan(
             sections: planned(
                 flowing,
-                at: count > 1 ? column : room.fieldWidth
+                at: count > 1 ? column : single
             ),
             columns: count
         )

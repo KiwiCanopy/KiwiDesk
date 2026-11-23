@@ -5,10 +5,9 @@ import Testing
 
 /// The Shortcuts side's columns (#3570 ▸ Ruling 5, amended with the
 /// ui-designer 2026-11-23): one column while it fits the sheet's
-/// room, else the fewest that do at a 460 pt pitch, at most three;
-/// the fill is column-major, its tallest column shortest, and a
-/// section past 1.25 × the even share breaks at a row. Pure
-/// arithmetic.
+/// room, else as many as the room holds at a 400 pt pitch, at most
+/// three; the fill is column-major, breaks at any row and makes the
+/// columns as even as it can. Pure arithmetic.
 @Suite("Shortcuts column plan")
 struct ShortcutsColumnPlanTests {
     private typealias Plan = ShortcutsColumnPlan
@@ -27,7 +26,6 @@ struct ShortcutsColumnPlanTests {
     ) -> Int {
         Plan.count(
             single: sections,
-            split: sections,
             closing: closing,
             cap: cap,
             limit: limit
@@ -42,13 +40,13 @@ struct ShortcutsColumnPlanTests {
         #expect(Plan.width(columns: 1, inset: 16, gap: 24) == 0)
     }
 
-    @Test("past the room, the fewest columns that fit, up to the limit")
-    func fewestColumns() {
+    /// Past the room, as many columns as it holds, so a MacBook's
+    /// panel gets three (owner, 2026-11-23).
+    @Test("past the room, as many columns as the room holds")
+    func asManyAsFit() {
         let sections = [section(4), section(4), section(4), section(4)]
-        // Four 130 pt sections: two to a column is 276 pt.
-        #expect(count(sections, cap: 276) == 2)
-        #expect(count(sections, cap: 275) == 3)
-        #expect(count(sections, cap: 10) == 3)
+        #expect(count(sections, cap: 567) == 3)
+        #expect(count(sections, cap: 568) == 1)
         #expect(count(sections, cap: 10, limit: 2) == 2)
         #expect(count(sections, cap: 10, limit: 1) == 1)
     }
@@ -60,7 +58,7 @@ struct ShortcutsColumnPlanTests {
         let sections = [section(4), section(4)]
         let whole = Plan.height(sections.map(\.height))
         #expect(count(sections, cap: whole) == 1)
-        #expect(count(sections, cap: whole, closing: 30) == 2)
+        #expect(count(sections, cap: whole, closing: 30) == 3)
         #expect(count(sections, cap: whole + 46, closing: 30) == 1)
     }
 
@@ -78,10 +76,10 @@ struct ShortcutsColumnPlanTests {
         #expect(order == expected)
     }
 
-    /// Breaks only before a title where no section is past 1.25 × the
-    /// even share, and the cut makes the tallest column shortest:
-    /// four even sections split two and two, not one and three.
-    @Test("the cut balances at section boundaries")
+    /// The cut makes the tallest column shortest: four even
+    /// sections split two and two, not one and three, and a row
+    /// break that would only lengthen a column is not taken.
+    @Test("the cut balances the columns")
     func balancesAtSections() {
         let even = Plan(
             sections: Array(repeating: section(4), count: 4),
@@ -114,9 +112,9 @@ struct ShortcutsColumnPlanTests {
         )
     }
 
-    /// A section past 1.25 × the even share breaks at a row; its
-    /// rows go on at the next column's top under the repeated title.
-    @Test("an oversized section breaks at a row and continues")
+    /// Any section may break at a row; its rows go on at the next
+    /// column's top under the repeated title.
+    @Test("a long section breaks at a row and continues")
     func oversizedBreaks() throws {
         let sections = [section(30), section(2)]
         let plan = Plan.balanced(sections, into: 2)
@@ -129,7 +127,7 @@ struct ShortcutsColumnPlanTests {
         // Balanced, not 858 over 74.
         let whole = Plan.height(sections.map(\.height))
         #expect(plan.tallest < whole * 0.6)
-        // Under the share, the same section stays whole.
+        // Where a break would only lengthen a column, none is taken.
         let kept = Plan.balanced([section(6), section(6)], into: 2)
         #expect(kept.columns.joined().allSatisfy { !$0.continued })
     }
@@ -142,19 +140,18 @@ struct ShortcutsColumnPlanTests {
         #expect(plan.columns[1].isEmpty && plan.columns[2].isEmpty)
     }
 
-    /// Two columns at the 460 pt pitch, the 24 pt gap between them
-    /// and a 16 pt inset each side take 928 pt; three take 1388.
+    /// Two columns at the 400 pt pitch, the 24 pt gap between them
+    /// and a 16 pt inset each side take 808 pt; three take 1208.
     @Test("the columns that fit the room, one to three")
     func columnsFitting() {
         func fit(_ room: CGFloat) -> Int {
             Plan.columnsFitting(room, inset: 16, gap: 24)
         }
-        #expect(Plan.width(columns: 2, inset: 16, gap: 24) == 928)
-        #expect(fit(928) == 2)
-        #expect(fit(927) == 1)
-        #expect(fit(1000) == 2)
-        #expect(fit(1387) == 2)
-        #expect(fit(1388) == 3)
+        #expect(Plan.width(columns: 2, inset: 16, gap: 24) == 808)
+        #expect(fit(808) == 2)
+        #expect(fit(807) == 1)
+        #expect(fit(1207) == 2)
+        #expect(fit(1208) == 3)
         #expect(fit(5000) == 3)
         #expect(fit(100) == 1)
     }
