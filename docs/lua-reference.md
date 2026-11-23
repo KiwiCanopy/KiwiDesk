@@ -5854,8 +5854,14 @@ Out of the box these are bound:
 | `swipe4` | ⌃⌥ | `display` |
 | `rotate` | ⌃⌥ | `layout` |
 | `spread` | ⌃⌥ | Toggle maximized ([`toggle_maximized`](#toggle_maximized)) |
-| `pinch_together` | ⌃⌥ | The Desktop overview |
+| `pinch_together` | ⌃⌥ | Toggle floating ([`toggle_floating`](#toggle_floating)) |
 | `pinch_together4` | ⌃⌥ | The window switcher |
+
+:::unreleased
+⌃⌥ pinch together toggles floating, pairing with ⌃⌥ spread's
+maximize; the Desktop overview keeps ⌃⌥ three-finger swipe up. A
+pinch row you changed keeps its binding.
+:::
 
 `hover_move`, the clicks and the side buttons are unbound. In a
 setup the Settings app manages, with Settings ▸ Shortcuts ▸

@@ -104,7 +104,7 @@ struct GestureBindingTests {
         )
         #expect(
             resolved[GestureKey(.pinchTogether, hyper)]
-                == run(KiwiHubSide.desktops.lua)
+                == run("KiwiDesk.toggle_floating()")
         )
         #expect(
             resolved[GestureKey(.pinchTogether4, hyper)]

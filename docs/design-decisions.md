@@ -14361,6 +14361,21 @@ decodes strictly, so a slot a later release adds is a name this build
 refuses, and adding one bumps `GuiConfig.currentFormat` and
 `Profile.currentFormat`.
 
+**Amended (#3587, owner 2026-11-23): ⌃⌥ pinch together toggles
+floating.** The pinch seed moves from the Desktop overview to
+`toggle_floating`, so the overview keeps one seed, ⌃⌥ three-finger
+swipe up, the Mission Control gesture, and pinch and spread are the
+two window-state toggles: spread maximizes, pinch floats, and each
+undoes itself, so a stray pinch is undone by the same gesture. The
+four-finger pinch stays the window switcher and the four-finger
+spread stays unbound. The cost: pinch reads as zoom-out on macOS,
+which made the overview its natural reading (the ui-designer's
+preference); the owner chose the pair over that reading and over a
+duplicate seed. The change is the mirror cost stated above — it
+reaches everyone who kept the seed — and owes no `ConfigMigration`,
+since a kept seed is no stored value and an edited row keeps its
+own binding.
+
 *Amended (#3199): the slots are keys of the one binding list*
 (▸ Shortcuts, *Mouse and trackpad gestures are one list of
 bindings*), stored as `gesture` in the same sparse shape, keyed by
