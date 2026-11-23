@@ -1,0 +1,190 @@
+import CoreGraphics
+import Testing
+
+@testable import KiwiDesk
+
+/// The Shortcuts side's columns (#3570 ▸ Ruling 5, amended with the
+/// ui-designer 2026-11-23): one column while it fits the sheet's
+/// room, else as many as the room holds at a 400 pt pitch, at most
+/// three; the fill is column-major, breaks at any row and makes the
+/// columns as even as it can. Pure arithmetic.
+@Suite("Shortcuts column plan")
+struct ShortcutsColumnPlanTests {
+    private typealias Plan = ShortcutsColumnPlan
+    private typealias Section = ShortcutsColumnPlan.Section
+
+    /// A section of `rows` rows under an 18 pt title: 18 + 28 × rows.
+    private func section(_ rows: Int) -> Section {
+        Section(header: 18, rows: rows)
+    }
+
+    private func count(
+        _ sections: [Section],
+        cap: CGFloat,
+        closing: CGFloat = 0,
+        limit: Int = 3
+    ) -> Int {
+        Plan.count(
+            single: sections,
+            closing: closing,
+            cap: cap,
+            limit: limit
+        )
+    }
+
+    @Test("one column while it fits the room")
+    func oneColumnFits() {
+        let sections = [section(4), section(3), section(2)]
+        let tall = Plan.height(sections.map(\.height))
+        #expect(count(sections, cap: tall) == 1)
+        #expect(Plan.width(columns: 1, inset: 16, gap: 24) == 0)
+    }
+
+    /// Past the room, as many columns as it holds, so a MacBook's
+    /// panel gets three (owner, 2026-11-23).
+    @Test("past the room, as many columns as the room holds")
+    func asManyAsFit() {
+        let sections = [section(4), section(4), section(4), section(4)]
+        #expect(count(sections, cap: 567) == 3)
+        #expect(count(sections, cap: 568) == 1)
+        #expect(count(sections, cap: 10, limit: 2) == 2)
+        #expect(count(sections, cap: 10, limit: 1) == 1)
+    }
+
+    /// The full-width closing section takes its height and a gap off
+    /// the room every count is judged in.
+    @Test("the closing section's room counts against the columns")
+    func closingTakesRoom() {
+        let sections = [section(4), section(4)]
+        let whole = Plan.height(sections.map(\.height))
+        #expect(count(sections, cap: whole) == 1)
+        #expect(count(sections, cap: whole, closing: 30) == 3)
+        #expect(count(sections, cap: whole + 46, closing: 30) == 1)
+    }
+
+    @Test("the fill reads column-major and keeps every row once")
+    func columnMajor() {
+        let sections = [section(2), section(5), section(3), section(4)]
+        let plan = Plan(sections: sections, columns: 2)
+        #expect(plan.columns.count == 2)
+        let order = plan.columns.joined().flatMap { piece in
+            piece.rows.map { piece.section * 100 + $0 }
+        }
+        let expected = sections.enumerated().flatMap { index, section in
+            (0..<section.rows).map { index * 100 + $0 }
+        }
+        #expect(order == expected)
+    }
+
+    /// The cut makes the tallest column shortest: four even
+    /// sections split two and two, not one and three, and a row
+    /// break that would only lengthen a column is not taken.
+    @Test("the cut balances the columns")
+    func balancesAtSections() {
+        let even = Plan(
+            sections: Array(repeating: section(4), count: 4),
+            columns: 2
+        )
+        #expect(even.columns.map { $0.map(\.section) } == [[0, 1], [2, 3]])
+        #expect(even.columns.joined().allSatisfy { !$0.continued })
+        let tall = Plan.balanced(
+            [section(2), section(2), section(6)],
+            into: 2
+        )
+        // 164 over 186 would rise: the first column takes the long
+        // section's first row, 226 over 158.
+        #expect(
+            tall.columns.map { $0.map(\.section) } == [[0, 1, 2], [2]]
+        )
+        #expect(tall.tallest == 226)
+    }
+
+    /// Where several cuts share the shortest tallest column, the
+    /// most even wins, and among equally even cuts the earlier
+    /// columns hold the extra: heights never rise (owner,
+    /// 2026-11-23).
+    @Test("a tie goes to the evenest cut, extra rows first")
+    func tieFillsEarlierColumns() {
+        // A 300 pt one-row section fixes the tallest whatever the cut.
+        let tall = Section(header: 272, rows: 1)
+        let plan = Plan.balanced(
+            [tall] + Array(repeating: section(1), count: 4),
+            into: 3
+        )
+        #expect(plan.tallest == 300)
+        #expect(
+            plan.columns.map { $0.map(\.section) } == [[0], [1, 2], [3, 4]]
+        )
+    }
+
+    /// The owner's sheet (2026-11-23): its last column held four
+    /// titles and ran longest. Heights never rise left to right.
+    @Test("the first column is the longest, heights never rising")
+    func heightsNeverRise() {
+        let sections = [5, 3, 1, 15, 1, 2, 1, 9].map { section($0) }
+        let plan = Plan.balanced(sections, into: 3)
+        let heights = plan.columns.map { pieces -> CGFloat in
+            pieces.enumerated().reduce(0) { sum, entry in
+                let (index, piece) = entry
+                return sum + (index == 0 ? 0 : Plan.sectionGap) + 18
+                    + CGFloat(piece.rows.count) * 28
+            }
+        }
+        #expect(heights.count == 3)
+        #expect(heights == heights.sorted(by: >), "\(heights)")
+        #expect(plan.tallest == heights.first)
+    }
+
+    /// Seven rows over three columns: the extra rows go to the
+    /// earlier columns, three, two, two.
+    @Test("an uneven split puts the extra rows first")
+    func extraRowsFirst() {
+        let plan = Plan.balanced([section(7)], into: 3)
+        #expect(plan.columns.map { $0.map(\.rows.count) } == [[3], [2], [2]])
+        #expect(plan.columns.joined().map(\.continued) == [false, true, true])
+    }
+
+    /// Any section may break at a row; its rows go on at the next
+    /// column's top under the repeated title.
+    @Test("a long section breaks at a row and continues")
+    func oversizedBreaks() throws {
+        let sections = [section(30), section(2)]
+        let plan = Plan.balanced(sections, into: 2)
+        let first = try #require(plan.columns.first?.first)
+        let next = try #require(plan.columns.last?.first)
+        #expect(plan.columns[0].map(\.section) == [0])
+        #expect(next.section == 0)
+        #expect(next.continued)
+        #expect(first.rows.upperBound == next.rows.lowerBound)
+        // Balanced, not 858 over 74.
+        let whole = Plan.height(sections.map(\.height))
+        #expect(plan.tallest < whole * 0.6)
+        // Where a break would only lengthen a column, none is taken.
+        let kept = Plan.balanced([section(6), section(6)], into: 2)
+        #expect(kept.columns.joined().allSatisfy { !$0.continued })
+    }
+
+    @Test("fewer pieces than columns leave the last columns empty")
+    func emptyColumns() {
+        let plan = Plan(sections: [section(1)], columns: 3)
+        #expect(plan.columns.count == 3)
+        #expect(plan.columns[0].count == 1)
+        #expect(plan.columns[1].isEmpty && plan.columns[2].isEmpty)
+    }
+
+    /// Two columns at the 400 pt pitch, the 24 pt gap between them
+    /// and a 16 pt inset each side take 808 pt; three take 1208.
+    @Test("the columns that fit the room, one to three")
+    func columnsFitting() {
+        func fit(_ room: CGFloat) -> Int {
+            Plan.columnsFitting(room, inset: 16, gap: 24)
+        }
+        #expect(Plan.width(columns: 2, inset: 16, gap: 24) == 808)
+        #expect(fit(808) == 2)
+        #expect(fit(807) == 1)
+        #expect(fit(1207) == 2)
+        #expect(fit(1208) == 3)
+        #expect(fit(5000) == 3)
+        #expect(fit(100) == 1)
+    }
+}

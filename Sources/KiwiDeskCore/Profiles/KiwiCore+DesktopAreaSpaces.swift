@@ -161,9 +161,30 @@ extension KiwiCore {
         in snapshot: DesktopSnapshot,
         except lead: PlacementID?
     ) {
+        for (area, target) in areaSpaceTargets(
+            on: display,
+            arriving: desktop,
+            in: snapshot,
+            except: lead
+        ) {
+            state.workspaces.show(target, on: area)
+        }
+    }
+
+    /// The Space each area of a split `display` but `lead` shows on
+    /// arriving at `desktop`, as `showAreaSpaces` switches them —
+    /// the one answer the switch and KiwiHub's hidden cards read
+    /// (#3572). Empty on an unsplit screen.
+    func areaSpaceTargets(
+        on display: DisplayID,
+        arriving desktop: DesktopKey,
+        in snapshot: DesktopSnapshot,
+        except lead: PlacementID?
+    ) -> [(PlacementID, SpaceID)] {
         let areas = state.workspaces.placements(of: display)
-        guard areas.count > 1 else { return }
+        guard areas.count > 1 else { return [] }
         var taken = spacesShownElsewhere(excluding: desktop, in: snapshot)
+        var targets: [(PlacementID, SpaceID)] = []
         for area in areas where area.id != lead {
             guard
                 let target = areaSpaceTarget(
@@ -173,8 +194,9 @@ extension KiwiCore {
                 )
             else { continue }
             taken.insert(target)
-            state.workspaces.show(target, on: area.id)
+            targets.append((area.id, target))
         }
+        return targets
     }
 
     /// The Space `area` shows on `desktop`: the one filed under its

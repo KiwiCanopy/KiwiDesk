@@ -125,7 +125,7 @@ struct SettingsAnchorIdentityTests {
         // Scroll identity: Jump to window scrolls its selected
         // row into view (#1875). Not a Settings destination, so
         // nothing there is a reveal target.
-        "JumpPanelView.swift": 1,
+        "JumpPanelView+List.swift": 1,
         // Scroll identity: Add binding scrolls the Shortcuts page
         // to its end, past the floating save pill (#2688), and a
         // segment pick to its top (#3184). Not reveal targets —
@@ -146,11 +146,12 @@ struct SettingsAnchorIdentityTests {
         // (#3460). A popover, so nothing there is a reveal target.
         "MaximizeCustomShare.swift": 1,
         // Scroll identity: KiwiHub's Desktops side scrolls its
-        // selected screen row, card and line into view (#1229). Not
-        // a Settings destination, so nothing there is a reveal
-        // target.
+        // selected screen column, card and line into view (#1229,
+        // #3570); a card ids its lines in an area group and its
+        // unfiled line apart (#3572). Not a Settings destination,
+        // so nothing there is a reveal target.
         "DesktopsSideView.swift": 2,
-        "DesktopCardView.swift": 1,
+        "DesktopCardView.swift": 2,
         // Scroll identity: KiwiHub's app strip follows its selected
         // tile clear of the fade (#3135, #2901). Not a Settings
         // destination, so nothing there is a reveal target.

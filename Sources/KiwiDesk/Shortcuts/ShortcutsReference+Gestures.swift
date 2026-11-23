@@ -166,32 +166,65 @@ extension ShortcutsReferenceBuilder {
     }
 
     /// The motions no row holds, one row per binding where a family
-    /// runs every way, else one per way.
+    /// runs every way, else one per way; ways that run one command
+    /// and draw as one row share it, wearing every badge, as a keyed
+    /// row does (owner, 2026-11-23).
     private static func gestureRows(
         _ open: [GestureReach],
         bindings: [GestureKey: GestureAction]
     ) -> [ShortcutRow] {
+        var rows: [ShortcutRow] = []
+        var byCommand: [String: Int] = [:]
+        for (lua, row) in perBinding(open, bindings: bindings) {
+            // A binding's own label or mark keeps its own row.
+            let command =
+                lua.isEmpty
+                ? ""
+                : [
+                    lua, row.label, "\(String(describing: row.icon))",
+                    row.bundleID ?? "",
+                ].joined(separator: "\u{1F}")
+            guard !command.isEmpty, let at = byCommand[command] else {
+                if !command.isEmpty { byCommand[command] = rows.count }
+                rows.append(row)
+                continue
+            }
+            rows[at].gestures = (rows[at].gestures + row.gestures)
+                .sorted(by: ShortcutGestureBadge.moreSpecific)
+        }
+        return rows
+    }
+
+    /// One row per binding where a family runs every way, else one
+    /// per way, each with the Lua it runs; empty for a family's row.
+    private static func perBinding(
+        _ open: [GestureReach],
+        bindings: [GestureKey: GestureAction]
+    ) -> [(String, ShortcutRow)] {
         let byKey = Dictionary(grouping: open, by: \.badge.key)
-        return byKey.keys.sorted().flatMap { key -> [ShortcutRow] in
+        return byKey.keys.sorted().flatMap { key -> [(String, ShortcutRow)] in
             let reached = byKey[key] ?? []
             if case .family(let family) = bindings[key],
                 reached.count == key.input.directions.count
             {
                 return [
-                    gestureRow(
-                        GestureReach(
-                            badge: ShortcutGestureBadge(
-                                key: key,
-                                direction: nil
-                            ),
-                            lua: "",
-                            label: GestureListWords.family(family),
-                            icon: .symbol(familyIcon(for: family))
+                    (
+                        "",
+                        gestureRow(
+                            GestureReach(
+                                badge: ShortcutGestureBadge(
+                                    key: key,
+                                    direction: nil
+                                ),
+                                lua: "",
+                                label: GestureListWords.family(family),
+                                icon: .symbol(familyIcon(for: family))
+                            )
                         )
                     )
                 ]
             }
-            return reached.map(gestureRow)
+            return reached.map { ($0.lua, gestureRow($0)) }
         }
     }
 

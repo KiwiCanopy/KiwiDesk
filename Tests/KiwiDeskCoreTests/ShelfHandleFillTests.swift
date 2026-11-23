@@ -4,8 +4,8 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A handle's look and its approach fill (#3360, #3361): at the
-/// default thickness a 2 pt core capsule on a neutral 3 pt capsule,
+/// A handle's look and its approach fill (#3360, #3361): at a
+/// 3 pt thickness a 2 pt core capsule on a neutral 3 pt capsule,
 /// flush on the edge (the thickness itself: `HandleThicknessTests`),
 /// and a fill that runs out from its start along the core alone,
 /// plays under Reduce Motion and drops under KiwiDesk's Off. What
@@ -53,7 +53,6 @@ struct ShelfHandleFillTests {
     @Test("The handle is a 2 pt core capsule in a 3 pt one, flush")
     func twoTone() {
         #expect(ShelfHandleSpec.inset == 0)
-        #expect(ShelfHandleSpec.depth(of: KiwiShelf()) == 3)
         let bounds = CGRect(x: 0, y: 0, width: 400, height: 3)
         let parts = ShelfHandleSpec.parts(of: bounds)
         #expect(parts.outer == bounds)

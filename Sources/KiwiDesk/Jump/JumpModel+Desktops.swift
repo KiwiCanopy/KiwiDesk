@@ -174,6 +174,8 @@ extension JumpModel {
             }
         }
         desktops = state
+        // The panel sizes only through its refit (#3570).
+        onResultsChange()
     }
 
     /// Reads the desk again under the open side, for a drop still
@@ -201,13 +203,20 @@ extension JumpModel {
         ).subtracting(desktopIcons.keys)
         if !pids.isEmpty { desktopIcons.merge(loadIcons(pids)) { $1 } }
         desktops = fresh
+        onResultsChange()
     }
 
     /// The side's state over `overview`, sized from the panel.
     private func state(of overview: DesktopOverview) -> DesktopsState {
+        // The width the panel grants the side for this overview's
+        // columns (#3570 ▸ Ruling 4), read before the state exists.
+        let width = room.width(
+            JumpPanelRoom.fit(of: .desktops),
+            content: DesktopsGeometry.preferredWidth(of: overview)
+        )
         let geometry = DesktopsGeometry(
             overview: overview,
-            width: panelWidth,
+            width: width,
             cap: sheetCap
         )
         return DesktopsState(overview: overview, geometry: geometry)

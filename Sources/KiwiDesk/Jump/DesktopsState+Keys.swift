@@ -78,7 +78,7 @@ extension DesktopsState {
             if isInside {
                 stepWindow(delta, wrap: !repeated)
             } else {
-                moveCard(delta, wrap: !repeated)
+                moveScreen(delta, wrap: !repeated)
             }
             return .moved
         case .openSpace:

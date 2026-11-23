@@ -3,8 +3,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// KiwiHub hands its list and Move here the screen it opened on
-/// (#2791): `JumpMoveHereScreenTests` drives the core doors and
+/// KiwiHub hands its list and Move here the area it opened over
+/// (#2791, #3572): `JumpMoveHereScreenTests` drives the core doors and
 /// stays green on a panel that never passes the screen.
 @Suite("KiwiHub Move here target wiring (#2791)")
 struct JumpMoveHereTargetWiringTests {
@@ -13,7 +13,7 @@ struct JumpMoveHereTargetWiringTests {
             .split(whereSeparator: \.isWhitespace).joined()
     }
 
-    @Test("the list and the pick read the panel's screen")
+    @Test("the list and the pick read the panel's area")
     func pickPassesThePanelSpace() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let controller = try Self.squashed(
@@ -21,20 +21,46 @@ struct JumpMoveHereTargetWiringTests {
                 "Sources/KiwiDesk/Jump/JumpPanelController.swift"
             )
         )
-        #expect(controller.contains("hubDisplay=core.jumpDisplay()"))
+        #expect(controller.contains("hubArea=core.jumpArea()"))
+        // The panel centres over that area (#3572 ruling 1), and the
+        // Layout line reads the same "here".
         #expect(
-            controller.occurrences(of: "core.jumpSnapshot(on:hubDisplay)")
+            controller.contains("hubArea.flatMap(core.visibleFrame(of:))")
+        )
+        let picker = try Self.squashed(
+            root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+LayoutPicker.swift"
+            )
+        )
+        #expect(picker.contains("moveHereSpace(in:area)"))
+        // The Desktops side reads the overview over the same area.
+        let desktops = try Self.squashed(
+            root.appendingPathComponent(
+                "Sources/KiwiDesk/Jump/JumpPanelController+Desktops.swift"
+            )
+        )
+        #expect(
+            desktops.contains("core.desktopOverview(on:self.hubArea)")
+        )
+        #expect(
+            controller.contains(
+                "hubArea=core.jumpArea()"
+                    + "pickerSpace=core.layoutPickerSpace(in:hubArea)"
+            )
+        )
+        #expect(
+            controller.occurrences(of: "core.jumpSnapshot(on:hubArea)")
                 == 1
         )
         #expect(
             controller.occurrences(
-                of: "core.moveHere(entry.target,on:hubDisplay)"
+                of: "core.moveHere(entry.target,on:hubArea)"
             ) == 1
         )
         // Swap here's "your window" is the same screen's (#2885).
         #expect(
             controller.occurrences(
-                of: "core.swapHere(entry.target,on:hubDisplay)"
+                of: "core.swapHere(entry.target,on:hubArea)"
             ) == 1
         )
         // No GUI caller reaches either door without the screen.
@@ -47,12 +73,12 @@ struct JumpMoveHereTargetWiringTests {
             #expect(
                 source.occurrences(of: ".moveHere(")
                     + source.occurrences(of: ".swapHere(")
-                    == source.occurrences(of: ",on:hubDisplay)"),
+                    == source.occurrences(of: ",on:hubArea)"),
                 "\(file.lastPathComponent)"
             )
             #expect(
                 source.occurrences(of: ".jumpSnapshot(")
-                    == source.occurrences(of: "(on:hubDisplay)"),
+                    == source.occurrences(of: "(on:hubArea)"),
                 "\(file.lastPathComponent)"
             )
         }

@@ -420,6 +420,14 @@ twice, was a question the user answered twice. The argument is
   handle, a step of its own with its own frozen palettes, or every
   upgraded set wearing a bundled palette reads as custom
   (`HandleStampMigrationTests`).
+- **A retune of a styling value a bundled look carries owes stored
+  files a `ConfigMigration` step, or an owner ruling refusing one
+  recorded in `docs/design-decisions.md`** — a `Resources/Looks`
+  style entry, or a `KiwiShelf` or starter default Glass derives
+  through `LookCatalog.defaultLook`. `ShelfLook.match` compares the
+  whole styling, so without either every upgraded set wearing that
+  look marks none (#3586 refused one, `HandleThicknessTests` ▸
+  `storedThicknessStays`). No scan sees a retune; it is review's.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one
