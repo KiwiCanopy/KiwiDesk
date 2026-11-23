@@ -84,9 +84,11 @@ extension JumpPanelController {
         )
     }
 
-    /// Each line's items. The Profile line always shows, ending in
-    /// Save as New Profile… (#2359 ruling 3, amending #2309 ruling
-    /// 2). `inert` is why every chip greys, nil where none does.
+    /// Each line's items. The Profile line, ending in Save as New
+    /// Profile… (#2359 ruling 3), shows only where two or more
+    /// profiles are saved, so there is one to switch to (#3570 ▸
+    /// Ruling 6); a missing line is no stop for ↑ ↓. `inert` is why
+    /// every chip greys, nil where none does.
     static func items(
         layout: LayoutPickerState?,
         profiles: (current: String?, all: [String], broken: Set<String>),
@@ -126,8 +128,8 @@ extension JumpPanelController {
                     inertReason: grey
                 )
             ]
-        return [
-            .layout: layouts, .profile: profileItems,
+        var lines: [ViewPickList.Line: [ViewPickList.Item]] = [
+            .layout: layouts,
             .vision: visionItems(
                 vision,
                 chord: visionChord,
@@ -136,6 +138,8 @@ extension JumpPanelController {
                 inert: grey
             ),
         ]
+        if profiles.all.count >= 2 { lines[.profile] = profileItems }
+        return lines
     }
 
     /// Default, each lens, then New Lens… (#2103 rulings 55–57); no

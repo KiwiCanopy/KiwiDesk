@@ -40,8 +40,8 @@ struct JumpPanelShapeTests {
 
     /// A side shelf narrows the panel; it never collapses the sheet
     /// to its floor, which a side strip crossing the field's span
-    /// once did.
-    @Test("the sheet grows to 40 pt above the area, a side shelf aside")
+    /// once did. The key sequence panel keeps a compact side's cap.
+    @Test("the hint sheet grows to 40 pt above the area, a shelf aside")
     func sheetCap() {
         let free = C.sheetCap(visible: visible, area: visible)
         let top = visible.maxY - visible.height * C.topFraction
@@ -63,16 +63,24 @@ struct JumpPanelShapeTests {
         #expect(C.sheetCap(visible: tiny, area: tiny) == 200)
     }
 
+    /// A growing side's content runs to 48 pt above the area's
+    /// bottom, past the compact ceiling (#3570 ▸ Ruling 3).
+    @Test("a growing side's sheet runs to 48 pt above the area")
+    func growingSheetCap() {
+        let room = C.room(visible: visible, area: visible)
+        let top = visible.maxY - visible.height * C.topFraction
+        #expect(C.sheetCap(in: room) == top - 48 - C.shortcutsChrome)
+        let compact = C.sheetCap(visible: visible, area: visible)
+        #expect(C.sheetCap(in: room) > compact)
+    }
+
     @Test("the panel stands in the area, its top at the field's line")
     func origin() {
         let area = CGRect(x: 40, y: 30, width: 1400, height: 870)
-        let point = C.origin(
-            size: CGSize(width: 720, height: 2000),
-            visible: visible,
-            area: area
-        )
+        let room = C.room(visible: visible, area: area)
+        let point = room.origin(of: CGSize(width: 720, height: 300))
         #expect(point.x == area.midX - 360)
-        #expect(point.y == 30)
+        #expect(point.y + 300 == room.top)
     }
 
     /// One hint lit: the pick that acts on the selection with the
@@ -220,9 +228,11 @@ struct JumpPanelShapeTests {
         .split(whereSeparator: \.isWhitespace).joined()
         for needle in [
             "shelves:core.shelfFrames()",
-            "sheetCap:Self.sheetCap(visible:visible,area:area)",
-            "visible:visible,area:area)",
-            "Self.width(visibleWidth:area.width)",
+            "letroom=Self.room(visible:visible,area:area)",
+            "sheetCap:Self.sheetCap(in:room)",
+            "room:room,",
+            "letwidth=room.fieldWidth",
+            "setFrameOrigin(room.origin(of:panel.frame.size))",
         ] {
             #expect(controller.contains(needle), "\(needle)")
         }

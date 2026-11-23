@@ -10,14 +10,16 @@ struct JumpPanelView: View {
     @ObservedObject var model: JumpModel
     /// This opening, which the entrance and the fade out read.
     let presence: PanelPresence
-    /// The panel's width on its screen, from the controller.
+    /// The field row's width on its screen, from the controller;
+    /// every side stands at least this wide (#3570).
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
     @Environment(\.kiwiDeskReduceMotion)
     private var reduceMotion
 
-    /// The key panels' scale (#2229 ▸ shared panel style).
-    static let width: CGFloat = 720
+    /// The key panels' scale (#2229 ▸ shared panel style): the
+    /// field row's width (#3570).
+    static let width = JumpPanelRoom.fieldWidth
     static let fieldHeight: CGFloat = 44
     /// The scope switch's cross-fade; the refit waits it out.
     static let scopeFade: TimeInterval = 0.12
@@ -38,7 +40,13 @@ struct JumpPanelView: View {
             )
             .frame(maxHeight: .infinity, alignment: .top)
             .panelContentFade(presence)
-            .frame(width: width)
+            // The side's own width, which the window glides to on ⇥
+            // while the field row holds still at its centre (#3570).
+            .frame(
+                minWidth: width,
+                idealWidth: max(model.sideWidth, width),
+                maxWidth: .infinity
+            )
             .tint(SettingsTheme.accent)
             .panelGlassChrome(
                 in: KeyPanelStyle.shape,
@@ -100,7 +108,7 @@ struct JumpPanelView: View {
             .horizontal,
             KeyPanelStyle.selectionInset + JumpRowView.padding
         )
-        .frame(height: Self.fieldHeight)
+        .frame(width: width, height: Self.fieldHeight)
         .onAppear { fieldFocused = true }
         .onChange(of: model.fieldFocusRequests) { fieldFocused = true }
         .onChange(of: model.scope) { fieldFocused = true }
@@ -135,6 +143,7 @@ struct JumpPanelView: View {
                 JumpShortcutsView(
                     sheet: sheet,
                     scroll: model.sheetScroll,
+                    plan: model.shortcutColumns,
                     maxHeight: model.sheetCap,
                     fades: true
                 )

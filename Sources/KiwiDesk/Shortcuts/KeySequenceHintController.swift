@@ -120,11 +120,10 @@ final class KeySequenceHintController {
         panel.contentView = host
         panel.setFrame(
             CGRect(
-                origin: JumpPanelController.origin(
-                    size: size,
+                origin: JumpPanelController.room(
                     visible: visible,
                     area: area
-                ),
+                ).origin(of: size),
                 size: size
             ),
             display: true

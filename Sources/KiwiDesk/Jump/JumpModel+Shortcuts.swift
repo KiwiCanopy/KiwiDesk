@@ -10,8 +10,9 @@ struct SheetScroll: Equatable {
 }
 
 /// The Shortcuts side of the key panel (#2246): its keys, its
-/// query and the scroll its keys drive. Read-only, so ↩ and the
-/// ⌘ numbers do nothing here.
+/// query, the scroll its keys drive and its column plan (#3570 ▸
+/// Ruling 5). A reference sheet: no selection, so ↩ and the ⌘
+/// numbers do nothing here, and ← → stay with the field's text.
 extension JumpModel {
     /// Re-reads the sheet, keeping the query.
     func reloadShortcuts() {
@@ -55,6 +56,33 @@ extension JumpModel {
             serial: sheetScroll.serial + 1,
             lines: lines,
             pages: pages
+        )
+    }
+
+    /// Lays the sheet out again for what it shows now.
+    func planShortcuts() {
+        guard let sheet = shortcuts, let shown = sheet.shown,
+            !shown.isEmpty
+        else {
+            shortcutColumns = .empty
+            return
+        }
+        let inset = JumpShortcutsView.kiwiHubInset
+        let view = ShortcutsSheetView(reference: shown, needle: sheet.needle)
+        let sections = view.sections(shown).map {
+            ShortcutsSheetView.planned(
+                $0,
+                needle: sheet.needle,
+                width: ShortcutsColumnPlan.columnWidth
+            )
+        }
+        shortcutColumns = ShortcutsColumnPlan(
+            sections: sections,
+            cap: sheetCap - 2 * JumpShortcutsView.kiwiHubVerticalInset,
+            columns: ShortcutsColumnPlan.columnsFitting(
+                room.widest,
+                inset: inset
+            )
         )
     }
 

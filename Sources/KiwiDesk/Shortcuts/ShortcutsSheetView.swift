@@ -2,40 +2,72 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The shortcuts sheet (#326, #820) as the key panel's Shortcuts
-/// side draws it (#2246): one titled column — each Controls
-/// group, then Apps, Custom, Inactive and Unavailable last.
-/// Section titles are the one heading level, and a section the
-/// query empties is dropped.
+/// side draws it (#2246): titled sections — each Controls group,
+/// then Apps, Custom, Inactive and Unavailable last — in one column,
+/// or in the column-major columns KiwiHub's plan cuts them into
+/// (#3570 ▸ Ruling 5). Section titles are the one heading level,
+/// and a section the query empties is dropped.
 struct ShortcutsSheetView: View {
     /// What the sheet shows; nil where `init.lua` owns the
     /// shortcuts.
     let reference: ShortcutsReference?
     /// The typed query, drawn bold in each row's name.
     let needle: String
+    /// Each column's sections, as ranges into `sections`; one
+    /// column where there is one or none.
+    var columns: [Range<Int>] = []
 
     var body: some View {
         if let reference, !reference.isEmpty {
             let sections = sections(reference)
-            let rows = sections.flatMap(\.rows)
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(
-                    Array(sections.enumerated()),
-                    id: \.offset
-                ) { index, section in
-                    sectionView(section, first: index == 0)
+            // A plan cut for another sheet draws one column.
+            let fits = columns.last?.upperBound == sections.count
+            let cut =
+                columns.count > 1 && fits ? columns : [0..<sections.count]
+            HStack(alignment: .top, spacing: 0) {
+                ForEach(Array(cut.enumerated()), id: \.offset) { _, range in
+                    column(sections, range)
+                        .frame(
+                            maxWidth: cut.count > 1
+                                ? ShortcutsColumnPlan.columnWidth
+                                    - Self.columnGap : .infinity,
+                            alignment: .leading
+                        )
+                        .frame(
+                            maxWidth: .infinity,
+                            alignment: .leading
+                        )
                 }
             }
-            // One chord column for the whole panel (#3424).
-            .modifier(
-                ShortcutPanelColumns(
-                    badges: rows.contains { !$0.gestures.isEmpty },
-                    chords: rows.contains { !$0.combo.isEmpty }
-                )
-            )
             .environment(\.shortcutMatch, needle)
         } else {
             placeholder
         }
+    }
+
+    /// The room between two columns, taken from the left one's
+    /// 400 pt.
+    static let columnGap: CGFloat = 24
+
+    /// One column, its chords sized to its own widest (#3424).
+    private func column(_ sections: [Section], _ range: Range<Int>)
+        -> some View
+    {
+        let rows = sections[range].flatMap(\.rows)
+        return VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(range), id: \.self) { index in
+                sectionView(
+                    sections[index],
+                    first: index == range.lowerBound
+                )
+            }
+        }
+        .modifier(
+            ShortcutPanelColumns(
+                badges: rows.contains { !$0.gestures.isEmpty },
+                chords: rows.contains { !$0.combo.isEmpty }
+            )
+        )
     }
 
     /// One titled run of rows.
@@ -115,7 +147,7 @@ struct ShortcutsSheetView: View {
             }
             .opacity(section.dims ? 0.6 : 1)
         }
-        .padding(.top, first ? 0 : 16)
+        .padding(.top, first ? 0 : ShortcutsColumnPlan.sectionGap)
     }
 
     /// Settings' own section says the same thing and then adds

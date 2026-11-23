@@ -16587,6 +16587,48 @@ and the Windows list past its nine rows, fade the edge that cuts
 them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
 
+:::unreleased
+*Amended (#3570, owner with ui-designer, 2026-11-23): the fixed
+720 pt width becomes a fixed 720 pt field row, and the one ceiling
+becomes a ceiling per side.* What the fixed width protected was the
+field and the side switch staying under the eye on ⇥, and the field
+row alone carries that: it stays 720 pt wide, centred, at
+`topFraction`, and on ⇥ only the panel's outer edges and its footer
+glide, so nothing the user reads or aims at moves. Windows and View
+keep 720 × 488, since a ranked list and three lines of chips gain
+nothing from width and a glance should stay compact. Desktops and
+Shortcuts are overviews — a screen per column, every bound key —
+and at 720 × 488 both scrolled on any real desk, which hides the
+very thing they exist to show; so they take the width their content
+asks, from 720 pt up to the area less 96 pt each side, and run down
+to 48 pt above its bottom before they scroll. What keeps them a
+panel rather than a window is everything but the size: the fixed
+field row, the margins, no title bar, no resizing or dragging, and
+Esc. The panel is never lifted: a lifted panel moves the field,
+which is the one thing the width rule existed to hold. Every limit
+is measured on the rect the panel opens in — a screen's clear area,
+or a screen area's (#3572) — never on `NSScreen` directly
+(`JumpPanelRoom`, `JumpPanelRoomTests`).
+
+*Amended (#3570): the one-column sheet becomes column-major
+columns.* One column still reads best while it fits, so the sheet
+stays one column until a single column would scroll past one
+screenful; then it cuts into columns about 400 pt wide, at most
+three — three side by side is already a page to scan, and a fourth
+would be read as a grid with no order. The columns are column-major
+and break only before a section title, so a section is never split
+and VoiceOver keeps one reading order, down a column and on to the
+next; the cut is as even as the section boundaries allow, so a
+filtered sheet rarely scrolls. The keys stay a reference sheet's
+(ui-designer, 2026-11-23): ↑ ↓ and the Page keys scroll the one
+shared scroll view, ← → stay with the field's text, and nothing is
+selected. A highlighted row on a Mac promises that ↩ acts, the
+other sides carry a selection only because they act on it, and
+VoiceOver already moves row by row, so a read cursor added for
+column-hopping would teach the wrong thing
+(`ShortcutsColumnPlanTests`, `ShortcutsColumnKeysTests`).
+:::
+
 **An Apps row says its action in its title** (#3448, owner on
 ui-designer's recommendation, 2026-11-18). A key set to gather or
 to open new reads "Gather Safari Windows" or "New Safari Window";
@@ -16861,6 +16903,16 @@ instead of the side being stepped past, because the other two
 lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
+
+:::unreleased
+*Amended (#3570 ▸ Ruling 6): the Profile line shows only
+with two or more profiles.* With one profile the line offered a
+switch to where the user already is, and a third line to step past
+on every ↓; Save as New Profile… leaves with it, the Settings
+Profiles page being where a second profile is made. The
+look picker stays its own full-screen surface (#3038), never a
+fourth line.
+:::
 
 **The Desktops side is KiwiHub's overview of the whole desk (#1229,
 owner ruling 2026-11-01).** The Space Bar answers what is on the

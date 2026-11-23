@@ -14,7 +14,14 @@ final class JumpModel: ObservableObject {
     @Published var view: ViewPickList?
     /// The Shortcuts side's sheet, read fresh on each entry to it
     /// (#2246).
-    @Published var shortcuts: ShortcutsSheet?
+    @Published var shortcuts: ShortcutsSheet? {
+        didSet { planShortcuts() }
+    }
+    /// How the sheet lays out in the room the panel opened in
+    /// (#3570 ▸ Ruling 5).
+    @Published var shortcutColumns = ShortcutsColumnPlan.empty
+    /// The scroll the Shortcuts side's keys last asked for.
+    @Published var sheetScroll = SheetScroll()
     /// The Desktops side's reading and selection, read fresh on
     /// each entry to it (#1229).
     @Published var desktops: DesktopsState?
@@ -24,8 +31,6 @@ final class JumpModel: ObservableObject {
     /// and what swells for a beat (#3170).
     @Published var desktopsRefusal: String?
     @Published var desktopsSwell: DesktopsSwell?
-    /// The scroll the Shortcuts side's keys last asked for.
-    @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
     /// ⌥ previews Swap here (#2885).
@@ -109,12 +114,16 @@ final class JumpModel: ObservableObject {
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
     let rowCap: Int
-    /// The tallest the Shortcuts side's sheet stands, from the
-    /// screen it opens on (`JumpPanelController.sheetCap`).
+    /// The tallest a growing side's content stands between the
+    /// field and the footer, from the room the panel opens in
+    /// (`JumpPanelController.sheetCap(in:)`).
     let sheetCap: CGFloat
-    /// The panel's width on that screen
-    /// (`JumpPanelController.width`).
+    /// The field row's width there, every side's least width
+    /// (`JumpPanelRoom.fieldWidth`).
     let panelWidth: CGFloat
+    /// Where the panel opens: each side's width and height limits
+    /// (#3570).
+    let room: JumpPanelRoom
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
     /// A pick Core refuses at the press: what VoiceOver hears. The
@@ -176,6 +185,7 @@ final class JumpModel: ObservableObject {
         rowCap: Int,
         sheetCap: CGFloat = 400,
         panelWidth: CGFloat = JumpPanelView.width,
+        room: JumpPanelRoom? = nil,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -185,6 +195,13 @@ final class JumpModel: ObservableObject {
         self.rowCap = rowCap
         self.sheetCap = sheetCap
         self.panelWidth = panelWidth
+        self.room =
+            room
+            ?? JumpPanelRoom(
+                visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
+                area: CGRect(x: 0, y: 0, width: 1440, height: 900),
+                topFraction: JumpPanelController.topFraction
+            )
         noteModifiers(modifiers)
     }
 

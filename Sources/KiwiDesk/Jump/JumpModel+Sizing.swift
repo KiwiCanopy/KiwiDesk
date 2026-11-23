@@ -1,0 +1,33 @@
+import CoreGraphics
+import KiwiDeskCore
+
+/// Each side's width in the room the panel opened in (#3570): the
+/// side reports what its content asks, and `JumpPanelRoom` clamps
+/// it to the side's limits.
+extension JumpModel {
+    /// The panel's width on the shown side.
+    var sideWidth: CGFloat { sideWidth(for: scope) }
+
+    func sideWidth(for scope: JumpScope) -> CGFloat {
+        room.width(
+            JumpPanelRoom.sizing(of: scope),
+            content: contentWidth(for: scope)
+        )
+    }
+
+    /// The width a side's content asks for, before the room clamps
+    /// it; a compact side asks for the field row's.
+    func contentWidth(for scope: JumpScope) -> CGFloat {
+        switch scope {
+        case .windows, .view: return room.fieldWidth
+        case .shortcuts:
+            let inset = JumpShortcutsView.kiwiHubInset
+            return shortcutColumns.width(inset: inset)
+        case .desktops: return desktopsContentWidth
+        }
+    }
+
+    /// The Desktops side's own width: the field row's until its
+    /// screen columns report theirs (#3570 ▸ Ruling 4).
+    var desktopsContentWidth: CGFloat { room.fieldWidth }
+}

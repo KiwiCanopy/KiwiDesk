@@ -95,13 +95,15 @@ final class JumpPanelController: NSObject {
             shelves: core.shelfFrames()
         )
         let snapshot = core.jumpSnapshot(on: hubDisplay)
-        let width = Self.width(visibleWidth: area.width)
+        let room = Self.room(visible: visible, area: area)
+        let width = room.fieldWidth
         let model = JumpModel(
             snapshot: snapshot,
             icons: Self.icons(for: snapshot),
             rowCap: Self.rowCap,
-            sheetCap: Self.sheetCap(visible: visible, area: area),
+            sheetCap: Self.sheetCap(in: room),
             panelWidth: width,
+            room: room,
             modifiers: NSEvent.modifierFlags
         )
         // The chord that opened the panel is still held (#3168).
@@ -135,13 +137,7 @@ final class JumpPanelController: NSObject {
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
         if screen != nil {
-            panel.setFrameOrigin(
-                Self.origin(
-                    size: panel.frame.size,
-                    visible: visible,
-                    area: area
-                )
-            )
+            panel.setFrameOrigin(room.origin(of: panel.frame.size))
         } else {
             panel.center()
         }

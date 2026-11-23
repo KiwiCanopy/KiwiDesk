@@ -8118,6 +8118,12 @@ live glance at the active layer's bindings.
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
 
+:::unreleased
+A list too long for one column above the screen's bottom splits
+into up to three columns, each section kept whole, read down each
+column in turn; the columns scroll together.
+:::
+
 The panel also lists every bound [gesture](#gesture-actions), once
 each. A gesture whose action has a row is a badge on that row: the
 most specific first — a trackpad gesture before a mouse one, then
@@ -8213,6 +8219,11 @@ panel, the current item on each marked ✓.
   Studio". The line ends in **New Lens…**, which opens Settings ▸
   KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
   Lua-owned setup greys it.
+
+:::unreleased
+The **Profile** line shows only while two or more profiles are
+saved; **↑** and **↓** then step from Layout to KiwiVision.
+:::
 
 Keys on this side:
 
