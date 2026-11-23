@@ -98,6 +98,22 @@ struct ShortcutsColumnPlanTests {
         #expect(tall.tallest == 186)
     }
 
+    /// Where several cuts share the shortest tallest column, the
+    /// most even wins: no column ends early beside a long one.
+    @Test("a tie goes to the most even cut")
+    func tieGoesToTheEvenest() {
+        // A 300 pt one-row section fixes the tallest whatever the cut.
+        let tall = Section(header: 272, rows: 1)
+        let plan = Plan.balanced(
+            [tall] + Array(repeating: section(1), count: 4),
+            into: 3
+        )
+        #expect(plan.tallest == 300)
+        #expect(
+            plan.columns.map { $0.map(\.section) } == [[0], [1, 2], [3, 4]]
+        )
+    }
+
     /// A section past 1.25 × the even share breaks at a row; its
     /// rows go on at the next column's top under the repeated title.
     @Test("an oversized section breaks at a row and continues")
