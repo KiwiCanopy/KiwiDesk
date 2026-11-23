@@ -1462,6 +1462,20 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   `stickyGateKnowsTheLanding`), so a refused move still creates
   nothing.
 
+## A hand move holds until a screen change (#3578)
+
+**A door that changes no screen places only the Spaces it
+touched**, through `resolveSpaceDisplays(of:)` — a pin its pinned
+Space, a delete or a retire none, the heal and the float
+re-anchor still running — or `placeUnplacedSpaces` for a Space it
+created. The total `resolveSpaceDisplays()` re-places every Space
+from the pins, which reverts `move_space_to_display`, so it is
+for a screen change, a profile apply, a config or Settings apply,
+boot and the #634 reset; a new caller is one of those or takes
+the scoped door (`PinKeepsMovedSpaceTests` ▸
+`pinOfAnotherSpaceKeepsTheMove`, `deleteKeepsTheMove`;
+`screenChangeReresolves` is the control).
+
 ## A screen-count change settles before it chooses (#1612)
 
 macOS reports an in-between screen layout on some transitions

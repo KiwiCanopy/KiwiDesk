@@ -47,7 +47,7 @@ extension KiwiCore {
         let heldRetired = retireEmptiedHeldSpaces()
         var spacesChanged = false
         if retireEmptiedTemporarySpaces() || heldRetired {
-            resolveSpaceDisplays()
+            resolveSpaceDisplays(of: [])  // the heal alone (#3578)
             spacesChanged = true
         } else if placeUnplacedSpaces() {
             // A Space some door created by an undeclared id takes

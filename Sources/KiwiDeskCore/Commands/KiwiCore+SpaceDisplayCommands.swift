@@ -43,9 +43,10 @@ extension KiwiCore {
 
     /// `move_space_to_display(space, display)` — moves a space to
     /// another monitor NOW and shows it there. Runtime only: a
-    /// later monitor re-resolve (dock/undock) reverts to the
-    /// space's pin or auto placement — use `pin_space_to_display`
-    /// to make it stick. Auto-creates the space if new.
+    /// later screen change (dock/undock), profile apply or config
+    /// load reverts to the space's pin or auto placement — use
+    /// `pin_space_to_display` to make it stick. Auto-creates the
+    /// space if new.
     func moveSpaceToDisplay(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -104,10 +105,10 @@ extension KiwiCore {
         // placements (`SpacePlacement` precedence); a fresh pin
         // wins, so drop any stale Main designation.
         mainSpaces.remove(space)
-        // `resolveSpaceDisplays` re-anchors the floats of every
-        // space it relocates (#444) — including another space
-        // this pin displaces off the target display.
-        resolveSpaceDisplays()
+        // Places the pinned Space alone, so another Space's hand
+        // move holds (#3578); the resolve re-anchors the floats of
+        // whatever it relocates (#444), a heal's seed included.
+        resolveSpaceDisplays(of: [space])
         retile(pass: .apply)
         emitSpaceChange()
         return .ok()
