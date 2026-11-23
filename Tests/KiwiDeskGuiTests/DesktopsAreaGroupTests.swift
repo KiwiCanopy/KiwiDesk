@@ -100,6 +100,28 @@ struct DesktopsAreaGroupTests {
             DesktopsText.spoken(desktop.spaces[1], at: 1, on: desktop)
                 == "Space 3, shown, Left, Desktop 1, windows: 0"
         )
+        // A nameless area speaks no empty name.
+        let nameless = DesktopOverview.Desktop(
+            native: 1,
+            label: 1,
+            number: 1,
+            isShown: true,
+            profile: nil,
+            spaces: desktop.spaces,
+            areas: [
+                DesktopOverview.Area(
+                    key: ScreenAreaKey(fingerprint: "Wide:3440x1440"),
+                    name: nil,
+                    position: nil,
+                    isHere: true,
+                    lines: 0..<4
+                )
+            ]
+        )
+        #expect(
+            DesktopsText.spoken(nameless.spaces[1], at: 1, on: nameless)
+                == "Space 3, shown, Desktop 1, windows: 0"
+        )
         // The unfiled line is in no area.
         #expect(
             DesktopsText.spoken(desktop.spaces[4], at: 4, on: desktop)

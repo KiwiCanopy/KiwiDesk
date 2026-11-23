@@ -143,6 +143,29 @@ struct DesktopOverviewAreaTests {
         )
     }
 
+    /// Every Space of the screen shown elsewhere: the switch's cursor
+    /// falls back to the screen's first Space, in the right area,
+    /// and the left area finds nothing free.
+    @Test("a full screen marks the switch's fallback")
+    func fallbackFollowsTheSwitch() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, areas) = makeCore()
+        try #require(areas.count == 2)
+        let keys = areas.compactMap {
+            core.state.workspaces[placement: $0]?.key.description
+        }
+        try #require(keys.count == 2)
+        let other = try #require(authoritySnapshot().key(of: 11))
+        core.desktopMemory.areaSpaces[other] = [
+            keys[0]: SpaceID(6), keys[1]: SpaceID(5),
+        ]
+        let screen = try split(core.desktopOverview(on: areas[0]))
+        let card = try #require(screen.desktops.first { !$0.isShown })
+        #expect(
+            card.spaces.map(\.isShown) == [false, false, true, false]
+        )
+    }
+
     @Test("area ranges run in order and cover all but unfiled")
     func rangesCoverTheLines() throws {
         defer { resetAuthorityOverrides() }
