@@ -208,9 +208,13 @@ editing here:
   it is handed (`AreaEdgeTests`). A reader asking which Space a
   screen shows names the placement it means: the area a window,
   the pointer or a bar sits in through `PlacementID`, the screen's
-  first area through `leadPlacement(of:)`, and a `DisplayID` read
-  only for a question about the whole physical screen; which reader
-  is which is review's.
+  first area through `leadPlacement(of:)`, and the `DisplayID`
+  read — the active Space where it sits on that screen, else the
+  first area's — only where that is the answer meant, as the
+  menu-bar Space mark means it; which reader is which is review's.
+  A merge's keys move in the write that merges, from Settings or
+  Lua alike: the pins, the bars' per-area maps and the live
+  Spaces to the survivor (`AreaMergeStickyTests`).
   A Desktop stays the physical screen's (ruling 17): a switch
   files each area's shown Space under the Desktop left through
   `rememberAreaSpaces` and moves every other area of the screen

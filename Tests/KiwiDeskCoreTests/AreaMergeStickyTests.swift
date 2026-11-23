@@ -65,4 +65,22 @@ struct AreaMergeStickyTests {
         #expect(core.stickyMoveBlock(WindowID(1), to: "3") == nil)
         #expect(core.stickyMoveBlock(WindowID(1), to: "2") != nil)
     }
+
+    /// A Lua merge rewrites a pin on the merged-away area to the
+    /// survivor, as a Settings merge does (ruling 22).
+    @Test func luaMergeMovesThePinToTheSurvivor() throws {
+        let (core, _) = try core()
+        let right = ScreenAreaKey(parsing: "\(wide.fingerprint)#2")
+        core.spacePins["3"] = right.description
+        let reply = core.execute(
+            "set_display_areas",
+            args: [
+                .string(wide.fingerprint), .string("side_by_side"),
+                .number(1720), .number(1720),
+            ]
+        )
+        #expect(reply.isSuccess)
+        let survivor = ScreenAreaKey(parsing: "\(wide.fingerprint)#1")
+        #expect(core.spacePins["3"] == survivor.description)
+    }
 }

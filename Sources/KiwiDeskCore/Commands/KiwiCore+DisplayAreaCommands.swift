@@ -31,11 +31,28 @@ extension KiwiCore {
         ) {
             return .fail(Self.message(for: problem))
         }
+        // A merged-away area's keys move to the survivor in the same
+        // write as the split, as a Settings merge's do (ruling 22).
+        var settings = tiler.settings
+        let remaps =
+            previous.map {
+                Self.areaRemaps(
+                    from: [screen.fingerprint: $0],
+                    to: [screen.fingerprint: split]
+                )
+            } ?? []
+        for remap in remaps {
+            settings.apply(remap)
+            for (space, pin) in spacePins {
+                spacePins[space] = remap.rewrite(pin)
+            }
+        }
         // A whole split stays stored once one existed, so its next id
         // outlives the merge and a later split mints none reused
         // (ruling 21).
-        tiler.settings.displayAreas[screen.fingerprint] =
+        settings.displayAreas[screen.fingerprint] =
             split.isWhole && previous == nil ? nil : split
+        tiler.settings = settings
         retile()
         return .ok()
     }

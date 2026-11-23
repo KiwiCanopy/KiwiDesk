@@ -1,12 +1,12 @@
 import AppKit
 
 /// KiwiHub's View side (#762, #2229, #2309): its Layout line,
-/// acting on the Space shown under the pointer — its area's on a
-/// split screen (#3517) — since on a desk of several screens the
-/// pointer is the one unambiguous "here".
+/// acting on the Space the pointer's screen shows —
+/// on a desk of several screens the pointer is the one unambiguous
+/// "this screen".
 extension KiwiCore {
-    /// The Space the Layout line acts on: the one shown under the
-    /// pointer.
+    /// The Space the Layout line acts on: the one shown on the
+    /// screen under the pointer.
     public func layoutPickerSpace() -> SpaceID? {
         spaceUnderPointer(shelves.contextMenus.pointer())
     }
@@ -17,14 +17,11 @@ extension KiwiCore {
         displayUnderPointer(shelves.contextMenus.pointer())
     }
 
-    /// The Space shown where `point` (Cocoa) is — its area's on a
-    /// split screen (#3517) — else the active one.
+    /// The Space shown on the screen holding `point` (Cocoa), else
+    /// the active one — KiwiHub's one "here", which its Windows
+    /// side's Move here reads too, so the panel's sides agree.
     func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
-        guard let display = displayUnderPointer(point) else {
-            return moveHereSpace(on: nil)
-        }
-        return shownSpace(atAX: GeometryUtils.axPoint(point), on: display)
-            ?? moveHereSpace(on: display)
+        moveHereSpace(on: displayUnderPointer(point))
     }
 
     /// The screen holding `point` (Cocoa), nil off every screen.
