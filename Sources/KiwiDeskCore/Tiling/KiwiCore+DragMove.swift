@@ -112,7 +112,7 @@ extension KiwiCore {
         let looksResize =
             (pressNearEdge && sizeChanged)
             || MouseResize.isResize(from: start, to: frame)
-        // A gesture that already crossed displays (#504) is a
+        // A gesture that already crossed placements (#504) is a
         // move for the rest of its life: macOS clamps a big
         // window's size as it lands on a smaller display, which
         // the magnitude test would read as a resize — hiding the

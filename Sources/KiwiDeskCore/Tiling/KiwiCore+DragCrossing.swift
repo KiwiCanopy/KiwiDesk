@@ -96,7 +96,7 @@ extension KiwiCore {
         else { return }
         // The #445 sticky gate, once per gesture: the refusal
         // pill should not re-flash on every dwell while the
-        // cursor stays on the refused display.
+        // cursor stays in the refused placement.
         guard !dragCrossing.stickyRefused(id) else { return }
         if stickyMoveRefused(id, to: destID) {
             dragCrossing.markStickyRefused(id)

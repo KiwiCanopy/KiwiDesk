@@ -6,10 +6,11 @@ import Foundation
 /// one (#3574).
 @MainActor
 public final class DragCrossingCoordinator {
-    /// Dwell delay before cross-display window migration triggers (0.15s).
+    /// Dwell delay before a crossing into another placement fires (0.15s).
     public var dwell: TimeInterval = 0.15
 
-    /// Resolves display ID under Cocoa screen point. Injected for unit
+    /// Resolves display ID under Cocoa screen point: `placementAt`'s
+    /// screen input, which drag readers ask instead. Injected for unit
     /// testing.
     public var displayAt: @MainActor (CGPoint) -> DisplayID? = {
         _ in nil
@@ -104,7 +105,7 @@ public final class DragCrossingCoordinator {
         gestures[id] = gesture
     }
 
-    /// Returns whether window crossed displays during current gesture (#492).
+    /// Returns whether window crossed placements during current gesture.
     func hasCrossed(_ id: WindowID) -> Bool {
         gestures[id]?.crossed == true
     }

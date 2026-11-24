@@ -8,9 +8,11 @@ import Testing
 @MainActor
 struct DragCrossingCoordinatorTests {
     private let home = PlacementID(display: DisplayID(1), area: 0)
-    private let foreign = PlacementID(display: DisplayID(2), area: 0)
+    /// Another area of the home screen, so the suite tells an area
+    /// seam from a screen seam (#3574).
+    private let foreign = PlacementID(display: DisplayID(1), area: 1)
 
-    /// Left half of the plane is display 1, right half display 2.
+    /// Left half of the plane is area 0, right half area 1.
     private func makeCoordinator() -> DragCrossingCoordinator {
         let crossing = DragCrossingCoordinator()
         crossing.dwell = 0.05
@@ -20,7 +22,7 @@ struct DragCrossingCoordinatorTests {
         return crossing
     }
 
-    @Test("A dwell on a foreign display fires one crossing")
+    @Test("A dwell on a foreign area fires one crossing")
     func dwellFires() async throws {
         let crossing = makeCoordinator()
         var fired: [PlacementID] = []
@@ -36,7 +38,7 @@ struct DragCrossingCoordinatorTests {
         )
         let dwell = crossing.dwellTask
         #expect(dwell != nil, "the move armed no dwell")
-        // Same-display moves must keep the armed dwell running,
+        // Same-area moves must keep the armed dwell running,
         // not restart it — which is the identity of the handle,
         // asserted rather than hoped for the way re-arming
         // inside a poll loop had to (#994).
@@ -67,7 +69,7 @@ struct DragCrossingCoordinatorTests {
             cursor: CGPoint(x: 1500, y: 100),
             home: home
         )
-        // Back on the home display before the dwell elapses:
+        // Back in the home area before the dwell elapses:
         // the seam-skim case the debounce exists for.
         crossing.moved(
             id,
@@ -78,13 +80,13 @@ struct DragCrossingCoordinatorTests {
         #expect(fired == 0)
     }
 
-    @Test("A cursor over no display disarms the dwell")
+    @Test("A cursor over no placement disarms the dwell")
     func nowhereDisarms() async throws {
         let crossing = makeCoordinator()
         var fired = 0
         crossing.onCross = { _, _ in fired += 1 }
         let id = WindowID(1)
-        // Arm toward a display that then stops resolving
+        // Arm toward a placement that then stops resolving
         // (topology change mid-drag).
         crossing.placementAt = { [foreign] _ in foreign }
         crossing.moved(

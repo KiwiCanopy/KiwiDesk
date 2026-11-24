@@ -103,6 +103,54 @@ struct AreaDragCrossingTests {
         #expect(core.activeSpace?.id == "2")
         #expect(core.dragCrossing.hasCrossed(id))
         #expect(core.dragCrossing.origin(for: id)?.space == "1")
+        // The drop at the same cursor names the Space the dwell
+        // filed into, so the release re-files nothing.
+        #expect(core.dropDestination() == "2")
+    }
+
+    /// On a stacked split the dwell crosses into the lower area, the
+    /// drop keeps it there and ends the gesture, and a second
+    /// gesture crosses back into the upper area.
+    @Test func stackedCrossDropAndBack() async throws {
+        let core = try core(.stacked)
+        let id = WindowID(1)
+        let lower = cocoa(CGPoint(x: 1000, y: 1300))
+        core.drag.cursorLocation = { lower }
+        core.updateDragCrossing(id, cursor: lower)
+        let down = core.dragCrossing.dwellTask
+        #expect(down != nil, "the stacked seam armed no dwell")
+        await down?.value
+        #expect(core.state.workspaces.space(of: id) == "2")
+        core.handleDragEnd(
+            id,
+            start: CGRect(x: 0, y: 0, width: 500, height: 500),
+            frame: CGRect(x: 0, y: 900, width: 400, height: 400)
+        )
+        #expect(core.state.workspaces.space(of: id) == "2")
+        #expect(!core.dragCrossing.hasCrossed(id))
+        let upper = cocoa(CGPoint(x: 1000, y: 100))
+        core.drag.cursorLocation = { upper }
+        core.updateDragCrossing(id, cursor: upper)
+        let back = core.dragCrossing.dwellTask
+        #expect(back != nil, "the way back armed no dwell")
+        await back?.value
+        #expect(core.state.workspaces.space(of: id) == "1")
+    }
+
+    /// A dwell whose cursor is back in the home area by fire time
+    /// crosses nothing.
+    @Test func staleFireStaysHome() async throws {
+        let core = try core(.sideBySide)
+        let id = WindowID(1)
+        let point = cocoa(CGPoint(x: 3000, y: 700))
+        core.updateDragCrossing(id, cursor: point)
+        let dwell = core.dragCrossing.dwellTask
+        #expect(dwell != nil, "the area seam armed no dwell")
+        let home = cocoa(CGPoint(x: 100, y: 700))
+        core.drag.cursorLocation = { home }
+        await dwell?.value
+        #expect(core.state.workspaces.space(of: id) == "1")
+        #expect(!core.dragCrossing.hasCrossed(id))
     }
 
     /// The pointer still in the window's own area arms nothing.
