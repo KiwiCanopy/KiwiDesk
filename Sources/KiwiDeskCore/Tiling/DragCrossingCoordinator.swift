@@ -1,8 +1,9 @@
 import CoreGraphics
 import Foundation
 
-/// Debounce and gesture bookkeeping for cross-display drag movement (#504,
-/// #372).
+/// Debounce and gesture bookkeeping for a drag crossing into another
+/// placement (#504, #372): another screen, or another area of a split
+/// one (#3574).
 @MainActor
 public final class DragCrossingCoordinator {
     /// Dwell delay before cross-display window migration triggers (0.15s).
@@ -14,8 +15,13 @@ public final class DragCrossingCoordinator {
         _ in nil
     }
 
-    /// Callback invoked when debounced display crossing fires.
-    var onCross: @MainActor (WindowID, DisplayID) -> Void = {
+    /// Resolves the placement under a Cocoa screen point: the area
+    /// under it on a split screen, the screen's one area otherwise.
+    /// Wired by the core over `displayAt`; injected for unit testing.
+    var placementAt: @MainActor (CGPoint) -> PlacementID? = { _ in nil }
+
+    /// Callback invoked when a debounced crossing fires.
+    var onCross: @MainActor (WindowID, PlacementID) -> Void = {
         _,
         _ in
     }
@@ -32,7 +38,7 @@ public final class DragCrossingCoordinator {
     /// window's dwell without harm; `gestures` stays per-window
     /// because ids must not inherit stale bookkeeping.
     private var pending:
-        (window: WindowID, display: DisplayID, task: Task<Void, Never>)?
+        (window: WindowID, target: PlacementID, task: Task<Void, Never>)?
 
     #if DEBUG
         /// Timeline handle for async crossing testing (#994;
@@ -48,22 +54,20 @@ public final class DragCrossingCoordinator {
     func moved(
         _ id: WindowID,
         cursor: CGPoint,
-        homeDisplay: DisplayID?
+        home: PlacementID?
     ) {
         guard
-            let cursorDisplay = displayAt(cursor),
-            let homeDisplay,
-            cursorDisplay != homeDisplay
+            let target = placementAt(cursor),
+            let home,
+            target != home
         else {
             cancelPending(for: id)
             return
         }
-        if let pending, pending.window == id,
-            pending.display == cursorDisplay
-        {
+        if let pending, pending.window == id, pending.target == target {
             return
         }
-        schedule(id, display: cursorDisplay)
+        schedule(id, target: target)
     }
 
     /// Disarms pending dwell timer for `id`.
@@ -132,22 +136,22 @@ public final class DragCrossingCoordinator {
         return crossed
     }
 
-    private func schedule(_ id: WindowID, display: DisplayID) {
+    private func schedule(_ id: WindowID, target: PlacementID) {
         pending?.task.cancel()
         let task = Task { [weak self] in
             let ns = UInt64((self?.dwell ?? 0) * 1_000_000_000)
             try? await Task.sleep(nanoseconds: ns)
             guard !Task.isCancelled else { return }
-            self?.fire(id, display: display)
+            self?.fire(id, target: target)
         }
-        pending = (id, display, task)
+        pending = (id, target, task)
     }
 
-    private func fire(_ id: WindowID, display: DisplayID) {
+    private func fire(_ id: WindowID, target: PlacementID) {
         guard let pending, pending.window == id,
-            pending.display == display
+            pending.target == target
         else { return }
         self.pending = nil
-        onCross(id, display)
+        onCross(id, target)
     }
 }

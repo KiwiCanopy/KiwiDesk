@@ -64,13 +64,22 @@ struct DragCrossingTests {
         return core
     }
 
+    /// Fires the wired crossing onto display 2's one area, as the
+    /// coordinator's dwell would.
+    private func cross(_ core: KiwiCore, _ id: WindowID) {
+        core.dragCrossing.onCross(
+            id,
+            core.state.workspaces.placementOrWhole(of: DisplayID(2))
+        )
+    }
+
     @Test("A crossing eager-moves membership and follows focus")
     func crossingMovesMembership() {
         let core = makeTwoDisplayCore()
         let id = WindowID(1)
         // The wired onCross is the debounced dwell's landing
         // point — fire it directly, as the coordinator would.
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(
             core.state.workspaces.space(of: id) == SpaceID("2")
         )
@@ -102,7 +111,7 @@ struct DragCrossingTests {
         let id = WindowID(1)
         // The dwell fired after the release: the drop-commit
         // relocate (#492) owns the gesture now.
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )
@@ -113,7 +122,7 @@ struct DragCrossingTests {
     func cancelReverts() {
         let core = makeTwoDisplayCore()
         let id = WindowID(2)
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(
             core.state.workspaces.space(of: id) == SpaceID("2")
         )
@@ -136,7 +145,7 @@ struct DragCrossingTests {
     func dropEndsGesture() {
         let core = makeTwoDisplayCore()
         let id = WindowID(1)
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(core.dragCrossing.hasCrossed(id))
         // The real drop runs handleDragEnd, which must both
         // read the crossing (resize bypass) and clear it.
@@ -163,7 +172,7 @@ struct DragCrossingTests {
         // the home display — the fire must not commit.
         core.drag.cursorLocation = { CGPoint(x: 100, y: 100) }
         let id = WindowID(1)
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )
@@ -182,7 +191,7 @@ struct DragCrossingTests {
         try #require(core.spaceBarDrop.isArmed)
         // The bar spring is a competing membership mover; an
         // armed target wins over a racing dwell fire.
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )
@@ -194,7 +203,7 @@ struct DragCrossingTests {
         let core = makeTwoDisplayCore()
         let old = WindowID(1)
         let new = WindowID(9)
-        core.dragCrossing.onCross(old, DisplayID(2))
+        cross(core, old)
         #expect(
             core.state.workspaces.space(of: old) == SpaceID("2")
         )
@@ -216,7 +225,7 @@ struct DragCrossingTests {
         let core = makeTwoDisplayCore()
         let id = WindowID(1)
         core.dragCrossing.markStickyRefused(id)
-        core.dragCrossing.onCross(id, DisplayID(2))
+        cross(core, id)
         #expect(
             core.state.workspaces.space(of: id) == SpaceID(1)
         )

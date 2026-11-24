@@ -2,13 +2,14 @@ import AppKit
 import Foundation
 
 /// Live cross-display "make-room" (#504): dragging a tiled window
-/// onto another display moves its MEMBERSHIP there mid-drag, after
+/// onto another display — or another area of a split one (#3574) —
+/// moves its MEMBERSHIP there mid-drag, after
 /// a short dwell — the destination's windows slide apart to open a
 /// real slot under the cursor while the dragged window stays
 /// pinned under the pointer (`dragExemptWindow`, never re-framed
-/// mid-drag). From then on the drag is an ordinary SAME-display
+/// mid-drag). From then on the drag is an ordinary SAME-placement
 /// gesture in the destination space — the Space-Bar-spring model
-/// (#372) keyed on displays — so the drop swaps / snaps exactly
+/// (#372) keyed on placements — so the drop swaps / snaps exactly
 /// like a local drag, and `relocateAcrossDisplay` (#492) remains
 /// only the fast-flick path whose dwell never fired.
 extension KiwiCore {
@@ -19,9 +20,20 @@ extension KiwiCore {
                 .first { $0.frame.contains(point) }?
                 .kiwiDisplayID
         }
-        dragCrossing.onCross = { [weak self] id, display in
+        // Read through `displayAt` at call time, so a test's fake
+        // topology reaches the area rule too.
+        dragCrossing.placementAt = { [weak self] point in
+            guard let self,
+                let display = self.dragCrossing.displayAt(point)
+            else { return nil }
+            return self.pointerPlacement(
+                atAX: GeometryUtils.axPoint(point),
+                on: display
+            )
+        }
+        dragCrossing.onCross = { [weak self] id, placement in
             self?.withUserMotion {
-                self?.performLiveCrossing(id, onto: display)
+                self?.performLiveCrossing(id, onto: placement)
             }
         }
     }
@@ -37,19 +49,19 @@ extension KiwiCore {
             return
         }
         let home = state.workspaces.space(of: id)
-            .flatMap { state.workspaces.display(of: $0) }
-        dragCrossing.moved(id, cursor: cursor, homeDisplay: home)
+            .flatMap { state.workspaces.placement(of: $0) }
+        dragCrossing.moved(id, cursor: cursor, home: home)
     }
 
     /// The debounced crossing: eager-moves the dragged window into
-    /// the active space of the display the cursor settled on.
+    /// the Space shown in the placement the cursor settled on.
     /// Mirrors `relocateAcrossDisplay`'s placement (shared
     /// `insertDropped` choke point) but, like the Space-Bar spring,
     /// asserts NO AX focus and schedules NO settle — the pointer is
     /// inside the OS drag loop; the drop path owns focus.
     private func performLiveCrossing(
         _ id: WindowID,
-        onto display: DisplayID
+        onto placement: PlacementID
     ) {
         guard
             // Released during the dwell: the drop-commit
@@ -58,7 +70,7 @@ extension KiwiCore {
             // The dwell disarms only on AX move events, and
             // Electron/WebKit apps deliver those 100–300 ms
             // late — longer than the dwell (§5). Re-validate
-            // the LIVE cursor at fire time: still on the display
+            // the LIVE cursor at fire time: still in the placement
             // the dwell armed for, and not aiming at a Space Bar
             // item (a competing membership mover) — checked both
             // via the armed state AND a live bar hit-test, since
@@ -68,17 +80,14 @@ extension KiwiCore {
             spaceBars.spaceItem(
                 atGlobal: drag.cursorLocation()
             ) == nil,
-            dragCrossing.displayAt(drag.cursorLocation())
-                == display,
+            dragCrossing.placementAt(drag.cursorLocation())
+                == placement,
             let originID = state.workspaces.space(of: id),
             let origin = state.workspaces[originID],
             origin.windows.contains(id),
             state.placementMode(of: origin) != .floating,
             state.windows[id]?.isFloating == false,
-            let destID = shownSpace(
-                atAX: GeometryUtils.axPoint(drag.cursorLocation()),
-                on: display
-            ),
+            let destID = state.workspaces.activeSpace(on: placement),
             destID != originID,
             let dest = state.workspaces[destID],
             // A floating-mode destination has no layout to make

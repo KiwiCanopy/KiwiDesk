@@ -199,7 +199,10 @@ struct DragEmptyPlacementZoneTests {
         let point = CGPoint(x: 6000, y: 300)
         let home = try drag(core, to: point)
         let zone = try #require(core.dragOverlay.dropZoneFrame)
-        core.dragCrossing.onCross(WindowID(1), other)
+        core.dragCrossing.onCross(
+            WindowID(1),
+            core.state.workspaces.placementOrWhole(of: other)
+        )
         #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
         core.handleDragMove(
             WindowID(1),
@@ -261,7 +264,10 @@ struct DragEmptyPlacementZoneTests {
         addWindow(core, 2)
         core.dragCrossing.displayAt = { $0.x < 5000 ? id : other }
         let home = try drag(core, to: CGPoint(x: 6000, y: 300))
-        core.dragCrossing.onCross(WindowID(1), other)
+        core.dragCrossing.onCross(
+            WindowID(1),
+            core.state.workspaces.placementOrWhole(of: other)
+        )
         let gap = GeometryUtils.axPoint(CGPoint(x: 10, y: 700))
         core.drag.cursorLocation = { gap }
         core.handleDragMove(
