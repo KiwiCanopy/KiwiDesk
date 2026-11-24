@@ -4891,6 +4891,13 @@ Both take their corners from
 [`border.set_corner_style`](#borderset_corner_style); their look
 is otherwise fixed.
 
+:::unreleased
+Over another screen, or another [area](#set_display_areas) of a
+split screen, whose Space has no tiled window, the drop zone marks
+where the window lands there. A floating Space and a screen
+showing a full-screen app draw none.
+:::
+
 ### drag.set_drop_zone_enabled
 
 **Expects:** `true` or `false` (default `true`).

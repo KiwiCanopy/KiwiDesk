@@ -188,10 +188,17 @@ extension KiwiCore {
         // Suppress the highlight over a cross-display track dest
         // (files by rule, not the slot); see `dropZoneTarget` (#492).
         let honestTarget = dropZoneTarget(target, from: space)
-        if settings.dragDropZone.enabled,
-            let honestTarget,
-            let targetSlot = slots[honestTarget]
-        {
+        // An empty Space's placement has no slot to swap with, so
+        // the zone marks the slot the drop gives it there (#3582).
+        let zone =
+            settings.dragDropZone.enabled
+            ? honestTarget.flatMap { slots[$0] }
+                ?? (target == nil
+                    ? emptyPlacementDropZone(id, from: space)
+                        ?? crossedLoneSlot(id, in: space, slots: slots)
+                    : nil)
+            : nil
+        if let targetSlot = zone {
             dragOverlay.showDropZone(
                 at: targetSlot,
                 cornerRadius: corner,
