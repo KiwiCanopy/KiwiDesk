@@ -165,11 +165,7 @@ struct ScreenAreaDivider: View {
             snap: kept ? snapped.snap : nil,
             cut: index,
             position: landed.position,
-            landed: ScreenAreaCuts.cuts(
-                of: landed.split.areas,
-                width: extent,
-                height: depth
-            )?.first { $0.holds(cut, at: landed.position) }
+            landed: landed.split.cut(holding: cut, at: landed.position)
         )
     }
 

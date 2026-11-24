@@ -162,17 +162,10 @@ struct ScreenCard: View {
         let factor = scale(storedSplit)
         // A drag in flight re-spans the dividers inside the box it
         // resizes; match them by axis and place, never by index.
-        let moving =
-            drag.flatMap {
-                ScreenAreaCuts.cuts(
-                    of: $0.split.areas,
-                    width: width,
-                    height: height
-                )
-            } ?? []
         ForEach(Array(cuts.enumerated()), id: \.offset) { index, stored in
             let cut =
-                moving.first { $0.holds(stored) } ?? stored
+                drag?.split.cut(holding: stored, at: stored.position)
+                ?? stored
             let side = cut.axis == .sideBySide
             let dragged = drag?.cut == index ? drag?.position : nil
             let position = dragged ?? cut.position

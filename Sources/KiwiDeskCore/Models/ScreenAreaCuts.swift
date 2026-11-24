@@ -89,3 +89,19 @@ extension ScreenAreaCut {
             && start < other.end && other.start < end
     }
 }
+
+extension ScreenSplit {
+    /// This split's cut that holds `cut` placed at `position`: a
+    /// dragged divider's landing, the segments it joined included
+    /// (#3541).
+    public func cut(holding cut: ScreenAreaCut, at position: Int)
+        -> ScreenAreaCut?
+    {
+        ScreenAreaCuts.cuts(
+            of: areas,
+            width: extent.width,
+            height: extent.height
+        )?
+        .first { $0.holds(cut, at: position) }
+    }
+}

@@ -89,16 +89,19 @@ struct ScreenAreaNestedEditTests {
     @Test func mergeRowLaysOutAtEveryWidth() throws {
         LocalizationManager.shared.select("en")
         let (model, screen) = model()
-        tJunction(model, screen)
+        // Left | Middle | Right: the middle has two neighbours.
+        model.splitArea(0, on: screen, .sideBySide)
+        model.splitArea(1, on: screen, .sideBySide)
+        #expect(model.mergeNeighbours(of: 1, on: screen).count == 2)
         for name in [nil, String(repeating: "Wide name ", count: 4)] {
             if let name {
-                model.renameArea(1, on: screen, to: name + "1")
-                model.renameArea(3, on: screen, to: name + "2")
+                model.renameArea(0, on: screen, to: name + "1")
+                model.renameArea(2, on: screen, to: name + "2")
             }
             let editor = ScreenAreaEditor(
                 model: model,
                 display: screen,
-                area: 0,
+                area: 1,
                 rename: .constant(nil),
                 sizes: .constant(nil),
                 givingWay: .constant([]),
@@ -150,9 +153,7 @@ struct ScreenAreaNestedEditTests {
                 snap: .divider,
                 cut: 0,
                 position: landed.position,
-                landed: try cuts(landed.split).first {
-                    $0.holds(lead, at: landed.position)
-                }
+                landed: landed.split.cut(holding: lead, at: landed.position)
             )
             #expect(drag.landed != nil)
             return drag.joins(other)
@@ -260,11 +261,30 @@ struct ScreenAreaNestedEditTests {
         #expect(body.contains(".help(title)"))
         #expect(body.contains(".accessibilityLabel(title)"))
         #expect(body.contains("Button(model.areaLabel(other, on: display)"))
-        #expect(editor.contains("ViewThatFits(in: .horizontal)"))
+        // The fit ladder's last candidate is the same pull-down.
+        let ladder = try #require(
+            editor.range(of: "ViewThatFits(in: .horizontal) {")
+        )
+        let tail = editor[ladder.upperBound...]
+        let close = try #require(tail.range(of: "\n                    }\n"))
+        #expect(
+            tail[..<close.lowerBound].hasSuffix("mergeMenu(area, neighbours)")
+        )
         // A joined divider lights through every style the dragged
         // one takes.
         let divider = try source("ScreenAreaDivider.swift")
         #expect(divider.contains("dragging || drag?.joins(cut) == true"))
+        let card = try source("ScreenCard.swift")
+        #expect(
+            card.contains(
+                "drag?.split.cut(holding: stored, at: stored.position)"
+            )
+        )
+        #expect(
+            divider.contains(
+                "landed: landed.split.cut(holding: cut, at: landed.position)"
+            )
+        )
         #expect(!divider.contains("if dragging {"))
         #expect(!divider.contains("dragging ? 2"))
         #expect(!divider.contains("dragging\n"))

@@ -195,9 +195,36 @@ struct ScreenSplitNestedTests {
         )
         let upright = cuts.filter { $0.axis == .sideBySide }
         #expect(upright.count == 1)
-        #expect(upright.first?.position == 1720)
+        #expect(upright.first?.position == 3440 / 2)
         #expect(upright.first?.start == 0)
         #expect(upright.first?.end == 1440)
+    }
+
+    /// A cut holds another only on its own axis and line, spans
+    /// overlapping: a square 2x2 puts both axes at one number.
+    @Test func aCutHoldsOnlyItsOwnAxisAndLine() throws {
+        let square = ScreenSplit.whole(width: 1440, height: 1440)
+        let split = try #require(
+            square.splitting(0, .sideBySide)?.splitting(0, .stacked)
+        )
+        let cuts = try #require(
+            ScreenAreaCuts.cuts(of: split.areas, width: 1440, height: 1440)
+        )
+        let upright = try #require(cuts.first { $0.axis == .sideBySide })
+        let level = try #require(cuts.first { $0.axis == .stacked })
+        #expect(upright.position == level.position)
+        #expect(upright.holds(upright))
+        #expect(!upright.holds(level))
+        #expect(split.cut(holding: upright, at: 720) == upright)
+        let columns = try #require(
+            square.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
+        )
+        let pair = try #require(
+            ScreenAreaCuts.cuts(of: columns.areas, width: 1440, height: 1440)
+        )
+        #expect(pair.count == 2)
+        #expect(!pair[0].holds(pair[1]))
+        #expect(pair[0].holds(pair[1], at: pair[0].position))
     }
 
     @Test func aSegmentMovesAlone() throws {
