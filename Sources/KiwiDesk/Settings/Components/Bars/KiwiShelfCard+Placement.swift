@@ -5,12 +5,12 @@ import SwiftUI
 /// bars along the edge: alignment for a lone bar, order and share
 /// once both show.
 extension KiwiShelfCard {
-    /// How KiwiShelf shows (#761, #2978): one master for every bar
-    /// and the Pocket, each behind Each bar and Pocket — the Space
-    /// Bar in every layout, the App Bar only where a layout can
-    /// carry one, then the Pocket — then the reveal. The master
-    /// selects nothing while they differ and says why through its
-    /// `?`; the drawer then stays open.
+    /// The card's head (#761, #2978, #3612): the Show and Position
+    /// masters for every bar and the Pocket, each bar's own rows
+    /// behind Each bar and Pocket — the Space Bar in every layout,
+    /// the App Bar only where a layout can carry one, then the
+    /// Pocket. A master selects nothing while they differ and says
+    /// why through its `?`; the drawer then stays open.
     var showGroup: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(BarsRowOrder.kiwishelfShow, id: \.id) {
@@ -48,41 +48,26 @@ extension KiwiShelfCard {
                 )
     }
 
-    /// The Show master and its Each bar drawer, attached to it.
-    @ViewBuilder var visibilityRows: some View {
+    /// The Show master; Each bar and Pocket hangs under Position.
+    var visibilityRows: some View {
         SegmentedPicker(
             L("kiwishelf.show.label", "Show"),
             selection: model.barVisibilityMaster,
             options: AppBarOptions.visibility.map { ($0.1, $0.0) },
             help: visibilityMasterHelp
         )
-        SettingsDisclosure(
-            SettingsCatalog.bars.kiwishelfShowEach,
-            chrome: .attached,
-            isExpanded: $showExpanded,
-            scrollHoisted: true,
-            locked: visibilitySplit
-        ) {
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(BarsRowOrder.kiwishelfShowEach, id: \.id) {
-                    showRow($0)
-                }
-            }
-            .padding(.top, 8)
-        }
     }
 
     @ViewBuilder func showRow(_ key: SettingKey) -> some View {
         switch key {
         case .spaceBar(.spaceBarVisibility):
             visibilityRow(
-                SettingsCatalog.bars.kiwishelfShowEach.children
-                    .spaceBarShow.text,
+                L("kiwishelf.show.label", "Show"),
                 model.barShowBinding(.spaceBar),
                 help: model.screenShowsHelp(.space)
             )
             .searchAnchored(
-                SettingsCatalog.bars.kiwishelfShowEach.children
+                SettingsCatalog.bars.kiwishelfEach.children
                     .spaceBarShow
             )
             besideAlwaysNote(.space, in: [.monocle, .scrolling])
@@ -91,14 +76,13 @@ extension KiwiShelfCard {
                 in: .monocle
             )
             visibilityRow(
-                SettingsCatalog.bars.kiwishelfShowEach.children
-                    .monocleShowIn.text,
+                Self.showIn(.monocle),
                 model.barShowBinding(.appBar(.monocle)),
                 help: model.screenShowsHelp(.app)
             )
             .modifier(GreyOut(active: maximizes))
             .searchAnchored(
-                SettingsCatalog.bars.kiwishelfShowEach.children
+                SettingsCatalog.bars.kiwishelfEach.children
                     .monocleShowIn
             )
             if maximizes {
@@ -108,31 +92,29 @@ extension KiwiShelfCard {
             }
         case .layoutAppBar(.scrollingAppBarVisibility):
             visibilityRow(
-                SettingsCatalog.bars.kiwishelfShowEach.children
-                    .scrollingShowIn.text,
+                Self.showIn(.scrolling),
                 model.barShowBinding(.appBar(.scrolling)),
                 help: model.screenShowsHelp(.app)
             )
             .searchAnchored(
-                SettingsCatalog.bars.kiwishelfShowEach.children
+                SettingsCatalog.bars.kiwishelfEach.children
                     .scrollingShowIn
             )
             besideAlwaysNote(.app, in: [.scrolling])
         case .kiwishelf(.pocketVisibility):
             visibilityRow(
-                SettingsCatalog.bars.kiwishelfShowEach.children
-                    .pocketShow.text,
+                L("kiwishelf.show.label", "Show"),
                 $model.config.settings.kiwishelf.pocketVisibility,
                 options: AppBarOptions.pocketVisibility
             )
             .searchAnchored(
-                SettingsCatalog.bars.kiwishelfShowEach.children
+                SettingsCatalog.bars.kiwishelfEach.children
                     .pocketShow
             )
             autoPocketNote
         case .kiwishelf(.pocketDragReveal):
             ToggleRow(
-                label: SettingsCatalog.bars.kiwishelfShowEach.children
+                label: SettingsCatalog.bars.kiwishelfEach.children
                     .pocketDragReveal.text,
                 isOn: $model.config.settings.kiwishelf.pocketDragReveal,
                 help: L(
@@ -142,7 +124,7 @@ extension KiwiShelfCard {
                 )
             )
             .searchAnchored(
-                SettingsCatalog.bars.kiwishelfShowEach.children
+                SettingsCatalog.bars.kiwishelfEach.children
                     .pocketDragReveal
             )
         default:
@@ -151,6 +133,11 @@ extension KiwiShelfCard {
             )
             EmptyView()
         }
+    }
+
+    /// An App Bar Show row's label under its bar's name (#3612).
+    static func showIn(_ mode: LayoutMode) -> String {
+        L("kiwishelf.show.app_bar_in", "Show in %1$@", mode.displayName)
     }
 
     /// Under the App Bar in Monocle while Monocle maximizes its

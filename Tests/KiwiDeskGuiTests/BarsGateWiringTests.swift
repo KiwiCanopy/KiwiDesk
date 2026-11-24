@@ -55,13 +55,11 @@ struct BarsGateWiringTests {
                 "autoPocketNotecase.kiwishelf(.pocketDragReveal):",
                 "screen.barKeepsAutoPocket(in:$0,on:nil)",
                 "model.config.settings.screenVariants",
-                // The Show drawer hangs under its master unruled.
-                "SettingsCatalog.bars.kiwishelfShowEach,"
-                    + "chrome:.attached,",
             ],
-            // So does Position's (#761).
+            // Each bar and Pocket hangs under Position unruled
+            // (#761, #3612).
             "Components/Bars/KiwiShelfCard+Edge.swift": [
-                "SettingsCatalog.bars.kiwishelfEdges,"
+                "SettingsCatalog.bars.kiwishelfEach,"
                     + "chrome:.attached,"
             ],
             // The Reveal row's grey while no bar hides (owner

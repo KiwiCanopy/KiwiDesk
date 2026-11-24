@@ -115,7 +115,7 @@ extension InterpolatedLabelTests {
         "kiwishelf.edge.screens_differ.help": 2,
         "kiwishelf.edge.pocket.screens_differ.help": 1,
         "kiwishelf.show.differ_per_screen.help": 2,  // #3517
-        "kiwishelf.show.screens_differ.help": 2,
+        "kiwishelf.show.screens_differ.help": 1,  // #3612
         // #3471: the Off pointer names its page; the scan does not
         // read the catalog row it also names.
         "kiwishelf.durations.animations_off.link": 1,

@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The pocket's place along its edge (#2678), drawn in Position's
-/// Each bar and Pocket drawer under the Pocket's edge rows (#3445).
+/// The pocket's place along its edge (#2678), drawn in Each bar and
+/// Pocket under the Pocket's edge rows (#3445, #3612).
 extension KiwiShelfCard {
     /// The rule a bar's edge sets: shown under the row while the
     /// pocket shares one, and in the `?` otherwise (#3376).
@@ -26,7 +26,7 @@ extension KiwiShelfCard {
     }
 
     private var pocketPositionRow: some View {
-        let label = SettingsCatalog.bars.kiwishelfEdges.children
+        let label = SettingsCatalog.bars.kiwishelfEach.children
             .kiwishelfPocketPosition.text
         let readout = SettingsValueReadout.percent(
             Double(shelf.wrappedValue.pocketPosition) / 100
@@ -61,7 +61,7 @@ extension KiwiShelfCard {
             }
         }
         .searchAnchored(
-            SettingsCatalog.bars.kiwishelfEdges.children
+            SettingsCatalog.bars.kiwishelfEach.children
                 .kiwishelfPocketPosition
         )
     }

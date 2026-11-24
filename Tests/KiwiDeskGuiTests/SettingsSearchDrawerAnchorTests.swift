@@ -53,9 +53,8 @@ struct SettingsSearchDrawerAnchorTests {
             (
                 .bars, "Bars & Pocket", .kiwishelf,
                 [
-                    SettingsCatalog.bars.kiwishelfShowEach,
+                    SettingsCatalog.bars.kiwishelfEach,
                     SettingsCatalog.bars.kiwishelfDurations,
-                    SettingsCatalog.bars.kiwishelfEdges,
                     SettingsCatalog.bars.kiwishelfStyle,
                     SettingsCatalog.bars.kiwishelfMargins,
                 ]

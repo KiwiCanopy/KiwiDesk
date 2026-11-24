@@ -22173,6 +22173,21 @@ place: the value still picks the end of the shelf the Pocket takes,
 places it in the strip under Hidden, and governs every screen that
 does not share an edge — so hiding it would hide a working control.
 
+:::unreleased
+*Amended (#3612, owner 2026-11-24):* the card is grouped by bar. The
+Show and Position masters lead it, and one *Each bar and Pocket*
+drawer hangs under Position: the Space Bar, the App Bar and the
+Pocket each take a heading over their own Show rows, their Position
+and a *Per screen or area* drawer, whose rows stack a labelled
+segmented Show over a labelled Position, each named as Settings ▸
+Screens names the area. The Pocket's drawer has Position only, and
+Pocket position closes the Pocket's block. Two drawers of one name,
+one per master, read as one topic split by widget type, and a Show
+pop-up beside an edge picker read as part of the position. Menu bar
+icon, Handle thickness, Reveal and Durations follow under the heading
+*When a bar is out of view* — not "hidden", which is a Show choice.
+:::
+
 **Choices stay open; numbers go in one drawer per bar card (#2507,
 owner ruling 2026-10-21).** Nothing hides rows by experience
 level, so every open row on Bars is in front of someone who just

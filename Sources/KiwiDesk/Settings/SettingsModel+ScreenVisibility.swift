@@ -126,23 +126,51 @@ extension SettingsModel {
         return [(nil, perLayout)] + values
     }
 
-    /// A Per screen row's name, and its diff row's: `screen`, and on
-    /// a split screen its area's place in reading order, every area
-    /// numbered — interim until the positional area names (#3517).
+    /// A Per screen or area row's name (#3612): a connected screen's
+    /// or area's as Settings ▸ Screens says it (`areaName(_:on:)`);
+    /// a twin's or a disconnected one's through `perScreenName`.
+    func perScreenName(key: String) -> String {
+        let area = ScreenAreaKey(parsing: key)
+        let split =
+            areaKeys(of: area.fingerprint).count > 1 || area.areaID != 0
+        let found = displays.filter { $0.fingerprint == area.fingerprint }
+        if found.count == 1, let display = found.first {
+            if !split { return areaName(nil, on: display) }
+            if areaLabel(area.areaID, on: display) != nil {
+                return areaName(area.areaID, on: display)
+            }
+        }
+        // Twins share their fingerprint's split, so either's words.
+        let label = found.first.flatMap {
+            split ? areaLabel(area.areaID, on: $0) : nil
+        }
+        return Self.perScreenName(
+            screen: Display.fingerprintParts(area.fingerprint).name,
+            key: key,
+            splits: config.settings.displayAreas,
+            area: label
+        )
+    }
+
+    /// A Per screen row's name where no one connected screen words
+    /// it, and its diff row's: `screen`, and on a split screen `area`,
+    /// else the area's stored name, else its number in reading order.
     static func perScreenName(
         screen: String,
         key: String,
-        splits: [String: ScreenSplit]
+        splits: [String: ScreenSplit],
+        area label: String? = nil
     ) -> String {
         let area = ScreenAreaKey(parsing: key)
         let keys = ScreenSplit.areaKeys(of: area.fingerprint, in: splits)
         guard keys.count > 1 || area.areaID != 0 else { return screen }
+        let stored = splits[area.fingerprint]?.areas
+            .first { $0.id == area.areaID }?.name
         let place = keys.firstIndex(of: key) ?? area.areaID
-        return L(
-            "kiwishelf.per_screen.area_name",
-            "%1$@ – Area %2$@",
-            screen,
-            String(place + 1)
+        return ScreenAreaWords.composed(
+            screen: screen,
+            area: label ?? stored
+                ?? ScreenAreaWords.position(.numbered(place + 1))
         )
     }
 

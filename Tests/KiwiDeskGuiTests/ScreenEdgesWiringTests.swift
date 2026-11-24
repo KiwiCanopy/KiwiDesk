@@ -101,10 +101,10 @@ struct ScreenEdgesWiringTests {
     @Test("a drawer held open greys its chevron")
     func lockedDrawersGreyTheirChevron() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
-        #expect(count("locked:edgesHeldOpen", in: card) == 1)
+        #expect(count("locked:eachHeldOpen", in: card) == 1)
         #expect(
             count(
-                "varedgesHeldOpen:Bool{edgesSplit"
+                "vareachHeldOpen:Bool{visibilitySplit||edgesSplit"
                     + "||model.hasScreenShows(.space)"
                     + "||model.hasScreenShows(.app)}",
                 in: card

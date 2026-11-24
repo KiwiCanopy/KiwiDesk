@@ -1,13 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A bar's Per screen drawer (#1948): one edge picker per screen
-/// of the draft profile, each showing the edge that screen gets —
-/// per area on a split screen — and for the two bars a Show menu
-/// beside it, that screen's or area's visibility (#3517 ruling 30).
-/// A pick of the bar's own edge stores nothing; the drawer opens
-/// by itself, held open, while a screen has an edge or a Show of
-/// its own. On a one-screen profile with no split its rows grey,
+/// A bar's Per screen or area drawer (#1948, #3612): one row per
+/// screen of the draft profile — per area on a split screen — each
+/// named as Settings ▸ Screens names it, its labelled Show strip
+/// (the two bars only, #3517 ruling 30) stacked over its Position
+/// strip. A pick of the bar's own value stores nothing; the drawer
+/// opens by itself, held open, while a screen has an edge or a Show
+/// of its own. On a one-screen profile with no split its rows grey,
 /// its `?` naming what unlocks them (#2677).
 /// Not a `SettingsDisclosure`: its key is a catalog CHILD of Each
 /// bar, which search opens, and its rows are dynamic, so a hit
@@ -94,13 +94,24 @@ struct ScreenEdgesDrawer<Bar: ScreenEdged>: View {
     }
 
     private func screenRow(_ row: ScreenEdgeRow) -> some View {
-        // One element per row: the picker speaks the name, the
-        // count and the absence; the drawn twins are hidden.
+        // The name line is drawn; each strip speaks the name with
+        // its own control, and the absence.
         let name = row.count > 1 ? "\(row.name) × \(row.count)" : row.name
         let absent = L("kiwishelf.edge.screen.absent", "not connected")
-        return SettingsRowShape {
+        let spoken =
+            row.present
+            ? name
+            : L(
+                "kiwishelf.edge.screen.ax_absent",
+                "%1$@, %2$@",
+                name,
+                absent
+            )
+        let position = L("kiwishelf.edge.label", "Position")
+        return VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Text(name)
+                    .fontWeight(.medium)
                     .lineLimit(1)
                     .truncationMode(.middle)
                 if !row.present {
@@ -108,62 +119,49 @@ struct ScreenEdgesDrawer<Bar: ScreenEdged>: View {
                 }
             }
             .accessibilityHidden(true)
-        } control: {
-            let spoken =
-                row.present
-                ? name
-                : L(
-                    "kiwishelf.edge.screen.ax_absent",
-                    "%1$@, %2$@",
-                    name,
-                    absent
-                )
-            HStack(spacing: 8) {
+            if let show {
+                showStrip(show, row: row, spoken: spoken)
+            }
+            labelled(position) {
                 SegmentedPicker(
-                    spokenLabel: show == nil
-                        ? spoken
-                        : Self.qualified(
-                            spoken,
-                            L("kiwishelf.edge.label", "Position")
-                        ),
+                    spokenLabel: Self.qualified(spoken, position),
                     selection: model.screenEdge(bar, on: row.id),
                     options: options
                 )
-                if let show {
-                    showMenu(show, row: row, spoken: spoken)
-                }
             }
         }
         .padding(.leading, 16)
     }
 
-    /// The row's Show menu: Always, Auto or Hidden, and for the App
-    /// Bar Per layout, which follows each layout's own.
-    private func showMenu(
+    /// The row's Show strip: Always, Auto or Hidden, and for the App
+    /// Bar Per layout first, which follows each layout's own.
+    private func showStrip(
         _ show: ScreenShowBar,
         row: ScreenEdgeRow,
         spoken: String
     ) -> some View {
-        let options = SettingsModel.screenShowOptions(show)
-        let value = model.screenShow(show, on: row.id)
-        let title = options.first { $0.0 == value }?.1 ?? ""
-        return Picker(
-            selection: model.screenShowBinding(show, on: row.id)
-        ) {
-            ForEach(options, id: \.1) { option in
-                Text(option.1).tag(option.0)
-            }
-        } label: {
-            EmptyView()
+        let label = L("kiwishelf.show.label", "Show")
+        return labelled(label) {
+            SegmentedPicker(
+                spokenLabel: Self.qualified(spoken, label),
+                selection: model.screenShowBinding(show, on: row.id),
+                options: SettingsModel.screenShowOptions(show)
+                    .map { ($0.1, $0.0) }
+            )
         }
-        .labelsHidden()
-        .pickerStyle(.menu)
-        .neutralMenuLabel()
-        .fixedSize()
-        .accessibilityLabel(
-            Self.qualified(spoken, L("kiwishelf.show.label", "Show"))
-        )
-        .accessibilityValue(title)
+    }
+
+    /// A strip on the label axis, its drawn label silent: the strip
+    /// speaks the row's name with it.
+    private func labelled<Control: View>(
+        _ label: String,
+        @ViewBuilder control: () -> Control
+    ) -> some View {
+        SettingsRowShape {
+            SettingsRowLabel(label: label)
+        } control: {
+            control()
+        }
     }
 
     /// A row's name with the control it names, so its two controls

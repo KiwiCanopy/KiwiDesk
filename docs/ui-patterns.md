@@ -1166,7 +1166,8 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
 The bars' own animations are not on that card: they sit in
-Bars & Pocket ▸ KiwiShelf ▸ Show ▸ Durations beside the Reveal picker,
+Bars & Pocket ▸ KiwiShelf ▸ When a bar is out of view ▸ Durations
+beside the Reveal picker,
 and the card points there.
 
 The drawer holds two switches, **Animate the reveal** and **Animate

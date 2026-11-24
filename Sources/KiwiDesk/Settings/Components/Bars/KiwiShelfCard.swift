@@ -1,15 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Settings card for the shelf the bars sit on (#1517): which
-/// bars it shows, where each hangs (#1731), how the two share an
-/// edge, and the look they share. No container gate: a hidden
+/// Settings card for the shelf the bars sit on (#1517): how the
+/// bars show and where each hangs (#1731), grouped by bar (#3612),
+/// what plays while one is out of view, how the two share an edge,
+/// and the look they share. No container gate: a hidden
 /// bar's shortcut still shows it, so its look always matters
 /// (#761).
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
-    @State var edgesExpanded = false
-    @State var showExpanded = false
+    @State var eachExpanded = false
     @State var durationsExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false
@@ -33,6 +33,8 @@ struct KiwiShelfCard: View {
                 destination: .looks
             )
             showGroup
+            Divider()
+            outOfViewGroup
             Divider()
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(BarsRowOrder.kiwishelfPlacement, id: \.id) {
@@ -63,6 +65,21 @@ struct KiwiShelfCard: View {
                 "unrendered KiwiShelf census key: \(key.id)"
             )
             EmptyView()
+        }
+    }
+
+    /// What plays while a bar is out of view (#3612), under one
+    /// heading: what the menu bar shows instead, the handle, how
+    /// the bar comes back and how long that takes.
+    private var outOfViewGroup: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SettingsGroupHeading(
+                title: SettingsCatalog.bars.kiwishelfOutOfView.text
+            )
+            .searchAnchored(SettingsCatalog.bars.kiwishelfOutOfView)
+            ForEach(BarsRowOrder.kiwishelfOutOfView, id: \.id) {
+                row(for: $0)
+            }
         }
     }
 

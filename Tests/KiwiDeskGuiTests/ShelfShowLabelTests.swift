@@ -18,7 +18,7 @@ struct ShelfShowLabelTests {
         )
         #expect(monocle == "App Bar in Monocle")
         #expect(
-            SettingsCatalog.bars.kiwishelfShowEach.children.monocleShowIn.text
+            SettingsCatalog.bars.kiwishelfEach.children.monocleShowIn.text
                 == monocle
         )
         let scrolling = SettingsCensusLabel.label(
@@ -26,7 +26,7 @@ struct ShelfShowLabelTests {
         )
         #expect(scrolling == "App Bar in Scrolling")
         #expect(
-            SettingsCatalog.bars.kiwishelfShowEach.children.scrollingShowIn
+            SettingsCatalog.bars.kiwishelfEach.children.scrollingShowIn
                 .text == scrolling
         )
     }

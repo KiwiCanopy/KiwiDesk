@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One screen row in a bar's Per screen drawer (#1948), or one
+/// One screen row in a bar's Per screen or area drawer (#1948), or one
 /// area's on a split screen (#3517 ruling 30).
 struct ScreenEdgeRow: Identifiable, Equatable {
     /// The screen's fingerprint (`Name:WxH`), which identical
@@ -98,11 +98,7 @@ extension SettingsModel {
             let area = ScreenAreaKey(parsing: key)
             return ScreenEdgeRow(
                 id: key,
-                name: Self.perScreenName(
-                    screen: Display.fingerprintParts(area.fingerprint).name,
-                    key: key,
-                    splits: config.settings.displayAreas
-                ),
+                name: perScreenName(key: key),
                 count: count,
                 present: connected.contains(area.fingerprint)
             )
