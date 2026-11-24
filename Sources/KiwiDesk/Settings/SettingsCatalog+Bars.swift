@@ -9,17 +9,11 @@ struct BarsControls: Sendable {
         "bars.switch.kiwishelf",
         "KiwiShelf"
     )
-    let kiwishelfEdges = SettingsDrawer(
-        "kiwishelf.edge.each",
-        "Each bar and Pocket",
-        instance: "kiwishelf",
-        children: KiwiShelfEdgeControls()
-    )
-    let kiwishelfShowEach = SettingsDrawer(
+    let kiwishelfEach = SettingsDrawer(
         "kiwishelf.show.each_bar",
         "Each bar and Pocket",
         instance: "kiwishelf",
-        children: KiwiShelfShowControls()
+        children: KiwiShelfEachControls()
     )
     let kiwishelfStyle = SettingsDrawer(
         "bars.style",
@@ -38,6 +32,12 @@ struct BarsControls: Sendable {
         "Margins",
         instance: "kiwishelf",
         children: KiwiShelfMarginControls()
+    )
+    /// The heading over what plays while a bar is out of view
+    /// (#3612): menu bar icon, handle, Reveal and Durations.
+    let kiwishelfOutOfView = SettingsControl(
+        "kiwishelf.out_of_view",
+        "When a bar is out of view"
     )
     let kiwishelfHandleThickness = SettingsControl(
         "kiwishelf.handle_thickness",
@@ -67,7 +67,7 @@ struct BarsControls: Sendable {
     )
 }
 
-/// KiwiShelf ▸ Show ▸ Durations rows (owner ruling, 2026-10-21),
+/// KiwiShelf ▸ Durations rows (owner ruling, 2026-10-21),
 /// in `BarsRowOrder.kiwishelfDurations`' order.
 struct KiwiShelfDurationControls: Sendable {
     let onReveal = SettingsControl(
@@ -77,33 +77,6 @@ struct KiwiShelfDurationControls: Sendable {
     let onExpand = SettingsControl(
         "kiwishelf.on_expand",
         "Animate the expand"
-    )
-}
-
-/// KiwiShelf ▸ Show ▸ Each bar and Pocket rows (#761, #2978), in
-/// `BarsRowOrder.kiwishelfShowEach`' order.
-struct KiwiShelfShowControls: Sendable {
-    let spaceBarShow = SettingsControl(
-        "kiwishelf.show.space_bar",
-        "Space Bar"
-    )
-    let monocleShowIn = SettingsControl(
-        "kiwishelf.show.monocle",
-        "App Bar in %1$@",
-        naming: .monocle
-    )
-    let scrollingShowIn = SettingsControl(
-        "kiwishelf.show.scrolling",
-        "App Bar in %1$@",
-        naming: .scrolling
-    )
-    let pocketShow = SettingsControl(
-        "kiwishelf.show.pocket",
-        "Pocket"
-    )
-    let pocketDragReveal = SettingsControl(
-        "kiwishelf.show.pocket_drag",
-        "Show the Pocket while dragging a window"
     )
 }
 
@@ -197,21 +170,39 @@ struct SpaceBarTuningControls: Sendable {
     )
 }
 
-/// KiwiShelf ▸ Position ▸ Each bar and Pocket rows (#1731,
-/// #3376), in
-/// `BarsRowOrder.kiwishelfEdges`' order.
-struct KiwiShelfEdgeControls: Sendable {
+/// KiwiShelf ▸ Each bar and Pocket rows, grouped by bar (#3612),
+/// in `BarsRowOrder.kiwishelfEach`' order; every per-screen child
+/// anchors the Screen or area picker.
+struct KiwiShelfEachControls: Sendable {
+    let screenOrArea = SettingsControl(
+        "kiwishelf.scope.label",
+        "Screen or area"
+    )
+    let spaceBarShow = SettingsControl(
+        "kiwishelf.show.space_bar",
+        "Space Bar"
+    )
     let kiwishelfSpaceBarEdge = SettingsControl(
         "kiwishelf.edge.space_bar",
         "Space Bar"
     )
     let kiwishelfSpaceBarScreenEdges = SettingsControl(
         "kiwishelf.edge.per_screen.space_bar",
-        "Per screen"
+        "Per screen or area"
     )
     let kiwishelfSpaceBarScreenShows = SettingsControl(
         "kiwishelf.show.per_screen.space_bar",
         "Space Bar: Show per screen"
+    )
+    let monocleShowIn = SettingsControl(
+        "kiwishelf.show.monocle",
+        "App Bar in %1$@",
+        naming: .monocle
+    )
+    let scrollingShowIn = SettingsControl(
+        "kiwishelf.show.scrolling",
+        "App Bar in %1$@",
+        naming: .scrolling
     )
     let kiwishelfAppBarEdge = SettingsControl(
         "kiwishelf.edge.app_bar",
@@ -219,11 +210,19 @@ struct KiwiShelfEdgeControls: Sendable {
     )
     let kiwishelfAppBarScreenEdges = SettingsControl(
         "kiwishelf.edge.per_screen.app_bar",
-        "Per screen"
+        "Per screen or area"
     )
     let kiwishelfAppBarScreenShows = SettingsControl(
         "kiwishelf.show.per_screen.app_bar",
         "App Bar: Show per screen"
+    )
+    let pocketShow = SettingsControl(
+        "kiwishelf.show.pocket",
+        "Pocket"
+    )
+    let pocketDragReveal = SettingsControl(
+        "kiwishelf.show.pocket_drag",
+        "Show the Pocket while dragging a window"
     )
     let kiwishelfPocketEdge = SettingsControl(
         "kiwishelf.edge.pocket",
@@ -231,7 +230,7 @@ struct KiwiShelfEdgeControls: Sendable {
     )
     let kiwishelfPocketScreenEdges = SettingsControl(
         "kiwishelf.edge.per_screen.pocket",
-        "Per screen"
+        "Per screen or area"
     )
     let kiwishelfPocketPosition = SettingsControl(
         "kiwishelf.pocket_position",

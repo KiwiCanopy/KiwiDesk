@@ -148,6 +148,7 @@ settings.bsp.newWindowPlacement
 settings.bsp.splitRatioH
 settings.bsp.splitRatioV
 settings.bsp.strategy
+settings.displayAreas[screen]
 settings.dragDropZone.enabled
 settings.dragGhost.enabled
 settings.floatingStyle.color

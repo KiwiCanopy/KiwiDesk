@@ -27,6 +27,12 @@ extension SettingsView {
         if resolved.destination == .kiwiVision {
             model.nav.kiwiVisionLens = nil
         }
+        // A Bars landing shows All screens, so a bar-level row a hit
+        // names is drawn, and a per-area hit lands on the picker
+        // (#3612).
+        if resolved.destination == .bars {
+            model.nav.barsScope = nil
+        }
         var scroll = resolved.scroll
         switch resolved.surface {
         case .main:

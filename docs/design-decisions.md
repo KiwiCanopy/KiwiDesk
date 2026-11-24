@@ -7275,7 +7275,8 @@ only whether it shows, which is the question KiwiShelf's Show
 already asks of each bar. So the pocket takes the bars' three values
 (`kiwishelf.pocket_visibility`, stored beside them and left out of a
 look, as their Show is), and Show's master sets it with the bars,
-its drawer *Each bar and Pocket*; a master writing per-profile values
+the Pocket's own row in *Each bar and Pocket*; a master writing
+per-profile values
 cannot also write an app-wide one without one press reaching every
 profile. **Hidden is really hidden**: nothing at rest
 and no strip, with windows inside or not, coming out only for a
@@ -18917,8 +18918,9 @@ render no row. What breaks if this is ignored: either the Bars
 page grows back its three near-identical cards, or someone
 "fixes" the Lua chain's GUI-lessness by hiding the fields —
 both worse than the boundary. The two per-layout **enabled**
-toggles are not styling and keep their GUI (the KiwiShelf card's
-**App Bar in Monocle** / **App Bar in Scrolling**): they are the
+toggles are not styling and keep their GUI (the App Bar's **Show
+in Monocle** / **Show in Scrolling** in the KiwiShelf card's Each
+bar and Pocket): they are the
 only way a layout carries a bar at all, and they own the App Bar
 editor's grey. The class reaches the App Bar's own fields alone;
 the shelf's take no per-layout value (App Bar ▸ one shelf).
@@ -20548,6 +20550,10 @@ Each bar holds the rest.
 too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
 bar's edge may differ per screen*).
 
+:::unreleased
+*Amended* (#3612): ▸ *The bar cards share one canonical row order*.
+:::
+
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
@@ -21302,6 +21308,10 @@ nothing about the option, while the `?` names the one thing that
 unlocks it, a profile for more screens, so the grey promises
 nothing a setting would have to keep.
 
+:::unreleased
+*Amended* (#3612): ▸ *The bar cards share one canonical row order*.
+:::
+
 *Amended: the pocket's edge may differ per screen too.*
 ([#3376](https://github.com/KiwiCanopy/KiwiDesk/issues/3376),
 ruled 2026-11-17.) The pocket sits on the shelf's edges, so a
@@ -21325,6 +21335,10 @@ screen. Its drawer, Each bar and Pocket, gives the pocket a row and
 Per screen rows of its own beside each bar's, and the separate
 Pocket edge row is gone: two rows writing one value would let the
 master and the row disagree about which was the pocket's edge.
+
+:::unreleased
+*Amended* (#3612): ▸ *The bar cards share one canonical row order*.
+:::
 
 :::unreleased
 *Amended: a bar's edge and Show may differ per area.*
@@ -21362,9 +21376,9 @@ Show, in Settings, and the screen-less `space_bar.set_visibility`
 and `<layout>.set_app_bar_visibility` in Lua — clears that bar's
 entries, as a pick of a bar's edge writes every level below it, so
 the master and those rows read as differing, with a `?` naming the
-Per screen rows, while an entry stands. Settings writes the entries
-in the same Per screen rows as the edge — a Show menu beside each
-edge picker, a row per area on a split screen — so an area's bars
+Screen or area picker, while an entry stands. Settings writes the
+entries where it writes the edge — the bar's Show and Position for
+the screen or area the picker picks (#3612) — so an area's bars
 have one home; a forgotten screen setup drops them with its edges.
 :::
 
@@ -22172,6 +22186,32 @@ the row stays live with its note under it, never a `?` in its
 place: the value still picks the end of the shelf the Pocket takes,
 places it in the strip under Hidden, and governs every screen that
 does not share an edge — so hiding it would hide a working control.
+
+:::unreleased
+*Amended (#3612, owner 2026-11-24):* the card is grouped by bar, and
+a screen or area is set up by picking it first. The Show and Position
+masters lead the card, and one *Each bar and Pocket* drawer hangs
+under Position. Its first row is a *Screen or area* pop-up: *All
+screens*, the default, edits each bar's own values; a screen or area,
+named as Settings ▸ Screens names it and listed in reading order
+within its screen, makes the Space Bar, App Bar and Pocket blocks
+below edit that area — the App Bar's one Show then leads with Per
+layout. The Pocket's Show, its drag reveal and Pocket position are
+one value for every screen, so they stay in the Pocket's block and
+grey while an area is picked, the picker being the switch that
+brings them back. An item holding values of its own says so in words,
+the caption under All screens names those areas, and the shut drawer
+counts them; the drawer stays open by itself only while the bars' and
+the Pocket's own values differ. On a profile with one unsplit screen the
+picker greys, its `?` saying what unlocks it (#2677). Setting up an area is the job, not comparing areas, so
+the area comes first; per-bar per-screen drawers, two drawers of one
+name per master and a Show pop-up beside an edge picker all read
+worse, and a List / By-area switch was ruled out as a second layout
+to keep. Menu bar icon, Handle thickness, Reveal and Durations follow
+under the heading *When a bar is out of view* — not "hidden", which
+is a Show choice — then Alignment, Thickness, Style and Margins as
+before.
+:::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
 owner ruling 2026-10-21).** Nothing hides rows by experience

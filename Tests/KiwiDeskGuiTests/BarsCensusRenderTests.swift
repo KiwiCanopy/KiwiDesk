@@ -35,9 +35,8 @@ struct BarsCensusRenderTests {
     @Test("KiwiShelf drawer rows are the census's show-more set")
     func kiwishelfDrawers() {
         let rendered =
-            BarsRowOrder.kiwishelfShowEach
+            BarsRowOrder.kiwishelfEach
             + BarsRowOrder.kiwishelfDurations
-            + BarsRowOrder.kiwishelfEdges
             + BarsRowOrder.kiwishelfStyle
             + BarsRowOrder.kiwishelfMargins
         #expect(Set(rendered) == censusRows(.kiwishelf, .showMore))
@@ -116,7 +115,7 @@ struct BarsCensusRenderTests {
     @Test("the Show group's App Bar rows are Core's hosting set")
     func appBarRowsMatchCoreHosting() {
         let rows = Set(
-            BarsRowOrder.kiwishelfShowEach
+            BarsRowOrder.kiwishelfEach
                 .filter {
                     if case .layoutAppBar = $0 { return true }
                     return false

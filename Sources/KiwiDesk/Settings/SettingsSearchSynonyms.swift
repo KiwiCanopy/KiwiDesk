@@ -94,6 +94,9 @@ enum SettingsSearchSynonyms {
                 "loop", "around", "edge", "next screen", "monitor",
                 "scrolling", "monocle", "track",
             ]
+        // The words a user splitting a screen arrives with (#3616).
+        case .screens(.displayAreas):
+            return ["split", "area", "areas", "divide"]
         // "Monitor fingerprints" until #865 retired the noun.
         case .screens(.fingerprints):
             return ["monitor fingerprints", "display fingerprints"]

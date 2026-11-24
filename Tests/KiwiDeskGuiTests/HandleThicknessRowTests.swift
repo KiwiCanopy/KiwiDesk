@@ -26,12 +26,11 @@ struct HandleThicknessRowTests {
         BarsGates(settings: settings).inertReason(for: key)
     }
 
-    @Test("it sits between Show and Reveal")
+    @Test("it sits between the menu bar icon and Reveal")
     func order() {
         #expect(
-            BarsRowOrder.kiwishelfShow == [
-                .kiwishelf(.visibility), .kiwishelf(.menuBarIcon), key,
-                .kiwishelf(.revealStyle),
+            BarsRowOrder.kiwishelfOutOfView == [
+                .kiwishelf(.menuBarIcon), key, .kiwishelf(.revealStyle),
             ]
         )
         #expect(BarsGates.resolved.contains(key))

@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Which bar a Per screen row's Show menu writes (#3517 ruling
-/// 30): the Space Bar's one visibility, or the App Bar's, which
+/// Which bar a picked area's Show writes (#3517 ruling 30,
+/// #3612): the Space Bar's one visibility, or the App Bar's, which
 /// each layout holds for itself.
 enum ScreenShowBar {
     case space
@@ -15,9 +15,9 @@ enum BarShowRow {
     case appBar(LayoutMode)
 }
 
-/// The Show menu in a bar's Per screen rows (#3517 ruling 30): an
-/// area's own visibility, keyed by its `ScreenAreaKey` — an unsplit
-/// screen by its fingerprint.
+/// A bar's Show for a picked screen or area (#3517 ruling 30,
+/// #3612): an area's own visibility, keyed by its `ScreenAreaKey` —
+/// an unsplit screen by its fingerprint.
 extension SettingsModel {
     /// What `key` shows for `bar`: its own value, else the Space
     /// Bar's own; nil for an App Bar area with no value of its own,
@@ -33,10 +33,10 @@ extension SettingsModel {
         }
     }
 
-    /// The menu's binding: the Space Bar's own value stores nothing
-    /// for the area; the App Bar's nil, Per layout, clears it. A
-    /// pick needs the rows offered, since a greyed `.menu` picker
-    /// still takes one (gui.md).
+    /// The picked area's Show binding: the Space Bar's own value
+    /// stores nothing for the area; the App Bar's nil, Per layout,
+    /// clears it. Reached only under a picked area
+    /// (`KiwiShelfCard.activeScope`).
     func screenShowBinding(
         _ bar: ScreenShowBar,
         on key: String
@@ -44,7 +44,6 @@ extension SettingsModel {
         Binding(
             get: { self.screenShow(bar, on: key) },
             set: { value in
-                guard self.offersScreenShows(bar) else { return }
                 var next = self.config.settings
                 switch bar {
                 case .space:
@@ -57,15 +56,6 @@ extension SettingsModel {
                 self.config.settings = next
             }
         )
-    }
-
-    /// Whether `bar`'s Per screen rows take a Show pick: the edge
-    /// drawer's own offer for that bar.
-    private func offersScreenShows(_ bar: ScreenShowBar) -> Bool {
-        switch bar {
-        case .space: offersScreenEdges(\.spaceBarStyle, show: .space)
-        case .app: offersScreenEdges(\.appBarStyle, show: .app)
-        }
     }
 
     /// A bar's own Show row — the Space Bar's, or a layout's App
@@ -98,7 +88,7 @@ extension SettingsModel {
     }
 
     /// Whether `bar` gives some screen or area a visibility of its
-    /// own, which holds its Per screen drawer open.
+    /// own, which its Show row's `?` then says.
     func hasScreenShows(_ bar: ScreenShowBar) -> Bool {
         switch bar {
         case .space:
@@ -126,23 +116,57 @@ extension SettingsModel {
         return [(nil, perLayout)] + values
     }
 
-    /// A Per screen row's name, and its diff row's: `screen`, and on
-    /// a split screen its area's place in reading order, every area
-    /// numbered — interim until the positional area names (#3517).
+    /// A screen's or area's name in the Screen or area picker
+    /// (#3612): as Settings ▸ Screens says it (`areaName(_:on:)`)
+    /// where one connected screen carries it, else through
+    /// `perScreenName(screen:key:splits:area:)`.
+    func perScreenName(key: String) -> String {
+        let area = ScreenAreaKey(parsing: key)
+        let split =
+            areaKeys(of: area.fingerprint).count > 1 || area.areaID != 0
+        let found = displays.filter { $0.fingerprint == area.fingerprint }
+        if found.count == 1, let display = found.first,
+            !split || areaLabel(area.areaID, on: display) != nil
+        {
+            return areaName(split ? area.areaID : nil, on: display)
+        }
+        // Twins share their fingerprint's split, so either's words.
+        let label =
+            split
+            ? found.first.flatMap { areaLabel(area.areaID, on: $0) } : nil
+        return Self.perScreenName(
+            screen: screenWords { $0.fingerprint == area.fingerprint }
+                ?? Display.fingerprintParts(area.fingerprint).name,
+            key: key,
+            splits: config.settings.displayAreas,
+            area: label
+        )
+    }
+
+    /// A screen's or area's name where no one connected screen words
+    /// it, and its diff row's: `screen`, and on a split screen
+    /// `area`, else the area's stored name, else its position in the
+    /// stored split (`ScreenSplit.positions`), else its number in
+    /// reading order.
     static func perScreenName(
         screen: String,
         key: String,
-        splits: [String: ScreenSplit]
+        splits: [String: ScreenSplit],
+        area label: String? = nil
     ) -> String {
         let area = ScreenAreaKey(parsing: key)
         let keys = ScreenSplit.areaKeys(of: area.fingerprint, in: splits)
         guard keys.count > 1 || area.areaID != 0 else { return screen }
+        let split = splits[area.fingerprint]
+        let stored = split?.areas.first { $0.id == area.areaID }?.name
+        let position = split?.positions[area.areaID].map {
+            ScreenAreaWords.position($0)
+        }
         let place = keys.firstIndex(of: key) ?? area.areaID
-        return L(
-            "kiwishelf.per_screen.area_name",
-            "%1$@ – Area %2$@",
-            screen,
-            String(place + 1)
+        return ScreenAreaWords.composed(
+            screen: screen,
+            area: label ?? stored ?? position
+                ?? ScreenAreaWords.position(.numbered(place + 1))
         )
     }
 

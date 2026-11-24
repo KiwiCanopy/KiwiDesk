@@ -123,7 +123,7 @@ extension KiwiShelfCard {
             revealStyleRow
         case .menuBarIcon:
             menuBarIconRow
-        // Drawn in the Show drawer (`showRow`).
+        // Drawn in Each bar and Pocket (`showRow`).
         case .pocketVisibility, .pocketDragReveal:
             EmptyView()
         // Drawn in Layout Defaults ▸ Maximize (`MaximizeCard`).

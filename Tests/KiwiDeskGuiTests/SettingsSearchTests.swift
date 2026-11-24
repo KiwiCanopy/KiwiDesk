@@ -202,4 +202,20 @@ struct SettingsSearchTests {
         )
         #expect(hits.settings.contains(.destination(.screens)))
     }
+
+    /// The split editor shows only once a screen is selected, so
+    /// search is the other way in (#3616): each word lands on the
+    /// Screens page's split row.
+    @Test("split and area words find the split editor")
+    func splitWordsFindTheEditor() {
+        pinEnglish()
+        defer { reset() }
+        for query in ["split", "area", "areas", "divide"] {
+            let hit = settings(query).first {
+                guard case .setting(let row) = $0 else { return false }
+                return row.key == .screens(.displayAreas)
+            }
+            #expect(hit?.destination == .screens, Comment(rawValue: query))
+        }
+    }
 }

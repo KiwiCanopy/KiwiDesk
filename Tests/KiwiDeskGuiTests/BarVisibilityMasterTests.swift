@@ -99,20 +99,15 @@ struct BarVisibilityMasterTests {
 
     /// Where the bars sit runs coarse to fine, and the strip's
     /// depth follows after a rule, in the card body (#761); the
-    /// pocket's place along its edge closes Position's drawer,
+    /// pocket's place along its edge closes Each bar and Pocket,
     /// under the Pocket's edge rows (owner, 2026-11-18, #3445);
     /// order and minimum close the Style drawer (#2507).
     @Test("placement rows run coarse to fine, depth after them")
     func placementOrder() {
+        #expect(BarsRowOrder.kiwishelfPlacement == [.kiwishelf(.alignment)])
         #expect(
-            BarsRowOrder.kiwishelfPlacement == [
-                .kiwishelf(.edge), .kiwishelf(.alignment),
-            ]
-        )
-        #expect(
-            BarsRowOrder.kiwishelfEdges.suffix(3) == [
-                .kiwishelf(.pocketEdge), .kiwishelf(.pocketScreenEdge),
-                .kiwishelf(.pocketPosition),
+            BarsRowOrder.kiwishelfEach.suffix(2) == [
+                .kiwishelf(.pocketEdge), .kiwishelf(.pocketPosition),
             ]
         )
         #expect(
@@ -123,7 +118,8 @@ struct BarVisibilityMasterTests {
         #expect(BarsRowOrder.kiwishelfDepth == [.kiwishelf(.thickness)])
         #expect(
             BarsRowOrder.kiwishelfAtRest
-                == BarsRowOrder.kiwishelfPlacement
+                == BarsRowOrder.kiwishelfOutOfView
+                + BarsRowOrder.kiwishelfPlacement
                 + BarsRowOrder.kiwishelfDepth
         )
     }
@@ -140,8 +136,12 @@ struct BarVisibilityMasterTests {
 
     @Test("the followers sit behind Each bar, the master at rest")
     func followersBehindTheDrawer() {
-        #expect(BarsRowOrder.kiwishelfShow.first == .kiwishelf(.visibility))
-        for key in BarsRowOrder.kiwishelfShowEach {
+        #expect(
+            BarsRowOrder.kiwishelfShow == [
+                .kiwishelf(.visibility), .kiwishelf(.edge),
+            ]
+        )
+        for key in BarsRowOrder.kiwishelfEach {
             #expect(key.placement.tier == .showMore, "\(key.id)")
         }
     }

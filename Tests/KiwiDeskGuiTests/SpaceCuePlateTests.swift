@@ -70,7 +70,9 @@ struct SpaceCuePlateTests {
             #expect(placement.container == .spaceSwitch)
             #expect(placement.gate == .runtime(.luaOwnsConfig))
         }
-        #expect(BarsRowOrder.kiwishelfShow.last == .kiwishelf(.revealStyle))
+        #expect(
+            BarsRowOrder.kiwishelfOutOfView.last == .kiwishelf(.revealStyle)
+        )
     }
 
     /// The pickers' greys are wired: off under Lua (#2524).
@@ -116,14 +118,15 @@ struct SpaceCuePlateTests {
         )
     }
 
-    /// The Reveal row sits in the Show group under Handle
-    /// thickness (#3451), at rest rather than in the Style drawer
-    /// (owner ruling, 2026-10-21).
-    @Test("the Reveal row follows Each bar in the Show group")
+    /// The Reveal row sits under Handle thickness (#3451), below
+    /// Each bar and Pocket under "When a bar is out of view"
+    /// (#3612), at rest rather than in the Style drawer (owner
+    /// ruling, 2026-10-21).
+    @Test("the Reveal row closes the out-of-view group")
     func revealFollowsEachBar() {
-        let show = BarsRowOrder.kiwishelfShow
-        // Show, Menu bar icon (#3532), Handle thickness, Reveal.
-        #expect(show.dropFirst(3).first == .kiwishelf(.revealStyle))
+        let group = BarsRowOrder.kiwishelfOutOfView
+        // Menu bar icon (#3532), Handle thickness, Reveal.
+        #expect(group.dropFirst(2).first == .kiwishelf(.revealStyle))
         #expect(
             !BarsRowOrder.kiwishelfStyle.contains(.kiwishelf(.revealStyle))
         )

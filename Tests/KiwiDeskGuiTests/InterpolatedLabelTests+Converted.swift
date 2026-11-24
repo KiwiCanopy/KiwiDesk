@@ -62,8 +62,7 @@ extension InterpolatedLabelTests {
         // its key (#2737, #2777); the root's name is not a label.
         "simple.spaces.hint": 1,
         "simple.kiwihub.change_help": 1,
-        // The state-change toggle names the reflow toggle its
-        // neighbours follow (#2676).
+        // The state-change toggle names the reflow toggle (#2676).
         "behavior.animations.state_change.help": 1,
         // A full-screen window's spoken status on the Desktops side
         // reuses the Windows side's Full Screen label (#3486).
@@ -80,8 +79,7 @@ extension InterpolatedLabelTests {
         // the drafting round did exactly that (localization
         // audit, 2026-08-16).
         "spaces.preview.caption_default": 1,
-        // The temporary-Space note under the per-Space shortcut
-        // rows names the Spaces pane (#1827).
+        // The per-Space shortcuts' temporary note names Spaces (#1827).
         "shortcuts.temporary_space.note": 1,
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
@@ -98,12 +96,10 @@ extension InterpolatedLabelTests {
         "panel.caption.with_hover_hint": 1,
         "layout.schematic.grid.ax": 2,
         "track.new_window_position.help": 4,
-        // Monocle's hide-style popover (#881): both option
-        // names interpolated from their own keys, authored that
-        // way from the start.
+        // Monocle's hide-style popover (#881): both option names
+        // interpolated from their own keys from the start.
         "monocle.hide_style.help": 2,
-        // #1683: the Windows in other Spaces `?` names its
-        // segments.
+        // #1683: the Windows in other Spaces `?` names segments.
         "space_bar.inactive_content.help": 2,
         // #1535: the Space label `?` names both segments.
         "space_bar.item_label.help": 2,
@@ -112,10 +108,14 @@ extension InterpolatedLabelTests {
         "lua_editor.adopt_help.body": 1,
         "shortcuts.import.help": 1,
         "kiwishelf.background_fit.boxed_only": 1,
-        "kiwishelf.edge.screens_differ.help": 2,
+        "kiwishelf.edge.screens_differ.help": 1,  // #3612
         "kiwishelf.edge.pocket.screens_differ.help": 1,
+        "kiwishelf.edge.differ_per_screen.help": 2,  // #3612
         "kiwishelf.show.differ_per_screen.help": 2,  // #3517
-        "kiwishelf.show.screens_differ.help": 2,
+        "kiwishelf.show.screens_differ.help": 1,  // #3612
+        "kiwishelf.edge.screen.absent_name": 1,  // #3612
+        "kiwishelf.scope.help": 3,  // #3612
+        "kiwishelf.scope.every_screen": 1,  // #3612
         // #3471: the Off pointer names its page; the scan does not
         // read the catalog row it also names.
         "kiwishelf.durations.animations_off.link": 1,

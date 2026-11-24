@@ -121,6 +121,10 @@ struct SettingsView: View {
         .onChange(of: model.destination) { _, _ in
             previewShown = false
         }
+        // Bars reopens on All screens (#3612).
+        .onChange(of: model.destination) { old, _ in
+            if old == .bars { model.nav.barsScope = nil }
+        }
         // The card is per mount, and a root switch is a navigation.
         .onChange(of: model.showsSimple) { _, _ in
             previewShown = false

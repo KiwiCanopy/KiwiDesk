@@ -1,10 +1,38 @@
 /// Display order for the Bars settings area (#678, `BarsCensusRenderTests`).
 enum BarsRowOrder {
-    /// KiwiShelf card, Show group: the master, its Each bar
-    /// drawer, the handle's thickness (#3451), the reveal, then the
-    /// Space cue (#761, owner ruling 2026-10-21).
+    /// KiwiShelf card, its head: the Show and Position masters,
+    /// Position carrying the Each bar and Pocket drawer (#3612).
     static let kiwishelfShow: [SettingKey] = [
         .kiwishelf(.visibility),
+        .kiwishelf(.edge),
+    ]
+
+    /// KiwiShelf card, behind Each bar and Pocket (#3612): the
+    /// per-screen values, which the Screen or area picker heading
+    /// the drawer edits, then each bar's Show and Position, by bar;
+    /// the pocket's place along its edge closes the list (owner,
+    /// 2026-11-18, #3445).
+    static let kiwishelfEach: [SettingKey] = [
+        .kiwishelf(.spaceBarScreenEdge),
+        .kiwishelf(.spaceBarScreenVisibility),
+        .kiwishelf(.appBarScreenEdge),
+        .kiwishelf(.appBarScreenVisibility),
+        .kiwishelf(.pocketScreenEdge),
+        .spaceBar(.spaceBarVisibility),
+        .kiwishelf(.spaceBarEdge),
+        .layoutAppBar(.monocleAppBarVisibility),
+        .layoutAppBar(.scrollingAppBarVisibility),
+        .kiwishelf(.appBarEdge),
+        .kiwishelf(.pocketVisibility),
+        .kiwishelf(.pocketDragReveal),
+        .kiwishelf(.pocketEdge),
+        .kiwishelf(.pocketPosition),
+    ]
+
+    /// KiwiShelf card, under its "When a bar is out of view"
+    /// heading (#3612): the menu bar icon, the handle's thickness
+    /// (#3451) and the reveal (#761, owner ruling 2026-10-21).
+    static let kiwishelfOutOfView: [SettingKey] = [
         .kiwishelf(.menuBarIcon),
         .kiwishelf(.handleThickness),
         .kiwishelf(.revealStyle),
@@ -17,21 +45,10 @@ enum BarsRowOrder {
         .colours(.animationsOnExpand),
     ]
 
-    /// KiwiShelf card, behind Show's Each bar and Pocket
-    /// disclosure (#761, #2978).
-    static let kiwishelfShowEach: [SettingKey] = [
-        .spaceBar(.spaceBarVisibility),
-        .layoutAppBar(.monocleAppBarVisibility),
-        .layoutAppBar(.scrollingAppBarVisibility),
-        .kiwishelf(.pocketVisibility),
-        .kiwishelf(.pocketDragReveal),
-    ]
-
-    /// KiwiShelf card, at rest below the Show group: where the
-    /// bars sit, coarse to fine.
+    /// KiwiShelf card, after a rule: where the bars sit along the
+    /// edge.
     static let kiwishelfPlacement: [SettingKey] = [
-        .kiwishelf(.edge),
-        .kiwishelf(.alignment),
+        .kiwishelf(.alignment)
     ]
 
     /// KiwiShelf card, after a rule: how deep the strip is.
@@ -39,25 +56,10 @@ enum BarsRowOrder {
         .kiwishelf(.thickness)
     ]
 
-    /// KiwiShelf card, every at-rest row below the Show group.
+    /// KiwiShelf card, every at-rest row below its head.
     static var kiwishelfAtRest: [SettingKey] {
-        kiwishelfPlacement + kiwishelfDepth
+        kiwishelfOutOfView + kiwishelfPlacement + kiwishelfDepth
     }
-
-    /// KiwiShelf card, behind Position's Each bar and Pocket
-    /// disclosure (#1731, #3376); the pocket's place along its
-    /// edge under that edge's rows (owner, 2026-11-18, #3445).
-    static let kiwishelfEdges: [SettingKey] = [
-        .kiwishelf(.spaceBarEdge),
-        .kiwishelf(.spaceBarScreenEdge),
-        .kiwishelf(.spaceBarScreenVisibility),
-        .kiwishelf(.appBarEdge),
-        .kiwishelf(.appBarScreenEdge),
-        .kiwishelf(.appBarScreenVisibility),
-        .kiwishelf(.pocketEdge),
-        .kiwishelf(.pocketScreenEdge),
-        .kiwishelf(.pocketPosition),
-    ]
 
     /// KiwiShelf card, behind the Style disclosure; how two bars
     /// on one edge meet closes it (#2507).

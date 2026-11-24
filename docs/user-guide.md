@@ -627,8 +627,8 @@ takes any value from 20 up.
 The App Bar renders only in **Monocle** and **Scrolling**, and
 its card has no on/off row.
 
-The KiwiShelf card's **App Bar in Monocle** and **App Bar in
-Scrolling** switches are its visibility.
+Its visibility is **Show in Monocle** and **Show in Scrolling**
+under the App Bar in the KiwiShelf card's **Each bar and Pocket**.
 
 Drag an item to reorder the windows.
 
@@ -717,9 +717,9 @@ icon, or its name where it has none — with the active layer's icon
 ahead of them.
 
 :::unreleased
-What the menu bar icon shows is Settings ▸ Bars & Pocket ▸ KiwiShelf ▸ Show ▸
-**Menu bar icon**; at its default, Auto, it stands in for the Space
-Bar wherever a screen shows none at rest.
+What the menu bar icon shows is Settings ▸ Bars & Pocket ▸ KiwiShelf ▸
+When a bar is out of view ▸ **Menu bar icon**; at its default, Auto,
+it stands in for the Space Bar wherever a screen shows none at rest.
 :::
 
 The bar shows the Desktop you are looking at: a window on a macOS
