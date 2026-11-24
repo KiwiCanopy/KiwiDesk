@@ -126,9 +126,10 @@ struct GlassCard: View {
                 isOn: $model.config.settings.kiwishelf.tintHubAndPlates,
                 help: L(
                     "kiwishelf.tint_hub_and_plates.help",
-                    "%1$@ and the plates a Space, Desktop or layout "
-                        + "switch shows wear the bars' %2$@ and colors. "
-                        + "Off, they keep the system appearance.",
+                    "%1$@, the plates a Space, Desktop or layout "
+                        + "switch shows and the drag ghost wear the "
+                        + "bars' %2$@ and colors. Off, they keep the "
+                        + "system appearance.",
                     JumpScope.panelName,
                     L("kiwishelf.color.fill", "Fill")
                 )
@@ -175,7 +176,7 @@ struct GlassCard: View {
         L(
             "colors.glass.caption",
             "A translucent material over both bars, %1$@, the "
-                + "drag drop zone, the sticky mark and the plates a "
+                + "drag ghost, the sticky mark and the plates a "
                 + "Space switch slides.",
             JumpScope.panelName
         )
@@ -188,14 +189,14 @@ struct GlassCard: View {
         L(
             "colors.liquid_glass.help",
             "Lays macOS's translucent material over the Space "
-                + "Bar, the App Bar, %2$@, the drag ghost and drop "
-                + "zone, the sticky mark and the plates a Space "
-                + "switch slides. KiwiShelf's %1$@ color tints the "
-                + "bars, fading from their screen edge as far as "
+                + "Bar, the App Bar, %2$@, the drag ghost, the "
+                + "sticky mark and the plates a Space switch "
+                + "slides. KiwiShelf's %1$@ color tints the bars, "
+                + "fading from their screen edge as far as "
                 + "\u{201C}%3$@\u{201D} sets; with "
-                + "\u{201C}%4$@\u{201D} on, it tints %2$@ and the "
-                + "plates too. The drag ghost, drop zone and sticky "
-                + "mark take their own colors.",
+                + "\u{201C}%4$@\u{201D} on, it tints %2$@, the "
+                + "plates and the drag ghost too. The sticky mark "
+                + "takes its own color.",
             L("kiwishelf.color.fill", "Fill"),
             JumpScope.panelName,
             L("kiwishelf.fill_fade", "Fill fade"),

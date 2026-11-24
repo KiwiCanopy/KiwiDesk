@@ -97,7 +97,7 @@ extension KiwiCore {
             glass: tiler.settings.shortcutPanelLiquidGlass
         )
         let shelf = tiler.settings.kiwishelf
-        let ground = LiquidGlassGate.panelGround(shelf, glass: glass)
+        let ground = SwitchPlateView.Ground(shelf: shelf, glass: glass)
         let pressed = spaceSlide.press(
             SpaceSlideOverlay.Press(
                 display: intent.display,
@@ -116,7 +116,7 @@ extension KiwiCore {
                 holes: holes,
                 space: target,
                 glass: glass,
-                tint: shelf.glassFill(on: ground),
+                tint: ground.tint,
                 frost: ground.frost,
                 pace: spaceSlidePace
             )

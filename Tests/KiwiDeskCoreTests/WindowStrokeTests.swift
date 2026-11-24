@@ -103,34 +103,74 @@ struct WindowStrokeTests {
     }
 
     /// Both drag render paths hand the markers the border's
-    /// corners — the engine's and the Settings picture's (#2797).
+    /// corners, through the one `dragMarkerLook` — the engine's and
+    /// the Settings picture's (#2797, #3583). Every marker call hands
+    /// the look, however many calls a path grows, and no path reads
+    /// the stroke beside it.
     @Test("the drag paths hand over the border's stroke")
     func dragPathsReadTheStroke() async throws {
-        for (path, needle, count) in [
+        let look = try Self.code(
+            "Sources/KiwiDeskCore/Tiling/DragMarkerLook.swift"
+        )
+        let corner = "cornerRadius: windowStroke.cornerRadius"
+        #expect(Self.count(corner, in: look) == 1)
+        for (path, calls, handed) in [
             (
                 "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
-                "settings.windowStroke.cornerRadius", 1
-            ),
-            // Both markers are handed that read.
-            (
-                "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
-                "cornerRadius: corner,", 2
+                ["dragOverlay.showGhost(", "dragOverlay.showDropZone("],
+                "look: look"
             ),
             (
                 "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"
                     + "GapsBordersPanelPreview.swift",
-                "cornerRadius: settings.windowStroke.cornerRadius,", 2
+                ["DragVisualPreview("],
+                "look: settings.dragMarkerLook"
             ),
         ] {
-            // Code only: a needle kept alive in a comment beside a
-            // literal must not count.
-            let text = try Self.source(path)
-                .split(separator: "\n", omittingEmptySubsequences: false)
-                .map { $0.components(separatedBy: "//")[0] }
-                .joined(separator: "\n")
-            let hits = text.components(separatedBy: needle).count - 1
-            #expect(hits == count, "\(path) hands \(hits)")
+            let text = try Self.code(path)
+            let made = calls.map { Self.count($0, in: text) }
+            #expect(made.allSatisfy { $0 > 0 }, "\(path) draws \(made)")
+            #expect(
+                Self.count(handed, in: text) == made.reduce(0, +),
+                "\(path): a marker call hands no look"
+            )
+            #expect(!text.contains("windowStroke"), "\(path) reads the stroke")
         }
+        let move = try Self.code(
+            "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
+        )
+        #expect(Self.count("settings.dragMarkerLook", in: move) == 1)
+    }
+
+    /// The look carries the stroke's corners as settings state
+    /// them, Rounded and Square alike (#3583).
+    @Test("the drag look's corners are the stroke's")
+    func dragLookTakesTheStroke() {
+        var settings = TilingSettings()
+        for style in [BorderStyle.CornerStyle.rounded, .square] {
+            settings.borderStyle.cornerStyle = style
+            #expect(
+                settings.dragMarkerLook.cornerRadius
+                    == settings.windowStroke.cornerRadius
+            )
+        }
+        #expect(
+            settings.dragMarkerLook.focusColor
+                == settings.borderStyle.focusedColor
+        )
+    }
+
+    /// Code only: a needle kept alive in a comment beside a literal
+    /// must not count.
+    private static func code(_ path: String) throws -> String {
+        try source(path)
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.components(separatedBy: "//")[0] }
+            .joined(separator: "\n")
+    }
+
+    private static func count(_ needle: String, in text: String) -> Int {
+        text.components(separatedBy: needle).count - 1
     }
 
     private static func source(_ path: String) throws -> String {

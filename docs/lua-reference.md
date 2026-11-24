@@ -3239,6 +3239,11 @@ the fill, opaque, where
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
 on.
 
+:::unreleased
+The [drag ghost](#drag--drop-rearranging) is such a plate, so it
+draws the same way.
+:::
+
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
@@ -3320,6 +3325,11 @@ takes `hover_fill_color` and `hover_item_color`. A light fill
 keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
 They draw as with `false` while the fill has no color.
+
+:::unreleased
+The [drag ghost](#drag--drop-rearranging) wears the fill the same
+way, as the plates a Space switch slides.
+:::
 
 While their glass is off, and below macOS 26, they wear the fill
 at its own alpha, as one even color over their blurred
@@ -4878,18 +4888,24 @@ swaps the two; dropping anywhere else snaps the window back.
 While you drag, KiwiDesk can draw two markers, each just below the
 window you are holding:
 
-- **Drop zone** (`drag.set_drop_zone_enabled`, on by default): an
-  untinted frosted plate with a thin light rim over the slot a drop
-  would swap with. While the pointer is over the pocket, the drop
-  goes there and only the pocket lights.
-- **Ghost** (`drag.set_ghost_enabled`, off by default): a two-tone
-  outline, a dark line inside a light halo, over the dragged
-  window's slot — where it snaps back, and where the displaced
-  window would move.
+:::unreleased
+- **Drop zone** (`drag.set_drop_zone_enabled`, on by default): a
+  light wash of the focus border colour
+  ([`border.set_focused_color`](#borderset_focused_color)) with a
+  thin line of it, over the slot a drop would swap with. While the
+  pointer is over the pocket, the drop goes there and only the
+  pocket lights.
+- **Ghost** (`drag.set_ghost_enabled`, off by default): the plate
+  a Space switch slides a window as, without the app icon, over
+  the dragged window's slot — where it snaps back, and where the
+  displaced window would move. It wears KiwiShelf's Fill while
+  [`kiwishelf.set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
+  is on.
+:::
 
 Both take their corners from
-[`border.set_corner_style`](#borderset_corner_style); their look
-is otherwise fixed.
+[`border.set_corner_style`](#borderset_corner_style), and neither
+takes a colour setting of its own.
 
 :::unreleased
 Over another screen, or another [area](#set_display_areas) of a
@@ -4927,13 +4943,14 @@ drag.set_ghost_enabled(true)
 
 **Expects:** a boolean (default `true`).
 
-**Does:** draws the drop zone as macOS 26 Liquid Glass, untinted
-and thinned so the window a drop would swap with stays readable
-through it. Off, or below macOS 26, it draws the system blur
-material instead; while macOS's Reduce transparency is on, a flat
-grey at about 22 %. Settings writes this through the one **Liquid
-Glass** switch
+:::unreleased
+**Does:** draws the ghost's plate as macOS 26 Liquid Glass. Off,
+below macOS 26, or while macOS's Reduce transparency is on, the
+plate is the system blur material, wearing the Fill flat when it
+is tinted, as the Space-switch plates do. The drop zone draws no glass. Settings writes this
+through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+:::
 
 **Example:**
 
@@ -5000,8 +5017,10 @@ touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
 
-The drag markers draw lines of a fixed width, and take only the
-corner style from the border.
+:::unreleased
+The drag markers draw lines of a fixed width; they take the corner
+style from the border, and the drop zone also its focused colour.
+:::
 
 **Example:**
 

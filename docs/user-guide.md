@@ -645,10 +645,12 @@ Floating windows come last, past a thin line and the floating
 symbol. They cannot be dragged; **Tile Window** on the item's
 right-click menu tiles one.
 
+:::unreleased
 **Liquid Glass** is one switch for both bars, the shortcuts
-panel, the drag drop zone, and the sticky mark
+panel, the drag ghost, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
-flat look instead, the drop zone a blur.
+flat look instead, the ghost a blur.
+:::
 
 It covers the floating mark too.
 

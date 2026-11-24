@@ -23,7 +23,7 @@ extension KiwiCore {
         let style = tiler.settings.pocketStyle
         let glass = briefPocketPlateGlass()
         let shelf = tiler.settings.kiwishelf
-        let ground = LiquidGlassGate.panelGround(shelf, glass: glass)
+        let ground = SwitchPlateView.Ground(shelf: shelf, glass: glass)
         let flight = BriefPocketPlan.flight(
             durationMS: tiler.settings.animations.windowMS(at: appWide)
         )
@@ -46,7 +46,7 @@ extension KiwiCore {
                 iconPid: state.windows[id]?.pid,
                 markHex: style.color,
                 plateGlass: glass,
-                plateTint: shelf.glassFill(on: ground),
+                plateTint: ground.tint,
                 plateFrost: ground.frost,
                 flight: flight
             )
