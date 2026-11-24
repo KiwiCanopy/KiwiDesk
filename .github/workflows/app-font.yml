@@ -128,6 +128,11 @@ jobs:
           fi
           swift --version
 
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
+
       - name: Re-vendor the assets
         env:
           GH_TOKEN: ${{ github.token }}

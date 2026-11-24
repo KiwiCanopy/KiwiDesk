@@ -11,12 +11,8 @@ struct XcodePinParityTests {
 
     /// The workflows that run on a macOS image, by file name.
     private func macWorkflows() throws -> [String: String] {
-        let dir = scriptFixtureRepoRoot()
-            .appendingPathComponent(".github/workflows")
         var out: [String: String] = [:]
-        for name in try FileManager.default
-            .contentsOfDirectory(atPath: dir.path)
-        where name.hasSuffix(".yml") {
+        for name in try workflowFileNames() {
             let text = try workflowSource(name)
             if text.contains("runs-on: xcode-") { out[name] = text }
         }
