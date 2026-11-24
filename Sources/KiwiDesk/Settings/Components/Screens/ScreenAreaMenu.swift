@@ -58,13 +58,9 @@ struct AreaMenu: ViewModifier {
         if let area {
             let neighbours = model.mergeNeighbours(of: area, on: display)
             if !neighbours.isEmpty { Divider() }
-            if ScreenAreaEditing.mergePullsDown(neighbours) {
-                Menu(ScreenAreaEditing.mergeMenuTitle) {
-                    mergeItems(area, neighbours)
-                }
-            } else {
-                mergeItems(area, neighbours)
-            }
+            // Flat on every route: the same builder feeds VoiceOver's
+            // actions and the keyboard popover (`rowActions`).
+            mergeItems(area, neighbours)
             Divider()
             Button(L("monitors.sizes.menu.adjust", "Adjust Sizes…")) {
                 act(.adjust(here))
@@ -72,10 +68,7 @@ struct AreaMenu: ViewModifier {
             Button(L("monitors.sizes.even_out", "Even Out")) {
                 model.evenOutAreas(holding: area, on: display)
             }
-            .disabled(
-                model.areaSplit(of: display)?.run(holding: area)?.isEven
-                    ?? true
-            )
+            .disabled(!model.canEvenOut(holding: area, on: display))
         }
     }
 
@@ -109,8 +102,8 @@ enum ScreenAreaEditing {
     /// floor (`SettingsModel.canSplit`).
     static let axes: [ScreenAreaCut.Axis] = [.sideBySide, .stacked]
 
-    /// Whether Merge is one pull-down rather than a button or item
-    /// per neighbour: past two full-edge neighbours (#3541).
+    /// Whether the editor's Merge row is one pull-down rather than a
+    /// button per neighbour: past two full-edge neighbours (#3541).
     static func mergePullsDown(_ neighbours: [Int]) -> Bool {
         neighbours.count > 2
     }

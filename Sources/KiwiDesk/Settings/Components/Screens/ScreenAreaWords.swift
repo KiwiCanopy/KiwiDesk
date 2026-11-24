@@ -20,14 +20,44 @@ enum ScreenAreaWords {
         }
     }
 
-    /// A nested position, outer word first ("Middle Top"), each
-    /// pair joined through one frame so a locale may reorder it.
+    /// A position path, outer word first, as one name: a lone word,
+    /// or a pair as its own key, so a locale words each name whole.
+    /// A side (Left / Right) is said last, after the row ("Top
+    /// Left"); a middle column's half leads with "Middle" ("Middle
+    /// Top"), a row's middle trails ("Top Middle"); the middle of a
+    /// middle is "Middle". Core numbers anything deeper (#3541).
     static func position(_ path: [ScreenAreaPosition]) -> String {
-        path.map { Self.position($0) }.reduce(into: "") { out, word in
-            out =
-                out.isEmpty
-                ? word
-                : L("monitors.split.nested", "%1$@ %2$@", out, word)
+        guard path.count == 2 else {
+            return path.count == 1 ? position(path[0]) : ""
+        }
+        let sides: [ScreenAreaPosition] = [.left, .right]
+        let side = path.first { sides.contains($0) }
+        let row = path.first { !sides.contains($0) }
+        switch (row, side, path[0]) {
+        case (.top?, .left?, _):
+            return L("monitors.split.top_left", "Top Left")
+        case (.top?, .right?, _):
+            return L("monitors.split.top_right", "Top Right")
+        case (.bottom?, .left?, _):
+            return L("monitors.split.bottom_left", "Bottom Left")
+        case (.bottom?, .right?, _):
+            return L("monitors.split.bottom_right", "Bottom Right")
+        case (.middle?, .left?, _):
+            return L("monitors.split.middle_left", "Middle Left")
+        case (.middle?, .right?, _):
+            return L("monitors.split.middle_right", "Middle Right")
+        default: break
+        }
+        switch (path[0], path[1]) {
+        case (.middle, .top):
+            return L("monitors.split.middle_top", "Middle Top")
+        case (.middle, .bottom):
+            return L("monitors.split.middle_bottom", "Middle Bottom")
+        case (.top, .middle):
+            return L("monitors.split.top_middle", "Top Middle")
+        case (.bottom, .middle):
+            return L("monitors.split.bottom_middle", "Bottom Middle")
+        default: return position(.middle)
         }
     }
 
@@ -91,8 +121,8 @@ extension SettingsModel {
     }
 
     /// Member `index` of `run`'s label in Adjust…: a lone area's
-    /// own label; a nested one's the words all its areas share
-    /// ("Middle"), else its first and last areas' labels.
+    /// own label; a nested one's position from Core ("Middle"), else,
+    /// where the areas are numbered, its first and last areas'.
     func memberLabel(
         _ index: Int,
         of run: ScreenAreaRun?,
@@ -103,12 +133,8 @@ extension SettingsModel {
         else { return "" }
         let ids = run.members[index].areas
         if ids.count == 1 { return areaLabel(ids[0], on: display) ?? "" }
-        let paths = ids.compactMap { split.positions[$0] }
-        let shared = (paths.first ?? []).filter { word in
-            paths.allSatisfy { $0.contains(word) }
-        }
-        if !shared.isEmpty, paths.count == ids.count {
-            return ScreenAreaWords.position(shared)
+        if let path = split.position(ofMember: index, in: run) {
+            return ScreenAreaWords.position(path)
         }
         return L(
             "monitors.sizes.member_range",

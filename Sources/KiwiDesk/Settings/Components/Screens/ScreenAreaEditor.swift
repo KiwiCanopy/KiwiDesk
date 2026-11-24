@@ -213,7 +213,7 @@ struct ScreenAreaEditor: View {
                         model.evenOutAreas(holding: area, on: display)
                     }
                     .settingsActionButton()
-                    .disabled(run.isEven)
+                    .disabled(!model.canEvenOut(holding: area, on: display))
                 }
             }
         }

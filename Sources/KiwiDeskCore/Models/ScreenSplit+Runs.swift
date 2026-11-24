@@ -104,17 +104,39 @@ extension ScreenSplit {
     }
 
     /// The run holding `id` with every member as long as an even
-    /// split makes it; odd points go to the leading members.
-    public func evenedOut(holding id: Int) -> ScreenSplit {
+    /// split makes it, odd points to the leading members, but none
+    /// below its own floor (`memberFloor`): a member the even length
+    /// would squeeze keeps its floor and the rest share what is left.
+    /// Self where no such layout fits.
+    public func evenedOut(
+        holding id: Int,
+        floor: Int = ScreenArea.minimumSide
+    ) -> ScreenSplit {
         guard let run = run(holding: id) else { return self }
-        let total = run.lengths.reduce(0, +)
-        let count = run.members.count
-        return resizing(
-            run,
-            to: (0..<count).map {
-                total / count + ($0 < total % count ? 1 : 0)
+        let floors = run.members.indices.map {
+            memberFloor(of: $0, in: run, floor: floor)
+        }
+        var total = run.lengths.reduce(0, +)
+        var fixed: [Int: Int] = [:]
+        while true {
+            let free = run.members.indices.filter { fixed[$0] == nil }
+            guard !free.isEmpty else { return self }
+            let share = total / free.count
+            let squeezed = free.filter { floors[$0] > share }
+            if squeezed.isEmpty {
+                var lengths = Array(repeating: 0, count: floors.count)
+                for (rank, index) in free.enumerated() {
+                    lengths[index] =
+                        share + (rank < total % free.count ? 1 : 0)
+                }
+                for (index, length) in fixed { lengths[index] = length }
+                return resizing(run, to: lengths)
             }
-        )
+            for index in squeezed {
+                fixed[index] = floors[index]
+                total -= floors[index]
+            }
+        }
     }
 
     /// Member `index` of `run` set to `length` points along its

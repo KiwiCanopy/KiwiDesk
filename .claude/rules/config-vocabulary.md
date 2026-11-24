@@ -381,17 +381,17 @@ synonym:
 - **area** — one of the side-by-side or top-to-bottom parts a
   screen is **split** into, each with its own Spaces (#3517); an
   area may be split again the other way (#3541); *split* is the
-  verb. In copy an area is named by position (Left / Middle /
-  Right, Top / Bottom, nested outer first with Left / Right last,
-  "Middle Top" or "Top Left"; "Area 1" onwards once any row or
-  column holds four) or by the name a user gave it, and a Space's
-  place reads "Screen 1 – Left". Never *segment* (the Space Bar's
+  verb. In copy an area is named by position — the words Left /
+  Middle / Right and Top / Bottom, a nested area by one key per
+  two-word name, "Area 1" onwards where `ScreenSplit.positions`
+  numbers them — or by the name a user gave it, and a Space's place
+  reads "Screen 1 – Left". Never *segment* (the Space Bar's
   front-app segment and segmented pickers spend it), *part*,
   *region*, *zone*, *display* or *monitor*, and never a bare
-  *screen*, which keeps meaning the physical one. Author no other sense of *area* in
-  copy; the code type `SettingsArea` is not copy, and the Swift
-  type for a split part is `ScreenArea` so the two never meet.
-  The wire spells it in the frozen display family
+  *screen*, which keeps meaning the physical one. Author no other
+  sense of *area* in copy; the code type `SettingsArea` is not
+  copy, and the Swift type for a split part is `ScreenArea` so the
+  two never meet. The wire spells it in the frozen display family
   (`display_areas`, `set_display_areas`).
 - **screen** vs **display** vs **monitor** — a physical screen is
   a **screen**, in a label, a caption or a doc comment. *Display*

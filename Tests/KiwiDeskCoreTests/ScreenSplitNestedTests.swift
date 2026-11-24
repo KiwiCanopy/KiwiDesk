@@ -50,14 +50,14 @@ struct ScreenSplitNestedTests {
         )
     }
 
-    @Test func gridNamesPutLeftAndRightLast() throws {
+    @Test func gridPathsRunOuterFirst() throws {
         let split = try grid()
         #expect(valid(split))
-        #expect(split.positions[0] == [.top, .left])
-        #expect(split.positions[3] == [.bottom, .right])
+        #expect(split.positions[0] == [.left, .top])
+        #expect(split.positions[3] == [.right, .bottom])
     }
 
-    @Test func aMiddleOfAMiddleIsSaidOnce() throws {
+    @Test func aMiddleOfAMiddleKeepsBothWords() throws {
         let rows = try #require(
             whole.splitting(0, .stacked)?.splitting(1, .stacked)
         )
@@ -71,7 +71,8 @@ struct ScreenSplitNestedTests {
         #expect(
             ids.map { even.positions[$0] ?? [] }
                 == [
-                    [.top], [.middle, .left], [.middle], [.middle, .right],
+                    [.top], [.middle, .left], [.middle, .middle],
+                    [.middle, .right],
                     [.bottom],
                 ]
         )
@@ -145,6 +146,10 @@ struct ScreenSplitNestedTests {
             .filter { run.members[index].areas.contains($0.id) }
             .map(\.w).min()
         #expect((narrow ?? 0) >= 300)
+        // 574 of 1147 mapped to 601 is 300.76: the shared edge rounds.
+        #expect(set.length == 601)
+        #expect(set.split.areas.first { $0.id == 1 }?.w == 301)
+        #expect(set.split.areas.first { $0.id == 4 }?.w == 300)
     }
 
     @Test func aDividerSnapsInLineWithAnother() throws {
@@ -183,5 +188,59 @@ struct ScreenSplitNestedTests {
         #expect(valid(moved))
         let right = moved.areas.filter { $0.x == 1720 }
         #expect(right.map(\.h).sorted() == [720, 720])
+    }
+
+    @Test func threeRunsDeepNumbersEveryArea() throws {
+        let deep = try #require(
+            try tJunction().splitting(1, .sideBySide)
+        )
+        #expect(valid(deep))
+        #expect(deep.runs.contains { $0.depth == 2 })
+        let ids = ScreenArea.readingOrder(deep.areas).map(\.id)
+        #expect(
+            ids.map { deep.positions[$0] ?? [] }
+                == (1...ids.count).map { [.numbered($0)] }
+        )
+    }
+
+    @Test func evenOutKeepsANestedMembersFloor() throws {
+        // [300 | rest], the rest split top to bottom, its top split
+        // again so a 300-wide area sits at its far edge.
+        let pair = try #require(whole.splitting(0, .sideBySide))
+        let run = try #require(pair.run(holding: 0))
+        let lopsided = try #require(
+            pair.setting(
+                member: 0,
+                of: run,
+                to: 300,
+                givingWay: 1,
+                floor: 300
+            )
+        ).split
+        let stacked = try #require(lopsided.splitting(1, .stacked))
+        let top = try #require(stacked.splitting(1, .sideBySide))
+        let topRun = try #require(top.run(holding: 1))
+        let narrow = try #require(
+            top.setting(
+                member: 1,
+                of: topRun,
+                to: 300,
+                givingWay: 0,
+                floor: 300
+            )
+        ).split
+        #expect(valid(narrow))
+        let even = narrow.evenedOut(holding: 0, floor: 300)
+        #expect(valid(even))
+        #expect(even.areas.allSatisfy { $0.w >= 300 })
+        // The nested member cannot give a point, so nothing moves.
+        #expect(even == narrow)
+    }
+
+    @Test func aMemberIsNamedByItsOwnWord() throws {
+        let split = try tJunction()
+        let run = try #require(split.run(holding: 0))
+        #expect(split.position(ofMember: 1, in: run) == [.middle])
+        #expect(split.position(ofMember: 0, in: run) == [.left])
     }
 }

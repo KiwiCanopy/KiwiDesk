@@ -215,13 +215,13 @@ struct ScreensSection: View {
         case .adjust(let area):
             selection = area
             let display = model.displays.first { $0.id == area.display }
-            guard let split = display.flatMap(model.areaSplit) else {
-                return
-            }
+            guard let split = display.flatMap(model.areaSplit),
+                let selected = area.area
+            else { return }
             DispatchQueue.main.async {
                 sizesRequest = AreaSizesRequest(
                     display: area.display,
-                    area: area.area ?? 0,
+                    area: selected,
                     seed: split
                 )
             }

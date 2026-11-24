@@ -20,6 +20,10 @@ public struct ScreenAreaRun: Equatable, Sendable {
     public let members: [Member]
     /// How many runs enclose this one: 0 for the screen's own.
     public let depth: Int
+    /// The run's box across its axis, in screen points: the span
+    /// each of its dividers runs.
+    public let crossStart: Int
+    public let crossEnd: Int
 
     /// The member holding area `id`, if any.
     public func member(holding id: Int) -> Int? {
@@ -30,9 +34,9 @@ public struct ScreenAreaRun: Equatable, Sendable {
     public var lengths: [Int] { members.map(\.length) }
 }
 
-/// Derives a split's runs from its rects, through the same
-/// guillotine walk as `ScreenAreaCuts`: side by side first, then
-/// stacked, in every box.
+/// Derives a split's runs from its rects: the one guillotine walk,
+/// side by side first, then stacked, in every box. `ScreenAreaCuts`
+/// reads its dividers off these runs.
 public enum ScreenAreaRuns {
     /// The runs of `areas` on a `width` × `height` screen, outermost
     /// first; nil where no full-span cut separates them. Empty while
@@ -87,7 +91,15 @@ public enum ScreenAreaRuns {
                     : (box.x, start, box.w, end - start)
                 inner.append((inside, sub))
             }
-            out.append(.init(axis: axis, members: members, depth: depth))
+            out.append(
+                .init(
+                    axis: axis,
+                    members: members,
+                    depth: depth,
+                    crossStart: side ? box.y : box.x,
+                    crossEnd: side ? box.y + box.h : box.x + box.w
+                )
+            )
             return inner.allSatisfy {
                 collect($0.0, box: $0.1, depth: depth + 1, into: &out)
             }

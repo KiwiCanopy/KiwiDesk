@@ -67,6 +67,13 @@ struct AreaSizesPopover: View {
         }
         // A draft typed in the other unit is not this unit's number.
         .onChange(of: percent) { drafts = [:] }
+        // A size that lines two segments up can re-root the walk, so
+        // the run's members change: the typing order no longer names
+        // them (#3541).
+        .onChange(of: run?.members.map(\.areas)) {
+            typed = []
+            drafts = [:]
+        }
         .onExitCommand(perform: cancel)
         .onDisappear { givingWay = [] }
     }

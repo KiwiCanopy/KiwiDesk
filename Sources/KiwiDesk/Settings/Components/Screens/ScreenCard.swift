@@ -155,20 +155,11 @@ struct ScreenCard: View {
         let cuts =
             ScreenAreaCuts.cuts(of: stored.areas, width: width, height: height)
             ?? []
-        let drawn =
-            drag.flatMap {
-                ScreenAreaCuts.cuts(
-                    of: $0.split.areas,
-                    width: width,
-                    height: height
-                )
-            } ?? cuts
         let factor = scale(stored)
         ForEach(Array(cuts.enumerated()), id: \.offset) { index, cut in
             let side = cut.axis == .sideBySide
-            let position =
-                drawn.indices.contains(index)
-                ? drawn[index].position : cut.position
+            let dragged = drag?.cut == index ? drag?.position : nil
+            let position = dragged ?? cut.position
             let at = CGFloat(position) * (side ? factor.width : factor.height)
             // A nested cut spans only its own box (#3541).
             let across = side ? factor.height : factor.width
@@ -198,11 +189,11 @@ struct ScreenCard: View {
     /// While a divider moves, each area beside it shows its length,
     /// the one a snap made a screen fraction naming it (ruling 25).
     @ViewBuilder private func capsules(_ split: ScreenSplit?) -> some View {
-        if let drag, let split,
+        if let drag, let split, let stored = model.areaSplit(of: display),
             let cut = ScreenAreaCuts.cuts(
-                of: split.areas,
-                width: split.extent.width,
-                height: split.extent.height
+                of: stored.areas,
+                width: stored.extent.width,
+                height: stored.extent.height
             )?[safe: drag.cut]
         {
             let side = cut.axis == .sideBySide

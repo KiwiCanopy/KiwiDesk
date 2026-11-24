@@ -9,8 +9,9 @@ public enum ScreenAreaPosition: Hashable, Sendable {
     case right
     case top
     case bottom
-    /// Where any run holds four or more members, every area is
-    /// numbered in reading order, from 1.
+    /// Where any run holds four or more members, or an area sits
+    /// three runs deep, every area is numbered in reading order,
+    /// from 1.
     case numbered(Int)
 }
 
@@ -44,67 +45,64 @@ extension ScreenSplit {
         }
     }
 
-    /// Each area's positional default, by id, outer word first:
-    /// "Middle Top" in a T-junction, "Top Left" on a 2×2 (Left and
-    /// Right always come last, after the #3528 notes). Each run
-    /// names up to three members Left / Middle / Right or Top /
-    /// Middle / Bottom; where a run holds four or more, every area
-    /// is numbered in reading order instead, never a mix. Empty
-    /// while whole.
+    /// Each area's positional default, by id: one word per run it
+    /// sits in, outer run first ("Middle", "Top" for the top half of
+    /// a T-junction's middle column), structure the GUI words whole
+    /// (#96). Each run names up to three members Left / Middle /
+    /// Right or Top / Middle / Bottom; where a run holds four or
+    /// more, or an area sits three runs deep, every area is
+    /// numbered in reading order instead, never a mix. Empty while
+    /// whole.
     public var positions: [Int: [ScreenAreaPosition]] {
         let all = runs
         guard !all.isEmpty else { return [:] }
-        let ordered = ScreenArea.readingOrder(areas).map(\.id)
-        if all.contains(where: { $0.members.count > 3 }) {
+        let numbered =
+            all.contains { $0.members.count > 3 || $0.depth > 1 }
+        if numbered {
             return Dictionary(
-                uniqueKeysWithValues: ordered.enumerated().map {
-                    ($1, [.numbered($0 + 1)])
-                }
+                uniqueKeysWithValues: ScreenArea.readingOrder(areas)
+                    .enumerated().map { ($1.id, [.numbered($0 + 1)]) }
             )
         }
         var out: [Int: [ScreenAreaPosition]] = [:]
         for run in all {
             for (index, member) in run.members.enumerated() {
-                let word = Self.word(
-                    index,
-                    of: run.members.count,
-                    axis: run.axis
-                )
+                let word = Self.word(index, of: run)
                 for id in member.areas {
                     out[id, default: []].append(word)
                 }
             }
         }
-        return out.mapValues(Self.reading)
+        return out
+    }
+
+    /// Member `index` of `run`'s own position, outer word first: the
+    /// path every area in it shares down to the run ("Middle" for a
+    /// T-junction's middle column). Nil where the areas are numbered.
+    public func position(
+        ofMember index: Int,
+        in run: ScreenAreaRun
+    ) -> [ScreenAreaPosition]? {
+        guard run.members.indices.contains(index),
+            let first = run.members[index].areas.first,
+            let path = positions[first], path.count > run.depth,
+            !path.contains(where: {
+                if case .numbered = $0 { return true }
+                return false
+            })
+        else { return nil }
+        return Array(path.prefix(run.depth + 1))
     }
 
     private static func word(
         _ index: Int,
-        of count: Int,
-        axis: ScreenAreaCut.Axis
+        of run: ScreenAreaRun
     ) -> ScreenAreaPosition {
         let side: [ScreenAreaPosition] =
-            axis == .sideBySide
+            run.axis == .sideBySide
             ? [.left, .middle, .right] : [.top, .middle, .bottom]
-        if count == 2 { return index == 0 ? side[0] : side[2] }
+        if run.members.count == 2 { return index == 0 ? side[0] : side[2] }
         return side[index]
-    }
-
-    /// A path in reading order: Left / Right last, and a "Middle"
-    /// of a middle said once ("Middle", not "Middle Middle").
-    private static func reading(
-        _ path: [ScreenAreaPosition]
-    ) -> [ScreenAreaPosition] {
-        let sides: Set<ScreenAreaPosition> = [.left, .right]
-        let ordered =
-            path.filter { !sides.contains($0) }
-            + path.filter { sides.contains($0) }
-        var out: [ScreenAreaPosition] = []
-        for word in ordered
-        where !(word == .middle && out.last == .middle) {
-            out.append(word)
-        }
-        return out
     }
 }
 

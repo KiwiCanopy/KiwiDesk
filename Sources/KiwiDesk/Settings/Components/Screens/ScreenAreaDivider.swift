@@ -8,7 +8,12 @@ import SwiftUI
 struct AreaDividerDrag: Equatable {
     let split: ScreenSplit
     let snap: ScreenAreaSnap?
+    /// The dragged divider's index among the STORED split's cuts: a
+    /// snap into line with another divider can re-root the walk, so
+    /// the split in flight is never asked for its cuts by index.
     let cut: Int
+    /// Where the dragged divider is, in screen points.
+    let position: Int
 }
 
 /// One divider of a split card (#3517 ruling 25): a hairline seam
@@ -147,7 +152,8 @@ struct ScreenAreaDivider: View {
         return AreaDividerDrag(
             split: landed.split,
             snap: kept ? snapped.snap : nil,
-            cut: index
+            cut: index,
+            position: landed.position
         )
     }
 

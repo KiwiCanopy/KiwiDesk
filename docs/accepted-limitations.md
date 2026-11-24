@@ -112,6 +112,17 @@ class — see
 | A screen whose **bottom corners both have another screen beside, below or past them** — a landscape screen between two taller portrait ones, or one above a wider screen — shows the windows KiwiDesk parks there on a neighbour. | A parked window must stay on its own screen: parked on another screen's free corner, macOS moves it onto that screen's Desktop (measured 2026-10-29), which would break [Parking is not a Desktop move](spaces-and-desktops.md#parking-is-not-a-desktop-move). And macOS keeps a parked window's title bar about 48 pt on screen, so its body hangs off the corner into whatever lies beside and below it. | With no clear corner on its own screen, every corner `TilingEngine.optimalHideCorner` can pick lands part of a parked window on a neighbour ([#410](https://github.com/KiwiCanopy/KiwiDesk/issues/410), [#2547](https://github.com/KiwiCanopy/KiwiDesk/issues/2547)). | Rearrange the screens in System Settings ▸ Displays so one bottom corner of each screen is clear ([With more than one screen](spaces-and-desktops.md#with-more-than-one-screen)). |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
+:::unreleased
+On a [split screen](lua-reference.md#set_display_areas), two
+dividers dragged into line become one: once the segments meet edge
+to edge, a drag moves the whole line. A split is stored as its
+areas' rectangles, which keep no memory of which cut came first, so
+the dividers are read off the rectangles each time. To part the
+line again, merge the areas on one side and split them anew, or set
+the rects from Lua
+([#3541](https://github.com/KiwiCanopy/KiwiDesk/issues/3541)).
+:::
+
 For a screen with **no free bottom corner**, Settings ▸ Screens and
 the Mac Checklist offer to move one or more screens in your macOS
 screen arrangement so every screen has one, after you say yes

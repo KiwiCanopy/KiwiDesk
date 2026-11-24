@@ -71,11 +71,24 @@ extension SettingsModel {
     }
 
     /// Every member of the run area `id` sits in as long as an
-    /// even split makes it (#3541).
+    /// even split makes it, none below the floor (#3541).
     func evenOutAreas(holding id: Int, on display: Display) {
         guard let split = areaSplit(of: display) else { return }
         config.settings.displayAreas[display.fingerprint] =
-            split.evenedOut(holding: id)
+            evenedOut(split, holding: id)
+    }
+
+    /// Whether Even Out would change the run area `id` sits in.
+    func canEvenOut(holding id: Int, on display: Display) -> Bool {
+        guard let split = areaSplit(of: display) else { return false }
+        return evenedOut(split, holding: id) != split
+    }
+
+    private func evenedOut(_ split: ScreenSplit, holding id: Int)
+        -> ScreenSplit
+    {
+        let axis = split.run(holding: id)?.axis ?? .sideBySide
+        return split.evenedOut(holding: id, floor: areaFloor(axis))
     }
 
     /// Writes `split` back for `display` — a divider's release or a
