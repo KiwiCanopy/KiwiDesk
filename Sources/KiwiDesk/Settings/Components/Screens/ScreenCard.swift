@@ -253,7 +253,7 @@ struct ScreenCard: View {
         return split.axis == .stacked
             ? L(
                 "monitor_card.split.stacked.ax",
-                "Areas: %1$d, stacked",
+                "Areas: %1$d, top to bottom",
                 count
             )
             : L(

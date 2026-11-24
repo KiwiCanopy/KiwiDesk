@@ -96,10 +96,16 @@ struct ScreenAreaEditor: View {
         greyed: Bool
     ) -> some View {
         let name = model.areaName(area, on: display)
-        return Button(ScreenAreaEditing.buttonTitle(axis)) {
+        return Button {
             model.splitArea(id, on: display, axis)
             select(ScreenSelection(display: display.id, area: id))
             landFocus()
+        } label: {
+            Label(
+                ScreenAreaEditing.buttonTitle(axis),
+                systemImage: ScreenAreaEditing.symbol(axis)
+            )
+            .labelStyle(.titleAndIcon)
         }
         .settingsActionButton()
         .disabled(greyed)
@@ -118,7 +124,11 @@ struct ScreenAreaEditor: View {
                     "Split %1$@ side by side",
                     name
                 )
-                : L("monitors.split.stacked.ax", "Split %1$@ stacked", name)
+                : L(
+                    "monitors.split.stacked.ax",
+                    "Split %1$@ top to bottom",
+                    name
+                )
         )
     }
 

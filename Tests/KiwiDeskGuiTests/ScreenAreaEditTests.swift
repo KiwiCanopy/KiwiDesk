@@ -183,4 +183,15 @@ struct ScreenAreaEditTests {
             #expect(text.contains(changed == other ? "#5" : "“Call”"))
         }
     }
+
+    /// A misspelt symbol draws an empty slot, so each must resolve.
+    @Test func splitSymbolsResolve() {
+        let symbols = ScreenAreaCut.Axis.allCases.map(
+            ScreenAreaEditing.symbol
+        )
+        for symbol in symbols {
+            #expect(KiwiCore.iconIsSymbol(symbol), "\(symbol)")
+        }
+        #expect(Set(symbols).count == symbols.count)
+    }
 }
