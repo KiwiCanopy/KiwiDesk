@@ -244,4 +244,42 @@ struct ScreenSplitNestedTests {
         #expect(split.position(ofMember: 1, in: run) == [.middle])
         #expect(split.position(ofMember: 0, in: run) == [.left])
     }
+
+    @Test func aNestedCutSpansOnlyItsBox() throws {
+        let split = try tJunction()
+        let cuts = try #require(
+            ScreenAreaCuts.cuts(of: split.areas, width: 3440, height: 1440)
+        )
+        let side = cuts.filter { $0.axis == .sideBySide }
+        #expect(side.map(\.position) == [1147, 2294])
+        #expect(side.allSatisfy { $0.start == 0 && $0.end == 1440 })
+        let stacked = try #require(cuts.first { $0.axis == .stacked })
+        #expect(stacked.position == 720)
+        #expect(stacked.start == 1147 && stacked.end == 2294)
+    }
+
+    @Test func evenOutMovesTheFreeMembersAroundAFloor() throws {
+        // [1720 | 860 | 860]; the middle split top to bottom, its top
+        // split side by side with a 200-wide area, so the middle
+        // column's own floor (300 · 860 / 200) outgrows an even third.
+        let three = try #require(
+            whole.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
+        )
+        let stacked = try #require(three.splitting(1, .stacked))
+        let top = try #require(stacked.splitting(1, .sideBySide))
+        let row = try #require(top.run(holding: 1))
+        let narrow = try #require(
+            top.setting(
+                member: 1,
+                of: row,
+                to: 200,
+                givingWay: 0,
+                floor: 100
+            )
+        ).split
+        let even = narrow.evenedOut(holding: 0, floor: 300)
+        #expect(valid(even))
+        #expect(even.run(holding: 0)?.lengths == [1075, 1290, 1075])
+        #expect(even.areas.allSatisfy { $0.w >= 300 })
+    }
 }

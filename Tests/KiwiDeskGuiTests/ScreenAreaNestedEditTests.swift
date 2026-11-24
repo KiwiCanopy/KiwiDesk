@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDesk
@@ -139,5 +140,28 @@ struct ScreenAreaNestedEditTests {
             }
         }
         return out
+    }
+
+    /// The menu and the editor offer the axes and branch Merge
+    /// through the one rule, never a list or a count of their own.
+    @Test func editorAndMenuTakeTheSharedRules() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let dir = "Sources/KiwiDesk/Settings/Components/Screens/"
+        func source(_ name: String) throws -> String {
+            SourceScan.stripComments(
+                try String(
+                    contentsOf: root.appendingPathComponent(dir + name),
+                    encoding: .utf8
+                )
+            )
+        }
+        let menu = try source("ScreenAreaMenu.swift")
+        let editor = try source("ScreenAreaEditor.swift")
+        #expect(!menu.isEmpty && !editor.isEmpty)
+        #expect(menu.contains("ForEach(ScreenAreaEditing.axes,"))
+        #expect(editor.contains("let axes = ScreenAreaEditing.axes\n"))
+        #expect(
+            editor.contains("if ScreenAreaEditing.mergePullsDown(neighbours)")
+        )
     }
 }
