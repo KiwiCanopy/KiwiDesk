@@ -148,6 +148,24 @@ struct LayoutUndoKeySeedTests {
         #expect(combo(redo, in: stored(core)) == "control+option+shift+z")
     }
 
+    @Test("an upgrade with undo already on the key adds redo beside it")
+    func ownUndoKeepsThePair() throws {
+        let core = makeCore(layout: Self.qwertz)
+        var config = GuiConfig()
+        let index = try #require(config.layers.firstIndex { $0.isDefault })
+        config.layers[index].bindings = [
+            KeyBinding(
+                combo: "control+option+y",
+                lua: undo,
+                kind: .navigation
+            )
+        ]
+        try core.guiConfigStore.save(config)
+        core.desktopMemory.readLegacyShortcutOffer = { nil }
+        core.topUpGenerationShortcuts()
+        #expect(combo(redo, in: stored(core)) == "control+option+shift+y")
+    }
+
     @Test("the test core pins a US board over any layout")
     func pinIsUS() {
         let core = makeTestCore()

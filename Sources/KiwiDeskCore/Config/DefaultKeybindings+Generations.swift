@@ -72,7 +72,13 @@ extension DefaultKeybindings {
         )
         var bound = Set(existing.map(\.lua))
         var added: [KeyBinding] = []
-        let undo = freeUndoKey(undoKey, among: existing, base: base)
+        // The pair's own rows never take its key from itself.
+        let pair = Set(layoutUndoRows(key: undoKey).map(\.lua))
+        let undo = freeUndoKey(
+            undoKey,
+            among: existing.filter { !pair.contains($0.lua) },
+            base: base
+        )
         for number in (max(mark, 0) + 1)...newestGeneration {
             for seeded in rows(ofGeneration: number, undoKey: undo) {
                 let row = base.rebased(seeded)

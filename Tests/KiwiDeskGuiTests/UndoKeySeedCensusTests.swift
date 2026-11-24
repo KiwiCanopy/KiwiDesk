@@ -22,9 +22,11 @@ struct UndoKeySeedCensusTests {
         "DefaultKeybindings.bindings", "generationTopUp", "rows",
     ]
 
-    /// File → calls whose rows are read for their `.lua` alone.
+    /// "File producer" → calls whose rows are read for their `.lua`
+    /// alone. Keyed by the producer too, so an unnamed writer in the
+    /// same file cannot stand in for the exempt read.
     private static let luaOnly: [String: Int] = [
-        "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift": 1
+        "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift rows": 1
     ]
 
     @Test("every producer call names the undo key")
@@ -41,10 +43,10 @@ struct UndoKeySeedCensusTests {
                 let key = String(
                     file.path.dropFirst(Self.root.path.count + 1)
                 )
-                for args in Self.arguments(in: text) {
+                for (producer, args) in Self.arguments(in: text) {
                     seen += 1
                     if !args.contains("undoKey:") {
-                        unnamed[key, default: 0] += 1
+                        unnamed["\(key) \(producer)", default: 0] += 1
                     }
                 }
             }
@@ -56,8 +58,10 @@ struct UndoKeySeedCensusTests {
 
     /// The argument lists of every producer call in `text`, a
     /// declaration (`func …(`) left out.
-    private static func arguments(in text: [Character]) -> [String] {
-        var found: [String] = []
+    private static func arguments(
+        in text: [Character]
+    ) -> [(String, String)] {
+        var found: [(String, String)] = []
         for producer in producers {
             for site in SourceScan.callSites(in: text, for: producer) {
                 guard var cursor = site.paren else { continue }
@@ -75,7 +79,7 @@ struct UndoKeySeedCensusTests {
                 if producer == "rows", !head.hasPrefix("ofGeneration") {
                     continue
                 }
-                found.append(args)
+                found.append((producer, args))
             }
         }
         return found

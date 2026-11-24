@@ -92,7 +92,7 @@ extension DefaultKeybindings {
     /// are free in `SystemShortcuts.map` and the seed (read
     /// 2026-11-24); another layout's key is checked against the
     /// seed alone.
-    public static func layoutUndoRows(key: String = "z") -> [KeyBinding] {
+    public static func layoutUndoRows(key: String) -> [KeyBinding] {
         [
             KeyBinding(
                 combo: "control+option+\(key)",
