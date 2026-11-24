@@ -237,8 +237,8 @@ synonym:
   `SpaceChip`, `BadgeChip`, `SpaceAssignmentChip`). Live and
   correct; retired only as a name for the sticky mark.
 - **KiwiShelf** / **shelf** — **KiwiShelf** is the product name
-  of the one place both bars are managed — what both share: when
-  they show, where they sit, and how they look — not of a
+  of what both bars share — when they show, where they sit, and
+  how they look — not of a
   strip: the bars may sit on one edge or each on its own (Lua
   `kiwishelf.*`, JSON `settings.kiwishelf`, #1517, #1731). Write **KiwiShelf** in UI
   copy and never the common noun *shelf*, which the owner struck
@@ -246,7 +246,11 @@ synonym:
   say *the shelf* once KiwiShelf is named. As a product name it
   appears verbatim in every catalog —
   `scripts/localization_guards.py`'s `PRODUCT_NAMES` is the
-  register. It is not the palette picker's source-only
+  register. **Title the Settings destination by what it holds,
+  "Bars & Pocket", never "KiwiShelf"** (owner ruling 2026-11-24,
+  #3608): the door names its contents as "Gaps & Borders" does,
+  and KiwiShelf stays the name of the shelf inside it — its card,
+  its drawers, `kiwishelf.*`. It is not the palette picker's source-only
   `PaletteShelf` type: do not name a bar concept after that type,
   or a palette concept after KiwiShelf.
 - **look** — a named set of presentation STYLING — the bars,

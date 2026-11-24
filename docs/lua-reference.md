@@ -3681,16 +3681,15 @@ kiwishelf.set_pocket_edge("right")
 ```
 
 **Per screen:** a second argument names a screen, in the forms
-[`space_bar.set_edge`](#space_barset_edge) takes, and the pocket
-takes that edge on that screen alone. The screens are judged and
-collapse as a bar's are; a call without a screen sets every
-screen and clears their own edges, and a look leaves each screen's
-own untouched. The edges are stored per profile under
-`kiwishelf.pocket_edge_override`, keyed by fingerprint. Settings ▸
-KiwiShelf writes them as **Pocket** under **Position** ▸ **Each bar
-and Pocket**, every screen at once, and as its **Per screen** rows,
-one screen each; **Position** sets the pocket's edge with both
-bars'.
+[`space_bar.set_edge`](#space_barset_edge) takes, and the pocket takes
+that edge on that screen alone. The screens are judged and collapse as
+a bar's are; a call without a screen sets every screen and clears
+their own edges, and a look leaves each screen's own untouched. The
+edges are stored per profile under `kiwishelf.pocket_edge_override`,
+keyed by fingerprint. Settings ▸ Bars & Pocket ▸ KiwiShelf writes them
+as **Pocket** under **Position** ▸ **Each bar and Pocket**, every
+screen at once, and as its **Per screen** rows, one screen each;
+**Position** sets the pocket's edge with both bars'.
 
 ```lua
 kiwishelf.set_pocket_edge("left", "LG HDR 4K:3840x2160")
@@ -3822,8 +3821,8 @@ there until the pointer has left it.
 [`kiwishelf.set_pocket_drag_reveal`](#kiwishelfset_pocket_drag_reveal)
 turns that drag-time pocket off.
 
-Settings ▸ Bars & Pocket writes it as **Pocket** under **Show** ▸
-**Each bar and Pocket**; **Show** sets it with the bars'
+Settings ▸ Bars & Pocket ▸ KiwiShelf writes it as **Pocket** under
+**Show** ▸ **Each bar and Pocket**; **Show** sets it with the bars'
 visibilities. A look never carries it.
 
 **Example:**
@@ -3845,9 +3844,9 @@ pocket already showing — `"always"`, or held out by its list or a
 window going in or out — still takes a drop. Its keys, its list and
 [`pocket`](#pocket) reach it either way.
 
-Settings ▸ Bars & Pocket writes it as **Show the Pocket while dragging a
-window** under **Show** ▸ **Each bar and Pocket**. A look never
-carries it.
+Settings ▸ Bars & Pocket ▸ KiwiShelf writes it as **Show the Pocket
+while dragging a window** under **Show** ▸ **Each bar and Pocket**. A
+look never carries it.
 
 **Example:**
 
@@ -3923,8 +3922,8 @@ pause symbol after its glyph. While a layer other than `default` is
 on, its glyph leads the listed Spaces; where no Space is listed, a
 layer with an icon shows its icon in place of the logo.
 
-Settings ▸ Bars & Pocket writes it as **Menu bar icon** under
-**Show**. A look never carries it.
+Settings ▸ Bars & Pocket ▸ KiwiShelf writes it as **Menu bar icon**
+under **Show**. A look never carries it.
 
 **Example:**
 
@@ -4147,12 +4146,12 @@ call without a screen is refused: each layout keeps its own App
 Bar visibility, set with that layout's `set_app_bar_visibility`
 ([Per-Layout App Bar Overrides](#per-layout-app-bar-overrides)).
 
-**Does:** sets the App Bar's visibility on that screen in every
-layout that has an App Bar; the values mean what
-[`space_bar.set_visibility`](#space_barset_visibility) says. The
-other screens keep each layout's value. The values are stored per
-profile under `app_bar.visibility_override`, keyed by fingerprint.
-Settings ▸ Bars & Pocket writes them in the App Bar's **Per screen**
+**Does:** sets the App Bar's visibility on that screen in every layout
+that has an App Bar; the values mean what
+[`space_bar.set_visibility`](#space_barset_visibility) says. The other
+screens keep each layout's value. The values are stored per profile
+under `app_bar.visibility_override`, keyed by fingerprint. Settings ▸
+Bars & Pocket ▸ KiwiShelf writes them in the App Bar's **Per screen**
 rows under **Position** ▸ **Each bar and Pocket**.
 
 **Example:**
@@ -4471,12 +4470,12 @@ space_bar.set_visibility("auto")
 :::unreleased
 **Per screen:** a second argument names a screen, in the forms
 [`space_bar.set_edge`](#space_barset_edge) takes, and the value is
-that screen's alone. Naming the bar's own value returns a screen
-to it; a call without a screen sets every screen and clears their
-own values. The values are stored per profile under
+that screen's alone. Naming the bar's own value returns a screen to
+it; a call without a screen sets every screen and clears their own
+values. The values are stored per profile under
 `space_bar.visibility_override`, keyed by fingerprint. Settings ▸
-KiwiShelf writes them in the Space Bar's **Per screen** rows under
-**Position** ▸ **Each bar and Pocket**.
+Bars & Pocket ▸ KiwiShelf writes them in the Space Bar's **Per
+screen** rows under **Position** ▸ **Each bar and Pocket**.
 
 ```lua
 space_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")
@@ -10274,8 +10273,8 @@ KiwiDesk's own Off
 ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
 stops it.
 
-The switch is Bars & Pocket ▸ Show ▸ Durations ▸ Animate the expand in
-Settings; the length is Lua-only.
+The switch is Bars & Pocket ▸ KiwiShelf ▸ Show ▸ Durations ▸ Animate
+the expand in Settings; the length is Lua-only.
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired → these two; a saved profile, look or backup carrying the
@@ -10316,12 +10315,12 @@ animations.set_reveal_duration(600)
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** a hidden bar's reveal. Off, the bar shows and hides at
-once. It plays with macOS's Reduce Motion on too, and KiwiDesk's
-own Off ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
-stops it. In Settings it is
-Bars & Pocket ▸ Show ▸ Durations ▸ Animate the reveal; the length,
-`animations.set_reveal_duration`, is Lua-only.
+**Does:** a hidden bar's reveal. Off, the bar shows and hides at once.
+It plays with macOS's Reduce Motion on too, and KiwiDesk's own Off
+([`animations.set_reduce_motion`](#animationsset_reduce_motion)) stops
+it. In Settings it is Bars & Pocket ▸ KiwiShelf ▸ Show ▸ Durations ▸
+Animate the reveal; the length, `animations.set_reveal_duration`, is
+Lua-only.
 
 **Example:**
 

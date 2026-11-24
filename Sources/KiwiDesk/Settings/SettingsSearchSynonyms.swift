@@ -55,7 +55,7 @@ enum SettingsSearchSynonyms {
         // "Shortcuts & Gestures" until #3184, and its third part.
         case .shortcuts: return ["gestures", "mouse", "trackpad"]
         // "KiwiShelf" until #3608; the shelf keeps the name inside.
-        case .bars: return ["kiwishelf", "shelf"]
+        case .bars: return ["kiwishelf"]
         default: return []
         }
     }

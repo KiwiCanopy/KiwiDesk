@@ -413,10 +413,9 @@ to stop, so the escape is ranked too. Take the first that fits.
    ("Voir les dispositions", "Раскладки набора"); restoring the
    qualifier let each button collapse to the bare noun.
    `destination.bars` is qualified the same way — "Bars & Pocket"
-   (owner ruling 2026-11-24, #3608, replacing #1517's "KiwiShelf
-   & Bars") — so a catalog that renders it as a bare *Bars* has
-   this step's defect, and the bare noun stays free for ordinary
-   sites. The bars' noun translates; *Pocket* stays Latin, and
+   (owner ruling 2026-11-24, #3608) — so a catalog that renders it
+   as a bare *Bars* has this step's defect, and the bare noun stays
+   free for ordinary sites. The bars' noun translates; *Pocket* stays Latin, and
    *KiwiShelf* stays Latin (Family A) as the name of the shelf
    inside the page.
 2. **Where English's own destination IS the bare noun** —
