@@ -62,6 +62,16 @@ because two real clients now remove drift — see
   (`WindowSwitcherLastAppSeedTests`, `SizeLayerSeedTests` ▸
   `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
   `LayoutCycleSeedTests`).
+- **A default row seeds on a key-code POSITION, save the undo pair,
+  which seeds on the key that types Z on the active layout (#3599,
+  owner 2026-11-24).** Every writer of a default row and every
+  reader comparing a layer with the seed passes
+  `KiwiCore.layoutUndoKey` as `undoKey:` (`UndoKeySeedCensusTests`
+  holds the calls), and the free check falls back to `z` through
+  the one `freeUndoKey` (`LayoutUndoKeySeedTests`,
+  `RestoreUndoKeyTests`). A further row placed by letter is a
+  ruling of its own; the argument is `docs/design-decisions.md` ▸
+  *Layout undo validates instead of hooking*.
 - **App chrome is seeded from the ONE `appChromeRows`, and
   every site that authors a layer takes it (#602/#1381).** The
   base seed and a GUI-created layer are two authoring sites, and

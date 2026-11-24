@@ -73,7 +73,8 @@ extension SettingsModel {
         DefaultKeybindings.bindings(
             spaces: spaces,
             resizeStep: Int(resizeStep),
-            base: base
+            base: base,
+            undoKey: core.layoutUndoKey
         )
             + bindableDesktops.compactMap {
                 DefaultKeybindings.desktopRow($0, base: base)

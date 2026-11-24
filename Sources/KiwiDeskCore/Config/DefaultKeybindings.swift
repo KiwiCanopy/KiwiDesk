@@ -12,11 +12,12 @@ public enum DefaultKeybindings {
     ]
 
     /// Starter keybindings for base `default` mode (#91, #466, #1094, #602),
-    /// on `base` (#2460).
+    /// on `base` (#2460), undo on `undoKey` (#3599, `layoutUndoKey`).
     public static func bindings(
         spaces: [SpaceID],
         resizeStep: Int,
-        base: ShortcutBase
+        base: ShortcutBase,
+        undoKey: String = "z"
     ) -> [KeyBinding] {
         var rows: [KeyBinding] = []
         // Tier 1 — ⌃⌥: focus window / space
@@ -84,13 +85,38 @@ public enum DefaultKeybindings {
         rows.append(desktopOverviewRow())
         rows.append(kiwiVisionRow())
         rows.append(resetSizesRow())
-        rows.append(contentsOf: layoutUndoRows())
+        let undoAt = rows.count
         rows.append(maximizeRow())
         rows.append(contentsOf: directionalMaximizeRows())
         rows.append(toggleTilingRow())
         rows.append(contentsOf: barRevealRows())
         rows.append(contentsOf: appChromeRows())
+        let undo = freeUndoKey(
+            undoKey,
+            among: rows.map(base.rebased),
+            base: base
+        )
+        rows.insert(contentsOf: layoutUndoRows(key: undo), at: undoAt)
         return rows.map(base.rebased)
+    }
+
+    /// `key`, or the US `z` where a row of `rows` (on `base`)
+    /// already holds one of the undo pair's chords on it (#3599):
+    /// the one rule the seed and generation 15's top-up share.
+    static func freeUndoKey(
+        _ key: String,
+        among rows: [KeyBinding],
+        base: ShortcutBase
+    ) -> String {
+        let taken = Set(
+            rows.compactMap { KeyCombo.parse($0.combo)?.registered }
+        )
+        let free = layoutUndoRows(key: key).allSatisfy {
+            guard let combo = KeyCombo.parse(base.rebased($0).combo)
+            else { return false }
+            return !taken.contains(combo.registered)
+        }
+        return free ? key : "z"
     }
 
     /// The app-chrome rows on the `⌃⌥` base — ⌃⌥K opens the

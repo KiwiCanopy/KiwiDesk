@@ -272,7 +272,15 @@ extension KiwiCore {
             DefaultKeybindings.bindings(
                 spaces: config.spaces,
                 resizeStep: Int(config.settings.resizeStep),
-                base: config.shortcutBase
+                base: config.shortcutBase,
+                undoKey: layoutUndoKey
             )
+    }
+
+    /// The key the undo pair seeds on, by letter on the active
+    /// layout (#3599), the `undoKey:` every default-row producer
+    /// takes (`UndoKeySeedCensusTests`).
+    public var layoutUndoKey: String {
+        DefaultKeybindings.layoutUndoKey(keyCodeTyping: keyCodeTyping)
     }
 }
