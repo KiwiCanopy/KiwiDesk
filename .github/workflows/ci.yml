@@ -226,6 +226,11 @@ jobs:
           swift --version
           xcodebuild -version
 
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
+
       # The warning ratchet (#1594): swiftc errors on anything
       # but a deprecation, which stays a warning while
       # AXHelper's `activateIgnoringOtherApps` call is #1170's
@@ -294,6 +299,11 @@ jobs:
           swift --version
           xcodebuild -version
 
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
+
       - name: Test (Core)
         run: >-
           scripts/warning-gate swift test
@@ -330,6 +340,11 @@ jobs:
           fi
           swift --version
           xcodebuild -version
+
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
 
       - name: Lint
         run: ./scripts/lint.sh
@@ -408,6 +423,11 @@ jobs:
           fi
           swift --version
           xcodebuild -version
+
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
 
       - name: Build (release)
         run: swift build -c release

@@ -192,6 +192,11 @@ jobs:
           swift --version
           xcodebuild -version
 
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
+
       - name: Build
         run: swift build
 
@@ -226,6 +231,11 @@ jobs:
           sudo xcode-select -s "$XCODE"
           swift --version
           xcodebuild -version
+
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
 
       - name: Test (Core)
         run: >-
@@ -307,6 +317,11 @@ jobs:
           sudo xcode-select -s "$XCODE"
           swift --version
           xcodebuild -version
+
+      # Before any swift step: a transient clone refusal
+      # retries once (#3591).
+      - name: Resolve packages
+        run: scripts/resolve-packages
 
       - name: Resolve the tag
         id: tag

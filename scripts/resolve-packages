@@ -1,0 +1,39 @@
+#!/bin/bash
+# Resolve the package's dependencies from Package.resolved alone,
+# retrying exactly once (#3591). A fresh CI VM clones every
+# dependency, and github.com now and then refuses an anonymous
+# clone of a public repository ("could not read Username"), which
+# failed a job before any test ran. The retry clears the clones
+# that attempt left behind, so it starts from nothing again.
+#
+# `--only-use-versions-from-resolved-file` keeps a stale or broken
+# Package.resolved fatal: it fails both attempts, and the second
+# failure fails the step (packaging-and-release.md ▸ CI).
+#
+# Usage: scripts/resolve-packages
+# KIWIDESK_RESOLVE_SWIFT names the swift binary; a test seam.
+set -uo pipefail
+
+SWIFT="${KIWIDESK_RESOLVE_SWIFT:-swift}"
+CACHE="$HOME/Library/Caches/org.swift.swiftpm/repositories"
+
+resolve() {
+    "$SWIFT" package resolve --only-use-versions-from-resolved-file
+}
+
+if resolve; then
+    exit 0
+fi
+
+echo "::warning::swift package resolve failed; clearing the" \
+    "repository clones and retrying once (#3591)"
+rm -rf .build/repositories "$CACHE"
+
+resolve
+STATUS=$?
+if [ "$STATUS" -eq 0 ]; then
+    exit 0
+fi
+echo "::error::swift package resolve failed twice; a second" \
+    "failure is a real one (check Package.resolved)" >&2
+exit "$STATUS"
