@@ -40,7 +40,11 @@ enum DesktopsGridFixture {
         )
     }
 
-    static func overview(shared: Bool = true) -> DesktopOverview {
+    /// `rows` overrides the rows Core would read off the screens.
+    static func overview(
+        shared: Bool = true,
+        rows: [DesktopOverview.Row]? = nil
+    ) -> DesktopOverview {
         let here = DesktopOverview.Screen(
             display: DisplayID(1),
             name: "Built-in",
@@ -65,11 +69,24 @@ enum DesktopsGridFixture {
             screens: [here, other],
             yours: nil,
             rows: shared
-                ? [
-                    DesktopOverview.Row(native: 1, isShown: true),
-                    DesktopOverview.Row(native: 2, isShown: false),
+                ? rows ?? [
+                    row(1, profile: nil, shown: true),
+                    row(2, profile: "Work", shown: false),
                 ]
                 : []
+        )
+    }
+
+    static func row(
+        _ label: Int,
+        profile: String?,
+        shown: Bool
+    ) -> DesktopOverview.Row {
+        DesktopOverview.Row(
+            native: UInt64(label),
+            label: label,
+            profile: profile,
+            isShown: shown
         )
     }
 

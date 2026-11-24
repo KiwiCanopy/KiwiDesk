@@ -1,17 +1,28 @@
 import Foundation
 
 extension DesktopOverview {
-    /// One shared Desktop's row across every screen (#3602): the
-    /// Desktop's own verdicts, which no column's card stands for.
+    /// One shared Desktop's row across every screen (#3602): what
+    /// its header draws, the Desktop's own, never one column's.
     public struct Row: Sendable, Equatable {
         /// The Desktop's native Space id, the same on every screen.
         public let native: SkyLight.SpaceID
+        /// Its number across screens (`Desktop.label`).
+        public let label: Int
+        /// The profile its binding names, nil where none is bound.
+        public let profile: String?
         /// Whether the screens show it now, read for the Desktop
         /// itself, never as "any column shows it".
         public let isShown: Bool
 
-        public init(native: SkyLight.SpaceID, isShown: Bool) {
+        public init(
+            native: SkyLight.SpaceID,
+            label: Int,
+            profile: String?,
+            isShown: Bool
+        ) {
             self.native = native
+            self.label = label
+            self.profile = profile
             self.isShown = isShown
         }
     }
@@ -30,6 +41,13 @@ extension DesktopOverview {
         guard !natives.isEmpty, !natives.contains(0),
             screens.allSatisfy({ $0.desktops.map(\.native) == natives })
         else { return [] }
-        return natives.map { Row(native: $0, isShown: isShown($0)) }
+        return first.desktops.map {
+            Row(
+                native: $0.native,
+                label: $0.label,
+                profile: $0.profile,
+                isShown: isShown($0.native)
+            )
+        }
     }
 }

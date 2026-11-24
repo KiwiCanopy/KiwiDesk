@@ -43,12 +43,10 @@ struct DesktopCardView: View {
         .accessibilityLabel(groupLabel)
     }
 
-    /// The card's VoiceOver group: its Desktop, or in the grid,
-    /// whose row names the Desktop, its screen.
+    /// The card's VoiceOver group: its Desktop; none in the grid,
+    /// whose row names the Desktop and whose lines their screen.
     private var groupLabel: String {
-        titled
-            ? DesktopsText.desktop(desktop.label)
-            : DesktopsSideView.title(state.overview.screens[screen])
+        titled ? DesktopsText.desktop(desktop.label) : ""
     }
 
     /// The lines, each area's under its header (#3572 ruling 2),

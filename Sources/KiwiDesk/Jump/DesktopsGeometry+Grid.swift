@@ -28,6 +28,10 @@ extension DesktopsGeometry {
         let gutter: CGFloat
         let rows: [CGFloat]
 
+        /// The frozen span before the first screen's column: the
+        /// header column and its gap.
+        var lead: CGFloat { gutter + gutterGap }
+
         /// The rows stacked, a hairline between two.
         var height: CGFloat {
             rows.reduce(0, +) + CGFloat(max(rows.count - 1, 0)) * divider
@@ -42,15 +46,23 @@ extension DesktopsGeometry {
         of overview: DesktopOverview,
         measure: (String) -> CGFloat = DesktopsGutter.titleWidth
     ) -> CGFloat? {
-        guard !overview.rows.isEmpty, let first = overview.screens.first
-        else { return nil }
+        guard !overview.rows.isEmpty else { return nil }
         let widest =
-            first.desktops.map {
+            overview.rows.map {
                 measure(DesktopsText.desktop($0.label))
             }.max() ?? 0
         let width = (widest + checkSlot + headerLeading + headerTrailing)
             .rounded(.up)
         return min(max(width, narrowestGutter), widestGutter)
+    }
+
+    /// The gutter the side draws: none without rows, whatever was
+    /// measured.
+    static func drawn(
+        _ gutter: CGFloat?,
+        in overview: DesktopOverview
+    ) -> CGFloat? {
+        overview.rows.isEmpty ? nil : gutter
     }
 
     /// Every row's height at `line` per Space line.
@@ -71,7 +83,7 @@ extension DesktopsGeometry {
             $0.desktops.indices.contains(index) ? $0.desktops[index] : nil
         }
         let cells = desktops.map { cell(of: $0, line: line) }.max() ?? 0
-        let profile = desktops.first?.profile != nil
+        let profile = overview.rows[index].profile != nil
         return max(header(line: line, profile: profile), cells)
             + 2 * rowPadding
     }

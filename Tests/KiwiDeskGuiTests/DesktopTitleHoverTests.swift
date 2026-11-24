@@ -70,7 +70,7 @@ struct DesktopTitleHoverTests {
         let body = try run(
             row,
             from: "varbody:someView{",
-            to: "privatevarlabel"
+            to: "privatevarcells"
         )
         #expect(
             body.contains(
@@ -92,6 +92,7 @@ struct DesktopTitleHoverTests {
             )
         )
         #expect(!ring.contains(".fill("))
+        #expect(!ring.contains(".background"))
         let header = try source("DesktopRowHeaderView")
         #expect(
             header.contains(
@@ -126,6 +127,7 @@ struct DesktopTitleHoverTests {
             to: ".accessibilityLabel(DesktopsText.shown)"
         )
         #expect(check.contains(".foregroundStyle(.primary)"))
+        #expect(!check.contains(".opacity("))
         #expect(!check.contains("paint.selection"))
         #expect(!check.contains("SettingsTheme.accent"))
         let header = try run(
@@ -134,6 +136,7 @@ struct DesktopTitleHoverTests {
             to: ".accessibilityLabel(DesktopsText.shown)"
         )
         #expect(header.contains(".foregroundStyle(.primary)"))
+        #expect(!header.contains(".opacity("))
         #expect(!header.contains("paint.selection"))
         #expect(!header.contains("SettingsTheme.accent"))
     }

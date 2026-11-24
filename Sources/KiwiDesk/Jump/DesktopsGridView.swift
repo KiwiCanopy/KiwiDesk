@@ -17,14 +17,14 @@ struct DesktopsGridView: View {
     let pointer: DesktopsPointer
 
     private var geometry: DesktopsGeometry { state.geometry }
-    private var gutter: CGFloat { geometry.grid?.gutter ?? 0 }
+    private var lead: CGFloat { geometry.grid?.lead ?? 0 }
     private var rows: Range<Int> { state.overview.rows.indices }
 
     /// The grid's whole width: the header column, its gap, the
     /// columns and the hairlines between them.
     private var width: CGFloat {
         let columns = geometry.columns
-        return gutter + DesktopsGeometry.gutterGap + columns.reduce(0, +)
+        return lead + columns.reduce(0, +)
             + CGFloat(max(columns.count - 1, 0)) * DesktopsGeometry.divider
     }
 
@@ -32,8 +32,7 @@ struct DesktopsGridView: View {
         ViewLine(
             selected: state.place.map { DesktopsScrollID.screen($0.screen) },
             inset: DesktopsGeometry.rowInset,
-            pinned: DesktopsGeometry.rowInset + gutter
-                + DesktopsGeometry.gutterGap
+            pinned: DesktopsGeometry.rowInset + lead
         ) {
             VStack(alignment: .leading, spacing: DesktopsGeometry.headerGap) {
                 DesktopsGridHeader(state: state)
@@ -94,13 +93,12 @@ private struct DesktopsGridHeader: View {
 
     @Environment(\.viewLineScrolled) private var scrolled
 
+    private var lead: CGFloat { state.geometry.grid?.lead ?? 0 }
+
     var body: some View {
         let geometry = state.geometry
         HStack(spacing: 0) {
-            Color.clear.frame(
-                width: (geometry.grid?.gutter ?? 0)
-                    + DesktopsGeometry.gutterGap
-            )
+            Color.clear.frame(width: lead)
             HStack(spacing: 0) {
                 ForEach(state.overview.screens.indices, id: \.self) {
                     screen in
@@ -115,12 +113,20 @@ private struct DesktopsGridHeader: View {
                             width: geometry.columns[screen],
                             alignment: .leading
                         )
-                        .id(DesktopsScrollID.screen(screen))
+                        .background(alignment: .trailing) {
+                            // The reveal's target reaches back over
+                            // the frozen span, so a screen scrolled
+                            // to lands clear of it.
+                            Color.clear
+                                .frame(
+                                    width: geometry.columns[screen]
+                                        + DesktopsGeometry.rowInset + lead
+                                )
+                                .id(DesktopsScrollID.screen(screen))
+                        }
                 }
             }
-            .mask(alignment: .leading) {
-                Rectangle().padding(.leading, scrolled)
-            }
+            .frozenCut(scrolled)
         }
     }
 }

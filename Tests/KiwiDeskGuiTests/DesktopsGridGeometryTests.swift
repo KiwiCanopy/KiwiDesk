@@ -17,7 +17,7 @@ struct DesktopsGridGeometryTests {
     typealias G = DesktopsGeometry
     typealias F = DesktopsGridFixture
 
-    @Test("separate Spaces or one screen draws no grid")
+    @Test("an overview without rows draws no grid")
     func noGridWithoutRows() {
         #expect(F.geometry(F.overview(shared: false)).grid == nil)
         #expect(G.gutter(of: F.overview(shared: false)) == nil)
@@ -34,6 +34,52 @@ struct DesktopsGridGeometryTests {
         #expect(
             mid.grid?.gutter
                 == 90 + G.checkSlot + G.headerLeading + G.headerTrailing
+        )
+    }
+
+    @Test("the header column and a row's header read the row's facts")
+    func headerReadsTheRow() throws {
+        LocalizationManager.shared.select("en")
+        // Rows naming Desktop 10 and a profile the columns' cards
+        // lack: the gutter measures "Desktop 10", and row 1's header
+        // grows a profile line its cells' cards do not carry.
+        let rows = [
+            F.row(10, profile: nil, shown: true),
+            F.row(2, profile: "Home", shown: false),
+        ]
+        var overview = F.overview(rows: rows)
+        let gutter = try #require(G.gutter(of: overview, measure: F.measure))
+        let title = F.measure(DesktopsText.desktop(10))
+        #expect(
+            gutter
+                == max(
+                    title + G.checkSlot + G.headerLeading + G.headerTrailing,
+                    G.narrowestGutter
+                )
+        )
+        // One line per cell, so a header with a profile outgrows it.
+        overview = DesktopOverview(
+            screens: overview.screens.map { screen in
+                DesktopOverview.Screen(
+                    display: screen.display,
+                    name: screen.name,
+                    isMain: screen.isMain,
+                    isHere: screen.isHere,
+                    desktops: screen.desktops.map {
+                        F.desktop($0.label, lines: 1)
+                    }
+                )
+            },
+            yours: nil,
+            rows: rows
+        )
+        let line = G.tallestLine
+        #expect(
+            G.row(1, of: overview, line: line)
+                == G.header(line: line, profile: true) + 2 * G.rowPadding
+        )
+        #expect(
+            G.row(0, of: overview, line: line) == line + 2 * G.rowPadding
         )
     }
 
@@ -83,7 +129,14 @@ struct DesktopsGridGeometryTests {
             gutter: gutter
         )
         #expect(shared == columns + gutter + G.gutterGap)
-        #expect(columns == G.preferredWidth(of: F.overview(shared: false)))
+        #expect(F.geometry().preferred == shared)
+        #expect(
+            columns
+                == G.preferredWidth(
+                    of: F.overview(shared: false),
+                    gutter: nil
+                )
+        )
     }
 
     @Test("the columns share what the header column leaves")

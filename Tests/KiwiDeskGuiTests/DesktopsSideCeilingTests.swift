@@ -40,12 +40,14 @@ struct DesktopsSideCeilingTests {
         let side = DesktopsGeometry(
             overview: overview,
             width: JumpPanelView.width,
-            cap: model.sheetCap
+            cap: model.sheetCap,
+            gutter: nil
         )
         let whole = DesktopsGeometry(
             overview: overview,
             width: JumpPanelView.width,
-            cap: .infinity
+            cap: .infinity,
+            gutter: nil
         )
         #expect(side.height == whole.height)
         #expect(

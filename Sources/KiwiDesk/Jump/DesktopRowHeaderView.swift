@@ -18,10 +18,8 @@ struct DesktopRowHeaderView: View {
     private var here: Int {
         state.overview.screens.firstIndex(where: \.isHere) ?? 0
     }
-    private var desktop: DesktopOverview.Desktop {
-        state.overview.screens[here].desktops[index]
-    }
-    private var isShown: Bool { state.overview.rows[index].isShown }
+    /// The header's facts: the row's, never one column's.
+    private var row: DesktopOverview.Row { state.overview.rows[index] }
 
     /// The hover its row rings for (`DesktopRowView`).
     static func target(
@@ -35,9 +33,9 @@ struct DesktopRowHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
-                Text(DesktopsText.desktop(desktop.label))
+                Text(DesktopsText.desktop(row.label))
                     .font(.callout.weight(.semibold))
-                if isShown {
+                if row.isShown {
                     // The card title's "in use" mark: own ink at full
                     // strength, never the accent (#3210, #3484).
                     Image(systemName: "checkmark.circle.fill")
@@ -47,7 +45,7 @@ struct DesktopRowHeaderView: View {
                 }
             }
             .frame(height: DesktopsGeometry.titleHeight)
-            if let profile = desktop.profile {
+            if let profile = row.profile {
                 Text(profile)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -72,10 +70,10 @@ struct DesktopRowHeaderView: View {
         .contentShape(Rectangle())
         .onTapGesture { click() }
         .desktopsHover(Self.target(state, index), pointer)
-        .help(DesktopsText.switchTo(desktop.label))
+        .help(DesktopsText.switchTo(row.label))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityHint(DesktopsText.switchTo(desktop.label))
+        .accessibilityHint(DesktopsText.switchTo(row.label))
         .accessibilityAction { click(count: 1, modifiers: []) }
     }
 
@@ -89,7 +87,8 @@ struct DesktopRowHeaderView: View {
             DesktopsPlace(
                 screen: here,
                 desktop: index,
-                line: desktop.landingLine
+                line: state.overview.screens[here].desktops[index]
+                    .landingLine
             ),
             count,
             modifiers,

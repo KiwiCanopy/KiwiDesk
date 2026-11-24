@@ -58,6 +58,8 @@ struct DesktopsGeometry: Equatable {
     /// With shared Desktops on two or more screens, the row grid
     /// (#3602); nil where each screen is a column of its own.
     let grid: Grid?
+    /// The width the side asks of the panel (`preferredWidth`).
+    let preferred: CGFloat
 
     /// `gutter` is the grid's header column, measured once where the
     /// side opens (`gutter(of:)`); the grid draws where it is given
@@ -66,11 +68,11 @@ struct DesktopsGeometry: Equatable {
         overview: DesktopOverview,
         width: CGFloat,
         cap: CGFloat,
-        gutter: CGFloat? = nil
+        gutter: CGFloat?
     ) {
         let screens = overview.screens
         let budget = cap - Self.chrome
-        let gutter = overview.rows.isEmpty ? nil : gutter
+        let gutter = Self.drawn(gutter, in: overview)
         let line =
             gutter == nil
             ? Self.lineHeight(screens, budget: budget)
@@ -86,6 +88,7 @@ struct DesktopsGeometry: Equatable {
         }
         let content = grid?.height ?? stacks.max() ?? 0
         height = min(Self.chrome + content, cap)
+        preferred = Self.preferredWidth(of: overview, gutter: gutter)
     }
 
     /// The width the side asks of the panel (#3570 ruling 4): one
@@ -95,10 +98,10 @@ struct DesktopsGeometry: Equatable {
     /// scrolls sideways.
     static func preferredWidth(
         of overview: DesktopOverview,
-        gutter: CGFloat? = nil
+        gutter: CGFloat?
     ) -> CGFloat {
         let n = CGFloat(max(overview.screens.count, 1))
-        let gutter = overview.rows.isEmpty ? nil : gutter
+        let gutter = drawn(gutter, in: overview)
         return 2 * rowInset + n * narrowestColumn + (n - 1) * divider
             + (gutter.map { $0 + gutterGap } ?? 0)
     }
@@ -140,7 +143,7 @@ struct DesktopsGeometry: Equatable {
 
     /// The largest line height at which the tallest column fits
     /// `budget`, held between the shortest and the tallest line.
-    static func lineHeight(
+    private static func lineHeight(
         _ screens: [DesktopOverview.Screen],
         budget: CGFloat
     ) -> CGFloat {

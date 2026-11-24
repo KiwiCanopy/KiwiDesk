@@ -1423,7 +1423,12 @@ must keep:
   lighter than a selected tile's 2 pt ring, and draws no ground of
   its own
   (`DesktopTitleHoverTests` ▸ `cardRings`, `rowRings`,
-  `titleStaysPlain`).
+  `titleStaysPlain`). **In the shared-Desktop grid a row header
+  draws the Desktop's own facts** — its title, ✓ and profile — from
+  Core's `DesktopOverview.Row`, never from one column's card, and
+  the geometry sizes the header from the same row (#3602,
+  `DesktopOverviewRowTests` ▸ `sharedRows`,
+  `DesktopsGridGeometryTests` ▸ `headerReadsTheRow`).
 
 ## A diff row's ↺ (#792)
 

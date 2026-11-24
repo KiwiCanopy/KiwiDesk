@@ -49,12 +49,11 @@ struct DesktopOverviewRowTests {
         let core = makeCore(shared: true)
         defer { reset() }
         let overview = overview(core)
-        #expect(
-            overview.rows == [
-                DesktopOverview.Row(native: 10, isShown: true),
-                DesktopOverview.Row(native: 11, isShown: false),
-            ]
-        )
+        #expect(overview.rows.map(\.native) == [10, 11])
+        #expect(overview.rows.map(\.isShown) == [true, false])
+        let first = overview.screens[0].desktops
+        #expect(overview.rows.map(\.label) == first.map(\.label))
+        #expect(overview.rows.map(\.profile) == first.map(\.profile))
         for screen in overview.screens {
             #expect(screen.desktops.map(\.native) == [10, 11])
         }
@@ -90,7 +89,7 @@ struct DesktopOverviewRowTests {
                     label: index + 1,
                     number: index + 1,
                     isShown: native == shown,
-                    profile: nil,
+                    profile: native == 11 ? "Work" : nil,
                     spaces: []
                 )
             }
@@ -105,6 +104,8 @@ struct DesktopOverviewRowTests {
             isShown: { $0 == 11 }
         )
         #expect(rows.map(\.isShown) == [false, true])
+        #expect(rows.map(\.label) == [1, 2])
+        #expect(rows.map(\.profile) == [nil, "Work"])
     }
 
     @Test("screens listing different sets read no rows")
@@ -121,5 +122,11 @@ struct DesktopOverviewRowTests {
             isShown: { _ in true }
         )
         #expect(synthetic.isEmpty)
+        let separate = DesktopOverview.rows(
+            of: [screen(1, [10, 11]), screen(2, [10, 11])],
+            shared: false,
+            isShown: { _ in true }
+        )
+        #expect(separate.isEmpty)
     }
 }

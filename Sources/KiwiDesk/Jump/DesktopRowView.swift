@@ -35,20 +35,14 @@ struct DesktopRowView: View {
             .offset(x: scrolled)
             .zIndex(1)
             Color.clear.frame(width: DesktopsGeometry.gutterGap)
-            cells
-                // What slides under the frozen header is cut there.
-                .mask(alignment: .leading) {
-                    Rectangle().padding(.leading, scrolled)
-                }
+            cells.frozenCut(scrolled)
         }
         .frame(height: height, alignment: .top)
         .overlay { ring }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(DesktopsText.desktop(label))
-    }
-
-    private var label: Int {
-        state.overview.screens.first?.desktops[index].label ?? index + 1
+        .accessibilityLabel(
+            DesktopsText.desktop(state.overview.rows[index].label)
+        )
     }
 
     private var cells: some View {
@@ -90,7 +84,38 @@ struct DesktopRowView: View {
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(paint.selection, lineWidth: 1.5)
                 .padding(2)
+                // Its leading edge stays with the frozen header.
+                .padding(.leading, scrolled)
                 .allowsHitTesting(false)
         }
+    }
+}
+
+extension View {
+    /// Cuts what slides under the grid's frozen header column, for
+    /// the eye and the pointer alike: `scrolled` points from the
+    /// leading edge (#3602).
+    func frozenCut(_ scrolled: CGFloat) -> some View {
+        mask(alignment: .leading) {
+            Rectangle().padding(.leading, scrolled)
+        }
+        .contentShape(LeadingCut(cut: scrolled))
+    }
+}
+
+/// A rectangle less its first `cut` points.
+private struct LeadingCut: Shape {
+    let cut: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let cut = min(max(cut, 0), rect.width)
+        return Path(
+            CGRect(
+                x: rect.minX + cut,
+                y: rect.minY,
+                width: rect.width - cut,
+                height: rect.height
+            )
+        )
     }
 }

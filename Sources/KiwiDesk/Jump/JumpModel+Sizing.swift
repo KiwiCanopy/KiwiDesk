@@ -34,11 +34,6 @@ extension JumpModel {
     /// screen (#3570 ▸ Ruling 4) and the grid's header column
     /// (#3602), the field row's before it loads.
     var desktopsContentWidth: CGFloat {
-        desktops.map {
-            DesktopsGeometry.preferredWidth(
-                of: $0.overview,
-                gutter: $0.geometry.grid?.gutter
-            )
-        } ?? room.fieldWidth
+        desktops?.geometry.preferred ?? room.fieldWidth
     }
 }
