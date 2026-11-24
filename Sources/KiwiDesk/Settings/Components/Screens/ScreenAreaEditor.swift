@@ -152,6 +152,8 @@ struct ScreenAreaEditor: View {
                         }
                         mergeMenu(area, neighbours)
                     }
+                    // Measured against the row, not half of it.
+                    .layoutPriority(1)
                 }
             }
         }

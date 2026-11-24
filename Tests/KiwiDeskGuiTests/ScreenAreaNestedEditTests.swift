@@ -1,5 +1,7 @@
+import AppKit
 import CoreGraphics
 import Foundation
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -82,36 +84,82 @@ struct ScreenAreaNestedEditTests {
         )
     }
 
-    /// A snap into line tints the divider it joined, and only that
-    /// one: same axis, same position, a `.divider` snap.
-    @Test func aSnapLightsOnlyTheDividerItJoined() throws {
-        let split = try #require(
-            ScreenSplit.whole(width: 3440, height: 1440)
-                .splitting(0, .sideBySide)?.splitting(0, .stacked)
-        )
-        let cut = try #require(
-            ScreenAreaCuts.cuts(of: split.areas, width: 3440, height: 1440)?
-                .first { $0.axis == .stacked }
-        )
-        func drag(
-            _ snap: ScreenAreaSnap?,
-            _ axis: ScreenAreaCut.Axis,
-            at position: Int
-        ) -> AreaDividerDrag {
-            AreaDividerDrag(
-                split: split,
-                snap: snap,
-                cut: 9,
-                position: position,
-                axis: axis
+    /// The Merge row's fit ladder lays out from wide to narrow,
+    /// with short names and with long custom ones (#3271's trap).
+    @Test func mergeRowLaysOutAtEveryWidth() throws {
+        LocalizationManager.shared.select("en")
+        let (model, screen) = model()
+        tJunction(model, screen)
+        for name in [nil, String(repeating: "Wide name ", count: 4)] {
+            if let name {
+                model.renameArea(1, on: screen, to: name + "1")
+                model.renameArea(3, on: screen, to: name + "2")
+            }
+            let editor = ScreenAreaEditor(
+                model: model,
+                display: screen,
+                area: 0,
+                rename: .constant(nil),
+                sizes: .constant(nil),
+                givingWay: .constant([]),
+                percent: .constant(false),
+                select: { _ in }
+            )
+            for width: CGFloat in [1200, 640, 320, 120] {
+                let host = NSHostingView(rootView: editor)
+                host.frame = NSRect(x: 0, y: 0, width: width, height: 400)
+                host.layoutSubtreeIfNeeded()
+                #expect(host.fittingSize.height > 0)
+            }
+        }
+    }
+
+    /// A drag lights a divider only where Core reads it onto the
+    /// dragged one's cut: in line AND touching (#3541 ruling 5).
+    @Test func aDragLightsOnlyTheDividersItJoined() throws {
+        let whole = ScreenSplit.whole(width: 3000, height: 900)
+        func cuts(_ split: ScreenSplit) throws -> [ScreenAreaCut] {
+            try #require(
+                ScreenAreaCuts.cuts(of: split.areas, width: 3000, height: 900)
             )
         }
-        let at = cut.position
-        #expect(drag(.divider, .stacked, at: at).joins(cut))
-        #expect(!drag(.even, .stacked, at: at).joins(cut))
-        #expect(!drag(nil, .stacked, at: at).joins(cut))
-        #expect(!drag(.divider, .sideBySide, at: at).joins(cut))
-        #expect(!drag(.divider, .stacked, at: at + 1).joins(cut))
+        // Rows, the first and last split side by side at their
+        // middles; `rows` 2 makes them touch, 3 puts a whole row
+        // between them.
+        func lit(rows: Int, at position: Int) throws -> Bool {
+            var split = whole
+            for _ in 1..<rows {
+                let last = split.areas.map(\.id).max() ?? 0
+                split = try #require(split.splitting(last, .stacked))
+            }
+            let top = try #require(split.areas.min { $0.y < $1.y })
+            let bottom = try #require(split.areas.max { $0.y < $1.y })
+            split = try #require(split.splitting(bottom.id, .sideBySide))
+            let low = try #require(
+                try cuts(split).first { $0.axis == .sideBySide }
+            )
+            split = split.moving(low, to: 2000, floor: 100).split
+            split = try #require(split.splitting(top.id, .sideBySide))
+            let upright = try cuts(split).filter { $0.axis == .sideBySide }
+            let lead = try #require(upright.min { $0.start < $1.start })
+            let other = try #require(upright.max { $0.start < $1.start })
+            let target = other.position + position
+            let landed = split.moving(lead, to: target, floor: 100)
+            let drag = AreaDividerDrag(
+                split: landed.split,
+                snap: .divider,
+                cut: 0,
+                position: landed.position,
+                landed: try cuts(landed.split).first {
+                    $0.holds(lead, at: landed.position)
+                }
+            )
+            #expect(drag.landed != nil)
+            return drag.joins(other)
+        }
+        #expect(try lit(rows: 2, at: 0))
+        #expect(try !lit(rows: 2, at: 50))
+        #expect(try !lit(rows: 3, at: 0))
     }
 
     /// Every split two runs deep, each run two or three wide, and
@@ -200,11 +248,26 @@ struct ScreenAreaNestedEditTests {
         let button = try #require(
             editor.range(of: "private func mergeButton(")
         )
-        let body = String(editor[button.lowerBound...].prefix(700))
+        let rest = editor[button.lowerBound...]
+        let end = try #require(rest.range(of: "\n    }\n"))
+        let body = String(rest[..<end.upperBound])
+        #expect(
+            body.contains(
+                "let title = ScreenAreaEditing.mergeTitle("
+                    + "other, model, display)"
+            )
+        )
         #expect(body.contains(".help(title)"))
         #expect(body.contains(".accessibilityLabel(title)"))
         #expect(body.contains("Button(model.areaLabel(other, on: display)"))
         #expect(editor.contains("ViewThatFits(in: .horizontal)"))
+        // A joined divider lights through every style the dragged
+        // one takes.
+        let divider = try source("ScreenAreaDivider.swift")
+        #expect(divider.contains("dragging || drag?.joins(cut) == true"))
+        #expect(!divider.contains("if dragging {"))
+        #expect(!divider.contains("dragging ? 2"))
+        #expect(!divider.contains("dragging\n"))
         // The hint stands in for the editor while nothing is selected.
         let section = try String(
             contentsOf: root.appendingPathComponent(

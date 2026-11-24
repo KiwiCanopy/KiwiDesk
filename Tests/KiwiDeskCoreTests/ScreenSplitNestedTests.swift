@@ -195,6 +195,7 @@ struct ScreenSplitNestedTests {
         )
         let upright = cuts.filter { $0.axis == .sideBySide }
         #expect(upright.count == 1)
+        #expect(upright.first?.position == 1720)
         #expect(upright.first?.start == 0)
         #expect(upright.first?.end == 1440)
     }

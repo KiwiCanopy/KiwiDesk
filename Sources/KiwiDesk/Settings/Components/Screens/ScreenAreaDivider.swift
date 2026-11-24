@@ -14,12 +14,14 @@ struct AreaDividerDrag: Equatable {
     let cut: Int
     /// Where the dragged divider is, in screen points.
     let position: Int
-    let axis: ScreenAreaCut.Axis
+    /// The in-flight split's cut that holds the dragged segment,
+    /// joined segments included (accepted-limitations.md).
+    let landed: ScreenAreaCut?
 
-    /// Whether `cut` is the divider a `.divider` snap joined: once
-    /// in line, the two move as one (accepted-limitations.md).
+    /// Whether the stored `cut` now moves with the drag: Core reads
+    /// it onto the same cut as the dragged segment.
     func joins(_ cut: ScreenAreaCut) -> Bool {
-        snap == .divider && cut.axis == axis && cut.position == position
+        landed?.holds(cut) == true
     }
 }
 
@@ -163,7 +165,11 @@ struct ScreenAreaDivider: View {
             snap: kept ? snapped.snap : nil,
             cut: index,
             position: landed.position,
-            axis: cut.axis
+            landed: ScreenAreaCuts.cuts(
+                of: landed.split.areas,
+                width: extent,
+                height: depth
+            )?.first { $0.holds(cut, at: landed.position) }
         )
     }
 

@@ -172,10 +172,7 @@ struct ScreenCard: View {
             } ?? []
         ForEach(Array(cuts.enumerated()), id: \.offset) { index, stored in
             let cut =
-                moving.first {
-                    $0.axis == stored.axis && $0.position == stored.position
-                        && $0.start < stored.end && stored.start < $0.end
-                } ?? stored
+                moving.first { $0.holds(stored) } ?? stored
             let side = cut.axis == .sideBySide
             let dragged = drag?.cut == index ? drag?.position : nil
             let position = dragged ?? cut.position

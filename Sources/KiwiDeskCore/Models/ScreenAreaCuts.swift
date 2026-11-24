@@ -77,3 +77,15 @@ public enum ScreenAreaCuts {
         )
     }
 }
+
+extension ScreenAreaCut {
+    /// Whether `other`, placed at `position` (its own when nil),
+    /// lies on this cut: same axis and line, spans overlapping.
+    /// Matches a stored divider to a split in flight, and names
+    /// the dividers a drag has joined (#3541).
+    public func holds(_ other: ScreenAreaCut, at position: Int? = nil) -> Bool
+    {
+        axis == other.axis && self.position == (position ?? other.position)
+            && start < other.end && other.start < end
+    }
+}
