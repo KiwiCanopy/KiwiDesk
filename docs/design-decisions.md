@@ -20551,11 +20551,7 @@ too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
 bar's edge may differ per screen*).
 
 :::unreleased
-*Amended* (#3612): Each bar and Pocket is one drawer, under
-Position, and its per-bar per-screen drawers gave way to one
-*Screen or area* picker heading it (▸ *The bar cards share one
-canonical row order*); on a one-screen profile the picker greys,
-its `?` the same.
+*Amended* (#3612): ▸ *The bar cards share one canonical row order*.
 :::
 
 A shortcut shows only the bar it names. On an `always` bar it
@@ -21313,11 +21309,7 @@ unlocks it, a profile for more screens, so the grey promises
 nothing a setting would have to keep.
 
 :::unreleased
-*Amended* (#3612): Each bar and Pocket is one drawer, under
-Position, and its per-bar per-screen drawers gave way to one
-*Screen or area* picker heading it (▸ *The bar cards share one
-canonical row order*); on a one-screen profile the picker greys,
-its `?` the same.
+*Amended* (#3612): ▸ *The bar cards share one canonical row order*.
 :::
 
 *Amended: the pocket's edge may differ per screen too.*
@@ -21345,11 +21337,7 @@ Pocket edge row is gone: two rows writing one value would let the
 master and the row disagree about which was the pocket's edge.
 
 :::unreleased
-*Amended* (#3612): Each bar and Pocket is one drawer, under
-Position, and its per-bar per-screen drawers gave way to one
-*Screen or area* picker heading it (▸ *The bar cards share one
-canonical row order*); on a one-screen profile the picker greys,
-its `?` the same.
+*Amended* (#3612): ▸ *The bar cards share one canonical row order*.
 :::
 
 :::unreleased
@@ -22214,7 +22202,8 @@ grey while an area is picked, the picker being the switch that
 brings them back. An item holding values of its own says so in words,
 the caption under All screens names those areas, and the shut drawer
 counts them; the drawer stays open by itself only while the bars' and
-the Pocket's own values differ. Setting up an area is the job, not comparing areas, so
+the Pocket's own values differ. On a profile with one unsplit screen the
+picker greys, its `?` saying what unlocks it (#2677). Setting up an area is the job, not comparing areas, so
 the area comes first; per-bar per-screen drawers, two drawers of one
 name per master and a Show pop-up beside an edge picker all read
 worse, and a List / By-area switch was ruled out as a second layout

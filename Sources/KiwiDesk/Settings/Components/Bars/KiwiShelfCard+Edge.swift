@@ -13,7 +13,7 @@ extension KiwiShelfCard {
     }
 
     var edgeMasterHelp: String {
-        model.config.settings.hasScreenEdges
+        model.config.settings.screenEdgesDiffer
             ? BarsGateHelp.edgesDifferPerScreen
             : edgesSplit
                 ? BarsGateHelp.edgesDiffer

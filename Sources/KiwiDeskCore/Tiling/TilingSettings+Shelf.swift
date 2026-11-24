@@ -216,11 +216,15 @@ extension TilingSettings {
     /// (`ScreenEdged.screensDiffer`, #1948, #3376): a level whose
     /// lower levels disagree shows none.
     public var uniformShelfEdge: AppBarEdge? {
-        guard !spaceBarStyle.screensDiffer,
-            !appBarStyle.screensDiffer,
-            !kiwishelf.pocketEdges.screensDiffer
-        else { return nil }
-        return ownShelfEdge
+        screenEdgesDiffer ? nil : ownShelfEdge
+    }
+
+    /// Whether some screen or area puts a bar or the pocket on an
+    /// edge other than its own (`ScreenEdged.screensDiffer`): an
+    /// entry equal to its bar's edge differs in nothing (#3612).
+    public var screenEdgesDiffer: Bool {
+        spaceBarStyle.screensDiffer || appBarStyle.screensDiffer
+            || kiwishelf.pocketEdges.screensDiffer
     }
 
     /// The edge both bars' and the pocket's OWN values share, a

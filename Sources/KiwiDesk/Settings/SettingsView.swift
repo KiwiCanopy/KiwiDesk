@@ -118,8 +118,10 @@ struct SettingsView: View {
             apply(request)
         }
         .onAppear { apply(model.nav.pendingReveal) }
-        .onChange(of: model.destination) { _, _ in
+        .onChange(of: model.destination) { old, _ in
             previewShown = false
+            // Bars reopens on All screens (#3612).
+            if old == .bars { model.nav.barsScope = nil }
         }
         // The card is per mount, and a root switch is a navigation.
         .onChange(of: model.showsSimple) { _, _ in

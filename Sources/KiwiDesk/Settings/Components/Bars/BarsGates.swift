@@ -117,7 +117,8 @@ enum BarsGateHelp {
     }
 
     /// The Position master's `?` while a screen or area puts a bar
-    /// or the Pocket on its own edge (#3612): it names the picker.
+    /// or the Pocket on an edge of its own (`screenEdgesDiffer`,
+    /// #3612): it names the picker.
     static var edgesDifferPerScreen: String {
         L(
             "kiwishelf.edge.differ_per_screen.help",

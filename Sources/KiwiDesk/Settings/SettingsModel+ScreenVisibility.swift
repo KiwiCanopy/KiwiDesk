@@ -35,8 +35,8 @@ extension SettingsModel {
 
     /// The picked area's Show binding: the Space Bar's own value
     /// stores nothing for the area; the App Bar's nil, Per layout,
-    /// clears it. A pick needs the Screen or area picker offered,
-    /// whose greyed pop-up still takes one (gui.md).
+    /// clears it. Reached only under a picked area
+    /// (`KiwiShelfCard.activeScope`).
     func screenShowBinding(
         _ bar: ScreenShowBar,
         on key: String
@@ -44,7 +44,6 @@ extension SettingsModel {
         Binding(
             get: { self.screenShow(bar, on: key) },
             set: { value in
-                guard self.offersScreenScopes else { return }
                 var next = self.config.settings
                 switch bar {
                 case .space:

@@ -177,9 +177,10 @@ struct BarsByBarWiringTests {
         )
     }
 
-    /// The pick is navigation state (#3612): a Bars landing and an
-    /// arrival at Bars show All screens, so a bar-level row a hit
-    /// names is drawn, and the pop-up reads what the blocks edit.
+    /// The pick is navigation state (#3612): a Bars landing and
+    /// leaving Bars clear it, so a bar-level row a hit names is
+    /// drawn and Bars reopens on All screens, and the pop-up reads
+    /// what the blocks edit.
     @Test("a landing and a reset clear the picked area")
     func landingClearsThePick() throws {
         let root = Self.root.appendingPathComponent(
@@ -197,8 +198,13 @@ struct BarsByBarWiringTests {
             )
         )
         // `SettingsNavigationResetTests` holds the reset's clear.
-        let card = try squashed("KiwiShelfCard.swift")
-        #expect(card.contains(".onAppear{model.nav.barsScope=nil}"))
+        let shell = try flat("SettingsView.swift")
+        #expect(
+            shell.contains(
+                ".onChange(of:model.destination){old,_inpreviewShown=false"
+                    + "ifold==.bars{model.nav.barsScope=nil}}"
+            )
+        )
         let each = try squashed("KiwiShelfCard+Each.swift")
         #expect(each.contains("Picker(label,selection:scopeBinding)"))
         #expect(each.contains("get:{activeScope}"))

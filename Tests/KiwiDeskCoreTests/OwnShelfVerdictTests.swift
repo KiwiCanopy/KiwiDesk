@@ -36,4 +36,18 @@ struct OwnShelfVerdictTests {
         settings.appBarStyle.edge = .bottom
         #expect(settings.ownShelfEdge == nil)
     }
+
+    @Test("an area pinned to its bar's own edge differs in nothing")
+    func equalPinIsNoDifference() {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.edge = .top
+        settings.appBarStyle.edge = .top
+        settings.kiwishelf.pocketEdge = .top
+        settings.spaceBarStyle.edgeOverride = [area: .top]
+        #expect(settings.hasScreenEdges)
+        #expect(!settings.screenEdgesDiffer)
+        #expect(settings.uniformShelfEdge == .top)
+        settings.spaceBarStyle.edgeOverride = [area: .left]
+        #expect(settings.screenEdgesDiffer)
+    }
 }

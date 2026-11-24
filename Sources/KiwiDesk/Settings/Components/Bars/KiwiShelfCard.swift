@@ -49,9 +49,6 @@ struct KiwiShelfCard: View {
                 marginsDisclosure
             }
         }
-        // The card opens on All screens, as its own state would
-        // (#3612).
-        .onAppear { model.nav.barsScope = nil }
     }
 
     @ViewBuilder func row(for key: SettingKey) -> some View {
