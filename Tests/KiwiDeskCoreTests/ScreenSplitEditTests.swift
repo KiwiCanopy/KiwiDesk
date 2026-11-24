@@ -95,7 +95,7 @@ struct ScreenSplitEditTests {
         let three = try #require(
             whole.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
         )
-        let even = three.evenedOut(holding: 0)
+        let even = three.evenedOut(holding: 0, floor: 300)
         #expect(even.areas.map(\.w) == [1147, 1147, 1146])
         #expect(even.areas.map(\.x) == [0, 1147, 2294])
         #expect(

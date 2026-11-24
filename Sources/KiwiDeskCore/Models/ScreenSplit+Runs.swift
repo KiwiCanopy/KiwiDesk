@@ -110,7 +110,7 @@ extension ScreenSplit {
     /// Self where no such layout fits.
     public func evenedOut(
         holding id: Int,
-        floor: Int = ScreenArea.minimumSide
+        floor: Int
     ) -> ScreenSplit {
         guard let run = run(holding: id) else { return self }
         let floors = run.members.indices.map {

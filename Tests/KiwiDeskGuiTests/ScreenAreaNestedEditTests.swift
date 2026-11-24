@@ -80,4 +80,64 @@ struct ScreenAreaNestedEditTests {
                 && ScreenAreaWords.position([.middle, .middle]) == "Middle"
         )
     }
+
+    /// Every split two runs deep, each run two or three wide, and
+    /// three deep where Core numbers: Core's paths and the GUI's
+    /// name table are one contract, so every area words to a name
+    /// and no two on a screen share one.
+    @Test func everyReachablePathWordsToAUniqueName() throws {
+        LocalizationManager.shared.select("en")
+        var checked = 0
+        for split in Self.splits() {
+            let names = split.positions.values.map {
+                ScreenAreaWords.position($0)
+            }
+            #expect(!names.contains(""), "\(split.positions)")
+            #expect(Set(names).count == names.count, "\(names)")
+            checked += 1
+        }
+        #expect(checked > 50)
+    }
+
+    private static func splits() -> [ScreenSplit] {
+        let whole = ScreenSplit.whole(width: 3600, height: 3600)
+        var out: [ScreenSplit] = []
+        for axis in ScreenAreaCut.Axis.allCases {
+            let other: ScreenAreaCut.Axis =
+                axis == .sideBySide ? .stacked : .sideBySide
+            for wide in [2, 3] {
+                var root = whole
+                for _ in 1..<wide {
+                    let last = root.areas.map(\.id).max() ?? 0
+                    root = root.splitting(last, axis, floor: 1) ?? root
+                }
+                let leaves = root.areas.map(\.id)
+                // Every subset of leaves split again, two or three wide.
+                for mask in 0..<(1 << leaves.count) {
+                    for inner in [2, 3] {
+                        var split = root
+                        for (bit, id) in leaves.enumerated()
+                        where mask & (1 << bit) != 0 {
+                            split =
+                                split.splitting(id, other, floor: 1) ?? split
+                            if inner == 3 {
+                                let fresh = split.nextID - 1
+                                split =
+                                    split.splitting(fresh, other, floor: 1)
+                                    ?? split
+                            }
+                        }
+                        out.append(split)
+                        // And one area three runs deep.
+                        if let deep = split.areas.last.flatMap({
+                            split.splitting($0.id, axis, floor: 1)
+                        }) {
+                            out.append(deep)
+                        }
+                    }
+                }
+            }
+        }
+        return out
+    }
 }

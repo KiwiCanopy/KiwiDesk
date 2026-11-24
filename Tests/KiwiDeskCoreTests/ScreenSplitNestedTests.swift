@@ -15,7 +15,8 @@ struct ScreenSplitNestedTests {
         let three = try #require(
             whole.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
         )
-        return try #require(three.evenedOut(holding: 0).splitting(1, .stacked))
+        let even = three.evenedOut(holding: 0, floor: 300)
+        return try #require(even.splitting(1, .stacked))
     }
 
     /// Top Left / Top Right over Bottom Left / Bottom Right.
@@ -62,10 +63,10 @@ struct ScreenSplitNestedTests {
             whole.splitting(0, .stacked)?.splitting(1, .stacked)
         )
         let middle = try #require(
-            rows.evenedOut(holding: 0).splitting(1, .sideBySide)?
+            rows.evenedOut(holding: 0, floor: 300).splitting(1, .sideBySide)?
                 .splitting(1, .sideBySide)
         )
-        let even = middle.evenedOut(holding: 1)
+        let even = middle.evenedOut(holding: 1, floor: 300)
         #expect(valid(even))
         let ids = ScreenArea.readingOrder(even.areas).map(\.id)
         #expect(
@@ -103,7 +104,7 @@ struct ScreenSplitNestedTests {
                 floor: 300
             )
         ).split
-        let inner = tall.evenedOut(holding: 3)
+        let inner = tall.evenedOut(holding: 3, floor: 300)
         #expect(inner.run(holding: 3)?.lengths == [720, 720])
         #expect(inner.run(holding: 0) == tall.run(holding: 0))
     }

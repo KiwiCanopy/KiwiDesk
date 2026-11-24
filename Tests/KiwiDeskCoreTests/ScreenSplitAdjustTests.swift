@@ -42,11 +42,11 @@ struct ScreenSplitAdjustTests {
         let split = try three()
         let run = try #require(split.run(holding: 0))
         #expect(run.lengths == [1720, 860, 860])
-        #expect(split.evenedOut(holding: 0) != split)
-        let even = split.evenedOut(holding: 0)
+        #expect(split.evenedOut(holding: 0, floor: 300) != split)
+        let even = split.evenedOut(holding: 0, floor: 300)
         let evenRun = try #require(even.run(holding: 0))
         #expect(evenRun.lengths == [1147, 1147, 1146])
-        #expect(even.evenedOut(holding: 0) == even)
+        #expect(even.evenedOut(holding: 0, floor: 300) == even)
         #expect(whole.run(holding: 0) == nil)
     }
 
@@ -165,7 +165,8 @@ struct ScreenSplitAdjustTests {
 
     @Test func percentsAddUpToAHundred() throws {
         let split = try three()
-        let even = try #require(split.evenedOut(holding: 0).run(holding: 0))
+        let evened = split.evenedOut(holding: 0, floor: 300)
+        let even = try #require(evened.run(holding: 0))
         #expect(even.percents == [34, 33, 33])
         #expect(try three().run(holding: 0)?.percents == [50, 25, 25])
         #expect(even.points(percent: 50) == 1720)
