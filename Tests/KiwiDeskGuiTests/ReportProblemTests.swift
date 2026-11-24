@@ -20,6 +20,7 @@ struct ReportProblemTests {
     private final class Calls {
         var opened: [URL] = []
         var picks = 0
+        var busyAtPick: Bool?
     }
 
     private func context(_ url: URL?) -> String? {
@@ -43,11 +44,13 @@ struct ReportProblemTests {
 
     private func handoff(
         _ calls: Calls,
-        picking file: URL?
+        picking file: URL?,
+        model: SettingsModel? = nil
     ) -> SettingsModel.ReportHandoff {
         SettingsModel.ReportHandoff(
             pick: {
                 calls.picks += 1
+                calls.busyAtPick = model?.isExportingLog
                 return file
             },
             open: { calls.opened.append($0) }
@@ -81,31 +84,28 @@ struct ReportProblemTests {
         #expect(FileManager.default.fileExists(atPath: file.path))
         #expect(calls.opened.count == 1)
         #expect(
-            context(calls.opened.first)?.hasSuffix(
-                "Drag the log you just saved into this field."
-            ) == true
+            context(calls.opened.first)?.hasSuffix(ProblemReport.logLine)
+                == true
         )
     }
 
-    /// Cancel in the save panel is the user stopping: nothing is
-    /// written and no form opens.
-    @Test("a cancelled pick writes and opens nothing")
-    func cancelledPickOpensNothing() async throws {
-        let folder = try scratchFolder()
-        defer { try? FileManager.default.removeItem(at: folder) }
+    /// Cancel in the save panel is the user stopping: no form
+    /// opens.
+    @Test("a cancelled pick opens nothing")
+    func cancelledPickOpensNothing() async {
         let calls = Calls()
-        let problem = await model(answering: Self.header + "a\n")
-            .reportProblem(
-                answering: .export(.lastHour),
-                handoff: handoff(calls, picking: nil)
-            )
+        let model = model(answering: Self.header + "a\n")
+        let problem = await model.reportProblem(
+            answering: .export(.lastHour),
+            handoff: handoff(calls, picking: nil, model: model)
+        )
         #expect(problem == nil)
         #expect(calls.picks == 1)
         #expect(calls.opened.isEmpty)
-        #expect(
-            try FileManager.default
-                .contentsOfDirectory(atPath: folder.path).isEmpty
-        )
+        // The footer and the Log row refuse while the panel is up,
+        // and take presses again once it closes.
+        #expect(calls.busyAtPick == true)
+        #expect(!model.isExportingLog)
     }
 
     @Test("an empty export opens no form")
@@ -135,7 +135,10 @@ struct ReportProblemTests {
         )
         #expect(calls.opened.count == 1)
         // Without a log the form asks for none, and no panel shows.
-        #expect(context(calls.opened.first)?.contains("Drag the log") == false)
+        #expect(
+            context(calls.opened.first)?.contains(ProblemReport.logLine)
+                == false
+        )
         _ = await model.reportProblem(
             answering: .cancel,
             handoff: handoff(calls, picking: nil)
@@ -185,5 +188,25 @@ struct ReportProblemTests {
         #expect(
             source.occurrences(of: ".disabled(model.isExportingLog)") == 1
         )
+    }
+
+    /// The live handoff asks through the shared save panel; every
+    /// other test fakes the pick, so only this sees a write past it.
+    @Test("the live handoff picks through the save panel")
+    func liveHandoffAsks() throws {
+        let source = try SourceScan.blankedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/"
+                        + "SettingsModel+ReportProblem.swift"
+                )
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.occurrences(
+                of: "pick:{SettingsModel.pickLogFile()}"
+            ) == 1
+        )
+        #expect(source.occurrences(of: "logFolder") == 0)
     }
 }

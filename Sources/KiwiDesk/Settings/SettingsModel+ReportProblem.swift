@@ -56,8 +56,13 @@ extension SettingsModel {
             handoff.open(report.formURL)
             return nil
         case .export(let choice):
+            // The panel's modal loop lets a VoiceOver press reach the
+            // footer or the Log row; both refuse while this is set.
+            isExportingLog = true
+            let picked = handoff.pick()
+            isExportingLog = false
             // Cancel in the save panel writes and opens nothing.
-            guard let url = handoff.pick() else { return nil }
+            guard let url = picked else { return nil }
             if let problem = await runLogExport(choice.range, to: url) {
                 return problem
             }
