@@ -92,15 +92,15 @@ extension KiwiCore {
         tiler.motionGate.forgetWrite(for: id)
         let endedMaximize = tiler.maximizeEndedByDrag == id
         tiler.maximizeEndedByDrag = nil
-        // Whether this gesture live-crossed displays (#504);
+        // Whether this gesture live-crossed placements (#504);
         // ends the crossing bookkeeping either way. A crossed
         // gesture is a MOVE for the resize gate below.
-        let crossedDisplays = dragCrossing.endGesture(id)
+        let crossed = dragCrossing.endGesture(id)
         // For the crossed drop's #463 settle below — captured
         // before the retile/focus can change it, mirroring the
         // drop-commit relocate.
         let priorFrontmost =
-            crossedDisplays ? frontmostPIDProvider?() : nil
+            crossed ? frontmostPIDProvider?() : nil
         dragOverlay.hideAll()
         spaceBars.endDragAutoScroll()
         defer { scheduleBorderDropReconcile(lone: true) }
@@ -213,27 +213,27 @@ extension KiwiCore {
         // from the screen-filling frame, never a slot: the drop puts
         // the window back rather than reading a swap or a resize off
         // it (#2448). A crossed one is a move like any other.
-        if endedMaximize, !crossedDisplays {
+        if endedMaximize, !crossed {
             retileEndingMaximize([id])
             return
         }
         // KiwiVision's fill cannot end: a resize of it snaps back
         // with the keyboard's refusal; a move proceeds (#3064).
-        if !crossedDisplays, state.visionFilledWindow(of: space) == id,
+        if !crossed, state.visionFilledWindow(of: space) == id,
             MouseResize.isResize(from: start, to: frame)
         {
             _ = refuseVisionFilled(id)
             retileEndingMaximize([id])
             return
         }
-        // A gesture that live-crossed displays (#504) skips the
-        // resize interpretation: macOS clamps a big window's size
-        // as it lands on a smaller display, which `isResize`
+        // A gesture that live-crossed placements (#504) skips the
+        // resize interpretation: a move, and macOS clamps a big
+        // window's size as it lands on a smaller display, which `isResize`
         // would read as a resize and mangle the destination's
         // ratios — the live twin of the relocate-before-resize
         // ordering above (#492).
         if slots[id] != nil,
-            !crossedDisplays,
+            !crossed,
             MouseResize.isResize(from: start, to: frame)
         {
             // Only edges shared with a neighbor trade space;
@@ -315,7 +315,7 @@ extension KiwiCore {
         // crossing time with NO settle (mid-drag, the spring
         // model); its drop is where the #463 re-assert belongs —
         // parity with the drop-commit relocate's obligation.
-        if crossedDisplays {
+        if crossed {
             scheduleSpaceSettle(
                 space.id,
                 priorFrontmost: priorFrontmost

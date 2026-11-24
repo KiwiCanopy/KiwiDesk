@@ -553,6 +553,11 @@ screen snaps the window back. Floating windows show no overlay
 and cannot be dropped onto a tiled slot; use *make tiled* first
 ([Accepted limitations](accepted-limitations.md)).
 
+:::unreleased
+On a screen split into areas, dragging into another area moves
+the window there live too, the same way.
+:::
+
 A floating window dropped on another screen moves into the Space
 that screen shows, and stays where you let go of it, clear of
 the bars. A sticky window keeps its own Space.

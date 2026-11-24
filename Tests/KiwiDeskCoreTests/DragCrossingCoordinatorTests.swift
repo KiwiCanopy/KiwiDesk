@@ -7,40 +7,45 @@ import Testing
 @Suite("DragCrossingCoordinator", .serialized)
 @MainActor
 struct DragCrossingCoordinatorTests {
-    /// Left half of the plane is display 1, right half display 2.
+    private let home = PlacementID(display: DisplayID(1), area: 0)
+    /// Another area of the home screen, so the suite tells an area
+    /// seam from a screen seam (#3574).
+    private let foreign = PlacementID(display: DisplayID(1), area: 1)
+
+    /// Left half of the plane is area 0, right half area 1.
     private func makeCoordinator() -> DragCrossingCoordinator {
         let crossing = DragCrossingCoordinator()
         crossing.dwell = 0.05
-        crossing.displayAt = { point in
-            point.x < 1000 ? DisplayID(1) : DisplayID(2)
+        crossing.placementAt = { [home, foreign] point in
+            point.x < 1000 ? home : foreign
         }
         return crossing
     }
 
-    @Test("A dwell on a foreign display fires one crossing")
+    @Test("A dwell on a foreign area fires one crossing")
     func dwellFires() async throws {
         let crossing = makeCoordinator()
-        var fired: [DisplayID] = []
-        crossing.onCross = { _, display in
-            fired.append(display)
+        var fired: [PlacementID] = []
+        crossing.onCross = { _, target in
+            fired.append(target)
         }
         let id = WindowID(1)
         let onForeign = CGPoint(x: 1500, y: 100)
         crossing.moved(
             id,
             cursor: onForeign,
-            homeDisplay: DisplayID(1)
+            home: home
         )
         let dwell = crossing.dwellTask
         #expect(dwell != nil, "the move armed no dwell")
-        // Same-display moves must keep the armed dwell running,
+        // Same-area moves must keep the armed dwell running,
         // not restart it — which is the identity of the handle,
         // asserted rather than hoped for the way re-arming
         // inside a poll loop had to (#994).
         crossing.moved(
             id,
             cursor: onForeign,
-            homeDisplay: DisplayID(1)
+            home: home
         )
         #expect(crossing.dwellTask == dwell)
         // Await the dwell's own timeline rather than poll a wall
@@ -50,7 +55,7 @@ struct DragCrossingCoordinatorTests {
         await dwell?.value
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
-        #expect(fired == [DisplayID(2)])
+        #expect(fired == [foreign])
     }
 
     @Test("Returning home before the dwell disarms it")
@@ -62,38 +67,38 @@ struct DragCrossingCoordinatorTests {
         crossing.moved(
             id,
             cursor: CGPoint(x: 1500, y: 100),
-            homeDisplay: DisplayID(1)
+            home: home
         )
-        // Back on the home display before the dwell elapses:
+        // Back in the home area before the dwell elapses:
         // the seam-skim case the debounce exists for.
         crossing.moved(
             id,
             cursor: CGPoint(x: 100, y: 100),
-            homeDisplay: DisplayID(1)
+            home: home
         )
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(fired == 0)
     }
 
-    @Test("A cursor over no display disarms the dwell")
+    @Test("A cursor over no placement disarms the dwell")
     func nowhereDisarms() async throws {
         let crossing = makeCoordinator()
         var fired = 0
         crossing.onCross = { _, _ in fired += 1 }
         let id = WindowID(1)
-        // Arm toward a display that then stops resolving
+        // Arm toward a placement that then stops resolving
         // (topology change mid-drag).
-        crossing.displayAt = { _ in DisplayID(2) }
+        crossing.placementAt = { [foreign] _ in foreign }
         crossing.moved(
             id,
             cursor: CGPoint(x: 1500, y: 100),
-            homeDisplay: DisplayID(1)
+            home: home
         )
-        crossing.displayAt = { _ in nil }
+        crossing.placementAt = { _ in nil }
         crossing.moved(
             id,
             cursor: CGPoint(x: 1500, y: 100),
-            homeDisplay: DisplayID(1)
+            home: home
         )
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(fired == 0)
@@ -108,7 +113,7 @@ struct DragCrossingCoordinatorTests {
         crossing.moved(
             id,
             cursor: CGPoint(x: 1500, y: 100),
-            homeDisplay: DisplayID(1)
+            home: home
         )
         // Nothing crossed yet — the drop landed before the
         // dwell elapsed (the fast flick #492 still owns).
@@ -148,7 +153,7 @@ struct DragCrossingCoordinatorTests {
         crossing.moved(
             old,
             cursor: CGPoint(x: 1500, y: 100),
-            homeDisplay: DisplayID(1)
+            home: home
         )
         crossing.rekey(old: old, new: new)
         // The bookkeeping follows the id swap (#308)…
