@@ -42,17 +42,16 @@ struct ProblemReportTests {
         #expect(fields.count == 4)
     }
 
-    /// The Export path names the saved log under the facts (#3544);
-    /// the plain form names none.
-    @Test("the form names a saved log only when given one")
-    func formNamesTheLog() {
-        let file = "~/Downloads/KiwiDesk-log-2026-11-22-1200.txt"
+    /// The Export path asks for the saved log under the facts
+    /// (#3544); the plain form asks for none.
+    @Test("the form asks for a log only once one is saved")
+    func formAsksForTheLog() {
         #expect(
-            query(report.formURL(logFile: file))["extra_context"]
+            query(report.formURL(logSaved: true))["extra_context"]
                 == "Screens: 2\nDisplays have separate Spaces: on\n"
-                + "Log saved as \(file) — drag it here."
+                + "Drag the log you just saved into this field."
         )
-        #expect(report.formURL(logFile: nil) == report.formURL)
+        #expect(report.formURL(logSaved: false) == report.formURL)
     }
 
     @Test("a plus in a fact survives the form's query")

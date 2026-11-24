@@ -5,17 +5,18 @@ import KiwiDeskCore
 /// form, on Home and in Simple alike. It asks first whether to
 /// export a log, because Simple has no Log row; nothing is
 /// uploaded, and the user's drag into the form stays the consent.
-/// The form names the saved file rather than Finder revealing it:
-/// activating Finder can switch the user's Desktop.
+/// The log goes where the user's save panel puts it, and the form
+/// asks for it rather than Finder revealing it: activating Finder
+/// can switch the user's Desktop.
 extension SettingsModel {
-    /// Where the footer's export lands, with no save panel, and
-    /// how the form opens.
+    /// Where the footer's export lands — the user's pick, nil on
+    /// Cancel — and how the form opens.
     struct ReportHandoff {
-        var folder: URL?
+        var pick: @MainActor () -> URL?
         var open: @MainActor (URL) -> Void
 
         static let live = ReportHandoff(
-            folder: SettingsModel.logFolder,
+            pick: { SettingsModel.pickLogFile() },
             open: { NSWorkspace.shared.open($0) }
         )
     }
@@ -37,7 +38,7 @@ extension SettingsModel {
         else { return }
         let alert = NSAlert()
         alert.messageText = LogExportText.title(for: problem)
-        alert.informativeText = ReportProblemPrompt.sentence(for: problem)
+        alert.informativeText = LogExportText.sentence(for: problem)
         alert.beginSheetModal(for: window) { _ in }
     }
 
@@ -55,35 +56,13 @@ extension SettingsModel {
             handoff.open(report.formURL)
             return nil
         case .export(let choice):
-            let name = LogExport.defaultFilename()
-            guard let folder = handoff.folder else {
-                return .writeFailed(URL(fileURLWithPath: name))
-            }
-            let url = Self.unused(folder.appendingPathComponent(name))
+            // Cancel in the save panel writes and opens nothing.
+            guard let url = handoff.pick() else { return nil }
             if let problem = await runLogExport(choice.range, to: url) {
                 return problem
             }
-            let shown = (url.path as NSString).abbreviatingWithTildeInPath
-            handoff.open(report.formURL(logFile: shown))
+            handoff.open(report.formURL(logSaved: true))
             return nil
-        }
-    }
-
-    /// `url`, or the first `name-2.txt`, `name-3.txt`… beside it
-    /// that does not exist yet: the export writes atomically and
-    /// would replace a log from the same minute.
-    static func unused(_ url: URL) -> URL {
-        let files = FileManager.default
-        guard files.fileExists(atPath: url.path) else { return url }
-        let stem = url.deletingPathExtension().lastPathComponent
-        let folder = url.deletingLastPathComponent()
-        var n = 2
-        while true {
-            let next = folder.appendingPathComponent(
-                "\(stem)-\(n).\(url.pathExtension)"
-            )
-            if !files.fileExists(atPath: next.path) { return next }
-            n += 1
         }
     }
 }

@@ -6,10 +6,11 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Report a problem's question (#3544): the form opens only after a
-/// written log or an explicit "without", the log lands in the
-/// handoff folder and the form names it, and the alert maps its
-/// buttons and popup to that answer. No test here
-/// spawns `/usr/bin/log` or opens a browser.
+/// written log or an explicit "without", the log lands where the
+/// save panel's pick says and the form asks for it, a cancelled
+/// pick writes and opens nothing, and the alert maps its buttons
+/// and popup to that answer. No test here spawns `/usr/bin/log`,
+/// shows a save panel or opens a browser.
 @Suite("Report a problem (#3544)")
 @MainActor
 struct ReportProblemTests {
@@ -18,6 +19,7 @@ struct ReportProblemTests {
 
     private final class Calls {
         var opened: [URL] = []
+        var picks = 0
     }
 
     private func context(_ url: URL?) -> String? {
@@ -41,10 +43,13 @@ struct ReportProblemTests {
 
     private func handoff(
         _ calls: Calls,
-        folder: URL?
+        picking file: URL?
     ) -> SettingsModel.ReportHandoff {
         SettingsModel.ReportHandoff(
-            folder: folder,
+            pick: {
+                calls.picks += 1
+                return file
+            },
             open: { calls.opened.append($0) }
         )
     }
@@ -60,44 +65,46 @@ struct ReportProblemTests {
         return url
     }
 
-    @Test("export writes, then opens the form naming the file")
+    @Test("export writes the pick, then opens the form asking for it")
     func exportWritesThenOpens() async throws {
+        let folder = try scratchFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appendingPathComponent("picked.txt")
+        let calls = Calls()
+        let problem = await model(answering: Self.header + "a\n")
+            .reportProblem(
+                answering: .export(.lastHour),
+                handoff: handoff(calls, picking: file)
+            )
+        #expect(problem == nil)
+        #expect(calls.picks == 1)
+        #expect(FileManager.default.fileExists(atPath: file.path))
+        #expect(calls.opened.count == 1)
+        #expect(
+            context(calls.opened.first)?.hasSuffix(
+                "Drag the log you just saved into this field."
+            ) == true
+        )
+    }
+
+    /// Cancel in the save panel is the user stopping: nothing is
+    /// written and no form opens.
+    @Test("a cancelled pick writes and opens nothing")
+    func cancelledPickOpensNothing() async throws {
         let folder = try scratchFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let calls = Calls()
         let problem = await model(answering: Self.header + "a\n")
             .reportProblem(
                 answering: .export(.lastHour),
-                handoff: handoff(calls, folder: folder)
+                handoff: handoff(calls, picking: nil)
             )
         #expect(problem == nil)
-        let written = try FileManager.default
-            .contentsOfDirectory(atPath: folder.path)
-        #expect(written.count == 1)
-        let name = try #require(written.first)
-        #expect(name.hasPrefix("KiwiDesk-log-"))
-        #expect(calls.opened.count == 1)
-        let shown = (folder.appendingPathComponent(name).path as NSString)
-            .abbreviatingWithTildeInPath
+        #expect(calls.picks == 1)
+        #expect(calls.opened.isEmpty)
         #expect(
-            context(calls.opened.first)?.hasSuffix(
-                "Log saved as \(shown) — drag it here."
-            ) == true
-        )
-    }
-
-    /// Two exports in one minute share a name; the second takes
-    /// `-2` rather than replacing the log the first form names.
-    @Test("a second export in the same minute keeps the first")
-    func sameMinuteKeepsBoth() throws {
-        let folder = try scratchFolder()
-        defer { try? FileManager.default.removeItem(at: folder) }
-        let first = folder.appendingPathComponent("KiwiDesk-log-x.txt")
-        #expect(SettingsModel.unused(first) == first)
-        try Data().write(to: first)
-        #expect(
-            SettingsModel.unused(first).lastPathComponent
-                == "KiwiDesk-log-x-2.txt"
+            try FileManager.default
+                .contentsOfDirectory(atPath: folder.path).isEmpty
         )
     }
 
@@ -109,7 +116,10 @@ struct ReportProblemTests {
         let problem = await model(answering: Self.header)
             .reportProblem(
                 answering: .export(.lastHour),
-                handoff: handoff(calls, folder: folder)
+                handoff: handoff(
+                    calls,
+                    picking: folder.appendingPathComponent("empty.txt")
+                )
             )
         #expect(problem == .empty)
         #expect(calls.opened.isEmpty)
@@ -121,16 +131,17 @@ struct ReportProblemTests {
         let model = model(answering: Self.header + "a\n")
         _ = await model.reportProblem(
             answering: .withoutLog,
-            handoff: handoff(calls, folder: nil)
+            handoff: handoff(calls, picking: nil)
         )
         #expect(calls.opened.count == 1)
-        // Without a log the form names none.
-        #expect(context(calls.opened.first)?.contains("Log saved") == false)
+        // Without a log the form asks for none, and no panel shows.
+        #expect(context(calls.opened.first)?.contains("Drag the log") == false)
         _ = await model.reportProblem(
             answering: .cancel,
-            handoff: handoff(calls, folder: nil)
+            handoff: handoff(calls, picking: nil)
         )
         #expect(calls.opened.count == 1)
+        #expect(calls.picks == 0)
     }
 
     @Test("the buttons and popup map to the answer")

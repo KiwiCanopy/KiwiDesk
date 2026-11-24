@@ -40,8 +40,8 @@ enum ReportProblemPrompt {
         alert.informativeText = L(
             "report.log.message",
             "A log helps find the cause, and lists the settings you "
-                + "changed. It is saved to Downloads; drag it into the "
-                + "form if you want it public."
+                + "changed. You choose where it is saved; drag it into "
+                + "the form if you want it public."
         )
         alert.addButton(withTitle: L("report.log.export", "Export Log"))
         alert.addButton(
@@ -93,20 +93,5 @@ enum ReportProblemPrompt {
         stack.spacing = 8
         stack.frame.size = stack.fittingSize
         return (stack, popup)
-    }
-
-    /// What stopped the export, for this path's alert. A write
-    /// failure has its own sentence: no save panel offers another
-    /// folder here.
-    static func sentence(for problem: LogExportProblem) -> String {
-        guard case .writeFailed = problem else {
-            return LogExportText.sentence(for: problem)
-        }
-        return L(
-            "report.log.write_failed",
-            "KiwiDesk couldn't save the log to your Downloads folder. "
-                + "Check that it exists and has free space, then try "
-                + "again."
-        )
     }
 }
