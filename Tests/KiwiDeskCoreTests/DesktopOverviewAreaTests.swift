@@ -65,7 +65,7 @@ struct DesktopOverviewAreaTests {
         let shown = try #require(screen.desktops.first { $0.isShown })
         #expect(shown.spaces.map(\.space) == ["6", "3", "4", "5"])
         #expect(shown.areas.map(\.lines) == [0..<2, 2..<4])
-        #expect(shown.areas.map(\.position) == [.left, .right])
+        #expect(shown.areas.map(\.position) == [[.left], [.right]])
         #expect(shown.areas.map(\.isHere) == [false, true])
         let keys = areas.compactMap {
             core.state.workspaces[placement: $0]?.key

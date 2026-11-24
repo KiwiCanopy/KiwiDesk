@@ -20,6 +20,47 @@ enum ScreenAreaWords {
         }
     }
 
+    /// A position path, outer word first, as one name: a lone word,
+    /// or a pair as its own key, so a locale words each name whole.
+    /// A side (Left / Right) is said last, after the row ("Top
+    /// Left"); a middle column's half leads with "Middle" ("Middle
+    /// Top"), a row's middle trails ("Top Middle"); the middle of a
+    /// middle is "Middle". Core numbers anything deeper (#3541).
+    static func position(_ path: [ScreenAreaPosition]) -> String {
+        guard path.count == 2 else {
+            return path.count == 1 ? position(path[0]) : ""
+        }
+        let sides: [ScreenAreaPosition] = [.left, .right]
+        let side = path.first { sides.contains($0) }
+        let row = path.first { !sides.contains($0) }
+        switch (row, side, path[0]) {
+        case (.top?, .left?, _):
+            return L("monitors.split.top_left", "Top Left")
+        case (.top?, .right?, _):
+            return L("monitors.split.top_right", "Top Right")
+        case (.bottom?, .left?, _):
+            return L("monitors.split.bottom_left", "Bottom Left")
+        case (.bottom?, .right?, _):
+            return L("monitors.split.bottom_right", "Bottom Right")
+        case (.middle?, .left?, _):
+            return L("monitors.split.middle_left", "Middle Left")
+        case (.middle?, .right?, _):
+            return L("monitors.split.middle_right", "Middle Right")
+        default: break
+        }
+        switch (path[0], path[1]) {
+        case (.middle, .top):
+            return L("monitors.split.middle_top", "Middle Top")
+        case (.middle, .bottom):
+            return L("monitors.split.middle_bottom", "Middle Bottom")
+        case (.top, .middle):
+            return L("monitors.split.top_middle", "Top Middle")
+        case (.bottom, .middle):
+            return L("monitors.split.bottom_middle", "Bottom Middle")
+        default: return position(.middle)
+        }
+    }
+
     /// "LG UltraWide – Left".
     static func composed(screen: String, area: String) -> String {
         L("monitors.split.name", "%1$@ – %2$@", screen, area)
@@ -76,7 +117,31 @@ extension SettingsModel {
             let area = split.areas.first(where: { $0.id == id })
         else { return nil }
         if let name = area.name { return name }
-        return split.positions[id].map(ScreenAreaWords.position)
+        return split.positions[id].map { ScreenAreaWords.position($0) }
+    }
+
+    /// Member `index` of `run`'s label in Adjust…: a lone area's
+    /// own label; a nested one's position from Core ("Middle"), else,
+    /// where the areas are numbered, its first and last areas'.
+    func memberLabel(
+        _ index: Int,
+        of run: ScreenAreaRun?,
+        on display: Display
+    ) -> String {
+        guard let run, run.members.indices.contains(index),
+            let split = areaSplit(of: display)
+        else { return "" }
+        let ids = run.members[index].areas
+        if ids.count == 1 { return areaLabel(ids[0], on: display) ?? "" }
+        if let path = split.position(ofMember: index, in: run) {
+            return ScreenAreaWords.position(path)
+        }
+        return L(
+            "monitors.sizes.member_range",
+            "%1$@ to %2$@",
+            areaLabel(ids[0], on: display) ?? "",
+            areaLabel(ids[ids.count - 1], on: display) ?? ""
+        )
     }
 
     /// The area's full name, "LG UltraWide – Left"; the screen's

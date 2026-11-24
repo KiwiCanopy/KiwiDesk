@@ -9,7 +9,7 @@ struct ScreensPicture: View {
     let rows: ScreensFamilyRows
     @Binding var selection: ScreenSelection?
     /// The area giving way in an open Adjust… popover.
-    var givingWay: ScreenSelection? = nil
+    var givingWay: Set<ScreenSelection> = []
     /// The pane a menu's Split or Merge hands focus to.
     var paneFocus: ScreenSelection? = nil
     var act: (ScreenAreaAction) -> Void = { _ in }

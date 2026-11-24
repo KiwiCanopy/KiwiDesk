@@ -15,7 +15,7 @@ struct ScreenCard: View {
     let size: CGSize
     @Binding var selection: ScreenSelection?
     /// The area giving way in an open Adjust… popover.
-    let givingWay: ScreenSelection?
+    let givingWay: Set<ScreenSelection>
     /// The pane a menu's Split or Merge hands focus to.
     let paneFocus: ScreenSelection?
     let act: (ScreenAreaAction) -> Void
@@ -108,8 +108,9 @@ struct ScreenCard: View {
             leads: pane.leads,
             size: pane.rect.size,
             corners: corners(pane.rect),
-            givesWay: givingWay
-                == ScreenSelection(display: display.id, area: pane.id),
+            givesWay: givingWay.contains(
+                ScreenSelection(display: display.id, area: pane.id)
+            ),
             selection: $selection,
             act: act,
             focusRequest: paneFocus,
@@ -148,44 +149,48 @@ struct ScreenCard: View {
 
     /// Each divider is handed the STORED cut, which its drag starts
     /// from, and drawn where the drag in flight has it.
-    @ViewBuilder private func dividers(_ stored: ScreenSplit) -> some View {
-        let width = stored.extent.width
-        let height = stored.extent.height
+    @ViewBuilder private func dividers(_ storedSplit: ScreenSplit) -> some View
+    {
+        let width = storedSplit.extent.width
+        let height = storedSplit.extent.height
         let cuts =
-            ScreenAreaCuts.cuts(of: stored.areas, width: width, height: height)
-            ?? []
-        let drawn =
-            drag.flatMap {
-                ScreenAreaCuts.cuts(
-                    of: $0.split.areas,
-                    width: width,
-                    height: height
-                )
-            } ?? cuts
-        let factor = scale(stored)
-        ForEach(Array(cuts.enumerated()), id: \.offset) { index, cut in
+            ScreenAreaCuts.cuts(
+                of: storedSplit.areas,
+                width: width,
+                height: height
+            ) ?? []
+        let factor = scale(storedSplit)
+        // A drag in flight re-spans the dividers inside the box it
+        // resizes; match them by axis and place, never by index.
+        ForEach(Array(cuts.enumerated()), id: \.offset) { index, stored in
+            let cut =
+                drag?.split.cut(holding: stored, at: stored.position)
+                ?? stored
             let side = cut.axis == .sideBySide
-            let position =
-                drawn.indices.contains(index)
-                ? drawn[index].position : cut.position
+            let dragged = drag?.cut == index ? drag?.position : nil
+            let position = dragged ?? cut.position
             let at = CGFloat(position) * (side ? factor.width : factor.height)
+            // A nested cut spans only its own box (#3541).
+            let across = side ? factor.height : factor.width
+            let from = CGFloat(cut.start) * across
+            let span = CGFloat(cut.end - cut.start) * across
             let band = ScreenAreaDivider.hitBand
             ScreenAreaDivider(
                 model: model,
                 display: display,
-                split: stored,
+                split: storedSplit,
                 index: index,
-                cut: cut,
+                cut: stored,
                 scale: side ? factor.width : factor.height,
                 drag: $drag
             )
             .frame(
-                width: side ? band : size.width,
-                height: side ? size.height : band
+                width: side ? band : span,
+                height: side ? span : band
             )
             .offset(
-                x: side ? at - band / 2 : 0,
-                y: side ? 0 : at - band / 2
+                x: side ? at - band / 2 : from,
+                y: side ? from : at - band / 2
             )
         }
     }
@@ -193,11 +198,11 @@ struct ScreenCard: View {
     /// While a divider moves, each area beside it shows its length,
     /// the one a snap made a screen fraction naming it (ruling 25).
     @ViewBuilder private func capsules(_ split: ScreenSplit?) -> some View {
-        if let drag, let split,
+        if let drag, let split, let stored = model.areaSplit(of: display),
             let cut = ScreenAreaCuts.cuts(
-                of: split.areas,
-                width: split.extent.width,
-                height: split.extent.height
+                of: stored.areas,
+                width: stored.extent.width,
+                height: stored.extent.height
             )?[safe: drag.cut]
         {
             let side = cut.axis == .sideBySide
@@ -250,17 +255,22 @@ struct ScreenCard: View {
     private var splitValue: String {
         guard let split = model.areaSplit(of: display) else { return "" }
         let count = split.areas.count
-        return split.axis == .stacked
-            ? L(
+        switch split.axis {
+        case .stacked?:
+            return L(
                 "monitor_card.split.stacked.ax",
                 "Areas: %1$d, top to bottom",
                 count
             )
-            : L(
+        case .sideBySide?:
+            return L(
                 "monitor_card.split.side_by_side.ax",
                 "Areas: %1$d, side by side",
                 count
             )
+        case nil:
+            return L("monitor_card.split.nested.ax", "Areas: %1$d", count)
+        }
     }
 }
 

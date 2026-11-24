@@ -800,9 +800,12 @@ own points, each optionally with an `id` and a `name`.
 **Does:** splits one screen into areas, each with its own Spaces,
 its own App Bar and Space Bar and its own shown Space; with no
 sizes the screen is whole again. The sizes or rects must cover the
-screen exactly, with no gap or overlap, every cut running one
-direction, and no area under 100 points. The top-left area is
-area 0: a rect list that gives id 0 to another area is refused.
+screen exactly, with no gap or overlap, every cut running edge to
+edge across the part it divides, and no area under 100 points. A
+rect list may nest: three areas side by side with the middle one
+split top to bottom, or a 2×2 grid. The sizes form splits one way.
+The top-left area is area 0: a rect list that gives id 0 to
+another area is refused.
 
 The sizes form keeps the screen's previous ids in reading order,
 area 0 first, and gives each area past them a new id; with fewer
@@ -843,8 +846,9 @@ KiwiDesk.set_display_areas(1)                -- whole again
 
 **Does:** names that area. Settings and the Space's Screen menu
 show the name in place of its position (Left, Middle, Right, Top,
-Bottom, or Area 1 onwards from four areas); an empty name goes
-back to the position. A name made only of digits, or one another
+Bottom; on a nested split Middle Top, Top Left and the like; Area 1
+onwards once a row or column holds four areas, or an area is split
+three levels deep); an empty name goes back to the position. A name made only of digits, or one another
 area or screen already has, is refused.
 :::
 

@@ -11,7 +11,7 @@ struct ScreensSection: View {
     @State var renameRequest: AreaRenameRequest?
     @State var sizesRequest: AreaSizesRequest?
     /// The area giving way while Adjust… is open (#3517 ruling 26).
-    @State var givingWay: ScreenSelection?
+    @State var givingWay: Set<ScreenSelection> = []
     /// The pane a menu's Split or Merge hands focus to, since the
     /// focused pane may be the one merged away.
     @State var paneFocus: ScreenSelection?
@@ -44,8 +44,7 @@ struct ScreensSection: View {
     private var areaCaption: String {
         L(
             "monitors.picture.caption",
-            "Drag a Space onto the screen it belongs to. Select a "
-                + "screen to split it into areas."
+            "Drag a Space onto the screen it belongs to."
         )
     }
 
@@ -180,10 +179,10 @@ struct ScreensSection: View {
     @ViewBuilder private func selectionEditor(
         rows: ScreensFamilyRows
     ) -> some View {
+        Divider()
         if let display = rows.displays.first(where: {
             $0.id == selection?.display
         }) {
-            Divider()
             ScreenAreaEditor(
                 model: model,
                 display: display,
@@ -194,6 +193,15 @@ struct ScreensSection: View {
                 percent: $model.nav.areaSizesInPercent,
                 select: { selection = $0 }
             )
+        } else {
+            Text(
+                L(
+                    "monitors.selection.hint",
+                    "Click a screen or an area to split, merge or rename it."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 
@@ -215,12 +223,13 @@ struct ScreensSection: View {
         case .adjust(let area):
             selection = area
             let display = model.displays.first { $0.id == area.display }
-            guard let split = display.flatMap(model.areaSplit) else {
-                return
-            }
+            guard let split = display.flatMap(model.areaSplit),
+                let selected = area.area
+            else { return }
             DispatchQueue.main.async {
                 sizesRequest = AreaSizesRequest(
                     display: area.display,
+                    area: selected,
                     seed: split
                 )
             }

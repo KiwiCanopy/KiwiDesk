@@ -138,7 +138,8 @@ showing are parked (see [Parking is not a Desktop
 move](#parking-is-not-a-desktop-move)).
 
 :::unreleased
-A screen can be split into areas side by side or top to bottom
+A screen can be split into areas side by side or top to bottom,
+and an area split again the other way
 ([`set_display_areas`](lua-reference.md#set_display_areas)). Each
 area has its own Spaces and shows one of them at a time, so a
 screen split in three shows three Spaces at once. A Desktop still

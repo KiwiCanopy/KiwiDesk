@@ -207,30 +207,10 @@ extension ScreenSplit {
         return (copy, vanished, survivor.id)
     }
 
-    /// Evens out the areas along the split's one axis, in reading
-    /// order; odd points go to the leading areas.
-    public func evenedOut(width: Int, height: Int) -> ScreenSplit {
-        guard areas.count > 1,
-            let cuts = ScreenAreaCuts.cuts(
-                of: areas,
-                width: width,
-                height: height
-            ),
-            let axis = cuts.first?.axis
-        else { return self }
-        let total = axis == .sideBySide ? width : height
-        return resized(
-            ScreenArea.readingOrder(areas).enumerated().map {
-                i,
-                _ in
-                total / areas.count + (i < total % areas.count ? 1 : 0)
-            },
-            axis: axis
-        )
-    }
-
     /// The areas, in reading order, laid out at `lengths` along
-    /// `axis` — one length per area, summing to the screen.
+    /// `axis` — one length per area, summing to the screen. For a
+    /// split that runs one way only (`laidOut`); a nested split is
+    /// sized per run through `resizing(_:to:)`.
     public func resized(
         _ lengths: [Int],
         axis: ScreenAreaCut.Axis

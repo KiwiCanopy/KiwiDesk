@@ -8,7 +8,21 @@ import SwiftUI
 struct AreaDividerDrag: Equatable {
     let split: ScreenSplit
     let snap: ScreenAreaSnap?
+    /// The dragged divider's index among the STORED split's cuts: a
+    /// snap into line with another divider can re-root the walk, so
+    /// the split in flight is never asked for its cuts by index.
     let cut: Int
+    /// Where the dragged divider is, in screen points.
+    let position: Int
+    /// The in-flight split's cut that holds the dragged segment,
+    /// joined segments included (accepted-limitations.md).
+    let landed: ScreenAreaCut?
+
+    /// Whether the stored `cut` now moves with the drag: Core reads
+    /// it onto the same cut as the dragged segment.
+    func joins(_ cut: ScreenAreaCut) -> Bool {
+        landed?.holds(cut) == true
+    }
 }
 
 /// One divider of a split card (#3517 ruling 25): a hairline seam
@@ -36,6 +50,8 @@ struct ScreenAreaDivider: View {
 
     private var sideBySide: Bool { cut.axis == .sideBySide }
     private var dragging: Bool { drag?.cut == index }
+    /// Dragged, or joined by the drag's snap: both take the tint.
+    private var lit: Bool { dragging || drag?.joins(cut) == true }
 
     var body: some View {
         ZStack {
@@ -47,7 +63,7 @@ struct ScreenAreaDivider: View {
                 )
             Capsule()
                 .fill(
-                    dragging
+                    lit
                         ? AnyShapeStyle(.tint)
                         : AnyShapeStyle(SettingsTheme.ink3)
                 )
@@ -85,14 +101,14 @@ struct ScreenAreaDivider: View {
     }
 
     private var lineStyle: AnyShapeStyle {
-        if dragging { return AnyShapeStyle(.tint) }
+        if lit { return AnyShapeStyle(.tint) }
         return hovering
             ? AnyShapeStyle(SettingsTheme.hoverEdge)
             : AnyShapeStyle(SettingsTheme.hairline)
     }
 
     private var lineWidth: CGFloat {
-        dragging ? 2 : hovering ? SettingsTheme.hoverEdgeStroke : 1
+        lit ? 2 : hovering ? SettingsTheme.hoverEdgeStroke : 1
     }
 
     private var cursor: NSCursor {
@@ -147,7 +163,9 @@ struct ScreenAreaDivider: View {
         return AreaDividerDrag(
             split: landed.split,
             snap: kept ? snapped.snap : nil,
-            cut: index
+            cut: index,
+            position: landed.position,
+            landed: landed.split.cut(holding: cut, at: landed.position)
         )
     }
 

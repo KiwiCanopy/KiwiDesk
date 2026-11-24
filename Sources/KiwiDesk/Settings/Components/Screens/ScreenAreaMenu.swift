@@ -35,7 +35,7 @@ struct AreaMenu: ViewModifier {
             }
             Divider()
         }
-        ForEach(ScreenAreaEditing.axes(of: model, display), id: \.self) {
+        ForEach(ScreenAreaEditing.axes, id: \.self) {
             axis in
             Button {
                 model.splitArea(area ?? 0, on: display, axis)
@@ -58,33 +58,38 @@ struct AreaMenu: ViewModifier {
         if let area {
             let neighbours = model.mergeNeighbours(of: area, on: display)
             if !neighbours.isEmpty { Divider() }
-            ForEach(neighbours, id: \.self) { other in
-                Button(ScreenAreaEditing.mergeTitle(other, model, display)) {
-                    if let kept = model.mergeArea(
-                        area,
-                        with: other,
-                        on: display
-                    ) {
-                        act(
-                            .select(
-                                ScreenSelection(
-                                    display: display.id,
-                                    area: model.areaSplit(of: display) == nil
-                                        ? nil : kept
-                                )
-                            )
-                        )
-                    }
-                }
-            }
+            // Flat on every route: the same builder feeds VoiceOver's
+            // actions and the keyboard popover (`rowActions`).
+            mergeItems(area, neighbours)
             Divider()
             Button(L("monitors.sizes.menu.adjust", "Adjust Sizes…")) {
                 act(.adjust(here))
             }
             Button(L("monitors.sizes.even_out", "Even Out")) {
-                model.evenOutAreas(on: display)
+                model.evenOutAreas(holding: area, on: display)
             }
-            .disabled(model.areaSplit(of: display)?.isEven ?? true)
+            .disabled(!model.canEvenOut(holding: area, on: display))
+        }
+    }
+
+    @ViewBuilder private func mergeItems(
+        _ area: Int,
+        _ neighbours: [Int]
+    ) -> some View {
+        ForEach(neighbours, id: \.self) { other in
+            Button(ScreenAreaEditing.mergeTitle(other, model, display)) {
+                if let kept = model.mergeArea(area, with: other, on: display) {
+                    act(
+                        .select(
+                            ScreenSelection(
+                                display: display.id,
+                                area: model.areaSplit(of: display) == nil
+                                    ? nil : kept
+                            )
+                        )
+                    )
+                }
+            }
         }
     }
 }
@@ -92,15 +97,19 @@ struct AreaMenu: ViewModifier {
 /// The words and offers the editor's rows and the area menu share.
 @MainActor
 enum ScreenAreaEditing {
-    /// The directions a selection may split along: both on a whole
-    /// screen, only the one its areas run once split — the other is
-    /// removed, not greyed, until nested splits ship (ruling 24).
-    static func axes(
-        of model: SettingsModel,
-        _ display: Display
-    ) -> [ScreenAreaCut.Axis] {
-        if let axis = model.areaSplit(of: display)?.axis { return [axis] }
-        return [.sideBySide, .stacked]
+    /// The directions a selection may split along: both, on a whole
+    /// screen and on every area (#3541); each greys alone at the
+    /// floor (`SettingsModel.canSplit`).
+    static let axes: [ScreenAreaCut.Axis] = [.sideBySide, .stacked]
+
+    /// Whether the editor's Merge row is one pull-down rather than a
+    /// button per neighbour: past two full-edge neighbours (#3541).
+    static func mergePullsDown(_ neighbours: [Int]) -> Bool {
+        neighbours.count > 2
+    }
+
+    static var mergeMenuTitle: String {
+        L("monitors.merge.menu", "Merge with…")
     }
 
     static func buttonTitle(_ axis: ScreenAreaCut.Axis) -> String {

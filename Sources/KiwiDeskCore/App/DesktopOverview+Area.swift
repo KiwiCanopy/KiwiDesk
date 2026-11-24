@@ -9,8 +9,9 @@ extension DesktopOverview {
         public let key: ScreenAreaKey
         /// The user's own name, nil where the area has none.
         public let name: String?
-        /// Its positional default, nil where the split names none.
-        public let position: ScreenAreaPosition?
+        /// Its positional default, outer word first; nil where the
+        /// split names none.
+        public let position: [ScreenAreaPosition]?
         /// The area KiwiHub opened over.
         public let isHere: Bool
         /// Its lines, as indices into the Desktop's `spaces`.
@@ -19,7 +20,7 @@ extension DesktopOverview {
         public init(
             key: ScreenAreaKey,
             name: String?,
-            position: ScreenAreaPosition?,
+            position: [ScreenAreaPosition]?,
             isHere: Bool,
             lines: Range<Int>
         ) {

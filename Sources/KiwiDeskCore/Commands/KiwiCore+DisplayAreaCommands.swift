@@ -148,8 +148,6 @@ extension KiwiCore {
         case .gap: "the areas must cover the whole screen"
         case .notGuillotine:
             "the areas must be separable by straight lines"
-        case .mixedAxes:
-            "areas must all run side by side or all stacked"
         case .missingLeadArea:
             "the top-left area must keep id 0"
         }

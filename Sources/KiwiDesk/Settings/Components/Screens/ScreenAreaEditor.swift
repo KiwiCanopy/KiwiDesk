@@ -12,7 +12,7 @@ struct ScreenAreaEditor: View {
     let area: Int?
     @Binding var rename: AreaRenameRequest?
     @Binding var sizes: AreaSizesRequest?
-    @Binding var givingWay: ScreenSelection?
+    @Binding var givingWay: Set<ScreenSelection>
     /// Adjust…'s unit, held by the page while Settings stays open.
     @Binding var percent: Bool
     let select: (ScreenSelection?) -> Void
@@ -65,7 +65,7 @@ struct ScreenAreaEditor: View {
     }
 
     private var splitRow: some View {
-        let axes = ScreenAreaEditing.axes(of: model, display)
+        let axes = ScreenAreaEditing.axes
         let rect = model.editableSplit(of: display).areas.first {
             $0.id == id
         }
@@ -139,46 +139,78 @@ struct ScreenAreaEditor: View {
                 title: L("monitors.merge.title", "Merge"),
                 caption: nil
             ) {
-                HStack(spacing: 6) {
-                    ForEach(neighbours, id: \.self) { other in
-                        Button(
-                            ScreenAreaEditing.mergeTitle(other, model, display)
-                        ) {
-                            let kept = model.mergeArea(
-                                area,
-                                with: other,
-                                on: display
-                            )
-                            select(
-                                ScreenSelection(
-                                    display: display.id,
-                                    area: model.areaSplit(of: display) == nil
-                                        ? nil : kept
-                                )
-                            )
-                            landFocus()
+                if ScreenAreaEditing.mergePullsDown(neighbours) {
+                    mergeMenu(area, neighbours)
+                } else {
+                    // Long custom names fall back to the pull-down.
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 6) {
+                            ForEach(neighbours, id: \.self) { other in
+                                mergeButton(area, other)
+                                    .settingsActionButton()
+                            }
                         }
-                        .settingsActionButton()
+                        mergeMenu(area, neighbours)
                     }
+                    // Measured against the row, not half of it.
+                    .layoutPriority(1)
                 }
             }
         }
     }
 
+    private func mergeMenu(_ area: Int, _ neighbours: [Int]) -> some View {
+        Menu(ScreenAreaEditing.mergeMenuTitle) {
+            ForEach(neighbours, id: \.self) { other in
+                mergeButton(area, other)
+            }
+        }
+        .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
+        .fixedSize()
+        .menuTriggerHover()
+    }
+
+    /// The neighbour's bare name: the row title says Merge, and
+    /// VoiceOver, which skips that title, hears the whole action.
+    private func mergeButton(_ area: Int, _ other: Int) -> some View {
+        let title = ScreenAreaEditing.mergeTitle(other, model, display)
+        return Button(model.areaLabel(other, on: display) ?? title) {
+            let kept = model.mergeArea(area, with: other, on: display)
+            select(
+                ScreenSelection(
+                    display: display.id,
+                    area: model.areaSplit(of: display) == nil ? nil : kept
+                )
+            )
+            landFocus()
+        }
+        .help(title)
+        .accessibilityLabel(title)
+    }
+
+    /// The row or column the selection sits in (#3541).
+    private func run(_ area: Int) -> ScreenAreaRun? {
+        model.areaSplit(of: display)?.run(holding: area)
+    }
+
     @ViewBuilder private var sizesRow: some View {
-        if let split = model.areaSplit(of: display) {
+        if let area, let split = model.areaSplit(of: display),
+            let run = run(area)
+        {
             SettingsActionRow(
                 title: L("monitors.sizes.title", "Area sizes"),
                 caption: L(
                     "monitors.sizes.caption",
                     "%1$@ pt",
-                    split.lengths.map(String.init).joined(separator: " · ")
+                    run.lengths.map(String.init).joined(separator: " · ")
                 )
             ) {
                 HStack(spacing: 6) {
                     Button(L("monitors.sizes.adjust", "Adjust…")) {
                         sizes = AreaSizesRequest(
                             display: display.id,
+                            area: area,
                             seed: split
                         )
                     }
@@ -195,10 +227,10 @@ struct ScreenAreaEditor: View {
                         .settingsPopoverChrome()
                     }
                     Button(L("monitors.sizes.even_out", "Even Out")) {
-                        model.evenOutAreas(on: display)
+                        model.evenOutAreas(holding: area, on: display)
                     }
                     .settingsActionButton()
-                    .disabled(split.isEven)
+                    .disabled(!model.canEvenOut(holding: area, on: display))
                 }
             }
         }
@@ -212,7 +244,7 @@ struct ScreenAreaEditor: View {
     /// while an area is selected; read from the redrawn editor.
     private func land() {
         landing = false
-        if let axis = ScreenAreaEditing.axes(of: model, display).first(
+        if let axis = ScreenAreaEditing.axes.first(
             where: { model.canSplit(id, on: display, $0) }
         ) {
             focus = .split(axis)
@@ -225,7 +257,7 @@ struct ScreenAreaEditor: View {
         let area = request.area
         let fallback =
             model.editableSplit(of: display).positions[area]
-            .map(ScreenAreaWords.position) ?? ""
+            .map { ScreenAreaWords.position($0) } ?? ""
         let current =
             model.areaSplit(of: display)?.areas
             .first { $0.id == area }?.name ?? ""

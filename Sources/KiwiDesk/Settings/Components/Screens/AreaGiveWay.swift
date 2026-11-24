@@ -1,12 +1,13 @@
 import Foundation
 import KiwiDeskCore
 
-/// Which area gives way to a typed size in Adjust… (#3517 ruling
-/// 26): among every area but the field in focus, the last one not
-/// yet typed in this popover, reading from the end; once all are
-/// typed, the one typed longest ago. With two areas, the other one.
+/// Which member of the run gives way to a typed size in Adjust…
+/// (#3517 ruling 26): among every member but the field in focus, the
+/// last one not yet typed in this popover, reading from the end;
+/// once all are typed, the one typed longest ago. With two members,
+/// the other one.
 enum AreaGiveWay {
-    /// `order` is the areas in reading order, `typed` the ones
+    /// `order` is the members in reading order, `typed` the ones
     /// typed this session, oldest first.
     static func pick(
         order: [Int],
@@ -31,6 +32,8 @@ enum AreaGiveWay {
 struct AreaSizesRequest: Identifiable, Equatable {
     let id = UUID()
     let display: DisplayID
+    /// The selected area, whose run the popover sizes (#3541).
+    let area: Int
     let seed: ScreenSplit
 }
 

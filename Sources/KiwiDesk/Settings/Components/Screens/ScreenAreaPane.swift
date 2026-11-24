@@ -274,13 +274,13 @@ struct ScreenAreaPane: View {
     private var selectActionName: String {
         switch (isSelected, isSplit) {
         case (true, false):
-            L("monitors.deselect", "Hide the Spaces on this screen")
+            L("monitors.deselect", "Deselect this screen")
         case (false, false):
-            L("monitors.select", "Show the Spaces on this screen")
+            L("monitors.select", "Select this screen to edit it")
         case (true, true):
-            L("monitors.area_deselect", "Hide the Spaces in this area")
+            L("monitors.area_deselect", "Deselect this area")
         case (false, true):
-            L("monitors.area_select", "Show the Spaces in this area")
+            L("monitors.area_select", "Select this area to edit it")
         }
     }
 

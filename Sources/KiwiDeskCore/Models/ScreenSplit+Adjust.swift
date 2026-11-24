@@ -6,6 +6,9 @@ import Foundation
 public enum ScreenAreaSnap: Hashable, Sendable {
     case fraction(Int, Int)
     case even
+    /// In line with another divider on the same axis, so the
+    /// segments of a T-junction line up (#3541).
+    case divider
 
     /// The screen fractions a divider snaps to, in order.
     public static let fractions: [ScreenAreaSnap] = [
@@ -55,9 +58,10 @@ extension ScreenSplit {
     }
 
     /// Where `cut` would snap on a `width` × `height` screen: the
-    /// ruled fractions of the screen along its axis, then the point
-    /// its two neighbours are equal (the leading one taking the odd
-    /// point, as a split does).
+    /// ruled fractions of the screen along its axis, the point its
+    /// two neighbours are equal (the leading one taking the odd
+    /// point, as a split does), then every other divider on its
+    /// axis.
     public func snaps(
         for cut: ScreenAreaCut,
         width: Int,
@@ -79,6 +83,13 @@ extension ScreenSplit {
             let hi = side ? trail[0].x + trail[0].w : trail[0].y + trail[0].h
             out.append((lo + (hi - lo + 1) / 2, .even))
         }
+        let others =
+            ScreenAreaCuts.cuts(of: areas, width: width, height: height)?
+            .filter { $0.axis == cut.axis && $0.position != cut.position }
+            ?? []
+        for other in Set(others.map(\.position)).sorted() {
+            out.append((other, .divider))
+        }
         return out
     }
 
@@ -97,51 +108,5 @@ extension ScreenSplit {
             .min { abs($0.position - raw) < abs($1.position - raw) }
         guard let near else { return (raw, nil) }
         return (near.position, near.snap)
-    }
-
-    /// Area `id` set to `length` points along the split's axis,
-    /// `other` giving way (ruling 26): one commit changes exactly
-    /// these two areas, the length clamped so both keep `floor`.
-    /// Nil where the split is whole or either id is missing.
-    public func setting(
-        _ id: Int,
-        to length: Int,
-        givingWay other: Int,
-        floor: Int
-    ) -> (split: ScreenSplit, length: Int)? {
-        let ordered = ScreenArea.readingOrder(areas).map(\.id)
-        guard let axis, id != other,
-            let i = ordered.firstIndex(of: id),
-            let j = ordered.firstIndex(of: other)
-        else { return nil }
-        var sizes = lengths
-        let pair = sizes[i] + sizes[j]
-        let clamped = min(max(length, floor), pair - floor)
-        guard clamped >= floor else { return nil }
-        sizes[i] = clamped
-        sizes[j] = pair - clamped
-        return (resized(sizes, axis: axis), clamped)
-    }
-
-    /// Each area's share of the screen in whole percent, in reading
-    /// order, adding up to 100 (largest remainder): for display
-    /// only, since a split stores points.
-    public var percents: [Int] {
-        let all = lengths
-        let total = all.reduce(0, +)
-        guard total > 0 else { return all.map { _ in 0 } }
-        var shares = all.map { $0 * 100 / total }
-        let order = all.indices.sorted {
-            (all[$0] * 100 % total, -$0) > (all[$1] * 100 % total, -$1)
-        }
-        for index in order.prefix(100 - shares.reduce(0, +)) {
-            shares[index] += 1
-        }
-        return shares
-    }
-
-    /// `percent` of the screen along the split's axis, in points.
-    public func points(percent: Double) -> Int {
-        Int((percent * Double(lengths.reduce(0, +)) / 100).rounded())
     }
 }
