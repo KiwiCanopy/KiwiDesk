@@ -37,7 +37,7 @@ struct AreaMenu: ViewModifier {
         }
         ForEach(ScreenAreaEditing.axes(of: model, display), id: \.self) {
             axis in
-            Button(ScreenAreaEditing.menuTitle(axis)) {
+            Button {
                 model.splitArea(area ?? 0, on: display, axis)
                 act(
                     .select(
@@ -46,6 +46,11 @@ struct AreaMenu: ViewModifier {
                             area: area ?? 0
                         )
                     )
+                )
+            } label: {
+                Label(
+                    ScreenAreaEditing.menuTitle(axis),
+                    systemImage: ScreenAreaEditing.symbol(axis)
                 )
             }
             .disabled(!model.canSplit(area ?? 0, on: display, axis))
@@ -103,7 +108,7 @@ enum ScreenAreaEditing {
         case .sideBySide:
             L("monitors.split.side_by_side", "Side by Side")
         case .stacked:
-            L("monitors.split.stacked", "Stacked")
+            L("monitors.split.stacked", "Top to Bottom")
         }
     }
 
@@ -112,7 +117,15 @@ enum ScreenAreaEditing {
         case .sideBySide:
             L("monitors.split.menu.side_by_side", "Split Side by Side")
         case .stacked:
-            L("monitors.split.menu.stacked", "Split Stacked")
+            L("monitors.split.menu.stacked", "Split Top to Bottom")
+        }
+    }
+
+    /// The SF Symbol leading `axis`'s Split button and menu item.
+    static func symbol(_ axis: ScreenAreaCut.Axis) -> String {
+        switch axis {
+        case .sideBySide: "rectangle.split.2x1"
+        case .stacked: "rectangle.split.1x2"
         }
     }
 
