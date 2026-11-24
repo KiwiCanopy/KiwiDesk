@@ -1170,7 +1170,7 @@
   "kiwishelf.durations.summary.off": "關閉",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "目前各列與 Pocket，或它們在不同螢幕上，位於不同邊緣；在此處選擇會讓它們在每個螢幕上都位於同一邊緣。",
-  "kiwishelf.edge.differ_per_screen.help": "部分螢幕或分區把某個列或 Pocket 放在自己的邊緣上——在「%2$@」的「%1$@」中選擇其中一個即可查看。在此處選擇會讓每個列與 Pocket 在每個螢幕上都位於同一邊緣。",
+  "kiwishelf.edge.differ_per_screen.help": "部分螢幕或分區把某個列或 Pocket 放在單獨的邊緣上——在「%2$@」的「%1$@」中選擇其中一個即可查看。在此處選擇會讓每個列與 Pocket 在每個螢幕上都位於同一邊緣。",
   "kiwishelf.edge.label": "位置",
   "kiwishelf.edge.label.help": "列與 Pocket 所在的螢幕邊緣。可在「%1$@」中讓它們各佔一個邊緣。",
   "kiwishelf.edge.per_screen.app_bar": "依螢幕或分區",

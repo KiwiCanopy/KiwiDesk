@@ -2731,7 +2731,7 @@
   "shortcuts.sequence.name_ax": "Nome per %1$@",
   "shortcuts.sequence.name_ax_new": "Nome per il nuovo tasto",
   "shortcuts.sequence.new_key": "Nuovo tasto",
-  "shortcuts.sequence.no_match": "Nessuna azione corrisponde a “%1$@”",
+  "shortcuts.sequence.no_match": "Nessuna azione corrisponde a «%1$@»",
   "shortcuts.sequence.opens_more": "Estendi sequenza",
   "shortcuts.sequence.remove": "Rimuovi tasto",
   "shortcuts.sequence.search": "Cerca azioni",

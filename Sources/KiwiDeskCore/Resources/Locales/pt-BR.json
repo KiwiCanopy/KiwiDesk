@@ -1170,7 +1170,7 @@
   "kiwishelf.durations.summary.off": "Desativado",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "As barras e o Pocket, ou as telas deles, estão em bordas diferentes agora; escolher aqui põe todos em uma mesma borda em todas as telas.",
-  "kiwishelf.edge.differ_per_screen.help": "Algumas telas ou áreas põem uma barra ou o Pocket na própria borda — escolha uma em “%1$@”, em “%2$@”, para ver. Escolher aqui põe todas as barras e o Pocket em uma mesma borda em todas as telas.",
+  "kiwishelf.edge.differ_per_screen.help": "Algumas telas ou áreas põem uma barra ou o Pocket em uma borda própria — escolha uma em “%1$@”, em “%2$@”, para ver. Escolher aqui põe todas as barras e o Pocket em uma mesma borda em todas as telas.",
   "kiwishelf.edge.label": "Posição",
   "kiwishelf.edge.label.help": "Em qual borda da tela as barras e o Pocket ficam. Coloque cada um na própria borda em “%1$@”.",
   "kiwishelf.edge.per_screen.app_bar": "Por tela ou área",

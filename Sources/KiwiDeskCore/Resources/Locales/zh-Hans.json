@@ -1170,7 +1170,7 @@
   "kiwishelf.durations.summary.off": "关闭",
   "kiwishelf.edge.app_bar": "App Bar",
   "kiwishelf.edge.differ.help": "目前各栏和 Pocket，或它们在不同显示器上，位于不同边缘；在此处选择会让它们在每台显示器上都位于同一边缘。",
-  "kiwishelf.edge.differ_per_screen.help": "部分显示器或分区把某个栏或 Pocket 放在了自己的边缘上——在“%2$@”的“%1$@”中选择其中一个即可查看。在此处选择会让每个栏和 Pocket 在每台显示器上都位于同一边缘。",
+  "kiwishelf.edge.differ_per_screen.help": "部分显示器或分区把某个栏或 Pocket 放在了单独的边缘上——在“%2$@”的“%1$@”中选择其中一个即可查看。在此处选择会让每个栏和 Pocket 在每台显示器上都位于同一边缘。",
   "kiwishelf.edge.label": "位置",
   "kiwishelf.edge.label.help": "栏和 Pocket 所在的屏幕边缘。可在“%1$@”中让它们各占一条边缘。",
   "kiwishelf.edge.per_screen.app_bar": "按显示器或分区",
