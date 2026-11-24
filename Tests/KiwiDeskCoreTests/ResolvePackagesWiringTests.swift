@@ -32,12 +32,8 @@ struct ResolvePackagesWiringTests {
     /// Every workflow, comments stripped, by file name: a new
     /// one is read without being listed here.
     static func workflows() throws -> [String: String] {
-        let dir = scriptFixtureRepoRoot()
-            .appendingPathComponent(".github/workflows")
         var out: [String: String] = [:]
-        for name in try FileManager.default
-            .contentsOfDirectory(atPath: dir.path)
-        where name.hasSuffix(".yml") {
+        for name in try workflowFileNames() {
             out[name] = try workflowSource(name)
         }
         return out

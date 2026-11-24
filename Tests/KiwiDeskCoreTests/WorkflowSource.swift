@@ -50,6 +50,20 @@ func workflowSource(_ name: String) throws -> String {
         .joined(separator: "\n")
 }
 
+/// Every workflow's file name, `.yml` and `.yaml` alike (GitHub
+/// runs both), so a guard over "every workflow" reads a new one
+/// without listing it.
+func workflowFileNames() throws -> [String] {
+    let dir = scriptFixtureRepoRoot()
+        .appendingPathComponent(".github/workflows")
+    let names = try FileManager.default
+        .contentsOfDirectory(atPath: dir.path)
+        .filter { $0.hasSuffix(".yml") || $0.hasSuffix(".yaml") }
+        .sorted()
+    #expect(!names.isEmpty, "no workflow read")
+    return names
+}
+
 /// One line with its comment removed — WHOLE-LINE and TRAILING
 /// alike.
 ///
