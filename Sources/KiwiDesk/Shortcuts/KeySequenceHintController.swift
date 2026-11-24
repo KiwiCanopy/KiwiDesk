@@ -96,19 +96,21 @@ final class KeySequenceHintController {
         self.panel = panel
         panel.wearsActiveLook = glass.enabled && glass.wearsActiveLook
         let visible = screen.visibleFrame
-        let area = JumpPanelController.clearArea(
+        // KiwiHub's place on the screen, a compact side's size; it
+        // fits a screen area once KiwiHub does (#3572).
+        let room = JumpPanelController.room(
             visible: visible,
-            shelves: core.shelfFrames()
+            area: JumpPanelController.clearArea(
+                visible: visible,
+                shelves: core.shelfFrames()
+            )
         )
         sheetScroll = KeySequenceHintScroll()
         let view = KeySequenceHintView(
             hint: hint,
             reference: reference,
             glass: glass,
-            sheetCap: JumpPanelController.sheetCap(
-                visible: visible,
-                area: area
-            ),
+            sheetCap: JumpPanelController.sheetCap(in: room, .compact),
             scroll: sheetScroll
         )
         .environment(\.kiwiDeskReduceMotion, ReduceMotion.isOn)
@@ -120,11 +122,7 @@ final class KeySequenceHintController {
         panel.contentView = host
         panel.setFrame(
             CGRect(
-                origin: JumpPanelController.origin(
-                    size: size,
-                    visible: visible,
-                    area: area
-                ),
+                origin: room.origin(of: size),
                 size: size
             ),
             display: true

@@ -114,7 +114,7 @@ struct JumpMoveHereCrossScreenTests {
         let core = makeCore()
         defer { teardown() }
         park(core, on: 11)
-        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(7)), on: core.hub(2)))
         #expect(Bridge.moves.map(\.1) == [20])
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("5"))
         #expect(core.jump.owed?.space == "5")
@@ -158,7 +158,7 @@ struct JumpMoveHereCrossScreenTests {
         let core = makeCore()
         defer { teardown() }
         park(core, on: 11)
-        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(7)), on: core.hub(2)))
         core.state.rememberedSpaces[WindowID(7)] = .departed("1")
         core.handle(
             .windowCreated(
@@ -185,7 +185,7 @@ struct JumpMoveHereCrossScreenTests {
         let start = core.wallClock()
         var lines: [String] = []
         core.onLog = { lines.append($0) }
-        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
+        #expect(core.moveHere(.window(WindowID(7)), on: core.hub(2)))
         core.state.rememberedSpaces[WindowID(7)] = .departed("1")
         core.wallClock = { start.addingTimeInterval(2) }
         core.launchFollow.pressAge = { 1 }
@@ -236,5 +236,17 @@ struct JumpMoveHereCrossScreenTests {
         // A screen not tracked yet is the main one, not a shared set.
         let untracked = snapshot(["UUID-C": 30], main: "UUID-C")
         #expect(core.hopDisplayKey(for: "5", in: untracked) == nil)
+    }
+}
+
+extension KiwiCore {
+    /// The area a test opens KiwiHub over on display `id`: its
+    /// first area, the whole screen while it is not split (#3572).
+    fileprivate func hub(_ id: UInt32) -> PlacementID {
+        hubArea(DisplayID(id))
+    }
+
+    fileprivate func hubArea(_ display: DisplayID) -> PlacementID {
+        state.workspaces.placementOrWhole(of: display)
     }
 }

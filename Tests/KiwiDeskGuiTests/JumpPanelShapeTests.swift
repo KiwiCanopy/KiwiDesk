@@ -40,12 +40,16 @@ struct JumpPanelShapeTests {
 
     /// A side shelf narrows the panel; it never collapses the sheet
     /// to its floor, which a side strip crossing the field's span
-    /// once did.
-    @Test("the sheet grows to 40 pt above the area, a side shelf aside")
+    /// once did. A compact side's sheet keeps the 488 pt ceiling.
+    @Test("a compact sheet grows to 40 pt above the area, a shelf aside")
     func sheetCap() {
-        let free = C.sheetCap(visible: visible, area: visible)
+        func cap(_ visible: CGRect, _ area: CGRect) -> CGFloat {
+            C.sheetCap(in: C.room(visible: visible, area: area), .compact)
+        }
+        let free = cap(visible, visible)
         let top = visible.maxY - visible.height * C.topFraction
-        #expect(free == min(top - 40, C.maxPanelHeight) - C.shortcutsChrome)
+        let ceiling = JumpPanelRoom.compactHeight
+        #expect(free == min(top - 40, ceiling) - C.shortcutsChrome)
         let side = C.clearArea(
             visible: visible,
             shelves: [
@@ -55,24 +59,32 @@ struct JumpPanelShapeTests {
                 )
             ]
         )
-        #expect(C.sheetCap(visible: visible, area: side) == free)
+        #expect(cap(visible, side) == free)
         // High enough that the bottom fit, not the ceiling, binds.
         let raised = CGRect(x: 0, y: 250, width: 1440, height: 650)
-        #expect(C.sheetCap(visible: visible, area: raised) < free)
+        #expect(cap(visible, raised) < free)
         let tiny = CGRect(x: 0, y: 0, width: 1440, height: 300)
-        #expect(C.sheetCap(visible: tiny, area: tiny) == 200)
+        #expect(cap(tiny, tiny) == 200)
+    }
+
+    /// A growing side's content runs to 48 pt above the area's
+    /// bottom, past the compact ceiling (#3570 ▸ Ruling 3).
+    @Test("a growing side's sheet runs to 48 pt above the area")
+    func growingSheetCap() {
+        let room = C.room(visible: visible, area: visible)
+        let top = visible.maxY - visible.height * C.topFraction
+        let grows = C.sheetCap(in: room, .grows)
+        #expect(grows == top - 48 - C.shortcutsChrome)
+        #expect(grows > C.sheetCap(in: room, .compact))
     }
 
     @Test("the panel stands in the area, its top at the field's line")
     func origin() {
         let area = CGRect(x: 40, y: 30, width: 1400, height: 870)
-        let point = C.origin(
-            size: CGSize(width: 720, height: 2000),
-            visible: visible,
-            area: area
-        )
+        let room = C.room(visible: visible, area: area)
+        let point = room.origin(of: CGSize(width: 720, height: 300))
         #expect(point.x == area.midX - 360)
-        #expect(point.y == 30)
+        #expect(point.y + 300 == room.top)
     }
 
     /// One hint lit: the pick that acts on the selection with the
@@ -220,12 +232,80 @@ struct JumpPanelShapeTests {
         .split(whereSeparator: \.isWhitespace).joined()
         for needle in [
             "shelves:core.shelfFrames()",
-            "sheetCap:Self.sheetCap(visible:visible,area:area)",
-            "visible:visible,area:area)",
-            "Self.width(visibleWidth:area.width)",
+            "letroom=Self.room(visible:visible,area:area)",
+            "room:room,",
+            "letwidth=room.fieldWidth",
+            "setFrameOrigin(room.origin(of:panel.frame.size))",
+            "anchor=CGPoint(x:panel.frame.midX,y:panel.frame.maxY)",
+            // One resize per keystroke (#3570 ▸ Ruling 5).
+            "hosting.sizingOptions=Self.hostingSizing",
+            "model.onResultsChange={[weakself]in"
+                + "DispatchQueue.main.async{self?.refit()}}",
         ] {
             #expect(controller.contains(needle), "\(needle)")
         }
+    }
+
+    /// A refit sizes around the field row's opening place, never
+    /// the frame's left edge, so the field never moves on ⇥ (#3570).
+    @Test("a refit holds the field row's anchor")
+    func refitHoldsTheAnchor() throws {
+        let sizing = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/"
+                            + "JumpPanelController+Sizing.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        let refit = try #require(
+            sizing.range(of: "funcrefit(").map {
+                String(sizing[$0.lowerBound...].prefix(400))
+            }
+        )
+        #expect(
+            refit.contains(
+                "JumpPanelRoom.frame(of:content.fittingSize,under:anchor)"
+            )
+        )
+        #expect(!refit.contains("panel.frame.minX"))
+    }
+
+    /// The panel sizes only through its refit, so every path that
+    /// reshapes a side's content asks for one (#3570).
+    @Test("every reshaping path refits")
+    func reshapesRefit() throws {
+        func body(_ file: String, _ after: String) throws -> String {
+            let text = SourceScan.stripComments(
+                try String(
+                    contentsOf: SourceScan.repoRoot(from: #filePath)
+                        .appendingPathComponent(
+                            "Sources/KiwiDesk/Jump/" + file
+                        ),
+                    encoding: .utf8
+                )
+            )
+            return try #require(
+                SourceScan.declarationBody(after: after, in: text)
+            )
+        }
+        for (file, after) in [
+            ("JumpModel+View.swift", "func reloadView()"),
+            ("JumpModel+Desktops.swift", "func reloadDesktops("),
+            ("JumpModel+Desktops.swift", "func refreshDesktops()"),
+        ] {
+            #expect(
+                try body(file, after).contains("onResultsChange()"),
+                "\(after)"
+            )
+        }
+        #expect(
+            try body("JumpPanelController.swift", "func settingsChanged(")
+                .contains("self?.refit()")
+        )
     }
 
     @Test("the model reads its selection and held modifiers")

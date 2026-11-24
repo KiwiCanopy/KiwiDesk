@@ -24,6 +24,8 @@ struct CrossSessionSeamTests {
         "StateSnapshot.swift": (1, "restore — the replay's adopt"),
         "KiwiCore+DragCrossing.swift":
             (1, "cancel — a crossing put back where it began"),
+        "KiwiCore+DragEmptyZone.swift":
+            (1, "probe — a what-if copy for the drop zone (#3582)"),
         "KiwiCore+ProfileSpaces.swift":
             (2, "bulk — a profile's Spaces re-filed"),
         "KiwiCore+HeldSpaces.swift":

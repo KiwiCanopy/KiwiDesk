@@ -118,7 +118,7 @@ struct DesktopOverviewFullScreenTests {
     }
 
     private func builtIn(_ core: KiwiCore) -> DesktopOverview.Screen {
-        core.desktopOverview(on: DisplayID(1)).screens[1]
+        core.desktopOverview(on: core.hub(1)).screens[1]
     }
 
     @Test("an away full-screen window lists on its Space's line")
@@ -171,7 +171,7 @@ struct DesktopOverviewFullScreenTests {
         defer { reset() }
         track(core, 1, in: "1")
         away(core, 3, on: 22, in: "5")
-        let screens = core.desktopOverview(on: DisplayID(1)).screens
+        let screens = core.desktopOverview(on: core.hub(1)).screens
         try #require(screens.count == 2)
         let builtIn = screens[1].desktops
         try #require(builtIn.count == 2 && !builtIn[0].spaces.isEmpty)
@@ -240,7 +240,7 @@ struct DesktopOverviewFullScreenTests {
             authoritySpace(12, display: "SHARED", isUser: false),
         ]
         away(core, 3, on: 12, in: "5")
-        let screens = core.desktopOverview(on: DisplayID(1)).screens
+        let screens = core.desktopOverview(on: core.hub(1)).screens
         try #require(
             screens.count == 2
                 && screens.allSatisfy { !$0.desktops.isEmpty }
@@ -266,5 +266,17 @@ struct DesktopOverviewFullScreenTests {
             )
         )
         #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+    }
+}
+
+extension KiwiCore {
+    /// The area a test opens KiwiHub over on display `id`: its
+    /// first area, the whole screen while it is not split (#3572).
+    fileprivate func hub(_ id: UInt32) -> PlacementID {
+        hubArea(DisplayID(id))
+    }
+
+    fileprivate func hubArea(_ display: DisplayID) -> PlacementID {
+        state.workspaces.placementOrWhole(of: display)
     }
 }

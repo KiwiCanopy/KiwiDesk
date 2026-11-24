@@ -291,10 +291,19 @@ extension TilingEngine {
     /// by drag / border / resize slot detection — a window on any
     /// display resolves to its correct slot. The retile issues
     /// `placedFrames` instead, which is these with a split
-    /// layout's floor residue placed (#934).
+    /// layout's floor residue placed (#934). `recording: false` is
+    /// a what-if read over a state that is not live, as
+    /// `placedFrames(state:recording:)` takes it: the monocle hold
+    /// the layout input records is put back.
     public func calculatedFrames(
-        state: StateCoordinator
+        state: StateCoordinator,
+        recording: Bool = true
     ) -> [WindowID: CGRect] {
-        visibleFrames(state: state, placed: false)
+        guard !recording else {
+            return visibleFrames(state: state, placed: false)
+        }
+        let held = monocleShownMembers
+        defer { monocleShownMembers = held }
+        return visibleFrames(state: state, placed: false)
     }
 }

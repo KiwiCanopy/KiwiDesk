@@ -142,7 +142,7 @@ struct AnnouncedValuePinTests {
         // App Rules ▸ Automatic floating's "Tile instead" (#2173).
         "AppRulesSection+Automatic.swift": 1,
         // Jump to window's Hidden section header (#1875).
-        "JumpPanelView.swift": 1,
+        "JumpPanelView+List.swift": 1,
         // Compare and Copy's title and side cards, and the Sync
         // across Macs group heading in General (#2324).
         "SyncCompareSheet.swift": 1,

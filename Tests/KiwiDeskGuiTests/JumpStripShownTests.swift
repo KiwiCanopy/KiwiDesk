@@ -239,7 +239,7 @@ struct JumpStripShownTests {
         // strip's latch (#3483).
         #expect(
             controller.contains(
-                "letsnapshot=core.jumpSnapshot(on:hubDisplay)"
+                "letsnapshot=core.jumpSnapshot(on:hubArea)"
             )
         )
         #expect(controller.contains("letmodel=JumpModel(snapshot:snapshot,"))
@@ -258,8 +258,9 @@ struct JumpStripShownTests {
         #expect(view.contains("ifmodel.list.stripShown{JumpStripView("))
         // The current window sits in the scrolled list, above the
         // results, and the list's height counts it.
+        let list = try squash("JumpPanelView+List.swift")
         #expect(
-            view.contains(
+            list.contains(
                 "inset:Self.listPadding){VStack(spacing:0)"
                     + "{ifletyours=model.list.yours"
                     + "{JumpYoursLine(entry:yours,"
@@ -267,7 +268,7 @@ struct JumpStripShownTests {
                     + "rows}"
             )
         )
-        #expect(view.contains("rows:model.list.drawnRows"))
+        #expect(list.contains("rows:model.list.drawnRows"))
         #expect(!view.contains("rows:model.list.results.count"))
         let footer = try squash("JumpPanelView+Footer.swift")
         #expect(footer.contains("lastAppChord:model.lastAppChord"))

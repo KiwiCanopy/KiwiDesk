@@ -107,9 +107,10 @@ public enum GestureSeeds {
         GestureKey(.swipe2, step): .family(.space),
         // Clockwise the next layout, counter-clockwise the previous.
         GestureKey(.rotate, pan): .family(.layout),
+        // The two window-state toggles, each undoing itself (#3587).
         GestureKey(.spread, pan): navigation("KiwiDesk.toggle_maximized()"),
         GestureKey(.pinchTogether, pan): navigation(
-            KiwiHubSide.desktops.lua
+            "KiwiDesk.toggle_floating()"
         ),
         GestureKey(.pinchTogether4, pan): navigation(
             KiwiHubSide.windows.lua

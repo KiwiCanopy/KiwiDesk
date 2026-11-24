@@ -121,7 +121,7 @@ struct ShelfHandleStripTests {
         let spec = spec()
         #expect(spec.frame.minX == 300 && spec.frame.width == 400)
         #expect(spec.frame.minY == ShelfHandleSpec.inset)
-        #expect(spec.frame.height == ShelfHandleSpec.depth(of: KiwiShelf()))
+        #expect(spec.frame.height == 3)
         // Its hover band starts at the edge itself, past the inset,
         // and runs the same run `hoverDepth` in (#3360).
         #expect(spec.hoverBand.minY == 0)

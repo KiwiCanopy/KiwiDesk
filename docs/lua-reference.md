@@ -3459,8 +3459,10 @@ kiwishelf.set_highlight_width(3)
 
 ### kiwishelf.set_handle_thickness
 
-**Expects:** points, 2–6 (default `3`); a value is rounded to a
+:::unreleased
+**Expects:** points, 2–6 (default `5`); a value is rounded to a
 whole point and kept within the range.
+:::
 
 **Does:** sets how thick an Auto bar's handle and the Pocket's tab
 draw at the screen edge. The handle stays flush on the edge and
@@ -4889,6 +4891,13 @@ Both take their corners from
 [`border.set_corner_style`](#borderset_corner_style); their look
 is otherwise fixed.
 
+:::unreleased
+Over another screen, or another [area](#set_display_areas) of a
+split screen, whose Space has no tiled window, the drop zone marks
+where the window lands there. A floating Space and a screen
+showing a full-screen app draw none.
+:::
+
 ### drag.set_drop_zone_enabled
 
 **Expects:** `true` or `false` (default `true`).
@@ -5854,8 +5863,13 @@ Out of the box these are bound:
 | `swipe4` | ⌃⌥ | `display` |
 | `rotate` | ⌃⌥ | `layout` |
 | `spread` | ⌃⌥ | Toggle maximized ([`toggle_maximized`](#toggle_maximized)) |
-| `pinch_together` | ⌃⌥ | The Desktop overview |
+| `pinch_together` | ⌃⌥ | Toggle floating ([`toggle_floating`](#toggle_floating)) |
 | `pinch_together4` | ⌃⌥ | The window switcher |
+
+:::unreleased
+⌃⌥ pinch together toggles floating. A pinch row set to another
+action keeps it.
+:::
 
 `hover_move`, the clicks and the side buttons are unbound. In a
 setup the Settings app manages, with Settings ▸ Shortcuts ▸
@@ -8118,6 +8132,17 @@ live glance at the active layer's bindings.
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
 
+:::unreleased
+A list too long for one column above the screen's bottom splits
+into as many columns as the screen holds, up to three, read down
+each column in turn, the earlier columns never shorter, with
+**Unavailable shortcuts** across the whole panel below them while
+a search matches it. A section may go on in the next column
+under its title again. The panel's width and its columns are set
+when the side opens; typing moves rows between the same columns
+and changes only the height. The columns scroll together.
+:::
+
 The panel also lists every bound [gesture](#gesture-actions), once
 each. A gesture whose action has a row is a badge on that row: the
 most specific first — a trackpad gesture before a mouse one, then
@@ -8125,6 +8150,11 @@ the fewest keys, then a swipe before other gestures, then the
 fewest fingers — and the rest behind **+N**, which names them on
 hover. Every other gesture is a row under **Gestures**. Typing a
 gesture's name finds its row and brings that badge to the front.
+
+:::unreleased
+Gestures that run the same action share one row under
+**Gestures**, wearing each badge.
+:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every
@@ -8135,6 +8165,14 @@ app. Typing narrows the list by app name, then by title. While a
 [KiwiVision lens](#kiwivisiondefine_lens) is on, the rows of the
 lens's apps come first and every other app's follow under **Other
 apps**, while you type too. Moving the mouse over a row selects it.
+
+:::unreleased
+On a screen split into areas, KiwiHub opens centred over the area
+under the pointer, and that area is "here" on every side: Move here
+files into the Space it shows, Swap here's "yours" is that Space's
+focused window, and the View side's Layout line acts on that Space.
+An unsplit screen is one area.
+:::
 
 A window in the [pocket](#pocket) is listed after the hidden apps,
 under **Pocket**.
@@ -8192,7 +8230,7 @@ A modifier still held from the shortcut that opened KiwiHub, or
 from a step of `kiwihub.show_last_app`, counts for nothing until
 you let it go: **Return** under the **⌥** of **⌥⇥** jumps.
 
-The `"view"` side is the **view picker**, three lines in one
+The `"view"` side is the **view picker**, up to three lines in one
 panel, the current item on each marked ✓.
 
 - **Layout** — a tile per layout for the Space shown on the screen
@@ -8214,6 +8252,12 @@ panel, the current item on each marked ✓.
   KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
   Lua-owned setup greys it.
 
+:::unreleased
+The **Profile** line, **Save as New Profile…** with it, shows only
+while two or more profiles are saved; **↑** and **↓** then step from
+Layout to KiwiVision.
+:::
+
 Keys on this side:
 
 - **←** and **→**, or moving the mouse over an item, move along a
@@ -8221,7 +8265,7 @@ Keys on this side:
   clamped to a shorter line. A line longer than the panel scrolls
   sideways.
 
-- Typing narrows all three lines, dimming the rest, and selects
+- Typing narrows every line, dimming the rest, and selects
   the first match.
 - **Return** applies the selected item and closes KiwiHub.
   **⌘1** … **⌘9** apply the line's items by position, counted
@@ -8275,6 +8319,19 @@ panel has the keyboard.
   front of their Space and the rest dim.
 - **Escape** steps back: the picked windows, the open Space, the
   typing, then KiwiHub.
+
+:::unreleased
+The overview lays each screen out as a column instead, left to
+right, its Desktops stacked downward; past the panel's width the
+columns scroll sideways, and past its height each column scrolls
+down. **↑** **↓** walk one screen's Desktops, **←** **→** step to
+the neighbouring screen, and **⌘1**–**⌘9** go to that Desktop of
+the selected screen. On a screen split into areas, each Desktop
+lists its Spaces under each area's name, each area marking the
+Space it shows, with **Not in a Space yet** last; clicking a
+Desktop's title goes to the Space shown in the area KiwiHub opened
+over, else in the first area.
+:::
 
 **Tab** reaches it from View, and **⇧Tab** from Windows.
 

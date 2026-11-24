@@ -111,11 +111,23 @@ struct DesktopOverviewMoveTests {
         entry.isUp = true
         core.state.awayWindows[WindowID(7)] = entry
         core.state.rememberedSpaces[WindowID(7)] = .departed("5")
-        let screens = core.desktopOverview(on: DisplayID(1)).screens
+        let screens = core.desktopOverview(on: core.hub(1)).screens
         let listed = screens.flatMap { screen in
             screen.desktops.filter { $0.native == 11 }
                 .flatMap(\.spaces).flatMap(\.windows).map(\.id)
         }
         #expect(listed == [WindowID(7)])
+    }
+}
+
+extension KiwiCore {
+    /// The area a test opens KiwiHub over on display `id`: its
+    /// first area, the whole screen while it is not split (#3572).
+    fileprivate func hub(_ id: UInt32) -> PlacementID {
+        hubArea(DisplayID(id))
+    }
+
+    fileprivate func hubArea(_ display: DisplayID) -> PlacementID {
+        state.workspaces.placementOrWhole(of: display)
     }
 }

@@ -3,19 +3,25 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The key panel's Shortcuts side (#2246): the active layer's
-/// shortcuts, narrowed by the field, scrolling under a capped
-/// height, its cut edges fading, and reporting that height as
-/// `SheetHeightKey`. Its layer name and Edit in Settings… sit in
-/// the panel's footer row.
+/// shortcuts, narrowed by the field, in KiwiHub's column plan
+/// (#3570), scrolling as one under a capped height, its cut edges
+/// fading, and reporting that height as `SheetHeightKey`. Its layer
+/// name and Edit in Settings… sit in the panel's footer row. The key
+/// sequence panel hosts it in one column.
 struct JumpShortcutsView: View {
     let sheet: ShortcutsSheet
     let scroll: SheetScroll
+    /// KiwiHub's plan for the sheet; empty draws one column.
+    var plan = ShortcutsColumnPlan.empty
     /// The tallest the sheet stands (`JumpPanelController.sheetCap`).
     let maxHeight: CGFloat
     /// The sheet's room inside the scroll view: KiwiHub's selection
     /// inset; the key sequence panel's own padding stands instead.
-    var horizontalInset = KeyPanelStyle.selectionInset + 10
-    var verticalInset: CGFloat = 12
+    var horizontalInset = Self.kiwiHubInset
+    var verticalInset = Self.kiwiHubVerticalInset
+    /// KiwiHub's room around the sheet, each side.
+    static let kiwiHubInset = KeyPanelStyle.selectionInset + 10
+    static let kiwiHubVerticalInset: CGFloat = 12
     /// Whether the sheet fades its own cut edges; each host says,
     /// so no sheet fades twice.
     let fades: Bool
@@ -54,7 +60,8 @@ struct JumpShortcutsView: View {
     private var sheetContent: some View {
         ShortcutsSheetView(
             reference: sheet.shown,
-            needle: sheet.needle
+            needle: sheet.needle,
+            columns: plan.columns
         )
         .padding(.horizontal, horizontalInset)
         .frame(maxWidth: .infinity, alignment: .leading)
