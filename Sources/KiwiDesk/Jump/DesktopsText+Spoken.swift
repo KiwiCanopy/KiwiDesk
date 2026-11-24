@@ -5,13 +5,30 @@ import KiwiDeskCore
 /// in macOS full screen named so (#3486).
 extension DesktopsText {
     static func spoken(_ state: DesktopsState) -> String {
-        guard let place = state.place, let line = state.line(place),
-            let desktop = state.desktop(place)
+        guard let place = state.place, let line = state.line(place)
         else { return "" }
         if let id = state.window, let window = state.overview.window(id) {
             return spoken(window, picked: state.carried.contains(id))
         }
-        return spoken(line, at: place.line, on: desktop)
+        return spoken(line, at: place, in: state)
+    }
+
+    /// A line as the side speaks it: in the shared-Desktop grid,
+    /// whose groups are rows, its screen added (#3602).
+    static func spoken(
+        _ line: DesktopOverview.SpaceLine,
+        at place: DesktopsPlace,
+        in state: DesktopsState
+    ) -> String {
+        guard let desktop = state.desktop(place) else { return "" }
+        let spoken = spoken(line, at: place.line, on: desktop)
+        guard state.geometry.grid != nil else { return spoken }
+        return L(
+            "desktop_overview.ax.screen_line",
+            "%1$@, %2$@",
+            spoken,
+            DesktopsSideView.title(state.overview.screens[place.screen])
+        )
     }
 
     static func spoken(

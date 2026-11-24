@@ -64,7 +64,8 @@ struct DesktopsGeometryTests {
         G(
             overview: DesktopOverview(screens: screens, yours: nil),
             width: width,
-            cap: cap
+            cap: cap,
+            gutter: nil
         )
     }
 
@@ -166,7 +167,8 @@ struct DesktopsGeometryTests {
                         Self.screen($0, desktops: 1, spaces: 1)
                     },
                     yours: nil
-                )
+                ),
+                gutter: nil
             )
         }
         #expect(asked(1) == 2 * G.rowInset + G.narrowestColumn)
@@ -180,8 +182,9 @@ struct DesktopsGeometryTests {
         )
         let granted = G(
             overview: overview,
-            width: G.preferredWidth(of: overview),
-            cap: Self.cap
+            width: G.preferredWidth(of: overview, gutter: nil),
+            cap: Self.cap,
+            gutter: nil
         )
         #expect(granted.columns.allSatisfy { $0 == G.narrowestColumn })
     }
@@ -231,7 +234,12 @@ struct DesktopsGeometryTests {
     func keysStepBySlots() throws {
         // 640 pt: six slots on the KiwiHub screen's seven-window line.
         let overview = T.overview()
-        let geometry = G(overview: overview, width: 640, cap: Self.cap)
+        let geometry = G(
+            overview: overview,
+            width: 640,
+            cap: Self.cap,
+            gutter: nil
+        )
         let fresh = DesktopsState(overview: overview, geometry: geometry)
         let place = try #require(fresh.place)
         #expect(fresh.slots(place) == 6)
@@ -251,7 +259,12 @@ struct DesktopsGeometryTests {
         // lands one slot off.
         let narrow = DesktopsState(
             overview: overview,
-            geometry: G(overview: overview, width: 540, cap: Self.cap)
+            geometry: G(
+                overview: overview,
+                width: 540,
+                cap: Self.cap,
+                gutter: nil
+            )
         )
         #expect(narrow.slots(place) == 4)
         var fifth = narrow
@@ -305,12 +318,21 @@ struct DesktopsGeometryTests {
         let model = try read("JumpModel+Desktops.swift")
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")
+        let wiring = [
+            "letgutter=DesktopsGeometry.gutter(of:overview)",
+            "letwidth=room.width(JumpPanelRoom.fit(of:.desktops),",
+            "content:DesktopsGeometry.preferredWidth(",
+            "of:overview,gutter:gutter))",
+            "letgeometry=DesktopsGeometry(",
+            "overview:overview,width:width,cap:sheetCap,",
+            "gutter:gutter)",
+        ].joined()
+        #expect(model.contains(wiring))
+        // The panel's width reads the same geometry's ask (#3602).
+        let sizing = try read("JumpModel+Sizing.swift")
+            .replacingOccurrences(of: " ", with: "")
         #expect(
-            model.contains(
-                "content:DesktopsGeometry.preferredWidth(of:overview))"
-                    + "letgeometry=DesktopsGeometry("
-                    + "overview:overview,width:width,cap:sheetCap)"
-            )
+            sizing.contains("desktops?.geometry.preferred??room.fieldWidth")
         )
         #expect(model.contains("geometry:geometry)"))
     }

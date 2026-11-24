@@ -408,6 +408,7 @@
   "desktop_overview.ax.place": "%1$@，%2$@，視窗：%3$d",
   "desktop_overview.ax.place_last_shown": "%1$@，上次顯示，%2$@，視窗：%3$d",
   "desktop_overview.ax.place_shown": "%1$@，已顯示，%2$@，視窗：%3$d",
+  "desktop_overview.ax.screen_line": "%1$@，%2$@",
   "desktop_overview.ax.window": "%1$@，%2$@",
   "desktop_overview.ax.window_picked": "%1$@，%2$@，已拿起",
   "desktop_overview.card.shown": "已顯示",

@@ -1,12 +1,15 @@
+import CoreGraphics
 import KiwiDeskCore
 
 /// The Desktops side's arrows (#1229, #3570 ruling 4). Each screen
 /// is a column: among places ↑↓ walk its Desktops' lines top to
 /// bottom, across area groups (#3572), and ←→ step to the
 /// neighbouring screen, keeping the Desktop and line where they
-/// can. Inside a Space ←→ walk its windows and ↑↓ take the places'
-/// route, re-entering where a line holds windows (#3169). A fresh
-/// press wraps at an end, a held key stops there (#2897).
+/// can; in the shared-Desktop grid they stay in the Desktop's row
+/// and land on the line nearest the one they left (#3602). Inside
+/// a Space ←→ walk its windows and ↑↓ take the places' route,
+/// re-entering where a line holds windows (#3169). A fresh press
+/// wraps at an end, a held key stops there (#2897).
 extension DesktopsState {
     /// ↑ / ↓ among places.
     mutating func moveLine(_ delta: Int, wrap: Bool) {
@@ -31,13 +34,38 @@ extension DesktopsState {
         else { return }
         let screen = screens[next]
         let desktops = overview.screens[screen].desktops
-        select(
-            clamped(
-                screen: screen,
-                desktop: min(place.desktop, desktops.count - 1),
-                line: place.line
-            )
+        let desktop = min(place.desktop, desktops.count - 1)
+        let line =
+            geometry.grid == nil
+            ? place.line
+            : nearestLine(to: place, on: screen, desktop: desktop)
+        select(clamped(screen: screen, desktop: desktop, line: line))
+    }
+
+    /// The line of `desktop` on `screen` whose top lies nearest the
+    /// top of `place`'s line, both read from their cells' tops; a
+    /// tie goes up.
+    func nearestLine(
+        to place: DesktopsPlace,
+        on screen: Int,
+        desktop: Int
+    ) -> Int {
+        guard let source = self.desktop(place) else { return place.line }
+        let line = geometry.line
+        let from = DesktopsGeometry.lineTop(
+            of: source,
+            at: place.line,
+            line: line
         )
+        let target = overview.screens[screen].desktops[desktop]
+        let distances = target.spaces.indices.map {
+            abs(
+                DesktopsGeometry.lineTop(of: target, at: $0, line: line)
+                    - from
+            )
+        }
+        guard let least = distances.min() else { return 0 }
+        return distances.firstIndex(of: least) ?? 0
     }
 
     /// ← / → inside a Space: the next window as drawn.

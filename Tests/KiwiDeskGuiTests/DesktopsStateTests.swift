@@ -66,7 +66,8 @@ struct DesktopsStateTests {
             geometry: DesktopsGeometry(
                 overview: overview,
                 width: 600,
-                cap: cap
+                cap: cap,
+                gutter: nil
             )
         )
     }

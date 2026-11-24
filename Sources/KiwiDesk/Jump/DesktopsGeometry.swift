@@ -9,8 +9,9 @@ import KiwiDeskCore
 /// width, never narrower than 224 pt, past which the row of screens
 /// scrolls sideways; a line's icon slots follow its column's width.
 /// On a split screen each Desktop counts an area header and its gap
-/// per area (#3572). Pure, so the side and the state read one
-/// answer.
+/// per area (#3572). With shared Desktops on two or more screens
+/// the Desktops are rows instead (`DesktopsGeometry+Grid`, #3602).
+/// Pure, so the side and the state read one answer.
 struct DesktopsGeometry: Equatable {
     static let tallestLine: CGFloat = 36
     static let shortestLine: CGFloat = 30
@@ -54,32 +55,62 @@ struct DesktopsGeometry: Equatable {
     /// The side's height: the tallest column whole up to the cap,
     /// past which the columns scroll down.
     let height: CGFloat
+    /// With shared Desktops on two or more screens, the row grid
+    /// (#3602); nil where each screen is a column of its own.
+    let grid: Grid?
+    /// The width the side asks of the panel (`preferredWidth`).
+    let preferred: CGFloat
 
-    init(overview: DesktopOverview, width: CGFloat, cap: CGFloat) {
+    /// `gutter` is the grid's header column, measured once where the
+    /// side opens (`gutter(of:)`); the grid draws where it is given
+    /// and the overview has rows.
+    init(
+        overview: DesktopOverview,
+        width: CGFloat,
+        cap: CGFloat,
+        gutter: CGFloat?
+    ) {
         let screens = overview.screens
         let budget = cap - Self.chrome
-        let line = Self.lineHeight(screens, budget: budget)
+        let gutter = Self.drawn(gutter, in: overview)
+        let line =
+            gutter == nil
+            ? Self.lineHeight(screens, budget: budget)
+            : Self.gridLineHeight(overview, budget: budget)
         self.line = line
         stacks = screens.map { Self.stack($0, line: line) }
-        let room = width - 2 * Self.rowInset
+        let room =
+            width - 2 * Self.rowInset
+            - (gutter.map { $0 + Self.gutterGap } ?? 0)
         columns = Self.columns(count: screens.count, room: room)
-        height = min(Self.chrome + (stacks.max() ?? 0), cap)
+        grid = gutter.map {
+            Grid(gutter: $0, rows: Self.rows(of: overview, line: line))
+        }
+        let content = grid?.height ?? stacks.max() ?? 0
+        height = min(Self.chrome + content, cap)
+        preferred = Self.preferredWidth(of: overview, gutter: gutter)
     }
 
     /// The width the side asks of the panel (#3570 ruling 4): one
-    /// narrowest column per screen, its dividers and its margins.
-    /// The panel grants it up to its limit, past which the row of
-    /// screens scrolls sideways.
-    static func preferredWidth(of overview: DesktopOverview) -> CGFloat {
+    /// narrowest column per screen, its dividers and its margins,
+    /// and the grid's header column and its gap (#3602). The panel
+    /// grants it up to its limit, past which the row of screens
+    /// scrolls sideways.
+    static func preferredWidth(
+        of overview: DesktopOverview,
+        gutter: CGFloat?
+    ) -> CGFloat {
         let n = CGFloat(max(overview.screens.count, 1))
+        let gutter = drawn(gutter, in: overview)
         return 2 * rowInset + n * narrowestColumn + (n - 1) * divider
+            + (gutter.map { $0 + gutterGap } ?? 0)
     }
 
     /// A Space line's icon: the line height less 8, so never under
     /// the Windows rows' 22 pt at the shortest line.
     var icon: CGFloat { line - 8 }
 
-    /// The height of the column scroll below a screen's header.
+    /// The height of the scroll below the screens' headers.
     var body: CGFloat {
         max(height - Self.chrome, 0)
     }
@@ -142,8 +173,16 @@ struct DesktopsGeometry: Equatable {
         of desktop: DesktopOverview.Desktop,
         line: CGFloat
     ) -> CGFloat {
+        titleHeight + titleGap + cell(of: desktop, line: line)
+    }
+
+    /// A Desktop's lines with, on a split screen, each area's
+    /// header and its gap: a card less its title, and a grid cell.
+    static func cell(
+        of desktop: DesktopOverview.Desktop,
+        line: CGFloat
+    ) -> CGFloat {
         let areas = CGFloat(desktop.areas.count) * (areaHeight + areaGap)
-        return titleHeight + titleGap + areas
-            + CGFloat(desktop.spaces.count) * line
+        return areas + CGFloat(desktop.spaces.count) * line
     }
 }

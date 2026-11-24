@@ -16913,6 +16913,17 @@ selected Desktop's column otherwise. Every other KiwiHub hover keeps the grey li
 hovered window icon's ground included, and the ✓ beside the shown
 Desktop stays in its own ink (#3210).
 
+:::unreleased
+*Amended (#3602, owner with the ui-designer, 2026-11-24):* the
+ring goes round the Desktop's card, which is a column with
+separate Spaces and a row with shared Desktops. The argument is
+the one above: the hover outlines what the click reaches, and on
+shared Desktops a title click switches every screen, so it
+reaches the whole row. The header click still lands in the
+column of the screen or area KiwiHub opened over, and the header
+is no keyboard stop.
+:::
+
 Under *Tint KiwiHub and plates* (#2569) the panel wears the bars'
 look (▸ the shortcuts panel entry), so its marks take the look's
 colours. The selection takes KiwiShelf's highlight, and the lift
@@ -17034,6 +17045,32 @@ marked "here": the starting selection already lands on the shown
 Space of the area KiwiHub opened over, so a caption would say it
 twice; "main" stays, since nothing else names the screen with the
 menu bar.
+:::
+
+:::unreleased
+*Amended* (owner with the ui-designer, 2026-11-24, #3602): with
+"Displays have separate Spaces" off and two or more screens, the
+side draws one row per Desktop instead, the screens still columns
+in physical order. Shared Desktops are one set: every screen shows
+the same Desktop, a title click switches them all, and the bound
+profile is the Desktop's, not a screen's. A title per column said
+"Desktop 2" once per screen and offered a choice per screen that
+does not exist, and columns scrolling on their own put the same
+Desktop at different heights as soon as one screen listed more
+lines than another (an area header, an unfiled line), so the eye
+had to match rows by number. A row header on the left names the
+Desktop once, with its ✓ and profile; it stays horizontal, since
+a rotated label cannot hold a long title ("Рабочий стол 10" runs
+near 100 pt), and its width follows the widest title the locale
+draws, held between 96 and 132 pt. A row stands as tall as its
+tallest cell, so a Desktop's lines start level on every screen,
+and one vertical scroll moves the whole grid under pinned screen
+headers. ← → stay in the row and land on the line nearest the one
+they left, ↑↓ still walk one screen's lines. The ✓ is the row's
+"shown", read by Core for the Desktop, never inferred from one
+column. One screen, or separate Spaces on, keeps the columns
+above: there each screen's Desktops are its own, and a row would
+pair Desktops that share nothing but a number.
 :::
 
 KiwiDesk keeps no Space set per Desktop (state-and-layout.md), so
