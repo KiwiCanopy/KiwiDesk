@@ -73,6 +73,7 @@ struct AreaSizesPopover: View {
         .onChange(of: run?.members.map(\.areas)) {
             typed = []
             drafts = [:]
+            focus = nil
         }
         .onExitCommand(perform: cancel)
         .onDisappear { givingWay = [] }

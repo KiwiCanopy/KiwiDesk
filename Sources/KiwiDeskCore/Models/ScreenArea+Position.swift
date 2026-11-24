@@ -48,7 +48,7 @@ extension ScreenSplit {
     /// Each area's positional default, by id: one word per run it
     /// sits in, outer run first ("Middle", "Top" for the top half of
     /// a T-junction's middle column), structure the GUI words whole
-    /// (#96). Each run names up to three members Left / Middle /
+    /// (#96, #3541). Each run names up to three members Left / Middle /
     /// Right or Top / Middle / Bottom; where a run holds four or
     /// more, or an area sits three runs deep, every area is
     /// numbered in reading order instead, never a mix. Empty while
@@ -107,16 +107,6 @@ extension ScreenSplit {
 }
 
 extension ScreenAreaRun {
-    /// Whether every member is as long as an even split makes it:
-    /// lengths a point apart at most, the longer ones leading.
-    public var isEven: Bool {
-        let all = lengths
-        guard let first = all.first, let last = all.last else {
-            return true
-        }
-        return first - last <= 1 && all == all.sorted(by: >)
-    }
-
     /// Each member's share of the run in whole percent, in reading
     /// order, adding up to 100 (largest remainder): for display
     /// only, since a split stores points.

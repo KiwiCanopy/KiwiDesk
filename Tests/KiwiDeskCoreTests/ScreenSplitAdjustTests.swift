@@ -42,11 +42,11 @@ struct ScreenSplitAdjustTests {
         let split = try three()
         let run = try #require(split.run(holding: 0))
         #expect(run.lengths == [1720, 860, 860])
-        #expect(!run.isEven)
+        #expect(split.evenedOut(holding: 0) != split)
         let even = split.evenedOut(holding: 0)
         let evenRun = try #require(even.run(holding: 0))
         #expect(evenRun.lengths == [1147, 1147, 1146])
-        #expect(evenRun.isEven)
+        #expect(even.evenedOut(holding: 0) == even)
         #expect(whole.run(holding: 0) == nil)
     }
 

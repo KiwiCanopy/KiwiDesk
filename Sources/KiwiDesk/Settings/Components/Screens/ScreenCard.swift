@@ -149,14 +149,33 @@ struct ScreenCard: View {
 
     /// Each divider is handed the STORED cut, which its drag starts
     /// from, and drawn where the drag in flight has it.
-    @ViewBuilder private func dividers(_ stored: ScreenSplit) -> some View {
-        let width = stored.extent.width
-        let height = stored.extent.height
+    @ViewBuilder private func dividers(_ storedSplit: ScreenSplit) -> some View
+    {
+        let width = storedSplit.extent.width
+        let height = storedSplit.extent.height
         let cuts =
-            ScreenAreaCuts.cuts(of: stored.areas, width: width, height: height)
-            ?? []
-        let factor = scale(stored)
-        ForEach(Array(cuts.enumerated()), id: \.offset) { index, cut in
+            ScreenAreaCuts.cuts(
+                of: storedSplit.areas,
+                width: width,
+                height: height
+            ) ?? []
+        let factor = scale(storedSplit)
+        // A drag in flight re-spans the dividers inside the box it
+        // resizes; match them by axis and place, never by index.
+        let moving =
+            drag.flatMap {
+                ScreenAreaCuts.cuts(
+                    of: $0.split.areas,
+                    width: width,
+                    height: height
+                )
+            } ?? []
+        ForEach(Array(cuts.enumerated()), id: \.offset) { index, stored in
+            let cut =
+                moving.first {
+                    $0.axis == stored.axis && $0.position == stored.position
+                        && $0.start < stored.end && stored.start < $0.end
+                } ?? stored
             let side = cut.axis == .sideBySide
             let dragged = drag?.cut == index ? drag?.position : nil
             let position = dragged ?? cut.position
@@ -169,9 +188,9 @@ struct ScreenCard: View {
             ScreenAreaDivider(
                 model: model,
                 display: display,
-                split: stored,
+                split: storedSplit,
                 index: index,
-                cut: cut,
+                cut: stored,
                 scale: side ? factor.width : factor.height,
                 drag: $drag
             )
