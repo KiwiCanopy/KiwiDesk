@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One screen row in a bar's Per screen or area drawer (#1948), or one
-/// area's on a split screen (#3517 ruling 30).
+/// One screen in the Screen or area picker (#1948, #3612), or one
+/// area of a split screen (#3517 ruling 30).
 struct ScreenEdgeRow: Identifiable, Equatable {
     /// The screen's fingerprint (`Name:WxH`), which identical
     /// models share — so they share one row — or an area's
@@ -12,6 +12,11 @@ struct ScreenEdgeRow: Identifiable, Equatable {
     /// How many of the profile's screens carry this fingerprint.
     let count: Int
     let present: Bool
+    /// The screen's half of `name`, which rows sort by.
+    let screen: String
+    /// The area's place in its screen's reading order; a leftover
+    /// entry's sorts last.
+    let place: Int
 }
 
 /// The Per screen rows under each bar's edge (#1948): which
@@ -60,9 +65,9 @@ extension SettingsModel {
         )
     }
 
-    /// A bar's screen rows, one per fingerprint: the profile's
-    /// screens and any screen holding an edge of its own,
-    /// connected ones first, then the rest, each A–Z by name.
+    /// A bar's screen rows: the profile's screens, one per area on a
+    /// split screen, and any screen or area holding a value of its
+    /// own, in `ordered`'s order.
     func screenEdgeRows<Bar: ScreenEdged>(
         _ bar: KeyPath<TilingSettings, Bar>,
         show: ScreenShowBar? = nil
@@ -94,23 +99,67 @@ extension SettingsModel {
         {
             keyed[key] = max(keyed[key] ?? 0, 1)
         }
-        return keyed.map { key, count in
-            let area = ScreenAreaKey(parsing: key)
-            return ScreenEdgeRow(
-                id: key,
-                name: perScreenName(key: key),
-                count: count,
-                present: connected.contains(area.fingerprint)
-            )
-        }
-        .sorted { a, b in
+        return Self.ordered(
+            keyed.map { key, count in
+                let area = ScreenAreaKey(parsing: key)
+                let fingerprint = area.fingerprint
+                return ScreenEdgeRow(
+                    id: key,
+                    name: perScreenName(key: key),
+                    count: count,
+                    present: connected.contains(fingerprint),
+                    screen: perScreenName(key: fingerprint),
+                    place: areaKeys(of: fingerprint).firstIndex(of: key)
+                        ?? Int.max
+                )
+            }
+        )
+    }
+
+    /// Connected screens first, then the rest, screens A–Z by name
+    /// and a split screen's areas in reading order (#3612).
+    static func ordered(_ rows: [ScreenEdgeRow]) -> [ScreenEdgeRow] {
+        rows.sorted { a, b in
             if a.present != b.present { return a.present }
-            switch a.name.localizedStandardCompare(b.name) {
+            switch a.screen.localizedStandardCompare(b.screen) {
             case .orderedAscending: return true
             case .orderedDescending: return false
-            case .orderedSame: return a.id < b.id
+            case .orderedSame:
+                return a.place != b.place ? a.place < b.place : a.id < b.id
             }
         }
+    }
+
+    /// Every screen or area the Screen or area picker lists
+    /// (#3612): each bar's rows, once.
+    var screenScopes: [ScreenEdgeRow] {
+        var rows: [String: ScreenEdgeRow] = [:]
+        for row in screenEdgeRows(\.spaceBarStyle, show: .space)
+            + screenEdgeRows(\.appBarStyle, show: .app)
+            + screenEdgeRows(\.kiwishelf.pocketEdges)
+        {
+            rows[row.id] = rows[row.id] ?? row
+        }
+        return Self.ordered(Array(rows.values))
+    }
+
+    /// Whether the picker has screens or areas to tell apart: any
+    /// bar's rows are offered (#2677).
+    var offersScreenScopes: Bool {
+        offersScreenEdges(\.spaceBarStyle, show: .space)
+            || offersScreenEdges(\.appBarStyle, show: .app)
+            || offersScreenEdges(\.kiwishelf.pocketEdges)
+    }
+
+    /// Whether `key` holds a value of its own for any bar: an edge,
+    /// or a Show.
+    func hasOwnSettings(_ key: String) -> Bool {
+        let settings = config.settings
+        return settings.spaceBarStyle.edgeOverride[key] != nil
+            || settings.spaceBarStyle.visibilityOverride[key] != nil
+            || settings.appBarStyle.edgeOverride[key] != nil
+            || settings.appBarStyle.visibilityOverride[key] != nil
+            || settings.kiwishelf.pocketEdges.edgeOverride[key] != nil
     }
 
     /// One screen's picker: the edge that screen gets; a pick of

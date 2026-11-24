@@ -106,9 +106,8 @@ struct BarVisibilityMasterTests {
     func placementOrder() {
         #expect(BarsRowOrder.kiwishelfPlacement == [.kiwishelf(.alignment)])
         #expect(
-            BarsRowOrder.kiwishelfEach.suffix(3) == [
-                .kiwishelf(.pocketEdge), .kiwishelf(.pocketScreenEdge),
-                .kiwishelf(.pocketPosition),
+            BarsRowOrder.kiwishelfEach.suffix(2) == [
+                .kiwishelf(.pocketEdge), .kiwishelf(.pocketPosition),
             ]
         )
         #expect(

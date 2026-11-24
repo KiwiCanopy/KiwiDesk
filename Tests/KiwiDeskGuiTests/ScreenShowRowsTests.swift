@@ -6,7 +6,8 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// KiwiShelf ▸ Each bar ▸ Per screen ▸ Show (#3517 rulings 30, 32):
+/// KiwiShelf ▸ Each bar ▸ a picked area's Show (#3517 rulings 30,
+/// 32; #3612):
 /// a split screen takes a row per area, a one-screen profile with a
 /// split screen still offers the rows, each row's Show menu writes
 /// that area's own value, and a bar-level Show pick clears them.
@@ -124,17 +125,17 @@ struct ScreenShowRowsTests {
         #expect(model.config.settings.appBarStyle.visibilityOverride.isEmpty)
     }
 
-    @Test("the drawers mount the Show menu for both bars")
+    @Test("an area picked edits both bars' Show")
     func drawersAreWired() throws {
         let source = try SourceScan.strippedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(
                     "Sources/KiwiDesk/Settings/Components/Bars/"
-                        + "KiwiShelfCard+Edge.swift"
+                        + "KiwiShelfCard+Each.swift"
                 )
         )
-        #expect(source.contains("show: .space"))
-        #expect(source.contains("show: .app"))
+        #expect(source.contains("areaShow(.space, on: key"))
+        #expect(source.contains("areaShow(.app, on: key"))
         let rows = try SourceScan.strippedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(

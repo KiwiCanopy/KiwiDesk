@@ -3691,10 +3691,10 @@ a bar's are; a call without a screen sets every screen and clears
 their own edges, and a look leaves each screen's own untouched. The
 edges are stored per profile under `kiwishelf.pocket_edge_override`,
 keyed by fingerprint. Settings ▸ Bars & Pocket ▸ KiwiShelf writes them
-as the Pocket's **Position** in **Each bar and Pocket**, every screen
-at once, and as its **Per screen or area** rows, one screen or area
-each; the card's own **Position** sets the pocket's edge with both
-bars'.
+as the Pocket's **Position** in **Each bar and Pocket**: under **All
+screens** for every screen at once, and for one screen or area once
+the **Screen or area** picker picks it; the card's own **Position**
+sets the pocket's edge with both bars'.
 
 ```lua
 kiwishelf.set_pocket_edge("left", "LG HDR 4K:3840x2160")
@@ -4156,8 +4156,9 @@ that has an App Bar; the values mean what
 [`space_bar.set_visibility`](#space_barset_visibility) says. The other
 screens keep each layout's value. The values are stored per profile
 under `app_bar.visibility_override`, keyed by fingerprint. Settings ▸
-Bars & Pocket ▸ KiwiShelf writes them in the App Bar's **Per screen
-or area** rows in **Each bar and Pocket**.
+Bars & Pocket ▸ KiwiShelf writes them as the App Bar's **Show** in
+**Each bar and Pocket** once its **Screen or area** picker picks a
+screen or area.
 
 **Example:**
 
@@ -4479,8 +4480,9 @@ that screen's alone. Naming the bar's own value returns a screen to
 it; a call without a screen sets every screen and clears their own
 values. The values are stored per profile under
 `space_bar.visibility_override`, keyed by fingerprint. Settings ▸
-Bars & Pocket ▸ KiwiShelf writes them in the Space Bar's **Per
-screen or area** rows in **Each bar and Pocket**.
+Bars & Pocket ▸ KiwiShelf writes them as the Space Bar's **Show** in
+**Each bar and Pocket** once its **Screen or area** picker picks a
+screen or area.
 
 ```lua
 space_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")

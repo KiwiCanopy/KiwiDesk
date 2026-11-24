@@ -7,29 +7,30 @@ enum BarsRowOrder {
         .kiwishelf(.edge),
     ]
 
-    /// KiwiShelf card, behind Each bar and Pocket, by bar (#3612):
-    /// each bar's Show, its Position and its Per screen or area
-    /// drawer; the pocket's place along its edge closes the list
-    /// (owner, 2026-11-18, #3445).
+    /// KiwiShelf card, behind Each bar and Pocket (#3612): the
+    /// per-screen values, which the Screen or area picker heading
+    /// the drawer edits, then each bar's Show and Position, by bar;
+    /// the pocket's place along its edge closes the list (owner,
+    /// 2026-11-18, #3445).
     static let kiwishelfEach: [SettingKey] = [
-        .spaceBar(.spaceBarVisibility),
-        .kiwishelf(.spaceBarEdge),
         .kiwishelf(.spaceBarScreenEdge),
         .kiwishelf(.spaceBarScreenVisibility),
+        .kiwishelf(.appBarScreenEdge),
+        .kiwishelf(.appBarScreenVisibility),
+        .kiwishelf(.pocketScreenEdge),
+        .spaceBar(.spaceBarVisibility),
+        .kiwishelf(.spaceBarEdge),
         .layoutAppBar(.monocleAppBarVisibility),
         .layoutAppBar(.scrollingAppBarVisibility),
         .kiwishelf(.appBarEdge),
-        .kiwishelf(.appBarScreenEdge),
-        .kiwishelf(.appBarScreenVisibility),
         .kiwishelf(.pocketVisibility),
         .kiwishelf(.pocketDragReveal),
         .kiwishelf(.pocketEdge),
-        .kiwishelf(.pocketScreenEdge),
         .kiwishelf(.pocketPosition),
     ]
 
     /// KiwiShelf card, under its "When a bar is out of view"
-    /// heading (#3612): the Space cue, the handle's thickness
+    /// heading (#3612): the menu bar icon, the handle's thickness
     /// (#3451) and the reveal (#761, owner ruling 2026-10-21).
     static let kiwishelfOutOfView: [SettingKey] = [
         .kiwishelf(.menuBarIcon),

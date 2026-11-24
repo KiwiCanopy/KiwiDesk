@@ -176,6 +176,11 @@ struct BarEdgeWriteCensusTests {
             "order and minimum grey only where no screen fuses "
                 + "the bars, over `screenVariants` (#1948)"
         ),
+        "KiwiShelfCard+Each.swift": (
+            2,
+            "Each bar and Pocket holds open while the bars' own "
+                + "edges differ, a screen's left to its summary (#3612)"
+        ),
         "ColorsAndGlassGates.swift": (
             1,
             "the front-app colour greys only where no screen "

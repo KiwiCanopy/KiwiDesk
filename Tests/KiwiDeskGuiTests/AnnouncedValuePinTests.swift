@@ -173,7 +173,7 @@ struct AnnouncedValuePinTests {
         "SimpleMacChecklist.swift": 1,
         // Each bar's name over its rows in Each bar and Pocket
         // (#3612), one site.
-        "KiwiShelfCard+Edge.swift": 1,
+        "KiwiShelfCard+Each.swift": 1,
     ]
 
     @Test("title components are rotor headings")

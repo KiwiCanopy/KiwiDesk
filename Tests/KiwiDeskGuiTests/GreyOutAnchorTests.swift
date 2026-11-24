@@ -102,11 +102,18 @@ struct GreyOutAnchorTests {
             "reasonCaption(for: key)",
             1
         ),
-        // The Per screen drawer on one screen (#2677): its rows
-        // grey, its `?` beside the live label.
+        // The Screen or area picker on one screen (#2677, #3612):
+        // its pop-up greys, its `?` on the live label.
         (
-            "ScreenEdgesDrawer.swift",
-            "explanation: Self.oneScreenHelp",
+            "KiwiShelfCard+Each.swift",
+            "help: offered ? Self.scopeHelp : Self.oneScreenHelp",
+            1
+        ),
+        // A Pocket row greyed while an area is picked (#3612): its
+        // `?` beside the greyed rows, outside the grey.
+        (
+            "KiwiShelfCard+Each.swift",
+            "HelpButton(explanation: Self.everyScreenHelp)",
             1
         ),
     ]

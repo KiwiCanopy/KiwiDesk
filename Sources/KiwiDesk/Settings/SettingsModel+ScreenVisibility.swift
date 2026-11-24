@@ -126,35 +126,38 @@ extension SettingsModel {
         return [(nil, perLayout)] + values
     }
 
-    /// A Per screen or area row's name (#3612): a connected screen's
-    /// or area's as Settings ▸ Screens says it (`areaName(_:on:)`);
-    /// a twin's or a disconnected one's through `perScreenName`.
+    /// A screen's or area's name in the Screen or area picker
+    /// (#3612): as Settings ▸ Screens says it (`areaName(_:on:)`)
+    /// where one connected screen carries it, else through
+    /// `perScreenName(screen:key:splits:area:)`.
     func perScreenName(key: String) -> String {
         let area = ScreenAreaKey(parsing: key)
         let split =
             areaKeys(of: area.fingerprint).count > 1 || area.areaID != 0
         let found = displays.filter { $0.fingerprint == area.fingerprint }
-        if found.count == 1, let display = found.first {
-            if !split { return areaName(nil, on: display) }
-            if areaLabel(area.areaID, on: display) != nil {
-                return areaName(area.areaID, on: display)
-            }
+        if found.count == 1, let display = found.first,
+            !split || areaLabel(area.areaID, on: display) != nil
+        {
+            return areaName(split ? area.areaID : nil, on: display)
         }
         // Twins share their fingerprint's split, so either's words.
-        let label = found.first.flatMap {
-            split ? areaLabel(area.areaID, on: $0) : nil
-        }
+        let label =
+            split
+            ? found.first.flatMap { areaLabel(area.areaID, on: $0) } : nil
         return Self.perScreenName(
-            screen: Display.fingerprintParts(area.fingerprint).name,
+            screen: screenWords { $0.fingerprint == area.fingerprint }
+                ?? Display.fingerprintParts(area.fingerprint).name,
             key: key,
             splits: config.settings.displayAreas,
             area: label
         )
     }
 
-    /// A Per screen row's name where no one connected screen words
-    /// it, and its diff row's: `screen`, and on a split screen `area`,
-    /// else the area's stored name, else its number in reading order.
+    /// A screen's or area's name where no one connected screen words
+    /// it, and its diff row's: `screen`, and on a split screen
+    /// `area`, else the area's stored name, else its position in the
+    /// stored split (`ScreenSplit.positions`), else its number in
+    /// reading order.
     static func perScreenName(
         screen: String,
         key: String,
@@ -164,12 +167,15 @@ extension SettingsModel {
         let area = ScreenAreaKey(parsing: key)
         let keys = ScreenSplit.areaKeys(of: area.fingerprint, in: splits)
         guard keys.count > 1 || area.areaID != 0 else { return screen }
-        let stored = splits[area.fingerprint]?.areas
-            .first { $0.id == area.areaID }?.name
+        let split = splits[area.fingerprint]
+        let stored = split?.areas.first { $0.id == area.areaID }?.name
+        let position = split?.positions[area.areaID].map {
+            ScreenAreaWords.position($0)
+        }
         let place = keys.firstIndex(of: key) ?? area.areaID
         return ScreenAreaWords.composed(
             screen: screen,
-            area: label ?? stored
+            area: label ?? stored ?? position
                 ?? ScreenAreaWords.position(.numbered(place + 1))
         )
     }

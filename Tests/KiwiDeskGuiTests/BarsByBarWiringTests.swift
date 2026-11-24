@@ -3,12 +3,14 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Settings ▸ Bars & Pocket grouped by bar (#3612, owner ruling
-/// 2026-11-24): one Each bar and Pocket drawer whose spelled-out
-/// rows follow `BarsRowOrder.kiwishelfEach`, each Per screen or area
-/// row stacking a segmented Show over its Position, and the rows
+/// Settings ▸ Bars & Pocket grouped by bar (#3612, owner rulings
+/// 2026-11-24): one Each bar and Pocket drawer, a Screen or area
+/// picker heading its bar blocks, its spelled-out rows following
+/// `BarsRowOrder.kiwishelfEach`, a picked area's rows editing that
+/// area while the Pocket's every-screen rows grey, and the rows
 /// after the container under one heading. Source scans, off the
-/// main actor.
+/// main actor. The per-screen needles are the picker's anchors,
+/// read in the order they are chained.
 @Suite("Bars by bar wiring (#3612)")
 struct BarsByBarWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -53,17 +55,23 @@ struct BarsByBarWiringTests {
 
     @Test("the drawer draws its rows in the census order, by bar")
     func drawerFollowsTheOrder() throws {
-        let edge = try squashed("KiwiShelfCard+Edge.swift")
+        let each = try squashed("KiwiShelfCard+Each.swift")
         let start = try #require(
-            edge.range(of: "SettingsCatalog.bars.kiwishelfEach,")
+            each.range(of: "SettingsCatalog.bars.kiwishelfEach,")
         )
         let end = try #require(
-            edge.range(
+            each.range(
                 of: "privatefuncbarGroup",
-                range: start.upperBound..<edge.endIndex
+                range: start.upperBound..<each.endIndex
             )
         )
-        let drawer = edge[start.upperBound..<end.lowerBound]
+        let drawer = each[start.upperBound..<end.lowerBound]
+        // The blocks draw in the order the drawer calls them.
+        #expect(
+            drawer.contains(
+                "scopeRows(own)spaceBarBlockappBarBlockpocketBlock}"
+            )
+        )
         var cursor = drawer.startIndex
         for key in BarsRowOrder.kiwishelfEach {
             let text = try #require(needle(key), "\(key.id)")
@@ -77,22 +85,75 @@ struct BarsByBarWiringTests {
         #expect(drawer.components(separatedBy: "barGroup(").count - 1 == 3)
     }
 
-    @Test("an area row stacks a segmented Show over its Position")
-    func areaRowsStack() throws {
-        let drawer = try squashed("ScreenEdgesDrawer.swift")
+    @Test("a picked area's rows edit it; the Pocket's others grey")
+    func areaRowsEditTheArea() throws {
+        let each = try squashed("KiwiShelfCard+Each.swift")
+        for (show, edged, block) in [
+            ("space", "spaceBarStyle", "spaceBar"),
+            ("app", "appBarStyle", "appBar"),
+        ] {
+            #expect(
+                each.contains(
+                    "ifletkey=activeScope{"
+                        + "areaShow(.\(show),on:key,bar:.\(block))"
+                        + "areaEdge(\\.\(edged),on:key,bar:.\(block))"
+                        + "}else{"
+                )
+            )
+        }
+        for row in [
+            "showRow(.kiwishelf(.pocketVisibility))",
+            "showRow(.kiwishelf(.pocketDragReveal))",
+            "pocketPositionRows",
+        ] {
+            #expect(each.contains("everyScreen(scoped){\(row)}"))
+        }
         #expect(
-            drawer.contains(
-                "ifletshow{showStrip(show,row:row,spoken:spoken)}"
-                    + "labelled(position){SegmentedPicker("
+            each.contains(
+                "ifscoped{HStack(alignment:.top,spacing:6){"
+                    + "VStack(alignment:.leading,spacing:8){row()}"
+                    + ".modifier(GreyOut(active:true,"
+                    + "help:Self.everyScreenHelp))"
+                    + "HelpButton(explanation:Self.everyScreenHelp)}"
             )
         )
-        #expect(!drawer.contains("pickerStyle(.menu)"))
+        // A pick the list no longer holds reads as All screens.
         #expect(
-            drawer.contains(
-                "SegmentedPicker(spokenLabel:Self.qualified(spoken,label),"
-                    + "selection:model.screenShowBinding(show,on:row.id),"
+            each.contains(
+                "guardletscope,model.offersScreenScopes,"
+                    + "model.screenScopes.contains(where:{$0.id==scope})"
+                    + "else{returnnil}"
             )
         )
+    }
+
+    @Test("the picker greys on one screen and anchors every hit")
+    func pickerIsWired() throws {
+        let each = try squashed("KiwiShelfCard+Each.swift")
+        #expect(
+            each.contains(
+                "help:offered?Self.scopeHelp:Self.oneScreenHelp"
+            )
+        )
+        #expect(each.contains("}.modifier(GreyOut(active:!offered))}"))
+        #expect(each.contains("letoffered=model.offersScreenScopes"))
+        for child in [
+            "kiwishelfSpaceBarScreenEdges", "kiwishelfSpaceBarScreenShows",
+            "kiwishelfAppBarScreenEdges", "kiwishelfAppBarScreenShows",
+            "kiwishelfPocketScreenEdges", "screenOrArea",
+        ] {
+            #expect(
+                each.contains(
+                    ".searchAnchored(SettingsCatalog.bars.kiwishelfEach"
+                        + ".children.\(child))"
+                )
+            )
+        }
+        // The caption under All screens, and the shut summary.
+        #expect(
+            each.contains("ifactiveScope==nil,!own.isEmpty{note(")
+        )
+        #expect(each.contains("summary:own.isEmpty?nil:L("))
     }
 
     @Test("the rows after the container sit under one heading")

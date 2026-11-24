@@ -63,6 +63,7 @@ extension KiwiShelfCard {
         case .spaceBar(.spaceBarVisibility):
             visibilityRow(
                 L("kiwishelf.show.label", "Show"),
+                .spaceBar,
                 model.barShowBinding(.spaceBar),
                 help: model.screenShowsHelp(.space)
             )
@@ -77,6 +78,7 @@ extension KiwiShelfCard {
             )
             visibilityRow(
                 Self.showIn(.monocle),
+                .appBar,
                 model.barShowBinding(.appBar(.monocle)),
                 help: model.screenShowsHelp(.app)
             )
@@ -93,6 +95,7 @@ extension KiwiShelfCard {
         case .layoutAppBar(.scrollingAppBarVisibility):
             visibilityRow(
                 Self.showIn(.scrolling),
+                .appBar,
                 model.barShowBinding(.appBar(.scrolling)),
                 help: model.screenShowsHelp(.app)
             )
@@ -104,6 +107,7 @@ extension KiwiShelfCard {
         case .kiwishelf(.pocketVisibility):
             visibilityRow(
                 L("kiwishelf.show.label", "Show"),
+                .pocket,
                 $model.config.settings.kiwishelf.pocketVisibility,
                 options: AppBarOptions.pocketVisibility
             )
@@ -218,15 +222,18 @@ extension KiwiShelfCard {
     }
 
     /// One bar's Always · Auto · Hidden strip, on the shared label
-    /// axis like every labelled picker (#2439).
+    /// axis like every labelled picker (#2439), spoken with its
+    /// block's name (#3612).
     private func visibilityRow(
         _ title: String,
+        _ block: ShelfBlock,
         _ selection: Binding<ShelfVisibility>,
         options: [(ShelfVisibility, String)] = AppBarOptions.visibility,
         help: String? = nil
     ) -> some View {
         SegmentedPicker(
             title,
+            spokenLabel: block.spoken(title),
             selection: selection,
             options: options.map { ($0.1, $0.0) },
             help: help

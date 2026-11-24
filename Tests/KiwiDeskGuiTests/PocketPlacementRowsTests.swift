@@ -3,9 +3,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Pocket's rows on KiwiShelf's card (#3401): its edge, its
-/// screens and its position sit in Position's drawer, the edge on
-/// the doors a bar's take and the position under them (#3445), and
+/// The Pocket's rows on KiwiShelf's card (#3401): its edge and its
+/// position close the Pocket's block in Each bar and Pocket
+/// (#3612), the edge on the doors a bar's take — a picked area's
+/// through `areaEdge` — and the position under them (#3445), and
 /// the Pocket position row shows its rule under itself while
 /// the pocket shares a bar's edge, in its `?` otherwise. Source
 /// needles, whitespace stripped; off the main actor, two file
@@ -37,12 +38,13 @@ struct PocketPlacementRowsTests {
     @Test("the drawer draws the Pocket's edge, screens and position")
     func drawerHoldsThePocket() throws {
         let edge = try source("KiwiShelfCard+Edge.swift")
-        let drawer = span(edge, from: "varedgeRows", to: "varspaceBarEdgeRow")
-        #expect(drawer.contains("pocketEdgeRow"))
-        #expect(drawer.contains("bar:\\.kiwishelf.pocketEdges,"))
+        let each = try source("KiwiShelfCard+Each.swift")
+        let block = span(each, from: "varpocketBlock", to: "privatefunc")
         #expect(
-            drawer.contains(
-                ".kiwishelfPocketScreenEdges)pocketPositionRows}"
+            block.contains(
+                "areaEdge(\\.kiwishelf.pocketEdges,on:key,bar:.pocket)"
+                    + "}else{pocketEdgeRow}"
+                    + "everyScreen(scoped){pocketPositionRows}"
             )
         )
         let row = span(

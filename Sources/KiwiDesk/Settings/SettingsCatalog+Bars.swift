@@ -171,10 +171,13 @@ struct SpaceBarTuningControls: Sendable {
 }
 
 /// KiwiShelf ▸ Each bar and Pocket rows, grouped by bar (#3612),
-/// in `BarsRowOrder.kiwishelfEach`' order: each bar's Show, its
-/// Position and its Per screen or area drawer, whose two children
-/// anchor one drawer.
+/// in `BarsRowOrder.kiwishelfEach`' order; every per-screen child
+/// anchors the Screen or area picker.
 struct KiwiShelfEachControls: Sendable {
+    let screenOrArea = SettingsControl(
+        "kiwishelf.scope.label",
+        "Screen or area"
+    )
     let spaceBarShow = SettingsControl(
         "kiwishelf.show.space_bar",
         "Space Bar"

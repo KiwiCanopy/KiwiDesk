@@ -4,7 +4,8 @@ import SwiftUI
 struct SegmentedPicker<Value: Hashable>: View {
     private let label: String?
     /// A name for VoiceOver alone, where the row's own sentence
-    /// already names the control and a drawn label would crowd it.
+    /// already names the control and a drawn label would crowd it;
+    /// beside a drawn label it replaces that label's name.
     private let spokenLabel: String?
     /// What VoiceOver reads for the selection, where the option's
     /// title alone would not say it — or nothing is selected.
@@ -98,7 +99,7 @@ struct SegmentedPicker<Value: Hashable>: View {
     }
 
     @ViewBuilder private var labeledTrack: some View {
-        if let name = label ?? spokenLabel {
+        if let name = spokenLabel ?? label {
             track.accessibilityLabel(name)
         } else {
             track

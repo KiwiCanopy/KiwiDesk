@@ -2574,7 +2574,12 @@ keep macOS's name. A surface that holds only a stored name or
 fingerprint words it through `SettingsModel.screenWords(where:)`,
 which names a screen only where exactly one connected screen
 matches. `TwinScreenWordsTests` and `JumpRowScreenTests` hold the
-surfaces this was written over; a new surface is review's.
+surfaces this was written over; a new surface is review's. **Copy
+that names a screen's area takes `SettingsModel.areaName(_:on:)`**,
+and a stored area key no one connected screen words takes
+`SettingsModel.perScreenName(screen:key:splits:area:)` — its stored
+name, else its stored split's position — never "Area n" of its own
+(#3612, `PerScreenAreaNameTests`).
 
 ## SwiftUI traps
 

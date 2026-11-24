@@ -58,7 +58,7 @@ struct BarsGateWiringTests {
             ],
             // Each bar and Pocket hangs under Position unruled
             // (#761, #3612).
-            "Components/Bars/KiwiShelfCard+Edge.swift": [
+            "Components/Bars/KiwiShelfCard+Each.swift": [
                 "SettingsCatalog.bars.kiwishelfEach,"
                     + "chrome:.attached,"
             ],

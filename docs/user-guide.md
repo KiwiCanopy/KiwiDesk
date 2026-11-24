@@ -627,8 +627,8 @@ takes any value from 20 up.
 The App Bar renders only in **Monocle** and **Scrolling**, and
 its card has no on/off row.
 
-The KiwiShelf card's **App Bar in Monocle** and **App Bar in
-Scrolling** switches are its visibility.
+Its visibility is **Show in Monocle** and **Show in Scrolling**
+under the App Bar in the KiwiShelf card's **Each bar and Pocket**.
 
 Drag an item to reorder the windows.
 

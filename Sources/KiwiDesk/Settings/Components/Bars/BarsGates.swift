@@ -117,28 +117,28 @@ enum BarsGateHelp {
     }
 
     /// The Show master's `?` while a screen or area shows a bar its
-    /// own way (#3517 ruling 32), pointing into Each bar (#3612).
+    /// own way (#3517 ruling 32), pointing at the picker (#3612).
     static var visibilityDiffersPerScreen: String {
         L(
             "kiwishelf.show.differ_per_screen.help",
-            "Some screens or areas show a bar their own way — see "
-                + "\u{201C}%1$@\u{201D} under each bar in "
-                + "\u{201C}%2$@\u{201D}. Choosing here sets every bar "
-                + "and the Pocket on every screen.",
-            L("kiwishelf.edge.per_screen.space_bar", "Per screen or area"),
+            "Some screens or areas show a bar their own way — pick one "
+                + "under \u{201C}%1$@\u{201D} in \u{201C}%2$@\u{201D} "
+                + "to see it. Choosing here sets every bar and the "
+                + "Pocket on every screen.",
+            L("kiwishelf.scope.label", "Screen or area"),
             L("kiwishelf.show.each_bar", "Each bar and Pocket")
         )
     }
 
     /// A bar's own Show row's `?` while a screen or area shows that
-    /// bar its own way (#3517 ruling 32): its drawer sits below.
+    /// bar its own way (#3517 ruling 32).
     static var screenShowsDiffer: String {
         L(
             "kiwishelf.show.screens_differ.help",
-            "Some screens or areas show this bar their own way — see "
-                + "\u{201C}%1$@\u{201D} below. Picking here sets it "
-                + "on every screen.",
-            L("kiwishelf.edge.per_screen.space_bar", "Per screen or area")
+            "Some screens or areas show this bar their own way — pick "
+                + "one under \u{201C}%1$@\u{201D} above to see it. "
+                + "Picking here sets it on every screen.",
+            L("kiwishelf.scope.label", "Screen or area")
         )
     }
 
@@ -167,23 +167,16 @@ enum BarsGateHelp {
         )
     }
 
-    /// A bar row's `?` while its screens differ (#1948), naming
-    /// that bar's own Per screen drawer.
-    static func screensDiffer(appBar: Bool) -> String {
+    /// A bar row's `?` while its screens or areas differ (#1948),
+    /// pointing at the picker (#3612).
+    static var screensDiffer: String {
         L(
             "kiwishelf.edge.screens_differ.help",
-            "Your screens put this bar on different edges — "
-                + "see \u{201C}%1$@\u{201D} below. Picking an edge "
-                + "here puts it there on every screen.",
-            appBar
-                ? L(
-                    "kiwishelf.edge.per_screen.app_bar",
-                    "Per screen or area"
-                )
-                : L(
-                    "kiwishelf.edge.per_screen.space_bar",
-                    "Per screen or area"
-                )
+            "Your screens or areas put this bar on different edges — "
+                + "pick one under \u{201C}%1$@\u{201D} above to see "
+                + "it. Picking an edge here puts it there on every "
+                + "screen.",
+            L("kiwishelf.scope.label", "Screen or area")
         )
     }
 
@@ -191,10 +184,11 @@ enum BarsGateHelp {
     static var pocketScreensDiffer: String {
         L(
             "kiwishelf.edge.pocket.screens_differ.help",
-            "Your screens put the Pocket on different edges — "
-                + "see \u{201C}%1$@\u{201D} below. Picking an edge "
-                + "here puts it there on every screen.",
-            L("kiwishelf.edge.per_screen.pocket", "Per screen or area")
+            "Your screens or areas put the Pocket on different edges "
+                + "— pick one under \u{201C}%1$@\u{201D} above to see "
+                + "it. Picking an edge here puts it there on every "
+                + "screen.",
+            L("kiwishelf.scope.label", "Screen or area")
         )
     }
 

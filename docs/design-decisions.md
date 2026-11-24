@@ -21362,9 +21362,9 @@ Show, in Settings, and the screen-less `space_bar.set_visibility`
 and `<layout>.set_app_bar_visibility` in Lua — clears that bar's
 entries, as a pick of a bar's edge writes every level below it, so
 the master and those rows read as differing, with a `?` naming the
-Per screen rows, while an entry stands. Settings writes the entries
-in the same Per screen rows as the edge — a Show menu beside each
-edge picker, a row per area on a split screen — so an area's bars
+Screen or area picker, while an entry stands. Settings writes the
+entries where it writes the edge — the bar's Show and Position for
+the screen or area the picker picks (#3612) — so an area's bars
 have one home; a forgotten screen setup drops them with its edges.
 :::
 
@@ -22174,18 +22174,28 @@ places it in the strip under Hidden, and governs every screen that
 does not share an edge — so hiding it would hide a working control.
 
 :::unreleased
-*Amended (#3612, owner 2026-11-24):* the card is grouped by bar. The
-Show and Position masters lead it, and one *Each bar and Pocket*
-drawer hangs under Position: the Space Bar, the App Bar and the
-Pocket each take a heading over their own Show rows, their Position
-and a *Per screen or area* drawer, whose rows stack a labelled
-segmented Show over a labelled Position, each named as Settings ▸
-Screens names the area. The Pocket's drawer has Position only, and
-Pocket position closes the Pocket's block. Two drawers of one name,
-one per master, read as one topic split by widget type, and a Show
-pop-up beside an edge picker read as part of the position. Menu bar
-icon, Handle thickness, Reveal and Durations follow under the heading
-*When a bar is out of view* — not "hidden", which is a Show choice.
+*Amended (#3612, owner 2026-11-24):* the card is grouped by bar, and
+a screen or area is set up by picking it first. The Show and Position
+masters lead the card, and one *Each bar and Pocket* drawer hangs
+under Position. Its first row is a *Screen or area* pop-up: *All
+screens*, the default, edits each bar's own values; a screen or area,
+named as Settings ▸ Screens names it and listed in reading order
+within its screen, makes the Space Bar, App Bar and Pocket blocks
+below edit that area — the App Bar's one Show then leads with Per
+layout. The Pocket's Show, its drag reveal and Pocket position are
+one value for every screen, so they stay in the Pocket's block and
+grey while an area is picked, the picker being the switch that
+brings them back. An item holding values of its own says so in words,
+the caption under All screens names those areas, and the shut drawer
+counts them; the drawer stays open by itself only while the bars' own
+values differ. Setting up an area is the job, not comparing areas, so
+the area comes first; per-bar per-screen drawers, two drawers of one
+name per master and a Show pop-up beside an edge picker all read
+worse, and a List / By-area switch was ruled out as a second layout
+to keep. Menu bar icon, Handle thickness, Reveal and Durations follow
+under the heading *When a bar is out of view* — not "hidden", which
+is a Show choice — then Alignment, Thickness, Style and Margins as
+before.
 :::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
