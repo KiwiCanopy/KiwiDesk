@@ -195,7 +195,7 @@ struct ScreenSplitNestedTests {
         )
         let upright = cuts.filter { $0.axis == .sideBySide }
         #expect(upright.count == 1)
-        #expect(upright.first?.position == 3440 / 2)
+        #expect(upright.first?.position == whole.extent.width / 2)
         #expect(upright.first?.start == 0)
         #expect(upright.first?.end == 1440)
     }
@@ -216,6 +216,7 @@ struct ScreenSplitNestedTests {
         #expect(upright.holds(upright))
         #expect(!upright.holds(level))
         #expect(split.cut(holding: upright, at: 720) == upright)
+        #expect(split.cut(holding: level, at: level.position) == level)
         let columns = try #require(
             square.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
         )

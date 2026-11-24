@@ -155,7 +155,8 @@ struct ScreenAreaNestedEditTests {
                 position: landed.position,
                 landed: landed.split.cut(holding: lead, at: landed.position)
             )
-            #expect(drag.landed != nil)
+            #expect(drag.landed?.axis == .sideBySide)
+            #expect(drag.landed?.holds(lead, at: landed.position) == true)
             return drag.joins(other)
         }
         #expect(try lit(rows: 2, at: 0))
