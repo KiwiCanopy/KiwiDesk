@@ -39,14 +39,7 @@ struct DesktopCardView: View {
         .padding(.horizontal, DesktopsGeometry.columnInset)
         .frame(width: width, alignment: .top)
         .overlay { ring }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(groupLabel)
-    }
-
-    /// The card's VoiceOver group: its Desktop; none in the grid,
-    /// whose row names the Desktop and whose lines their screen.
-    private var groupLabel: String {
-        titled ? DesktopsText.desktop(desktop.label) : ""
+        .modifier(CardGroup(label: titled ? desktop.label : nil))
     }
 
     /// The lines, each area's under its header (#3572 ruling 2),
@@ -177,5 +170,22 @@ struct DesktopCardView: View {
             modifiers,
             false
         )
+    }
+}
+
+/// A card's VoiceOver group, named for its Desktop; none for a grid
+/// cell, whose row names the Desktop and whose lines their screen
+/// (#3602).
+private struct CardGroup: ViewModifier {
+    let label: Int?
+
+    func body(content: Content) -> some View {
+        if let label {
+            content
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(DesktopsText.desktop(label))
+        } else {
+            content
+        }
     }
 }
