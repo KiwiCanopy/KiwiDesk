@@ -68,7 +68,7 @@ struct GesturesShelfEntries: View {
         .gestureAnchored(.appBarHover)
     }
 
-    /// Every pointer to KiwiShelf & Bars this group draws.
+    /// Every pointer to Bars & Pocket this group draws.
     private func link(_ prose: String) -> some View {
         CrossReferenceRow(
             prose: prose,

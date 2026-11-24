@@ -616,7 +616,7 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 [`sticky.set_color`](lua-reference.md#stickyset_color),
 [`floating.set_color`](lua-reference.md#floatingset_color).)
 
-## KiwiShelf
+## Bars & Pocket
 
 **Thickness** runs 20–80 pt on the **KiwiShelf** card; Lua
 ([`kiwishelf.set_thickness`](lua-reference.md#kiwishelfset_thickness))
@@ -717,7 +717,7 @@ icon, or its name where it has none — with the active layer's icon
 ahead of them.
 
 :::unreleased
-What the menu bar icon shows is Settings ▸ KiwiShelf ▸ Show ▸
+What the menu bar icon shows is Settings ▸ Bars & Pocket ▸ KiwiShelf ▸ Show ▸
 **Menu bar icon**; at its default, Auto, it stands in for the Space
 Bar wherever a screen shows none at rest.
 :::

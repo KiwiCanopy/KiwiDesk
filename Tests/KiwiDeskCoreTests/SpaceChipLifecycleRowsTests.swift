@@ -75,7 +75,7 @@ struct SpaceChipLifecycleRowsTests {
             Array(titles.suffix(8))
                 == [
                     "Space Settings…", "—", "New Space", "Delete Space",
-                    "—", "KiwiShelf Settings…", "Looks…",
+                    "—", "Bars & Pocket Settings…", "Looks…",
                     "Colors & Glass…",
                 ]
         )

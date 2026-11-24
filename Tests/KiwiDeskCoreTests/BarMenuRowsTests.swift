@@ -62,7 +62,7 @@ struct BarMenuRowsTests {
     }
 
     private let shelf = [
-        "KiwiShelf Settings…", "Looks…", "Colors & Glass…",
+        "Bars & Pocket Settings…", "Looks…", "Colors & Glass…",
     ]
 
     @Test("every menu ends with the shelf section")

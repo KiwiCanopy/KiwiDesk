@@ -4,7 +4,7 @@ import Foundation
 /// place; the GUI maps it to a destination and the row to reveal,
 /// the way the search lands (#96, #277).
 public enum SettingsLanding: Equatable, Sendable {
-    /// KiwiShelf & Bars, on the KiwiShelf card.
+    /// Bars & Pocket, on the KiwiShelf card.
     case shelf
     /// Looks & Animations.
     case looks
