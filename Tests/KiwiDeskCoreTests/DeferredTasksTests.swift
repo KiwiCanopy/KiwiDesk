@@ -132,24 +132,26 @@ struct DeferredTasksTests {
         #expect(core.deferred.task(for: .spaceSettle) == nil)
     }
 
+    /// The waits one schedule asked for, noted from its task.
+    private final class Sleeps: @unchecked Sendable {
+        private let lock = NSLock()
+        private var waits: [Duration] = []
+        func note(_ wait: Duration) {
+            lock.withLock { waits.append(wait) }
+        }
+        var all: [Duration] { lock.withLock { waits } }
+    }
+
+    /// Every wait parks until its slot is replaced, so only the cap
+    /// fires mid-stream; the 30 ms gaps are floors a slow runner
+    /// only widens (#3567).
     @Test("maxWait forces execution during a continuous burst")
     func maxWaitForcesExecution() async {
         let owner = DeferredTasks()
+        owner.sleep = { _ in try? await Task.sleep(for: .seconds(3_600)) }
         var fireCount = 0
-        let body: @MainActor () -> Void = {
-            fireCount += 1
-        }
-        owner.schedule(
-            .barTitleRefresh,
-            after: .milliseconds(100),
-            maxWait: .milliseconds(120),
-            body
-        )
-        // 10 iterations spaced 30 ms apart = 300 ms stream.
-        // maxWait (120 ms) forces execution mid-stream,
-        // and the trailing reschedule produces a second execution.
-        for _ in 1...10 {
-            try? await Task.sleep(for: .milliseconds(30))
+        let body: @MainActor () -> Void = { fireCount += 1 }
+        func reschedule() {
             owner.schedule(
                 .barTitleRefresh,
                 after: .milliseconds(100),
@@ -157,14 +159,31 @@ struct DeferredTasksTests {
                 body
             )
         }
-        // An inert maxWait would produce 0 mid-stream and only 1 total.
+        reschedule()
+        for _ in 1...10 {
+            try? await Task.sleep(for: .milliseconds(30))
+            reschedule()
+        }
+        // No wait has ended, so every fire so far is the cap's.
+        #expect(fireCount >= 1)
+        let capped = fireCount
+        owner.sleep = { _ in }
+        reschedule()
         await owner.task(for: .barTitleRefresh)?.value
-        #expect(fireCount >= 2)
+        #expect(fireCount == capped + 1)
     }
 
+    /// A long wait parks until its cancel and a short one lands, so
+    /// no verdict reads how fast the runner reached it (#3567).
     @Test("cancel() clears the maxWait burst tracking")
     func cancelClearsBurstTracking() async {
         let owner = DeferredTasks()
+        let sleeps = Sleeps()
+        owner.sleep = { wait in
+            sleeps.note(wait)
+            guard wait > .seconds(1) else { return }
+            try? await Task.sleep(for: .seconds(3_600))
+        }
         var fired = false
         owner.schedule(
             .barTitleRefresh,
@@ -173,14 +192,14 @@ struct DeferredTasksTests {
         ) {
             fired = true
         }
-        // Advance into the burst window, then cancel before it fires.
+        // Ages the burst start past 50 ms; a slow runner only
+        // ages it further.
         try? await Task.sleep(for: .milliseconds(50))
         owner.cancel(.barTitleRefresh)
         #expect(!fired)
 
-        // Reschedule with 100 ms delay and 150 ms maxWait. If cancel()
-        // did not clear the start timestamp, remaining maxWait would
-        // be shortened and fire prematurely.
+        // An inherited start would cut this wait below its 100 ms
+        // delay, or fire the body at once.
         owner.schedule(
             .barTitleRefresh,
             after: .milliseconds(100),
@@ -188,9 +207,10 @@ struct DeferredTasksTests {
         ) {
             fired = true
         }
-        try? await Task.sleep(for: .milliseconds(20))
-        #expect(!fired, "must not inherit pre-cancel burst time")
-        await owner.task(for: .barTitleRefresh)?.value
+        let rescheduled = owner.task(for: .barTitleRefresh)
+        #expect(rescheduled != nil, "must not inherit pre-cancel burst")
+        await rescheduled?.value
         #expect(fired)
+        #expect(sleeps.all.sorted() == [.milliseconds(100), .seconds(2)])
     }
 }
