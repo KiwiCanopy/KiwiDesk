@@ -99,7 +99,7 @@ activation, focus ring and accessibility child, which a
 
 A pointer whose sentence names a **location** takes a
 breadcrumb headed by the destination's own title
-("KiwiShelf ▸ App Bar"), not the section name alone: a
+("Bars & Pocket ▸ App Bar"), not the section name alone: a
 link reading "App Bar" names no card Home shows, and only a
 `▸`-shaped value enters `SidebarCrossReferenceTests`. A pointer whose sentence
 names the **feature itself** — a sentence turning on whether
@@ -1166,7 +1166,7 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
 The bars' own animations are not on that card: they sit in
-KiwiShelf ▸ KiwiShelf ▸ Show ▸ Durations beside the Reveal picker,
+Bars & Pocket ▸ KiwiShelf ▸ Show ▸ Durations beside the Reveal picker,
 and the card points there.
 
 The drawer holds two switches, **Animate the reveal** and **Animate

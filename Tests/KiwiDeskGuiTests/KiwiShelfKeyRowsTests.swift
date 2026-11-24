@@ -5,7 +5,7 @@ import Testing
 
 /// The bars' show/hide shortcut rows (#761): a row greys only
 /// while its bar is `always` wherever it can show, and its reason
-/// is a live pointer to KiwiShelf & Bars.
+/// is a live pointer to Bars & Pocket.
 @Suite("KiwiShelf shortcut rows (#761)")
 struct KiwiShelfKeyRowsTests {
     @Test("each row's caption places its link")

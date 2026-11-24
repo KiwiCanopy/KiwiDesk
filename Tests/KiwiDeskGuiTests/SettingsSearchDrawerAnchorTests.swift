@@ -51,7 +51,7 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
-                .bars, "KiwiShelf", .kiwishelf,
+                .bars, "Bars & Pocket", .kiwishelf,
                 [
                     SettingsCatalog.bars.kiwishelfShowEach,
                     SettingsCatalog.bars.kiwishelfDurations,
@@ -61,7 +61,7 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
-                .bars, "KiwiShelf", .spaceBar,
+                .bars, "Bars & Pocket", .spaceBar,
                 [SettingsCatalog.bars.spaceBarTuning]
             ),
             (

@@ -57,7 +57,7 @@ extension KiwiCore {
     func shelfSectionRows() -> [BarMenuRow] {
         [
             landingRow(
-                L("bar.menu.shelf_settings", "KiwiShelf Settings…"),
+                L("bar.menu.shelf_settings", "Bars & Pocket Settings…"),
                 .shelf
             ),
             landingRow(L("bar.menu.looks", "Looks…"), .looks),

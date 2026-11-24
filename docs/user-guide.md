@@ -717,7 +717,7 @@ icon, or its name where it has none — with the active layer's icon
 ahead of them.
 
 :::unreleased
-What the menu bar icon shows is Settings ▸ KiwiShelf ▸ Show ▸
+What the menu bar icon shows is Settings ▸ Bars & Pocket ▸ Show ▸
 **Menu bar icon**; at its default, Auto, it stands in for the Space
 Bar wherever a screen shows none at rest.
 :::

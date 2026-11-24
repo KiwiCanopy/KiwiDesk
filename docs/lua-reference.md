@@ -3822,7 +3822,7 @@ there until the pointer has left it.
 [`kiwishelf.set_pocket_drag_reveal`](#kiwishelfset_pocket_drag_reveal)
 turns that drag-time pocket off.
 
-Settings ▸ KiwiShelf writes it as **Pocket** under **Show** ▸
+Settings ▸ Bars & Pocket writes it as **Pocket** under **Show** ▸
 **Each bar and Pocket**; **Show** sets it with the bars'
 visibilities. A look never carries it.
 
@@ -3845,7 +3845,7 @@ pocket already showing — `"always"`, or held out by its list or a
 window going in or out — still takes a drop. Its keys, its list and
 [`pocket`](#pocket) reach it either way.
 
-Settings ▸ KiwiShelf writes it as **Show the Pocket while dragging a
+Settings ▸ Bars & Pocket writes it as **Show the Pocket while dragging a
 window** under **Show** ▸ **Each bar and Pocket**. A look never
 carries it.
 
@@ -3923,7 +3923,7 @@ pause symbol after its glyph. While a layer other than `default` is
 on, its glyph leads the listed Spaces; where no Space is listed, a
 layer with an icon shows its icon in place of the logo.
 
-Settings ▸ KiwiShelf writes it as **Menu bar icon** under
+Settings ▸ Bars & Pocket writes it as **Menu bar icon** under
 **Show**. A look never carries it.
 
 **Example:**
@@ -4152,7 +4152,7 @@ layout that has an App Bar; the values mean what
 [`space_bar.set_visibility`](#space_barset_visibility) says. The
 other screens keep each layout's value. The values are stored per
 profile under `app_bar.visibility_override`, keyed by fingerprint.
-Settings ▸ KiwiShelf writes them in the App Bar's **Per screen**
+Settings ▸ Bars & Pocket writes them in the App Bar's **Per screen**
 rows under **Position** ▸ **Each bar and Pocket**.
 
 **Example:**
@@ -10274,7 +10274,7 @@ KiwiDesk's own Off
 ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
 stops it.
 
-The switch is KiwiShelf ▸ Show ▸ Durations ▸ Animate the expand in
+The switch is Bars & Pocket ▸ Show ▸ Durations ▸ Animate the expand in
 Settings; the length is Lua-only.
 
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
@@ -10320,7 +10320,7 @@ animations.set_reveal_duration(600)
 once. It plays with macOS's Reduce Motion on too, and KiwiDesk's
 own Off ([`animations.set_reduce_motion`](#animationsset_reduce_motion))
 stops it. In Settings it is
-KiwiShelf ▸ Show ▸ Durations ▸ Animate the reveal; the length,
+Bars & Pocket ▸ Show ▸ Durations ▸ Animate the reveal; the length,
 `animations.set_reveal_duration`, is Lua-only.
 
 **Example:**
