@@ -70,14 +70,12 @@ extension SettingsModel {
         return survivor
     }
 
-    /// Every area of `display` as long as an even split makes it.
-    func evenOutAreas(on display: Display) {
+    /// Every member of the run area `id` sits in as long as an
+    /// even split makes it (#3541).
+    func evenOutAreas(holding id: Int, on display: Display) {
         guard let split = areaSplit(of: display) else { return }
         config.settings.displayAreas[display.fingerprint] =
-            split.evenedOut(
-                width: split.extent.width,
-                height: split.extent.height
-            )
+            split.evenedOut(holding: id)
     }
 
     /// Writes `split` back for `display` — a divider's release or a

@@ -219,8 +219,10 @@ restated `20...80` satisfies on the day it is written.
   clamps a typed size at `TilingSettings.areaFloor(along:)`, acts
   through `ScreenSplit`'s `moving`, `snapped` and `setting` and the
   one `GuiConfig.splitArea` and `GuiConfig.mergeAreas` doors, which
-  carry the bar values a split or merge owes, reads positions from
-  `ScreenSplit.positions` and refuses a name through
+  carry the bar values a split or merge owes, sizes and evens out
+  the run the selection sits in through `ScreenSplit.run(holding:)`
+  (#3541), reads positions from `ScreenSplit.positions` and refuses
+  a name through
   `ScreenArea.nameProblem` — never arithmetic or a rule of its own
   over a screen frame (`ScreenAreaEditTests`,
   `ScreenAreaRemapParityTests`).

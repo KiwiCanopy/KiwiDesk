@@ -72,12 +72,13 @@ struct ScreenAreaTests {
         )
     }
 
-    @Test func nestedAndPinwheelSplitsAreRefused() {
+    @Test func nestedSplitsPassAndPinwheelsAreRefused() {
+        // A T-junction: nested splits are legal since #3541.
         #expect(
             problem([
                 area(0, 0, 0, 1000, 1440), area(1, 1000, 0, 1440, 720),
                 area(2, 1000, 720, 1440, 720), area(3, 2440, 0, 1000, 1440),
-            ]) == .mixedAxes
+            ]) == nil
         )
         // Five rects, no full-span cut.
         #expect(

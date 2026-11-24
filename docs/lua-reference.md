@@ -800,8 +800,10 @@ own points, each optionally with an `id` and a `name`.
 **Does:** splits one screen into areas, each with its own Spaces,
 its own App Bar and Space Bar and its own shown Space; with no
 sizes the screen is whole again. The sizes or rects must cover the
-screen exactly, with no gap or overlap, every cut running one
-direction, and no area under 100 points. The top-left area is
+screen exactly, with no gap or overlap, every cut running edge to
+edge across the part it divides, and no area under 100 points. A rect list may nest: three areas side by side with the
+middle one split top to bottom, or a 2×2 grid. The sizes form
+splits one way. The top-left area is
 area 0: a rect list that gives id 0 to another area is refused.
 
 The sizes form keeps the screen's previous ids in reading order,

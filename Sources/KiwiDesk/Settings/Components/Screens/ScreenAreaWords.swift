@@ -20,6 +20,17 @@ enum ScreenAreaWords {
         }
     }
 
+    /// A nested position, outer word first ("Middle Top"), each
+    /// pair joined through one frame so a locale may reorder it.
+    static func position(_ path: [ScreenAreaPosition]) -> String {
+        path.map { Self.position($0) }.reduce(into: "") { out, word in
+            out =
+                out.isEmpty
+                ? word
+                : L("monitors.split.nested", "%1$@ %2$@", out, word)
+        }
+    }
+
     /// "LG UltraWide – Left".
     static func composed(screen: String, area: String) -> String {
         L("monitors.split.name", "%1$@ – %2$@", screen, area)
@@ -76,7 +87,35 @@ extension SettingsModel {
             let area = split.areas.first(where: { $0.id == id })
         else { return nil }
         if let name = area.name { return name }
-        return split.positions[id].map(ScreenAreaWords.position)
+        return split.positions[id].map { ScreenAreaWords.position($0) }
+    }
+
+    /// Member `index` of `run`'s label in Adjust…: a lone area's
+    /// own label; a nested one's the words all its areas share
+    /// ("Middle"), else its first and last areas' labels.
+    func memberLabel(
+        _ index: Int,
+        of run: ScreenAreaRun?,
+        on display: Display
+    ) -> String {
+        guard let run, run.members.indices.contains(index),
+            let split = areaSplit(of: display)
+        else { return "" }
+        let ids = run.members[index].areas
+        if ids.count == 1 { return areaLabel(ids[0], on: display) ?? "" }
+        let paths = ids.compactMap { split.positions[$0] }
+        let shared = (paths.first ?? []).filter { word in
+            paths.allSatisfy { $0.contains(word) }
+        }
+        if !shared.isEmpty, paths.count == ids.count {
+            return ScreenAreaWords.position(shared)
+        }
+        return L(
+            "monitors.sizes.member_range",
+            "%1$@ to %2$@",
+            areaLabel(ids[0], on: display) ?? "",
+            areaLabel(ids[ids.count - 1], on: display) ?? ""
+        )
     }
 
     /// The area's full name, "LG UltraWide – Left"; the screen's

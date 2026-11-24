@@ -21,31 +21,33 @@ struct ScreenSplitAdjustTests {
         #expect(whole.axis == nil)
         let two = try #require(whole.splitting(0, .stacked))
         #expect(two.axis == .stacked)
-        #expect(two.positions == [0: .top, 1: .bottom])
+        #expect(two.positions == [0: [.top], 1: [.bottom]])
         let pair = try #require(whole.splitting(0, .sideBySide))
-        #expect(pair.positions == [0: .left, 1: .right])
+        #expect(pair.positions == [0: [.left], 1: [.right]])
         let tall = try #require(two.splitting(1, .stacked))
-        #expect(tall.positions == [0: .top, 1: .middle, 2: .bottom])
+        #expect(tall.positions == [0: [.top], 1: [.middle], 2: [.bottom]])
         let split = try three()
-        #expect(split.positions == [0: .left, 1: .middle, 2: .right])
+        #expect(split.positions == [0: [.left], 1: [.middle], 2: [.right]])
         let four = try #require(split.splitting(2, .sideBySide))
         #expect(
             four.positions
                 == [
-                    0: .numbered(1), 1: .numbered(2), 2: .numbered(3),
-                    3: .numbered(4),
+                    0: [.numbered(1)], 1: [.numbered(2)],
+                    2: [.numbered(3)], 3: [.numbered(4)],
                 ]
         )
     }
 
     @Test func evenIsReadFromTheLengths() throws {
         let split = try three()
-        #expect(split.lengths == [1720, 860, 860])
-        #expect(!split.isEven)
-        let even = split.evenedOut(width: 3440, height: 1440)
-        #expect(even.lengths == [1147, 1147, 1146])
-        #expect(even.isEven)
-        #expect(whole.isEven)
+        let run = try #require(split.run(holding: 0))
+        #expect(run.lengths == [1720, 860, 860])
+        #expect(!run.isEven)
+        let even = split.evenedOut(holding: 0)
+        let evenRun = try #require(even.run(holding: 0))
+        #expect(evenRun.lengths == [1147, 1147, 1146])
+        #expect(evenRun.isEven)
+        #expect(whole.run(holding: 0) == nil)
     }
 
     @Test func floorIsTheLargestTilingLayout() {
@@ -69,10 +71,10 @@ struct ScreenSplitAdjustTests {
         )
         let moved = split.moving(cut, to: 1000, floor: 300)
         #expect(moved.position == 1000)
-        #expect(moved.split.lengths == [1000, 1580, 860])
+        #expect(moved.split.run(holding: 0)?.lengths == [1000, 1580, 860])
         let stopped = split.moving(cut, to: 2400, floor: 300)
         #expect(stopped.position == 2280)
-        #expect(stopped.split.lengths == [2280, 300, 860])
+        #expect(stopped.split.run(holding: 0)?.lengths == [2280, 300, 860])
         #expect(split.moving(cut, to: 10, floor: 300).position == 300)
     }
 
@@ -117,16 +119,32 @@ struct ScreenSplitAdjustTests {
 
     @Test func typedSizeMovesExactlyTwoAreas() throws {
         let split = try three()
+        let run = try #require(split.run(holding: 0))
+        func lengths(_ s: ScreenSplit) -> [Int] {
+            ScreenArea.readingOrder(s.areas).map(\.w)
+        }
         let set = try #require(
-            split.setting(2, to: 800, givingWay: 1, floor: 300)
+            split.setting(
+                member: 2,
+                of: run,
+                to: 800,
+                givingWay: 1,
+                floor: 300
+            )
         )
         #expect(set.length == 800)
-        #expect(set.split.lengths == [1720, 920, 800])
+        #expect(lengths(set.split) == [1720, 920, 800])
         let clamped = try #require(
-            split.setting(0, to: 2500, givingWay: 1, floor: 300)
+            split.setting(
+                member: 0,
+                of: run,
+                to: 2500,
+                givingWay: 1,
+                floor: 300
+            )
         )
         #expect(clamped.length == 2280)
-        #expect(clamped.split.lengths == [2280, 300, 860])
+        #expect(lengths(clamped.split) == [2280, 300, 860])
         #expect(
             ScreenArea.problem(
                 with: clamped.split.areas,
@@ -134,13 +152,22 @@ struct ScreenSplitAdjustTests {
                 height: 1440
             ) == nil
         )
-        #expect(whole.setting(0, to: 10, givingWay: 1, floor: 1) == nil)
+        #expect(
+            split.setting(
+                member: 0,
+                of: run,
+                to: 10,
+                givingWay: 0,
+                floor: 1
+            ) == nil
+        )
     }
 
     @Test func percentsAddUpToAHundred() throws {
-        let even = try three().evenedOut(width: 3440, height: 1440)
+        let split = try three()
+        let even = try #require(split.evenedOut(holding: 0).run(holding: 0))
         #expect(even.percents == [34, 33, 33])
-        #expect(try three().percents == [50, 25, 25])
+        #expect(try three().run(holding: 0)?.percents == [50, 25, 25])
         #expect(even.points(percent: 50) == 1720)
     }
 }

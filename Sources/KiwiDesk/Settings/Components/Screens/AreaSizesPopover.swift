@@ -2,16 +2,17 @@ import Foundation
 import KiwiDeskCore
 import SwiftUI
 
-/// Adjust… (#3517 ruling 26): one field per area of a split screen,
-/// in points or percent. A commit — Return, Tab or leaving a field —
-/// writes the typed area and the one giving way, clamped by Core;
-/// Escape restores the sizes it opened on.
+/// Adjust… (#3517 ruling 26): one field per member of the run the
+/// selection sits in (#3541), in points or percent. A commit —
+/// Return, Tab or leaving a field — writes the typed member and the
+/// one giving way, clamped by Core; Escape restores the sizes it
+/// opened on.
 struct AreaSizesPopover: View {
     @ObservedObject var model: SettingsModel
     let display: Display
     let request: AreaSizesRequest
-    /// The area giving way, which its pane wears too.
-    @Binding var givingWay: ScreenSelection?
+    /// The areas giving way, which their panes wear too.
+    @Binding var givingWay: Set<ScreenSelection>
     /// Whether it types in percent: held by the Screens page, so a
     /// switch lasts while Settings stays open and is never stored.
     @Binding var percent: Bool
@@ -24,9 +25,11 @@ struct AreaSizesPopover: View {
         model.areaSplit(of: display) ?? request.seed
     }
 
-    private var order: [Int] {
-        ScreenArea.readingOrder(split.areas).map(\.id)
-    }
+    /// The run the selection sits in; empty where the split went.
+    private var run: ScreenAreaRun? { split.run(holding: request.area) }
+
+    /// The run's members, by index in reading order.
+    private var order: [Int] { run.map { Array($0.members.indices) } ?? [] }
 
     private var rest: Int? {
         AreaGiveWay.pick(order: order, typed: typed, excluding: focus)
@@ -65,11 +68,11 @@ struct AreaSizesPopover: View {
         // A draft typed in the other unit is not this unit's number.
         .onChange(of: percent) { drafts = [:] }
         .onExitCommand(perform: cancel)
-        .onDisappear { givingWay = nil }
+        .onDisappear { givingWay = [] }
     }
 
     @ViewBuilder private func fieldRow(_ id: Int) -> some View {
-        let label = model.areaLabel(id, on: display) ?? ""
+        let label = model.memberLabel(id, of: run, on: display)
         let gives = rest == id
         GridRow {
             Text(label)
@@ -105,9 +108,11 @@ struct AreaSizesPopover: View {
         }
     }
 
-    private func shown(_ id: Int) -> Int {
-        guard let index = order.firstIndex(of: id) else { return 0 }
-        return percent ? split.percents[index] : split.lengths[index]
+    private func shown(_ index: Int) -> Int {
+        guard let run, run.members.indices.contains(index) else {
+            return 0
+        }
+        return percent ? run.percents[index] : run.lengths[index]
     }
 
     private func text(for id: Int) -> Binding<String> {
@@ -127,22 +132,29 @@ struct AreaSizesPopover: View {
                 typed: typed,
                 excluding: id
             ),
-            let axis = split.axis
+            let run
         else { return }
         let asked =
             percent
-            ? split.points(percent: number) : Int(number.rounded())
+            ? run.points(percent: number) : Int(number.rounded())
         guard asked != shown(id) || percent,
             let set = split.setting(
-                id,
+                member: id,
+                of: run,
                 to: asked,
                 givingWay: other,
-                floor: model.areaFloor(axis)
+                floor: model.areaFloor(run.axis)
             )
         else { return }
         model.writeAreaSplit(set.split, on: display)
         typed = AreaGiveWay.typing(id, after: typed)
-        announce(id, set.split, clamped: set.length != asked, other: other)
+        announce(
+            id,
+            set.split,
+            run: run,
+            clamped: set.length != asked,
+            other: other
+        )
     }
 
     private func cancel() {
@@ -153,24 +165,30 @@ struct AreaSizesPopover: View {
     }
 
     private func publishRest() {
-        givingWay = rest.map {
-            ScreenSelection(display: display.id, area: $0)
-        }
+        let areas =
+            rest.flatMap { index in
+                run.flatMap {
+                    $0.members.indices.contains(index)
+                        ? $0.members[index].areas : nil
+                }
+            } ?? []
+        givingWay = Set(
+            areas.map { ScreenSelection(display: display.id, area: $0) }
+        )
     }
 
     private func announce(
         _ id: Int,
         _ split: ScreenSplit,
+        run: ScreenAreaRun,
         clamped: Bool,
         other: Int
     ) {
-        func length(_ area: Int) -> Int {
-            split.areas.first { $0.id == area }.map {
-                split.axis == .stacked ? $0.h : $0.w
-            } ?? 0
+        func length(_ member: Int) -> Int {
+            split.memberLength(run.members[member], along: run.axis)
         }
-        func name(_ area: Int) -> String {
-            model.areaLabel(area, on: display) ?? ""
+        func name(_ member: Int) -> String {
+            model.memberLabel(member, of: run, on: display)
         }
         // A clamp moved the typed area too, so it is said first.
         let spoken =
@@ -197,7 +215,7 @@ struct AreaSizesPopover: View {
     }
 
     private func spokenName(_ label: String) -> String {
-        split.axis == .stacked
+        run?.axis == .stacked
             ? L("monitors.sizes.height.ax", "%1$@ height", label)
             : L("monitors.sizes.width.ax", "%1$@ width", label)
     }

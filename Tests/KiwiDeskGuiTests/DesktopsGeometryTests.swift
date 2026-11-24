@@ -50,7 +50,7 @@ struct DesktopsGeometryTests {
         DesktopOverview.Area(
             key: ScreenAreaKey(fingerprint: "Wide:3440x1440", areaID: id),
             name: nil,
-            position: id == 0 ? .left : .right,
+            position: id == 0 ? [.left] : [.right],
             isHere: here,
             lines: lines
         )

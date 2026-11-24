@@ -11,7 +11,7 @@ struct ScreensSection: View {
     @State var renameRequest: AreaRenameRequest?
     @State var sizesRequest: AreaSizesRequest?
     /// The area giving way while Adjust… is open (#3517 ruling 26).
-    @State var givingWay: ScreenSelection?
+    @State var givingWay: Set<ScreenSelection> = []
     /// The pane a menu's Split or Merge hands focus to, since the
     /// focused pane may be the one merged away.
     @State var paneFocus: ScreenSelection?
@@ -221,6 +221,7 @@ struct ScreensSection: View {
             DispatchQueue.main.async {
                 sizesRequest = AreaSizesRequest(
                     display: area.display,
+                    area: area.area ?? 0,
                     seed: split
                 )
             }

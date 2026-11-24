@@ -25,12 +25,18 @@ struct ScreenAreaEditTests {
     }
 
     @Test func splitKeepsTheLeadingId() throws {
+        LocalizationManager.shared.select("en")
         let (model, screen) = model()
         #expect(model.areaSplit(of: screen) == nil)
         model.splitArea(0, on: screen, .sideBySide)
         let split = try #require(model.areaSplit(of: screen))
         #expect(split.areas.map(\.id) == [0, 1])
-        #expect(ScreenAreaEditing.axes(of: model, screen) == [.sideBySide])
+        // Both directions stay on offer on a split screen (#3541).
+        #expect(model.canSplit(1, on: screen, .stacked))
+        model.splitArea(1, on: screen, .stacked)
+        let nested = try #require(model.areaSplit(of: screen))
+        #expect(nested.areas.count == 3)
+        #expect(model.areaLabel(1, on: screen) == "Top Right")
     }
 
     @Test func splitGreysAtCoresFloor() {

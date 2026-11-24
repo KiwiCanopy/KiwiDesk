@@ -15,7 +15,7 @@ struct ScreenCard: View {
     let size: CGSize
     @Binding var selection: ScreenSelection?
     /// The area giving way in an open Adjust… popover.
-    let givingWay: ScreenSelection?
+    let givingWay: Set<ScreenSelection>
     /// The pane a menu's Split or Merge hands focus to.
     let paneFocus: ScreenSelection?
     let act: (ScreenAreaAction) -> Void
@@ -108,8 +108,9 @@ struct ScreenCard: View {
             leads: pane.leads,
             size: pane.rect.size,
             corners: corners(pane.rect),
-            givesWay: givingWay
-                == ScreenSelection(display: display.id, area: pane.id),
+            givesWay: givingWay.contains(
+                ScreenSelection(display: display.id, area: pane.id)
+            ),
             selection: $selection,
             act: act,
             focusRequest: paneFocus,
@@ -169,6 +170,10 @@ struct ScreenCard: View {
                 drawn.indices.contains(index)
                 ? drawn[index].position : cut.position
             let at = CGFloat(position) * (side ? factor.width : factor.height)
+            // A nested cut spans only its own box (#3541).
+            let across = side ? factor.height : factor.width
+            let from = CGFloat(cut.start) * across
+            let span = CGFloat(cut.end - cut.start) * across
             let band = ScreenAreaDivider.hitBand
             ScreenAreaDivider(
                 model: model,
@@ -180,12 +185,12 @@ struct ScreenCard: View {
                 drag: $drag
             )
             .frame(
-                width: side ? band : size.width,
-                height: side ? size.height : band
+                width: side ? band : span,
+                height: side ? span : band
             )
             .offset(
-                x: side ? at - band / 2 : 0,
-                y: side ? 0 : at - band / 2
+                x: side ? at - band / 2 : from,
+                y: side ? from : at - band / 2
             )
         }
     }
@@ -250,17 +255,22 @@ struct ScreenCard: View {
     private var splitValue: String {
         guard let split = model.areaSplit(of: display) else { return "" }
         let count = split.areas.count
-        return split.axis == .stacked
-            ? L(
+        switch split.axis {
+        case .stacked?:
+            return L(
                 "monitor_card.split.stacked.ax",
                 "Areas: %1$d, top to bottom",
                 count
             )
-            : L(
+        case .sideBySide?:
+            return L(
                 "monitor_card.split.side_by_side.ax",
                 "Areas: %1$d, side by side",
                 count
             )
+        case nil:
+            return L("monitor_card.split.nested.ax", "Areas: %1$d", count)
+        }
     }
 }
 
