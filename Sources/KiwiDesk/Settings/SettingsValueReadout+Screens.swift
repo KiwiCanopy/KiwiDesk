@@ -68,7 +68,7 @@ extension SettingsValueReadout {
         old: [String: ScreenSplit],
         new: [String: ScreenSplit]
     ) -> [SettingsDiffRow] {
-        let base = L("diff.label.screen_areas", "Screen areas")
+        let base = L("monitors.areas.label", "Screen areas")
         let touched = Set(old.keys).union(new.keys)
             .filter { old[$0] != new[$0] }
             .sorted()

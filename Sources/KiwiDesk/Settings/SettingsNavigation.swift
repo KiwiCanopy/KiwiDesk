@@ -31,7 +31,8 @@ struct SettingsNavigation {
     /// The screen or area Bars & Pocket's Each bar and Pocket edits,
     /// nil for All screens (#3612) — on the model so a landing can
     /// clear it: an area pick swaps out the bar-level rows a hit
-    /// names. Read it through `KiwiShelfCard.activeScope`.
+    /// names. The card clears it on appearing. Read it through
+    /// `KiwiShelfCard.activeScope`.
     var barsScope: String?
 
     /// Whether Screens ▸ Adjust… types in percent (#3517 ruling
