@@ -123,7 +123,8 @@ extension KiwiCore {
         let added = DefaultKeybindings.generationTopUp(
             existing: config.layers[index].bindings + overrides,
             above: offer.generation,
-            base: config.shortcutBase
+            base: config.shortcutBase,
+            undoKey: layoutUndoKey
         )
         config.shortcutOffer = offer.merged(
             ShortcutOffer(generation: newest)
