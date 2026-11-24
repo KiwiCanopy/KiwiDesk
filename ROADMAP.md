@@ -28,4 +28,6 @@ that section is free.
 
 _As of 2026-11-19_
 
-- A look picker: one shortcut opens your looks, step through them with a preview, and apply one
+- A look picker: one shortcut opens your looks full screen, step through them with a preview, and apply one
+- Looks that carry a wallpaper, set on your desktop when you apply the look
+- Gestures per layer, so a swipe can do something different in each layer, as keys already do
