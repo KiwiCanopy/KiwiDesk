@@ -4142,31 +4142,6 @@ With a screen, the edge is that screen's alone, as
 app_bar.set_edge("right", "LG HDR 4K:3840x2160")
 ```
 
-### app_bar.set_visibility
-
-:::unreleased
-**Expects:** `"always"`, `"auto"` or `"hidden"`, then a screen,
-named as [`space_bar.set_edge`](#space_barset_edge) names one. A
-call without a screen is refused: each layout keeps its own App
-Bar visibility, set with that layout's `set_app_bar_visibility`
-([Per-Layout App Bar Overrides](#per-layout-app-bar-overrides)).
-
-**Does:** sets the App Bar's visibility on that screen in every layout
-that has an App Bar; the values mean what
-[`space_bar.set_visibility`](#space_barset_visibility) says. The other
-screens keep each layout's value. The values are stored per profile
-under `app_bar.visibility_override`, keyed by fingerprint. Settings ▸
-Bars & Pocket ▸ KiwiShelf writes them as the App Bar's **Show** in
-**Each bar and Pocket** once its **Screen or area** picker picks a
-screen or area.
-
-**Example:**
-
-```lua
-app_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")
-```
-:::
-
 ### app_bar.set_reserve
 
 **Expects:** boolean (default `true`).
@@ -4302,11 +4277,21 @@ The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
 no per-layout override either.
 
 :::unreleased
-A screen's own App Bar visibility, set with
-[`app_bar.set_visibility`](#app_barset_visibility), outranks every
-layout's on that screen. A layout's `set_app_bar_visibility` takes
-no screen, refusing one, and clears every screen's own App Bar
-visibility.
+A layout's `set_app_bar_visibility` takes an optional screen,
+named as [`space_bar.set_edge`](#space_barset_edge) names one: with
+it, the visibility is that layout's on that screen or area alone,
+and the layout's other screens keep its own value. These values
+are stored per profile under `<layout>.app_bar.visibility_override`,
+keyed by fingerprint or area key. Without a screen, it sets the
+layout's own visibility and clears that layout's screen values.
+Settings ▸ Bars & Pocket ▸ KiwiShelf writes them as **Show in
+Monocle** and **Show in Scrolling** in **Each bar and Pocket** once
+its **Screen or area** picker picks a screen or area; **Inherit**
+there is no value of its own.
+
+```lua
+monocle.set_app_bar_visibility("hidden", "LG HDR 4K:3840x2160")
+```
 :::
 
 **Example:**
@@ -9928,7 +9913,8 @@ set becomes the default unless the count already has another.
 
 :::unreleased
 `forget_monitor_set` also drops the bars' per-screen visibilities
-(`space_bar.visibility_override`, `app_bar.visibility_override`)
+(`space_bar.visibility_override`, each layout's
+`app_bar.visibility_override`)
 for the screens whose edges it drops.
 :::
 

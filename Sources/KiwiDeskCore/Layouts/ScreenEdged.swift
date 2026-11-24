@@ -126,8 +126,9 @@ extension TilingSettings {
         kiwishelf.pocketEdges.keepScreens(in: scope)
         spaceBarStyle.visibilityOverride =
             spaceBarStyle.visibilityOverride.filter { scope.holds($0.key) }
-        appBarStyle.visibilityOverride =
-            appBarStyle.visibilityOverride.filter { scope.holds($0.key) }
+        eachAppBarVisibilityMap { map in
+            map = map.filter { scope.holds($0.key) }
+        }
     }
 }
 

@@ -156,7 +156,7 @@ extension SettingsRevertRegister {
         // 32), so the two go back together.
         .layoutAppBar(.monocleAppBarVisibility): .all([
             .leaf(\.settings.monocle.appBar.visibility),
-            .leaf(\.settings.appBarStyle.visibilityOverride),
+            .leaf(\.settings.monocle.appBar.visibilityOverride),
         ]),
         .layoutAppBar(.monocleAppBarActiveIndicator):
             .leaf(\.settings.monocle.appBar.activeIndicator),
@@ -166,7 +166,7 @@ extension SettingsRevertRegister {
             .leaf(\.settings.monocle.appBar.groupAdjacentWindows),
         .layoutAppBar(.scrollingAppBarVisibility): .all([
             .leaf(\.settings.scrolling.appBar.visibility),
-            .leaf(\.settings.appBarStyle.visibilityOverride),
+            .leaf(\.settings.scrolling.appBar.visibilityOverride),
         ]),
         .layoutAppBar(.scrollingAppBarActiveIndicator):
             .leaf(\.settings.scrolling.appBar.activeIndicator),

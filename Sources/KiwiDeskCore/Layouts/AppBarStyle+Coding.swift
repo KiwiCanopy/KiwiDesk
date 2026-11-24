@@ -12,7 +12,6 @@ extension AppBarStyle {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case edge
         case edgeOverride = "edge_override"
-        case visibilityOverride = "visibility_override"
         case activeIndicator = "active_indicator"
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -35,11 +34,6 @@ extension AppBarStyle {
                 [String: AppBarEdge].self,
                 forKey: .edgeOverride
             ) ?? defaults.edgeOverride
-        visibilityOverride =
-            try container.decodeIfPresent(
-                [String: ShelfVisibility].self,
-                forKey: .visibilityOverride
-            ) ?? defaults.visibilityOverride
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,

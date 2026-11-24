@@ -97,7 +97,6 @@ public enum LookKeys {
         "app_bar.edge_override": screenEdges,
         "kiwishelf.pocket_edge_override": screenEdges,
         "space_bar.visibility_override": functionality,
-        "app_bar.visibility_override": functionality,
     ]
 
     /// Why a bar's and the pocket's per-screen edges stay out

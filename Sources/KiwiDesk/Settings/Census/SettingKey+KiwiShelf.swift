@@ -17,12 +17,15 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     /// that bar's Per screen drawer.
     case spaceBarScreenEdge = "settings.spaceBarStyle.edgeOverride[screen]"
     case appBarScreenEdge = "settings.appBarStyle.edgeOverride[screen]"
-    /// Each bar's per-screen and per-area Show (#3517): the Show menu
-    /// in that bar's Per screen rows.
+    /// Each bar's per-screen and per-area Show (#3517), the App
+    /// Bar's per layout (#3618): the Show rows under a picked
+    /// screen or area.
     case spaceBarScreenVisibility =
         "settings.spaceBarStyle.visibilityOverride[screen]"
-    case appBarScreenVisibility =
-        "settings.appBarStyle.visibilityOverride[screen]"
+    case monocleAppBarScreenVisibility =
+        "settings.monocle.appBar.visibilityOverride[screen]"
+    case scrollingAppBarScreenVisibility =
+        "settings.scrolling.appBar.visibilityOverride[screen]"
     case thickness = "settings.kiwishelf.thickness"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
@@ -89,7 +92,9 @@ extension KiwiShelfKey {
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
             .appBarScreenEdge, .spaceBarScreenVisibility,
-            .appBarScreenVisibility, .pocketEdge, .pocketScreenEdge,
+            .monocleAppBarScreenVisibility,
+            .scrollingAppBarScreenVisibility, .pocketEdge,
+            .pocketScreenEdge,
             .pocketPosition, .pocketVisibility:
             return .row(.bars, .kiwishelf, .showMore)
         case .background, .cornerRoundness, .border, .highlightWidth,

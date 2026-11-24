@@ -74,7 +74,7 @@ extension TilingSettings {
         appBarStyle.copyScreen(parent, to: minted)
         kiwishelf.pocketEdges.copyScreen(parent, to: minted)
         Self.copy(parent, to: minted, in: &spaceBarStyle.visibilityOverride)
-        Self.copy(parent, to: minted, in: &appBarStyle.visibilityOverride)
+        eachAppBarVisibilityMap { Self.copy(parent, to: minted, in: &$0) }
     }
 
     private static func copy(

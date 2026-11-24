@@ -64,7 +64,7 @@ extension KiwiShelfCard {
                 L("kiwishelf.show.label", "Show"),
                 .spaceBar,
                 model.barShowBinding(.spaceBar),
-                help: model.screenShowsHelp(.space)
+                help: model.screenShowsHelp(.spaceBar)
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfEach.children
@@ -79,7 +79,7 @@ extension KiwiShelfCard {
                 Self.showIn(.monocle),
                 .appBar,
                 model.barShowBinding(.appBar(.monocle)),
-                help: model.screenShowsHelp(.app)
+                help: model.screenShowsHelp(.appBar(.monocle))
             )
             .modifier(GreyOut(active: maximizes))
             .searchAnchored(
@@ -96,7 +96,7 @@ extension KiwiShelfCard {
                 Self.showIn(.scrolling),
                 .appBar,
                 model.barShowBinding(.appBar(.scrolling)),
-                help: model.screenShowsHelp(.app)
+                help: model.screenShowsHelp(.appBar(.scrolling))
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfEach.children

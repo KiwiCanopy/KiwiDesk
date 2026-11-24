@@ -72,7 +72,7 @@ struct ScreenShowRowsTests {
         model.config.settings.spaceBarStyle.visibilityOverride = [
             area: .hidden
         ]
-        model.config.settings.appBarStyle.visibilityOverride = [
+        model.config.settings.scrolling.appBar.visibilityOverride = [
             area: .auto
         ]
         #expect(
@@ -89,40 +89,68 @@ struct ScreenShowRowsTests {
     func showWritesTheArea() throws {
         let model = try model(split: true)
         let area = "Wide:3440x1440#1"
-        model.screenShowBinding(.space, on: area).wrappedValue = .hidden
+        model.screenShowBinding(.spaceBar, on: area).wrappedValue = .hidden
         #expect(
             model.config.settings.spaceBarStyle.visibilityOverride
                 == [area: .hidden]
         )
-        #expect(model.screenShow(.space, on: wide.fingerprint) == .always)
-        model.screenShowBinding(.space, on: area).wrappedValue = .always
+        #expect(
+            model.screenShow(.spaceBar, on: wide.fingerprint) == .always
+        )
+        model.screenShowBinding(.spaceBar, on: area).wrappedValue = .always
         #expect(model.config.settings.spaceBarStyle.visibilityOverride.isEmpty)
-        // The App Bar's Per layout clears; a value always stores.
-        model.screenShowBinding(.app, on: area).wrappedValue = .auto
-        #expect(model.screenShow(.app, on: area) == .auto)
-        model.screenShowBinding(.app, on: area).wrappedValue = nil
-        #expect(model.config.settings.appBarStyle.visibilityOverride.isEmpty)
-        #expect(model.screenShow(.app, on: area) == nil)
+        // A layout's App Bar takes its own value there; Inherit
+        // clears it, and the other layout keeps its own (#3618).
+        let monocle = model.screenShowBinding(.appBar(.monocle), on: area)
+        monocle.wrappedValue = .hidden
+        model.screenShowBinding(.appBar(.scrolling), on: area)
+            .wrappedValue = .always
+        #expect(
+            model.config.settings.monocle.appBar.visibilityOverride
+                == [area: .hidden]
+        )
+        #expect(
+            model.config.settings.scrolling.appBar.visibilityOverride
+                == [area: .always]
+        )
+        monocle.wrappedValue = nil
+        #expect(
+            model.config.settings.monocle.appBar.visibilityOverride.isEmpty
+        )
+        #expect(model.screenShow(.appBar(.monocle), on: area) == nil)
+        #expect(model.screenShow(.appBar(.scrolling), on: area) == .always)
     }
 
     @Test("a bar-level Show pick clears that bar's areas (ruling 32)")
     func barPickClears() throws {
         let model = try model(split: true)
         let area = "Wide:3440x1440#1"
-        model.screenShowBinding(.space, on: area).wrappedValue = .hidden
-        model.screenShowBinding(.app, on: area).wrappedValue = .hidden
+        model.screenShowBinding(.spaceBar, on: area).wrappedValue = .hidden
+        model.screenShowBinding(.appBar(.monocle), on: area)
+            .wrappedValue = .hidden
+        model.screenShowBinding(.appBar(.scrolling), on: area)
+            .wrappedValue = .hidden
         model.barShowBinding(.appBar(.monocle)).wrappedValue = .auto
-        #expect(model.config.settings.appBarStyle.visibilityOverride.isEmpty)
+        #expect(
+            model.config.settings.monocle.appBar.visibilityOverride.isEmpty
+        )
+        // That layout's areas alone (#3618).
+        #expect(
+            !model.config.settings.scrolling.appBar.visibilityOverride
+                .isEmpty
+        )
         #expect(
             !model.config.settings.spaceBarStyle.visibilityOverride.isEmpty
         )
         model.barShowBinding(.spaceBar).wrappedValue = .auto
         #expect(model.config.settings.spaceBarStyle.visibilityOverride.isEmpty)
-        model.screenShowBinding(.space, on: area).wrappedValue = .hidden
-        model.screenShowBinding(.app, on: area).wrappedValue = .hidden
+        model.screenShowBinding(.spaceBar, on: area).wrappedValue = .hidden
+        model.screenShowBinding(.appBar(.monocle), on: area)
+            .wrappedValue = .hidden
         model.barVisibilityMaster.wrappedValue = .always
         #expect(model.config.settings.spaceBarStyle.visibilityOverride.isEmpty)
-        #expect(model.config.settings.appBarStyle.visibilityOverride.isEmpty)
+        let maps = model.config.settings.appBarHosts.map(\.visibilityOverride)
+        #expect(maps.allSatisfy { $0.isEmpty })
     }
 
     @Test("an area picked edits both bars' Show")
@@ -134,8 +162,11 @@ struct ScreenShowRowsTests {
                         + "KiwiShelfCard+Each.swift"
                 )
         )
-        #expect(source.contains("areaShow(.space, on: key"))
-        #expect(source.contains("areaShow(.app, on: key"))
+        let flat = source.filter { !$0.isWhitespace }
+        #expect(flat.contains("areaShow(.spaceBar,"))
+        // One row per App Bar layout under a picked area (#3618).
+        #expect(flat.contains("areaShow(.appBar(.monocle),"))
+        #expect(flat.contains("areaShow(.appBar(.scrolling),"))
         let rows = try SourceScan.strippedSource(
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(

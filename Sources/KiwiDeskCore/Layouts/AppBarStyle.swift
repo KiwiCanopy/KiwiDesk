@@ -13,10 +13,6 @@ public struct AppBarStyle: Sendable, Equatable {
     /// A screen's own edge, keyed by its fingerprint (#1948); a
     /// screen with none uses `edge`. Global only, like `edge`.
     public var edgeOverride: [String: AppBarEdge] = [:]
-    /// An area's own visibility, keyed by its `ScreenAreaKey`
-    /// (#3517), replacing every layout's App Bar visibility there.
-    /// Global only, like `edge`.
-    public var visibilityOverride: [String: ShelfVisibility] = [:]
     /// Edge mark by default, where the Space Bar's is Outline:
     /// the indicator's SHAPE is what tells the sections apart
     /// (#1517).
@@ -40,7 +36,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// and a screen's edge is written by `set_edge` (#1948).
     static let layoutFixedKeys: [CodingKeys: String] = {
         let keys: [CodingKeys] = [
-            .edge, .edgeOverride, .reserve, .visibilityOverride,
+            .edge, .edgeOverride, .reserve,
         ]
         return Dictionary(
             uniqueKeysWithValues: keys.map { key in

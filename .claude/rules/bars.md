@@ -166,12 +166,13 @@ twice, was a question the user answered twice. The argument is
   `TilingSettings.onScreen(_:)`, never beside it** — a second
   read beside it lets one screen's drawn and reserved strips
   disagree. **A per-area visibility (#3517 ruling 30) resolves in
-  the same step**: `space_bar.visibility_override` and
-  `app_bar.visibility_override`, sparse and keyed by
-  `ScreenAreaKey`, replace the bar's stored visibility there — the
-  App Bar's in every layout that carries one, never giving a
-  layout one it lacks — so an area whose bars are `hidden` draws
-  and reserves nothing (`AreaBarVisibilityTests`). The
+  the same step**: `space_bar.visibility_override` and each
+  hosting layout's `<layout>.app_bar.visibility_override` (#3618),
+  sparse and keyed by `ScreenAreaKey`, replace that bar's stored
+  visibility there — the App Bar's per layout, never giving a
+  layout one it lacks and never through an area-wide App Bar value
+  — so an area whose bars are `hidden` draws and reserves nothing
+  (`AreaBarVisibilityTests`). The
   reservation (`shelfEdges(in:on:)`), each
   display's live plan in `updateBars()` and every style a bar
   draws read the edges it resolved, so the views read

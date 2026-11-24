@@ -89,16 +89,4 @@ extension KiwiCore {
     /// area.
     static let unknownArea =
         "expected a screen number, fingerprint, area key or name"
-
-    /// The refusal of a layout's per-screen App Bar visibility,
-    /// which is global.
-    static let appBarScreenVisibilityIsGlobal =
-        "the App Bar's per-screen visibility is global: "
-        + "app_bar.set_visibility"
-
-    /// The refusal of an App Bar visibility for no screen: each
-    /// layout holds its own.
-    static let appBarVisibilityNeedsAScreen =
-        "app_bar.set_visibility takes a screen; a layout's own App "
-        + "Bar visibility is <layout>.set_app_bar_visibility"
 }

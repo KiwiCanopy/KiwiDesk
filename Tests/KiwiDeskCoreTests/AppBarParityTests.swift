@@ -27,14 +27,16 @@ struct AppBarParityTests {
 
     @Test("LayoutAppBar mirrors every AppBarStyle field")
     func propertyParity() {
-        // `visibility` is the one layout-only field (#761); every
-        // look field but the layout-fixed ones is an optional
-        // override of the global style.
+        // `visibility` and its per-area map are the layout-only
+        // fields (#761, #3618); every look field but the
+        // layout-fixed ones is an optional override of the global
+        // style.
         #expect(
             Self.layoutFixed.count == AppBarStyle.layoutFixedKeys.count
         )
         #expect(
-            fieldNames(LayoutAppBar()).subtracting(["visibility"])
+            fieldNames(LayoutAppBar())
+                .subtracting(["visibility", "visibilityOverride"])
                 == fieldNames(AppBarStyle()).subtracting(Self.layoutFixed)
         )
     }
@@ -128,11 +130,16 @@ struct AppBarCommandParityTests {
             setting.apply(to: &bar)
             let onStyle = changedFields(style, from: AppBarStyle())
             let onBar = changedFields(bar, from: LayoutAppBar())
-            // `visibility` is a layout's own (#761): it writes the
-            // bar alone, never the global style.
+            // `visibility` and an area's are a layout's own (#761,
+            // #3618): they write the bar alone, never the style.
             if case .visibility = setting {
                 #expect(onStyle.isEmpty)
                 #expect(onBar == ["visibility"])
+                continue
+            }
+            if case .screenVisibility = setting {
+                #expect(onStyle.isEmpty)
+                #expect(onBar == ["visibilityOverride"])
                 continue
             }
             #expect(onStyle.count == 1)
@@ -178,8 +185,6 @@ struct AppBarCommandParityTests {
             return [.bool(true)]
         case .edge: return [.string("left")]
         case .edgeOverride: return [.string("left"), .string("S:1x1")]
-        case .visibilityOverride:
-            return [.string("hidden"), .string("S:1x1")]
         case .activeIndicator: return [.string("outline")]
         case .titleCap: return [.number(40)]
         }
@@ -217,9 +222,11 @@ struct AppBarCommandParityTests {
     /// shape AGENTS §5 warns about.
     @Test("Each bar-hosting layout mirrors LayoutAppBar's keys")
     func layoutAppBarNamespaceParity() {
+        // A scoped map's verb is its field's (`setterField(of:)`).
         let expected = Set(
             LayoutAppBar.Key.allCases.map {
-                "set_app_bar_\($0.stringValue)"
+                "set_app_bar_"
+                    + BarStyleKeys.setterField(of: $0.stringValue)
             }
         )
         let hosting = APIReference.namespaces.filter { _, verbs in

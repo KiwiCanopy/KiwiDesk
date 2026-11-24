@@ -82,7 +82,11 @@ extension KiwiShelfCard {
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEach.children
-                .kiwishelfAppBarScreenShows
+                .kiwishelfMonocleScreenShows
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfEach.children
+                .kiwishelfScrollingScreenShows
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEach.children
@@ -156,7 +160,7 @@ extension KiwiShelfCard {
     private var spaceBarBlock: some View {
         barGroup(L("kiwishelf.bar.space_bar", "Space Bar")) {
             if let key = activeScope {
-                areaShow(.space, on: key, bar: .spaceBar)
+                areaShow(.spaceBar, Self.showLabel, on: key, bar: .spaceBar)
                 areaEdge(\.spaceBarStyle, on: key, bar: .spaceBar)
             } else {
                 showRow(.spaceBar(.spaceBarVisibility))
@@ -168,7 +172,18 @@ extension KiwiShelfCard {
     private var appBarBlock: some View {
         barGroup(L("kiwishelf.bar.app_bar", "App Bar")) {
             if let key = activeScope {
-                areaShow(.app, on: key, bar: .appBar)
+                areaShow(
+                    .appBar(.monocle),
+                    Self.showIn(.monocle),
+                    on: key,
+                    bar: .appBar
+                )
+                areaShow(
+                    .appBar(.scrolling),
+                    Self.showIn(.scrolling),
+                    on: key,
+                    bar: .appBar
+                )
                 areaEdge(\.appBarStyle, on: key, bar: .appBar)
             } else {
                 showRow(.layoutAppBar(.monocleAppBarVisibility))
@@ -211,21 +226,35 @@ extension KiwiShelfCard {
         }
     }
 
-    /// The picked area's Show: Always, Auto or Hidden, and for the
-    /// App Bar Per layout first, which follows each layout's own.
+    /// The picked area's Show: Always, Auto or Hidden, and for a
+    /// layout's App Bar Inherit first, which follows that layout's
+    /// own (#3618).
     private func areaShow(
-        _ show: ScreenShowBar,
+        _ row: BarShowRow,
+        _ label: String,
         on key: String,
         bar: ShelfBlock
     ) -> some View {
-        let label = L("kiwishelf.show.label", "Show")
-        return SegmentedPicker(
+        SegmentedPicker(
             label,
             spokenLabel: bar.spoken(label),
-            selection: model.screenShowBinding(show, on: key),
-            options: SettingsModel.screenShowOptions(show)
-                .map { ($0.1, $0.0) }
+            selection: model.screenShowBinding(row, on: key),
+            options: SettingsModel.screenShowOptions(row)
+                .map { ($0.1, $0.0) },
+            help: row.isAppBar ? Self.inheritHelp : nil
         )
+    }
+
+    /// What a layout's Inherit follows, on its row's `?`.
+    private static var inheritHelp: String {
+        L(
+            "kiwishelf.show.screen.app_bar.inherit.help",
+            "Inherit follows this layout's Show under All screens."
+        )
+    }
+
+    private static var showLabel: String {
+        L("kiwishelf.show.label", "Show")
     }
 
     /// The picked area's edge for `edged`.

@@ -6,7 +6,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// An area may hide its bars (#3517 ruling 30): the sparse
-/// `visibility_override` beside each bar's visibility, keyed by
+/// `visibility_override` beside the Space Bar's visibility and
+/// each layout's App Bar visibility (#3618), keyed by
 /// area key, resolves in the one per-screen step, so an area whose
 /// bars are hidden draws and reserves nothing while its neighbour
 /// keeps them.
@@ -32,18 +33,41 @@ struct AreaBarVisibilityTests {
         #expect(area.onScreen(Self.key) == area)
     }
 
-    @Test("the App Bar's entry reaches only layouts that carry one")
-    func appBarEntryKeepsLayoutsWithout() {
+    @Test("a layout's App Bar entry reaches that layout alone")
+    func appBarEntryIsPerLayout() {
         var settings = TilingSettings()
-        settings.appBarStyle.visibilityOverride = [Self.key: .hidden]
+        settings.monocle.appBar.visibility = .always
+        settings.scrolling.appBar.visibility = .always
+        settings.monocle.appBar.visibilityOverride = [Self.key: .hidden]
+        settings.scrolling.appBar.visibilityOverride = [Self.key: .auto]
         let area = settings.onScreen(Self.key)
-        for mode in LayoutMode.allCases {
-            let stored = settings.appBarVisibility(in: mode)
-            let shown = area.appBarVisibility(in: mode)
-            #expect((stored == nil) == (shown == nil), "\(mode)")
-            if stored != nil { #expect(shown == .hidden, "\(mode)") }
+        #expect(area.appBarVisibility(in: .monocle) == .hidden)
+        #expect(area.appBarVisibility(in: .scrolling) == .auto)
+        for mode in LayoutMode.allCases
+        where mode != .monocle
+            && mode != .scrolling
+        {
+            #expect(area.appBarVisibility(in: mode) == nil, "\(mode)")
         }
-        #expect(area.appBarStyle.visibilityOverride.isEmpty)
+        let maps = area.appBarHosts.map(\.visibilityOverride)
+        #expect(maps.allSatisfy { $0.isEmpty })
+        // Another area takes each layout's own Show.
+        let other = settings.onScreen("Wide:3440x1440")
+        #expect(other.appBarVisibility(in: .monocle) == .always)
+        #expect(other.appBarVisibility(in: .scrolling) == .always)
+        #expect(area.onScreen(Self.key) == area)
+    }
+
+    /// No global App Bar map survives as a fallback (#3618): a
+    /// stored `app_bar.visibility_override` decodes to nothing.
+    @Test("a global App Bar map is no longer read")
+    func globalMapIsRetired() throws {
+        let json = #"{"visibility_override":{"Wide:3440x1440#1":"hidden"}}"#
+        let style = try JSONDecoder().decode(
+            AppBarStyle.self,
+            from: Data(json.utf8)
+        )
+        #expect(style == AppBarStyle())
     }
 
     @Test("a hidden area reserves nothing; its neighbour reserves")
@@ -85,12 +109,15 @@ struct AreaBarVisibilityTests {
     @Test("the map stays out of the JSON while empty and round-trips")
     func storedSparse() throws {
         var style = SpaceBarStyle()
-        var app = AppBarStyle()
-        let empty =
-            try JSONSerialization.jsonObject(
-                with: JSONEncoder().encode(style)
-            ) as? [String: Any]
-        #expect(empty?["visibility_override"] == nil)
+        var app = LayoutAppBar()
+        for encoded in [
+            try JSONEncoder().encode(style), try JSONEncoder().encode(app),
+        ] {
+            let empty =
+                try JSONSerialization.jsonObject(with: encoded)
+                as? [String: Any]
+            #expect(empty?["visibility_override"] == nil)
+        }
         style.visibilityOverride = [Self.key: .auto]
         app.visibilityOverride = [Self.key: .hidden]
         let back = try JSONDecoder().decode(
@@ -98,7 +125,7 @@ struct AreaBarVisibilityTests {
             from: JSONEncoder().encode(style)
         )
         let appBack = try JSONDecoder().decode(
-            AppBarStyle.self,
+            LayoutAppBar.self,
             from: JSONEncoder().encode(app)
         )
         #expect(back.visibilityOverride == [Self.key: .auto])

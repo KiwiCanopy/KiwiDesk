@@ -212,9 +212,15 @@ struct KiwiShelfEachControls: Sendable {
         "kiwishelf.edge.per_screen.app_bar",
         "Per screen or area"
     )
-    let kiwishelfAppBarScreenShows = SettingsControl(
-        "kiwishelf.show.per_screen.app_bar",
-        "App Bar: Show per screen"
+    let kiwishelfMonocleScreenShows = SettingsControl(
+        "kiwishelf.show.per_screen.monocle",
+        "App Bar in %1$@: Show per screen",
+        naming: .monocle
+    )
+    let kiwishelfScrollingScreenShows = SettingsControl(
+        "kiwishelf.show.per_screen.scrolling",
+        "App Bar in %1$@: Show per screen",
+        naming: .scrolling
     )
     let pocketShow = SettingsControl(
         "kiwishelf.show.pocket",

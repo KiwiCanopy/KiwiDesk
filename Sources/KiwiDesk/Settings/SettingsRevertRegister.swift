@@ -26,9 +26,10 @@ enum SettingsRevertRegister {
         .kiwishelf(.visibility): .all([
             .leaf(\.settings.spaceBarStyle.visibility),
             .leaf(\.settings.spaceBarStyle.visibilityOverride),
-            .leaf(\.settings.appBarStyle.visibilityOverride),
             .leaf(\.settings.monocle.appBar.visibility),
+            .leaf(\.settings.monocle.appBar.visibilityOverride),
             .leaf(\.settings.scrolling.appBar.visibility),
+            .leaf(\.settings.scrolling.appBar.visibilityOverride),
             .leaf(\.settings.kiwishelf.pocketVisibility),
         ]),
         .kiwishelf(.spaceBarEdge): spaceBarEdge,
@@ -38,8 +39,11 @@ enum SettingsRevertRegister {
         .kiwishelf(.spaceBarScreenVisibility): .leaf(
             \.settings.spaceBarStyle.visibilityOverride
         ),
-        .kiwishelf(.appBarScreenVisibility): .leaf(
-            \.settings.appBarStyle.visibilityOverride
+        .kiwishelf(.monocleAppBarScreenVisibility): .leaf(
+            \.settings.monocle.appBar.visibilityOverride
+        ),
+        .kiwishelf(.scrollingAppBarScreenVisibility): .leaf(
+            \.settings.scrolling.appBar.visibilityOverride
         ),
         .colours(.liquidGlassMaster): .all([
             .leaf(\.settings.kiwishelf.liquidGlass),

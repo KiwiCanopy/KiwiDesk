@@ -60,7 +60,8 @@ struct ScreenKeyedMapCensusTests {
         settings.appBarStyle.edgeOverride = edges
         settings.kiwishelf.pocketEdgeOverride = edges
         settings.spaceBarStyle.visibilityOverride = shows
-        settings.appBarStyle.visibilityOverride = shows
+        settings.monocle.appBar.visibilityOverride = shows
+        settings.scrolling.appBar.visibilityOverride = shows
         return settings
     }
 

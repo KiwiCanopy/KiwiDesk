@@ -21360,21 +21360,24 @@ area's entries onto the survivor, and a split copies the parent's
 to the new area, so splitting a screen whose bars sit at the bottom
 keeps them there. "Nothing else does" no longer
 holds for the bars' Show: each bar's visibility takes the same
-sparse shape — `space_bar.visibility_override` and
-`app_bar.visibility_override` — resolved in the one per-screen
+sparse shape — `space_bar.visibility_override` and each hosting
+layout's `<layout>.app_bar.visibility_override` — resolved in the
+one per-screen
 step, so an area whose bars are Hidden draws and reserves nothing.
 Thickness, margins and the rest stay one value, as before.
 
 The Space Bar keeps one visibility, so an area given the bar's own
 value stores nothing, as a screen given its bar's edge does. The
-App Bar's visibility is each layout's own, so there is no bar
-value to follow: an area's entry replaces it in every layout that
-carries an App Bar and gives none to a layout without one, and the
-row's Per layout choice is the "no entry" state. A bar-level Show
+App Bar's visibility is each layout's own, so its area map is each
+layout's too (#3618): an area's entry replaces that layout's value
+there and no other's, read as the layout's entry, else the
+layout's own visibility — never an area-wide App Bar value beside
+it, which would be the chain area×layout, then area, then layout.
+The row's Inherit choice is the "no entry" state. A bar-level Show
 pick — the Show master, the Space Bar's Show or a layout's App Bar
 Show, in Settings, and the screen-less `space_bar.set_visibility`
 and `<layout>.set_app_bar_visibility` in Lua — clears that bar's
-entries, as a pick of a bar's edge writes every level below it, so
+entries, a layout's Show only that layout's, as a pick of a bar's edge writes every level below it, so
 the master and those rows read as differing, with a `?` naming the
 Screen or area picker, while an entry stands. Settings writes the
 entries where it writes the edge — the bar's Show and Position for
