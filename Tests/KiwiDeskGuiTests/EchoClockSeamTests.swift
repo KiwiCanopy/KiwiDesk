@@ -24,9 +24,11 @@ import Testing
 /// every `Date()` left in Core is counted per file against a
 /// register naming why it stays, so a new ledger reds until it is
 /// classified. Residue: a ledger growing its own clock as
-/// `CACurrentMediaTime()` or `DispatchTime.now()` is not this
-/// needle's, and a pin re-written equivalently (`{ 0.0 }`) reads
-/// as missing, fail-closed.
+/// `CACurrentMediaTime()`, `DispatchTime.now()`,
+/// `ContinuousClock.now` or `clock_gettime_nsec_np` is not this
+/// needle's (tests.md says what its test owes, #3567), and a pin
+/// re-written equivalently (`{ 0.0 }`) reads as missing,
+/// fail-closed.
 @Suite("The echo grace runs on an injected clock")
 struct EchoClockSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)

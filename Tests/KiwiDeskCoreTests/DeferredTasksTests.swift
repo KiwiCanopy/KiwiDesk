@@ -164,13 +164,47 @@ struct DeferredTasksTests {
             try? await Task.sleep(for: .milliseconds(30))
             reschedule()
         }
-        // No wait has ended, so every fire so far is the cap's.
+        // No wait has ended, so every fire so far is the cap's; a
+        // cap fire opens a fresh burst, so 11 calls cap at most 5.
         #expect(fireCount >= 1)
+        #expect(fireCount <= 5)
         let capped = fireCount
         owner.sleep = { _ in }
         reschedule()
         await owner.task(for: .barTitleRefresh)?.value
         #expect(fireCount == capped + 1)
+    }
+
+    /// A burst's later wait is clamped to what is left of its cap;
+    /// an hour-long cap no runner reaches, so a slow run only
+    /// shortens what is left (#3567).
+    @Test("A rescheduled wait is clamped to the cap's remainder")
+    func rescheduleClampsToTheCap() async {
+        let owner = DeferredTasks()
+        let sleeps = Sleeps()
+        owner.sleep = { wait in
+            sleeps.note(wait)
+            try? await Task.sleep(for: .seconds(3_600))
+        }
+        func reschedule() {
+            owner.schedule(
+                .barTitleRefresh,
+                after: .seconds(3_600),
+                maxWait: .seconds(3_600)
+            ) {}
+        }
+        reschedule()
+        try? await Task.sleep(for: .milliseconds(50))
+        reschedule()
+        let last = owner.task(for: .barTitleRefresh)
+        #expect(last != nil)
+        owner.cancelAll()
+        await last?.value
+        let waits = sleeps.all.sorted()
+        let aged = Duration.seconds(3_600) - .milliseconds(50)
+        #expect(waits.count == 2)
+        #expect(waits.first.map { $0 <= aged } == true)
+        #expect(waits.last.map { $0 > .seconds(3_599) } == true)
     }
 
     /// A long wait parks until its cancel and a short one lands, so
@@ -192,9 +226,10 @@ struct DeferredTasksTests {
         ) {
             fired = true
         }
-        // Ages the burst start past 50 ms; a slow runner only
-        // ages it further.
-        try? await Task.sleep(for: .milliseconds(50))
+        // Ages the burst start past 250 ms, the slack a correct
+        // reschedule's own clock reads get; a slow runner only ages
+        // it further.
+        try? await Task.sleep(for: .milliseconds(250))
         owner.cancel(.barTitleRefresh)
         #expect(!fired)
 
@@ -203,7 +238,7 @@ struct DeferredTasksTests {
         owner.schedule(
             .barTitleRefresh,
             after: .milliseconds(100),
-            maxWait: .milliseconds(150)
+            maxWait: .milliseconds(350)
         ) {
             fired = true
         }
