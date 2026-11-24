@@ -148,6 +148,7 @@ struct ScreenAreaEditor: View {
                     .menuStyle(.borderlessButton)
                     .neutralMenuLabel()
                     .fixedSize()
+                    .menuTriggerHover()
                 } else {
                     HStack(spacing: 6) {
                         ForEach(neighbours, id: \.self) { other in
