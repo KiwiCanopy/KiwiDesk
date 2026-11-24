@@ -21,6 +21,7 @@ struct ReportProblemTests {
         var opened: [URL] = []
         var picks = 0
         var busyAtPick: Bool?
+        var writtenAtOpen: Bool?
     }
 
     private func context(_ url: URL?) -> String? {
@@ -53,7 +54,12 @@ struct ReportProblemTests {
                 calls.busyAtPick = model?.isExportingLog
                 return file
             },
-            open: { calls.opened.append($0) }
+            open: {
+                calls.opened.append($0)
+                calls.writtenAtOpen = file.map {
+                    FileManager.default.fileExists(atPath: $0.path)
+                }
+            }
         )
     }
 
@@ -83,6 +89,8 @@ struct ReportProblemTests {
         #expect(calls.picks == 1)
         #expect(FileManager.default.fileExists(atPath: file.path))
         #expect(calls.opened.count == 1)
+        // The log is on disk before the form asks for it.
+        #expect(calls.writtenAtOpen == true)
         #expect(
             context(calls.opened.first)?.hasSuffix(ProblemReport.logLine)
                 == true
@@ -134,6 +142,7 @@ struct ReportProblemTests {
             handoff: handoff(calls, picking: nil)
         )
         #expect(calls.opened.count == 1)
+        #expect(calls.picks == 0)
         // Without a log the form asks for none, and no panel shows.
         #expect(
             context(calls.opened.first)?.contains(ProblemReport.logLine)
@@ -208,5 +217,7 @@ struct ReportProblemTests {
             ) == 1
         )
         #expect(source.occurrences(of: "logFolder") == 0)
+        // …and the footer's door is the one that uses it.
+        #expect(source.occurrences(of: "handoff:.live") == 1)
     }
 }

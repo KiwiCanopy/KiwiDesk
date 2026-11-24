@@ -51,7 +51,10 @@ struct ProblemReportTests {
                 == "Screens: 2\nDisplays have separate Spaces: on\n"
                 + "Drag the log you just saved into this field."
         )
-        #expect(report.formURL(logSaved: false) == report.formURL)
+        #expect(
+            query(report.formURL(logSaved: false))["extra_context"]
+                == "Screens: 2\nDisplays have separate Spaces: on"
+        )
     }
 
     @Test("a plus in a fact survives the form's query")
