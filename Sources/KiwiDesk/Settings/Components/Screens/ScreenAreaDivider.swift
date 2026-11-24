@@ -14,6 +14,13 @@ struct AreaDividerDrag: Equatable {
     let cut: Int
     /// Where the dragged divider is, in screen points.
     let position: Int
+    let axis: ScreenAreaCut.Axis
+
+    /// Whether `cut` is the divider a `.divider` snap joined: once
+    /// in line, the two move as one (accepted-limitations.md).
+    func joins(_ cut: ScreenAreaCut) -> Bool {
+        snap == .divider && cut.axis == axis && cut.position == position
+    }
 }
 
 /// One divider of a split card (#3517 ruling 25): a hairline seam
@@ -41,6 +48,8 @@ struct ScreenAreaDivider: View {
 
     private var sideBySide: Bool { cut.axis == .sideBySide }
     private var dragging: Bool { drag?.cut == index }
+    /// Dragged, or joined by the drag's snap: both take the tint.
+    private var lit: Bool { dragging || drag?.joins(cut) == true }
 
     var body: some View {
         ZStack {
@@ -52,7 +61,7 @@ struct ScreenAreaDivider: View {
                 )
             Capsule()
                 .fill(
-                    dragging
+                    lit
                         ? AnyShapeStyle(.tint)
                         : AnyShapeStyle(SettingsTheme.ink3)
                 )
@@ -90,14 +99,14 @@ struct ScreenAreaDivider: View {
     }
 
     private var lineStyle: AnyShapeStyle {
-        if dragging { return AnyShapeStyle(.tint) }
+        if lit { return AnyShapeStyle(.tint) }
         return hovering
             ? AnyShapeStyle(SettingsTheme.hoverEdge)
             : AnyShapeStyle(SettingsTheme.hairline)
     }
 
     private var lineWidth: CGFloat {
-        dragging ? 2 : hovering ? SettingsTheme.hoverEdgeStroke : 1
+        lit ? 2 : hovering ? SettingsTheme.hoverEdgeStroke : 1
     }
 
     private var cursor: NSCursor {
@@ -153,7 +162,8 @@ struct ScreenAreaDivider: View {
             split: landed.split,
             snap: kept ? snapped.snap : nil,
             cut: index,
-            position: landed.position
+            position: landed.position,
+            axis: cut.axis
         )
     }
 

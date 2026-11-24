@@ -140,28 +140,40 @@ struct ScreenAreaEditor: View {
                 caption: nil
             ) {
                 if ScreenAreaEditing.mergePullsDown(neighbours) {
-                    Menu(ScreenAreaEditing.mergeMenuTitle) {
-                        ForEach(neighbours, id: \.self) { other in
-                            mergeButton(area, other)
-                        }
-                    }
-                    .menuStyle(.borderlessButton)
-                    .neutralMenuLabel()
-                    .fixedSize()
-                    .menuTriggerHover()
+                    mergeMenu(area, neighbours)
                 } else {
-                    HStack(spacing: 6) {
-                        ForEach(neighbours, id: \.self) { other in
-                            mergeButton(area, other).settingsActionButton()
+                    // Long custom names fall back to the pull-down.
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 6) {
+                            ForEach(neighbours, id: \.self) { other in
+                                mergeButton(area, other)
+                                    .settingsActionButton()
+                            }
                         }
+                        mergeMenu(area, neighbours)
                     }
                 }
             }
         }
     }
 
+    private func mergeMenu(_ area: Int, _ neighbours: [Int]) -> some View {
+        Menu(ScreenAreaEditing.mergeMenuTitle) {
+            ForEach(neighbours, id: \.self) { other in
+                mergeButton(area, other)
+            }
+        }
+        .menuStyle(.borderlessButton)
+        .neutralMenuLabel()
+        .fixedSize()
+        .menuTriggerHover()
+    }
+
+    /// The neighbour's bare name: the row title says Merge, and
+    /// VoiceOver, which skips that title, hears the whole action.
     private func mergeButton(_ area: Int, _ other: Int) -> some View {
-        Button(ScreenAreaEditing.mergeTitle(other, model, display)) {
+        let title = ScreenAreaEditing.mergeTitle(other, model, display)
+        return Button(model.areaLabel(other, on: display) ?? title) {
             let kept = model.mergeArea(area, with: other, on: display)
             select(
                 ScreenSelection(
@@ -171,6 +183,8 @@ struct ScreenAreaEditor: View {
             )
             landFocus()
         }
+        .help(title)
+        .accessibilityLabel(title)
     }
 
     /// The row or column the selection sits in (#3541).

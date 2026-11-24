@@ -44,8 +44,7 @@ struct ScreensSection: View {
     private var areaCaption: String {
         L(
             "monitors.picture.caption",
-            "Drag a Space onto the screen it belongs to. Select a "
-                + "screen to split it into areas."
+            "Drag a Space onto the screen it belongs to."
         )
     }
 
@@ -180,10 +179,10 @@ struct ScreensSection: View {
     @ViewBuilder private func selectionEditor(
         rows: ScreensFamilyRows
     ) -> some View {
+        Divider()
         if let display = rows.displays.first(where: {
             $0.id == selection?.display
         }) {
-            Divider()
             ScreenAreaEditor(
                 model: model,
                 display: display,
@@ -194,6 +193,15 @@ struct ScreensSection: View {
                 percent: $model.nav.areaSizesInPercent,
                 select: { selection = $0 }
             )
+        } else {
+            Text(
+                L(
+                    "monitors.selection.hint",
+                    "Click a screen or an area to split, merge or rename it."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 

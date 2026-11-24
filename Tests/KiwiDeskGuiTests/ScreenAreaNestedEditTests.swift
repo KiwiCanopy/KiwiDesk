@@ -82,6 +82,38 @@ struct ScreenAreaNestedEditTests {
         )
     }
 
+    /// A snap into line tints the divider it joined, and only that
+    /// one: same axis, same position, a `.divider` snap.
+    @Test func aSnapLightsOnlyTheDividerItJoined() throws {
+        let split = try #require(
+            ScreenSplit.whole(width: 3440, height: 1440)
+                .splitting(0, .sideBySide)?.splitting(0, .stacked)
+        )
+        let cut = try #require(
+            ScreenAreaCuts.cuts(of: split.areas, width: 3440, height: 1440)?
+                .first { $0.axis == .stacked }
+        )
+        func drag(
+            _ snap: ScreenAreaSnap?,
+            _ axis: ScreenAreaCut.Axis,
+            at position: Int
+        ) -> AreaDividerDrag {
+            AreaDividerDrag(
+                split: split,
+                snap: snap,
+                cut: 9,
+                position: position,
+                axis: axis
+            )
+        }
+        let at = cut.position
+        #expect(drag(.divider, .stacked, at: at).joins(cut))
+        #expect(!drag(.even, .stacked, at: at).joins(cut))
+        #expect(!drag(nil, .stacked, at: at).joins(cut))
+        #expect(!drag(.divider, .sideBySide, at: at).joins(cut))
+        #expect(!drag(.divider, .stacked, at: at + 1).joins(cut))
+    }
+
     /// Every split two runs deep, each run two or three wide, and
     /// three deep where Core numbers: Core's paths and the GUI's
     /// name table are one contract, so every area words to a name
@@ -162,6 +194,29 @@ struct ScreenAreaNestedEditTests {
         #expect(editor.contains("let axes = ScreenAreaEditing.axes\n"))
         #expect(
             editor.contains("if ScreenAreaEditing.mergePullsDown(neighbours)")
+        )
+        // A neighbour's button says its name and speaks the action;
+        // a pair too wide falls back to the pull-down.
+        let button = try #require(
+            editor.range(of: "private func mergeButton(")
+        )
+        let body = String(editor[button.lowerBound...].prefix(700))
+        #expect(body.contains(".help(title)"))
+        #expect(body.contains(".accessibilityLabel(title)"))
+        #expect(body.contains("Button(model.areaLabel(other, on: display)"))
+        #expect(editor.contains("ViewThatFits(in: .horizontal)"))
+        // The hint stands in for the editor while nothing is selected.
+        let section = try String(
+            contentsOf: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/ScreensSection.swift"
+            ),
+            encoding: .utf8
+        )
+        #expect(
+            SourceScan.stripComments(section).contains(
+                "} else {\n            Text(\n                L(\n"
+                    + "                    \"monitors.selection.hint\""
+            )
         )
     }
 }

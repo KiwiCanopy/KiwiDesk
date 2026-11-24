@@ -179,6 +179,26 @@ struct ScreenSplitNestedTests {
         #expect(snapped.snap == .divider)
     }
 
+    /// A split can line dividers up as a drag can: rows split in
+    /// half at the same x read as columns, so the two vertical
+    /// dividers are one, the limitation accepted-limitations.md
+    /// records (#3541 ruling 5).
+    @Test func aStackedFirstGridReadsAsColumns() throws {
+        let split = try #require(
+            whole.splitting(0, .stacked)?.splitting(0, .sideBySide)?
+                .splitting(1, .sideBySide)
+        )
+        #expect(valid(split))
+        #expect(split.runs.first?.axis == .sideBySide)
+        let cuts = try #require(
+            ScreenAreaCuts.cuts(of: split.areas, width: 3440, height: 1440)
+        )
+        let upright = cuts.filter { $0.axis == .sideBySide }
+        #expect(upright.count == 1)
+        #expect(upright.first?.start == 0)
+        #expect(upright.first?.end == 1440)
+    }
+
     @Test func aSegmentMovesAlone() throws {
         let split = try grid()
         let cuts = try #require(

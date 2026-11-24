@@ -114,8 +114,8 @@ class — see
 
 :::unreleased
 On a [split screen](lua-reference.md#set_display_areas), two
-dividers dragged into line become one: once the segments meet edge
-to edge, a drag moves the whole line. A split is stored as its
+dividers dragged or split into line become one: once the segments
+meet edge to edge, a drag moves the whole line. A split is stored as its
 areas' rectangles, which keep no memory of which cut came first, so
 the dividers are read off the rectangles each time. To part the
 line again, merge the areas on one side and split them anew, or set
