@@ -305,13 +305,16 @@ struct DesktopsGeometryTests {
         let model = try read("JumpModel+Desktops.swift")
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "\n", with: "")
-        #expect(
-            model.contains(
-                "content:DesktopsGeometry.preferredWidth(of:overview))"
-                    + "letgeometry=DesktopsGeometry("
-                    + "overview:overview,width:width,cap:sheetCap)"
-            )
-        )
+        let wiring = [
+            "letgutter=DesktopsGeometry.gutter(of:overview)",
+            "letwidth=room.width(JumpPanelRoom.fit(of:.desktops),",
+            "content:DesktopsGeometry.preferredWidth(",
+            "of:overview,gutter:gutter))",
+            "letgeometry=DesktopsGeometry(",
+            "overview:overview,width:width,cap:sheetCap,",
+            "gutter:gutter)",
+        ].joined()
+        #expect(model.contains(wiring))
         #expect(model.contains("geometry:geometry)"))
     }
 }

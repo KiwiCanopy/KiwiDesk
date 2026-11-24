@@ -31,9 +31,14 @@ extension JumpModel {
     }
 
     /// The Desktops side's own width: one narrowest column per
-    /// screen (#3570 ▸ Ruling 4), the field row's before it loads.
+    /// screen (#3570 ▸ Ruling 4) and the grid's header column
+    /// (#3602), the field row's before it loads.
     var desktopsContentWidth: CGFloat {
-        desktops.map { DesktopsGeometry.preferredWidth(of: $0.overview) }
-            ?? room.fieldWidth
+        desktops.map {
+            DesktopsGeometry.preferredWidth(
+                of: $0.overview,
+                gutter: $0.geometry.grid?.gutter
+            )
+        } ?? room.fieldWidth
     }
 }

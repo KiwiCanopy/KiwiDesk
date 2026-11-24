@@ -1422,7 +1422,8 @@ must keep:
   shared Desktops (#3602) — with a thin `paint.selection` stroke,
   lighter than a selected tile's 2 pt ring, and draws no ground of
   its own
-  (`DesktopTitleHoverTests` ▸ `columnRings`, `titleStaysPlain`).
+  (`DesktopTitleHoverTests` ▸ `cardRings`, `rowRings`,
+  `titleStaysPlain`).
 
 ## A diff row's ↺ (#792)
 

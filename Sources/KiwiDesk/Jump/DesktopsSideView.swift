@@ -7,7 +7,8 @@ import SwiftUI
 /// header, its Desktops stacked downward. The columns share the
 /// panel's width down to a floor past which the row of screens
 /// scrolls sideways, never wrapping; past the height cap each
-/// column scrolls down.
+/// column scrolls down. With shared Desktops on two or more screens
+/// the Desktops are rows instead (`DesktopsGridView`, #3602).
 struct DesktopsSideView: View {
     let state: DesktopsState
     let icons: [pid_t: NSImage]
@@ -23,6 +24,30 @@ struct DesktopsSideView: View {
     private var geometry: DesktopsGeometry { state.geometry }
 
     var body: some View {
+        Group {
+            if geometry.grid == nil {
+                columns
+            } else {
+                DesktopsGridView(
+                    state: state,
+                    icons: icons,
+                    onPlace: onPlace,
+                    onWindow: onWindow,
+                    onMore: onMore,
+                    onDrop: onDrop,
+                    pointer: pointer
+                )
+            }
+        }
+        .frame(height: geometry.height)
+        .desktopTitleHints()
+        .accessibilityAction(
+            named: Text(DesktopsText.editInSettings),
+            onSettings
+        )
+    }
+
+    private var columns: some View {
         ViewLine(
             selected: state.place.map { DesktopsScrollID.screen($0.screen) },
             inset: DesktopsGeometry.rowInset
@@ -42,19 +67,13 @@ struct DesktopsSideView: View {
             }
             .padding(.vertical, DesktopsGeometry.sidePadding)
         }
-        .frame(height: geometry.height)
-        .desktopTitleHints()
-        .accessibilityAction(
-            named: Text(DesktopsText.editInSettings),
-            onSettings
-        )
     }
 
     private func column(_ screen: Int) -> some View {
         let row = state.overview.screens[screen]
         return VStack(alignment: .leading, spacing: DesktopsGeometry.headerGap)
         {
-            header(row)
+            Self.header(row)
             // The selected line stays clear of the column's fade.
             FadingColumn(
                 selected: selected(in: screen),
@@ -127,7 +146,7 @@ struct DesktopsSideView: View {
     /// The column's header: the screen's name, and "main" on the
     /// screen with the menu bar. No "here": the starting selection
     /// says where KiwiHub opened (#3572 ruling 4).
-    private func header(_ row: DesktopOverview.Screen) -> some View {
+    static func header(_ row: DesktopOverview.Screen) -> some View {
         HStack(spacing: 6) {
             Image(systemName: "display")
                 .font(.caption2)
@@ -154,5 +173,7 @@ struct DesktopsSideView: View {
 enum DesktopsScrollID: Hashable {
     case screen(Int)
     case desktop(Int, Int)
+    /// A shared Desktop's row in the grid (#3602).
+    case row(Int)
     case line(DesktopsPlace)
 }

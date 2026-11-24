@@ -11,6 +11,10 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
     let selected: Selected?
     /// The margin before the first item and after the last.
     var inset: CGFloat = KeyPanelStyle.selectionInset
+    /// The width at the leading edge that stays put while the line
+    /// scrolls, the leading fade starting past it (#3602's frozen
+    /// header column, `viewLineScrolled`).
+    var pinned: CGFloat = 0
     @ViewBuilder let content: Content
 
     @State private var offset: CGFloat = 0
@@ -28,6 +32,7 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
                 content
                     .padding(.horizontal, inset)
                     .background(measure)
+                    .environment(\.viewLineScrolled, max(-offset, 0))
             }
             .coordinateSpace(name: Self.space)
             .onGeometryChange(for: CGFloat.self) {
@@ -92,6 +97,7 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
             inset: inset
         )
         return HStack(spacing: 0) {
+            Rectangle().frame(width: pinned)
             LinearGradient(
                 colors: [leading ? .clear : .black, .black],
                 startPoint: .leading,
@@ -107,4 +113,11 @@ struct ViewLine<Selected: Hashable, Content: View>: View {
             .frame(width: Self.fade)
         }
     }
+}
+
+extension EnvironmentValues {
+    /// How far the enclosing `ViewLine` has scrolled sideways, which
+    /// a frozen leading column offsets by and the content beside it
+    /// masks by (#3602).
+    @Entry var viewLineScrolled: CGFloat = 0
 }

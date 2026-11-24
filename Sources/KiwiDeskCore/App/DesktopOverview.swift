@@ -8,10 +8,16 @@ public struct DesktopOverview: Sendable, Equatable {
     public let screens: [Screen]
     /// The window the user is in, which "Move window there" moves.
     public let yours: WindowID?
+    /// With shared Desktops on two or more screens, one row per
+    /// Desktop in the order every screen lists them (#3602); empty
+    /// where each screen's Desktops are its own, or one screen is
+    /// connected.
+    public let rows: [Row]
 
-    public init(screens: [Screen], yours: WindowID?) {
+    public init(screens: [Screen], yours: WindowID?, rows: [Row] = []) {
         self.screens = screens
         self.yours = yours
+        self.rows = rows
     }
 
     /// One connected screen's row.

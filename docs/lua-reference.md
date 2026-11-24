@@ -8355,6 +8355,16 @@ Desktop's title goes to the Space shown in the area KiwiHub opened
 over, else in the first area.
 :::
 
+:::unreleased
+With **Displays have separate Spaces** off and two or more screens,
+the overview draws one row per Desktop instead, the screens still
+columns: the Desktop's name, its ✓ and its profile head the row on
+the left, and the whole grid scrolls down as one under the screens'
+names. **←** **→** stay on the Desktop and land on the Space beside
+the one you left. A click on a row's name goes to the Desktop as a
+title click does.
+:::
+
 **Tab** reaches it from View, and **⇧Tab** from Windows.
 
 On every side:

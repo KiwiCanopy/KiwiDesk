@@ -21,6 +21,9 @@ struct DesktopCardView: View {
     let onMore: (DesktopsPlace, Bool) -> Void
     let onDrop: ([WindowID], DesktopsPlace) -> Void
     let pointer: DesktopsPointer
+    /// False for a cell of the shared-Desktop grid, whose row header
+    /// carries the title and its ring (#3602).
+    var titled = true
 
     @Environment(\.kiwiHubPaint) private var paint
 
@@ -30,14 +33,22 @@ struct DesktopCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesktopsGeometry.titleGap) {
-            title
+            if titled { title }
             lines
         }
         .padding(.horizontal, DesktopsGeometry.columnInset)
         .frame(width: width, alignment: .top)
         .overlay { ring }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(DesktopsText.desktop(desktop.label))
+        .accessibilityLabel(groupLabel)
+    }
+
+    /// The card's VoiceOver group: its Desktop, or in the grid,
+    /// whose row names the Desktop, its screen.
+    private var groupLabel: String {
+        titled
+            ? DesktopsText.desktop(desktop.label)
+            : DesktopsSideView.title(state.overview.screens[screen])
     }
 
     /// The lines, each area's under its header (#3572 ruling 2),
@@ -106,7 +117,7 @@ struct DesktopCardView: View {
     /// title itself staying plain; the fill stays the selection's
     /// alone (#1173).
     @ViewBuilder private var ring: some View {
-        if pointer.lifts(titleTarget, selected: false) {
+        if titled, pointer.lifts(titleTarget, selected: false) {
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(paint.selection, lineWidth: 1.5)
                 .allowsHitTesting(false)

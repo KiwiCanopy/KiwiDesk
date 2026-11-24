@@ -18,6 +18,7 @@ extension KiwiCore {
         let main = PositionalDisplays.liveMainID
         let displays = state.workspaces.allDisplays
         let positions = ScreenShiftPlan.namePositions(of: displays)
+        let shared = sharedDesktops(in: snapshot)
         let screens = Self.physicalOrder(displays)
             .map { screen in
                 let uuid = byUUID.first { $0.value.id == screen.id }?.key
@@ -31,12 +32,20 @@ extension KiwiCore {
                         grouping: overviewGrouping(on: screen.id, here: area),
                         uuid: uuid,
                         in: snapshot,
-                        shared: sharedDesktops(in: snapshot)
+                        shared: shared
                     ),
                     position: positions[screen.id]
                 )
             }
-        return DesktopOverview(screens: screens, yours: jumpFocusedWindow())
+        return DesktopOverview(
+            screens: screens,
+            yours: jumpFocusedWindow(),
+            rows: DesktopOverview.rows(
+                of: screens,
+                shared: shared,
+                isShown: { Self.isShown($0, in: snapshot) }
+            )
+        )
     }
 
     /// Left to right, then top to bottom: System Settings ▸
