@@ -13,8 +13,21 @@ struct ResolvePackagesWiringTests {
     /// Commands that resolve the package when nothing has yet.
     private static let resolvers = [
         "swift build", "swift test", "swift run", "swift package",
-        "build-app.sh",
+        "build-app.sh", "-resolvePackageDependencies",
     ]
+
+    /// A `swift package … resolve` line, any flags between: a
+    /// resolve spelled outside the script, retried or not.
+    private static let handCopy =
+        #"swift\s+package\b[^\n]*\bresolve\b"#
+
+    /// The step's whole `run:` line, so `|| true` after it reads
+    /// as unwired rather than wired.
+    private static func wiredLines(_ job: String) -> Int {
+        job.split(separator: "\n").filter {
+            $0.trimmingCharacters(in: .whitespaces) == step
+        }.count
+    }
 
     /// Every workflow, comments stripped, by file name: a new
     /// one is read without being listed here.
@@ -63,15 +76,23 @@ struct ResolvePackagesWiringTests {
         for (id, body) in jobs {
             let isMac = Self.isMac(body)
             if isMac { macJobs += 1 }
-            let wired = body.components(separatedBy: Self.step)
+            let count = Self.wiredLines(body)
             #expect(
-                wired.count - 1 == (isMac ? 1 : 0),
-                "\(workflow) \(id) resolves \(wired.count - 1) times"
+                count == (isMac ? 1 : 0),
+                "\(workflow) \(id) resolves \(count) times"
             )
             #expect(
-                !body.contains("swift package resolve"),
+                body.range(of: Self.handCopy, options: .regularExpression)
+                    == nil,
                 "\(workflow) \(id) hand-copies the resolve"
             )
+            let wired = body.components(separatedBy: Self.step)
+            if wired.count > 1 {
+                // A step that may fail without failing the job.
+                let step = try workflowStep("Resolve packages", in: body)
+                #expect(!step.contains("continue-on-error"))
+                #expect(!step.contains("if:"))
+            }
             let head = wired[0]
             for needle in Self.resolvers {
                 #expect(
