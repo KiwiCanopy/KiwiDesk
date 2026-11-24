@@ -59,7 +59,7 @@ enum ColorsRowOrder {
     // MARK: - Colors & glass (#2389)
 
     /// The Accent group (#1857): the hue the active Space, the
-    /// focus border and the drag ghost share — one half of each
+    /// focus border and the drag drop zone share — one half of each
     /// colour-vision pair, beside the Second accent's other half.
     static let accentRows: [SettingKey] = [
         .kiwishelf(.activeItemColor),

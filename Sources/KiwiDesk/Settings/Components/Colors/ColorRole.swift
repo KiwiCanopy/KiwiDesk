@@ -22,8 +22,8 @@ enum ColorRole: CaseIterable {
         case .accent:
             return L(
                 "colors.accent.caption",
-                "The active Space, the focus border and the "
-                    + "window you drag."
+                "The active Space, the focus border and the drag "
+                    + "drop zone."
             )
         case .secondAccent:
             return L(

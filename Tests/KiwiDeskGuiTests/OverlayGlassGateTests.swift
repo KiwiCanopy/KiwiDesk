@@ -18,14 +18,11 @@ struct OverlayGlassGateTests {
     /// and the stored leaf it hands the gate.
     private static let renders = [
         (
-            file: "Tiling/KiwiCore+DragMove.swift",
-            function: "func handleDragMove(",
-            stored: "frost: settings.dragLiquidGlass"
-        ),
-        (
+            // The drag's panels and the Settings picture both
+            // render through this one door (#3583).
             file: "Tiling/DragMarkerView.swift",
-            function: "func redrawPreview(",
-            stored: "frost: input.storedGlass"
+            function: "func render(",
+            stored: "glass: look.storedGlass"
         ),
         (
             file: "App/KiwiCore+StickyMarks.swift",
@@ -130,20 +127,21 @@ struct OverlayGlassGateTests {
     }
 
     /// Every Core file that mints glass, and the suite that gates
-    /// its render — the one copy. Derived from `GlassPlate.make(`
-    /// and `GlassBox.make(` callers, so a new glass host reds until
-    /// it names its gate.
+    /// its render — the one copy. Derived from `GlassPlate.make(`,
+    /// `GlassBox.make(` and `SwitchPlateView` callers, so a new glass
+    /// host reds until it names its gate.
     private static let minters: [String: String] = [
         // The box mint behind the three callers below (#2150).
         "Bar/GlassBox.swift": "ReduceTransparencySeamTests",
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
-        "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
         "Borders/OverflowMarkView.swift": "OverlayGlassGateTests",
         "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
-        "Animation/BriefPocketViews.swift": "OverlayGlassGateTests",
+        "Bar/SwitchPlateView.swift": "OverlayGlassGateTests",
+        "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
+        "Animation/BriefPocketOverlay.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",
     ]
@@ -154,7 +152,11 @@ struct OverlayGlassGateTests {
         for file in try SourceScan.swiftSources(under: Self.core) {
             let text = Array(try SourceScan.strippedSource(at: file))
             guard
-                ["GlassPlate.make", "GlassBox.make"].contains(where: {
+                [
+                    "GlassPlate.make", "GlassBox.make",
+                    // A plate drawn through the shared view (#3583).
+                    "SwitchPlateView", "SwitchPlateView.surface",
+                ].contains(where: {
                     !SourceScan.callSites(in: text, for: $0).isEmpty
                 })
             else { continue }

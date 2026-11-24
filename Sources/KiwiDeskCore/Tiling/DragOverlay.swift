@@ -1,10 +1,11 @@
 import AppKit
 
 /// Visual drag feedback: the ghost at the dragged window's home slot
-/// and the drop zone at the slot a drop would swap with (#2797).
-/// Both are borderless click-through panels that never take focus or
-/// join the window cycle; frames are AX coordinates, flipped at the
-/// AppKit boundary.
+/// and the drop zone at the slot a drop would swap with (#2797,
+/// #3583). Both are borderless click-through panels that never take
+/// focus or join the window cycle; frames are AX coordinates, flipped
+/// at the AppKit boundary. How each draws is `DragMarkerView`'s, from
+/// the one `DragMarkerLook` every call hands it.
 @MainActor
 public final class DragOverlay {
     /// One marker's panel and the drawing it hosts.
@@ -12,8 +13,7 @@ public final class DragOverlay {
     final class Marker {
         let panel: NSPanel
         let view = DragMarkerView()
-        var glass: NSView? { view.glass }
-        var tint: GlassBackdrop { view.tint }
+        var plate: SwitchPlateView? { view.plate }
 
         init(panel: NSPanel) {
             self.panel = panel
@@ -47,31 +47,27 @@ public final class DragOverlay {
     /// panel directly beneath `window`, the window being dragged.
     public func showGhost(
         at frame: CGRect,
-        cornerRadius: CGFloat,
+        look: DragMarkerLook,
         beneath window: CGWindowID
     ) {
         let marker = ghost ?? Marker(panel: makePanel())
         ghost = marker
         place(marker.panel, at: frame, below: window)
-        marker.view.renderGhost(cornerRadius: cornerRadius)
+        marker.view.render(.ghost, look: look)
     }
 
     /// Marks the swap target's slot in AX coordinates, ordered like
-    /// the ghost, on `surface` from `LiquidGlassGate.rendered(frost:)`.
-    func showDropZone(
+    /// the ghost.
+    public func showDropZone(
         at frame: CGRect,
-        cornerRadius: CGFloat,
-        surface: DragMarkerView.Surface,
+        look: DragMarkerLook,
         beneath window: CGWindowID
     ) {
         let marker = dropZone ?? Marker(panel: makePanel())
         dropZone = marker
         dropZoneFrame = frame
         place(marker.panel, at: frame, below: window)
-        marker.view.renderDropZone(
-            cornerRadius: cornerRadius,
-            surface: surface
-        )
+        marker.view.render(.dropZone, look: look)
     }
 
     /// Hides only a shown panel: a grab calls it per event, and
@@ -114,8 +110,10 @@ public final class DragOverlay {
         panel.order(.below, relativeTo: Int(window))
     }
 
+    /// An `ActiveGlassPanel`, so the ghost's glass wears the
+    /// key-window rim (#3583) without taking the keyboard.
     private func makePanel() -> NSPanel {
-        let panel = NSPanel(
+        let panel = ActiveGlassPanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,

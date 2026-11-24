@@ -7,17 +7,17 @@ import Foundation
 extension APIReference {
     static let dragRecords: [String: APIRecord] = [
         "set_ghost_enabled": APIRecord(
-            "Shows or hides the ghost, a two-tone outline at the "
+            "Shows or hides the ghost, a Space-switch plate at the "
                 + "dragged window's home slot.",
             .boolean("enabled")
         ),
         "set_drop_zone_enabled": APIRecord(
-            "Shows or hides the drop zone, a frosted plate over the "
-                + "slot a drop would swap with.",
+            "Shows or hides the drop zone, a focus-colour wash over "
+                + "the slot a drop would swap with.",
             .boolean("enabled")
         ),
         "set_liquid_glass": APIRecord(
-            "Draws the drop zone as macOS 26 Liquid Glass rather "
+            "Draws the drag ghost as macOS 26 Liquid Glass rather "
                 + "than the blur material.",
             .boolean("enabled")
         ),

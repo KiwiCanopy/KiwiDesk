@@ -74,7 +74,7 @@ final class BriefPocketOverlay {
         let pocketHost: NSView
         let pocket: BriefPocketView
         let plateHost: NSView
-        let plate: BriefPocketPlateView
+        let plate: SwitchPlateView
         let origin: CGPoint
         let begin: CFTimeInterval
         let timeline: BriefPocketPlan.Timeline
@@ -108,10 +108,12 @@ final class BriefPocketOverlay {
         let pocket = BriefPocketView(frame: .zero)
         pocket.wear(markHex: request.markHex)
         pocketHost.addSubview(pocket)
-        let plate = BriefPocketPlateView(
-            glass: request.plateGlass,
-            tint: request.plateTint,
-            frost: request.plateFrost,
+        let plate = SwitchPlateView(
+            SwitchPlateView.Ground(
+                glass: request.plateGlass,
+                tint: request.plateTint,
+                frost: request.plateFrost
+            ),
             image: request.iconPid.flatMap { icon($0) }
         )
         plateHost.addSubview(plate)
@@ -191,17 +193,20 @@ final class BriefPocketOverlay {
             direction: request.direction,
             timeline: timeline
         )
-        current.plate.place(
-            local(
-                BriefPocketPlan.plateFrame(
-                    at: t,
-                    direction: request.direction,
-                    window: request.window,
-                    pocket: request.pocket,
-                    timeline: timeline
-                ),
-                current
+        let rect = local(
+            BriefPocketPlan.plateFrame(
+                at: t,
+                direction: request.direction,
+                window: request.window,
+                pocket: request.pocket,
+                timeline: timeline
             ),
+            current
+        )
+        current.plate.place(
+            rect,
+            cornerRadius: BriefPocketPlan.plateRadius(for: rect),
+            iconSide: BriefPocketPlan.iconSide(on: rect),
             host: current.root.effectiveAppearance
         )
     }

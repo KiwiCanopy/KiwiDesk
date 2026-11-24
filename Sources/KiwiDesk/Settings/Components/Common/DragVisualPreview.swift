@@ -5,11 +5,8 @@ import SwiftUI
 struct DragVisualPreview: View {
     let kind: DragMarkerView.Kind
     let visual: DragVisual
-    /// Every window outline's corner radius (#1742); the markers'
-    /// line widths are fixed (#2797).
-    let cornerRadius: CGFloat
-    /// The stored `dragLiquidGlass` leaf; Core gates it.
-    let glass: Bool
+    /// The draft's marker look (#3583); Core gates its glass leaf.
+    let look: DragMarkerLook
 
     var body: some View {
         ZStack {
@@ -30,13 +27,11 @@ struct DragVisualPreview: View {
     /// The marker as Core draws it, at the preview's scale: the
     /// engine's own view (#702, #1645).
     private var mock: some View {
-        DragMarkerHost(
-            kind: kind,
-            cornerRadius: cornerRadius > 0
-                ? FocusBorderPreview.roundedRadius : 0,
-            glass: glass
-        )
-        .opacity(visual.enabled ? 1 : 0.25)
+        var scaled = look
+        scaled.cornerRadius =
+            look.cornerRadius > 0 ? FocusBorderPreview.roundedRadius : 0
+        return DragMarkerHost(kind: kind, look: scaled)
+            .opacity(visual.enabled ? 1 : 0.25)
     }
 }
 
@@ -45,18 +40,13 @@ struct DragVisualPreview: View {
 /// its own gate.
 private struct DragMarkerHost: NSViewRepresentable {
     let kind: DragMarkerView.Kind
-    let cornerRadius: CGFloat
-    let glass: Bool
+    let look: DragMarkerLook
 
     func makeNSView(context: Context) -> DragMarkerView {
         DragMarkerView()
     }
 
     func updateNSView(_ view: DragMarkerView, context: Context) {
-        view.showPreview(
-            kind,
-            cornerRadius: cornerRadius,
-            storedGlass: glass
-        )
+        view.showPreview(kind, look: look)
     }
 }

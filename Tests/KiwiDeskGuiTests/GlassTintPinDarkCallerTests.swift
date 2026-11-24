@@ -27,8 +27,9 @@ struct GlassTintPinDarkCallerTests {
     private static let pickFollowers: [String: String] = [
         "Animation/SpaceSlideOverlay+Plates.swift":
             "the slide's plates: no Fill, KiwiHub's glass",
-        "Animation/BriefPocketViews.swift":
-            "the brief pocket's plate: the slide's, untinted",
+        "Bar/SwitchPlateView.swift":
+            "the slide's plate kept across frames, untinted: the "
+            + "brief pocket's and the drag ghost's (#2680, #3583)",
     ]
 
     /// The files that may call `pinFrost`, each with its reason —

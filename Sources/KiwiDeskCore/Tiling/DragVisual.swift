@@ -1,9 +1,9 @@
 import Foundation
 
 /// One drag marker's switch (`drag.ghost`, `drag.drop_zone`). Its
-/// look is fixed: the drop zone an untinted frosted plate, the ghost
-/// a two-tone outline (#2797, `DragMarkerView`); the corners are
-/// every window outline's, `TilingSettings.windowStroke` (#1742).
+/// look is fixed and drawn from the look's own colours (#3583,
+/// `DragMarkerView`); the corners are every window outline's,
+/// `TilingSettings.windowStroke` (#1742).
 public struct DragVisual: Sendable, Equatable, Encodable {
     public var enabled: Bool
 

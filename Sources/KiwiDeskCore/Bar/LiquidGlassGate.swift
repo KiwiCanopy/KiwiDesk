@@ -67,20 +67,20 @@ enum LiquidGlassGate {
         return copy
     }
 
-    /// A surface's stored glass leaf as drawn — the drop zone's and
+    /// A surface's stored glass leaf as drawn — the drag ghost's and
     /// the sticky mark's (#1620/#1621): off while transparency is
-    /// reduced, the stood-down look never made opaque
+    /// reduced. The mark's stood-down look is never made opaque; the
+    /// ghost's takes `panelGround` as the plates do
     /// (design-decisions ▸ Reduce transparency).
     static func rendered(glass stored: Bool) -> Bool {
         stored && drawsGlass
     }
 
     /// The ground KiwiHub's Core plates draw on (#2569): the
-    /// shelf's answer, handed `glass` — the caller's one read of
-    /// KiwiHub's leaf as drawn, `rendered(glass:)` — and this
+    /// shelf's answer, handed `glass` — the surface's own stored
+    /// glass leaf, already through `rendered(glass:)` — and this
     /// gate's own read of Reduce transparency. Its `.frost` is the
-    /// Fill over a plate's material, never `rendered(frost:)`'s
-    /// drop-zone surface.
+    /// Fill over a plate's material.
     static func panelGround(
         _ shelf: KiwiShelf,
         glass: Bool
@@ -89,15 +89,6 @@ enum LiquidGlassGate {
             glassDrawn: glass,
             reduceTransparency: reducesTransparency
         )
-    }
-
-    /// The drag drop zone's frost as drawn (#2797): glass where the
-    /// stored leaf draws it, the blur material where it does not,
-    /// flat grey while transparency is reduced. A surface, not a
-    /// Bool, since its fallback splits on this gate's own read.
-    static func rendered(frost stored: Bool) -> DragMarkerView.Surface {
-        if rendered(glass: stored) { return .glass }
-        return reducesTransparency ? .flat : .material
     }
 
     /// KiwiVision's stored blur as drawn (#2103): off while
