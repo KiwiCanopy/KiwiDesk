@@ -63,8 +63,7 @@ struct DesktopLineView: View {
     }
 
     private func spoken(_ line: DesktopOverview.SpaceLine) -> String {
-        guard let desktop = state.desktop(place) else { return "" }
-        return DesktopsText.spoken(line, at: place.line, on: desktop)
+        DesktopsText.spoken(line, at: place, in: state)
     }
 
     /// Whether the line wears the selection's whole fill and ink: the

@@ -49,7 +49,8 @@ struct DesktopsWidthGrantTests {
         // grants less, and the columns share what it grants.
         let wide = model(areaWidth: 2560)
         #expect(
-            wide.desktopsContentWidth == G.preferredWidth(of: overview)
+            wide.desktopsContentWidth
+                == G.preferredWidth(of: overview, gutter: nil)
         )
         #expect(wide.sideWidth(for: .desktops) == wide.desktopsContentWidth)
         #expect(
@@ -58,10 +59,15 @@ struct DesktopsWidthGrantTests {
         )
         let narrow = model(areaWidth: 1100)
         let granted = narrow.sideWidth(for: .desktops)
-        #expect(granted < G.preferredWidth(of: overview))
+        #expect(granted < G.preferredWidth(of: overview, gutter: nil))
         #expect(
             narrow.desktops?.geometry
-                == G(overview: overview, width: granted, cap: Self.cap)
+                == G(
+                    overview: overview,
+                    width: granted,
+                    cap: Self.cap,
+                    gutter: nil
+                )
         )
     }
 }

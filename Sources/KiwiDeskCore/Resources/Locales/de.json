@@ -408,6 +408,7 @@
   "desktop_overview.ax.place": "%1$@, %2$@, Fenster: %3$d",
   "desktop_overview.ax.place_last_shown": "%1$@, zuletzt angezeigt, %2$@, Fenster: %3$d",
   "desktop_overview.ax.place_shown": "%1$@, angezeigt, %2$@, Fenster: %3$d",
+  "desktop_overview.ax.screen_line": "%1$@, %2$@",
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, aufgenommen",
   "desktop_overview.card.shown": "angezeigt",

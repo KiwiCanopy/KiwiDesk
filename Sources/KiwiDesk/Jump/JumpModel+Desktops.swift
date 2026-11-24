@@ -209,15 +209,21 @@ extension JumpModel {
     /// The side's state over `overview`, sized from the panel.
     private func state(of overview: DesktopOverview) -> DesktopsState {
         // The width the panel grants the side for this overview's
-        // columns (#3570 ▸ Ruling 4), read before the state exists.
+        // columns (#3570 ▸ Ruling 4), read before the state exists;
+        // the grid's header column measured once here (#3602).
+        let gutter = DesktopsGeometry.gutter(of: overview)
         let width = room.width(
             JumpPanelRoom.fit(of: .desktops),
-            content: DesktopsGeometry.preferredWidth(of: overview)
+            content: DesktopsGeometry.preferredWidth(
+                of: overview,
+                gutter: gutter
+            )
         )
         let geometry = DesktopsGeometry(
             overview: overview,
             width: width,
-            cap: sheetCap
+            cap: sheetCap,
+            gutter: gutter
         )
         return DesktopsState(overview: overview, geometry: geometry)
     }

@@ -408,6 +408,7 @@
   "desktop_overview.ax.place": "%1$@, %2$@, 윈도우: %3$d",
   "desktop_overview.ax.place_last_shown": "%1$@, 마지막으로 표시됨, %2$@, 윈도우: %3$d",
   "desktop_overview.ax.place_shown": "%1$@, 표시됨, %2$@, 윈도우: %3$d",
+  "desktop_overview.ax.screen_line": "%1$@, %2$@",
   "desktop_overview.ax.window": "%1$@, %2$@",
   "desktop_overview.ax.window_picked": "%1$@, %2$@, 집음",
   "desktop_overview.card.shown": "표시됨",

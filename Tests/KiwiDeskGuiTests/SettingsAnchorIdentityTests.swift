@@ -148,10 +148,12 @@ struct SettingsAnchorIdentityTests {
         // Scroll identity: KiwiHub's Desktops side scrolls its
         // selected screen column, card and line into view (#1229,
         // #3570); a card ids its lines in an area group and its
-        // unfiled line apart (#3572). Not a Settings destination,
-        // so nothing there is a reveal target.
+        // unfiled line apart (#3572); the shared-Desktop grid ids
+        // its rows and screen headers (#3602). Not a Settings
+        // destination, so nothing there is a reveal target.
         "DesktopsSideView.swift": 2,
         "DesktopCardView.swift": 2,
+        "DesktopsGridView.swift": 2,
         // Scroll identity: KiwiHub's app strip follows its selected
         // tile clear of the fade (#3135, #2901). Not a Settings
         // destination, so nothing there is a reveal target.
