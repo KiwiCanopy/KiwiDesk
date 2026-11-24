@@ -382,6 +382,12 @@ bite large test PRs:
   uptime for a `TimeInterval` stamp and `wallClock` for a `Date`
   one. A handler's `now` and every stamp it judges come from the
   same clock, or a frozen stamp ages against a live read (#1852).
+  `EchoClockSeamTests` counts no `ContinuousClock.now` or raw
+  `clock_gettime_nsec_np` read, so a ledger stamped on one
+  (`DeferredTasks`' burst cap, `KeyboardTap.uptime()`) owes its
+  test a seam, or every real wait one-directional: a parked wait
+  seam, and real sleeps only as floors a slow runner widens
+  (`DeferredTasksTests`, #3567).
   `makeTestCore` freezes the applier's, the ledger's and the
   core's wall clock (a stamp read in the same test cannot age),
   and `EchoClockSeamTests` holds the host uptime to those seams'
