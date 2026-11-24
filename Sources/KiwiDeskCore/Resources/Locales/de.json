@@ -1778,6 +1778,7 @@
   "monitors.advanced.caption": "Profile werden automatisch aktiviert, wenn du ein bekanntes Bildschirm-Setup wieder anschließt.",
   "monitors.advanced.row_axlabel": "%1$@, Fingerabdruck %2$@",
   "monitors.advanced.title": "Bildschirm-Fingerabdrücke",
+  "monitors.areas.label": "Bildschirmabschnitte",
   "monitors.clear_pin.label": "Zurück zur automatischen Platzierung",
   "monitors.merge.title": "Zusammenführen",
   "monitors.merge.with": "Mit Abschnitt %1$@ zusammenführen",

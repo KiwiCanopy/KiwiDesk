@@ -1799,6 +1799,7 @@
   "monitors.advanced.title": "Screen fingerprints",
   "monitors.area_deselect": "Deselect this area",
   "monitors.area_select": "Select this area to edit it",
+  "monitors.areas.label": "Screen areas",
   "monitors.clear_pin.label": "Back to automatic placement",
   "monitors.deselect": "Deselect this screen",
   "monitors.merge.menu": "Merge with…",

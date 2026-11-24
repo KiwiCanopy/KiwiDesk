@@ -1777,6 +1777,7 @@
   "monitors.advanced.caption": "Les profils se rattachent automatiquement lorsqu'un ensemble d'écrans connu est reconnecté.",
   "monitors.advanced.row_axlabel": "%1$@, empreinte %2$@",
   "monitors.advanced.title": "Empreintes d'écran",
+  "monitors.areas.label": "Secteurs de l'écran",
   "monitors.clear_pin.label": "Revenir au placement automatique",
   "monitors.merge.title": "Fusionner",
   "monitors.merge.with": "Fusionner avec %1$@",

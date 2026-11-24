@@ -1777,6 +1777,7 @@
   "monitors.advanced.caption": "I profili si ricollegano automaticamente quando viene riconnesso un insieme di schermi conosciuto.",
   "monitors.advanced.row_axlabel": "%1$@, impronta %2$@",
   "monitors.advanced.title": "Impronte dello schermo",
+  "monitors.areas.label": "Aree dello schermo",
   "monitors.clear_pin.label": "Torna al posizionamento automatico",
   "monitors.merge.title": "Unisci",
   "monitors.merge.with": "Unisci con l'area %1$@",

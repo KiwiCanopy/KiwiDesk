@@ -1778,6 +1778,7 @@
   "monitors.advanced.caption": "重新接上已知的螢幕組態時，描述檔會自動重新附掛。",
   "monitors.advanced.row_axlabel": "%1$@，指紋 %2$@",
   "monitors.advanced.title": "螢幕指紋",
+  "monitors.areas.label": "螢幕分區",
   "monitors.clear_pin.label": "恢復自動放置",
   "monitors.merge.title": "合併",
   "monitors.merge.with": "與%1$@合併",

@@ -180,29 +180,34 @@ struct ScreensSection: View {
         rows: ScreensFamilyRows
     ) -> some View {
         Divider()
-        if let display = rows.displays.first(where: {
-            $0.id == selection?.display
-        }) {
-            ScreenAreaEditor(
-                model: model,
-                display: display,
-                area: selection?.area,
-                rename: $renameRequest,
-                sizes: $sizesRequest,
-                givingWay: $givingWay,
-                percent: $model.nav.areaSizesInPercent,
-                select: { selection = $0 }
-            )
-        } else {
-            Text(
-                L(
-                    "monitors.selection.hint",
-                    "Click a screen or an area to split, merge or rename it."
+        // A search hit lands here, on the editor or its hint (#3616).
+        Group {
+            if let display = rows.displays.first(where: {
+                $0.id == selection?.display
+            }) {
+                ScreenAreaEditor(
+                    model: model,
+                    display: display,
+                    area: selection?.area,
+                    rename: $renameRequest,
+                    sizes: $sizesRequest,
+                    givingWay: $givingWay,
+                    percent: $model.nav.areaSizesInPercent,
+                    select: { selection = $0 }
                 )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            } else {
+                Text(
+                    L(
+                        "monitors.selection.hint",
+                        "Click a screen or an area to split, merge or "
+                            + "rename it."
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
         }
+        .searchAnchored(SettingsCatalog.screens.screenAreas)
     }
 
     /// An area menu's request: select its area, then open the

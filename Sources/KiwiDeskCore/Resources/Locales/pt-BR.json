@@ -1777,6 +1777,7 @@
   "monitors.advanced.caption": "Os perfis se reconectam automaticamente quando um conjunto de telas conhecido é reconectado.",
   "monitors.advanced.row_axlabel": "%1$@, impressão digital %2$@",
   "monitors.advanced.title": "Impressões digitais da tela",
+  "monitors.areas.label": "Áreas da tela",
   "monitors.clear_pin.label": "Voltar ao posicionamento automático",
   "monitors.merge.title": "Fundir",
   "monitors.merge.with": "Fundir com %1$@",

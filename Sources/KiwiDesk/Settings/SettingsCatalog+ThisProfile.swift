@@ -120,6 +120,12 @@ struct ScreensControls: Sendable {
         "monitors.space_placement",
         "Space placement"
     )
+    /// The split editor, or the hint standing in for it while no
+    /// screen is selected (#3616).
+    let screenAreas = SettingsControl(
+        "monitors.areas.label",
+        "Screen areas"
+    )
     let orphanPins = SettingsControl(
         "monitors.orphan_pins.title",
         "Pinned to disconnected screens"

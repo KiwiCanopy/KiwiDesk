@@ -1778,6 +1778,7 @@
   "monitors.advanced.caption": "既知の画面構成が再接続されると、プロファイルが自動的に再適用されます。",
   "monitors.advanced.row_axlabel": "%1$@、識別情報 %2$@",
   "monitors.advanced.title": "画面識別情報",
+  "monitors.areas.label": "画面のエリア",
   "monitors.clear_pin.label": "自動配置に戻す",
   "monitors.merge.title": "結合",
   "monitors.merge.with": "%1$@と結合",

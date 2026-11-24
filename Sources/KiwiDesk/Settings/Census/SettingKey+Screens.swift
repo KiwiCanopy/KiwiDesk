@@ -40,8 +40,12 @@ extension ScreensKey {
 extension ScreensKey {
     var text: SettingRowText {
         switch self {
-        case .spacePins, .displayAreas:
+        case .spacePins:
             return .dynamic
+        // Search's way to the split editor, which shows only once a
+        // screen is selected (#3616).
+        case .displayAreas:
+            return .text("monitors.areas.label")
         case .mainSpaces:
             return .text("monitor_card.follows_main")
         case .orphanPinClear:

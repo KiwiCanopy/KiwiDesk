@@ -298,8 +298,9 @@ struct ScreenAreaNestedEditTests {
         )
         #expect(
             SourceScan.stripComments(section).contains(
-                "} else {\n            Text(\n                L(\n"
-                    + "                    \"monitors.selection.hint\""
+                "} else {\n                Text(\n"
+                    + "                    L(\n"
+                    + "                        \"monitors.selection.hint\""
             )
         )
     }

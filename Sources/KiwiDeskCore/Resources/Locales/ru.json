@@ -1778,6 +1778,7 @@
   "monitors.advanced.caption": "Профили подключаются заново автоматически, когда известная конфигурация экранов снова подсоединена.",
   "monitors.advanced.row_axlabel": "%1$@, отпечаток %2$@",
   "monitors.advanced.title": "Отпечатки экранов",
+  "monitors.areas.label": "Участки экрана",
   "monitors.clear_pin.label": "Вернуться к автоматическому размещению",
   "monitors.merge.title": "Объединить",
   "monitors.merge.with": "Объединить с участком %1$@",

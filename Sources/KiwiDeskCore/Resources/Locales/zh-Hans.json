@@ -1778,6 +1778,7 @@
   "monitors.advanced.caption": "重新连接已知的屏幕组合时，描述文件会自动重新套用。",
   "monitors.advanced.row_axlabel": "%1$@，指纹 %2$@",
   "monitors.advanced.title": "显示器指纹",
+  "monitors.areas.label": "显示器分区",
   "monitors.clear_pin.label": "恢复自动放置",
   "monitors.merge.title": "合并",
   "monitors.merge.with": "与%1$@合并",

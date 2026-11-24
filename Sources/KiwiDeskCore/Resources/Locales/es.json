@@ -1777,6 +1777,7 @@
   "monitors.advanced.caption": "Los perfiles se reasignan automáticamente cuando se vuelve a conectar un conjunto de pantallas conocido.",
   "monitors.advanced.row_axlabel": "%1$@, huella %2$@",
   "monitors.advanced.title": "Huellas dactilares de pantalla",
+  "monitors.areas.label": "Áreas de pantalla",
   "monitors.clear_pin.label": "Volver a la colocación automática",
   "monitors.merge.title": "Combinar",
   "monitors.merge.with": "Combinar con %1$@",

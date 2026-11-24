@@ -1778,6 +1778,7 @@
   "monitors.advanced.caption": "알려진 화면 구성이 다시 연결되면 프로필이 자동으로 다시 적용됩니다.",
   "monitors.advanced.row_axlabel": "%1$@, 핑거프린트 %2$@",
   "monitors.advanced.title": "화면 핑거프린트",
+  "monitors.areas.label": "화면 구역",
   "monitors.clear_pin.label": "자동 배치로 되돌리기",
   "monitors.merge.title": "병합",
   "monitors.merge.with": "%1$@ 구역과 병합",
