@@ -718,8 +718,8 @@ ahead of them.
 
 :::unreleased
 What the menu bar icon shows is Settings ▸ Bars & Pocket ▸ KiwiShelf ▸
-When a bar is out of view ▸ **Menu bar icon**; at its default, Auto, it stands in for the Space
-Bar wherever a screen shows none at rest.
+When a bar is out of view ▸ **Menu bar icon**; at its default, Auto,
+it stands in for the Space Bar wherever a screen shows none at rest.
 :::
 
 The bar shows the Desktop you are looking at: a window on a macOS

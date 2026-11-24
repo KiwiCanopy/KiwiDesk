@@ -19,8 +19,8 @@ struct ScreenEdgeRow: Identifiable, Equatable {
     let place: Int
 }
 
-/// The Per screen rows under each bar's edge (#1948): which
-/// screens get a row, and the binding a screen's picker writes.
+/// The screens and areas the Screen or area picker lists (#1948,
+/// #3612), and the binding a picked area's Position writes.
 extension SettingsModel {
     /// The draft as the main screen shows it (#1948): each bar on
     /// that screen's edge (`mainDisplay`). The Home cards picture
@@ -41,10 +41,10 @@ extension SettingsModel {
         return [MonitorSet(monitors: displays.map(\.fingerprint))]
     }
 
-    /// Whether a bar's Per screen rows can show: its rows grey
-    /// while the profile holds one screen (#2677, amending
-    /// #1948) — unless that bar's screens already differ, which
-    /// the rows must then show.
+    /// Whether a bar has screens or areas to tell apart: none while
+    /// the profile holds one unsplit screen (#2677, amending #1948)
+    /// — unless that bar's screens already differ, which the
+    /// picker must then reach.
     func offersScreenEdges<Bar: ScreenEdged>(
         _ bar: KeyPath<TilingSettings, Bar>,
         show: ScreenShowBar? = nil
@@ -154,12 +154,7 @@ extension SettingsModel {
     /// Whether `key` holds a value of its own for any bar: an edge,
     /// or a Show.
     func hasOwnSettings(_ key: String) -> Bool {
-        let settings = config.settings
-        return settings.spaceBarStyle.edgeOverride[key] != nil
-            || settings.spaceBarStyle.visibilityOverride[key] != nil
-            || settings.appBarStyle.edgeOverride[key] != nil
-            || settings.appBarStyle.visibilityOverride[key] != nil
-            || settings.kiwishelf.pocketEdges.edgeOverride[key] != nil
+        config.settings.screenKeys.contains(key)
     }
 
     /// One screen's picker: the edge that screen gets; a pick of

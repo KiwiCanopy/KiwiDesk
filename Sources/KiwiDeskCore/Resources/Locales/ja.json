@@ -1176,7 +1176,7 @@
   "kiwishelf.edge.per_screen.space_bar": "画面またはエリアごと",
   "kiwishelf.edge.pocket": "Pocket",
   "kiwishelf.edge.screen.absent": "未接続",
-  "kiwishelf.edge.screen.ax_absent": "%1$@、%2$@",
+  "kiwishelf.edge.screen.absent_name": "%1$@、%2$@",
   "kiwishelf.edge.space_bar": "Space Bar",
   "kiwishelf.fill_fade": "塗りつぶしが薄れる範囲",
   "kiwishelf.fill_fade.help": "「%1$@」がガラス上でどこまで薄れるかを設定します。「%2$@」にすると均一なカラーになります。",

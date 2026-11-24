@@ -2576,10 +2576,11 @@ which names a screen only where exactly one connected screen
 matches. `TwinScreenWordsTests` and `JumpRowScreenTests` hold the
 surfaces this was written over; a new surface is review's. **Copy
 that names a screen's area takes `SettingsModel.areaName(_:on:)`**,
-and a stored area key no one connected screen words takes
-`SettingsModel.perScreenName(screen:key:splits:area:)` — its stored
-name, else its stored split's position — never "Area n" of its own
-(#3612, `PerScreenAreaNameTests`).
+a stored screen or area key takes `SettingsModel.perScreenName(key:)`,
+and a surface with no model `perScreenName(screen:key:splits:area:)`
+— its stored name, else its stored split's position — never "Area
+n" of its own (#3612; `PerScreenAreaNameTests` holds the picker, a
+new surface is review's).
 
 ## SwiftUI traps
 

@@ -1176,7 +1176,7 @@
   "kiwishelf.edge.per_screen.space_bar": "Pro Bildschirm oder Abschnitt",
   "kiwishelf.edge.pocket": "Pocket",
   "kiwishelf.edge.screen.absent": "nicht angeschlossen",
-  "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",
+  "kiwishelf.edge.screen.absent_name": "%1$@, %2$@",
   "kiwishelf.edge.space_bar": "Space Bar",
   "kiwishelf.fill_fade": "Verblassen der Füllung",
   "kiwishelf.fill_fade.help": "Wie weit die Farbe „%1$@“ über das Glas verblasst. „%2$@“ ergibt eine gleichmäßige Farbe.",

@@ -34,7 +34,9 @@ extension KiwiShelfCard {
         return SettingsRowShape {
             SettingsRowLabel(
                 label: label,
-                help: pocketNoteShown ? nil : Self.pocketPositionNote
+                // Greyed under a picked area, its `?` the block's.
+                help: pocketNoteShown || activeScope != nil
+                    ? nil : Self.pocketPositionNote
             )
         } control: {
             HStack(spacing: 6) {

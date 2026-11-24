@@ -116,6 +116,21 @@ enum BarsGateHelp {
         )
     }
 
+    /// The Position master's `?` while a screen or area puts a bar
+    /// or the Pocket on its own edge (#3612): it names the picker.
+    static var edgesDifferPerScreen: String {
+        L(
+            "kiwishelf.edge.differ_per_screen.help",
+            "Some screens or areas put a bar or the Pocket on its own "
+                + "edge — pick one under \u{201C}%1$@\u{201D} in "
+                + "\u{201C}%2$@\u{201D} to see it. Choosing here puts "
+                + "every bar and the Pocket on one edge on every "
+                + "screen.",
+            L("kiwishelf.scope.label", "Screen or area"),
+            L("kiwishelf.show.each_bar", "Each bar and Pocket")
+        )
+    }
+
     /// The Show master's `?` while a screen or area shows a bar its
     /// own way (#3517 ruling 32), pointing at the picker (#3612).
     static var visibilityDiffersPerScreen: String {

@@ -110,7 +110,9 @@ struct GreyOutAnchorTests {
             1
         ),
         // A Pocket row greyed while an area is picked (#3612): its
-        // `?` beside the greyed rows, outside the grey.
+        // `?` beside the greyed rows. This counts the spelling only;
+        // `BarsByBarWiringTests` ▸ `areaRowsEditTheArea` holds it
+        // outside the grey.
         (
             "KiwiShelfCard+Each.swift",
             "HelpButton(explanation: Self.everyScreenHelp)",

@@ -10,18 +10,15 @@ extension KiwiShelfCard {
     /// Held open only while the bars' own Show or Position differ:
     /// a screen's or area's value is counted in the summary instead.
     var eachHeldOpen: Bool {
-        let s = model.config.settings
-        let shows =
-            [s.spaceBarStyle.visibility] + s.appBarHosts.map(\.visibility)
-            + [s.kiwishelf.pocketVisibility]
-        return Set(shows).count > 1 || s.sharedBarEdge == nil
-            || s.kiwishelf.pocketEdge != s.sharedBarEdge
+        let settings = model.config.settings
+        return settings.ownBarVisibility == nil
+            || settings.ownShelfEdge == nil
     }
 
     /// The picked screen or area, nil for All screens — also while
     /// the pick has left the list.
     var activeScope: String? {
-        guard let scope, model.offersScreenScopes,
+        guard let scope = model.nav.barsScope, model.offersScreenScopes,
             model.screenScopes.contains(where: { $0.id == scope })
         else { return nil }
         return scope
@@ -64,7 +61,7 @@ extension KiwiShelfCard {
                 note(
                     L(
                         "kiwishelf.scope.keep_own",
-                        "These keep their own settings: %1$@",
+                        "Own settings: %1$@",
                         LocalizedList.join(own.map(\.name))
                     )
                 )
@@ -105,10 +102,12 @@ extension KiwiShelfCard {
         let picked = scopes.first { $0.id == activeScope }
         return DropdownRow(
             label: label,
-            spokenValue: picked.map(Self.scopeTitle) ?? all,
+            spokenValue: picked.map {
+                Self.scopeTitle($0, own: model.hasOwnSettings($0.id))
+            } ?? all,
             help: offered ? Self.scopeHelp : Self.oneScreenHelp
         ) {
-            Picker(label, selection: $scope) {
+            Picker(label, selection: scopeBinding) {
                 Text(all).tag(String?.none)
                 Divider()
                 ForEach(scopes) { row in
@@ -122,17 +121,29 @@ extension KiwiShelfCard {
         }
     }
 
-    /// An item's words: its name, its twins, its absence, and
-    /// whether it holds values of its own.
-    static func scopeTitle(_ row: ScreenEdgeRow) -> String {
-        scopeTitle(row, own: false)
+    /// The picker's selection: what the blocks edit, so a pick that
+    /// has left the list reads as All screens.
+    private var scopeBinding: Binding<String?> {
+        Binding(
+            get: { activeScope },
+            // A greyed pop-up still takes a pick (gui.md).
+            set: { pick in
+                guard model.offersScreenScopes else { return }
+                model.nav.barsScope = pick
+            }
+        )
     }
 
+    /// An item's words: its name, its twins, its absence, and
+    /// whether it holds values of its own.
     static func scopeTitle(_ row: ScreenEdgeRow, own: Bool) -> String {
-        var title = row.count > 1 ? "\(row.name) × \(row.count)" : row.name
+        var title =
+            row.count > 1
+            ? L("kiwishelf.scope.twins", "%1$@ × %2$d", row.name, row.count)
+            : row.name
         if !row.present {
             title = L(
-                "kiwishelf.edge.screen.ax_absent",
+                "kiwishelf.edge.screen.absent_name",
                 "%1$@, %2$@",
                 title,
                 L("kiwishelf.edge.screen.absent", "not connected")
@@ -140,35 +151,6 @@ extension KiwiShelfCard {
         }
         guard own else { return title }
         return L("kiwishelf.scope.own", "%1$@ — own settings", title)
-    }
-
-    static var scopeHelp: String {
-        L(
-            "kiwishelf.scope.help",
-            "\u{201C}%1$@\u{201D} sets each bar's own Show and Position. "
-                + "Pick a screen or area to give it its own; picking "
-                + "a bar's own value there stores nothing.",
-            L("kiwishelf.scope.all", "All screens")
-        )
-    }
-
-    static var oneScreenHelp: String {
-        L(
-            "kiwishelf.edge.per_screen.one_screen_or_split",
-            "Needs a profile with two or more screens, or a screen "
-                + "split into areas."
-        )
-    }
-
-    /// The `?` and hover of a Pocket row that has one value for
-    /// every screen, greyed while an area is picked.
-    static var everyScreenHelp: String {
-        L(
-            "kiwishelf.scope.every_screen",
-            "Applies on every screen. Choose \u{201C}%1$@\u{201D} above "
-                + "to change it.",
-            L("kiwishelf.scope.all", "All screens")
-        )
     }
 
     private var spaceBarBlock: some View {
@@ -274,25 +256,5 @@ extension KiwiShelfCard {
                 .accessibilityAddTraits(.isHeader)
             rows()
         }
-    }
-}
-
-/// A block in Each bar and Pocket, whose name VoiceOver hears with
-/// each of its controls ("Space Bar, Show").
-enum ShelfBlock {
-    case spaceBar
-    case appBar
-    case pocket
-
-    @MainActor var name: String {
-        switch self {
-        case .spaceBar: L("kiwishelf.bar.space_bar", "Space Bar")
-        case .appBar: L("kiwishelf.bar.app_bar", "App Bar")
-        case .pocket: L("kiwishelf.bar.pocket", "Pocket")
-        }
-    }
-
-    @MainActor func spoken(_ control: String) -> String {
-        L("kiwishelf.per_screen.control.ax", "%1$@, %2$@", name, control)
     }
 }

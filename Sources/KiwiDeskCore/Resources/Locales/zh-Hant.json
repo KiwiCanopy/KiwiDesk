@@ -1176,7 +1176,7 @@
   "kiwishelf.edge.per_screen.space_bar": "依螢幕或分區",
   "kiwishelf.edge.pocket": "Pocket",
   "kiwishelf.edge.screen.absent": "未連接",
-  "kiwishelf.edge.screen.ax_absent": "%1$@，%2$@",
+  "kiwishelf.edge.screen.absent_name": "%1$@，%2$@",
   "kiwishelf.edge.space_bar": "Space Bar",
   "kiwishelf.fill_fade": "填色漸淡",
   "kiwishelf.fill_fade.help": "「%1$@」在玻璃上漸淡的程度。「%2$@」時為均勻的單一顏色。",

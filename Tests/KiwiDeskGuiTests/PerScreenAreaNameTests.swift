@@ -134,4 +134,21 @@ struct PerScreenAreaNameTests {
         #expect(model.hasOwnSettings("Elsewhere:800x600"))
         #expect(!model.hasOwnSettings(wide.fingerprint))
     }
+
+    @Test("an area no stored split places is numbered")
+    func unplacedAreaIsNumbered() throws {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let split = try #require(
+            ScreenSplit.whole(width: 1920, height: 1080)
+                .splitting(0, .sideBySide)
+        )
+        #expect(
+            SettingsModel.perScreenName(
+                screen: "Gone",
+                key: "\(gone)#5",
+                splits: [gone: split]
+            ) == "Gone – Area 6"
+        )
+    }
 }

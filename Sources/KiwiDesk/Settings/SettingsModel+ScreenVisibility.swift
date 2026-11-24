@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Which bar a Per screen row's Show menu writes (#3517 ruling
-/// 30): the Space Bar's one visibility, or the App Bar's, which
+/// Which bar a picked area's Show writes (#3517 ruling 30,
+/// #3612): the Space Bar's one visibility, or the App Bar's, which
 /// each layout holds for itself.
 enum ScreenShowBar {
     case space
@@ -15,9 +15,9 @@ enum BarShowRow {
     case appBar(LayoutMode)
 }
 
-/// The Show menu in a bar's Per screen rows (#3517 ruling 30): an
-/// area's own visibility, keyed by its `ScreenAreaKey` — an unsplit
-/// screen by its fingerprint.
+/// A bar's Show for a picked screen or area (#3517 ruling 30,
+/// #3612): an area's own visibility, keyed by its `ScreenAreaKey` —
+/// an unsplit screen by its fingerprint.
 extension SettingsModel {
     /// What `key` shows for `bar`: its own value, else the Space
     /// Bar's own; nil for an App Bar area with no value of its own,
@@ -33,10 +33,10 @@ extension SettingsModel {
         }
     }
 
-    /// The menu's binding: the Space Bar's own value stores nothing
-    /// for the area; the App Bar's nil, Per layout, clears it. A
-    /// pick needs the rows offered, since a greyed `.menu` picker
-    /// still takes one (gui.md).
+    /// The picked area's Show binding: the Space Bar's own value
+    /// stores nothing for the area; the App Bar's nil, Per layout,
+    /// clears it. A pick needs the Screen or area picker offered,
+    /// whose greyed pop-up still takes one (gui.md).
     func screenShowBinding(
         _ bar: ScreenShowBar,
         on key: String
@@ -44,7 +44,7 @@ extension SettingsModel {
         Binding(
             get: { self.screenShow(bar, on: key) },
             set: { value in
-                guard self.offersScreenShows(bar) else { return }
+                guard self.offersScreenScopes else { return }
                 var next = self.config.settings
                 switch bar {
                 case .space:
@@ -57,15 +57,6 @@ extension SettingsModel {
                 self.config.settings = next
             }
         )
-    }
-
-    /// Whether `bar`'s Per screen rows take a Show pick: the edge
-    /// drawer's own offer for that bar.
-    private func offersScreenShows(_ bar: ScreenShowBar) -> Bool {
-        switch bar {
-        case .space: offersScreenEdges(\.spaceBarStyle, show: .space)
-        case .app: offersScreenEdges(\.appBarStyle, show: .app)
-        }
     }
 
     /// A bar's own Show row — the Space Bar's, or a layout's App
@@ -98,7 +89,7 @@ extension SettingsModel {
     }
 
     /// Whether `bar` gives some screen or area a visibility of its
-    /// own, which holds its Per screen drawer open.
+    /// own, which its Show row's `?` then says.
     func hasScreenShows(_ bar: ScreenShowBar) -> Bool {
         switch bar {
         case .space:

@@ -1176,7 +1176,7 @@
   "kiwishelf.edge.per_screen.space_bar": "Par écran ou secteur",
   "kiwishelf.edge.pocket": "Pocket",
   "kiwishelf.edge.screen.absent": "non connecté",
-  "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",
+  "kiwishelf.edge.screen.absent_name": "%1$@, %2$@",
   "kiwishelf.edge.space_bar": "Space Bar",
   "kiwishelf.fill_fade": "Estompage du remplissage",
   "kiwishelf.fill_fade.help": "Jusqu'où le « %1$@ » s'estompe sur le verre. « %2$@ » donne une couleur uniforme.",

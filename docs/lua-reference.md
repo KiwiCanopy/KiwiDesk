@@ -3692,8 +3692,8 @@ their own edges, and a look leaves each screen's own untouched. The
 edges are stored per profile under `kiwishelf.pocket_edge_override`,
 keyed by fingerprint. Settings ▸ Bars & Pocket ▸ KiwiShelf writes them
 as the Pocket's **Position** in **Each bar and Pocket**: under **All
-screens** for every screen at once, and for one screen or area once
-the **Screen or area** picker picks it; the card's own **Position**
+screens** for every screen at once, and for one screen once the
+**Screen or area** picker picks it; the card's own **Position**
 sets the pocket's edge with both bars'.
 
 ```lua
@@ -10336,8 +10336,8 @@ animations.set_reveal_duration(600)
 It plays with macOS's Reduce Motion on too, and KiwiDesk's own Off
 ([`animations.set_reduce_motion`](#animationsset_reduce_motion)) stops
 it. In Settings it is Bars & Pocket ▸ KiwiShelf ▸ When a bar is out of
-view ▸ Durations ▸ Animate the reveal; the length, `animations.set_reveal_duration`, is
-Lua-only.
+view ▸ Durations ▸ Animate the reveal; the length,
+`animations.set_reveal_duration`, is Lua-only.
 
 **Example:**
 

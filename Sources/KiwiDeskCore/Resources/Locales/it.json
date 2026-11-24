@@ -1176,7 +1176,7 @@
   "kiwishelf.edge.per_screen.space_bar": "Per schermo o area",
   "kiwishelf.edge.pocket": "Pocket",
   "kiwishelf.edge.screen.absent": "non collegato",
-  "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",
+  "kiwishelf.edge.screen.absent_name": "%1$@, %2$@",
   "kiwishelf.edge.space_bar": "Space Bar",
   "kiwishelf.fill_fade": "Sfumatura del riempimento",
   "kiwishelf.fill_fade.help": "Quanto sfuma il «%1$@» sul vetro. «%2$@» è un colore uniforme.",

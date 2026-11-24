@@ -28,6 +28,12 @@ struct SettingsNavigation {
     /// able to set and clear it.
     var layoutModeTab: LayoutMode?
 
+    /// The screen or area Bars & Pocket's Each bar and Pocket edits,
+    /// nil for All screens (#3612) — on the model so a landing can
+    /// clear it: an area pick swaps out the bar-level rows a hit
+    /// names. Read it through `KiwiShelfCard.activeScope`.
+    var barsScope: String?
+
     /// Whether Screens ▸ Adjust… types in percent (#3517 ruling
     /// 26): it lasts while Settings stays open, across pages, and is
     /// never stored.
@@ -121,6 +127,7 @@ struct SettingsNavigation {
     /// process-lifetime one.
     mutating func resetSurfaces() {
         layoutModeTab = nil
+        barsScope = nil
         shortcutsLayer = nil
         shortcutsSegment = nil
         kiwiVisionLens = nil

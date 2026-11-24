@@ -7275,7 +7275,8 @@ only whether it shows, which is the question KiwiShelf's Show
 already asks of each bar. So the pocket takes the bars' three values
 (`kiwishelf.pocket_visibility`, stored beside them and left out of a
 look, as their Show is), and Show's master sets it with the bars,
-its drawer *Each bar and Pocket*; a master writing per-profile values
+the Pocket's own row in *Each bar and Pocket*; a master writing
+per-profile values
 cannot also write an app-wide one without one press reaching every
 profile. **Hidden is really hidden**: nothing at rest
 and no strip, with windows inside or not, coming out only for a
@@ -18917,8 +18918,9 @@ render no row. What breaks if this is ignored: either the Bars
 page grows back its three near-identical cards, or someone
 "fixes" the Lua chain's GUI-lessness by hiding the fields —
 both worse than the boundary. The two per-layout **enabled**
-toggles are not styling and keep their GUI (the KiwiShelf card's
-**App Bar in Monocle** / **App Bar in Scrolling**): they are the
+toggles are not styling and keep their GUI (the App Bar's **Show
+in Monocle** / **Show in Scrolling** in the KiwiShelf card's Each
+bar and Pocket): they are the
 only way a layout carries a bar at all, and they own the App Bar
 editor's grey. The class reaches the App Bar's own fields alone;
 the shelf's take no per-layout value (App Bar ▸ one shelf).
@@ -20548,6 +20550,14 @@ Each bar holds the rest.
 too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
 bar's edge may differ per screen*).
 
+:::unreleased
+*Amended* (#3612): Each bar and Pocket is one drawer, under
+Position, and its per-bar per-screen drawers gave way to one
+*Screen or area* picker heading it (▸ *The bar cards share one
+canonical row order*); on a one-screen profile the picker greys,
+its `?` the same.
+:::
+
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
 a bar already shown and must not hide one by writing a setting.
@@ -21302,6 +21312,14 @@ nothing about the option, while the `?` names the one thing that
 unlocks it, a profile for more screens, so the grey promises
 nothing a setting would have to keep.
 
+:::unreleased
+*Amended* (#3612): Each bar and Pocket is one drawer, under
+Position, and its per-bar per-screen drawers gave way to one
+*Screen or area* picker heading it (▸ *The bar cards share one
+canonical row order*); on a one-screen profile the picker greys,
+its `?` the same.
+:::
+
 *Amended: the pocket's edge may differ per screen too.*
 ([#3376](https://github.com/KiwiCanopy/KiwiDesk/issues/3376),
 ruled 2026-11-17.) The pocket sits on the shelf's edges, so a
@@ -21325,6 +21343,14 @@ screen. Its drawer, Each bar and Pocket, gives the pocket a row and
 Per screen rows of its own beside each bar's, and the separate
 Pocket edge row is gone: two rows writing one value would let the
 master and the row disagree about which was the pocket's edge.
+
+:::unreleased
+*Amended* (#3612): Each bar and Pocket is one drawer, under
+Position, and its per-bar per-screen drawers gave way to one
+*Screen or area* picker heading it (▸ *The bar cards share one
+canonical row order*); on a one-screen profile the picker greys,
+its `?` the same.
+:::
 
 :::unreleased
 *Amended: a bar's edge and Show may differ per area.*
@@ -22187,8 +22213,8 @@ one value for every screen, so they stay in the Pocket's block and
 grey while an area is picked, the picker being the switch that
 brings them back. An item holding values of its own says so in words,
 the caption under All screens names those areas, and the shut drawer
-counts them; the drawer stays open by itself only while the bars' own
-values differ. Setting up an area is the job, not comparing areas, so
+counts them; the drawer stays open by itself only while the bars' and
+the Pocket's own values differ. Setting up an area is the job, not comparing areas, so
 the area comes first; per-bar per-screen drawers, two drawers of one
 name per master and a Show pop-up beside an edge picker all read
 worse, and a List / By-area switch was ruled out as a second layout

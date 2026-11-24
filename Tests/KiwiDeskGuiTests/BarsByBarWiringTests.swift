@@ -120,7 +120,7 @@ struct BarsByBarWiringTests {
         // A pick the list no longer holds reads as All screens.
         #expect(
             each.contains(
-                "guardletscope,model.offersScreenScopes,"
+                "guardletscope=model.nav.barsScope,model.offersScreenScopes,"
                     + "model.screenScopes.contains(where:{$0.id==scope})"
                     + "else{returnnil}"
             )
@@ -175,5 +175,32 @@ struct BarsByBarWiringTests {
                 .kiwishelf(.revealStyle),
             ]
         )
+    }
+
+    /// The pick is navigation state (#3612): a Bars landing shows
+    /// All screens so a bar-level row a hit names is drawn, a window
+    /// open or edit-target switch clears it, and the pop-up reads
+    /// what the blocks edit.
+    @Test("a landing and a reset clear the picked area")
+    func landingClearsThePick() throws {
+        let root = Self.root.appendingPathComponent(
+            "Sources/KiwiDesk/Settings/"
+        )
+        func flat(_ file: String) throws -> String {
+            try SourceScan.strippedSource(
+                at: root.appendingPathComponent(file)
+            ).split(whereSeparator: \.isWhitespace).joined()
+        }
+        let reveal = try flat("SettingsView+Reveal.swift")
+        #expect(
+            reveal.contains(
+                "ifresolved.destination==.bars{model.nav.barsScope=nil}"
+            )
+        )
+        let nav = try flat("SettingsNavigation.swift")
+        #expect(nav.contains("layoutModeTab=nilbarsScope=nil"))
+        let each = try squashed("KiwiShelfCard+Each.swift")
+        #expect(each.contains("Picker(label,selection:scopeBinding)"))
+        #expect(each.contains("get:{activeScope}"))
     }
 }

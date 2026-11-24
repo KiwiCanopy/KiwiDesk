@@ -1176,7 +1176,7 @@
   "kiwishelf.edge.per_screen.space_bar": "화면 또는 구역별",
   "kiwishelf.edge.pocket": "Pocket",
   "kiwishelf.edge.screen.absent": "연결되지 않음",
-  "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",
+  "kiwishelf.edge.screen.absent_name": "%1$@, %2$@",
   "kiwishelf.edge.space_bar": "Space Bar",
   "kiwishelf.fill_fade": "채우기 옅어짐 범위",
   "kiwishelf.fill_fade.help": "‘%1$@’이(가) 유리 위에서 얼마나 옅어지는지 정합니다. ‘%2$@’(으)로 두면 고른 단색이 됩니다.",

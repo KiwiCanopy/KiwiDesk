@@ -218,9 +218,16 @@ extension TilingSettings {
     public var uniformShelfEdge: AppBarEdge? {
         guard !spaceBarStyle.screensDiffer,
             !appBarStyle.screensDiffer,
-            !kiwishelf.pocketEdges.screensDiffer,
-            let edge = sharedBarEdge,
-            kiwishelf.pocketEdge == edge
+            !kiwishelf.pocketEdges.screensDiffer
+        else { return nil }
+        return ownShelfEdge
+    }
+
+    /// The edge both bars' and the pocket's OWN values share, a
+    /// screen's or area's set aside, or nil while they differ: what
+    /// holds Settings' Each bar and Pocket open (#3612).
+    public var ownShelfEdge: AppBarEdge? {
+        guard let edge = sharedBarEdge, kiwishelf.pocketEdge == edge
         else { return nil }
         return edge
     }

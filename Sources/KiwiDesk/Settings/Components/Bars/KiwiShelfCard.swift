@@ -10,8 +10,6 @@ import SwiftUI
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
     @State var eachExpanded = false
-    /// The Screen or area picker's pick, nil for All screens.
-    @State var scope: String?
     @State var durationsExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false

@@ -57,15 +57,12 @@ struct ScreenEdgesWiringTests {
     func lockedDrawersGreyTheirChevron() throws {
         let each = try squashed(Self.bars + "Bars/KiwiShelfCard+Each.swift")
         #expect(count("locked:eachHeldOpen", in: each) == 1)
-        // The bars' own Show and edges, never a screen's (#3612).
+        // Core's verdicts on the bars' own values, never a screen's
+        // (#3612); `OwnShelfVerdictTests` holds what they answer.
         #expect(
             count(
-                "vareachHeldOpen:Bool{lets=model.config.settings"
-                    + "letshows=[s.spaceBarStyle.visibility]"
-                    + "+s.appBarHosts.map(\\.visibility)"
-                    + "+[s.kiwishelf.pocketVisibility]"
-                    + "returnSet(shows).count>1||s.sharedBarEdge==nil"
-                    + "||s.kiwishelf.pocketEdge!=s.sharedBarEdge}",
+                "returnsettings.ownBarVisibility==nil"
+                    + "||settings.ownShelfEdge==nil}",
                 in: each
             ) == 1
         )

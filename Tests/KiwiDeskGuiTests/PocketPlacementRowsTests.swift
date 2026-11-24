@@ -78,7 +78,8 @@ struct PocketPlacementRowsTests {
         )
         #expect(
             pocket.contains(
-                "help:pocketNoteShown?nil:Self.pocketPositionNote"
+                "help:pocketNoteShown||activeScope!=nil"
+                    + "?nil:Self.pocketPositionNote"
             )
         )
         let rows = try source("KiwiShelfCard+Rows.swift")

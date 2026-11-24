@@ -11,6 +11,13 @@ extension TilingSettings {
     /// Settings' Show master selects (#761, #2978).
     public var uniformBarVisibility: ShelfVisibility? {
         guard !hasScreenVisibilities else { return nil }
+        return ownBarVisibility
+    }
+
+    /// The visibility every element's OWN value shares, a screen's
+    /// or area's set aside, or nil while they differ: what holds
+    /// Settings' Each bar and Pocket open (#3612).
+    public var ownBarVisibility: ShelfVisibility? {
         let all =
             [spaceBarStyle.visibility] + appBarHosts.map(\.visibility)
             + [kiwishelf.pocketVisibility]

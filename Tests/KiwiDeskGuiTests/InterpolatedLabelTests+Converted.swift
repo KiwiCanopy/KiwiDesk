@@ -79,8 +79,7 @@ extension InterpolatedLabelTests {
         // the drafting round did exactly that (localization
         // audit, 2026-08-16).
         "spaces.preview.caption_default": 1,
-        // The temporary-Space note under the per-Space shortcut
-        // rows names the Spaces pane (#1827).
+        // The per-Space shortcuts' temporary note names Spaces (#1827).
         "shortcuts.temporary_space.note": 1,
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
@@ -111,10 +110,11 @@ extension InterpolatedLabelTests {
         "kiwishelf.background_fit.boxed_only": 1,
         "kiwishelf.edge.screens_differ.help": 1,  // #3612
         "kiwishelf.edge.pocket.screens_differ.help": 1,
+        "kiwishelf.edge.differ_per_screen.help": 2,  // #3612
         "kiwishelf.show.differ_per_screen.help": 2,  // #3517
         "kiwishelf.show.screens_differ.help": 1,  // #3612
-        "kiwishelf.edge.screen.ax_absent": 1,  // #3612
-        "kiwishelf.scope.help": 1,  // #3612
+        "kiwishelf.edge.screen.absent_name": 1,  // #3612
+        "kiwishelf.scope.help": 3,  // #3612
         "kiwishelf.scope.every_screen": 1,  // #3612
         // #3471: the Off pointer names its page; the scan does not
         // read the catalog row it also names.

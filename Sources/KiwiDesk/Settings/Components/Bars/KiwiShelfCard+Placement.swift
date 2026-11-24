@@ -1,16 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The KiwiShelf card's Show group and the rows that place the
-/// bars along the edge: alignment for a lone bar, order and share
-/// once both show.
+/// The KiwiShelf card's head, its Show rows, and the rows that
+/// place the bars along the edge once both show: order and share.
 extension KiwiShelfCard {
     /// The card's head (#761, #2978, #3612): the Show and Position
     /// masters for every bar and the Pocket, each bar's own rows
     /// behind Each bar and Pocket — the Space Bar in every layout,
     /// the App Bar only where a layout can carry one, then the
     /// Pocket. A master selects nothing while they differ and says
-    /// why through its `?`; the drawer then stays open.
+    /// why through its `?`.
     var showGroup: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(BarsRowOrder.kiwishelfShow, id: \.id) {
@@ -121,11 +120,14 @@ extension KiwiShelfCard {
                 label: SettingsCatalog.bars.kiwishelfEach.children
                     .pocketDragReveal.text,
                 isOn: $model.config.settings.kiwishelf.pocketDragReveal,
-                help: L(
-                    "kiwishelf.show.pocket_drag.help",
-                    "Off, a drag leaves the Pocket hidden. Its keys "
-                        + "and list still reach it."
-                )
+                // Greyed under a picked area, its `?` the block's.
+                help: activeScope != nil
+                    ? nil
+                    : L(
+                        "kiwishelf.show.pocket_drag.help",
+                        "Off, a drag leaves the Pocket hidden. Its keys "
+                            + "and list still reach it."
+                    )
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfEach.children
@@ -237,49 +239,6 @@ extension KiwiShelfCard {
             selection: selection,
             options: options.map { ($0.1, $0.0) },
             help: help
-        )
-    }
-
-    @ViewBuilder var alignmentRow: some View {
-        SegmentedPicker(
-            L("kiwishelf.alignment.label", "Alignment"),
-            selection: shelf.alignment,
-            options: AppBarOptions.alignment.map { ($0.1, $0.0) },
-            help: L(
-                "kiwishelf.alignment.label.help",
-                "Where the bars sit along the edge — a lone bar, "
-                    + "both as one run, or each bar on its own edge. "
-                    + "\u{201C}%1$@\u{201D} and \u{201C}%2$@\u{201D} "
-                    + "follow the edge, so on a left edge the start "
-                    + "is the top.",
-                L("app_bar.alignment.start", "Start"),
-                L("app_bar.alignment.end", "End")
-            )
-        )
-        if let note = alignmentNote {
-            BarNoteRow(text: note)
-        }
-    }
-
-    /// The accepted trade-off, said where it is chosen: once the
-    /// App Bar joins the Space Bar into one run, a Space Bar
-    /// aligned anywhere but the run's own end moves — Core's own
-    /// verdict names the alignment that holds it still (#1517).
-    private var alignmentNote: String? {
-        guard model.config.settings.bothBarsCanShow,
-            gates.bothBarsReason == nil,
-            let steady = ShelfArrangement.spaceBarMoves(
-                shelf: shelf.wrappedValue
-            )
-        else { return nil }
-        return L(
-            "kiwishelf.alignment.note",
-            "When the App Bar shows, the two bars join into one "
-                + "run, so the Space Bar moves. \u{201C}%1$@\u{201D} "
-                + "keeps it still.",
-            steady == .start
-                ? L("app_bar.alignment.start", "Start")
-                : L("app_bar.alignment.end", "End")
         )
     }
 

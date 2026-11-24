@@ -42,6 +42,7 @@ struct SettingsNavigationResetTests {
         nav.setRevealTarget("anchor")
         _ = nav.startFlash("anchor")
         nav.layoutModeTab = .stack
+        nav.barsScope = "Wide:3440x1440#1"
         nav.shortcutsLayer = "media"
         nav.shortcutsSegment = .personal
         nav.kiwiVisionLens = "Writing"

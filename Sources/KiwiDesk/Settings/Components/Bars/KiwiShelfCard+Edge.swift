@@ -13,15 +13,17 @@ extension KiwiShelfCard {
     }
 
     var edgeMasterHelp: String {
-        edgesSplit
-            ? BarsGateHelp.edgesDiffer
-            : L(
-                "kiwishelf.edge.label.help",
-                "Which screen edge the bars and the Pocket sit on. "
-                    + "Put each on its own edge under "
-                    + "\u{201C}%1$@\u{201D}.",
-                L("kiwishelf.show.each_bar", "Each bar and Pocket")
-            )
+        model.config.settings.hasScreenEdges
+            ? BarsGateHelp.edgesDifferPerScreen
+            : edgesSplit
+                ? BarsGateHelp.edgesDiffer
+                : L(
+                    "kiwishelf.edge.label.help",
+                    "Which screen edge the bars and the Pocket sit on. "
+                        + "Put each on its own edge under "
+                        + "\u{201C}%1$@\u{201D}.",
+                    L("kiwishelf.show.each_bar", "Each bar and Pocket")
+                )
     }
 
     @ViewBuilder var edgeRows: some View {
