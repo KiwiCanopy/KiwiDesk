@@ -114,7 +114,29 @@ struct AreaBarVisibilityVerbTests {
             "app_bar.set_visibility",
             args: [.string("hidden"), .string(wide.fingerprint)]
         )
-        #expect(!global.isSuccess)
+        // The style's guard refuses it; a parse alone would answer
+        // `.ok` and write nothing.
+        #expect(global.error?.contains("unknown bar setting") == true)
+        #expect(
+            core.tiler.settings.appBarHosts.map(\.visibilityOverride)
+                .allSatisfy { $0.isEmpty }
+        )
+        // Every layout-only field is the layouts' alone.
+        let styleKeys = Set(
+            AppBarStyle.CodingKeys.allCases.map(\.stringValue)
+        )
+        for key in LayoutAppBar.Key.allCases
+        where !styleKeys.contains(key.stringValue) {
+            let field = BarStyleKeys.setterField(of: key.stringValue)
+            let answer = core.execute(
+                "app_bar.set_\(field)",
+                args: [.string("hidden"), .string(wide.fingerprint)]
+            )
+            #expect(
+                answer.error?.contains("unknown bar setting") == true,
+                Comment(rawValue: field)
+            )
+        }
         let layout = core.execute(
             "scroll.set_app_bar_visibility",
             args: [.string("hidden"), .string(wide.fingerprint)]

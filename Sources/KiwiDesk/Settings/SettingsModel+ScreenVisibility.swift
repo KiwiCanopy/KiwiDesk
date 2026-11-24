@@ -14,11 +14,14 @@ enum BarShowRow {
     case spaceBar
     case appBar(LayoutMode)
 
-    /// Whether the row is a layout's App Bar's.
-    var isAppBar: Bool {
-        if case .appBar = self { return true }
-        return false
+    /// The bar the row belongs to.
+    var bar: ScreenShowBar {
+        if case .appBar = self { return .app }
+        return .space
     }
+
+    /// Whether the row is a layout's App Bar's.
+    var isAppBar: Bool { bar == .app }
 }
 
 /// A bar's Show for a picked screen or area (#3517 ruling 30,

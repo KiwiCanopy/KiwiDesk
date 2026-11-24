@@ -21343,28 +21343,28 @@ master and the row disagree about which was the pocket's edge.
 :::unreleased
 *Amended: a bar's edge and Show may differ per area.*
 ([#3517](https://github.com/KiwiCanopy/KiwiDesk/issues/3517),
-rulings 7, 14, 16, 22, 30 and 32, owner 2026-11-22.) A screen split
-into areas shows a Space in each, so each area has its own bars,
-and a reference area that keeps one window still wants no bars over
-it while its neighbour keeps them. So the per-screen maps are keyed
-by the area: an unsplit screen and a split screen's first area by
-the bare fingerprint, every other area by `fingerprint#id`. Reads
-are exact — an entry is its own area's, and an area with none takes
-the bar's value — and the fan-out is the write's: a verb naming a
-physical screen writes every area of it, while a fingerprint or an
-area key writes one. A read that fell back from an area to its
-screen was tried and cost a sibling pin on every write, a pin on
-every merge and a stored "per layout" for the App Bar, each a rule
-of its own; exact reads need none. A merge moves the absorbed
-area's entries onto the survivor, and a split copies the parent's
-to the new area, so splitting a screen whose bars sit at the bottom
-keeps them there. "Nothing else does" no longer
-holds for the bars' Show: each bar's visibility takes the same
-sparse shape — `space_bar.visibility_override` and each hosting
-layout's `<layout>.app_bar.visibility_override` — resolved in the
-one per-screen
-step, so an area whose bars are Hidden draws and reserves nothing.
-Thickness, margins and the rest stay one value, as before.
+rulings 7, 14, 16, 22, 30 and 32, owner 2026-11-22.) A screen
+split into areas shows a Space in each, so each area has its own
+bars, and a reference area that keeps one window still wants no
+bars over it while its neighbour keeps them. So the per-screen
+maps are keyed by the area: an unsplit screen and a split screen's
+first area by the bare fingerprint, every other area by
+`fingerprint#id`. Reads are exact — an entry is its own area's,
+and an area with none takes the bar's value — and the fan-out is
+the write's: a verb naming a physical screen writes every area of
+it, while a fingerprint or an area key writes one. A read that
+fell back from an area to its screen was tried and cost a sibling
+pin on every write, a pin on every merge and a stored "per layout"
+for the App Bar, each a rule of its own; exact reads need none. A
+merge moves the absorbed area's entries onto the survivor, and a
+split copies the parent's to the new area, so splitting a screen
+whose bars sit at the bottom keeps them there. "Nothing else does"
+no longer holds for the bars' Show: each bar's visibility takes
+the same sparse shape — `space_bar.visibility_override` and each
+hosting layout's `<layout>.app_bar.visibility_override` — resolved
+in the one per-screen step, so an area whose bars are Hidden draws
+and reserves nothing. Thickness, margins and the rest stay one
+value, as before.
 
 The Space Bar keeps one visibility, so an area given the bar's own
 value stores nothing, as a screen given its bar's edge does. The
@@ -21377,12 +21377,13 @@ The row's Inherit choice is the "no entry" state. A bar-level Show
 pick — the Show master, the Space Bar's Show or a layout's App Bar
 Show, in Settings, and the screen-less `space_bar.set_visibility`
 and `<layout>.set_app_bar_visibility` in Lua — clears that bar's
-entries, a layout's Show only that layout's, as a pick of a bar's edge writes every level below it, so
-the master and those rows read as differing, with a `?` naming the
-Screen or area picker, while an entry stands. Settings writes the
-entries where it writes the edge — the bar's Show and Position for
-the screen or area the picker picks (#3612) — so an area's bars
-have one home; a forgotten screen setup drops them with its edges.
+entries, a layout's Show only that layout's, as a pick of a bar's
+edge writes every level below it, so the master and those rows
+read as differing, with a `?` naming the Screen or area picker,
+while an entry stands. Settings writes the entries where it writes
+the edge — the bar's Show and Position for the screen or area the
+picker picks (#3612) — so an area's bars have one home; a
+forgotten screen setup drops them with its edges.
 :::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228

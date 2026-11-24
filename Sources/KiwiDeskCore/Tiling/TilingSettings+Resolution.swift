@@ -164,7 +164,8 @@ extension TilingSettings {
     /// decides which layouts host an App Bar (#527): reading
     /// (`appBarHost(for:)`) and writing (`setAppBarVisibility`)
     /// both derive from here, so a third hosting layout is one
-    /// edit. `KiwiCore`'s per-space twin keeps its own switch by
+    /// Core edit (Settings' census lists each layout's rows).
+    /// `KiwiCore`'s per-space twin keeps its own switch by
     /// necessity — two mirrors, which §2.4 allows, never three.
     public static func appBarPath(
         for mode: LayoutMode

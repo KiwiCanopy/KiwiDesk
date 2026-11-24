@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "Показывать Pocket при перетаскивании окна",
   "kiwishelf.show.pocket_drag.help": "Если выключено, при перетаскивании Pocket остаётся скрытым. Сочетания клавиш Pocket и его список по-прежнему дают к нему доступ.",
   "kiwishelf.show.screen.app_bar.inherit": "Наследовать",
-  "kiwishelf.show.screen.app_bar.inherit.help": "«Наследовать» следует значению «Показывать» этой раскладки в разделе «Все экраны».",
+  "kiwishelf.show.screen.app_bar.inherit.help": "«%1$@» следует значению «%2$@» этой раскладки в разделе «%3$@».",
   "kiwishelf.show.screens_differ.help": "Некоторые экраны или участки показывают эту панель по-своему — выбери такой экран или участок в списке «%1$@» выше, чтобы это увидеть. Выбор здесь настраивает её на каждом экране.",
   "kiwishelf.show.scrolling": "App Bar в %1$@",
   "kiwishelf.show.space_bar": "Space Bar",

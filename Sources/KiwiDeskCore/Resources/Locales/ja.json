@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "ウインドウのドラッグ中に Pocket を表示",
   "kiwishelf.show.pocket_drag.help": "オフにすると、ドラッグしても Pocket は非表示のままです。Pocket のショートカットとリストからは引き続き使えます。",
   "kiwishelf.show.screen.app_bar.inherit": "継承",
-  "kiwishelf.show.screen.app_bar.inherit.help": "「継承」は、「すべての画面」でのこのレイアウトの「表示」に従います。",
+  "kiwishelf.show.screen.app_bar.inherit.help": "「%1$@」は、「%3$@」でのこのレイアウトの「%2$@」に従います。",
   "kiwishelf.show.screens_differ.help": "一部の画面またはエリアでは、このバーを独自の方法で表示しています。確認するには、上の「%1$@」でその画面またはエリアを選んでください。ここで選ぶと、どの画面でもこのバーに設定されます。",
   "kiwishelf.show.scrolling": "%1$@のApp Bar",
   "kiwishelf.show.space_bar": "Space Bar",

@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "Mostra la Pocket mentre trascini una finestra",
   "kiwishelf.show.pocket_drag.help": "Disattivo: trascinare una finestra lascia nascosta la Pocket. Le scorciatoie Pocket e il suo elenco la raggiungono comunque.",
   "kiwishelf.show.screen.app_bar.inherit": "Eredita",
-  "kiwishelf.show.screen.app_bar.inherit.help": "«Eredita» segue «Mostra» di questo layout in «Tutti gli schermi».",
+  "kiwishelf.show.screen.app_bar.inherit.help": "«%1$@» segue «%2$@» di questo layout in «%3$@».",
   "kiwishelf.show.screens_differ.help": "Alcuni schermi o aree mostrano questa barra a modo loro: scegline uno sotto «%1$@» qui sopra per vederlo. Scegliere qui la imposta su ogni schermo.",
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",

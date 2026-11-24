@@ -62,12 +62,16 @@ struct AreaBarVisibilityTests {
     /// stored `app_bar.visibility_override` decodes to nothing.
     @Test("a global App Bar map is no longer read")
     func globalMapIsRetired() throws {
-        let json = #"{"visibility_override":{"Wide:3440x1440#1":"hidden"}}"#
+        let json =
+            #"{"reserve":false,"#
+            + #""visibility_override":{"Wide:3440x1440#1":"hidden"}}"#
         let style = try JSONDecoder().decode(
             AppBarStyle.self,
             from: Data(json.utf8)
         )
-        #expect(style == AppBarStyle())
+        var expected = AppBarStyle()
+        expected.reserve = false
+        #expect(style == expected)
     }
 
     @Test("a hidden area reserves nothing; its neighbour reserves")

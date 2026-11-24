@@ -249,7 +249,10 @@ extension KiwiShelfCard {
     private static var inheritHelp: String {
         L(
             "kiwishelf.show.screen.app_bar.inherit.help",
-            "Inherit follows this layout's Show under All screens."
+            "%1$@ follows this layout's %2$@ under %3$@.",
+            SettingsModel.inheritShow,
+            showLabel,
+            L("kiwishelf.scope.all", "All screens")
         )
     }
 

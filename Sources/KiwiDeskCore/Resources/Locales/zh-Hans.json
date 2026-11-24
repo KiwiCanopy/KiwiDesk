@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "拖动窗口时显示 Pocket",
   "kiwishelf.show.pocket_drag.help": "关闭时，拖动窗口不会显示 Pocket。Pocket 快捷键和其列表仍可访问它。",
   "kiwishelf.show.screen.app_bar.inherit": "继承",
-  "kiwishelf.show.screen.app_bar.inherit.help": "“继承”跟随此布局在“所有显示器”下的“显示”设置。",
+  "kiwishelf.show.screen.app_bar.inherit.help": "“%1$@”跟随此布局在“%3$@”下的“%2$@”设置。",
   "kiwishelf.show.screens_differ.help": "部分显示器或分区以自己的方式显示此栏——在上方的“%1$@”中选择其中一个即可查看。在此处选择会在每台显示器上设置此栏。",
   "kiwishelf.show.scrolling": "%1$@中的 App Bar",
   "kiwishelf.show.space_bar": "Space Bar",

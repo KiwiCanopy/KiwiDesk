@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "Afficher la Pocket quand vous faites glisser une fenêtre",
   "kiwishelf.show.pocket_drag.help": "Désactivé : faire glisser une fenêtre laisse la Pocket masquée. Les raccourcis Pocket et sa liste y accèdent toujours.",
   "kiwishelf.show.screen.app_bar.inherit": "Hériter",
-  "kiwishelf.show.screen.app_bar.inherit.help": "« Hériter » suit « Afficher » de cette disposition sous « Tous les écrans ».",
+  "kiwishelf.show.screen.app_bar.inherit.help": "« %1$@ » suit « %2$@ » de cette disposition sous « %3$@ ».",
   "kiwishelf.show.screens_differ.help": "Certains écrans ou secteurs affichent cette barre à leur façon — choisissez-en un sous « %1$@ » ci-dessus pour le voir. Choisir ici la règle sur chaque écran.",
   "kiwishelf.show.scrolling": "App Bar en %1$@",
   "kiwishelf.show.space_bar": "Space Bar",

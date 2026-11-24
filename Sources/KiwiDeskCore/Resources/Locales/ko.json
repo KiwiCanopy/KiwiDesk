@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "윈도우를 드래그하는 동안 Pocket 표시",
   "kiwishelf.show.pocket_drag.help": "끄면 드래그해도 Pocket이 가려진 채로 있습니다. Pocket 단축키와 목록으로는 계속 Pocket에 접근할 수 있습니다.",
   "kiwishelf.show.screen.app_bar.inherit": "상속",
-  "kiwishelf.show.screen.app_bar.inherit.help": "‘상속’은 ‘모든 화면’에서 이 레이아웃의 ‘표시’를 따릅니다.",
+  "kiwishelf.show.screen.app_bar.inherit.help": "‘%1$@’ 항목은 ‘%3$@’에서 이 레이아웃의 ‘%2$@’ 설정을 따릅니다.",
   "kiwishelf.show.screens_differ.help": "일부 화면 또는 구역에서는 이 바를 다른 방식으로 표시합니다. 확인하려면 위의 ‘%1$@’에서 그 화면이나 구역을 고르십시오. 여기서 고르면 모든 화면에서 이 바에 적용됩니다.",
   "kiwishelf.show.scrolling": "%1$@의 App Bar",
   "kiwishelf.show.space_bar": "Space Bar",

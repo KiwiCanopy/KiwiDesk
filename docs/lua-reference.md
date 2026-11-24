@@ -821,8 +821,9 @@ screen is whole again. A split made in Settings or from the CLI
 stays.
 
 Once a screen is split, a screen argument —
-`move_space_to_display`, `pin_space_to_display` and the bars'
-per-screen edge and visibility verbs — also takes an area key, as
+`move_space_to_display`, `pin_space_to_display`, the bars'
+per-screen edge and visibility verbs and a layout's
+`set_app_bar_visibility` — also takes an area key, as
 `list_monitors` prints it in `areas[].key`, or an area's own name.
 A number or a screen's name names its first area; what it names
 for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
@@ -4288,10 +4289,6 @@ Settings ▸ Bars & Pocket ▸ KiwiShelf writes them as **Show in
 Monocle** and **Show in Scrolling** in **Each bar and Pocket** once
 its **Screen or area** picker picks a screen or area; **Inherit**
 there is no value of its own.
-
-```lua
-monocle.set_app_bar_visibility("hidden", "LG HDR 4K:3840x2160")
-```
 :::
 
 **Example:**
@@ -4301,6 +4298,12 @@ monocle.set_app_bar_visibility("always")
 scroll.set_app_bar_visibility("hidden")
 scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
+
+:::unreleased
+```lua
+monocle.set_app_bar_visibility("hidden", "LG HDR 4K:3840x2160")
+```
+:::
 
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
 are retired: `false` is `"hidden"`.

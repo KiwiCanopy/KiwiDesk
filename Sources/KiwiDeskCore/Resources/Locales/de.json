@@ -1289,7 +1289,7 @@
   "kiwishelf.show.pocket_drag": "Die Pocket beim Ziehen eines Fensters anzeigen",
   "kiwishelf.show.pocket_drag.help": "Ist es aus, bleibt die Pocket beim Ziehen ausgeblendet. Die Pocket-Tastenkürzel und die Liste der Pocket erreichen sie weiterhin.",
   "kiwishelf.show.screen.app_bar.inherit": "Erben",
-  "kiwishelf.show.screen.app_bar.inherit.help": "„Erben“ folgt „Anzeigen“ dieses Layouts unter „Alle Bildschirme“.",
+  "kiwishelf.show.screen.app_bar.inherit.help": "„%1$@“ folgt „%2$@“ dieses Layouts unter „%3$@“.",
   "kiwishelf.show.screens_differ.help": "Manche Bildschirme oder Abschnitte zeigen diese Leiste auf ihre eigene Weise an — wähle oben unter „%1$@“ einen davon, um ihn zu sehen. Eine Wahl hier stellt sie auf jedem Bildschirm ein.",
   "kiwishelf.show.scrolling": "App Bar in %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
