@@ -1417,9 +1417,11 @@ must keep:
   #3042 exception and the mark are review's, save the shown
   Desktop's check, which names no accent (`DesktopTitleHoverTests`
   ▸ `checkKeepsItsInk`). **A Desktop's title under the pointer is
-  the owner's exception to the lift (#3484):** it rings its whole
-  column with a thin `paint.selection` stroke, lighter than a
-  selected tile's 2 pt ring, and draws no ground of its own
+  the owner's exception to the lift (#3484):** it rings its
+  Desktop's card — a column with separate Spaces, a row with
+  shared Desktops (#3602) — with a thin `paint.selection` stroke,
+  lighter than a selected tile's 2 pt ring, and draws no ground of
+  its own
   (`DesktopTitleHoverTests` ▸ `columnRings`, `titleStaysPlain`).
 
 ## A diff row's ↺ (#792)
