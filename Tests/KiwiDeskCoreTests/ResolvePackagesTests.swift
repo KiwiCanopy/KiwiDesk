@@ -23,10 +23,14 @@ struct ResolvePackagesTests {
         let root: URL
     }
 
-    /// Runs the script with a fake swift that exits 1 on its
-    /// first `failures` calls and 0 after. Each call logs its
-    /// arguments and whether both clone folders still exist.
-    private func resolve(failures: Int) throws -> Run {
+    /// Runs the script with a fake swift that fails its first
+    /// `failures` calls, exiting with their 1-based count, and
+    /// exits 0 after. Each call logs its arguments and which
+    /// clone folders still exist: the package's, then the user's.
+    private func resolve(
+        failures: Int,
+        onCI: Bool = true
+    ) throws -> Run {
         let root =
             testTemporaryDirectory
             .appendingPathComponent("resolve-\(UUID())")
@@ -41,11 +45,11 @@ struct ResolvePackagesTests {
         let body = """
             #!/bin/bash
             n=$(wc -l < calls.log 2>/dev/null || echo 0)
-            seen=gone
-            [ -d .build/repositories ] && [ -d "$HOME/\(Self.cache)" ] \
-            && seen=kept
-            echo "$* $seen" >> calls.log
-            [ "$n" -lt \(failures) ] && exit 1
+            own=gone; user=gone
+            [ -d .build/repositories ] && own=kept
+            [ -d "$HOME/\(Self.cache)" ] && user=kept
+            echo "$* $own $user" >> calls.log
+            [ "$n" -lt \(failures) ] && exit $((n + 1))
             exit 0
             """
         try body.write(to: fake, atomically: true, encoding: .utf8)
@@ -56,6 +60,7 @@ struct ResolvePackagesTests {
         var env = ProcessInfo.processInfo.environment
         env["HOME"] = root.path
         env["KIWIDESK_RESOLVE_SWIFT"] = fake.path
+        env["CI"] = onCI ? "true" : nil
         let run = try spawn(
             "/bin/bash",
             [Self.script.path],
@@ -83,7 +88,7 @@ struct ResolvePackagesTests {
     func successRunsOnce() throws {
         let run = try resolve(failures: 0)
         #expect(run.status == 0)
-        #expect(run.calls == ["\(Self.strict) kept"])
+        #expect(run.calls == ["\(Self.strict) kept kept"])
         #expect(!run.stdout.contains("::warning::"))
     }
 
@@ -92,7 +97,9 @@ struct ResolvePackagesTests {
         let run = try resolve(failures: 1)
         #expect(run.status == 0)
         #expect(
-            run.calls == ["\(Self.strict) kept", "\(Self.strict) gone"]
+            run.calls == [
+                "\(Self.strict) kept kept", "\(Self.strict) gone gone",
+            ]
         )
         #expect(run.stdout.contains("retrying once"))
         let files = FileManager.default
@@ -109,8 +116,22 @@ struct ResolvePackagesTests {
     @Test("A second failure fails the step, with no third try")
     func secondFailureFails() throws {
         let run = try resolve(failures: 5)
-        #expect(run.status == 1)
+        // The second attempt's own status, not a fixed code.
+        #expect(run.status == 2)
         #expect(run.calls.count == 2)
         #expect(run.stderr.contains("failed twice"))
+    }
+
+    /// Off CI the user-global clone cache is a developer's, so
+    /// only the package's own clones are cleared.
+    @Test("Off CI the retry keeps the user's clone cache")
+    func offCiKeepsUserCache() throws {
+        let run = try resolve(failures: 1, onCI: false)
+        #expect(run.status == 0)
+        #expect(
+            run.calls == [
+                "\(Self.strict) kept kept", "\(Self.strict) gone kept",
+            ]
+        )
     }
 }

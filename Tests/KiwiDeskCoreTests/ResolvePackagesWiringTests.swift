@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-/// Every macOS job in `ci.yml` and `release.yml` resolves through
+/// Every macOS job in every workflow resolves through
 /// `scripts/resolve-packages` before anything that would resolve
 /// on its own (#3591): one wiring point per job, so a job without
 /// it takes the unretried clone the script exists to replace, and
@@ -16,40 +16,53 @@ struct ResolvePackagesWiringTests {
         "build-app.sh",
     ]
 
-    /// Each job of a workflow, keyed by its id, comments stripped.
-    static func jobs(in yaml: String) throws -> [(String, String)] {
-        let lines = yaml.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        )
-        let top = try #require(
-            lines.firstIndex { $0 == "jobs:" },
-            "no jobs: block read"
-        )
-        var jobs: [(String, [Substring])] = []
-        for line in lines[(top + 1)...] {
-            let indent = line.prefix { $0 == " " }.count
-            if !line.isEmpty, indent == 0 { break }
-            if indent == 2, line.hasSuffix(":") {
-                let id = line.trimmingCharacters(in: .whitespaces)
-                jobs.append((String(id.dropLast()), []))
-            } else if !jobs.isEmpty {
-                jobs[jobs.count - 1].1.append(line)
-            }
+    /// Every workflow, comments stripped, by file name: a new
+    /// one is read without being listed here.
+    static func workflows() throws -> [String: String] {
+        let dir = scriptFixtureRepoRoot()
+            .appendingPathComponent(".github/workflows")
+        var out: [String: String] = [:]
+        for name in try FileManager.default
+            .contentsOfDirectory(atPath: dir.path)
+        where name.hasSuffix(".yml") {
+            out[name] = try workflowSource(name)
         }
-        return jobs.map { ($0.0, $0.1.joined(separator: "\n")) }
+        return out
     }
 
-    @Test(
-        "Each macOS job resolves once, before any resolving step",
-        arguments: ["ci.yml", "release.yml"]
-    )
-    func everyMacJobResolvesFirst(workflow: String) throws {
-        let jobs = try Self.jobs(in: try workflowSource(workflow))
-        let mac = jobs.filter { $0.1.contains("runs-on: xcode-") }
-        try #require(!mac.isEmpty, "\(workflow): no macOS job read")
+    /// Each job of a workflow as (id, block), through the one
+    /// splitter the other per-job workflow guards share.
+    static func jobs(in yaml: String) -> [(String, String)] {
+        CiPathFilterTests.jobIDs(in: yaml).compactMap { id in
+            CiPathFilterTests.jobBlock(id, in: yaml).map { (id, $0) }
+        }
+    }
+
+    private static func isMac(_ job: String) -> Bool {
+        job.contains("runs-on:") && !job.contains("runs-on: ubuntu-")
+    }
+
+    @Test("Each macOS job resolves once, before any resolving step")
+    func everyMacJobResolvesFirst() throws {
+        let workflows = try Self.workflows()
+        #expect(workflows["ci.yml"] != nil)
+        #expect(workflows["release.yml"] != nil)
+        var macJobs = 0
+        for (workflow, yaml) in workflows {
+            try check(workflow, Self.jobs(in: yaml), &macJobs)
+        }
+        // ci.yml alone has several; none read means the split broke.
+        #expect(macJobs >= 2, "read \(macJobs) macOS jobs")
+    }
+
+    private func check(
+        _ workflow: String,
+        _ jobs: [(String, String)],
+        _ macJobs: inout Int
+    ) throws {
         for (id, body) in jobs {
-            let isMac = mac.contains { $0.0 == id }
+            let isMac = Self.isMac(body)
+            if isMac { macJobs += 1 }
             let wired = body.components(separatedBy: Self.step)
             #expect(
                 wired.count - 1 == (isMac ? 1 : 0),
@@ -71,13 +84,12 @@ struct ResolvePackagesWiringTests {
 
     /// `Select Xcode` picks the toolchain the resolve runs on, so
     /// the step follows it rather than the checkout.
-    @Test(
-        "The resolve runs on the selected Xcode",
-        arguments: ["ci.yml", "release.yml"]
-    )
-    func resolveFollowsSelectXcode(workflow: String) throws {
-        let jobs = try Self.jobs(in: try workflowSource(workflow))
-        for (id, body) in jobs where body.contains(Self.step) {
+    @Test("The resolve runs on the selected Xcode")
+    func resolveFollowsSelectXcode() throws {
+        let jobs = try Self.workflows().flatMap { workflow, yaml in
+            Self.jobs(in: yaml).map { (workflow, $0.0, $0.1) }
+        }
+        for (workflow, id, body) in jobs where body.contains(Self.step) {
             let select = try #require(
                 body.range(of: "- name: Select Xcode"),
                 "\(workflow) \(id) selects no Xcode"

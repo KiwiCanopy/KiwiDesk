@@ -851,7 +851,8 @@ reach is worth stating once: `-Xswiftc` is swiftc's, so
 right after `Select Xcode` and before any step that would resolve
 on its own (#3591).** A fresh VM clones every dependency, and
 github.com sometimes refuses an anonymous clone; the script
-retries once after clearing the clones, and resolves only from
+retries once after clearing the clones (the user-global cache
+only under `CI=true`), and resolves only from
 `Package.resolved`, so a stale or broken pin still fails both
 attempts. A new macOS job takes the step, and no job spells the
 resolve or the retry itself (`ResolvePackagesWiringTests`;
