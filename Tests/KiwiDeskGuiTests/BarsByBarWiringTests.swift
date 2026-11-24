@@ -201,7 +201,7 @@ struct BarsByBarWiringTests {
         let shell = try flat("SettingsView.swift")
         #expect(
             shell.contains(
-                ".onChange(of:model.destination){old,_inpreviewShown=false"
+                ".onChange(of:model.destination){old,_in"
                     + "ifold==.bars{model.nav.barsScope=nil}}"
             )
         )
