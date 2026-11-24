@@ -278,7 +278,8 @@ extension KiwiCore {
     }
 
     /// The key the undo pair seeds on, by letter on the active
-    /// layout (#3599): every writer of a default row reads it here.
+    /// layout (#3599), the `undoKey:` every default-row producer
+    /// takes (`UndoKeySeedCensusTests`).
     public var layoutUndoKey: String {
         DefaultKeybindings.layoutUndoKey(keyCodeTyping: keyCodeTyping)
     }

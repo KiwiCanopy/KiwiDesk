@@ -1213,9 +1213,10 @@ sound when [`set_refusal_sound`](#set_refusal_sound) is on; a
 CLI or Lua caller gets the reason.
 
 `⌃⌥Z` runs it by default, listed as **Undo layout change** under
-Shortcuts ▸ Built-in ▸ Size & float. Its Z is the key that types
-Z on your keyboard layout, as ⌘Z's is, read when the default is
-added.
+Shortcuts ▸ Built-in ▸ Size & float. The default sits on the key
+that types Z on the keyboard layout active when it is added, or on
+the US Z key where that layout types no Z, and then stays on that
+key.
 :::
 
 **Example:**
@@ -1231,8 +1232,8 @@ KiwiDesk.undo_layout()
 
 **Does:** makes again the change [`undo_layout`](#undo_layout)
 took back. Any new change to the space clears what redo could
-make again. `⌃⌥⇧Z` runs it by default, on undo's Z, listed as
-**Redo layout change**.
+make again. `⌃⌥⇧Z` runs it by default, on the same key as undo,
+listed as **Redo layout change**.
 :::
 
 **Example:**

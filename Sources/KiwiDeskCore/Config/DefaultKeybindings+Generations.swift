@@ -55,7 +55,8 @@ extension DefaultKeybindings {
 
     /// The rows of every generation above `mark` whose action no
     /// row in `existing` binds and whose chord is free, each on
-    /// `base` (#2460), undo on `undoKey` (#3599). Additive, like
+    /// `base` (#2460), undo on `undoKey` or, where a row holds it,
+    /// on `z` (#3599, `freeUndoKey`). Additive, like
     /// `desktopTopUp`: a row the user deleted after its generation
     /// was offered stays deleted.
     public static func generationTopUp(
@@ -71,8 +72,9 @@ extension DefaultKeybindings {
         )
         var bound = Set(existing.map(\.lua))
         var added: [KeyBinding] = []
+        let undo = freeUndoKey(undoKey, among: existing, base: base)
         for number in (max(mark, 0) + 1)...newestGeneration {
-            for seeded in rows(ofGeneration: number, undoKey: undoKey) {
+            for seeded in rows(ofGeneration: number, undoKey: undo) {
                 let row = base.rebased(seeded)
                 guard !bound.contains(row.lua),
                     let combo = KeyCombo.parse(row.combo),

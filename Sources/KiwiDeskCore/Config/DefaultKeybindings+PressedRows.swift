@@ -87,8 +87,11 @@ extension DefaultKeybindings {
     /// Undo and redo the arrangement on `⌃⌥Z` and `⌃⌥⇧Z` (#3515),
     /// Z as ⌘Z; `⇧` reverses its twin as ⌘⇧Z does. `key` is the
     /// `KeyCombo` name of the key that types "z" here, by letter
-    /// rather than position (#3599, `layoutUndoKey`). Free in
-    /// `SystemShortcuts.map` and the seed (read 2026-11-22).
+    /// rather than position (#3599, `layoutUndoKey`), else `z`
+    /// where the seed holds it (`freeUndoKey`). `z` and QWERTZ's `y`
+    /// are free in `SystemShortcuts.map` and the seed (read
+    /// 2026-11-24); another layout's key is checked against the
+    /// seed alone.
     public static func layoutUndoRows(key: String = "z") -> [KeyBinding] {
         [
             KeyBinding(

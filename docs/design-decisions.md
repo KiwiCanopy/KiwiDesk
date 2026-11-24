@@ -4386,6 +4386,21 @@ before is taken at its first move, since a spring or a display
 crossing moves the window mid-gesture. Focus, the viewport and a
 Maximize stay out, each owned by doors of its own. It never takes
 `⌘Z`, which belongs to the focused app.
+
+The pair is seeded on the key that types Z on the active layout
+(#3599, owner 2026-11-24), the one default placed by letter: every
+other default keeps the key-code position *The keypad's ten digits
+ARE their number-row twins* argues for, because HJKL-style rows are
+shapes, while undo is a letter mnemonic read beside ⌘Z, which
+AppKit matches by character. A layout typing no Z, and a row
+already on the chord, fall back to the US position. The key is
+read when the row is added and is then an ordinary key-code
+binding. A reader comparing a layer with the seed, Restore Defaults
+among them, reads the layout active at that moment, so on a Mac
+with two input sources that place Z apart the pair can read as
+changed from its default while the other one is active; recording
+the seeded key was rejected, since it costs a stored-value crossing
+for a residue of that size.
 :::
 
 **Resize is truly 2-axis via two per-space BSP ratios; per-node

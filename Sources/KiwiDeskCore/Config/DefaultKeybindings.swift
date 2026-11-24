@@ -91,22 +91,29 @@ public enum DefaultKeybindings {
         rows.append(toggleTilingRow())
         rows.append(contentsOf: barRevealRows())
         rows.append(contentsOf: appChromeRows())
-        let undo = freeUndoKey(undoKey, among: rows)
+        let undo = freeUndoKey(
+            undoKey,
+            among: rows.map(base.rebased),
+            base: base
+        )
         rows.insert(contentsOf: layoutUndoRows(key: undo), at: undoAt)
         return rows.map(base.rebased)
     }
 
-    /// `key`, or `z` where another seed row already holds one of the
-    /// undo pair's chords on it (#3599).
+    /// `key`, or the US `z` where a row of `rows` (on `base`)
+    /// already holds one of the undo pair's chords on it (#3599):
+    /// the one rule the seed and generation 15's top-up share.
     static func freeUndoKey(
         _ key: String,
-        among rows: [KeyBinding]
+        among rows: [KeyBinding],
+        base: ShortcutBase
     ) -> String {
         let taken = Set(
             rows.compactMap { KeyCombo.parse($0.combo)?.registered }
         )
         let free = layoutUndoRows(key: key).allSatisfy {
-            guard let combo = KeyCombo.parse($0.combo) else { return false }
+            guard let combo = KeyCombo.parse(base.rebased($0).combo)
+            else { return false }
             return !taken.contains(combo.registered)
         }
         return free ? key : "z"

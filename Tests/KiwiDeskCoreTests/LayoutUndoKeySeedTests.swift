@@ -42,9 +42,15 @@ struct LayoutUndoKeySeedTests {
             DefaultKeybindings.layoutUndoKey(keyCodeTyping: { _ in nil })
                 == "z"
         )
-        // A code `KeyCombo` cannot name round-trips to the US Z.
+        // A code `KeyCombo` cannot name falls back to the US Z.
         #expect(
             DefaultKeybindings.layoutUndoKey(keyCodeTyping: { _ in 999 })
+                == "z"
+        )
+        // So does one whose name parses to another code: keypad 1
+        // (83) is named `1`, the number row's 18.
+        #expect(
+            DefaultKeybindings.layoutUndoKey(keyCodeTyping: { _ in 83 })
                 == "z"
         )
     }
@@ -123,8 +129,31 @@ struct LayoutUndoKeySeedTests {
         #expect(combo(redo, in: stored(core)) == "control+option+shift+y")
     }
 
-    @Test("the test core's pin is a US board")
+    @Test("an upgrade whose layout key is taken falls back to the US Z")
+    func takenTopUpFallsBack() throws {
+        let core = makeCore(layout: Self.qwertz)
+        var config = GuiConfig()
+        let index = try #require(config.layers.firstIndex { $0.isDefault })
+        config.layers[index].bindings = [
+            KeyBinding(
+                combo: "control+option+y",
+                lua: "KiwiDesk.reload_config()",
+                kind: .custom
+            )
+        ]
+        try core.guiConfigStore.save(config)
+        core.desktopMemory.readLegacyShortcutOffer = { nil }
+        core.topUpGenerationShortcuts()
+        #expect(combo(undo, in: stored(core)) == "control+option+z")
+        #expect(combo(redo, in: stored(core)) == "control+option+shift+z")
+    }
+
+    @Test("the test core pins a US board over any layout")
     func pinIsUS() {
-        #expect(makeTestCore().layoutUndoKey == "z")
+        let core = makeTestCore()
+        core.keyCodeTyping = Self.qwertz
+        pinDesktopReads(core)
+        #expect(core.keyCodeTyping("z") == 6)
+        #expect(core.layoutUndoKey == "z")
     }
 }

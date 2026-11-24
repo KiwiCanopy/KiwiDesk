@@ -15,11 +15,14 @@ public enum LayoutKeyGlyph {
     }
 
     /// The main-block key code that types `letter` unshifted on the
-    /// active layout (#3599); nil where that layout is not
-    /// ASCII-capable or no key types it.
+    /// active layout, or on the ASCII-capable one macOS matches ⌘
+    /// shortcuts on while a Cyrillic or Greek source is active
+    /// (#3599); nil where no key types it.
     public static func keyCode(typing letter: String) -> UInt32? {
-        guard let source = currentSource(), isASCIICapable(source)
-        else { return nil }
+        let current = currentSource().flatMap {
+            isASCIICapable($0) ? $0 : nil
+        }
+        guard let source = current ?? asciiSource() else { return nil }
         return mainBlockCodes.first {
             translate(keyCode: $0, source: source)?.lowercased()
                 == letter
