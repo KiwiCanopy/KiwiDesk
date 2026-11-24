@@ -25189,8 +25189,9 @@ nothing else: the form is public, so the settings a report needs
 ride in the exported log's header, which the user attaches by
 hand. That drag stays the consent; the link asks one question
 first — export a log or continue without — because Simple, which
-the footer serves, has no Log row, and the export writes only to
-Downloads, so the question publishes nothing (#3544). It is
+the footer serves, has no Log row, and the export writes only
+where the user's save panel puts it, so the question publishes
+nothing and the user sees what is stored (#3544). It is
 the form's one door: the Log row gains search words, not a
 button. "Report a problem" names the act; "bug report" stays the
 name of the thing filed.

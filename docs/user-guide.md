@@ -1398,10 +1398,10 @@ screen count and Desktop mode filled in. The exported log also
 lists the settings you changed.
 
 :::unreleased
-It first asks whether to include a log. **Export Log** saves the
-range you pick to Downloads and opens the report, which names the
-file; drag it in if you want it attached. Nothing is uploaded for
-you.
+It first asks whether to include a log. **Export Log** asks where
+to save the range you pick, starting in Downloads, then opens the
+report; drag the log in if you want it attached. Nothing is
+uploaded for you.
 :::
 
 **Shortcut not working?**  

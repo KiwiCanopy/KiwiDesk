@@ -36,16 +36,19 @@ public struct ProblemReport: Sendable, Equatable {
         ]
     }
 
+    /// The line under the facts once a log is saved.
+    static let logLine = "Drag the log you just saved into this field."
+
     /// The form's address with the facts filled in. Settings never
     /// ride here: the form is public and they name apps and paths.
-    public var formURL: URL { formURL(logFile: nil) }
+    public var formURL: URL { formURL(logSaved: false) }
 
-    /// The same, naming the log the user just saved at `logFile`,
-    /// home abbreviated to `~` (#3544): shown where the drag lands.
-    public func formURL(logFile: String?) -> URL {
+    /// The same, asking for the log the user just saved where the
+    /// drag lands (#3544); its place was the user's own pick.
+    public func formURL(logSaved: Bool) -> URL {
         var context = deskLines
-        if let logFile {
-            context.append("Log saved as \(logFile) — drag it here.")
+        if logSaved {
+            context.append(Self.logLine)
         }
         var parts = URLComponents(
             url: Self.form,
