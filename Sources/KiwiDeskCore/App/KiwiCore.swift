@@ -146,18 +146,16 @@ public final class KiwiCore {
     var frontmostPIDProvider: (@MainActor () -> pid_t?)?
 
     /// Trusted OS-frontmost focused window id (#1130); nil until
-    /// `start()` wires the #442 chain (the `frontmostPIDProvider`
-    /// pattern), so unit tests never read the host's focus.
+    /// `start()` wires the #442 chain, so tests never read focus.
     var trustedFrontmostProvider: (@MainActor () -> WindowID?)?
 
     /// The wake heal arm's timestamp (#1130) —
     /// `KiwiCore+WakeFocus.swift` is the one machine mutating it.
     var wakeFocusHealArmedAt: Date?
 
-    /// Hands key focus to Finder when a no-follow move empties
-    /// the focused display's space (#446) — the moved, now-stashed
-    /// window would otherwise keep key focus. nil by default so
-    /// unit tests observe the yield; `start()` wires the real one.
+    /// Hands key focus to Finder when a no-follow move empties the
+    /// focused display's space (#446), so the stashed window keeps
+    /// none; nil in unit tests, `start()` wires the real one.
     var desktopFocusYield: (@MainActor () -> Void)?
 
     /// Every machine touch Open or Focus's already-running branch
@@ -207,6 +205,8 @@ public final class KiwiCore {
     var timings = CoreTimings()
     /// The Hyper key's `hidutil` host (#1870); tests pin it inert.
     var hyperRemapHost = HyperKeyRemap.Host.live
+    /// The key code typing a letter here (#3599); tests pin US.
+    var keyCodeTyping: (String) -> UInt32? = LayoutKeyGlyph.keyCode
 
     /// The intent ledgers; each type's doc carries its argument
     /// (#482/#483, #1007, #1150, #1599, #1875, #2478).

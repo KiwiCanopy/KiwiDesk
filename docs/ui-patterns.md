@@ -1018,6 +1018,11 @@ radius (override commands, existing configs, testers' mental
 model) for no gain. New option labels are new keys; what a
 relabel does to the label's own key is `docs/translating.md`
 ▸ *Maintaining the key set* ▸ *Rename vs. drop vs. deprecate*'s.
+The screen-area axis is the same collision on a split verb (a
+vertical split is side by side in Vim, top to bottom in tmux), so
+its wire stays `side_by_side` / `stacked`, never `horizontal` /
+`vertical`, under the labels "Side by Side" / "Top to Bottom"
+(#3603).
 
 **Geometric wire, presentational label — the rule for every
 two-axis layout.** The **Track** picker has the same collision

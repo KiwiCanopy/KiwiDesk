@@ -8,7 +8,7 @@ extension KeyCombo {
     /// left- or right-only modifier or with ✦ (AppKit's column
     /// draws only ⌃⌥⇧⌘, #3470), a tap, or a key with no menu glyph
     /// leaves `item` untouched. `layoutChar` is the active layout's
-    /// base character for a key code (the GUI's `LayoutKeyGlyph`).
+    /// base character for a key code (`LayoutKeyGlyph`).
     @MainActor public func applyMenuEquivalent(
         to item: NSMenuItem,
         layoutChar: (UInt32) -> String?

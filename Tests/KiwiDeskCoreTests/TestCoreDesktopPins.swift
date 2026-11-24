@@ -3,8 +3,9 @@ import Foundation
 @testable import KiwiDeskCore
 
 /// `makeTestCore`'s compositor and Desktop pins (#1146, #1147,
-/// #2937), split from `TestCore.swift` at the 350-line ceiling
-/// and twinned like it (`MachineTouchTests`).
+/// #2937) and its keyboard-layout pin (#3599), split from
+/// `TestCore.swift` at the 350-line ceiling and twinned like it
+/// (`MachineTouchTests`).
 @MainActor
 func pinDesktopReads(_ core: KiwiCore) {
     // Same class, sixth time (#1146): the compositor reads behind the
@@ -62,6 +63,9 @@ func pinDesktopReads(_ core: KiwiCore) {
     // stamping suite takes the live writer back explicitly, with
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
+    // The host's keyboard layout picks the undo seed's key (#3599):
+    // pinned to a US board, so a QWERTZ developer seeds `z` too.
+    core.keyCodeTyping = { KeyCombo.keyCodes[$0] }
 }
 
 /// Whether a suite states none of the topology overrides the live

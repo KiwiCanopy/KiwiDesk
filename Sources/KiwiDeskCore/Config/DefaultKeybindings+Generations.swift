@@ -11,8 +11,12 @@ extension DefaultKeybindings {
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
-    /// even where a later release re-chorded one.
-    public static func rows(ofGeneration number: Int) -> [KeyBinding] {
+    /// even where a later release re-chorded one. Undo sits on
+    /// `undoKey` (#3599, `layoutUndoKey`).
+    public static func rows(
+        ofGeneration number: Int,
+        undoKey: String = "z"
+    ) -> [KeyBinding] {
         switch number {
         // 2.3.0: the Space steps and the Space history (#1655).
         case 1: spaceStepRows() + spaceHistoryRows()
@@ -44,19 +48,22 @@ extension DefaultKeybindings {
         // The window switcher's last-app opener on ⌥⇥ (#3135).
         case 14: [windowSwitcherLastAppRow()]
         // Undo and redo the arrangement (#3515).
-        case 15: layoutUndoRows()
+        case 15: layoutUndoRows(key: undoKey)
         default: []
         }
     }
 
     /// The rows of every generation above `mark` whose action no
     /// row in `existing` binds and whose chord is free, each on
-    /// `base` (#2460). Additive, like `desktopTopUp`: a row the user
-    /// deleted after its generation was offered stays deleted.
+    /// `base` (#2460), undo on `undoKey` or, where a row holds it,
+    /// on `z` (#3599, `freeUndoKey`). Additive, like
+    /// `desktopTopUp`: a row the user deleted after its generation
+    /// was offered stays deleted.
     public static func generationTopUp(
         existing: [KeyBinding],
         above mark: Int,
-        base: ShortcutBase
+        base: ShortcutBase,
+        undoKey: String = "z"
     ) -> [KeyBinding] {
         guard mark < newestGeneration else { return [] }
         // As registered: a Hyper row holds its bare chord (#1870).
@@ -65,8 +72,15 @@ extension DefaultKeybindings {
         )
         var bound = Set(existing.map(\.lua))
         var added: [KeyBinding] = []
+        // The pair's own rows never take its key from itself.
+        let pair = Set(layoutUndoRows(key: undoKey).map(\.lua))
+        let undo = freeUndoKey(
+            undoKey,
+            among: existing.filter { !pair.contains($0.lua) },
+            base: base
+        )
         for number in (max(mark, 0) + 1)...newestGeneration {
-            for seeded in rows(ofGeneration: number) {
+            for seeded in rows(ofGeneration: number, undoKey: undo) {
                 let row = base.rebased(seeded)
                 guard !bound.contains(row.lua),
                     let combo = KeyCombo.parse(row.combo),

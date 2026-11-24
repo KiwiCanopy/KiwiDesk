@@ -85,23 +85,41 @@ extension DefaultKeybindings {
     }
 
     /// Undo and redo the arrangement on `⌃⌥Z` and `⌃⌥⇧Z` (#3515),
-    /// Z as ⌘Z; `⇧` reverses its twin as ⌘⇧Z does. Free in
-    /// `SystemShortcuts.map` and the seed (read 2026-11-22).
-    public static func layoutUndoRows() -> [KeyBinding] {
+    /// Z as ⌘Z; `⇧` reverses its twin as ⌘⇧Z does. `key` is the
+    /// `KeyCombo` name of the key that types "z" here, by letter
+    /// rather than position (#3599, `layoutUndoKey`), else `z`
+    /// where the seed holds it (`freeUndoKey`). `z` and QWERTZ's `y`
+    /// are free in `SystemShortcuts.map` and the seed (read
+    /// 2026-11-24); another layout's key is checked against the
+    /// seed alone.
+    public static func layoutUndoRows(key: String) -> [KeyBinding] {
         [
             KeyBinding(
-                combo: "control+option+z",
+                combo: "control+option+\(key)",
                 lua: "KiwiDesk.undo_layout()",
                 kind: .navigation,
                 label: "Undo layout change"
             ),
             KeyBinding(
-                combo: "control+option+shift+z",
+                combo: "control+option+shift+\(key)",
                 lua: "KiwiDesk.redo_layout()",
                 kind: .navigation,
                 label: "Redo layout change"
             ),
         ]
+    }
+
+    /// The `KeyCombo` name of the key `keyCodeTyping` says types
+    /// "z" (#3599), else `z`, the US position: a letter mnemonic,
+    /// unlike the positional HJKL-style rows.
+    public static func layoutUndoKey(
+        keyCodeTyping: (String) -> UInt32?
+    ) -> String {
+        guard let code = keyCodeTyping("z"),
+            let name = KeyCombo.keyName(for: code),
+            KeyCombo.keyCodes[name] == code
+        else { return "z" }
+        return name
     }
 
     /// Maximize on `⌃⌥M` (#2448), M for maximize: the focused
