@@ -153,6 +153,16 @@ struct AreaDragCrossingTests {
         #expect(!core.dragCrossing.hasCrossed(id))
     }
 
+    /// A flick released in the other area before any dwell: the drop
+    /// names that area's Space, not the screen's active one.
+    @Test func flickDropNamesTheAreaUnderTheCursor() throws {
+        let core = try core(.sideBySide)
+        let point = cocoa(CGPoint(x: 3000, y: 700))
+        core.drag.cursorLocation = { point }
+        #expect(core.activeSpace?.id == "1")
+        #expect(core.dropDestination() == "2")
+    }
+
     /// The pointer still in the window's own area arms nothing.
     @Test func ownAreaArmsNothing() throws {
         let core = try core(.sideBySide)
