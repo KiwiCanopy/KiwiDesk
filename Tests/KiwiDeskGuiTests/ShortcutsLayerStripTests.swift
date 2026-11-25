@@ -50,12 +50,38 @@ struct ShortcutsLayerStripTests {
                     + ".noGestures(empty))"
             )
         )
-        let model = makeTestModel()
-        model.config.layers.append(KeyLayer(name: "Coding"))
-        model.nav.shortcutsLayer = "Coding"
-        #expect(model.gestureLayerMap.isEmpty)
-        #expect(!model.gestureScope.isDefault)
-        #expect(model.gestureScope.seeds.isEmpty)
+        let coding = GestureSeedScope(shortcutBase: .standard, layer: "x")
+        let off = GestureMap([swipe: .unbound])
+        #expect(GesturesPart.emptyLayer(GestureMap(), scope: coding) == "x")
+        #expect(GesturesPart.emptyLayer(off, scope: coding) == "x")
+        let bound = GestureMap([swipe: .bound(.family(.space))])
+        #expect(GesturesPart.emptyLayer(bound, scope: coding) == nil)
+        #expect(
+            GesturesPart.emptyLayer(
+                GestureMap(),
+                scope: .defaultLayer(on: .standard)
+            ) == nil
+        )
+    }
+
+    @Test("what no layer owns says so, once a layer exists")
+    func everyLayerNotes() throws {
+        let card = try squashed("Components/Gestures/GestureListCard.swift")
+        #expect(
+            card.contains(
+                "ifShortcutsGates(config:model.config).layersExist"
+                    + "{Text(LayerScopeWords.everyLayer)"
+            )
+        )
+        let keys = try squashed(
+            "Components/Keybindings/ModifierKeysCard.swift"
+        )
+        #expect(
+            keys.contains(
+                "help:ShortcutsGates(config:model.config).layersExist"
+                    + "?LayerScopeWords.everyLayer:nil"
+            )
+        )
     }
 
     @Test("the cards edit the picked layer's map")
@@ -63,9 +89,16 @@ struct ShortcutsLayerStripTests {
         let model = makeTestModel()
         model.config.layers.append(KeyLayer(name: "Coding"))
         model.nav.shortcutsLayer = "Coding"
+        model.config.gesture["default"] = GestureMap([
+            swipe: .bound(.family(.space))
+        ])
+        #expect(model.gestureLayerMap[swipe] == nil)
         model.gestureLayerMap[swipe] = .bound(.family(.layout))
+        #expect(model.gestureLayerMap[swipe] == .bound(.family(.layout)))
         #expect(model.config.gesture["Coding"][swipe] != nil)
-        #expect(model.config.gesture["default"][swipe] == nil)
+        #expect(
+            model.config.gesture["default"][swipe] == .bound(.family(.space))
+        )
         #expect(
             model.gestureReachKey(swipe)
                 == LayerGestureKey("Coding", swipe).spelling
@@ -84,6 +117,27 @@ struct ShortcutsLayerStripTests {
         #expect(model.config.gesture["Code"][swipe] != nil)
         model.deleteLayer("Code", .everywhere)
         #expect(model.config.gesture["Code"].isEmpty)
+    }
+
+    @Test("a layer's rename and delete carry its rows' picks")
+    func layerEditsCarryPicks() {
+        let model = makeTestModel()
+        model.config.layers.append(KeyLayer(name: "Coding"))
+        let old = LayerGestureKey("Coding", swipe).spelling
+        let new = LayerGestureKey("Code", swipe).spelling
+        let other = swipe.spelling
+        var edits = model.reachEdits
+        edits.reach[.gesture] = [old: .listed(["Home"])]
+        edits.removal[.gesture] = [old: .here, other: .here]
+        model.reachEdits = edits
+        model.renameLayer("Coding", to: "Code")
+        #expect(model.reachEdits.reach[.gesture] == [new: .listed(["Home"])])
+        #expect(
+            model.reachEdits.removal[.gesture] == [new: .here, other: .here]
+        )
+        model.deleteLayer("Code", .everywhere)
+        #expect(model.reachEdits.reach[.gesture]?.isEmpty != false)
+        #expect(model.reachEdits.removal[.gesture] == [other: .here])
     }
 
     private func squashed(_ path: String) throws -> String {

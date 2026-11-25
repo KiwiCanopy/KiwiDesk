@@ -121,10 +121,7 @@ extension SettingsModel {
         )
         snapshot.gestures = RuleReachDraft.encode(
             snapshot.gestures,
-            current: RuleReachTable<GestureAction>.gestureSeedsUnder(
-                config.gesture,
-                shortcutBase: config.shortcutBase
-            ),
+            current: gestureEncodeCurrent(snapshot.gestures, editing),
             editing: editing,
             isLoaded: reachIsLoaded,
             reach: reachEdits.reach[.gesture] ?? [:],

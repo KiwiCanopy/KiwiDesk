@@ -111,6 +111,23 @@ struct LayerGestureMigrationTests {
         #expect(read.gesture == config.gesture)
     }
 
+    @Test("a current profile and backup stay as they are")
+    func currentProfileAndBundleStay() throws {
+        var current = profile
+        current.gesture = LayerGestures(["default": map, "Coding": map])
+        let file = try JSONEncoder().encode(current)
+        #expect(ConfigMigration.migratingGesturesOntoLayers(file) == nil)
+        let bundle = SetupBundle(
+            format: SetupBundle.currentFormat,
+            writtenBy: "test",
+            config: GuiConfig(),
+            profiles: [current],
+            palettes: []
+        )
+        let backup = try JSONEncoder().encode(bundle)
+        #expect(ConfigMigration.migratingGesturesOntoLayers(backup) == nil)
+    }
+
     /// An empty old map carries no binding and stores nothing.
     @Test("an empty map leaves")
     func emptyMapLeaves() throws {
@@ -123,7 +140,10 @@ struct LayerGestureMigrationTests {
         root["format"] = 28
         let data = try JSONSerialization.data(withJSONObject: root)
         let out = try #require(ConfigMigration.migrated(data))
-        let read = try JSONDecoder().decode(GuiConfig.self, from: out)
-        #expect(read.gesture.isEmpty)
+        let migrated = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        let gesture = migrated["gesture"] as? [String: Any]
+        #expect(gesture?.isEmpty == true)
     }
 }

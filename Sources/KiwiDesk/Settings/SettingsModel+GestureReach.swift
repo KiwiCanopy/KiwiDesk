@@ -41,9 +41,10 @@ extension SettingsModel {
             scope: defaultGestureScope
         )
         var seeds: [String: GestureAction] = [:]
-        for (key, action) in GestureSeeds.seeds(on: shortcutBase)
+        for (key, action) in defaultGestureScope.seeds
         where key.input.device == device {
-            seeds[key.spelling] = action
+            seeds[LayerGestureKey(KeyLayer.defaultName, key).spelling] =
+                action
         }
         return RestoreSeeds(
             seeds: seeds,

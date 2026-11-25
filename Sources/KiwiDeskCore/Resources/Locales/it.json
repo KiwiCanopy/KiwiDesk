@@ -2481,7 +2481,7 @@
   "shortcuts.gestures.keys.help": "Fai clic, poi tieni premuti i tasti di questo gesto e rilasciali.",
   "shortcuts.gestures.keys.none": "Solo il gesto",
   "shortcuts.gestures.layer_empty": "Il livello «%1$@» non associa alcun gesto. Finché è attivo, mouse e trackpad fanno solo ciò che fa macOS.",
-  "shortcuts.gestures.layer_row": "%1$@ sul livello «%2$@»",
+  "shortcuts.gestures.layer_row": "%1$@ nel livello «%2$@»",
   "shortcuts.gestures.list.add": "Aggiungi",
   "shortcuts.gestures.list.gesture": "Gesto",
   "shortcuts.gestures.list.magic_mouse": "Vale anche per il Magic Mouse.",

@@ -64,6 +64,31 @@ struct GestureReachTableTests {
         #expect(written["default"] == base)
     }
 
+    /// A layer's binding equal to a default seed is kept: only
+    /// `default` lies over the seeds (#3535 ▸ Ruling 1).
+    @Test("a layer keeps a binding a default seed shares")
+    func layerKeepsASeedValue() throws {
+        let (seed, action) = try #require(
+            GestureSeeds.seeds(on: .standard).first
+        )
+        var table = RuleReachTable<GestureAction>.gestures(
+            base: LayerGestures(),
+            overrides: [("Work", nil)],
+            shortcutBase: .standard
+        )
+        table.apply(
+            LayerGestureKey("Coding", seed).spelling,
+            value: action,
+            reach: .shared(joining: []),
+            editing: "Work"
+        )
+        let written = table.gestureBase(
+            original: LayerGestures(),
+            shortcutBase: .standard
+        )
+        #expect(written["Coding"][seed] == .bound(action))
+    }
+
     private func table() -> RuleReachTable<GestureAction> {
         .gestures(
             base: LayerGestures(defaultLayer: base),

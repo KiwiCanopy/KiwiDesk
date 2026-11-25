@@ -20,15 +20,15 @@ extension RuleReachSnapshot {
         }
     }
 
-    /// `layer`'s maps dropped from `profiles`' overrides, and from
-    /// the shared base where `base` says so.
+    /// `layer`'s maps dropped from `profiles`' overrides, nil naming
+    /// every profile, and from the shared base where `base` says so.
     public mutating func dropGestureLayer(
         _ layer: String,
-        profiles: [String],
+        profiles: [String]?,
         base: Bool
     ) throws {
         try rewriteGestureLayers(
-            profiles: Set(profiles),
+            profiles: profiles.map(Set.init),
             base: base
         ) { $0.removing(layer) }
     }

@@ -188,11 +188,10 @@ struct ShortcutsCensusRenderTests {
         #expect(card.occurrences(of: "KiwiDeskKeyRows(") == 1)
     }
 
-    /// The strip is the offer, `.showMore`; the rows that exist
-    /// once a layer does are `.immediate`, so the card opens on
-    /// arrival the moment one exists (#2654). Reading those as
-    /// show-more hides a user's configuration from them, which an
-    /// earlier draft of this area did.
+    /// The strip is drawn at rest: Personal's open offer, then the
+    /// page-wide pick (#3535); the rows that exist once a layer
+    /// does are `.immediate` (#2654). Reading those as show-more
+    /// hides a user's configuration from them.
     /// Bespoke container — membership only (see the suite note).
     @Test("Layers renders the census's two tiers")
     func layersTier() {
@@ -204,8 +203,8 @@ struct ShortcutsCensusRenderTests {
             .immediate,
             "layers"
         )
-        pin([.shortcuts(.layers)], .layers, .showMore, "layer strip")
-        #expect(censusRows(.layers, .atRest).isEmpty)
+        pin([.shortcuts(.layers)], .layers, .atRest, "layer strip")
+        #expect(censusRows(.layers, .showMore).isEmpty)
     }
 
     /// Two tiers in one container: the raw-Lua rows hide behind

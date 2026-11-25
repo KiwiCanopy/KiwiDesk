@@ -69,9 +69,8 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
 
     /// Whether the page draws a rule above this part in `segment`:
     /// between Built-in's Modifier keys, which apply on every layer,
-    /// and the layer's own rows (owner 2026-11-08), the first of
-    /// which follows Modifier keys since Layers left Built-in
-    /// (#3535).
+    /// and the part after it, the layer's own rows (owner
+    /// 2026-11-08).
     func ruledAbove(in segment: ShortcutsSegment) -> Bool {
         let parts = Self.parts(in: segment)
         guard let at = parts.firstIndex(of: self), at > 0 else {

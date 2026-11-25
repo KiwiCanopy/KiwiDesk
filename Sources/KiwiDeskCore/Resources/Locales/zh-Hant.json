@@ -2481,7 +2481,7 @@
   "shortcuts.gestures.keys.help": "點按後，按住此手勢要用的按鍵再放開。",
   "shortcuts.gestures.keys.none": "僅手勢",
   "shortcuts.gestures.layer_empty": "「%1$@」層未綁定任何手勢。此層作用期間，滑鼠和觸控式軌跡板只會執行 macOS 的預設行為。",
-  "shortcuts.gestures.layer_row": "「%2$@」層上的%1$@",
+  "shortcuts.gestures.layer_row": "「%2$@」層中的%1$@",
   "shortcuts.gestures.list.add": "加入",
   "shortcuts.gestures.list.gesture": "手勢",
   "shortcuts.gestures.list.magic_mouse": "也適用於巧控滑鼠。",

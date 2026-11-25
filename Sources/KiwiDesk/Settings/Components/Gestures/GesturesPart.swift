@@ -8,8 +8,9 @@ import SwiftUI
 /// lands with its feature, never before, and one whose surface is
 /// off greys with a pointer to where it turns on. It mounts
 /// inside the section's `keybindingLayerName` scope, so a gesture
-/// recorder (#1656, #1519) must never read that value: a gesture
-/// modifier belongs to no layer.
+/// recorder (#1656, #1519) must never read that value: a gesture's
+/// keys are no layer's chord. The bindings are the picked layer's,
+/// read through `SettingsModel.gestureLayerMap` (#3535).
 struct GesturesPart: View {
     @ObservedObject var model: SettingsModel
     /// The page's rows, for the gesture cards' action catalogue.
@@ -17,14 +18,18 @@ struct GesturesPart: View {
 
     private var settings: TilingSettings { model.config.settings }
 
-    /// The selected layer, where it is not `default` and its map
-    /// binds nothing.
     private var emptyLayer: String? {
-        let scope = model.gestureScope
+        Self.emptyLayer(model.gestureLayerMap, scope: model.gestureScope)
+    }
+
+    /// `scope`'s layer, where it is not `default` and `map` binds
+    /// nothing.
+    static func emptyLayer(
+        _ map: GestureMap,
+        scope: GestureSeedScope
+    ) -> String? {
         guard !scope.isDefault,
-            !model.gestureLayerMap.entries.values.contains(where: {
-                $0.action != nil
-            })
+            !map.entries.values.contains(where: { $0.action != nil })
         else { return nil }
         return scope.layer
     }

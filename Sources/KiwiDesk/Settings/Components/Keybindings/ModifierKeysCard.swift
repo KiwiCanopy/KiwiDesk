@@ -55,8 +55,8 @@ struct ModifierKeysCard: View {
             isExpanded: $expanded,
             summary: summary(spoken: false),
             spokenSummary: summary(spoken: true),
-            // Layer-independent under a page-wide pick (#3535).
-            help: LayerScopeWords.everyLayer
+            help: ShortcutsGates(config: model.config).layersExist
+                ? LayerScopeWords.everyLayer : nil
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 VStack(alignment: .leading, spacing: 4) {

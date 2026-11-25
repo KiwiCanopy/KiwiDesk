@@ -147,10 +147,11 @@ extension SettingsModel {
                 Dictionary(uniqueKeysWithValues: reached.map { ($0, drop) }),
                 base: removal == .here ? nil : drop
             )
-            // The layer's gestures leave with it (#3535).
+            // Every profile on a delete everywhere: one holding the
+            // layer's gestures alone too (#3535).
             try snapshot.dropGestureLayer(
                 name,
-                profiles: reached,
+                profiles: removal == .here ? [editing] : nil,
                 base: removal != .here
             )
         }
@@ -178,7 +179,6 @@ extension SettingsModel {
             Dictionary(uniqueKeysWithValues: holders.map { ($0, rename) }),
             base: inBase ? rename : nil
         )
-        // The layer's gestures follow its name (#3535).
         try snapshot.renameGestureLayers(map)
     }
 
@@ -223,18 +223,25 @@ extension SettingsModel {
         }
         let drop = { KeybindingCatalog.deleteLayer(in: $0, named: name) }
         var transforms: [String: ([KeyLayer]) -> [KeyLayer]] = [:]
+        var leaving: [String] = []
         for profile in table.profiles {
             let has = table.resolved(name, for: profile) != nil
             let wants =
                 members.profiles.contains(profile) || profile == editing
             if wants && !has { transforms[profile] = add }
-            if !wants && has { transforms[profile] = drop }
+            if !wants && has {
+                transforms[profile] = drop
+                leaving.append(profile)
+            }
         }
         let inBase = table.base[name] != nil
         let base: (([KeyLayer]) -> [KeyLayer])? =
             members.shared == inBase ? nil : (members.shared ? add : drop)
         guard !transforms.isEmpty || base != nil else { return }
         try snapshot.rewriteLayers(transforms, base: base)
+        // A profile leaving the layer leaves its own gestures there
+        // too; the shared base stays for the members (#3535).
+        try snapshot.dropGestureLayer(name, profiles: leaving, base: false)
     }
 }
 

@@ -116,13 +116,12 @@ extension ShortcutsKey {
         case .kiwiHubNavigationKeys:
             return .luaOnly
         case .layers:
-            // The strip: the offer to make the first layer, behind
-            // the Layers card's disclosure on Built-in (#2654); open
-            // on Personal, which one tier per row cannot say.
-            return .row(.shortcuts, .layers, .showMore)
+            // The strip: Personal's open offer to make the first
+            // layer, then the page-wide pick above the switcher
+            // (#3535).
+            return .row(.shortcuts, .layers, .atRest)
         case .layersIcon, .layersReach, .switchToLayer:
-            // Exist once a layer does; the card then opens on
-            // arrival (#2654).
+            // Exist once a layer does (#2654).
             return .row(
                 .shortcuts,
                 .layers,

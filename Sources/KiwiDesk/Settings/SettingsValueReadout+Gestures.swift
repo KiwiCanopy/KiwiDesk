@@ -99,7 +99,7 @@ extension SettingsValueReadout {
         guard layer != KeyLayer.defaultName else { return row }
         return L(
             "shortcuts.gestures.layer_row",
-            "%1$@ on \u{201C}%2$@\u{201D}",
+            "%1$@ in the \u{201C}%2$@\u{201D} layer",
             row,
             layer
         )

@@ -34,3 +34,28 @@ extension SettingsModel {
         .defaultLayer(on: config.shortcutBase)
     }
 }
+
+extension SettingsModel {
+    /// The page's gesture rows the encode compares against `table`:
+    /// the draft's, laid over the seeds, and as stored for a layer
+    /// the page does not hold, which is no row of the page's — a
+    /// layer deleted here leaves the shared base's rows standing
+    /// (#3535).
+    func gestureEncodeCurrent(
+        _ table: RuleReachTable<GestureAction>,
+        _ editing: String
+    ) -> [String: GestureAction] {
+        var current = RuleReachTable<GestureAction>.gestureSeedsUnder(
+            config.gesture,
+            shortcutBase: config.shortcutBase
+        )
+        let page = Set(config.layers.map(\.name))
+        for (spelling, action) in table.resolved(for: editing) {
+            guard let key = LayerGestureKey(spelling: spelling),
+                !page.contains(key.layer)
+            else { continue }
+            current[spelling] = action
+        }
+        return current
+    }
+}

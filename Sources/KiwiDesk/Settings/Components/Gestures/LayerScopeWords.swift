@@ -8,7 +8,7 @@ import KiwiDeskCore
 enum LayerScopeWords {
     /// Under a setting that applies whatever layer is active.
     static var everyLayer: String {
-        L("shortcuts.every_layer", "Applies on every layer.")
+        L("shortcuts.every_layer", "Applies in every layer.")
     }
 
     /// Over Mouse & Trackpad while `layer` binds no gesture.

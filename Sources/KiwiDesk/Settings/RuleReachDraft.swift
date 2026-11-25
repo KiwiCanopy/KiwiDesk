@@ -13,7 +13,8 @@ enum RuleFamily: Hashable {
     /// A scroll-gesture setting, keyed by `ScrollGestureField`
     /// (#1656).
     case scroll
-    /// A gesture binding, keyed by `GestureKey.spelling` (#3225).
+    /// A gesture binding, keyed by `LayerGestureKey.spelling`
+    /// (#3225, #3535).
     case gesture
     /// The Space history setting, keyed by
     /// `RuleReachTable.spaceHistoryKey` (#1655).

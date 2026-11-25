@@ -44,9 +44,12 @@ extension RuleReachTable where Value == GestureAction {
         shortcutBase: ShortcutBase
     ) -> [String: GestureAction] {
         var out: [String: GestureAction] = [:]
-        for (key, action) in GestureSeeds.seeds(on: shortcutBase) {
-            out[LayerGestureKey(KeyLayer.defaultName, key).spelling] =
-                action
+        let layers = Set(maps.layers).union([KeyLayer.defaultName])
+        for layer in layers {
+            let seeds = GestureSeeds.seeds(on: shortcutBase, layer: layer)
+            for (key, action) in seeds {
+                out[LayerGestureKey(layer, key).spelling] = action
+            }
         }
         for (layer, map) in maps.maps {
             for (key, entry) in map.entries {
@@ -63,13 +66,15 @@ extension RuleReachTable where Value == GestureAction {
         over resolved: [String: GestureAction],
         shortcutBase: ShortcutBase
     ) -> LayerGestures {
-        let seeds = GestureSeeds.seeds(on: shortcutBase)
         var maps = LayerGestures()
-        let defaultLayer = KeyLayer.defaultName
-        for key in seeds.keys {
-            let spelling = LayerGestureKey(defaultLayer, key).spelling
-            if resolved[spelling] == nil {
-                maps[defaultLayer][key] = .unbound
+        let layers = Set(
+            resolved.keys.compactMap { LayerGestureKey(spelling: $0)?.layer }
+        ).union([KeyLayer.defaultName])
+        for layer in layers {
+            let seeds = GestureSeeds.seeds(on: shortcutBase, layer: layer)
+            for key in seeds.keys
+            where resolved[LayerGestureKey(layer, key).spelling] == nil {
+                maps[layer][key] = .unbound
             }
         }
         for (spelling, action) in resolved {

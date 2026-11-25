@@ -2481,7 +2481,7 @@
   "shortcuts.gestures.keys.help": "Cliquez, puis maintenez les touches de ce geste et relâchez-les.",
   "shortcuts.gestures.keys.none": "Geste seul",
   "shortcuts.gestures.layer_empty": "Le calque « %1$@ » n'associe aucun geste. Tant qu'il est actif, la souris et le trackpad font seulement ce que fait macOS.",
-  "shortcuts.gestures.layer_row": "%1$@ sur le calque « %2$@ »",
+  "shortcuts.gestures.layer_row": "%1$@ du calque « %2$@ »",
   "shortcuts.gestures.list.add": "Ajouter",
   "shortcuts.gestures.list.gesture": "Geste",
   "shortcuts.gestures.list.magic_mouse": "S'applique aussi à la Magic Mouse.",
