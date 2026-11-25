@@ -95,7 +95,7 @@ extension KiwiCore {
                 // Owed: windows wait for the profile, bars re-home.
                 if monitorSettlePending { updateBars() }
             } else {
-                handleMonitorChange()
+                handleScreenChange()
                 emitMonitorChange()
             }
         case .windowFocused(let id):

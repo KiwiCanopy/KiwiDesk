@@ -50,9 +50,8 @@ public final class KiwiCore {
     var defersWindowRuleReconcile = false
 
     /// Boot's half of the same suppression (#836): raised in
-    /// `start()`, lowered where the startup sweep is armed or on any
-    /// exit from `start()`. The argument is at its one reader,
-    /// `mayReconcileWindowRulesNow`.
+    /// `start()`, lowered where the startup sweep is armed or on
+    /// any exit from it; argued at `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
     /// A bound Desktop switch's apply; its sweep follows (#2347).
     var defersRuleSweepToSwitchPass = false
@@ -115,8 +114,7 @@ public final class KiwiCore {
     /// pile frames make containment alone ambiguous. nil until
     /// `start()` wires it (`ClickProvenanceWiringTests`), so
     /// unit tests never read the host's real windows (the
-    /// `frontmostPIDProvider` pattern); nil resolves no
-    /// provenance.
+    /// `frontmostPIDProvider` pattern); nil resolves no provenance.
     var stackingOrderProvider: (@MainActor () -> [WindowID])?
 
     /// Windows raised purely for z-order (#418 floats, #425 pile restores),
@@ -315,6 +313,8 @@ public final class KiwiCore {
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
     public var onShortcutsAdded: ShortcutsAdded = { _ in }
+    /// A screen change composed the Standard (#3646).
+    public var onStandardFallback: StandardFallbackComposed = { _ in }
     /// A verb saved or deleted a look (#1685): Settings re-reads.
     public var onLookLibraryChanged: @MainActor () -> Void = {}
     /// An outside rule write landed (#1685): a draft adopts it.
