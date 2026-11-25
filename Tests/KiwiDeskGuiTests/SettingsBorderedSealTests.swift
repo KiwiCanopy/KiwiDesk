@@ -23,18 +23,11 @@ import Testing
 /// Split from `SettingsLabelNeutralityTests` (the menu half and
 /// the direct-use enumeration) at the 350-line ceiling.
 ///
-/// One residue is knowingly unguarded and stated so it is not
-/// mistaken for coverage: a `role: .destructive` button routed
-/// THROUGH the seal is invisible to every needle here — the
-/// role sits inside the `Button` initialiser, lines away from
-/// the modifier, so no substring count can bind the two. The
-/// seal silently suppresses such a button's system red (#770's
-/// hand-pairing did exactly that on LayerStripEditor's delete,
-/// carried into the seal by #771 and caught in its review).
-/// Only the COMPLIANT path is registered — a destructive
-/// button styled raw names itself in `borderedExempt` — so a
-/// misrouted one is caught by review and the owner's eye, not
-/// by any needle here.
+/// A `role: .destructive` button routed THROUGH the seal keeps
+/// its red on the Settings ground: the chip face reads the role
+/// and draws the label in `SettingsTheme.danger` (#3630), pinned
+/// by `deleteTwinsRouteThroughSeal`. KiwiHub's Fill draws its own
+/// hierarchy instead, and no destructive chip sits there.
 @Suite("Settings bordered seal")
 struct SettingsBorderedSealTests {
     /// The trees this guard covers — `ChromeScanRoots`, whose
@@ -78,20 +71,12 @@ struct SettingsBorderedSealTests {
         [String: (count: Int, needle: String, why: String)] = [
             "SpacesSection+Overrides.swift": (
                 1, "role: .destructive",
-                "the system red IS the warning and must survive"
+                "a raw destructive reset not yet moved onto the "
+                    + "seal, as #3630 moved the delete twins"
             ),
             "SpaceOverrideRows+Footer.swift": (
-                1, "role: .destructive", "reset-all"
-            ),
-            "LayerEditorPopover.swift": (
                 1, "role: .destructive",
-                "Delete Layer…: #770's hand-pairing suppressed "
-                    + "its red, carried through by #771's seal"
-            ),
-            "KiwiVisionLensHeader.swift": (
-                1, "role: .destructive",
-                "Delete Lens…, the layer header's twin (#2103 "
-                    + "ruling 49): the system red IS the warning"
+                "reset-all, the same straggler"
             ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",
@@ -256,38 +241,48 @@ struct SettingsBorderedSealTests {
         }
     }
 
-    /// The window's accent tint beats a destructive role's red on
-    /// a raw `.bordered` button, so the two delete twins name the
-    /// danger tint themselves (#3263 amendment, #3630). The Spaces
-    /// reset buttons are not covered; widening this would red them.
-    @Test("the lens and layer delete buttons carry the danger tint")
-    func deleteTwinsCarryDangerTint() throws {
+    /// The two delete twins are action chips like Rename… beside
+    /// them, the role alone drawing the label red, and the face
+    /// still reads the role (#3630).
+    @Test("the lens and layer delete buttons route through the seal")
+    func deleteTwinsRouteThroughSeal() throws {
         let sources = try scannedSources()
-        for name in [
-            "KiwiVisionLensHeader.swift", "LayerEditorPopover.swift",
+        // Each button's own chain: its head up to what follows it.
+        for (name, head, end) in [
+            (
+                "KiwiVisionLensHeader.swift",
+                "Button(KiwiVisionLensWords.deleteLens,role:.destructive)",
+                "VStack("
+            ),
+            (
+                "LayerEditorPopover.swift",
+                "Button(LayerEditorWords.deleteLayer,role:.destructive)",
+                "Spacer("
+            ),
         ] {
-            let file = try #require(
-                sources.first { $0.lastPathComponent == name },
-                Comment(rawValue: "no such file: \(name)")
-            )
-            let source = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try Self.source(name, in: sources)
+            let flat = source.filter { !$0.isWhitespace }
+            let start = try #require(flat.range(of: head))
+            let tail = flat[start.upperBound...]
+            let stop = try #require(tail.range(of: end))
+            let chain = tail[..<stop.lowerBound]
             #expect(
-                source.occurrences(of: ".tint(SettingsTheme.danger)")
-                    >= 1,
+                chain.contains(".settingsActionButton()")
+                    && !chain.contains(".buttonStyle("),
                 Comment(
                     rawValue:
-                        "\(name): Delete's raw `.bordered` button "
-                        + "draws the accent, not the system red, "
-                        + "without `.tint(SettingsTheme.danger)`."
+                        "\(name): Delete must be a destructive "
+                        + "`.settingsActionButton()`, never a raw "
+                        + "tinted `.bordered` (#3630)."
                 )
             )
             if name == "KiwiVisionLensHeader.swift" {
+                // The lens's settings sit on a card plate (#3630).
+                #expect(flat.contains(".background(SettingsCardPlate())"))
                 #expect(
-                    source.occurrences(
-                        of: ".keyboardShortcut(.defaultAction)"
-                    ) >= 1,
+                    flat.contains(
+                        "role:.cancel){}.keyboardShortcut(.defaultAction)"
+                    ),
                     Comment(
                         rawValue:
                             "the lens delete dialog's Cancel must be "
@@ -296,5 +291,26 @@ struct SettingsBorderedSealTests {
                 )
             }
         }
+        let face = try Self.source("ChipFace.swift", in: sources)
+            .filter { !$0.isWhitespace }
+        #expect(
+            face.contains(
+                "configuration.role==.destructive?SettingsTheme.danger"
+            ) && face.contains(".foregroundStyle(ink)"),
+            "ChipFace must draw a destructive role's label in danger red"
+        )
+    }
+
+    private static func source(
+        _ name: String,
+        in sources: [URL]
+    ) throws -> String {
+        let file = try #require(
+            sources.first { $0.lastPathComponent == name },
+            Comment(rawValue: "no such file: \(name)")
+        )
+        return SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
     }
 }

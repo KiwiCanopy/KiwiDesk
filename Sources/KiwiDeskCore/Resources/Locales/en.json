@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Apple Shortcut…",
   "shortcuts.sequence.caption": "Also known as a leader key. Press the first chord (the leader) and a panel lists the next keys. A key can open more keys; the last key runs its action. esc cancels, ⌫ goes back one step.",
+  "shortcuts.sequence.card_empty": "No key sequence has been set up yet. Add one and its first chord opens a panel of the keys that come next.",
   "shortcuts.sequence.change_action": "Change action…",
   "shortcuts.sequence.choose": "Choose…",
   "shortcuts.sequence.default_symbol": "Folder",

@@ -4,8 +4,10 @@ extension View {
     /// Paints a bordered button's LABEL in ordinary ink instead
     /// of the accent (#678 turn 16b tinted every bordered button
     /// green). The accent belongs on control FILLS, never on text.
-    /// Not for every button: a `.destructive` label's system red
-    /// IS the warning; `.borderedProminent` is a filled control;
+    /// Never hand-paired on a raw `.destructive` button, whose red
+    /// IS the warning: a destructive action goes through the seal,
+    /// whose chip face draws its label red (#3630).
+    /// `.borderedProminent` is a filled control;
     /// per-state tinters are exempt via `SettingsBorderedSealTests`'
     /// `borderedExempt` map. BOTH `.tint` and `.foregroundStyle`,
     /// so the AppKit-drawn half of a label is covered too.

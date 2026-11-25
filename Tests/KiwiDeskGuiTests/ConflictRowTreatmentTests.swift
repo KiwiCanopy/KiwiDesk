@@ -53,7 +53,8 @@ struct ConflictRowTreatmentTests {
             "RecorderButtonChrome(recording:recording,dead:isDead,",
             // …the captions go to the row's slot, drawn in the
             // field only where no row hosts it…
-            "clearButton}.alignmentGuide(.shortcutLine){"
+            "clearButtonifmarksTrailing{trailingMarks}}"
+                + ".alignmentGuide(.shortcutLine){"
                 + "$0[VerticalAlignment.center]}ifcaptionSlot==nil{"
                 + "RecorderCaptionLines(captions:captions)}",
             // …and the tier and its sentence arrive as ONE

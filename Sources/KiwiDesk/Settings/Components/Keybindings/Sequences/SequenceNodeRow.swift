@@ -277,6 +277,8 @@ struct SequenceNodeRow: View {
                     )
                 }
                 .settingsActionButton()
+                // In the column of the wells it adds to (#3649).
+                .padding(.leading, SettingsMetrics.shortcutTextIndent)
                 .accessibilityHint(name)
             }
         }

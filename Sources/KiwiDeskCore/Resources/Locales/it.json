@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Comando rapido Apple…",
   "shortcuts.sequence.caption": "Detto anche tasto leader. Premi la prima scorciatoia (il leader) e un pannello elenca i tasti successivi. Un tasto può aprire altri tasti; l'ultimo esegue la sua azione. esc annulla, ⌫ torna indietro di un passo.",
+  "shortcuts.sequence.card_empty": "Nessuna sequenza di tasti è ancora configurata. Aggiungine una: la sua prima scorciatoia apre un pannello con i tasti successivi.",
   "shortcuts.sequence.change_action": "Modifica azione…",
   "shortcuts.sequence.choose": "Scegli…",
   "shortcuts.sequence.default_symbol": "Cartella",

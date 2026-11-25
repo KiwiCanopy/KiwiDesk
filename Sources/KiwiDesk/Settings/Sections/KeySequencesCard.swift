@@ -30,8 +30,30 @@ struct KeySequencesCard: View {
     @ViewBuilder private func rows(
         _ catalog: SequenceActionCatalog
     ) -> some View {
-        // A rule between two sequences, none above Add Sequence
-        // (#3425).
+        if sequences.isEmpty {
+            Text(Self.empty)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            sequenceRows(catalog)
+        }
+        Button(action: add) {
+            Label(
+                L("shortcuts.sequence.add", "Add Sequence"),
+                systemImage: "plus"
+            )
+        }
+        .settingsActionButton()
+        // In the leaders' well column (#3649).
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
+    }
+
+    /// A rule between two sequences, none above Add Sequence
+    /// (#3425).
+    private func sequenceRows(
+        _ catalog: SequenceActionCatalog
+    ) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(sequences.enumerated()), id: \.element.id) {
                 index,
@@ -56,13 +78,14 @@ struct KeySequencesCard: View {
                 )
             }
         }
-        Button(action: add) {
-            Label(
-                L("shortcuts.sequence.add", "Add Sequence"),
-                systemImage: "plus"
-            )
-        }
-        .settingsActionButton()
+    }
+
+    static var empty: String {
+        L(
+            "shortcuts.sequence.card_empty",
+            "No key sequence has been set up yet. Add one and its "
+                + "first chord opens a panel of the keys that come next."
+        )
     }
 
     /// The concept, in the title's `?` (#3162 ▸ second amendment).

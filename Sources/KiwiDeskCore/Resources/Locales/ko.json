@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "앱…",
   "shortcuts.sequence.apple_shortcut": "Apple 단축어…",
   "shortcuts.sequence.caption": "리더 키라고도 합니다. 첫 번째 단축키(리더)를 누르면 패널에 다음 키가 표시됩니다. 키 하나가 더 많은 키를 열 수 있으며, 마지막 키가 그 동작을 실행합니다. esc는 취소하고, ⌫는 한 단계 뒤로 돌아갑니다.",
+  "shortcuts.sequence.card_empty": "아직 설정된 키 시퀀스가 없습니다. 하나를 추가하면 첫 번째 단축키로 다음 키를 보여 주는 패널이 열립니다.",
   "shortcuts.sequence.change_action": "동작 변경…",
   "shortcuts.sequence.choose": "선택…",
   "shortcuts.sequence.default_symbol": "폴더",

@@ -26,6 +26,9 @@ struct KeyRecorderField: View {
     let onClear: () -> Void
     /// Arms on arrival while empty — a key sequence's new key (#1871).
     var armsOnAppear = false
+    /// A leading-aligned field's badge and sides menu, drawn after
+    /// the clear button and only when used (#3649).
+    var marksTrailing = false
     #if DEBUG
         /// A test's chord, committed on arrival as a recording is: a
         /// posted key event reaches every recorder in the process.
@@ -64,10 +67,13 @@ struct KeyRecorderField: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             HStack(spacing: 6) {
-                conflictBadge
-                sidesSlot
+                if !marksTrailing {
+                    conflictBadge
+                    sidesSlot
+                }
                 recordButton
                 clearButton
+                if marksTrailing { trailingMarks }
             }
             .alignmentGuide(.shortcutLine) { $0[VerticalAlignment.center] }
             if captionSlot == nil {
@@ -171,9 +177,9 @@ struct KeyRecorderField: View {
             .help(helpText)
             .accessibilityHint(hint ?? "")
             .accessibilityLabel(name)
-            // The cost is announced ONCE, by the badge that precedes
-            // this button in the row (#1126) — a second copy here
-            // read the same sentence on two adjacent VoiceOver stops.
+            // The cost is announced ONCE, by the badge beside this
+            // button, before or after it (#1126, #3649) — a copy
+            // here read the sentence on two adjacent VoiceOver stops.
             .accessibilityValue(spokenTap ?? SidedChordWords.label(label))
     }
 

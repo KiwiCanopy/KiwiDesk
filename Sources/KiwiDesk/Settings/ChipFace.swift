@@ -55,12 +55,15 @@ struct ChipFace: View {
         )
     }
 
-    /// The theme's ink, or on KiwiHub's Fill the panel's own
-    /// hierarchy and the shelf's hover ink (gui.md).
+    /// The theme's ink, a destructive role's label in danger red
+    /// (#3630), or on KiwiHub's Fill the panel's own hierarchy and
+    /// the shelf's hover ink (gui.md).
     private var ink: AnyShapeStyle {
         guard paint.tinted else {
+            guard isEnabled else { return AnyShapeStyle(SettingsTheme.ink3) }
             return AnyShapeStyle(
-                isEnabled ? SettingsTheme.ink : SettingsTheme.ink3
+                configuration.role == .destructive
+                    ? SettingsTheme.danger : SettingsTheme.ink
             )
         }
         guard isEnabled else { return AnyShapeStyle(.tertiary) }

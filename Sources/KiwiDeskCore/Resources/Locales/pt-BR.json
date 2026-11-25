@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Atalho da Apple…",
   "shortcuts.sequence.caption": "Também conhecida como tecla líder. Pressione o primeiro atalho (o líder) e um painel lista as próximas teclas. Uma tecla pode abrir mais teclas; a última executa a ação dela. esc cancela, ⌫ volta um passo.",
+  "shortcuts.sequence.card_empty": "Nenhuma sequência de teclas foi configurada ainda. Adicione uma e o primeiro atalho dela abre um painel com as próximas teclas.",
   "shortcuts.sequence.change_action": "Alterar ação…",
   "shortcuts.sequence.choose": "Escolher…",
   "shortcuts.sequence.default_symbol": "Pasta",

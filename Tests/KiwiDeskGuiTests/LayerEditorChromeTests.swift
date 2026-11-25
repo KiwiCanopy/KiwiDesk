@@ -2,12 +2,12 @@ import Foundation
 import Testing
 
 /// The layer editor's Delete Layer… keeps its red inside a popover
-/// (#3263 amendment): the Settings window tints its content with
-/// the accent, which replaces the colour a destructive role draws,
-/// so the button names the danger tint itself.
+/// (#3263 amendment): an action chip, whose face draws a
+/// destructive role's label red whatever the window's accent
+/// (#3630).
 @Suite("Layer editor chrome (#3263)")
 struct LayerEditorChromeTests {
-    @Test("Delete Layer… is tinted red, not the accent")
+    @Test("Delete Layer… is a destructive action chip")
     func deleteKeepsItsRed() throws {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -21,7 +21,7 @@ struct LayerEditorChromeTests {
         let tail = source[start.upperBound...]
         let end = try #require(tail.range(of: "Spacer("))
         let chain = tail[..<end.lowerBound]
-        #expect(chain.contains(".buttonStyle(.bordered)"))
-        #expect(chain.contains(".tint(SettingsTheme.danger)"))
+        #expect(chain.contains(".settingsActionButton()"))
+        #expect(!chain.contains(".buttonStyle(.bordered)"))
     }
 }

@@ -39,7 +39,8 @@ extension SequenceNodeRow {
             preflight: preflight,
             onRecord: record,
             onClear: { editing.update(node.id) { $0.combo = "" } },
-            armsOnAppear: fresh == node.id
+            armsOnAppear: fresh == node.id,
+            marksTrailing: true
         )
     }
 
