@@ -50,6 +50,19 @@ extension KiwiCore {
         // truncated write cues the refusal.
         let base =
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
+        // A press that would move the focused window against the
+        // press, or not at all, refuses instead (#2969).
+        if let focused = space.focused,
+            !bspPressMoves(
+                focused,
+                axis: axis,
+                delta: delta,
+                to: base + signed / span,
+                space: space
+            )
+        {
+            return .ok()
+        }
         writeCappedBspRatio(
             proposed: base + signed / span,
             axis: axis,

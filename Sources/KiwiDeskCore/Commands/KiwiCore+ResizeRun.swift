@@ -228,6 +228,26 @@ extension KiwiCore {
         return true
     }
 
+    /// A weight at its limit moves nothing: a hold just ends there
+    /// and a press cues, mirroring `pushOrCue`'s spent arms (#2709,
+    /// #2969), so a change to one owes the other. `mate` is the
+    /// neighbour a grow names.
+    func cueWeightLimit(
+        _ window: WindowID,
+        mate: WindowID?,
+        delta: Double,
+        axis: String
+    ) {
+        guard !endGlideStep() else { return }
+        if delta < 0 {
+            refuseShrinkAtMinimum(window, axis: axis)
+        } else if let mate, mate != window {
+            refuseGrowAtNeighborMinimum(window, anchor: mate, axis: axis)
+        } else {
+            refuseGrowAtBoundary(window, axis: axis)
+        }
+    }
+
     /// Whether a drag shrinking `id` on `vertical`'s axis hands the
     /// room to someone in its zone, past any neighbour the drop's
     /// slots show (#2970): `RunZone.shrinkTaker`, where the mouse

@@ -4947,6 +4947,13 @@ the *effective* float since
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184), whose
 entry below is the ruling's home. (#122, #124, #129)
 
+:::unreleased
+**Amended (#2969):** a keyboard press that would move the focused
+window against the press, or move nothing, refuses with the
+writer's blame instead of writing, so a hold ends; the direction
+stays the midpoint rule above, shared with the mouse.
+:::
+
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
 resize floor is the `min_window_size` of the layout that places
