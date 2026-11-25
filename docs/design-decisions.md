@@ -17119,8 +17119,8 @@ next pick-up or the carry's end, so typing finds a drop target and
 ↩ drops on a match: a field that took text mid-carry and moved
 nothing was a dead input. Clearing the query at the pick-up
 instead would break picking up several matches in a row. Esc
-clears that query before it ends the carry, since it is the newer
-layer. Typing never switches; ↩ does. A typed number naming
+clears the field before it ends the carry, since that query is the
+newer layer. Typing never switches; ↩ does. A typed number naming
 Desktop N was weighed and deferred until users ask for it: nothing
 in the panel could show it at first sight, so it would be found
 only in the docs, and ⌘N already reaches the first nine. Prefix

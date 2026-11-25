@@ -129,7 +129,8 @@ struct DesktopsState: Equatable {
     /// Matches move to the front. Typing never acts: a selection
     /// still matching stays, one the query dims moves to the first
     /// match (#3624), and a selected window that no longer matches
-    /// leaves the Space for its place.
+    /// leaves the Space for its place. Called for the user's edit
+    /// alone: during a carry it hands the carry to the query.
     mutating func setQuery(_ text: String) {
         query = text
         queryLeadsCarry = isCarrying && !text.isEmpty
