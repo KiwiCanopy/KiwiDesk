@@ -17,44 +17,51 @@ struct KiwiVisionLensHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(lens)
-                .font(.title3.weight(.semibold))
-                .accessibilityAddTraits(.isHeader)
+            // The lens's name and its actions; its settings below,
+            // one row each in a card like the page's others (#3630).
             HStack(spacing: 10) {
-                if let profiles = model.lensProfiles, !profiles.isEmpty {
-                    Text(KiwiVisionLensWords.appliesTo)
-                        .foregroundStyle(.secondary)
-                        .accessibilityHidden(true)
-                    KiwiVisionLensReachControl(
-                        model: model,
-                        lens: lens,
-                        profiles: profiles
-                    )
-                }
+                Text(lens)
+                    .font(.title3.weight(.semibold))
+                    .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 8)
                 renameButton
                 Button(KiwiVisionLensWords.deleteLens, role: .destructive) {
                     deleting = LensDeleteRequest(id: lens)
                 }
-                .buttonStyle(.bordered)
-                // The window's accent tint would replace the system
-                // red the role draws (#3263 amendment, #3630).
-                .tint(SettingsTheme.danger)
+                // The chip's face draws the role's label red.
+                .settingsActionButton()
             }
-            NavRow(
-                model: model,
-                bindings: defaultBindings,
-                command: KeybindingCatalog.toggleLens(lens),
-                layer: layerName,
-                system: systemShortcutState
-            )
-            .equatable()
-            if let layer = otherLayer {
-                Text(KiwiVisionLensWords.chordElsewhere(layer))
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink3)
-                    .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 8) {
+                if let profiles = model.lensProfiles, !profiles.isEmpty {
+                    HStack(spacing: 10) {
+                        Text(KiwiVisionLensWords.appliesTo)
+                            .accessibilityHidden(true)
+                        Spacer(minLength: 8)
+                        KiwiVisionLensReachControl(
+                            model: model,
+                            lens: lens,
+                            profiles: profiles
+                        )
+                    }
+                }
+                NavRow(
+                    model: model,
+                    bindings: defaultBindings,
+                    command: KeybindingCatalog.toggleLens(lens),
+                    layer: layerName,
+                    system: systemShortcutState
+                )
+                .equatable()
+                if let layer = otherLayer {
+                    Text(KiwiVisionLensWords.chordElsewhere(layer))
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.ink3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+            .padding(SettingsMetrics.sectionPlateInset)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(SettingsCardPlate())
         }
         .font(.callout)
         .confirmationDialog(
