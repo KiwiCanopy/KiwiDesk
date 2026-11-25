@@ -332,12 +332,6 @@
   .mode-toggle__extra {
     display: none;
   }
-  .nav__support-text {
-    display: none;
-  }
-  .nav__support {
-    padding: 0.5rem 0.6rem;
-  }
 }
 /* Very tight phones (≤365): shrink the mode segments to their
    floor. The labels stay legible ("Normalo" is the widest) beside

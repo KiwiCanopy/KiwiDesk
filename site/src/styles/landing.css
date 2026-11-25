@@ -480,8 +480,7 @@ body::before {
 }
 
 /* Tight phones: shed the nav's least-critical text before the
-   cluster can overflow. The Ko-fi button is already icon-only, so
-   there's no text left to shed there. */
+   cluster can overflow. */
 @media (max-width: 460px) {
   .nav__inner {
     gap: 0.4rem;
@@ -612,46 +611,7 @@ body::before {
   }
 }
 
-/* Ko-fi nav button — icon-only and compact. Counterintuitively this
-   reads as LESS obtrusive than a worded link: a small, recognizable,
-   clearly-clickable button sits quietly among the other nav
-   controls instead of competing for reading attention. Sized and
-   shaped like a sibling of the toggles beside it (same ~30px
-   height, rounded, subtle fill/border at rest). The footer's Ko-fi
-   treatment is intentionally different (a quiet text link) — this
-   is the nav-only variant. */
-.nav__support {
-  display: inline-grid;
-  place-items: center;
-  width: 36px;
-  height: 30px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--kofi-border);
-  background: var(--kofi-bg);
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.nav__support:hover {
-  background: var(--kofi-hover-bg);
-  border-color: var(--kofi-ink);
-}
-
-/* Drop the icon-only Ko-fi button across the whole phone range —
-   it's still reachable from the footer and the final CTA, and
-   dropping it buys the crowded cluster (Learn + lang + mode +
-   theme) the width it needs. Placed AFTER the base .nav__support
-   rule so the hide wins the cascade (the base display:inline-grid
-   would otherwise override an earlier media-query hide at equal
-   specificity). */
-@media (max-width: 460px) {
-  .nav__support {
-    display: none;
-  }
-}
-
-/* Official Ko-fi cup mark, kept in its brand colors. Sized up
-   slightly from the footer's icon since it now carries the button
-   alone, with no adjacent label text. */
+/* Official Ko-fi cup mark, kept in its brand colors. */
 .kofi-icon {
   width: 18px;
   height: 14px;

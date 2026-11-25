@@ -16,7 +16,6 @@ import "../styles/landing.css";
 import ThemeHead from "./ThemeHead.astro";
 import FaviconLinks from "./FaviconLinks.astro";
 import logoMark from "../assets/brand/logo.svg";
-import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { Image } from "astro:assets";
 import en from "../i18n/en.json";
@@ -203,12 +202,6 @@ const makerProfile = "https://github.com/hajiboy95";
               </span>
             </span>
           </button>
-          <a class="nav__support" href={kofi} target="_blank"
-            rel="noopener" aria-label={t("nav_support_aria")}
-            title={t("nav_support_aria")}>
-            <img class="kofi-icon" src={kofiIcon.src} alt=""
-              aria-hidden="true" width="20" height="16" />
-          </a>
         </div>
       </div>
     </nav>
