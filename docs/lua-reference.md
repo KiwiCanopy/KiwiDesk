@@ -1820,6 +1820,11 @@ renamed in place from the Settings app's **Spaces** section; the
 rename is persisted and follows the id everywhere it is used —
 its layout mode, app rules, screen pins, and any keybindings.
 
+:::unreleased
+When `init.lua` owns the config, the order in which it first
+names each Space is the Space order, on every load.
+:::
+
 ### How inactive spaces hide their windows
 
 Switching spaces parks the other spaces' tiled windows in a
