@@ -10634,8 +10634,8 @@ end
 
 To name the screen instead, look `display` up in `list_monitors`:
 the entry whose `id` equals it has the screen's `name`. Two
-identical screens macOS leaves unnumbered share one fingerprint,
-and so every setting kept by it
+identical screens that macOS leaves unnumbered share one
+fingerprint, and so share every setting stored by it
 ([twin screens](accepted-limitations.md),
 [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734)).
 :::
