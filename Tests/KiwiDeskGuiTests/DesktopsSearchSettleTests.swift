@@ -54,6 +54,20 @@ struct DesktopsSearchSettleTests {
         #expect(state.place == Self.place(3))
     }
 
+    @Test("Esc ending a carry on a matching line leaves its dimmed window")
+    func cancelLeavesTheWindowOnly() {
+        var state = Search.state()
+        state.setQuery("No")
+        _ = state.press(.openSpace, repeated: false)
+        _ = state.press(.pickUp, repeated: false)
+        // A click on 1Password, whose line matches through Notes.
+        state.select(window: WindowID(1), in: Self.place(1))
+        _ = state.press(.escape, repeated: false)
+        #expect(!state.isCarrying)
+        #expect(state.place == Self.place(1))
+        #expect(state.window == nil)
+    }
+
     @Test("during a carry the window steps stay on matches")
     func carriedWindowsStayMatchOnly() {
         var state = Search.state()
