@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "Disattivato",
   "kiwivision.lens.delay.seconds": "%1$@ s",
   "kiwivision.lens.delete": "Elimina lente…",
+  "kiwivision.lens.delete.cancel": "Annulla",
   "kiwivision.lens.delete.confirm": "Elimina",
   "kiwivision.lens.delete.message": "La sua scorciatoia viene eliminata con lei. Non cambia nulla finché non salvi.",
   "kiwivision.lens.delete.title": "Eliminare la lente «%1$@»?",

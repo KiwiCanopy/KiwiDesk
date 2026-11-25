@@ -255,4 +255,46 @@ struct SettingsBorderedSealTests {
             )
         }
     }
+
+    /// The window's accent tint beats a destructive role's red on
+    /// a raw `.bordered` button, so the two delete twins name the
+    /// danger tint themselves (#3263 amendment, #3630). The Spaces
+    /// reset buttons are not covered; widening this would red them.
+    @Test("the lens and layer delete buttons carry the danger tint")
+    func deleteTwinsCarryDangerTint() throws {
+        let sources = try scannedSources()
+        for name in [
+            "KiwiVisionLensHeader.swift", "LayerEditorPopover.swift",
+        ] {
+            let file = try #require(
+                sources.first { $0.lastPathComponent == name },
+                Comment(rawValue: "no such file: \(name)")
+            )
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                source.occurrences(of: ".tint(SettingsTheme.danger)")
+                    >= 1,
+                Comment(
+                    rawValue:
+                        "\(name): Delete's raw `.bordered` button "
+                        + "draws the accent, not the system red, "
+                        + "without `.tint(SettingsTheme.danger)`."
+                )
+            )
+            if name == "KiwiVisionLensHeader.swift" {
+                #expect(
+                    source.occurrences(
+                        of: ".keyboardShortcut(.defaultAction)"
+                    ) >= 1,
+                    Comment(
+                        rawValue:
+                            "the lens delete dialog's Cancel must be "
+                            + "the default action (#3630)."
+                    )
+                )
+            }
+        }
+    }
 }

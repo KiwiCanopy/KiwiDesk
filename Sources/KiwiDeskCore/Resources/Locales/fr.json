@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "Désactivé",
   "kiwivision.lens.delay.seconds": "%1$@ s",
   "kiwivision.lens.delete": "Supprimer la lentille…",
+  "kiwivision.lens.delete.cancel": "Annuler",
   "kiwivision.lens.delete.confirm": "Supprimer",
   "kiwivision.lens.delete.message": "Son raccourci est supprimé avec elle. Rien ne change tant que vous n'enregistrez pas.",
   "kiwivision.lens.delete.title": "Supprimer la lentille « %1$@ » ?",

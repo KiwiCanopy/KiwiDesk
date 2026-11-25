@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "Desactivado",
   "kiwivision.lens.delay.seconds": "%1$@ s",
   "kiwivision.lens.delete": "Eliminar lente…",
+  "kiwivision.lens.delete.cancel": "Cancelar",
   "kiwivision.lens.delete.confirm": "Eliminar",
   "kiwivision.lens.delete.message": "Su atajo se elimina con ella. No cambia nada hasta que guardes.",
   "kiwivision.lens.delete.title": "¿Eliminar la lente «%1$@»?",

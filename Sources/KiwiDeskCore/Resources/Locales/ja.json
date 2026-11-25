@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "オフ",
   "kiwivision.lens.delay.seconds": "%1$@ 秒",
   "kiwivision.lens.delete": "レンズを削除…",
+  "kiwivision.lens.delete.cancel": "キャンセル",
   "kiwivision.lens.delete.confirm": "削除",
   "kiwivision.lens.delete.message": "レンズのショートカットも一緒に削除されます。保存するまでは何も変わりません。",
   "kiwivision.lens.delete.title": "レンズ「%1$@」を削除しますか？",

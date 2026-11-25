@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "Off",
   "kiwivision.lens.delay.seconds": "%1$@ s",
   "kiwivision.lens.delete": "Delete Lens…",
+  "kiwivision.lens.delete.cancel": "Cancel",
   "kiwivision.lens.delete.confirm": "Delete",
   "kiwivision.lens.delete.message": "Its shortcut goes with it. Nothing changes until you save.",
   "kiwivision.lens.delete.title": "Delete the lens “%1$@”?",

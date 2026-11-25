@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "Aus",
   "kiwivision.lens.delay.seconds": "%1$@ s",
   "kiwivision.lens.delete": "Linse löschen…",
+  "kiwivision.lens.delete.cancel": "Abbrechen",
   "kiwivision.lens.delete.confirm": "Löschen",
   "kiwivision.lens.delete.message": "Ihr Tastenkürzel wird mit ihr entfernt. Bis du speicherst, ändert sich nichts.",
   "kiwivision.lens.delete.title": "Linse „%1$@“ löschen?",

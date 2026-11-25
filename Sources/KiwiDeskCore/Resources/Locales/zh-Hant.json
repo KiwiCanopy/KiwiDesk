@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "關閉",
   "kiwivision.lens.delay.seconds": "%1$@ 秒",
   "kiwivision.lens.delete": "刪除鏡頭…",
+  "kiwivision.lens.delete.cancel": "取消",
   "kiwivision.lens.delete.confirm": "刪除",
   "kiwivision.lens.delete.message": "它的快速鍵會一併刪除。儲存之前不會有任何變更。",
   "kiwivision.lens.delete.title": "要刪除鏡頭「%1$@」嗎？",
