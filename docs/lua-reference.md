@@ -10613,8 +10613,11 @@ the two often look alike: a `display` of `1` passed as a screen
 writes the main screen, wherever the Space sits. Each space object
 also has `fingerprint`, the `list_monitors` fingerprint of its
 screen (`nil` for a Space on no screen), which every screen verb
-takes as is. On a split screen the fingerprint names the first
-area, so pass the Space's area first:
+takes as is. Two identical screens can share one fingerprint, as
+they share every per-screen setting
+([#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734)). On a
+split screen the fingerprint names the first area, so pass the
+Space's area first:
 
 ```lua
 local state = KiwiDesk.get_state()
