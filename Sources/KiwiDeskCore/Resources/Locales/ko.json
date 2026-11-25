@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "공유 레이어에는 로드된 프로필의 페이지에서 참여합니다.",
   "shortcuts.advanced.actions_hint": "키로 실행할 수 있는 모든 동작은 %1$@에서 볼 수 있습니다.",
   "shortcuts.advanced.actions_link": "동작 목록",
-  "shortcuts.advanced.caption": "임의의 Lua를 단축키에 할당할 수 있습니다. 고급 사용자를 위한 통로이며, 위의 그룹이 내장 동작을 모두 다룹니다.",
+  "shortcuts.advanced.caption": "고급 사용자를 위한 통로이며, 위의 그룹이 내장 동작을 모두 다룹니다.",
   "shortcuts.advanced.title": "Lua 단축키",
   "shortcuts.app_behavior": "동작",
   "shortcuts.app_behavior.gather": "윈도우 모으기",

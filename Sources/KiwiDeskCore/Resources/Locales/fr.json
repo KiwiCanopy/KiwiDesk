@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "Pour rejoindre un calque partagé, passez par la page du profil chargé.",
   "shortcuts.advanced.actions_hint": "Toutes les actions qu'une touche peut lancer figurent dans %1$@.",
   "shortcuts.advanced.actions_link": "la liste des actions",
-  "shortcuts.advanced.caption": "Associez tout code Lua à un raccourci. C'est l'échappatoire pour utilisateurs avancés — les groupes ci-dessus couvrent les actions intégrées.",
+  "shortcuts.advanced.caption": "C'est l'échappatoire pour utilisateurs avancés — les groupes ci-dessus couvrent les actions intégrées.",
   "shortcuts.advanced.title": "Raccourcis Lua",
   "shortcuts.app_behavior": "Action",
   "shortcuts.app_behavior.gather": "Rassembler les fenêtres",

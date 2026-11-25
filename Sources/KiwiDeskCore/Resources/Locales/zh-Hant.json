@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "共用層需在已載入描述檔的頁面上加入。",
   "shortcuts.advanced.actions_hint": "按鍵可執行的所有動作都在%1$@中。",
   "shortcuts.advanced.actions_link": "動作清單",
-  "shortcuts.advanced.caption": "把任意 Lua 綁定到熱鍵。這是給進階使用者的逃生門 — 上方的群組已涵蓋內建動作。",
+  "shortcuts.advanced.caption": "這是給進階使用者的逃生門 — 上方的群組已涵蓋內建動作。",
   "shortcuts.advanced.title": "Lua 綁定",
   "shortcuts.app_behavior": "動作",
   "shortcuts.app_behavior.gather": "收集視窗",

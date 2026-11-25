@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "Per unirti a un livello condiviso, usa la pagina del profilo caricato.",
   "shortcuts.advanced.actions_hint": "Tutte le azioni che un tasto può eseguire: %1$@.",
   "shortcuts.advanced.actions_link": "elenco delle azioni",
-  "shortcuts.advanced.caption": "Associa qualsiasi codice Lua a un tasto di scelta rapida. È la via di fuga per gli utenti esperti: i gruppi qui sopra coprono le azioni integrate.",
+  "shortcuts.advanced.caption": "È la via di fuga per gli utenti esperti: i gruppi qui sopra coprono le azioni integrate.",
   "shortcuts.advanced.title": "Scorciatoie Lua",
   "shortcuts.app_behavior": "Azione",
   "shortcuts.app_behavior.gather": "Raccogli finestre",

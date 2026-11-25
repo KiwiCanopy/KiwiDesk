@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "Para unirte a una capa compartida, usa la página del perfil cargado.",
   "shortcuts.advanced.actions_hint": "Todas las acciones que puede ejecutar una tecla están en %1$@.",
   "shortcuts.advanced.actions_link": "la lista de acciones",
-  "shortcuts.advanced.caption": "Asigna cualquier código Lua a un atajo de teclado. Es la opción de escape para usuarios avanzados — los grupos superiores cubren las acciones integradas.",
+  "shortcuts.advanced.caption": "Es la opción de escape para usuarios avanzados — los grupos superiores cubren las acciones integradas.",
   "shortcuts.advanced.title": "Atajos Lua",
   "shortcuts.app_behavior": "Acción",
   "shortcuts.app_behavior.gather": "Reunir ventanas",

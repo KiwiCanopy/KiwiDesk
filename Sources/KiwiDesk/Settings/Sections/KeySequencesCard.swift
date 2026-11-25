@@ -18,7 +18,7 @@ struct KeySequencesCard: View {
     var body: some View {
         let catalog = SequenceActionCatalog(expander: expander)
         return SettingsSection(
-            SettingsCatalog.shortcuts.keySequencesCard.control,
+            SettingsCatalog.shortcuts.keySequencesCard,
             help: Self.help
         ) {
             VStack(alignment: .leading, spacing: 12) {

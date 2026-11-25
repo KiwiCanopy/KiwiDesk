@@ -12758,10 +12758,10 @@ Each offer sits behind its own container's disclosure
 (`SettingTier.showMore`), and the rows that exist once the
 config uses the capability are `.immediate`: the container
 opens on arrival for them and is never swapped (#1125). Layers
-and Modifier keys are collapsible cards; Lua bindings keeps its
-drawer. (Shortcuts ▸ Personal draws its offers open and Lua
-bindings as a collapsible section — *One page, three parts*,
-amended 2026-11-25.) Where a drawer would hide one control, the offer takes
+on Built-in and Modifier keys are collapsible cards. Shortcuts ▸
+Personal is the ruled exception: its offers draw open, and Lua
+bindings is its one collapsible section (*One page, three
+parts*, amended 2026-11-25). Where a drawer would hide one control, the offer takes
 the row's own menu instead: title matching
 is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs

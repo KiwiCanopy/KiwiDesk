@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "Para entrar numa camada compartilhada, use a página do perfil carregado.",
   "shortcuts.advanced.actions_hint": "Todas as ações que uma tecla pode executar: %1$@.",
   "shortcuts.advanced.actions_link": "lista de ações",
-  "shortcuts.advanced.caption": "Associe qualquer código Lua a uma tecla de atalho. Esta é a saída para usuários avançados — os grupos acima cobrem as ações integradas.",
+  "shortcuts.advanced.caption": "Esta é a saída para usuários avançados — os grupos acima cobrem as ações integradas.",
   "shortcuts.advanced.title": "Atalhos Lua",
   "shortcuts.app_behavior": "Ação",
   "shortcuts.app_behavior.gather": "Reunir janelas",

@@ -6,7 +6,7 @@ extension ShortcutsSection {
     var advancedDrawerCaption: String {
         L(
             "shortcuts.advanced.caption",
-            "Bind any Lua to a hotkey. This is the "
+            "This is the "
                 + "power-user escape hatch — the "
                 + "groups above cover the built-in "
                 + "actions."

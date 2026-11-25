@@ -117,7 +117,8 @@ extension ShortcutsKey {
             return .luaOnly
         case .layers:
             // The strip: the offer to make the first layer, behind
-            // the Layers card's disclosure (#2654).
+            // the Layers card's disclosure on Built-in (#2654); open
+            // on Personal, which one tier per row cannot say.
             return .row(.shortcuts, .layers, .showMore)
         case .layersIcon, .layersReach, .switchToLayer:
             // Exist once a layer does; the card then opens on

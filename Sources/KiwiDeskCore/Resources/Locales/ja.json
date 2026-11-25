@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "共有レイヤーへの参加は、読み込み済みのプロファイルのページで行います。",
   "shortcuts.advanced.actions_hint": "キーで実行できるすべてのアクションは%1$@にあります。",
   "shortcuts.advanced.actions_link": "アクション一覧",
-  "shortcuts.advanced.caption": "任意のLuaをホットキーに割り当てられます。上級者向けの逃げ道で、上のグループが内蔵のアクションを網羅しています。",
+  "shortcuts.advanced.caption": "上級者向けの逃げ道で、上のグループが内蔵のアクションを網羅しています。",
   "shortcuts.advanced.title": "Lua ショートカット",
   "shortcuts.app_behavior": "アクション",
   "shortcuts.app_behavior.gather": "ウインドウを集める",

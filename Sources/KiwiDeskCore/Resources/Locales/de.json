@@ -2341,7 +2341,7 @@
   "shortcuts.add_layer.stored_page": "Gemeinsamen Ebenen trittst du auf der Seite des geladenen Profils bei.",
   "shortcuts.advanced.actions_hint": "Alle Aktionen, die eine Taste ausführen kann, findest du in %1$@.",
   "shortcuts.advanced.actions_link": "der Aktionsliste",
-  "shortcuts.advanced.caption": "Weise beliebigem Lua-Code ein Tastenkürzel zu. Das ist die Notlösung für Power-User — die Gruppen oben decken die integrierten Aktionen ab.",
+  "shortcuts.advanced.caption": "Das ist die Notlösung für Power-User — die Gruppen oben decken die integrierten Aktionen ab.",
   "shortcuts.advanced.title": "Lua-Tastenkürzel",
   "shortcuts.app_behavior": "Aktion",
   "shortcuts.app_behavior.gather": "Fenster sammeln",

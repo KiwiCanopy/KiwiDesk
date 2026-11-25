@@ -4,23 +4,24 @@ import KiwiDeskCore
 /// three parts (#3184).
 
 struct ShortcutsControls: Sendable {
-    /// Layer definition and switching, a collapsible card (#2654),
-    /// declared with its static-label rows so a hit on one opens
-    /// it after the user shut it.
+    /// Layer definition and switching: a collapsible card on
+    /// Built-in (#2654), an open one on Personal. Declared with its
+    /// static-label rows so a hit on one opens it after the user
+    /// shut it.
     let layersCard = SettingsDrawer(
         "shortcuts.section.layers",
         "Layers",
         children: LayersControls()
     )
-    /// The edited layer's key sequences, a collapsible card under
-    /// Layers (#1871).
-    let keySequencesCard = SettingsDrawer(
+    /// The edited layer's key sequences, an open card on Personal
+    /// (#1871).
+    let keySequencesCard = SettingsControl(
         "shortcuts.section.key_sequences",
         "Key sequences"
     )
-    /// Keys running the user's Apple Shortcuts, a collapsible card
-    /// after Open applications (#3526).
-    let appleShortcutsCard = SettingsDrawer(
+    /// Keys running the user's Apple Shortcuts, an open card after
+    /// Open applications (#3526).
+    let appleShortcutsCard = SettingsControl(
         "shortcuts.section.apple_shortcuts",
         "Apple Shortcuts"
     )

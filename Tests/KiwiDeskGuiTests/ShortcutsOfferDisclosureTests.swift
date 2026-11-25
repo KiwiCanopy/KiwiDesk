@@ -181,7 +181,7 @@ struct ShortcutsOfferDisclosureTests {
             #expect(
                 source.contains(
                     "SettingsSection(SettingsCatalog.shortcuts"
-                        + ".\(card).control,"
+                        + ".\(card),"
                 ),
                 Comment(rawValue: file)
             )

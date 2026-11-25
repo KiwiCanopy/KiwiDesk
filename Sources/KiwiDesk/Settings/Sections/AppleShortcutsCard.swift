@@ -24,7 +24,7 @@ struct AppleShortcutsCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.shortcuts.appleShortcutsCard.control,
+            SettingsCatalog.shortcuts.appleShortcutsCard,
             help: AppleShortcutAction.conflictBlindSpot
         ) {
             VStack(alignment: .leading, spacing: 8) {
