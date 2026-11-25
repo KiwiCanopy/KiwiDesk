@@ -134,4 +134,54 @@ struct LayerPassGestureTests {
             ) == LayerGestures(["Coding": shared])
         )
     }
+
+    @Test("a renamed layer's revert brings its gestures back")
+    func renameRevertRestores() throws {
+        let model = try model()
+        model.renameLayer("Coding", to: "Code")
+        model.revertLayer(stored: "Coding", page: "Code")
+        #expect(model.config.gesture["Code"].isEmpty)
+        #expect(model.config.gesture["Coding"] == shared)
+    }
+
+    /// The revert reads the clean gestures on the draft's base, as
+    /// the layer's rows do.
+    @Test("a revert under a base switch brings gestures on that base")
+    func revertFollowsTheBase() throws {
+        let model = try model()
+        model.deleteLayer("Coding", .here)
+        model.config.shortcutBase = .hyper
+        model.revertLayer(stored: "Coding", page: nil)
+        let moved = GestureKey(.swipe3, [.hyper])
+        #expect(model.config.gesture["Coding"][moved] != nil)
+        #expect(model.config.gesture["Coding"][swipe] == nil)
+    }
+
+    /// A new row on a layer only Work holds stays Work's: a shared
+    /// pick there would write the layer's map into the base.
+    @Test("a row on an unshared layer lands on its holders alone")
+    func unsharedLayerStaysOwn() throws {
+        let core = makeTestCore()
+        var config = GuiConfig()
+        config.spaces = [SpaceID("1")]
+        try core.guiConfigStore.save(config)
+        var work = profile("Work", nil)
+        work.layers = KeyLayerOverride(layers: [KeyLayer(name: "Solo")])
+        try core.profiles.save(work)
+        try core.profiles.write(profile("Home", nil))
+        let model = makeTestModel(core: core)
+        model.reload()
+        model.nav.shortcutsLayer = "Solo"
+        model.gestureLayerMap[tap] = .bound(.run(LuaAction(lua: "y()")))
+        let encoded = try #require(model.encodedReach)
+        let base = encoded.gestures.gestureBase(
+            original: encoded.storedGestureBase,
+            shortcutBase: .standard
+        )
+        #expect(base["Solo"].isEmpty)
+        #expect(
+            encoded.gestures.gestureOverride(for: "Work")?["Solo"][tap] != nil
+        )
+        #expect(encoded.gestures.gestureOverride(for: "Home") == nil)
+    }
 }
