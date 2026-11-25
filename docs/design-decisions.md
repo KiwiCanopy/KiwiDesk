@@ -12759,7 +12759,9 @@ Each offer sits behind its own container's disclosure
 config uses the capability are `.immediate`: the container
 opens on arrival for them and is never swapped (#1125). Layers
 and Modifier keys are collapsible cards; Lua bindings keeps its
-drawer. Where a drawer would hide one control, the offer takes
+drawer. (Shortcuts ▸ Personal draws its offers open and Lua
+bindings as a collapsible section — *One page, three parts*,
+amended 2026-11-25.) Where a drawer would hide one control, the offer takes
 the row's own menu instead: title matching
 is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs
@@ -17718,9 +17720,23 @@ Home, the other two add a navigator.
   that run one of the user's Apple Shortcuts. It is its own card
   because Open applications is about reaching an app's window, and a
   shortcut runs an automation with no window and a conflict blind
-  spot of its own (a chord set in the Shortcuts app is unseen). Like
-  Key sequences it is shut with a summary until a row exists, and
-  its rows are fixed once added, as an app row's app is (#2708).
+  spot of its own (a chord set in the Shortcuts app is unseen). Its
+  rows are fixed once added, as an app row's app is (#2708).
+  *Amended (owner and ui-designer 2026-11-25):* **Personal draws
+  its offers open.** Layers, Apple Shortcuts and Key sequences
+  show their empty state and add control on arrival, as Open
+  applications already did, and none carries a disclosure there.
+  On a part of four short cards a shut card hides nothing worth
+  hiding: it costs the same height as the open empty one, plus a
+  click and a decision, and a page mixing open and shut cards for
+  no visible reason reads as arbitrary. An empty list with its add
+  control is the macOS shape (System Settings ▸ Login Items).
+  Lua bindings is the one card that stays shut until a binding
+  exists, being the powerful-on-demand tier; it is a collapsible
+  section like its siblings, its title above the card, never a
+  titleless drawer. Layers stays a shut card on Built-in, the long
+  part, so it reads which part is shown. This amends #2654's offer
+  clause below for Personal alone.
 - **Mouse & Trackpad** opens with the Mouse and Trackpad binding
   cards, the part's own settings (#3298), then holds open groups
   ordered by where the hand is — on your windows, on the

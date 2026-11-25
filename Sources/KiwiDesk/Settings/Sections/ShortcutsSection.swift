@@ -301,13 +301,15 @@ struct ShortcutsSection: View {
         }
     }
 
-    /// Shut until a layer carries a Lua binding, then open on
-    /// arrival — never swapped for an open card (#1125, #2654).
+    /// Personal's one collapsible section: shut until a layer
+    /// carries a Lua binding, then open on arrival — never swapped
+    /// for an open card (#1125, #2654; `docs/design-decisions.md` ▸
+    /// One page, three parts).
     private var luaDrawer: some View {
-        SettingsDisclosure(
+        SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.luaBindings,
-            chrome: .card,
-            isExpanded: $advancedExpanded
+            isExpanded: $advancedExpanded,
+            summary: luaSummary
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(advancedDrawerCaption)
@@ -320,7 +322,6 @@ struct ShortcutsSection: View {
                     onAdd: { luaAdded += 1 }
                 )
             }
-            .padding(.top, 8)
         }
     }
 }

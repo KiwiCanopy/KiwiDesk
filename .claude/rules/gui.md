@@ -941,7 +941,11 @@ Modifier keys opens only while Hyper's remap is refused with a
 Take Over, `ShortcutsOfferDisclosureTests` ▸
 `modifierKeysOpenInTrouble`;
 `docs/design-decisions.md` ▸ *A drawer of settings opens when
-asked*).
+asked*). A short page of offers draws them open instead: on
+Shortcuts ▸ Personal only Lua bindings collapses, and the
+others show their empty state and add control
+(`ShortcutsOfferDisclosureTests` ▸ `personalOffersDrawOpen`;
+`docs/design-decisions.md` ▸ *One page, three parts*).
 
 **A row that writes through `SettingsModel.setAppWide` draws
 `LiveSettingNote` (#3218):** under its card's title where the
