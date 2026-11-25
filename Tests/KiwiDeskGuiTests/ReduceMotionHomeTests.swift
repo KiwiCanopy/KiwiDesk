@@ -165,6 +165,11 @@ struct ReduceMotionHomeTests {
                     + "ReduceMotion.isOn)"
             ),
             (
+                "StandardNotice", "StandardFallbackNotice.swift",
+                .function("makeWindow"),
+                ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"
+            ),
+            (
                 "Shortcuts", "KeySequenceHintController.swift",
                 .function("draw"),
                 ".environment(\\.kiwiDeskReduceMotion,ReduceMotion.isOn)"

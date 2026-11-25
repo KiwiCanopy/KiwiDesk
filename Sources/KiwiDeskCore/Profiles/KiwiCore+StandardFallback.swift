@@ -17,14 +17,16 @@ public typealias StandardFallbackComposed =
     @MainActor (StandardFallback) -> Void
 
 extension KiwiCore {
-    /// The profile choice of a change in the connected screens —
-    /// the first screen report and a settled count change — which
-    /// announces a Standard it composed. The other callers of
-    /// `handleMonitorChange` re-choose after a profile edit, a
-    /// delete or a restore; no screen arrived, so they announce
-    /// nothing (#3646).
-    func handleScreenChange() {
-        guard let fallback = handleMonitorChange() else { return }
+    /// The profile choice of a change in the connected screens,
+    /// announcing a Standard it composed where `announcing` — the
+    /// first screen report and a settled count change. A same-count
+    /// re-report (a wake, a resolution change) passes false, and
+    /// the re-choice after a profile edit, a delete or a restore
+    /// calls `handleMonitorChange` itself: no screen arrived, so
+    /// they announce nothing (#3646).
+    func handleScreenChange(announcing: Bool) {
+        let fallback = handleMonitorChange()
+        guard announcing, let fallback else { return }
         onStandardFallback(fallback)
     }
 }

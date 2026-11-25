@@ -19,6 +19,11 @@ struct StandardFallbackAnnounceTests {
         name: "EXTERNAL",
         frame: CGRect(x: 1440, y: 0, width: 2560, height: 1440)
     )
+    private let other = Display(
+        id: DisplayID(3),
+        name: "OTHER",
+        frame: CGRect(x: 1440, y: 0, width: 1920, height: 1080)
+    )
 
     /// A core whose config the GUI manages, with every announce
     /// recorded in `heard`.
@@ -60,6 +65,28 @@ struct StandardFallbackAnnounceTests {
         #expect(heard.counts == [2])
     }
 
+    @Test("a same-count re-report announces nothing")
+    func reReportIsQuiet() throws {
+        let heard = Heard()
+        let core = try makeCore(heard: heard)
+        core.handle(.displaysChanged([builtIn]))
+        core.handle(.displaysChanged([builtIn]))
+        #expect(heard.counts == [1])
+    }
+
+    @Test("the Starter recomposed for a new count announces")
+    func starterRecomposeAnnounces() throws {
+        let heard = Heard()
+        let core = try makeCore(heard: heard)
+        core.handle(.displaysChanged([builtIn]))
+        core.seedFirstRunStarterProfile()
+        #expect(core.isOnStarterBaseline)
+        heard.counts = []
+        core.handle(.displaysChanged([builtIn, external]))
+        #expect(core.profiles.currentStandard == StarterSetup.name)
+        #expect(heard.counts == [2])
+    }
+
     @Test("a saved profile for the count announces nothing")
     func savedProfileIsQuiet() throws {
         let heard = Heard()
@@ -71,6 +98,19 @@ struct StandardFallbackAnnounceTests {
         heard.counts = []
         core.handle(.displaysChanged([builtIn]))
         #expect(core.profiles.currentName == "solo")
+        #expect(heard.counts.isEmpty)
+    }
+
+    @Test("the count's default profile announces nothing")
+    func countDefaultIsQuiet() throws {
+        let heard = Heard()
+        let core = try makeCore(heard: heard)
+        core.handle(.displaysChanged([builtIn, external]))
+        core.execute("save_profile", args: [.string("pair")])
+        core.handle(.displaysChanged([builtIn]))
+        heard.counts = []
+        core.handle(.displaysChanged([builtIn, other]))
+        #expect(core.profiles.currentName == "pair")
         #expect(heard.counts.isEmpty)
     }
 

@@ -1,39 +1,47 @@
+import AppKit
 import Foundation
 import Testing
 
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The Standard notice's gate, words and wiring (#3646). The
-/// window itself is never shown here; the gate and the words are
-/// what decide whether and what it says.
+/// The Standard notice's admission, window, words and wiring
+/// (#3646). The window is built and inspected, never shown.
 @MainActor
 @Suite("Standard notice (#3646)")
 struct StandardFallbackNoticeTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    @Test("a count is shown once on this Mac")
+    @Test("a count is admitted once on this Mac")
     func oncePerCount() {
         let (defaults, name) = makeScratchDefaults()
         defer { TestScratch.remove(name) }
-        #expect(gate(1, defaults: defaults))
-        StandardFallbackShown.markShown(1, in: defaults)
-        StandardFallbackShown.markShown(1, in: defaults)
-        #expect(!gate(1, defaults: defaults))
-        #expect(gate(2, defaults: defaults))
+        #expect(admit(1, defaults: defaults))
+        #expect(!admit(1, defaults: defaults))
+        #expect(admit(2, defaults: defaults))
         #expect(
             defaults.array(forKey: StandardFallbackShown.key)
-                as? [Int] == [1]
+                as? [Int] == [1, 2]
         )
     }
 
-    @Test("the tour and an open notice hold it back")
-    func standsDown() {
+    @Test("the tour holds the notice and records the count")
+    func tourRecords() {
         let (defaults, name) = makeScratchDefaults()
         defer { TestScratch.remove(name) }
-        #expect(!gate(1, tour: true, defaults: defaults))
-        #expect(!gate(1, showing: true, defaults: defaults))
-        #expect(!StandardFallbackShown.wasShown(1, in: defaults))
+        #expect(!admit(1, tour: true, defaults: defaults))
+        #expect(StandardFallbackShown.wasShown(1, in: defaults))
+        #expect(!admit(1, defaults: defaults))
+    }
+
+    @Test("the window sits above the bars and closes like OK")
+    func window() {
+        LocalizationManager.shared.select("en")
+        let window = StandardFallbackNotice.makeWindow(screenCount: 2) {}
+        #expect(window.level == BarPanel.aboveLevel)
+        #expect(window.title == "Spaces for 2 Screens")
+        #expect(window.styleMask.contains(.closable))
+        #expect(!window.isReleasedWhenClosed)
     }
 
     @Test("the words take the count's plural form")
@@ -58,7 +66,7 @@ struct StandardFallbackNoticeTests {
         #expect(StandardFallbackWords.body(2).contains(save))
     }
 
-    @Test("Core's hook reaches the gated present")
+    @Test("Core's hook reaches the admitted present")
     func wiring() throws {
         let delegate = try source("Sources/KiwiDesk/AppDelegate.swift")
         #expect(delegate.contains("wireStandardFallbackNotice()"))
@@ -69,22 +77,63 @@ struct StandardFallbackNoticeTests {
         #expect(wire.contains("StandardFallbackNotice.present("))
         #expect(wire.contains("onboardingWindow?.isVisible==true"))
         let notice = try source(
-            "Sources/KiwiDesk/StandardFallbackNotice.swift"
+            "Sources/KiwiDesk/StandardNotice/StandardFallbackNotice.swift"
         )
-        #expect(notice.contains("guardshouldPresent("))
-        #expect(notice.contains("noticeShowing:open!=nil"))
+        #expect(
+            notice.contains(
+                "guardadmit(count:fallback.screenCount,"
+                    + "tourShowing:tourShowing,"
+            )
+        )
+        let view = try source(
+            "Sources/KiwiDesk/StandardNotice/StandardFallbackView.swift"
+        )
+        #expect(view.contains(".keyboardShortcut(.defaultAction)"))
+        #expect(view.contains(".onExitCommand(perform:onOK)"))
     }
 
-    private func gate(
+    /// Only the two screen-change doors announce; the re-choices
+    /// after a profile edit, a delete or a restore stay on the plain
+    /// `handleMonitorChange` (#3646).
+    @Test("only the screen-change doors announce")
+    func announcingDoors() throws {
+        let core = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore"
+        )
+        let files = try #require(
+            FileManager.default.enumerator(atPath: core.path)
+        )
+        var callers: [String] = []
+        for case let path as String in files where path.hasSuffix(".swift") {
+            let text = try SourceScan.strippedSource(
+                at: core.appendingPathComponent(path)
+            ).filter { !$0.isWhitespace }
+            let calls =
+                text.components(separatedBy: "handleScreenChange(")
+                .count - 1
+            let defs =
+                text.components(
+                    separatedBy: "funchandleScreenChange("
+                ).count - 1
+            for _ in 0..<(calls - defs) {
+                callers.append((path as NSString).lastPathComponent)
+            }
+        }
+        #expect(
+            callers.sorted() == [
+                "KiwiCore+Events.swift", "KiwiCore+MonitorSettle.swift",
+            ]
+        )
+    }
+
+    private func admit(
         _ count: Int,
         tour: Bool = false,
-        showing: Bool = false,
         defaults: UserDefaults
     ) -> Bool {
-        StandardFallbackNotice.shouldPresent(
+        StandardFallbackNotice.admit(
             count: count,
             tourShowing: tour,
-            noticeShowing: showing,
             defaults: defaults
         )
     }

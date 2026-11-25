@@ -56,7 +56,7 @@ extension KiwiCore {
     func settleMonitorChange() {
         deferred.cancel(.monitorSettle)
         retireOrphanedHealSeeds()
-        handleScreenChange()
+        handleScreenChange(announcing: true)
         state.settlingScreens = [:]
         emitMonitorChange()
         if !defersEventRetiles { retile() }
