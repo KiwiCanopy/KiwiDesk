@@ -127,4 +127,21 @@ extension RunZone {
             }
         )
     }
+
+    /// `heads` and `tails` with this zone's ends set to show
+    /// `visible`, every other zone's left as stored — what a
+    /// writer stores as `Space.runHeads` and `runTails`.
+    public func ends(
+        showing visible: Range<Int>,
+        heads: Set<WindowID>,
+        tails: Set<WindowID>
+    ) -> (heads: Set<WindowID>, tails: Set<WindowID>) {
+        var heads = heads.subtracting(members)
+        var tails = tails.subtracting(members)
+        if visible.lowerBound > 0 { heads.insert(members[visible.lowerBound]) }
+        if visible.upperBound < members.count {
+            tails.insert(members[visible.upperBound - 1])
+        }
+        return (heads, tails)
+    }
 }

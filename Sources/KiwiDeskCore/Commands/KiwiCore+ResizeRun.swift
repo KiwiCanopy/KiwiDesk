@@ -138,9 +138,15 @@ extension KiwiCore {
         ) {
             return .ok()
         }
-        state.workspaces.withSpace(space.id) {
-            $0.stackWeights[window] = outcome.value
-        }
+        storeZoneWeight(
+            outcome.value,
+            of: window,
+            members: zone.members,
+            axis: axis,
+            delta: delta,
+            space: space,
+            in: (zone, context)
+        )
         return .ok()
     }
 
@@ -259,7 +265,7 @@ extension KiwiCore {
 
     /// The zone `focused` sits in along `axis`, read from the
     /// render's own input.
-    private func runZone(
+    func runZone(
         of focused: WindowID,
         axis: String,
         in space: Space

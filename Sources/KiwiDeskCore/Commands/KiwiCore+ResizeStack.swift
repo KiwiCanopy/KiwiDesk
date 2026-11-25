@@ -244,9 +244,15 @@ extension KiwiCore {
         ) {
             return .ok()
         }
-        state.workspaces.withSpace(space.id) {
-            $0.stackWeights[focused] = outcome.value
-        }
+        storeZoneWeight(
+            outcome.value,
+            of: focused,
+            members: members,
+            axis: axis,
+            delta: delta,
+            space: space,
+            in: runZone(of: focused, axis: axis, in: space)
+        )
         return .ok()
     }
 

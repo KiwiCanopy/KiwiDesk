@@ -103,6 +103,16 @@ extension RunZone {
             members.count > 1,
             StackLayout.weightSpent(line.weights[index], by: Double(delta))
         else { return delta }
+        return pushDistance(line, index, by: delta)
+    }
+
+    /// A grow far enough to push: past what the shown mates have
+    /// left above their floors.
+    func pushDistance(
+        _ line: Line,
+        _ index: Int,
+        by delta: CGFloat
+    ) -> CGFloat {
         let others = line.before.filter { $0 != index }
         let slack =
             line.span - line.gap * CGFloat(others.count)
@@ -167,13 +177,15 @@ extension RunZone {
     /// The run's weight step (#2235): it divides the span the shown
     /// windows' floors leave, among the windows that take a share,
     /// with no minimum of its own, since the layout keeps the floors.
+    /// Nil where no weight moves the window the way the press asks
+    /// (`checkedWeight`).
     func weightStep(
         _ line: Line,
         _ index: Int,
         shown: [Int],
         by delta: CGFloat,
         in context: LayoutContext
-    ) -> Press {
+    ) -> Press? {
         guard shown.count > 1, let at = shown.firstIndex(of: index) else {
             return Press(cue: .nothingToDivide, refusal: .alone)
         }
@@ -193,53 +205,48 @@ extension RunZone {
             minSizes: Array(repeating: 0, count: shown.count)
         ).value
         guard
-            let weight = honestWeight(
+            let weight = checkedWeight(
                 stepped,
-                line,
-                index,
+                of: members[index],
                 by: delta,
                 in: context
             )
-        else {
-            let anchor = members[shown[StackLayout.nearestMate(of: at)]]
-            return Press(
-                cue: delta < 0 ? .ownMinimum : .neighborMinimum(anchor),
-                refusal: .atMinimum
-            )
-        }
+        else { return nil }
         var press = Press()
         press.weight = weight
         return press
     }
 
-    /// `stepped` where the render keeps its split, else the weight
-    /// that moves the window the way the press asks, nearest the
-    /// length asked; nil where none does. A step crossing the whole
-    /// split redraws every share, which can move it the other way
-    /// (#2967).
-    private func honestWeight(
+    /// `stepped` where it keeps the render's split, else the weight
+    /// that moves `id` the way `delta` presses, nearest the length
+    /// asked; nil where none does. A step that flips the split
+    /// between whole and floor-and-share redraws every share, which
+    /// can move the window the other way (#2967), so every weight
+    /// write of a zone takes this.
+    func checkedWeight(
         _ stepped: Double,
-        _ line: Line,
-        _ index: Int,
+        of id: WindowID,
         by delta: CGFloat,
         in context: LayoutContext
     ) -> Double? {
-        let id = members[index]
+        guard let index = members.firstIndex(of: id) else {
+            return stepped
+        }
         var trial = context
         trial.stackWeights[id] = stepped
         let isRun = run(in: context) != nil
         if (run(in: trial) != nil) == isRun { return stepped }
-        let drawn = line.drawn[index]
+        let drawn = drawnLength(
+            of: id,
+            weight: plainWeight(of: id, in: context),
+            in: context
+        )
         let target = drawn + delta
         let sense: CGFloat = delta < 0 ? -1 : 1
+        let floor = floorsAndGap(in: context).bare[index]
         return
             ([stepped]
-            + weightCandidates(
-                for: id,
-                at: target,
-                floor: line.bare[index],
-                in: context
-            ))
+            + weightCandidates(for: id, at: target, floor: floor, in: context))
             .map { ($0, drawnLength(of: id, weight: $0, in: context)) }
             .filter { ($0.1 - drawn) * sense > Self.unchangedTolerance }
             .min { abs($0.1 - target) < abs($1.1 - target) }?.0
