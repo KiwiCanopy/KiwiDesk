@@ -84,6 +84,20 @@ struct RunZoneCrossingTests {
         let id = WindowID(2)
         #expect(zone.run(in: context) != nil)
         let drawn = width(id, zone, context)
+        // The premise: the weight drawing nearest the length asked
+        // draws the window wider.
+        let line = zone.line(in: context)
+        let nearest = try #require(
+            zone.weightCandidates(
+                for: id,
+                at: drawn - 7,
+                floor: line.bare[1],
+                in: context
+            )
+            .map { zone.drawnLength(of: id, weight: $0, in: context) }
+            .min { abs($0 - (drawn - 7)) < abs($1 - (drawn - 7)) }
+        )
+        try #require(nearest > drawn)
         let press = try #require(
             zone.press(id, by: -7, toward: .both, in: context)
         )

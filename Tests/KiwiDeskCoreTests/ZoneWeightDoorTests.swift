@@ -5,14 +5,16 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Every weight door of a zone laid by floor and weight moves the
-/// pressed window the way the press asks, or cues (#2967): seeded
-/// `resize` presses through the real writers, whole-zone and run
-/// alike, on a Stack zone and a fixed Grid's last row, read off the
-/// frames the render draws. The display, gaps and floor are pinned
-/// (#531, #660); a failure names its seed and step, so it replays.
+/// A Stack zone's weight presses move the pressed window the way
+/// they ask, or cue (#2967): seeded `resize` presses through the
+/// real writers, read off the frames the render draws. The
+/// whole-zone writer clamps its step at the floors the render's
+/// whole split reads, so its step never flips that split; a floor
+/// one reads and the other does not reds here. The display, gaps
+/// and floor are pinned (#531, #660); a failure names its seed and
+/// step, so it replays.
 @Suite(
-    "Zone weight doors keep the press's sense (#2967)",
+    "Stack zone weight presses keep their sense (#2967)",
     .serialized,
     .enabled(if: NSScreen.main != nil)
 )
@@ -42,21 +44,7 @@ struct ZoneWeightDoorTests {
             focusable: [2, 3, 4],
             axis: "y",
             setup: { _ in }
-        ),
-        Case(
-            mode: "grid",
-            windows: 5,
-            focusable: [4, 5],
-            axis: "x",
-            setup: {
-                $0.execute("grid.set_type", args: [.string("rigid")])
-                $0.execute(
-                    "grid.set_dimensions",
-                    args: [.number(3), .number(2)]
-                )
-                $0.execute("grid.set_auto_size", args: [.bool(false)])
-            }
-        ),
+        )
     ]
 
     private func makeSpace(
@@ -111,6 +99,9 @@ struct ZoneWeightDoorTests {
     @Test("A press never moves the window against its sense")
     func pressesKeepTheirSense() throws {
         for (offset, spec) in cases.enumerated() {
+            // Steps that reached an assertion: a fixture that only
+            // cues or pushes would pass having checked nothing.
+            var asserted = 0
             for seed in 1...40 {
                 var random = Seeded(state: UInt64(seed * 7 + offset))
                 let (core, id) = makeSpace(
@@ -155,10 +146,12 @@ struct ZoneWeightDoorTests {
                     guard shown(core, id) == shownBefore, cues == cued
                     else { continue }
                     let after = length(core, window, spec.axis)
+                    asserted += 1
                     if delta > 0 { #expect(after >= before - 1, note) }
                     if delta < 0 { #expect(after <= before + 1, note) }
                 }
             }
+            #expect(asserted >= 200, Comment(rawValue: spec.mode))
         }
     }
 

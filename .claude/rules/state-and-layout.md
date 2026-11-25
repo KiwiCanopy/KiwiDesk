@@ -2428,11 +2428,12 @@ editing here:
   neighbour's floor stopped asks through `pushOrCue` before any
   neighbour-minimum cue — a writer refuses no grow the run could
   take, and decides no length, side or pushed window of its own.
-  A weight a writer stores for such a zone, the whole-zone
-  writers' included, goes through `RunZone.checkedWeight`, which
+  A run's weight step goes through `RunZone.checkedWeight`, which
   judges it against the render's split, since a step that flips
-  between the whole split and floor-and-share redraws every
-  share (#2967, `RunZonePressPropertyTests`, `ZoneWeightDoorTests`).
+  between the whole split and floor-and-share redraws every share
+  (#2967, `RunZoneCrossingTests`); a whole-zone writer clamps its
+  step at the very floors `fitsWhole` reads, so a floor one side
+  reads and the other does not reopens it (`ZoneWeightDoorTests`).
   A press's lengths and the run's two ends are stored in one
   write, and whether a stored length plans is the run's alone
   (`RunZone.honouredSizes`): the render takes it and the persist
