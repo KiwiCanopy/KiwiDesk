@@ -85,6 +85,7 @@ extension KiwiCore {
             borders.displaysChanged()
             // A screen back may show another Space than filed.
             desktopMemory.shownUserSpaces = [:]
+            drainPendingSpacePins()  // #3631: resolve inputs first
             if monitorChangeSettles(priorCount: priorDisplayCount) {
                 if !monitorSettlePending {
                     state.settlingScreens = priorScreens

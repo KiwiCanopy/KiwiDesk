@@ -242,9 +242,7 @@ extension KiwiCore {
         globalRuleBase.liveFloatAutomatically = nil
         // The guess stays: the load's tail judges the one it builds
         // against the live one, once.
-        installFloatRules(
-            FloatRules([], guess: eventLoop.floatRules.guess)
-        )
+        installFloatRules(FloatRules([], guess: eventLoop.floatRules.guess))
         eventLoop.ignoreRules = IgnoreRules([])
         globalRuleBase.appRules = [:]
         globalRuleBase.titledAppRules = [:]
@@ -271,6 +269,7 @@ extension KiwiCore {
         // Read while `init.lua`'s last Spaces still count (#1790).
         let temporaries = Set(liveTemporarySpaces)
         initDeclaredSpaces = []
+        pendingSpacePins = [:]
         // The session resize layer reseeds on reload (#458):
         // the config about to apply is the new truth, and a
         // shadowing session value would make an edited ratio
