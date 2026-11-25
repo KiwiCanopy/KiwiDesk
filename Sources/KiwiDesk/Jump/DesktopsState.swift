@@ -79,12 +79,19 @@ struct DesktopsState: Equatable {
 
     var selectedLine: DesktopOverview.SpaceLine? { place.flatMap(line) }
 
+    /// Whether `window` matches what is typed; everything does while
+    /// nothing is.
+    func matches(_ window: DesktopOverview.Window) -> Bool {
+        guard !query.isEmpty else { return true }
+        return window.app.localizedCaseInsensitiveContains(query)
+            || window.title.localizedCaseInsensitiveContains(query)
+    }
+
     /// A line's windows as drawn: matches first, each part in its
     /// Space's order (#1229, #3624).
     func ordered(_ place: DesktopsPlace) -> [DesktopOverview.Window] {
         guard let windows = line(place)?.windows else { return [] }
-        let hit = windows.filter { matches($0, at: place) }
-        return hit + windows.filter { !matches($0, at: place) }
+        return windows.filter(matches) + windows.filter { !matches($0) }
     }
 
     /// The icons `place`'s line shows at once; more fold into "+n".

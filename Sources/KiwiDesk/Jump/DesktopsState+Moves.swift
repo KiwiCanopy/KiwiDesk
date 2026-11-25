@@ -129,27 +129,13 @@ extension DesktopsState {
     /// selected screen's column, on its landing line.
     func desktop(digit index: Int) -> DesktopsPlace? {
         guard let place else { return nil }
-        return numbered(index, screen: place.screen)
-    }
-
-    /// Desktop `index` (0-based) of `screen`'s column, as ⌘N and a
-    /// typed number count, on its landing line.
-    func numbered(_ index: Int, screen: Int) -> DesktopsPlace? {
-        let desktops = overview.screens[screen].desktops
+        let desktops = overview.screens[place.screen].desktops
         guard desktops.indices.contains(index) else { return nil }
         return clamped(
-            screen: screen,
+            screen: place.screen,
             desktop: index,
             line: desktops[index].landingLine
         )
-    }
-
-    /// Whether `place` lies on Desktop `number` (1-based) of its
-    /// column, as `numbered` counts.
-    func isNumbered(_ place: DesktopsPlace, _ number: Int?) -> Bool {
-        guard let number else { return false }
-        return numbered(number - 1, screen: place.screen)?.desktop
-            == place.desktop
     }
 
     /// How many Desktops the selected column's digits reach.

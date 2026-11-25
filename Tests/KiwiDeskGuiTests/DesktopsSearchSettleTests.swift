@@ -82,7 +82,7 @@ struct DesktopsSearchSettleTests {
     @Test("a click acts while nothing matches; the keys beep")
     func clickSkipsTheBeep() throws {
         var state = Search.state()
-        state.setQuery("12")
+        state.setQuery("zzz")
         state.select(Self.place(2))
         let target = try #require(state.target(Self.place(2)))
         #expect(state.press(.pick(moveHere: false), repeated: false) == .dead)

@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDesk
 
 /// The Desktops side's search (#3624 ▸ Ruling): match-only keys, a
-/// carry reaching every line, and a typed number naming a Desktop.
-/// KiwiHub's screen has five Desktops; Desktop 3 shows its second
-/// line and holds Terminal on its first. The other screen holds
-/// Mail on its one Desktop.
+/// carry reaching every line, a query change settling the
+/// selection. KiwiHub's screen has five Desktops; Desktop 3 shows
+/// its second line and holds Terminal on its first. The other
+/// screen holds Mail on its one Desktop.
 @Suite("Desktops side search")
 struct DesktopsSearchTests {
     typealias Fixture = DesktopsStateTests
@@ -131,7 +131,7 @@ struct DesktopsSearchTests {
         #expect(column.allSatisfy(state.reaches))
         // The icons keep their emphasis.
         let safari = Self.window(3, "Safari")
-        #expect(!state.matches(safari, at: Self.place(2)))
+        #expect(!state.matches(safari))
     }
 
     @Test("a cancelled carry leaves a dimmed line for a match")
@@ -148,52 +148,22 @@ struct DesktopsSearchTests {
         #expect(state.place == Self.place(3))
     }
 
-    @Test("a number selects that Desktop's landing line; ↩ jumps")
-    func numberSelects() {
-        var state = Self.state()
-        state.setQuery("3")
-        #expect(state.place == Self.place(3, 1))
-        let target = state.target(state.place!)!
-        #expect(target.desktop.label == 3)
-        #expect(
-            state.press(.pick(moveHere: false), repeated: false)
-                == .act(.jump(target))
-        )
-        // ↓ stays among Desktop 3's lines.
-        _ = state.press(.step(1), repeated: false)
-        #expect(state.place == Self.place(3, 0))
-        _ = state.press(.step(1), repeated: false)
-        #expect(state.place == Self.place(3, 1))
-    }
-
-    @Test("a number is trimmed and drops leading zeros, with no 0 alias")
-    func numberForms() {
-        var state = Self.state()
-        state.setQuery(" 03 ")
-        #expect(state.search == .number(3))
-        #expect(state.place == Self.place(3, 1))
-        state.setQuery("0")
-        #expect(state.matchesNothing)
-        state.setQuery("99999999999999999999999")
-        #expect(state.search == .number(nil))
-        #expect(state.matchesNothing)
-    }
-
-    @Test("a number matches no window text")
-    func numberIgnoresText() {
+    @Test("a typed digit is text, matched against titles too")
+    func digitsAreText() {
         var state = Self.state()
         state.setQuery("3")
         let notes = Self.window(2, "Notes", title: "v3")
-        #expect(!state.matches(notes, at: Self.place(1)))
-        #expect(!state.reaches(Self.place(1)))
-        let terminal = Self.window(4, "Terminal")
-        #expect(state.matches(terminal, at: Self.place(3)))
+        #expect(state.matches(notes))
+        #expect(state.place == Self.place(1))
+        #expect(!state.reaches(Self.place(3)))
+        state.setQuery("1p")
+        #expect(state.matches(Self.window(1, "1Password")))
     }
 
-    @Test("a number out of range matches nothing, and the keys beep")
-    func numberOutOfRange() {
+    @Test("a query matching nothing leaves the keys beeping")
+    func nothingMatches() {
         var state = Self.state()
-        state.setQuery("12")
+        state.setQuery("zzz")
         #expect(state.matchesNothing)
         #expect(state.place == Self.place(1))
         #expect(state.press(.pick(moveHere: false), repeated: false) == .dead)
@@ -202,15 +172,6 @@ struct DesktopsSearchTests {
         #expect(state.press(.step(1), repeated: false) == .dead)
         #expect(state.press(.side(1), repeated: false) == .dead)
         #expect(state.press(.openSpace, repeated: false) == .dead)
-        #expect(state.place == Self.place(1))
-    }
-
-    @Test("text starting with a digit is text")
-    func digitLedText() {
-        var state = Self.state()
-        state.setQuery("1p")
-        #expect(state.search == .text("1p"))
-        #expect(state.matches(Self.window(1, "1Password"), at: Self.place(1)))
         #expect(state.place == Self.place(1))
     }
 

@@ -8284,12 +8284,9 @@ the one you left. A click on a row's name goes to the Desktop as a
 title click does.
 
 :::unreleased
-Typing a number, such as `12`, finds Desktop 12 in each screen's
-column, counted as **⌘1**–**⌘9** count, and no window's name or
-title; a number past the last Desktop finds nothing. While anything
-is typed, the arrows land only on what matches, and when the
-selected Space stops matching the selection moves to the first
-match; typing never switches, **Return** does. While nothing
+While anything is typed, the arrows land only on what matches, and
+when the selected Space stops matching the selection moves to the
+first match; typing never switches, **Return** does. While nothing
 matches, the arrows, **⌘↓** and **Return**, with or without **⇧**
 or **⌃**, do nothing, and a click still acts. While windows ride
 along, the arrows reach every Space again and no Space dims.
