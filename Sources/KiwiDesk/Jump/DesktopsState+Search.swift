@@ -111,7 +111,9 @@ extension DesktopsState {
     /// query change and carry end passes (#3624): a window the query
     /// dims leaves the Space, and a line it dims gives way to the
     /// first match in its screen's column, then the next column's.
-    /// A selection still matching stays.
+    /// A selection still matching stays. A new writer of `query` or
+    /// `carried` calls it; a re-read moves a clicked dimmed
+    /// selection too.
     mutating func settle() {
         if let window, let place, let found = overview.window(window),
             !reaches(found, at: place)
