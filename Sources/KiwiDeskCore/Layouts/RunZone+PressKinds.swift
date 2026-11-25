@@ -207,7 +207,8 @@ extension RunZone {
         guard
             let weight = checkedWeight(
                 stepped,
-                of: members[index],
+                line,
+                index,
                 by: delta,
                 in: context
             )
@@ -218,35 +219,34 @@ extension RunZone {
     }
 
     /// `stepped` where it keeps the render's split, else the weight
-    /// that moves `id` the way `delta` presses, nearest the length
-    /// asked; nil where none does. A step that flips the split
+    /// that moves the window the way `delta` presses, nearest the
+    /// length asked; nil where none does. A step that flips the split
     /// between whole and floor-and-share redraws every share, which
-    /// can move the window the other way (#2967), so every weight
-    /// write of a zone takes this.
-    func checkedWeight(
+    /// can move the window the other way (#2967). A whole-zone
+    /// writer's floors keep its own step from crossing
+    /// (state-and-layout.md).
+    private func checkedWeight(
         _ stepped: Double,
-        of id: WindowID,
+        _ line: Line,
+        _ index: Int,
         by delta: CGFloat,
         in context: LayoutContext
     ) -> Double? {
-        guard let index = members.firstIndex(of: id) else {
-            return stepped
-        }
+        let id = members[index]
         var trial = context
         trial.stackWeights[id] = stepped
-        let isRun = run(in: context) != nil
-        if (run(in: trial) != nil) == isRun { return stepped }
-        let drawn = drawnLength(
-            of: id,
-            weight: plainWeight(of: id, in: context),
-            in: context
-        )
+        guard run(in: trial) == nil else { return stepped }
+        let drawn = line.drawn[index]
         let target = drawn + delta
         let sense: CGFloat = delta < 0 ? -1 : 1
-        let floor = floorsAndGap(in: context).bare[index]
         return
             ([stepped]
-            + weightCandidates(for: id, at: target, floor: floor, in: context))
+            + weightCandidates(
+                for: id,
+                at: target,
+                floor: line.bare[index],
+                in: context
+            ))
             .map { ($0, drawnLength(of: id, weight: $0, in: context)) }
             .filter { ($0.1 - drawn) * sense > Self.unchangedTolerance }
             .min { abs($0.1 - target) < abs($1.1 - target) }?.0
