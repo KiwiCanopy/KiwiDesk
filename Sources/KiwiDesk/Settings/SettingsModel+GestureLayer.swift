@@ -37,16 +37,17 @@ extension SettingsModel {
 
 extension SettingsModel {
     /// The page's gesture rows the encode compares against `table`:
-    /// the draft's, laid over the seeds, and as stored for a layer
+    /// `maps`, the draft's, laid over the seeds, and as stored for a layer
     /// the page does not hold, which is no row of the page's — a
     /// layer deleted here leaves the shared base's rows standing
     /// (#3535).
     func gestureEncodeCurrent(
+        _ maps: LayerGestures,
         _ table: RuleReachTable<GestureAction>,
         _ editing: String
     ) -> [String: GestureAction] {
         var current = RuleReachTable<GestureAction>.gestureSeedsUnder(
-            config.gesture,
+            maps,
             shortcutBase: config.shortcutBase
         )
         let page = Set(config.layers.map(\.name))

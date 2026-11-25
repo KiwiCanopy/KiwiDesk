@@ -119,7 +119,11 @@ extension SettingsModel {
             reach: reachEdits.reach[.scroll] ?? [:],
             removal: [:]
         )
-        let gestureCurrent = gestureEncodeCurrent(snapshot.gestures, editing)
+        let gestureCurrent = gestureEncodeCurrent(
+            config.gesture,
+            snapshot.gestures,
+            editing
+        )
         snapshot.gestures = RuleReachDraft.encode(
             snapshot.gestures,
             current: gestureCurrent,
