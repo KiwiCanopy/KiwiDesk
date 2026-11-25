@@ -198,16 +198,19 @@ because two real clients now remove drift — see
   beside `moveShortcutBase` — and the rows it leaves on `⌃⌥` are
   `GestureBaseSwitch.kept`'s, never a GUI rule beside it
   (`GestureBaseSwitchTests`, `ShortcutBaseGestureTests`).
-- **The gesture maps are per keybinding layer (#3535).** A
-  gesture reach key is minted and parsed through `LayerGestureKey` alone, since a
-  bare `GestureKey(spelling:` reads `default`'s rows and silently
-  drops every other layer's (`GestureKeySpellingDoorTests`). Every
-  layer edit — rename, delete, a profile leaving the layer —
+- **The gesture maps are per keybinding layer (#3535).** Mint and
+  parse a gesture reach key through `LayerGestureKey` alone: a bare
+  `GestureKey(spelling:` reads `default`'s rows and silently drops
+  every other layer's. The parse is guarded
+  (`GestureKeySpellingDoorTests`); a mint is review's. Every layer
+  edit — rename, delete, revert, a profile leaving the layer —
   carries the layer's gesture maps in the draft
-  (`LayerGestures.renaming` / `removing`, `LayerGesturePicks`) and
-  in the layer pass (`RuleReachSnapshot.renameGestureLayers` /
-  `dropGestureLayer`), never one half (`LayerPassGestureTests`,
-  `ShortcutsLayerStripTests`).
+  (`LayerGestures.renaming` / `removing`) and in the layer pass
+  (`RuleReachSnapshot.renameGestureLayers` / `dropGestureLayer`),
+  never one half. A gesture pick on a layer other than `default`
+  names only the layer's holders, as a key row's does
+  (`LayerGesturePicks.keep` / `scoped`, beside `LayerRowPicks`'s)
+  (`LayerPassGestureTests`, `ShortcutsLayerStripTests`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

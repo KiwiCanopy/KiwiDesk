@@ -39,4 +39,69 @@ enum LayerGesturePicks {
         edits.removal[.gesture] =
             edits.removal[.gesture]?.filter { !gone($0.key) }
     }
+
+    /// A gesture pick on a layer other than `default` names only
+    /// the layer's holders, as `LayerRowPicks.keep` does for keys: a
+    /// tick left on a profile the layer leaves would write its map
+    /// back there.
+    static func keep(
+        _ edits: inout RuleReachEdits,
+        layer: String,
+        holders: Set<String>,
+        shared: Bool
+    ) {
+        guard layer != KeyLayer.defaultName,
+            var picks = edits.reach[.gesture]
+        else { return }
+        for (spelling, reach) in picks
+        where LayerGestureKey(spelling: spelling)?.layer == layer {
+            switch reach {
+            case .listed(let members):
+                picks[spelling] = .listed(members.intersection(holders))
+            case .shared(let joining):
+                picks[spelling] =
+                    shared
+                    ? .shared(joining: joining.intersection(holders))
+                    : .listed(holders)
+            }
+        }
+        edits.reach[.gesture] = picks
+    }
+
+    /// The gesture picks the encode takes, as `LayerRowPicks.scoped`
+    /// for keys: in a layer the base does not share, a new row
+    /// starts on the layer's holders and a shared pick is theirs, so
+    /// no row writes the layer's map into the shared base.
+    static func scoped(
+        _ picks: [String: RuleReach],
+        page: [String: GestureAction],
+        layers: RuleReachTable<Bool>,
+        gestures: RuleReachTable<GestureAction>,
+        editing: String,
+        isLoaded: Bool
+    ) -> [String: RuleReach] {
+        var result = picks
+        for spelling in Set(page.keys).union(picks.keys) {
+            guard let layer = LayerGestureKey(spelling: spelling)?.layer,
+                layer != KeyLayer.defaultName,
+                layers.base[layer] == nil
+            else { continue }
+            let holders = Set(
+                layers.profiles.filter {
+                    layers.resolved(layer, for: $0) != nil
+                }
+            ).union([editing])
+            switch picks[spelling] {
+            case .shared?:
+                result[spelling] = .listed(holders)
+            case nil
+            where isLoaded
+                && gestures.resolved(spelling, for: editing) == nil:
+                result[spelling] = .listed(holders)
+            default:
+                break
+            }
+        }
+        return result
+    }
 }

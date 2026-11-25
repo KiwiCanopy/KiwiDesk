@@ -22,6 +22,8 @@ extension RuleReachSnapshot {
 
     /// `layer`'s maps dropped from `profiles`' overrides, nil naming
     /// every profile, and from the shared base where `base` says so.
+    /// A gesture map is not gated by layer membership, so nil means
+    /// every profile file, not the layer's holders.
     public mutating func dropGestureLayer(
         _ layer: String,
         profiles: [String]?,

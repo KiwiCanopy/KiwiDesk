@@ -128,6 +128,7 @@ extension SettingsModel {
                     saved: { renamed[$0]?.stored ?? $0 }
                 )
                 config.layers = back.layers
+                config.gesture[stored] = cleanConfig.gesture[stored]
                 Self.dropKeyPicks(back.keys, in: &edits)
             }
         }

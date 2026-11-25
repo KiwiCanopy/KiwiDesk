@@ -125,12 +125,20 @@ extension SettingsModel {
             edit.members = members
         }
         edits.layers[name] = edit.isInert(at: name) ? nil : edit
+        let holders = (edit.members?.profiles ?? before?.users ?? [])
+            .union(reachProfile.map { [$0] } ?? [])
+        let shared = edit.members?.shared ?? before?.shared ?? true
         LayerRowPicks.keep(
             &edits,
             layer: name,
-            holders: (edit.members?.profiles ?? before?.users ?? [])
-                .union(reachProfile.map { [$0] } ?? []),
-            shared: edit.members?.shared ?? before?.shared ?? true
+            holders: holders,
+            shared: shared
+        )
+        LayerGesturePicks.keep(
+            &edits,
+            layer: name,
+            holders: holders,
+            shared: shared
         )
         reachEdits = edits
     }

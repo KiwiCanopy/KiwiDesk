@@ -9,7 +9,8 @@ import Testing
 /// base's and each profile's map with the layer, drops them with a
 /// delete everywhere, keeps the base on a delete here, and drops a
 /// profile's own map when the profile leaves the layer. Work is
-/// loaded and edited; Home carries its own "Coding" map. Main-actor
+/// loaded and edited; Home carries its own "Coding" map, Away one
+/// for a layer it leaves out. Main-actor
 /// spend: one test core, three small file writes and one model
 /// reload per test; no scan, no AppKit layout.
 @Suite("Layer pass over gestures (#3535)", .serialized)
@@ -37,6 +38,10 @@ struct LayerPassGestureTests {
         try core.profiles.write(
             profile("Home", LayerGestures(["Coding": home]))
         )
+        // Away leaves Coding out yet still holds a map for it.
+        var away = profile("Away", LayerGestures(["Coding": home]))
+        away.layers = KeyLayerOverride(leftOut: ["Coding"])
+        try core.profiles.write(away)
         let model = makeTestModel(core: core)
         model.reload()
         return model
@@ -73,6 +78,7 @@ struct LayerPassGestureTests {
         let pass = try #require(model.layeredReach)
         #expect(pass.storedGestureBase.isEmpty)
         #expect(pass.gestures.gestureOverride(for: "Home") == nil)
+        #expect(pass.gestures.gestureOverride(for: "Away") == nil)
     }
 
     @Test("a delete here keeps the base and writes no tombstones")
@@ -98,5 +104,34 @@ struct LayerPassGestureTests {
         let pass = try #require(model.layeredReach)
         #expect(pass.gestures.gestureOverride(for: "Home") == nil)
         #expect(pass.storedGestureBase == LayerGestures(["Coding": shared]))
+    }
+
+    @Test("a profile leaving the layer leaves its gesture picks")
+    func leavingDropsThePick() throws {
+        let model = try model()
+        let row = LayerGestureKey("Coding", swipe).spelling
+        var edits = model.reachEdits
+        edits.reach[.gesture] = [row: .listed(["Work", "Home"])]
+        model.reachEdits = edits
+        model.setLayerProfile("Coding", "Home", false)
+        #expect(model.reachEdits.reach[.gesture]?[row] == .listed(["Work"]))
+        let encoded = try #require(model.encodedReach)
+        #expect(encoded.gestures.gestureOverride(for: "Home") == nil)
+    }
+
+    @Test("a layer's revert brings its gestures back")
+    func revertRestores() throws {
+        let model = try model()
+        model.deleteLayer("Coding", .here)
+        #expect(model.config.gesture["Coding"].isEmpty)
+        model.revertLayer(stored: "Coding", page: nil)
+        #expect(model.config.gesture["Coding"] == shared)
+        let encoded = try #require(model.encodedReach)
+        #expect(
+            encoded.gestures.gestureBase(
+                original: encoded.storedGestureBase,
+                shortcutBase: .standard
+            ) == LayerGestures(["Coding": shared])
+        )
     }
 }

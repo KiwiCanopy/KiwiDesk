@@ -5,7 +5,8 @@ import Testing
 /// (#3535): a bare `GestureKey(spelling:` beside it reads the
 /// default layer's keys and silently drops every other layer's.
 /// The map's own decoder and the layer key's parse are the one
-/// pair of homes.
+/// pair of homes. Whitespace and `.init` spellings are folded; a
+/// reference passed as a function value is review's.
 @Suite("Gesture key spelling door (#3535)")
 struct GestureKeySpellingDoorTests {
     private static let allowed: Set<String> = [
@@ -20,10 +21,12 @@ struct GestureKeySpellingDoorTests {
         let prefix = root.path + "/"
         var homes: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {
-            let source = SourceScan.stripComments(
+            let flat = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
-            )
-            let bare = source.replacingOccurrences(
+            ).filter { !$0.isWhitespace }
+                .replacingOccurrences(of: ".init?(", with: "(")
+                .replacingOccurrences(of: ".init(", with: "(")
+            let bare = flat.replacingOccurrences(
                 of: "LayerGestureKey(spelling:",
                 with: ""
             )

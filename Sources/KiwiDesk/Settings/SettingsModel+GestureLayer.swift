@@ -50,6 +50,7 @@ extension SettingsModel {
             shortcutBase: config.shortcutBase
         )
         let page = Set(config.layers.map(\.name))
+            .union([KeyLayer.defaultName])
         for (spelling, action) in table.resolved(for: editing) {
             guard let key = LayerGestureKey(spelling: spelling),
                 !page.contains(key.layer)
