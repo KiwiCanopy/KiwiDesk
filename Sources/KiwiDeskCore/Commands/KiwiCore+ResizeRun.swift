@@ -222,10 +222,27 @@ extension KiwiCore {
     /// did. Only a press pushes (#2709), so a hold cannot hide windows
     /// faster than they can be pulled back, and stopping there is no
     /// refusal.
-    private func endGlideStep() -> Bool {
+    func endGlideStep() -> Bool {
         guard keys.isApplyingGlideStep else { return false }
         keys.endGlide()
         return true
+    }
+
+    /// A weight at its limit moves nothing: a hold just ends there
+    /// and a press cues, as a Stack zone's weight does (#2709,
+    /// #2969). `mate` is the neighbour a grow names.
+    func cueWeightLimit(
+        _ window: WindowID,
+        mate: WindowID?,
+        delta: Double,
+        axis: String
+    ) {
+        guard !endGlideStep() else { return }
+        if delta < 0 {
+            refuseShrinkAtMinimum(window, axis: axis)
+        } else if let mate {
+            refuseGrowAtNeighborMinimum(window, anchor: mate, axis: axis)
+        }
     }
 
     /// Whether a drag shrinking `id` on `vertical`'s axis hands the
