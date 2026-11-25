@@ -31,7 +31,8 @@ extension KiwiCore {
 
     /// The floor a clamp stops at on `axis`: the effective minimum
     /// raised to the window's least refusal there (#2774), the
-    /// clamp twin of `LayoutContext.plannedFloor`.
+    /// clamp twin of `LayoutContext.plannedFloor`: a floor input
+    /// joins both, or a weight step crosses the whole split (#2967).
     func plannedMinSize(of id: WindowID, axis: String) -> Double {
         max(
             effectiveMinSize(of: id, axis: axis),

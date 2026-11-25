@@ -10,7 +10,9 @@ import Testing
 /// them and then open on arrival — save Modifier keys, a drawer of
 /// settings, which opens only in trouble (#3261). Each reads its
 /// own hold-open, and none swaps its container for another once in use — a
-/// recorder inside must survive its first combo (#1125).
+/// recorder inside must survive its first combo (#1125). On
+/// Personal the offers draw open and Lua bindings alone collapses
+/// (`docs/design-decisions.md` ▸ One page, three parts).
 ///
 /// **The half that must never break**: a user's own layers,
 /// modifier keys or Lua bindings are never folded away on
@@ -166,6 +168,52 @@ struct ShortcutsOfferDisclosureTests {
         )
     }
 
+    /// Personal draws Layers, Apple Shortcuts and Key sequences as
+    /// open sections and Lua bindings as its one collapsible
+    /// section, titled like its siblings rather than a bare drawer.
+    @Test("Personal draws its offers open, Lua bindings collapses")
+    func personalOffersDrawOpen() throws {
+        for (file, card) in [
+            ("AppleShortcutsCard", "appleShortcutsCard"),
+            ("KeySequencesCard", "keySequencesCard"),
+        ] {
+            let source = try squashed("Sections/\(file).swift")
+            #expect(
+                source.contains(
+                    "SettingsSection(SettingsCatalog.shortcuts"
+                        + ".\(card),"
+                ),
+                Comment(rawValue: file)
+            )
+            #expect(
+                !source.contains("SettingsCollapsibleSection("),
+                Comment(rawValue: file)
+            )
+        }
+        let layers = try squashed("Sections/LayersCard.swift")
+        #expect(
+            layers.contains(
+                "ifsegment==.personal{SettingsSection("
+                    + "SettingsCatalog.shortcuts.layersCard.control,"
+            )
+        )
+        #expect(
+            layers.contains(
+                "}else{SettingsCollapsibleSection("
+                    + "SettingsCatalog.shortcuts.layersCard,"
+            )
+        )
+        let section = try squashed("Sections/ShortcutsSection.swift")
+        #expect(
+            section.contains(
+                "SettingsCollapsibleSection(SettingsCatalog.shortcuts"
+                    + ".luaBindings,isExpanded:$advancedExpanded,"
+                    + "summary:luaSummary)"
+            )
+        )
+        #expect(!section.contains("SettingsDisclosure("))
+    }
+
     /// The drawer's rows and its hold-open read one predicate, so
     /// an imported kind cannot be listed with the drawer shut.
     @Test("Lua rows and the hold-open share one predicate")
@@ -177,6 +225,11 @@ struct ShortcutsOfferDisclosureTests {
         #expect(
             try squashed("Components/Keybindings/ShortcutsGates.swift")
                 .contains(".contains(where:Self.isLuaBinding)")
+        )
+        // The shut summary names the rows the drawer lists.
+        #expect(
+            try squashed("Sections/ShortcutsSection+Draft.swift")
+                .contains(".filter(ShortcutsGates.isLuaBinding)")
         )
     }
 

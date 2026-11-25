@@ -1820,6 +1820,15 @@ renamed in place from the Settings app's **Spaces** section; the
 rename is persisted and follows the id everywhere it is used —
 its layout mode, app rules, screen pins, and any keybindings.
 
+:::unreleased
+When `init.lua`
+[owns the config](#what-coexists-with-the-settings-app-and-what-doesnt),
+the order in which its run first refers to each Space through a
+KiwiDesk call is the Space order, on every load. Spaces it never
+refers to follow in their own order, and an active profile's
+order still wins.
+:::
+
 ### How inactive spaces hide their windows
 
 Switching spaces parks the other spaces' tiled windows in a

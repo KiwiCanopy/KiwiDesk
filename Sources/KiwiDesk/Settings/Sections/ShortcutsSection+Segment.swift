@@ -43,7 +43,9 @@ private struct ShortcutsSegmentKey: EnvironmentKey {
 extension EnvironmentValues {
     /// The Shortcuts page's part a row is drawn in, nil off that
     /// page (#3184): a conflict naming a row of the other part
-    /// links to it (`RecorderCoordinator.segmentHolding`).
+    /// links to it (`RecorderCoordinator.segmentHolding`), and
+    /// `LayersCard` draws open on `.personal` alone, nil taking
+    /// Built-in's collapsible shape.
     var shortcutsSegment: ShortcutsSegment? {
         get { self[ShortcutsSegmentKey.self] }
         set { self[ShortcutsSegmentKey.self] = newValue }

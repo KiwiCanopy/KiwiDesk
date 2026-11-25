@@ -32,8 +32,10 @@ public struct WorkspaceManager: Sendable {
 
     /// Every id `ensureSpace` was handed since `loadConfig` last
     /// cleared it, existing or not — so a reload's `create_space`
-    /// of a space already live is still on record (#1509).
-    var referenced: Set<SpaceID> = []
+    /// of a space already live is still on record (#1509) — once
+    /// each, in first-reference order, a Lua-owned config's Space
+    /// order (#3625).
+    var referenced: [SpaceID] = []
 
     /// The window focused immediately before `lastFocused` — a
     /// one-deep history, deliberately never a deeper walk-back:
@@ -59,7 +61,7 @@ public struct WorkspaceManager: Sendable {
         _ id: SpaceID,
         mode: LayoutMode = .bsp
     ) -> Space {
-        referenced.insert(id)
+        if !referenced.contains(id) { referenced.append(id) }
         if let existing = spaces[id] {
             return existing
         }

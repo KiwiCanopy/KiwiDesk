@@ -94,24 +94,27 @@ extension RunZone {
         if spent {
             return Press(cue: .ownMinimum, refusal: .atWeightLimit)
         }
-        return weightStep(line, index, shown: shown, by: delta, in: context)
-    }
-
-    /// `heads` and `tails` with this zone's ends set to show
-    /// `visible`, every other zone's left as stored — what a
-    /// writer stores as `Space.runHeads` and `runTails`.
-    public func ends(
-        showing visible: Range<Int>,
-        heads: Set<WindowID>,
-        tails: Set<WindowID>
-    ) -> (heads: Set<WindowID>, tails: Set<WindowID>) {
-        var heads = heads.subtracting(members)
-        var tails = tails.subtracting(members)
-        if visible.lowerBound > 0 { heads.insert(members[visible.lowerBound]) }
-        if visible.upperBound < members.count {
-            tails.insert(members[visible.upperBound - 1])
+        if let press = weightStep(
+            line,
+            index,
+            shown: shown,
+            by: delta,
+            in: context
+        ) {
+            return press
         }
-        return (heads, tails)
+        // No weight moves the window the press's way (#2967): a grow
+        // pushes, as at its weight's limit, and a shrink stops there.
+        guard delta > 0 else {
+            return Press(cue: .ownMinimum, refusal: .atWeightLimit)
+        }
+        let push = lengthStep(
+            line,
+            index,
+            by: pushDistance(line, index, by: delta),
+            toward: side
+        )
+        return lengths(push, of: id, on: line, context)
     }
 
     /// Below this many points a press moved nothing the screen

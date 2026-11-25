@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The edited layer's keys that run an Apple Shortcut (#3526), a
-/// collapsible card after Open applications. Shut with a summary
-/// until a key exists, then open on arrival, as Key sequences is;
-/// never swapped for another container (#1125). A row's shortcut is
-/// fixed once added, as an app row's app is (#2708).
+/// The edited layer's keys that run an Apple Shortcut (#3526), an
+/// open card after Open applications: Personal draws its offers
+/// open (`docs/design-decisions.md` ▸ One page, three parts). A
+/// row's shortcut is fixed once added, as an app row's app is
+/// (#2708).
 struct AppleShortcutsCard: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -14,7 +14,6 @@ struct AppleShortcutsCard: View {
     @Environment(\.keybindingLayerName)
     var layerName
     @ObservedObject private var library = AppleShortcutLibrary.shared
-    @State private var expanded = false
     /// Alphabetical order snapshotted on arrival, as the app rows'
     /// (#333): a live re-sort could move a row mid-record.
     @State private var displayOrder: [UUID] = []
@@ -24,10 +23,8 @@ struct AppleShortcutsCard: View {
     }
 
     var body: some View {
-        SettingsCollapsibleSection(
+        SettingsSection(
             SettingsCatalog.shortcuts.appleShortcutsCard,
-            isExpanded: $expanded,
-            summary: summary,
             help: AppleShortcutAction.conflictBlindSpot
         ) {
             VStack(alignment: .leading, spacing: 8) {
@@ -53,14 +50,7 @@ struct AppleShortcutsCard: View {
                 )
             }
         }
-        // Open on arrival once in use — never forced shut.
-        .onAppear {
-            recomputeOrder()
-            if !shortcuts.isEmpty { expanded = true }
-        }
-        .onChange(of: shortcuts.isEmpty) { _, empty in
-            if !empty { expanded = true }
-        }
+        .onAppear { recomputeOrder() }
         .onChange(of: layerName) { _, _ in recomputeOrder() }
         .task(id: shortcuts.isEmpty) {
             if !shortcuts.isEmpty {
@@ -173,17 +163,6 @@ struct AppleShortcutsCard: View {
 
     private func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
-    }
-
-    /// The shortcuts by name once one has a key, or what the card is.
-    private var summary: String {
-        guard !shortcuts.isEmpty else {
-            return L(
-                "shortcuts.apple_shortcut.summary",
-                "Run a shortcut from the Shortcuts app with a key"
-            )
-        }
-        return LocalizedList.join(ordered.map(name(of:)))
     }
 
     static var empty: String {

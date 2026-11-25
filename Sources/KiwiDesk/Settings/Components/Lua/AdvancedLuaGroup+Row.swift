@@ -7,7 +7,7 @@ import SwiftUI
 /// named as KiwiHub names it.
 extension AdvancedLuaGroup {
     func row(_ binding: Binding<KeyBinding>) -> some View {
-        let name = rowName(binding.wrappedValue)
+        let name = Self.rowName(binding.wrappedValue)
         return VStack(alignment: .leading, spacing: 6) {
             ShortcutKeyRow {
                 ShortcutSymbolPicker.lua(binding.symbol, name: name)
@@ -49,7 +49,7 @@ extension AdvancedLuaGroup {
 
     /// The name KiwiHub lists the row under: its description, else
     /// its Lua; a row with neither is a new binding.
-    func rowName(_ binding: KeyBinding) -> String {
+    static func rowName(_ binding: KeyBinding) -> String {
         if !binding.desc.trimmed.isEmpty { return binding.desc }
         if !binding.lua.isEmpty { return LuaBodyShape.firstLine(binding.lua) }
         return L("shortcuts.lua.new_binding", "New binding")

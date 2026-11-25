@@ -2,17 +2,19 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Keybinding layer management — a bespoke container
-/// (`ShortcutsRowOrder.bespokeContainers`) drawn as a collapsible
-/// card (#2654). Config presence expands it: once a layer exists
-/// the card opens on arrival, and it is never swapped for another
-/// container, so a recorder inside survives its first combo
-/// (#1125).
+/// (`ShortcutsRowOrder.bespokeContainers`). On Built-in a
+/// collapsible card (#2654) that opens on arrival once a layer
+/// exists; on Personal an open card, as that part draws its offers
+/// open (`docs/design-decisions.md` ▸ One page, three parts).
+/// Neither is swapped for another container while shown, so a
+/// recorder inside survives its first combo (#1125).
 struct LayersCard: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     @Binding var selected: String
     let expander: ShortcutsFamilyRows
     @State private var expanded = false
+    @Environment(\.shortcutsSegment) private var segment
 
     /// Whether configured layers exist (`ShortcutsGates`) — the
     /// census gate of the rows and the card's hold-open alike.
@@ -20,30 +22,43 @@ struct LayersCard: View {
         ShortcutsGates(config: model.config).layersExist
     }
 
-    var body: some View {
-        SettingsCollapsibleSection(
-            SettingsCatalog.shortcuts.layersCard,
-            isExpanded: $expanded,
-            summary: summary,
-            help: Self.help
-        ) {
-            VStack(alignment: .leading, spacing: 12) {
-                LayerStripEditor(
+    @ViewBuilder var body: some View {
+        if segment == .personal {
+            SettingsSection(
+                SettingsCatalog.shortcuts.layersCard.control,
+                help: Self.help
+            ) {
+                content
+            }
+        } else {
+            SettingsCollapsibleSection(
+                SettingsCatalog.shortcuts.layersCard,
+                isExpanded: $expanded,
+                summary: summary,
+                help: Self.help
+            ) {
+                content
+            }
+            // Open on arrival once in use — never forced shut.
+            .onAppear { if layersExist { expanded = true } }
+        }
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            LayerStripEditor(
+                model: model,
+                selected: $selected
+            )
+            if layersExist {
+                KeybindingFamilyRows(
                     model: model,
-                    selected: $selected
+                    bindings: $bindings,
+                    key: .shortcuts(.switchToLayer),
+                    expander: expander
                 )
-                if layersExist {
-                    KeybindingFamilyRows(
-                        model: model,
-                        bindings: $bindings,
-                        key: .shortcuts(.switchToLayer),
-                        expander: expander
-                    )
-                }
             }
         }
-        // Open on arrival once in use — never forced shut.
-        .onAppear { if layersExist { expanded = true } }
     }
 
     /// What a layer is, in the title's `?` (#3263).

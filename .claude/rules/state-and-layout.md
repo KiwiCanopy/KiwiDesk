@@ -95,10 +95,21 @@ editing here:
   `StateCoordinator.placeholderSpace`, and the next config load
   retires it through `retirePlaceholderSpace` unless a source
   declares it — asked of the sources (`declaredSources(of:)` and
-  the sidecar's list), never of `referenced`, which the display
-  resolve fills with every live Space. An unarmed seed is a Space
-  nobody made that every launch brings back
+  the sidecar's list), never of `referenced`, which records what a
+  run touched rather than what a source declares. An unarmed seed
+  is a Space nobody made that every launch brings back
   (`PlaceholderSpaceTests`).
+- **A Lua-owned config's Space order is `init.lua`'s
+  first-reference order, imposed on every load (#3625).** Keep
+  `WorkspaceManager.referenced` an ordered ledger, and reorder
+  through the one `applyLuaSpaceOrder` in `loadConfig`'s
+  non-GUI-managed branch, ahead of `reapplyActiveProfileState`, so
+  an active profile's order still wins; a Space the run never named
+  keeps its relative order behind. A door that places or shows a
+  Space enters only a Space it creates in `referenced`, or the run
+  reimposes the live order (`LuaSpaceOrderTests` ▸
+  `displayResolveKeepsTheScript`). A second Lua-side order source,
+  such as a `set_space_order` verb, owes a ruling on #3625.
 - **Never store which Space a window holds PER DESKTOP; do store
   it per PROFILE (#1230).** The two look alike and are
   opposites, and the discriminator is **when the record is
@@ -2432,6 +2443,17 @@ editing here:
   neighbour's floor stopped asks through `pushOrCue` before any
   neighbour-minimum cue — a writer refuses no grow the run could
   take, and decides no length, side or pushed window of its own.
+  A run's weight step goes through `RunZone.checkedWeight`, which
+  judges it against the render's split, since a step that flips
+  between the whole split and floor-and-share redraws every share
+  (#2967, `RunZoneCrossingTests`). A whole-zone writer clamps its
+  step at floors no lower than the ones `fitsWhole` plans —
+  `KiwiCore.plannedMinSize`, the clamp twin of
+  `LayoutContext.plannedFloor` — so a floor input joins both, or a
+  step crosses the split; a Grid's fixed cells are exempt, since a
+  zone that fits whole draws them (`RunZone.drawsSlots`). The
+  Stack writer is guarded (`ZoneWeightDoorTests`); the Track and
+  BSP chain writers are review's.
   A press's lengths and the run's two ends are stored in one
   write, and whether a stored length plans is the run's alone
   (`RunZone.honouredSizes`): the render takes it and the persist
