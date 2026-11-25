@@ -7,10 +7,13 @@ extension KiwiCore {
     /// Profile selection on monitor reconfiguration (#36):
     /// exact stored set → adopt clean; the count's default
     /// user profile → load dirty; else compose the built-in
-    /// Standard (#53) → transient dirty state.
-    func handleMonitorChange() {
+    /// Standard (#53) → transient dirty state. Answers the
+    /// Standard it composed, which only the screen-change doors
+    /// announce (`handleScreenChange`, #3646).
+    @discardableResult
+    func handleMonitorChange() -> StandardFallback? {
         let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else { return }
+        guard !displays.isEmpty else { return nil }
         supersedeMonitorSettle()
         // No exit may leave a space orphaned (#676): the state
         // fold already ran, and any display id churn (sleep,
@@ -48,7 +51,7 @@ extension KiwiCore {
                     "monitor change: loaded bound profile "
                         + "'\(pick.profile.name)'"
                 )
-                return
+                return nil
             case .failure(let refusal):
                 onLog(
                     "monitor change: "
@@ -57,6 +60,7 @@ extension KiwiCore {
             }
         }
 
+        var composedFallback: StandardFallback?
         switch profiles.match(fingerprints: fingerprints) {
         case .exact(let profile):
             if profile.name != profiles.currentName {
@@ -121,7 +125,7 @@ extension KiwiCore {
                         + "else by number "
                         + "(tiling stays Lua/profile-owned)"
                 )
-                return
+                return nil
             }
             // On the starter setup baseline, recompose the
             // setup at the live display count instead of a
@@ -132,7 +136,7 @@ extension KiwiCore {
                 let composed = composeMonitorChangeFallback(
                     displays: displays
                 )
-            else { return }
+            else { return nil }
             // `apply(composed:)` adopts the composed placement, so
             // the plan's Spaces land where it put them (not scattered
             // into the resolve's fallback plan), and files the
@@ -146,6 +150,10 @@ extension KiwiCore {
                 "monitor change: no matching profile, "
                     + "composed standard '\(composed.sourceName)'"
             )
+            composedFallback = StandardFallback(
+                screenCount: displays.count
+            )
         }
+        return composedFallback
     }
 }

@@ -128,6 +128,8 @@ struct AnnouncedValuePinTests {
         "UpdateWindowView.swift": 1,
         "UpdateNotesGroups.swift": 3,
         "UpdateCheckingWindowController.swift": 1,
+        // The Standard notice's lead (#3646).
+        "StandardFallbackView.swift": 1,
         // What's new's "Next on my list" label (#1813).
         "NextOnMyListPanel.swift": 1,
         // The in-card group heading — Mouse & trackpad (#1726),

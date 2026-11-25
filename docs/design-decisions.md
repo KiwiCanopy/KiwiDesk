@@ -11192,6 +11192,19 @@ notification](#scheduled-update-reminders-are-a-mark-not-a-notification-1013)),
 and acting on that row is the user beginning the interaction, so
 the alert then comes forward under this entry's rule.
 
+**A notice about what the user's own act just did comes forward
+too ([#3646](https://github.com/KiwiCanopy/KiwiDesk/issues/3646),
+owner 2026-11-25).** Connecting a screen count no profile covers
+puts Spaces on the screens that the user never made; the window
+saying so answers that act, as the other-window-manager alert
+answers a launch, and offers nothing. Its one OK is also what
+Return and Escape give, so a key meant for the app in front lands
+on a window where every answer changes nothing, and it is shown
+once per screen count on a Mac, so it never becomes the reminder
+the paragraph above refuses. A window that asks for a choice on
+such a change ([#3648](https://github.com/KiwiCanopy/KiwiDesk/issues/3648))
+argues its own place here.
+
 Sparkle is the worked case
 ([#1011](https://github.com/KiwiCanopy/KiwiDesk/issues/1011)). It
 activates for the windows it opens on a check the *user* asked

@@ -246,6 +246,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         wireBarMenus()
         wireWhatsNewTrail()
+        wireStandardFallbackNotice()
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues
