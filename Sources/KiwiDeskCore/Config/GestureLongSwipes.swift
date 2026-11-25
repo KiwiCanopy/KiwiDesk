@@ -9,28 +9,35 @@ extension GestureFamily {
 
 extension GestureSeeds {
     /// Whether long swipes reach any binding once `base` lies over
-    /// the seeds and `profile` over that (#3369): a two-finger swipe
-    /// whose whole family, or one axis's, runs the pan. The input
-    /// half mirrors `ScrollStepMeter.feed`, whose wheel notch steps
-    /// once; a change there owes this predicate the same change.
+    /// the seeds and `profile` over that (#3369), on any layer
+    /// (#3535): a two-finger swipe whose whole family, or one axis's,
+    /// runs the pan. The input half mirrors `ScrollStepMeter.feed`,
+    /// whose wheel notch steps once; a change there owes this
+    /// predicate the same change.
     public static func longSwipesApply(
-        base: GestureMap,
-        profile: GestureMap?,
+        base: LayerGestures,
+        profile: LayerGestures?,
         shortcutBase: ShortcutBase
     ) -> Bool {
-        resolved(
-            base: base,
-            profile: profile,
-            shortcutBase: shortcutBase
-        ).contains { key, action in
-            guard key.input == .swipe2 else { return false }
-            switch action {
-            case .family(let family):
-                return family.runsThePan
-            case .split(let split):
-                return split.axes.values.contains(where: \.runsThePan)
-            case .run, .grab:
-                return false
+        let layers = Set(base.layers)
+            .union(profile?.layers ?? [])
+            .union([KeyLayer.defaultName])
+        return layers.contains { layer in
+            resolved(
+                base: base[layer],
+                profile: profile?.maps[layer],
+                shortcutBase: shortcutBase,
+                layer: layer
+            ).contains { key, action in
+                guard key.input == .swipe2 else { return false }
+                switch action {
+                case .family(let family):
+                    return family.runsThePan
+                case .split(let split):
+                    return split.axes.values.contains(where: \.runsThePan)
+                case .run, .grab:
+                    return false
+                }
             }
         }
     }

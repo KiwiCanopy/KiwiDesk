@@ -2,8 +2,9 @@ import Foundation
 
 /// Where the gesture bindings reach their fronts (#3199).
 extension KiwiCore {
-    /// The ONE resolve: the seeds, the base over them and the live
-    /// profile's override on top, handed to the pointer tap's grab
+    /// The ONE resolve: the active keybinding layer's seeds, its
+    /// base over them and the live profile's override on top
+    /// (#3535), handed to the pointer tap's grab
     /// and its buttons,
     /// then the scroll settings resolved and the scroll tap and the
     /// touch reader handed the bindings, since a swipe's direction
@@ -14,9 +15,9 @@ extension KiwiCore {
     /// keeping the one in hand. A scroll setting alone, which
     /// moves no binding, takes `applyScrollGestures`.
     func applyGestures(
-        base: GestureMap? = nil,
+        base: LayerGestures? = nil,
         shortcutBase: ShortcutBase? = nil,
-        profile: GestureMap?,
+        profile: LayerGestures?,
         scrollBase: ScrollGestureBase? = nil,
         scrollProfile: ScrollGestureOverride?
     ) {
@@ -24,7 +25,8 @@ extension KiwiCore {
         gestures.adopt(
             base: base ?? gestures.base,
             profileOverride: profile,
-            shortcutBase: shortcutBase ?? gestures.shortcutBase
+            shortcutBase: shortcutBase ?? gestures.shortcutBase,
+            layer: keys.currentLayer
         )
         mouse.pointer.configure(grab: Self.grabSettings(gestures.resolved))
         mouse.pointer.configure(
@@ -33,6 +35,24 @@ extension KiwiCore {
         applyScrollGestures(base: scrollBase, profile: scrollProfile)
         keys.setHyperGestureBound(
             gestures.resolved.keys.contains { $0.chord.contains(.hyper) }
+        )
+    }
+
+    /// A keybinding layer switch: the gestures re-resolve onto the
+    /// layer now active, then the event goes out.
+    func layerChanged(_ from: String, _ to: String) {
+        layerChangedGestures()
+        emitLayerChange(from: from, to: to)
+    }
+
+    /// The bindings re-resolved onto the layer now active, every
+    /// input kept (#3535).
+    func layerChangedGestures() {
+        let gestures = mouse.gestures
+        guard gestures.layer != keys.currentLayer else { return }
+        applyGestures(
+            profile: gestures.profileOverride,
+            scrollProfile: mouse.scroll.profileOverride
         )
     }
 

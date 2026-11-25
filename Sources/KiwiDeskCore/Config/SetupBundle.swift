@@ -123,7 +123,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 52 = a colour set wearing a bundled palette with an Automatic
     /// handle takes that palette's handle colour (#3409), in its
     /// `config`'s shared look, its `[Profile]` and its looks.
-    public static let currentFormat = 52
+    /// 53 = the `gesture` map is one map per layer, today's the
+    /// default layer's (#3535), in a bundle's `config` and its
+    /// `[Profile]` alike.
+    public static let currentFormat = 53
 
     public let format: Int
 

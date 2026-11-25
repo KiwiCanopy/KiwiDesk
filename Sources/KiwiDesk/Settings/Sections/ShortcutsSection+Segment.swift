@@ -5,6 +5,23 @@ import SwiftUI
 /// so it reads apart from Built-in's chips, which start at the
 /// leading edge (#1520 amendment 6).
 extension ShortcutsSection {
+    /// The page-wide layer pick above the switcher (#3535 ▸ Ruling
+    /// 3): every part below it is the picked layer's, so it stays
+    /// put across the three. Drawn once a layer other than `default`
+    /// exists; until then Personal's Layers card holds the offer.
+    @ViewBuilder var layerStrip: some View {
+        if ShortcutsGates(config: model.config).layersExist {
+            LayerStripEditor(model: model, selected: selection)
+                .padding(.horizontal, SettingsMetrics.paneInset)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(
+                    SettingsCatalog.shortcuts.layersCard.control.text
+                )
+        }
+    }
+
     func segmentControl(_ proxy: ScrollViewProxy) -> some View {
         SegmentedPicker(
             spokenLabel: SettingsDestination.shortcuts.title,

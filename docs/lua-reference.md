@@ -5665,6 +5665,17 @@ Each row's **Applies to** picks the profiles it reaches, as a
 written to the base or a profile's own bindings
 ([Gesture storage](#gesture-storage)).
 
+:::unreleased
+Gesture bindings belong to a keybinding layer, as keys do, and
+only the active layer's fire. A gesture the active layer does not
+bind does nothing: switching to a layer that binds no gestures
+turns every gesture off while it is active, the defaults included,
+which belong to `default`. In the Settings app the layer picked
+above the **Built-in | Personal | Mouse & Trackpad** switcher is
+the one the cards edit, and **Restore Defaults** is on `default`
+alone.
+:::
+
 ### Gesture inputs
 
 | Input | What the hand does | Binds |
@@ -5996,6 +6007,17 @@ family whole. A
 binding [`gesture.bind`](#gesturebind) would refuse is kept and
 does nothing.
 
+:::unreleased
+The `gesture` object holds one such map per keybinding layer,
+keyed by the layer's name, in `gui.json` and in a profile file
+alike: `{ "default": { "tap3": null }, "Coding": { … } }`. The
+`default` layer's map lies over the defaults; every other layer's
+binds only what it names. A layer's rename carries its map, and
+its delete drops it. A file an earlier release wrote, whose
+`gesture` object is one map, moves that map under `default` on its
+next load.
+:::
+
 A file a release before this one wrote is moved on its next load:
 `trackpad_gesture`'s slots, `modifier_drag`'s `move` and `resize`
 — a `"drag"` start becoming a `drag` binding and a `"hover"` start
@@ -6070,6 +6092,18 @@ gesture.bind("wheel", "control+option+command", {
 })
 ```
 
+:::unreleased
+A fourth argument names the keybinding layer the binding is on,
+`default` when it is left out; an empty name fails. A binding on a
+layer fires only while that layer is active
+([Gestures](#gestures)), and a layer named before
+`KiwiDesk.define_layer` defines it keeps its bindings.
+
+```lua
+gesture.bind("swipe3", "control+option", "space", "Coding")
+```
+:::
+
 ### gesture.unbind
 
 **Expects:** an input and keys, as for
@@ -6084,6 +6118,11 @@ included.
 gesture.unbind("tap3", "")
 gesture.unbind("drag", "control+option")
 ```
+
+:::unreleased
+A third argument names the layer, as for
+[`gesture.bind`](#gesturebind).
+:::
 
 ### scroll_gesture.set_pan
 

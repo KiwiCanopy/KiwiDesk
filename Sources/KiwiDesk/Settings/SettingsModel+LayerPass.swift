@@ -116,7 +116,7 @@ extension SettingsModel {
         }
         let gestures = config.gesture
         try snapshot.moveGestureBase(onto: base) {
-            gestures[$0]?.action != nil
+            gestures[$0.layer][$0.key]?.action != nil
         }
     }
 
@@ -147,6 +147,12 @@ extension SettingsModel {
                 Dictionary(uniqueKeysWithValues: reached.map { ($0, drop) }),
                 base: removal == .here ? nil : drop
             )
+            // The layer's gestures leave with it (#3535).
+            try snapshot.dropGestureLayer(
+                name,
+                profiles: reached,
+                base: removal != .here
+            )
         }
     }
 
@@ -172,6 +178,8 @@ extension SettingsModel {
             Dictionary(uniqueKeysWithValues: holders.map { ($0, rename) }),
             base: inBase ? rename : nil
         )
+        // The layer's gestures follow its name (#3535).
+        try snapshot.renameGestureLayers(map)
     }
 
     /// `layers` with each layer it holds renamed by `map`, through a
@@ -237,7 +245,7 @@ struct LayeredReachCache {
         let page: [KeyLayer]
         let profile: String?
         let switchedBase: ShortcutBase?
-        let gesture: GestureMap?
+        let gesture: LayerGestures?
         let spaces: [SpaceID]
     }
 
@@ -257,7 +265,7 @@ struct EncodedReachCache {
         let floatRules: [String]
         let layers: [KeyLayer]
         let scrollGesture: ScrollGestureBase
-        let gesture: GestureMap
+        let gesture: LayerGestures
         let spaceHistory: SpaceHistoryKind
         let focusWrap: FocusWrap
         let modeCycle: [LayoutMode]

@@ -54,7 +54,9 @@ struct ModifierKeysCard: View {
             SettingsCatalog.shortcuts.modifierKeys,
             isExpanded: $expanded,
             summary: summary(spoken: false),
-            spokenSummary: summary(spoken: true)
+            spokenSummary: summary(spoken: true),
+            // Layer-independent under a page-wide pick (#3535).
+            help: LayerScopeWords.everyLayer
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 VStack(alignment: .leading, spacing: 4) {

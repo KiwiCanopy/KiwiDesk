@@ -62,23 +62,29 @@ struct RestoreReachTests {
         let core = makeTestCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        config.gesture = base
+        config.gesture = LayerGestures(defaultLayer: base)
         try core.guiConfigStore.save(config)
         var work = profile("Work")
-        work.gesture = GestureMap([
-            key: .bound(.run(lua)), added: .bound(.run(other)),
-        ])
+        work.gesture = LayerGestures(
+            defaultLayer: GestureMap([
+                key: .bound(.run(lua)), added: .bound(.run(other)),
+            ])
+        )
         try core.profiles.save(work)
         var home = profile("Home")
         let other2 = try second
-        home.gesture = GestureMap([
-            key: .bound(.run(lua)), other2: .bound(.run(other)),
-        ])
+        home.gesture = LayerGestures(
+            defaultLayer: GestureMap([
+                key: .bound(.run(lua)), other2: .bound(.run(other)),
+            ])
+        )
         try core.profiles.write(home)
         var travel = profile("Travel")
-        travel.gesture = GestureMap(
-            travelAdds
-                ? [added: .bound(.run(lua))] : [key: .bound(.run(other))]
+        travel.gesture = LayerGestures(
+            defaultLayer: GestureMap(
+                travelAdds
+                    ? [added: .bound(.run(lua))] : [key: .bound(.run(other))]
+            )
         )
         try core.profiles.write(travel)
         let model = makeTestModel(core: core)
@@ -89,7 +95,8 @@ struct RestoreReachTests {
     private func gesture(_ model: SettingsModel, _ name: String) throws
         -> GestureMap?
     {
-        try model.core.profiles.read(name: name).gesture
+        try model.core.profiles.read(name: name)
+            .gesture?[KeyLayer.defaultName]
     }
 
     @Test("who changed is the union across the card's seeded gestures")
@@ -145,7 +152,11 @@ struct RestoreReachTests {
             try gesture(model, "Home")?[try second] == .bound(.run(other))
         )
         #expect(try gesture(model, "Travel")?[key] == .bound(.run(other)))
-        #expect(model.core.guiConfigStore.load()?.gesture[key] == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][
+                key
+            ] == nil
+        )
     }
 
     @Test("every profile resets every value, matching or not")
@@ -160,7 +171,11 @@ struct RestoreReachTests {
         // A seed Work never moved is reset where Home changed it.
         #expect(try gesture(model, "Home")?[try second] == nil)
         #expect(try gesture(model, "Work")?[added] == .bound(.run(other)))
-        #expect(model.core.guiConfigStore.load()?.gesture[key] == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][
+                key
+            ] == nil
+        )
     }
 
     /// A shared base off the seed: the followers count as changed,
@@ -174,7 +189,9 @@ struct RestoreReachTests {
         model.restoreGestureDefaults(on: .mouse, reach: .here)
         model.updateActiveProfile()
         #expect(
-            model.core.guiConfigStore.load()?.gesture[key]
+            model.core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][
+                key
+            ]
                 == .bound(.run(other))
         )
         let work = try #require(model.gestureReach(key.spelling))

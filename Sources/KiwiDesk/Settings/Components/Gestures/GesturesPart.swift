@@ -17,8 +17,28 @@ struct GesturesPart: View {
 
     private var settings: TilingSettings { model.config.settings }
 
+    /// The selected layer, where it is not `default` and its map
+    /// binds nothing.
+    private var emptyLayer: String? {
+        let scope = model.gestureScope
+        guard !scope.isDefault,
+            !model.gestureLayerMap.entries.values.contains(where: {
+                $0.action != nil
+            })
+        else { return nil }
+        return scope.layer
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            // No fall-through: a layer binding nothing turns every
+            // gesture off while active (#3535 ▸ Ruling 1).
+            if let empty = emptyLayer {
+                Text(LayerScopeWords.noGestures(empty))
+                    .font(.callout)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             gestureCards
             SettingsSection(SettingsCatalog.shortcuts.gesturesOnWindows) {
                 focusEntries

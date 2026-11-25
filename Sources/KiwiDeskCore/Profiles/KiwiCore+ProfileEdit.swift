@@ -191,7 +191,7 @@ extension KiwiCore {
                 base: base.scrollGesture,
                 edited: config.scrollGesture
             )
-            profile.gesture = GestureMap.diff(
+            profile.gesture = LayerGestures.diff(
                 base: base.gesture,
                 edited: config.gesture,
                 shortcutBase: base.shortcutBase

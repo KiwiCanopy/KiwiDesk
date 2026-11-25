@@ -63,4 +63,41 @@ extension GestureSeeds {
         case .hyper: hyperSeeds
         }
     }
+
+    /// The seeds `layer`'s map lies over: `default`'s are the seeds
+    /// on `base`, and every other layer has none, binding only what
+    /// it names (#3535 ▸ Ruling 1, no fall-through).
+    public static func seeds(
+        on base: ShortcutBase,
+        layer: String
+    ) -> [GestureKey: GestureAction] {
+        layer == KeyLayer.defaultName ? seeds(on: base) : [:]
+    }
+}
+
+/// What a layer's map lies over: the stored shortcut base and the
+/// layer, whose seeds are `GestureSeeds.seeds(on:layer:)` (#3444,
+/// #3535). One value, so an editor handed one cannot read one
+/// layer's map over another's seeds.
+public struct GestureSeedScope: Hashable, Sendable {
+    public let shortcutBase: ShortcutBase
+    public let layer: String
+
+    public init(shortcutBase: ShortcutBase, layer: String) {
+        self.shortcutBase = shortcutBase
+        self.layer = layer
+    }
+
+    /// The default layer's scope on `base`.
+    public static func defaultLayer(on base: ShortcutBase) -> Self {
+        Self(shortcutBase: base, layer: KeyLayer.defaultName)
+    }
+
+    public var seeds: [GestureKey: GestureAction] {
+        GestureSeeds.seeds(on: shortcutBase, layer: layer)
+    }
+
+    /// Whether the layer is the default one, whose map alone lies
+    /// over seeds.
+    public var isDefault: Bool { layer == KeyLayer.defaultName }
 }

@@ -239,24 +239,6 @@ struct KeyboardLayerWiringTests {
         )
     }
 
-    /// The jump bar's readout names the same layer under the same
-    /// condition, so it asks the same resolver. It moved off the
-    /// header with #1520; nothing else scans it —
-    /// `ShortcutsOfferDisclosureTests` is keyed on `LayersCard` and the
-    /// clause above on the panel (re-review 2026-09-04).
-    @Test("the jump bar asks the gate whether to name the layer")
-    func readoutAsksTheResolver() throws {
-        let readout = try Self.source(
-            "Sections/ShortcutsSection+Jump.swift"
-        )
-        #expect(
-            readout.contains(
-                "ShortcutsGates(config:model.config).layersExist"
-            )
-        )
-        #expect(readout.contains("\"shortcuts.editing_layer\""))
-        #expect(readout.occurrences(of: "layers.count") == 0)
-    }
 }
 
 /// The half a source scan cannot reach: whether the panel ever

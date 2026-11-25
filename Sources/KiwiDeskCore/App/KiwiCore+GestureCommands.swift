@@ -1,9 +1,10 @@
 import Foundation
 
-/// `gesture.bind(input, keys, action)` and `gesture.unbind(input,
-/// keys)` (#3199): they write the running BASE, so a profile's own
-/// override still wins, and last until the next config load. No
-/// window moves.
+/// `gesture.bind(input, keys, action, layer)` and
+/// `gesture.unbind(input, keys, layer)` (#3199): they write the
+/// running BASE of `layer`, `default` when it is left out (#3535),
+/// so a profile's own override still wins, and last until the next
+/// config load. No window moves.
 extension KiwiCore {
     func gestureCommand(
         _ command: String,
@@ -23,7 +24,17 @@ extension KiwiCore {
             )
         }
         let key = GestureKey(input, keys)
-        var base = mouse.gestures.base
+        let layerIndex = command == "gesture.bind" ? 3 : 2
+        let layer: String
+        if args.count > layerIndex {
+            guard let name = args[layerIndex].stringValue, !name.isEmpty
+            else { return .fail("expected a layer name") }
+            layer = name
+        } else {
+            layer = KeyLayer.defaultName
+        }
+        var all = mouse.gestures.base
+        var base = all[layer]
         switch command {
         case "gesture.unbind":
             base[key] = .unbound
@@ -41,8 +52,9 @@ extension KiwiCore {
             if let refusal = GestureSeeds.shadowRefusal(
                 of: key,
                 base: base,
-                profile: mouse.gestures.profileOverride,
-                shortcutBase: mouse.gestures.shortcutBase
+                profile: mouse.gestures.profileOverride?.maps[layer],
+                shortcutBase: mouse.gestures.shortcutBase,
+                layer: layer
             ) {
                 return .fail(Self.gestureRefusal(refusal, key))
             }
@@ -50,8 +62,9 @@ extension KiwiCore {
         default:
             return .fail("unknown command: \(command)")
         }
+        all[layer] = base
         applyGestures(
-            base: base,
+            base: all,
             profile: mouse.gestures.profileOverride,
             scrollProfile: mouse.scroll.profileOverride
         )

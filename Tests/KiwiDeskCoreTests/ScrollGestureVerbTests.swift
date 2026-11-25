@@ -66,7 +66,7 @@ struct ScrollGestureVerbTests {
         )
         #expect(!hover.isSuccess)
         #expect(
-            core.mouse.gestures.base[
+            core.mouse.gestures.base[KeyLayer.defaultName][
                 GestureKey(.hoverMove, [.control, .option])
             ]
                 == nil

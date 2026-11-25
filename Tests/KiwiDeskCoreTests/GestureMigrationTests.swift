@@ -74,7 +74,10 @@ struct GestureMigrationTests {
     private func map(_ object: [String: Any]?) throws -> GestureMap {
         let value = try #require(object?["gesture"])
         let data = try JSONSerialization.data(withJSONObject: value)
-        return try JSONDecoder().decode(GestureMap.self, from: data)
+        // The whole chain runs, so the map lands on `default` (#3535).
+        return try JSONDecoder().decode(LayerGestures.self, from: data)[
+            KeyLayer.defaultName
+        ]
     }
 
     @Test("gui.json folds every moved setting and drops the old keys")
@@ -128,7 +131,8 @@ struct GestureMigrationTests {
         let resolved = GestureSeeds.resolved(
             base: gestures,
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(resolved[GestureKey(.swipe2, seed)] == nil)
         #expect(

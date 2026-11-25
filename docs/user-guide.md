@@ -1259,6 +1259,12 @@ Settings ▸ Shortcuts ▸ Mouse & Trackpad lists every gesture, and
 works only with its keys held; with no keys held, macOS and your
 apps keep the gesture.
 
+:::unreleased
+Gestures belong to the layer picked above the switcher, as
+shortcuts do, and only the active layer's fire: a layer that binds
+no gestures turns them off while it is active.
+:::
+
 - **Two-finger swipes** step after a short travel. A swipe that
   moves focus keeps stepping while your fingers move, with
   **Long two-finger swipes move focus further** on; each step

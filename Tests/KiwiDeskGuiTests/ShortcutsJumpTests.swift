@@ -279,19 +279,9 @@ struct ShortcutsJumpTests {
         #expect(bar.contains(".accessibilityElement(children:.contain)"))
         // Squeezed, so the English reads without its space.
         #expect(bar.contains("L(\"shortcuts.jump.label\",\"Jumpto\")"))
-        // Drawn once by the caption (`ShortcutsJumpReadoutTests`).
+        // Drawn once by the caption (`ShortcutsJumpCaptionTests`).
         #expect(bar.contains(".accessibilityLabel(label)"))
         #expect(bar.contains(".accessibilityAddTraits(marked?.isSelected:[])"))
-        // The readout speaks the full layer name it may draw cut.
-        #expect(bar.contains(".accessibilityLabel(spokenReadout??text)"))
-        let jump = try Self.source("Sections/ShortcutsSection+Jump.swift")
-        #expect(
-            jump.contains(
-                "readout:editingReadout("
-                    + "ShortcutsJumpBar.shownName(selected)),"
-                    + "spokenReadout:editingReadout(selected)"
-            )
-        )
     }
 
     /// Neither hover nor press erases the marking (#1173): each

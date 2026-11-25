@@ -5,8 +5,9 @@ import KiwiDeskCore
 /// ▸ Ruling): a card lists the bound rows of one device, the seeds
 /// included as real rows, and every edit writes the sparse map —
 /// a seeded key a row leaves is tombstoned, any other key is
-/// dropped. The seeds are those on the draft's shortcut base
-/// (#3444), a required argument as every default row's writer takes
+/// dropped. The map is the selected layer's and the seeds those of
+/// that layer on the draft's shortcut base (#3444, #3535), one
+/// required `GestureSeedScope` as every default row's writer takes
 /// it (profiles.md). Pure, so the card and its tests share one copy.
 enum GestureListEdits {
     /// The inputs a card offers: the device's, and only those a front
@@ -24,14 +25,14 @@ enum GestureListEdits {
     static func rows(
         in base: GestureMap,
         on device: GestureInput.Device,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> [GestureKey] {
         let offered = Set(inputs(on: device))
-        let seeds = GestureSeeds.seeds(on: shortcutBase)
+        let seeds = scope.seeds
         let keys = Set(seeds.keys).union(base.entries.keys)
         return keys.filter {
             offered.contains($0.input)
-                && action(of: $0, in: base, shortcutBase: shortcutBase) != nil
+                && action(of: $0, in: base, scope: scope) != nil
         }
         .sorted()
     }
@@ -46,9 +47,9 @@ enum GestureListEdits {
         pending: Set<UUID>,
         in base: GestureMap,
         on device: GestureInput.Device,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> [GestureListEntry] {
-        let bound = rows(in: base, on: device, shortcutBase: shortcutBase)
+        let bound = rows(in: base, on: device, scope: scope)
         let kept = entries.filter {
             bound.contains($0.key) || pending.contains($0.id)
         }
@@ -73,7 +74,7 @@ enum GestureListEdits {
     static func heldByDrag(
         _ key: GestureKey,
         in base: GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> GestureRefusal? {
         guard key.input == .hoverMove || key.input == .click else {
             return nil
@@ -82,7 +83,8 @@ enum GestureListEdits {
             of: key,
             base: base,
             profile: nil,
-            shortcutBase: shortcutBase
+            shortcutBase: scope.shortcutBase,
+            layer: scope.layer
         )
     }
 
@@ -90,10 +92,10 @@ enum GestureListEdits {
     static func action(
         of key: GestureKey,
         in base: GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> GestureAction? {
         if let entry = base[key] { return entry.action }
-        return GestureSeeds.seeds(on: shortcutBase)[key]
+        return scope.seeds[key]
     }
 
     /// Binds `action` at `key`.
@@ -101,9 +103,9 @@ enum GestureListEdits {
         _ action: GestureAction,
         at key: GestureKey,
         in base: inout GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) {
-        let seed = GestureSeeds.seeds(on: shortcutBase)[key]
+        let seed = scope.seeds[key]
         base[key] = seed == action ? nil : .bound(action)
     }
 
@@ -112,9 +114,9 @@ enum GestureListEdits {
     static func remove(
         _ key: GestureKey,
         in base: inout GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) {
-        let seed = GestureSeeds.seeds(on: shortcutBase)[key]
+        let seed = scope.seeds[key]
         base[key] = seed == nil ? nil : .unbound
     }
 
@@ -125,14 +127,14 @@ enum GestureListEdits {
         _ from: GestureKey,
         to: GestureKey,
         in base: inout GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> Bool {
         guard from != to else { return true }
-        guard action(of: to, in: base, shortcutBase: shortcutBase) == nil,
-            let moving = action(of: from, in: base, shortcutBase: shortcutBase)
+        guard action(of: to, in: base, scope: scope) == nil,
+            let moving = action(of: from, in: base, scope: scope)
         else { return false }
-        remove(from, in: &base, shortcutBase: shortcutBase)
-        set(moving, at: to, in: &base, shortcutBase: shortcutBase)
+        remove(from, in: &base, scope: scope)
+        set(moving, at: to, in: &base, scope: scope)
         return true
     }
 
@@ -141,9 +143,9 @@ enum GestureListEdits {
     static func restoreDefaults(
         on device: GestureInput.Device,
         in base: inout GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) {
-        for key in GestureSeeds.seeds(on: shortcutBase).keys
+        for key in scope.seeds.keys
         where key.input.device == device {
             base[key] = nil
         }
@@ -285,9 +287,9 @@ enum GestureListEdits {
     static func differsFromDefaults(
         on device: GestureInput.Device,
         in base: GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> Bool {
-        GestureSeeds.seeds(on: shortcutBase).keys.contains {
+        scope.seeds.keys.contains {
             $0.input.device == device && base[$0] != nil
         }
     }

@@ -4,7 +4,7 @@ import KiwiDeskCore
 /// carries its reach through `carryPick`, as a sequence does.
 extension SettingsModel {
     /// The checklist of a gesture row, keyed by
-    /// `GestureKey.spelling`; nil without a checklist.
+    /// `LayerGestureKey.spelling`; nil without a checklist.
     func gestureReach(_ key: String) -> RuleReachReading? {
         guard let reach = encodedReach else { return nil }
         return reading(
@@ -25,7 +25,8 @@ extension SettingsModel {
 }
 
 /// A gesture card's Restore Defaults (#3248 ▸ Ruling), keyed as the
-/// gesture reach table keys a binding.
+/// gesture reach table keys a binding. The seeds are the default
+/// layer's alone, so it restores that layer (#3535).
 extension SettingsModel {
     /// `device`'s seeds and the page's map before and after the
     /// card restores them.
@@ -36,8 +37,8 @@ extension SettingsModel {
         var restored = config.gesture
         GestureListEdits.restoreDefaults(
             on: device,
-            in: &restored,
-            shortcutBase: shortcutBase
+            in: &restored[KeyLayer.defaultName],
+            scope: defaultGestureScope
         )
         var seeds: [String: GestureAction] = [:]
         for (key, action) in GestureSeeds.seeds(on: shortcutBase)
@@ -80,8 +81,8 @@ extension SettingsModel {
         let stored = layeredReach?.gestures
         GestureListEdits.restoreDefaults(
             on: device,
-            in: &config.gesture,
-            shortcutBase: config.shortcutBase
+            in: &config.gesture[KeyLayer.defaultName],
+            scope: defaultGestureScope
         )
         stageRestore(.gesture, restore, stored: stored, reach: reach)
     }

@@ -58,7 +58,12 @@ struct GestureBaseSwitchTests {
         var map = GestureMap()
         map[mine] = .bound(.family(.space))
         map[GestureKey(.swipe2, pan)] = .unbound
-        let moved = GestureBaseSwitch.move(map, from: .standard, onto: .hyper)
+        let moved = GestureBaseSwitch.move(
+            map,
+            from: .standard,
+            onto: .hyper,
+            layer: KeyLayer.defaultName
+        )
         #expect(moved.kept.isEmpty)
         #expect(
             moved.map[GestureKey(.wheel, hyper.union(.shift))]
@@ -69,12 +74,14 @@ struct GestureBaseSwitchTests {
         let before = GestureSeeds.resolved(
             base: map,
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         let after = GestureSeeds.resolved(
             base: moved.map,
             profile: nil,
-            shortcutBase: .hyper
+            shortcutBase: .hyper,
+            layer: KeyLayer.defaultName
         )
         let rebased = Dictionary(
             uniqueKeysWithValues: before.map {
@@ -90,11 +97,17 @@ struct GestureBaseSwitchTests {
         map[GestureKey(.wheel, pan.union(.command))] = .bound(.family(.walk))
         map[GestureKey(.tap3)] = .unbound
         map[GestureKey(.drag, pan)] = .bound(.grab(.resize))
-        let there = GestureBaseSwitch.move(map, from: .standard, onto: .hyper)
+        let there = GestureBaseSwitch.move(
+            map,
+            from: .standard,
+            onto: .hyper,
+            layer: KeyLayer.defaultName
+        )
         let back = GestureBaseSwitch.move(
             there.map,
             from: .hyper,
-            onto: .standard
+            onto: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(back.map == map)
     }
@@ -105,7 +118,12 @@ struct GestureBaseSwitchTests {
     func heldTargetPins() {
         var map = GestureMap()
         map[GestureKey(.drag, hyper)] = .bound(.grab(.resize))
-        let moved = GestureBaseSwitch.move(map, from: .standard, onto: .hyper)
+        let moved = GestureBaseSwitch.move(
+            map,
+            from: .standard,
+            onto: .hyper,
+            layer: KeyLayer.defaultName
+        )
         let old = GestureKey(.drag, pan)
         #expect(moved.map[old] == .bound(.grab(.move)))
         #expect(
@@ -120,7 +138,8 @@ struct GestureBaseSwitchTests {
         let resolved = GestureSeeds.resolved(
             base: moved.map,
             profile: nil,
-            shortcutBase: .hyper
+            shortcutBase: .hyper,
+            layer: KeyLayer.defaultName
         )
         #expect(resolved[GestureKey(.drag, hyper)] == .grab(.resize))
         #expect(resolved[old] == .grab(.move))
@@ -130,12 +149,18 @@ struct GestureBaseSwitchTests {
     func pinRoundTrips() {
         var map = GestureMap()
         map[GestureKey(.drag, hyper)] = .bound(.grab(.resize))
-        let there = GestureBaseSwitch.move(map, from: .standard, onto: .hyper)
+        let there = GestureBaseSwitch.move(
+            map,
+            from: .standard,
+            onto: .hyper,
+            layer: KeyLayer.defaultName
+        )
         #expect(there.map[GestureKey(.drag, pan)] != nil)
         let back = GestureBaseSwitch.move(
             there.map,
             from: .hyper,
-            onto: .standard
+            onto: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(back.map == map)
     }
@@ -149,6 +174,7 @@ struct GestureBaseSwitchTests {
             GestureMap(),
             from: .standard,
             onto: .hyper,
+            layer: KeyLayer.defaultName,
             staying: { $0 == old }
         )
         #expect(moved.map[old] == .bound(.grab(.move)))
@@ -183,17 +209,24 @@ struct GestureBaseSwitchTests {
         profile[GestureKey(.pinchTogether, hyper)] = .bound(
             .run(LuaAction(lua: "x()"))
         )
-        let moved = GestureBaseSwitch.move(base, from: .standard, onto: .hyper)
+        let moved = GestureBaseSwitch.move(
+            base,
+            from: .standard,
+            onto: .hyper,
+            layer: KeyLayer.defaultName
+        )
         let following = profile.following(moved.moves)
         let before = GestureSeeds.resolved(
             base: base,
             profile: profile,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         let after = GestureSeeds.resolved(
             base: moved.map,
             profile: following,
-            shortcutBase: .hyper
+            shortcutBase: .hyper,
+            layer: KeyLayer.defaultName
         )
         #expect(after[GestureKey(.drag, hyper)] == nil)
         // The profile's own wheel row stays where the profile put it.
@@ -214,11 +247,18 @@ struct GestureBaseSwitchTests {
     @Test("the switch moves the draft's gesture map with its rows")
     func switchMovesGestures() {
         var config = GuiConfig()
-        config.gesture[GestureKey(.swipe2, pan)] = .unbound
+        config.gesture[KeyLayer.defaultName][GestureKey(.swipe2, pan)] =
+            .unbound
         ShortcutBaseSwitch.apply(.hyper, to: &config)
         #expect(config.shortcutBase == .hyper)
-        #expect(config.gesture[GestureKey(.swipe2, hyper)] == .unbound)
-        #expect(config.gesture[GestureKey(.swipe2, pan)] == nil)
+        #expect(
+            config.gesture[KeyLayer.defaultName][GestureKey(.swipe2, hyper)]
+                == .unbound
+        )
+        #expect(
+            config.gesture[KeyLayer.defaultName][GestureKey(.swipe2, pan)]
+                == nil
+        )
     }
 
     @Test("a load on ✦ grabs on ✦ drag")

@@ -117,5 +117,9 @@ extension GuiConfig {
     /// **28 (#3409)**: a shared look wearing a bundled palette with
     /// an Automatic handle takes that palette's handle colour
     /// (`migratingHandleStamp`).
-    public static let currentFormat = 28
+    ///
+    /// **29 (#3535)**: the `gesture` map is one map per keybinding
+    /// layer, today's becoming the default layer's
+    /// (`migratingGesturesOntoLayers`).
+    public static let currentFormat = 29
 }

@@ -37,6 +37,7 @@ private let notAreaKeyed: [String: String] = [
     "settings.displayAreas":
         "keyed by the PHYSICAL screen; a merge rewrites its split",
     "look.colors": "a colour path to its hex",
+    "gesture.maps": "keyed by keybinding layer name (#3535)",
 ]
 
 /// A config whose every area-keyed field names `vanished`. This

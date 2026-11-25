@@ -116,8 +116,9 @@ extension SettingsRevertRegister {
         case .gesture:
             // Against the saved map on the draft's base (#3444).
             let saved = clean.onShortcutBase(config.shortcutBase).gesture
-            if let key = GestureKey(spelling: subject) {
-                config.gesture[key] = saved[key]
+            if let key = LayerGestureKey(spelling: subject) {
+                config.gesture[key.layer][key.key] =
+                    saved[key.layer][key.key]
             }
         default:
             break
@@ -233,7 +234,8 @@ extension SettingsRevertRegister {
             return
         }
         for key in row.keys {
-            model.config.gesture[key] = saved[key]
+            model.config.gesture[key.layer][key.key] =
+                saved[key.layer][key.key]
             settle(model, .gesture, key.spelling)
         }
     }
@@ -295,8 +297,8 @@ extension SettingsRevertRegister {
                 family.subject(ofRule: $0) == subject
             }
         case .gesture:
-            let entry = GestureKey(spelling: subject).flatMap {
-                config.gesture[$0]
+            let entry = LayerGestureKey(spelling: subject).flatMap {
+                config.gesture[$0.layer][$0.key]
             }
             return [entry.map { "\($0)" } ?? "follows"]
         case .tilingOffHides:

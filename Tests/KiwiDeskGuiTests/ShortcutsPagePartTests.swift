@@ -202,15 +202,19 @@ struct ShortcutsPagePartTests {
     }
 
     /// The page rules Built-in between Modifier keys and the layer's
-    /// own rows (owner 2026-11-08), and no other part.
-    @Test("the page rule sits above Built-in's Layers card")
+    /// own rows (owner 2026-11-08), and no other part; Layers left
+    /// Built-in for Personal (#3535).
+    @Test("the page rule sits under Built-in's Modifier keys")
     func pageRuleSplitsTheLayer() throws {
         for segment in ShortcutsSegment.allCases {
             let ruled = ShortcutsPagePart.parts(in: segment).filter {
                 $0.ruledAbove(in: segment)
             }
-            #expect(ruled == (segment == .builtIn ? [.layers] : []))
+            #expect(
+                ruled == (segment == .builtIn ? [.defaultShortcuts] : [])
+            )
         }
+        #expect(ShortcutsPagePart.layers.segments == [.personal])
         let page = try Self.source("Sections/ShortcutsSection.swift")
         #expect(
             page.contains(

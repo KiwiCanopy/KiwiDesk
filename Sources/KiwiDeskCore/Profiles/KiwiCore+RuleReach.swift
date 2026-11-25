@@ -12,15 +12,16 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// The scroll gestures, one field per key (#1656).
     public var scrollGestures: RuleReachTable<ScrollGestureValue>
     public let storedScrollBase: ScrollGestureBase
-    /// The gesture bindings, one `GestureKey` per key (#3225), the
+    /// The gesture bindings, one `LayerGestureKey` per key (#3225,
+    /// #3535), the
     /// base map as `gui.json` holds it and the shortcut base its
     /// seeds sit on (#3444) — the files' until the switch's pass
     /// moves them (`moveGestureBase`); `fileGestureBase` stays the
     /// file's, which a save compares against.
     public var gestures: RuleReachTable<GestureAction>
-    public internal(set) var storedGestureBase: GestureMap
+    public internal(set) var storedGestureBase: LayerGestures
     public internal(set) var gestureShortcutBase: ShortcutBase
-    public let fileGestureBase: GestureMap
+    public let fileGestureBase: LayerGestures
     /// The profiles whose override the switch's pass moved; a save
     /// writes each.
     public internal(set) var movedGestureProfiles: Set<String> = []
@@ -76,7 +77,7 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         scrollGestures: RuleReachTable<ScrollGestureValue>,
         storedScrollBase: ScrollGestureBase,
         gestures: RuleReachTable<GestureAction>,
-        storedGestureBase: GestureMap,
+        storedGestureBase: LayerGestures,
         gestureShortcutBase: ShortcutBase,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,

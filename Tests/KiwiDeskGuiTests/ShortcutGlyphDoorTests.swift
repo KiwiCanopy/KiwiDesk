@@ -25,7 +25,6 @@ struct ShortcutGlyphDoorTests {
     private static let drawers: Set<String> = [
         "Settings/Components/Keybindings/AppleShortcutMark.swift",
         "Settings/Components/Keybindings/KeybindingNavRow.swift",
-        "Settings/Components/Keybindings/ShortcutsJumpBar.swift",
         "Settings/Components/Keybindings/Sequences/"
             + "SequenceActionMenu+Trigger.swift",
         "Settings/Components/Keybindings/Sequences/"

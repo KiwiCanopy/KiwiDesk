@@ -25,6 +25,9 @@ extension SettingsModel {
             in: config.layers,
             named: name
         )
+        // Its gestures leave with it (#3535).
+        config.gesture = config.gesture.removing(name)
+        LayerGesturePicks.deleted(&edits, layer: name)
     }
 
     /// Renames the page's layer, and its switch rows, in every
@@ -42,6 +45,9 @@ extension SettingsModel {
             from: old,
             to: new
         )
+        // Its gestures follow its name (#3535).
+        config.gesture = config.gesture.renaming(old, to: new)
+        LayerGesturePicks.renamed(&edits, from: old, to: new)
         reachEdits = edits
     }
 

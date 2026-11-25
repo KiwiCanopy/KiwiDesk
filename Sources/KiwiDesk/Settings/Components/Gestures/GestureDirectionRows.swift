@@ -26,8 +26,8 @@ struct GestureDirectionRows: View {
     private func splitAxes() -> Set<GestureAxis> {
         let action = GestureListEdits.action(
             of: key,
-            in: model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: model.gestureLayerMap,
+            scope: model.gestureScope
         )
         guard case .split(let split) = action else { return [] }
         return Set(
@@ -115,8 +115,8 @@ struct GestureDirectionRow: View {
     var action: GestureAction? {
         GestureListEdits.action(
             of: key,
-            in: model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: model.gestureLayerMap,
+            scope: model.gestureScope
         )
     }
 
@@ -229,8 +229,8 @@ struct GestureDirectionRow: View {
         GestureListEdits.set(
             saved,
             at: key,
-            in: &model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: &model.gestureLayerMap,
+            scope: model.gestureScope
         )
     }
 }

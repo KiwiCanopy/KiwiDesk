@@ -37,9 +37,7 @@ extension KiwiCore {
         crash.onLog = log
         eventLoop.onLog = log
         keys.onLog = log
-        keys.onLayerChange = { [weak self] from, to in
-            self?.emitLayerChange(from: from, to: to)
-        }
+        keys.onLayerChange = { [weak self] in self?.layerChanged($0, $1) }
         keys.onBareHyper = { [weak self] in self?.cueBareHyper() }
         keys.onHyperShortcutsChange = { [weak self] in
             self?.onAppWideChange()

@@ -17765,8 +17765,37 @@ Home, the other two add a navigator.
   replaces #1726's collapsed card, the picture strip the shut card
   drew, and Mouse & trackpad's first chip and the rule after it:
   open groups need no summary and no strip to be found.
-- Layers draws on Built-in and Personal and reads the one
-  `nav.shortcutsLayer`, so the layer picked survives a switch. The
+  *Amended (#3535, owner 2026-11-20 and 2026-11-25):* **a layer
+  binds gestures as it binds keys**, so the part is the picked
+  layer's too, and "a layer does not act on a gesture" is spent.
+  There is no fall-through: a gesture the active layer does not
+  bind runs nothing, as a key does not, so a layer that binds none
+  turns every gesture off while it is active and the part says so
+  over its empty cards. Fall-through would make gestures the one
+  place a layer inherits, and a layer meant to free the mouse for
+  a game would keep every default; an "inherit default's
+  gestures" switch per layer stays possible later, as a field
+  beside the map. Restore Defaults is drawn on `default` alone,
+  whose map alone lies over the seeds. Natural scrolling is no
+  layer's and says so under its row.
+- *Amended (#3535, owner 2026-11-25, after a ui-designer consult
+  and a preview):* **the layer pick is page-wide, a strip above
+  the switcher.** With all three parts per layer, a pick inside
+  one part would read as that part's, so the chips, ✎ and + sit
+  above Built-in | Personal | Mouse & Trackpad and stay put while
+  the parts swap under them. The whole Layers card above the
+  switcher was refused: it is tall, pushes the page's first
+  choice below the fold, and puts key rows on the gesture part.
+  The strip is drawn only once a layer other than `default`
+  exists, since a pick with one choice decides nothing; until
+  then Personal's Layers card holds the strip as the offer, and
+  after it the card holds the "Switch to layer" keys. Built-in
+  loses its Layers card and its jump bar's "Editing the X layer"
+  line, which the strip says. This retires "Layers stays a shut
+  card on Built-in" above.
+- Layers draws on Personal and reads the one
+  `nav.shortcutsLayer` the strip writes, so the layer picked
+  survives a switch. The
   part shown is a `SettingsNavigation` reading too (#1127):
   Built-in on a first visit, the last part for the window's
   session after that. Only the part shown is built: the page
@@ -17780,13 +17809,14 @@ Home, the other two add a navigator.
   hidden — would stand, which is why it is a condition of the
   ruling rather than a nicety.
 
-**A rule above the Layers card parts what applies everywhere
-from the layer's own rows** (owner 2026-11-08). Everything under
-"Editing the X layer" reads as belonging to that layer, so the
-Layers card leads only what is layer-scoped, and Built-in's
-Modifier keys card above it belongs to no layer. The page draws a
-rule between the two, so its two bands read apart without the
-jump bar.
+**A rule under Modifier keys parts what applies everywhere from
+the layer's own rows** (owner 2026-11-08). Everything under the
+layer strip reads as belonging to that layer, so Built-in's
+Modifier keys card, which belongs to no layer, says so in its
+`?`, and the page draws a rule between it and the rows after it,
+so its two bands read apart without the jump bar. *Amended
+(#3535):* the rule followed the Layers card until Layers left
+Built-in; it now sits above the first part after Modifier keys.
 
 **Its entries are grouped by where the hand is** — on your
 windows, anywhere holding a modifier, on the KiwiShelf — never by

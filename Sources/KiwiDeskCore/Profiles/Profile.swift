@@ -48,8 +48,9 @@ public struct Profile: Codable, Sendable, Equatable {
     public var ignoreRules: RuleListOverride?
     /// Sparse scroll-gesture overrides (#1656).
     public var scrollGesture: ScrollGestureOverride?
-    /// Sparse gesture bindings (#3199); nil follows the base.
-    public var gesture: GestureMap?
+    /// Sparse gesture bindings per layer (#3199, #3535); nil
+    /// follows the base.
+    public var gesture: LayerGestures?
     /// Sparse Space history override (#1655); nil follows the base.
     public var spaceHistory: SpaceHistoryKind?
     /// Sparse layout-cycle override (#453); nil follows the base.
@@ -89,7 +90,7 @@ public struct Profile: Codable, Sendable, Equatable {
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
-        gesture: GestureMap? = nil,
+        gesture: LayerGestures? = nil,
         spaceHistory: SpaceHistoryKind? = nil,
         modeCycle: [LayoutMode]? = nil,
         focusWrap: FocusWrap? = nil,
@@ -242,7 +243,7 @@ public struct Profile: Codable, Sendable, Equatable {
             forKey: .scrollGesture
         )
         gesture = try container.decodeIfPresent(
-            GestureMap.self,
+            LayerGestures.self,
             forKey: .gesture
         )
         spaceHistory = try container.decodeIfPresent(

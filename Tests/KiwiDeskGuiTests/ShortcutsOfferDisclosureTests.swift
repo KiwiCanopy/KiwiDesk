@@ -131,7 +131,6 @@ struct ShortcutsOfferDisclosureTests {
     @Test("each card opens on arrival from its own hold-open")
     func cardsOpenOnArrival() throws {
         let layers = try squashed("Sections/LayersCard.swift")
-        #expect(layers.contains(".onAppear{iflayersExist{expanded=true}}"))
         #expect(
             layers.contains("ShortcutsGates(config:model.config).layersExist")
         )
@@ -190,19 +189,15 @@ struct ShortcutsOfferDisclosureTests {
                 Comment(rawValue: file)
             )
         }
+        // Personal alone draws Layers (#3535), open.
         let layers = try squashed("Sections/LayersCard.swift")
         #expect(
             layers.contains(
-                "ifsegment==.personal{SettingsSection("
-                    + "SettingsCatalog.shortcuts.layersCard.control,"
+                "SettingsSection(SettingsCatalog.shortcuts.layersCard"
+                    + ".control,help:Self.help)"
             )
         )
-        #expect(
-            layers.contains(
-                "}else{SettingsCollapsibleSection("
-                    + "SettingsCatalog.shortcuts.layersCard,"
-            )
-        )
+        #expect(!layers.contains("SettingsCollapsibleSection("))
         let section = try squashed("Sections/ShortcutsSection.swift")
         #expect(
             section.contains(

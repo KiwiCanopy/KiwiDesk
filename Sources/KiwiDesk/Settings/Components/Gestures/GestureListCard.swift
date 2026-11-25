@@ -46,13 +46,15 @@ struct GestureListCard: View {
         // Another profile's page is a fresh list, sorted (#3225).
         .onChange(of: model.target) { reload() }
         .onChange(of: model.reachPage) { reload() }
-        .onChange(of: model.config.gesture) { _, base in
+        // A layer pick reloads, as another profile's page does.
+        .onChange(of: model.nav.shortcutsLayerSelection) { reload() }
+        .onChange(of: model.gestureLayerMap) { _, base in
             entries = GestureListEdits.reconcile(
                 entries,
                 pending: pending,
                 in: base,
                 on: device,
-                shortcutBase: model.config.shortcutBase
+                scope: model.gestureScope
             )
             // A row that took an action is the map's from here on.
             pending = pending.filter { id in
@@ -60,7 +62,7 @@ struct GestureListCard: View {
                     GestureListEdits.action(
                         of: $0.key,
                         in: base,
-                        shortcutBase: model.config.shortcutBase
+                        scope: model.gestureScope
                     ) == nil
                 } ?? false
             }
@@ -121,6 +123,13 @@ struct GestureListCard: View {
             .columns(.gestures)
             if device == .trackpad {
                 Text(GestureListWords.magicMouseCaption)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .padding(.leading, GestureListRow.textIndent)
+            }
+            // Natural scrolling is no layer's (#3535 ▸ Ruling 3.4).
+            if ShortcutsGates(config: model.config).layersExist {
+                Text(LayerScopeWords.everyLayer)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
                     .padding(.leading, GestureListRow.textIndent)
@@ -186,38 +195,44 @@ struct GestureListCard: View {
             }
             .settingsActionButton()
             Spacer()
-            Button(GestureListWords.restoreDefaults, action: restore)
-                .settingsActionButton()
-                .disabled(
-                    !GestureListEdits.differsFromDefaults(
-                        on: device,
-                        in: model.config.gesture,
-                        shortcutBase: model.config.shortcutBase
+            // Defaults are the default layer's alone (#3535 ▸ Ruling,
+            // point 3.6): another layer starts empty.
+            if model.gestureScope.isDefault {
+                Button(GestureListWords.restoreDefaults, action: restore)
+                    .settingsActionButton()
+                    .disabled(
+                        !GestureListEdits.differsFromDefaults(
+                            on: device,
+                            in: model.gestureLayerMap,
+                            scope: model.gestureScope
+                        )
                     )
-                )
-                .confirmationDialog(
-                    GestureListWords.restoreAskTitle,
-                    isPresented: asking,
-                    titleVisibility: .visible
-                ) {
-                    if let profile = model.reachProfile {
-                        Button(RestoreReachWords.here(profile)) {
-                            restore(.here)
-                        }
-                        .keyboardShortcut(.defaultAction)
-                    }
-                    Button(RestoreReachWords.everyProfile, role: .destructive)
-                    {
-                        restore(.everyProfile)
-                    }
-                    Button(
-                        L("spaces.delete_confirm.cancel", "Cancel"),
-                        role: .cancel
+                    .confirmationDialog(
+                        GestureListWords.restoreAskTitle,
+                        isPresented: asking,
+                        titleVisibility: .visible
                     ) {
+                        if let profile = model.reachProfile {
+                            Button(RestoreReachWords.here(profile)) {
+                                restore(.here)
+                            }
+                            .keyboardShortcut(.defaultAction)
+                        }
+                        Button(
+                            RestoreReachWords.everyProfile,
+                            role: .destructive
+                        ) {
+                            restore(.everyProfile)
+                        }
+                        Button(
+                            L("spaces.delete_confirm.cancel", "Cancel"),
+                            role: .cancel
+                        ) {
+                        }
+                    } message: {
+                        Text(GestureListWords.restoreAskMessage(elsewhere))
                     }
-                } message: {
-                    Text(GestureListWords.restoreAskMessage(elsewhere))
-                }
+            }
         }
         .padding(.top, 4)
     }
@@ -228,40 +243,6 @@ struct GestureListCard: View {
             set: { if !$0 { elsewhere = [] } }
         )
     }
-
-    private var help: String {
-        switch device {
-        case .mouse:
-            L(
-                "shortcuts.gestures.list.mouse_help",
-                "Bind a drag, a move, a click, the wheel click, the "
-                    + "side buttons or a scroll to an action. A click "
-                    + "always takes keys held with it, so a plain click "
-                    + "stays the app's; the wheel click and the side "
-                    + "buttons may take none. With one action for every "
-                    + "direction, a scroll steps as far as you scroll; "
-                    + "give one direction its own action and each "
-                    + "direction acts once per scroll instead. Where a "
-                    + "mouse's own app, such as Logi Options+, remaps a "
-                    + "button, KiwiDesk sees what that app sends."
-            )
-        case .trackpad:
-            // The ladder is stated here once, for swipes (#1873 ▸
-            // Ruling 2026-11-15).
-            L(
-                "shortcuts.gestures.list.trackpad_help_steps",
-                "Bind a tap, a swipe, a pinch or a rotation to an "
-                    + "action; a tap may take no keys. Two fingers move "
-                    + "between windows, three between Spaces and the "
-                    + "Desktop overview, four between screens. A "
-                    + "two-finger swipe that moves between windows can "
-                    + "step as far as you swipe; every other swipe takes "
-                    + "one step. Give one direction its own action and "
-                    + "it acts once per swipe."
-            )
-        }
-    }
-
     // MARK: - Rows
 
     /// The rows as the map binds them; mixed rows open, the rest
@@ -274,17 +255,17 @@ struct GestureListCard: View {
 
     private func reload() {
         entries = GestureListEdits.rows(
-            in: model.config.gesture,
+            in: model.gestureLayerMap,
             on: device,
-            shortcutBase: model.config.shortcutBase
+            scope: model.gestureScope
         )
         .map { GestureListEntry($0) }
         open = Set(
             entries.filter {
                 if case .split = GestureListEdits.action(
                     of: $0.key,
-                    in: model.config.gesture,
-                    shortcutBase: model.config.shortcutBase
+                    in: model.gestureLayerMap,
+                    scope: model.gestureScope
                 ) {
                     return true
                 }
@@ -314,13 +295,13 @@ struct GestureListCard: View {
     private func remove(_ entry: GestureListEntry) {
         if GestureListEdits.action(
             of: entry.key,
-            in: model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: model.gestureLayerMap,
+            scope: model.gestureScope
         ) != nil {
             GestureListEdits.remove(
                 entry.key,
-                in: &model.config.gesture,
-                shortcutBase: model.config.shortcutBase
+                in: &model.gestureLayerMap,
+                scope: model.gestureScope
             )
         }
         entries.removeAll { $0.id == entry.id }

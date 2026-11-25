@@ -30,13 +30,14 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
 
     var id: String { "shortcuts.part." + rawValue }
 
-    /// The segments drawing this part. Layers draws on both key
-    /// parts, reading the one `nav.shortcutsLayer`; the conflict
-    /// banner on both too (#3184).
+    /// The segments drawing this part; the conflict banner draws on
+    /// both key parts (#3184). The layer pick is page-wide, above
+    /// the switcher, so Layers is Personal's card of switch keys
+    /// and the offer to add one (#3535).
     var segments: [ShortcutsSegment] {
         switch self {
-        case .conflictBanner, .layers: return [.builtIn, .personal]
-        case .openApplications, .appleShortcuts, .keySequences,
+        case .conflictBanner: return [.builtIn, .personal]
+        case .layers, .openApplications, .appleShortcuts, .keySequences,
             .luaBindings:
             return [.personal]
         case .gestures: return [.mouse]
@@ -68,13 +69,15 @@ enum ShortcutsPagePart: String, CaseIterable, Identifiable {
 
     /// Whether the page draws a rule above this part in `segment`:
     /// between Built-in's Modifier keys, which apply on every layer,
-    /// and the layer's own rows (owner 2026-11-08).
+    /// and the layer's own rows (owner 2026-11-08), the first of
+    /// which follows Modifier keys since Layers left Built-in
+    /// (#3535).
     func ruledAbove(in segment: ShortcutsSegment) -> Bool {
         let parts = Self.parts(in: segment)
         guard let at = parts.firstIndex(of: self), at > 0 else {
             return false
         }
-        return self == .layers && parts[at - 1] == .modifierKeys
+        return parts[at - 1] == .modifierKeys
     }
 
     /// The part that draws a census container's rows; nil for a

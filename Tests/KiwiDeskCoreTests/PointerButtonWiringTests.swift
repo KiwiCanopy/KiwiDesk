@@ -28,7 +28,9 @@ struct PointerButtonWiringTests {
 
     private func bind(_ core: KiwiCore, _ map: [GestureKey: GestureAction]) {
         core.applyGestures(
-            base: GestureMap(map.mapValues(GestureEntry.bound)),
+            base: LayerGestures(
+                defaultLayer: GestureMap(map.mapValues(GestureEntry.bound))
+            ),
             profile: nil,
             scrollProfile: nil
         )

@@ -47,13 +47,13 @@ struct GestureCatalogueTests {
                 action,
                 at: key,
                 in: &base,
-                shortcutBase: .standard
+                scope: .defaultLayer(on: .standard)
             )
             guard
                 case .run(let stored) = GestureListEdits.action(
                     of: key,
                     in: base,
-                    shortcutBase: .standard
+                    scope: .defaultLayer(on: .standard)
                 )
             else {
                 Issue.record("\(command.lua) did not store as Lua")

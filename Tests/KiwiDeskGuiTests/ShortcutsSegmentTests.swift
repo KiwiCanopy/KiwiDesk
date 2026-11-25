@@ -11,13 +11,14 @@ import Testing
 @Suite("Shortcuts page segments")
 @MainActor
 struct ShortcutsSegmentTests {
-    /// Each part's cards in page order; Restore sits between the
-    /// Layers pick that gates it and the groups it rewrites (#3179).
+    /// Each part's cards in page order; Restore sits above the
+    /// groups it rewrites (#3179), under Modifier keys since the
+    /// layer pick left for the strip above the switcher (#3535).
     @Test("each part draws its ruled cards in order")
     func partsInOrder() {
         #expect(
             ShortcutsPagePart.parts(in: .builtIn) == [
-                .conflictBanner, .modifierKeys, .layers,
+                .conflictBanner, .modifierKeys,
                 .defaultShortcuts, .showHide, .focus, .moveWindows,
                 .macosDesktops, .layout, .sizeFloat, .pocket, .inactive,
             ]

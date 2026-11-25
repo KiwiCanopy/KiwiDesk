@@ -151,7 +151,7 @@ struct SettingsValueReadoutTests {
         expectRows(.kiwishelf(.pocketScreenEdge), clean, edited)
 
         edited = clean
-        edited.gesture[GestureKey(.tap5)] = .bound(.family(.space))
+        edited.gesture["default"][GestureKey(.tap5)] = .bound(.family(.space))
         expectRows(.shortcuts(.gestureBindings), clean, edited)
 
         edited = clean

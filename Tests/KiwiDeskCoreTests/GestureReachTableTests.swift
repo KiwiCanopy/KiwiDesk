@@ -26,10 +26,50 @@ struct GestureReachTableTests {
         return map
     }
 
+    private func layered(_ map: GestureMap) -> LayerGestures {
+        LayerGestures(defaultLayer: map)
+    }
+
+    /// Another layer's rows key apart from default's, lie over no
+    /// seeds and write back to that layer's map (#3535).
+    @Test("a layer's rows key apart and write to their layer")
+    func layerRows() {
+        let coding = GestureMap([GestureKey(.tap3): .bound(.run(tap))])
+        let maps = LayerGestures(["default": base, "Coding": coding])
+        var table = RuleReachTable<GestureAction>.gestures(
+            base: maps,
+            overrides: [("Work", nil)],
+            shortcutBase: .standard
+        )
+        let key = LayerGestureKey("Coding", GestureKey(.tap3)).spelling
+        #expect(table.resolved(key, for: "Work") == .run(tap))
+        #expect(
+            table.resolved(GestureKey(.tap3).spelling, for: "Work") == nil
+        )
+        #expect(
+            table.gestureBase(original: maps, shortcutBase: .standard) == maps
+        )
+        table.apply(
+            key,
+            value: nil,
+            reach: .shared(joining: []),
+            editing: "Work"
+        )
+        let written = table.gestureBase(
+            original: maps,
+            shortcutBase: .standard
+        )
+        // No seed sits under Coding's tap, so nothing is tombstoned.
+        #expect(written["Coding"].isEmpty)
+        #expect(written["default"] == base)
+    }
+
     private func table() -> RuleReachTable<GestureAction> {
         .gestures(
-            base: base,
-            overrides: [("Work", work), ("Home", nil)],
+            base: LayerGestures(defaultLayer: base),
+            overrides: [
+                ("Work", LayerGestures(defaultLayer: work)), ("Home", nil),
+            ],
             shortcutBase: .standard
         )
     }
@@ -43,7 +83,8 @@ struct GestureReachTableTests {
             let runtime = GestureSeeds.resolved(
                 base: base,
                 profile: override,
-                shortcutBase: .standard
+                shortcutBase: .standard,
+                layer: KeyLayer.defaultName
             )
             let resolved = table.resolved(for: name).compactMap { pair in
                 GestureKey(spelling: pair.key).map { ($0, pair.value) }
@@ -57,9 +98,10 @@ struct GestureReachTableTests {
     func untouchedIsLossless() {
         let table = table()
         #expect(
-            table.gestureBase(original: base, shortcutBase: .standard) == base
+            table.gestureBase(original: layered(base), shortcutBase: .standard)
+                == layered(base)
         )
-        #expect(table.gestureOverride(for: "Work") == work)
+        #expect(table.gestureOverride(for: "Work") == layered(work))
         #expect(table.gestureOverride(for: "Home") == nil)
     }
 
@@ -83,12 +125,14 @@ struct GestureReachTableTests {
         )
         let home = table.gestureOverride(for: "Home")
         #expect(
-            home?[GestureKey(.rightClick, [.control])] == .bound(.run(tap))
+            home?["default"][GestureKey(.rightClick, [.control])]
+                == .bound(.run(tap))
         )
         #expect(
-            table.gestureBase(original: base, shortcutBase: .standard) == base
+            table.gestureBase(original: layered(base), shortcutBase: .standard)
+                == layered(base)
         )
-        #expect(table.gestureOverride(for: "Work") == work)
+        #expect(table.gestureOverride(for: "Work") == layered(work))
     }
 
     @Test("a shared row turned off writes a seed's tombstone")
@@ -102,9 +146,9 @@ struct GestureReachTableTests {
             editing: "Home"
         )
         let written = table.gestureBase(
-            original: base,
+            original: layered(base),
             shortcutBase: .standard
-        )
+        )["default"]
         #expect(written[key] == .unbound)
         #expect(written[GestureKey(.tap3)] == .unbound)
     }
@@ -116,12 +160,14 @@ struct GestureReachTableTests {
             GestureSeeds.resolved(
                 base: page,
                 profile: nil,
-                shortcutBase: .standard
+                shortcutBase: .standard,
+                layer: KeyLayer.defaultName
             )
                 == GestureSeeds.resolved(
                     base: base,
                     profile: work,
-                    shortcutBase: .standard
+                    shortcutBase: .standard,
+                    layer: KeyLayer.defaultName
                 )
         )
     }

@@ -122,7 +122,9 @@ struct StepLengthRowTests {
                 == .longSwipesOff
         )
         config.scrollGesture.longSwipes = true
-        config.gesture[GestureKey(.swipe2, GestureSeeds.panKeys)] = .unbound
+        config.gesture[KeyLayer.defaultName][
+            GestureKey(.swipe2, GestureSeeds.panKeys)
+        ] = .unbound
         #expect(
             ShortcutsGates(config: config).inertReason(for: key)
                 == .noPanSwipe

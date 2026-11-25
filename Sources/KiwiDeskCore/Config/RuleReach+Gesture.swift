@@ -1,27 +1,32 @@
 import Foundation
 
 // The gesture bindings as a `RuleReachTable` (#3225): a key is one
-// `GestureKey` by its spelling, its value the whole action. The base
-// is the seeds on the stored shortcut base (#3444) with `gui.json`'s
-// map laid over them, so a seed the
-// base turns off is a key the base lacks, and a profile's tombstone
-// is a profile leaving the key out. It holds what the files say: a
-// binding `GestureSeeds.resolved` refuses still reaches, and its row
-// narrates the refusal.
+// binding by its `LayerGestureKey` spelling (#3535), its value the
+// whole action. The base is each layer's seeds on the stored
+// shortcut base (#3444) with `gui.json`'s map laid over them, so a
+// seed the base turns off is a key the base lacks, and a profile's
+// tombstone is a profile leaving the key out. It holds what the
+// files say: a binding `GestureSeeds.resolved` refuses still
+// reaches, and its row narrates the refusal.
 
 extension RuleReachTable where Value == GestureAction {
     /// The family, from the stored base and each profile's sparse
     /// override.
     public static func gestures(
-        base: GestureMap,
-        overrides: [(profile: String, override: GestureMap?)],
+        base: LayerGestures,
+        overrides: [(profile: String, override: LayerGestures?)],
         shortcutBase: ShortcutBase
     ) -> Self {
         var entries: [String: [String: GestureAction?]] = [:]
         for (profile, override) in overrides {
             var own: [String: GestureAction?] = [:]
-            for (key, entry) in override?.entries ?? [:] {
-                own.updateValue(entry.action, forKey: key.spelling)
+            for (layer, map) in override?.maps ?? [:] {
+                for (key, entry) in map.entries {
+                    own.updateValue(
+                        entry.action,
+                        forKey: LayerGestureKey(layer, key).spelling
+                    )
+                }
             }
             entries[profile] = own
         }
@@ -32,67 +37,85 @@ extension RuleReachTable where Value == GestureAction {
         )
     }
 
-    /// `map` laid over the seeds on `shortcutBase`, keyed by
-    /// spelling.
+    /// `maps` laid over each layer's seeds on `shortcutBase`, keyed
+    /// by `LayerGestureKey` spelling.
     public static func gestureSeedsUnder(
-        _ map: GestureMap,
+        _ maps: LayerGestures,
         shortcutBase: ShortcutBase
     ) -> [String: GestureAction] {
         var out: [String: GestureAction] = [:]
         for (key, action) in GestureSeeds.seeds(on: shortcutBase) {
-            out[key.spelling] = action
+            out[LayerGestureKey(KeyLayer.defaultName, key).spelling] =
+                action
         }
-        for (key, entry) in map.entries {
-            out[key.spelling] = entry.action
+        for (layer, map) in maps.maps {
+            for (key, entry) in map.entries {
+                out[LayerGestureKey(layer, key).spelling] = entry.action
+            }
         }
         return out
     }
 
-    /// The stored map that lays `resolved` over the seeds on
-    /// `shortcutBase`: a key equal to its seed is left to the seed,
-    /// a seed `resolved` lacks is turned off.
+    /// The stored maps that lay `resolved` over each layer's seeds
+    /// on `shortcutBase`: a key equal to its seed is left to the
+    /// seed, a seed `resolved` lacks is turned off.
     public static func gestureMap(
         over resolved: [String: GestureAction],
         shortcutBase: ShortcutBase
-    ) -> GestureMap {
+    ) -> LayerGestures {
         let seeds = GestureSeeds.seeds(on: shortcutBase)
-        var map = GestureMap()
-        for key in seeds.keys where resolved[key.spelling] == nil {
-            map[key] = .unbound
+        var maps = LayerGestures()
+        let defaultLayer = KeyLayer.defaultName
+        for key in seeds.keys {
+            let spelling = LayerGestureKey(defaultLayer, key).spelling
+            if resolved[spelling] == nil {
+                maps[defaultLayer][key] = .unbound
+            }
         }
         for (spelling, action) in resolved {
-            guard let key = GestureKey(spelling: spelling) else { continue }
-            if seeds[key] != action { map[key] = .bound(action) }
+            guard let key = LayerGestureKey(spelling: spelling) else {
+                continue
+            }
+            let seed = GestureSeeds.seeds(
+                on: shortcutBase,
+                layer: key.layer
+            )[key.key]
+            if seed != action { maps[key.layer][key.key] = .bound(action) }
         }
-        return map
+        return maps
     }
 
-    /// The base map: `original` with each touched key rebuilt
+    /// The base maps: `original` with each touched key rebuilt
     /// against the seeds, so an untouched entry keeps its stored
     /// form.
     public func gestureBase(
-        original: GestureMap,
+        original: LayerGestures,
         shortcutBase: ShortcutBase
-    ) -> GestureMap {
+    ) -> LayerGestures {
         guard !baseTouched.isEmpty else { return original }
-        var map = original
+        var maps = original
         let rebuilt = Self.gestureMap(over: base, shortcutBase: shortcutBase)
         for spelling in baseTouched {
-            guard let key = GestureKey(spelling: spelling) else { continue }
-            map[key] = rebuilt[key]
+            guard let key = LayerGestureKey(spelling: spelling) else {
+                continue
+            }
+            maps[key.layer][key.key] = rebuilt[key.layer][key.key]
         }
-        return map
+        return maps
     }
 
     /// `profile`'s override as the table holds it; nil when empty.
     /// The entries are the file's own, so an untouched one is
     /// written back as it was read.
-    public func gestureOverride(for profile: String) -> GestureMap? {
-        var map = GestureMap()
+    public func gestureOverride(for profile: String) -> LayerGestures? {
+        var maps = LayerGestures()
         for (spelling, entry) in entries[profile] ?? [:] {
-            guard let key = GestureKey(spelling: spelling) else { continue }
-            map[key] = entry.map(GestureEntry.bound) ?? .unbound
+            guard let key = LayerGestureKey(spelling: spelling) else {
+                continue
+            }
+            maps[key.layer][key.key] =
+                entry.map(GestureEntry.bound) ?? .unbound
         }
-        return map.isEmpty ? nil : map
+        return maps.isEmpty ? nil : maps
     }
 }
