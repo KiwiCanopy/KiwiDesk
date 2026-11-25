@@ -85,7 +85,9 @@ extension KiwiCore {
     /// `gui.json` — under a GUI-managed config the Settings Canvas
     /// stays the persistent pin owner, so a pin set here is a
     /// session override there. Under a Lua-managed config the
-    /// declarative `init.lua` re-exec is the persistence.
+    /// declarative `init.lua` re-exec is the persistence. While no
+    /// screen is reported the pin is held and answers ok unjudged;
+    /// an unmatched name is logged at the first report (#3631).
     func pinSpaceToDisplay(
         _ args: [JSONValue]
     ) -> CommandResponse {

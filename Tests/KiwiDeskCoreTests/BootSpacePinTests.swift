@@ -60,9 +60,11 @@ struct BootSpacePinTests {
 
     @Test("a pin by name loaded with no screen lands at the first report")
     func bootPinApplies() throws {
-        PositionalDisplays.mainIDOverride = { Self.external.id }
-        defer { PositionalDisplays.mainIDOverride = nil }
+        let saved = PositionalDisplays.mainIDOverride
+        defer { PositionalDisplays.mainIDOverride = saved }
         let core = try makeCore(lua: Self.pinComms)
+        // After `makeTestCore`, which installs the host's main.
+        PositionalDisplays.mainIDOverride = { Self.external.id }
         var log: [String] = []
         core.onLog = { log.append($0) }
         #expect(core.state.workspaces.allDisplays.isEmpty)
@@ -78,9 +80,11 @@ struct BootSpacePinTests {
 
     @Test("a pin dropped from init.lua before the report never lands")
     func droppedPinNeverApplies() throws {
-        PositionalDisplays.mainIDOverride = { Self.external.id }
-        defer { PositionalDisplays.mainIDOverride = nil }
+        let saved = PositionalDisplays.mainIDOverride
+        defer { PositionalDisplays.mainIDOverride = saved }
         let core = try makeCore(lua: Self.pinComms)
+        // After `makeTestCore`, which installs the host's main.
+        PositionalDisplays.mainIDOverride = { Self.external.id }
         core.loadConfig()
         let code = """
             app_rules = { ["com.apple.mail"] = "Comms" }
@@ -93,6 +97,17 @@ struct BootSpacePinTests {
         dock(core)
         #expect(core.spacePins["Comms"] == nil)
         #expect(core.spacePins["Code"] == Self.external.fingerprint)
+    }
+
+    @Test("a Space dropped before the report takes its held pin with it")
+    func droppedSpaceForgetsItsPin() throws {
+        let core = try makeCore(lua: Self.pinComms)
+        core.loadConfig()
+        #expect(core.pendingSpacePins["Comms"] != nil)
+        core.forwardWindows(of: "Comms", to: "Code")
+        #expect(core.pendingSpacePins["Comms"] == nil)
+        dock(core)
+        #expect(core.state.workspaces["Comms"] == nil)
     }
 
     @Test("with screens known, a name no screen matches still fails")
