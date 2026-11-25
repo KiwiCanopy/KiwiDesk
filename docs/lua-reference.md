@@ -8283,6 +8283,17 @@ names. **←** **→** stay on the Desktop and land on the Space beside
 the one you left. A click on a row's name goes to the Desktop as a
 title click does.
 
+:::unreleased
+While anything is typed, the arrows land only on what matches, and
+when the selected Space stops matching the selection moves to the
+first match; typing never switches, **Return** does. While nothing
+matches, the arrows, **⌘↓** and **Return**, with or without **⇧**
+or **⌃**, do nothing, and a click still acts. While windows ride
+along, the arrows reach every Space again and no Space dims; typing
+while they ride along searches again until the next pick-up, and
+**Escape** clears that typing before it puts the windows back.
+:::
+
 **Tab** reaches it from View, and **⇧Tab** from Windows.
 
 On every side:

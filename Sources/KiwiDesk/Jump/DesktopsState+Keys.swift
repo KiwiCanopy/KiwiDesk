@@ -61,8 +61,23 @@ extension DesktopsState {
         )
     }
 
-    /// One press, as `JumpKey` reads it on this side.
+    /// One press, as `JumpKey` reads it on this side. A query
+    /// matching nothing leaves the keys nowhere to land (#3624).
     mutating func press(_ key: JumpKey, repeated: Bool) -> DesktopsOutcome {
+        if matchesNothing, key.movesOrPicks { return .dead }
+        return act(key, repeated: repeated)
+    }
+
+    /// A click's press, after it selected what it landed on: a click
+    /// reaches a dimmed line, so no query turns it into a beep.
+    mutating func click(_ key: JumpKey) -> DesktopsOutcome {
+        act(key, repeated: false)
+    }
+
+    private mutating func act(
+        _ key: JumpKey,
+        repeated: Bool
+    ) -> DesktopsOutcome {
         switch key {
         case .step(let delta):
             if isInside {
@@ -83,7 +98,10 @@ extension DesktopsState {
             return .moved
         case .openSpace:
             if isInside { return .moved }
-            return open() ? .moved : .refuse(.emptySpace)
+            if open() { return .moved }
+            // Windows the query dims are no empty Space.
+            let held = selectedLine.map { !$0.windows.isEmpty } ?? false
+            return held ? .dead : .refuse(.emptySpace)
         case .leaveSpace:
             guard isInside else { return .dead }
             leave()
@@ -112,10 +130,12 @@ extension DesktopsState {
         }
     }
 
-    /// Esc steps back one layer: the carry, the Space, the search,
-    /// then the panel.
+    /// Esc steps back one layer: a query typed during the carry,
+    /// the carry, the Space, the search, then the panel.
     private mutating func escape() -> DesktopsOutcome {
-        if isCarrying {
+        if queryLeadsCarry {
+            setQuery("")
+        } else if isCarrying {
             cancelCarry()
         } else if isInside {
             leave()
@@ -176,5 +196,16 @@ extension DesktopsState {
             return .refuse(.alreadyThere(target.space))
         }
         return .act(.drop(moving, target, follow: follow))
+    }
+}
+
+extension JumpKey {
+    /// A Desktops key that moves the selection or acts on it, which
+    /// a query matching nothing turns into a beep (#3624).
+    fileprivate var movesOrPicks: Bool {
+        switch self {
+        case .step, .page, .side, .openSpace, .pick, .follow: true
+        default: false
+        }
     }
 }

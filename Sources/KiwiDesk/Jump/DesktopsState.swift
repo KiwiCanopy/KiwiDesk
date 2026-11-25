@@ -25,6 +25,10 @@ struct DesktopsState: Equatable {
     /// Picked windows, in pick order.
     private(set) var carried: [WindowID] = []
     private(set) var query = ""
+    /// True once the query is edited during the carry, until the
+    /// next pick-up or the carry's end: the query then steers the
+    /// carry like a search (#3624).
+    private(set) var queryLeadsCarry = false
     /// Each line's first shown slot, where it scrolled.
     private(set) var offsets: [DesktopsPlace: Int] = [:]
 
@@ -88,16 +92,10 @@ struct DesktopsState: Equatable {
     }
 
     /// A line's windows as drawn: matches first, each part in its
-    /// Space's order (#1229 ▸ Search).
+    /// Space's order (#1229, #3624).
     func ordered(_ place: DesktopsPlace) -> [DesktopOverview.Window] {
         guard let windows = line(place)?.windows else { return [] }
         return windows.filter(matches) + windows.filter { !matches($0) }
-    }
-
-    /// Whether any window of the place matches; a place with none
-    /// dims while a search is typed.
-    func hasMatch(_ place: DesktopsPlace) -> Bool {
-        query.isEmpty || ordered(place).contains(where: matches)
     }
 
     /// The icons `place`'s line shows at once; more fold into "+n".
@@ -128,15 +126,16 @@ struct DesktopsState: Equatable {
 
     // MARK: Search
 
-    /// Matches move to the front; the selection stays where it is,
-    /// and a selected window that no longer matches leaves the
-    /// Space for its place.
+    /// Matches move to the front. Typing never acts: a selection
+    /// still matching stays, one the query dims moves to the first
+    /// match (#3624), and a selected window that no longer matches
+    /// leaves the Space for its place. Called for the user's edit
+    /// alone: during a carry it hands the carry to the query.
     mutating func setQuery(_ text: String) {
         query = text
+        queryLeadsCarry = isCarrying && !text.isEmpty
         offsets = [:]
-        if let window, let found = overview.window(window), !matches(found) {
-            self.window = nil
-        }
+        settle()
         reveal()
     }
 
@@ -186,10 +185,12 @@ struct DesktopsState: Equatable {
     mutating func togglePick(_ id: WindowID) -> DesktopOverview.CarryBlock? {
         if let index = carried.firstIndex(of: id) {
             carried.remove(at: index)
+            if carried.isEmpty { endCarry() }
             return nil
         }
         if let block = pickBlock(id) { return block }
         carried.append(id)
+        queryLeadsCarry = false
         return nil
     }
 
@@ -198,7 +199,17 @@ struct DesktopsState: Equatable {
         carried.contains(id) ? nil : overview.window(id)?.block
     }
 
-    mutating func cancelCarry() { carried = [] }
+    /// Puts every picked window back; a selection the query dims
+    /// once nothing rides along moves to a match.
+    mutating func cancelCarry() {
+        carried = []
+        endCarry()
+    }
+
+    private mutating func endCarry() {
+        queryLeadsCarry = false
+        settle()
+    }
 
     /// Leaves the Space for its place.
     mutating func leave() { window = nil }
@@ -207,10 +218,10 @@ struct DesktopsState: Equatable {
     /// or its first; false where it holds none.
     mutating func open() -> Bool {
         guard let place, let line = line(place) else { return false }
-        let drawn = ordered(place)
+        let drawn = reachable(place)
         guard let first = drawn.first else { return false }
         let last = line.lastFocused.flatMap { id in
-            drawn.first { $0.id == id && matches($0) }
+            drawn.first { $0.id == id }
         }
         select(window: (last ?? first).id, in: place)
         return true

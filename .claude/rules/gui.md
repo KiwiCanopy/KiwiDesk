@@ -2373,6 +2373,16 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
+**Under a query a KiwiHub side's keys land only where the side
+does not dim** (#3135, #2309, #3624): a step filters on the one
+predicate the side dims by, and a step from a dimmed selection
+lands on the nearest undimmed item in its direction, wrapping
+through `JumpList.stepped` (`DesktopsSearchTests` ▸ `matchOnly`,
+`DesktopsSearchSettleTests` ▸ `offStopSteps`). Each side rules its
+own click: the strip and the View side refuse a dimmed item, and
+the Desktops side takes one, a click there being an act on a place
+(`DesktopsSearchSettleTests` ▸ `clickSkipsTheBeep`).
+
 ## KiwiHub sizes in the rect it fits (#3570)
 
 **A KiwiHub width, height or place is asked of `JumpPanelRoom`,
