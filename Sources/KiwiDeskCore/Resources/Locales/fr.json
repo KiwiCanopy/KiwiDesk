@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Raccourci Apple…",
   "shortcuts.sequence.caption": "Aussi appelée touche leader. Appuyez sur le premier raccourci (le leader) et un panneau liste les touches suivantes. Une touche peut ouvrir d’autres touches ; la dernière exécute son action. esc annule, ⌫ revient d’une étape.",
+  "shortcuts.sequence.card_empty": "Aucune séquence de touches n'est encore configurée. Ajoutez-en une : son premier raccourci ouvre un panneau listant les touches suivantes.",
   "shortcuts.sequence.change_action": "Modifier l’action…",
   "shortcuts.sequence.choose": "Choisir…",
   "shortcuts.sequence.default_symbol": "Dossier",

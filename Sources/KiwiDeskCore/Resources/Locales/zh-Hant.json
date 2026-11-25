@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Apple 捷徑…",
   "shortcuts.sequence.caption": "也稱為前導鍵。按下第一個快速鍵（前導鍵），面板會列出接下來的按鍵。一個按鍵可以開啟更多按鍵；最後一個按鍵執行其操作。esc 取消，⌫ 返回上一步。",
+  "shortcuts.sequence.card_empty": "還沒有設定任何按鍵序列。加入一個後，按下它的第一個快速鍵會開啟一個面板，列出接下來的按鍵。",
   "shortcuts.sequence.change_action": "變更操作…",
   "shortcuts.sequence.choose": "選擇…",
   "shortcuts.sequence.default_symbol": "檔案夾",

@@ -22,6 +22,21 @@ extension KeyRecorderField {
         }
     }
 
+    /// The sides menu and the badge after the well, each only
+    /// while it draws something (#3649).
+    @ViewBuilder var trailingMarks: some View {
+        if let sides = recorderSides,
+            Self.sidesMenuCombo(
+                combo,
+                recording: recording,
+                hyperKey: sides.hyperKey
+            ) != nil
+        {
+            sidesSlot
+        }
+        if conflictSentence != nil { conflictBadge }
+    }
+
     /// The combo the slot draws a menu for: nil while recording, and
     /// for a shortcut with no modifier that can take a side.
     static func sidesMenuCombo(

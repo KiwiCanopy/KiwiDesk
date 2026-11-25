@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Apple 快捷指令…",
   "shortcuts.sequence.caption": "也称为前导键。按下第一个快捷键（前导键），面板会列出接下来的按键。一个按键可以打开更多按键；最后一个按键执行其操作。esc 取消，⌫ 返回上一步。",
+  "shortcuts.sequence.card_empty": "还没有设置任何按键序列。添加一个后，按下它的第一个快捷键会打开一个面板，列出接下来的按键。",
   "shortcuts.sequence.change_action": "更改操作…",
   "shortcuts.sequence.choose": "选择…",
   "shortcuts.sequence.default_symbol": "文件夹",

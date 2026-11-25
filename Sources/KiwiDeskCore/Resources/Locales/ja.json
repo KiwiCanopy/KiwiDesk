@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "アプリ…",
   "shortcuts.sequence.apple_shortcut": "Appleのショートカット…",
   "shortcuts.sequence.caption": "リーダーキーとも呼ばれます。最初のショートカット（リーダー）を押すと、パネルに次のキーが一覧表示されます。キーからさらに別のキーを開くこともでき、最後のキーがその操作を実行します。esc でキャンセル、⌫ で1つ前の段階に戻ります。",
+  "shortcuts.sequence.card_empty": "キーシーケンスはまだ設定されていません。追加すると、最初のショートカットで次のキーを一覧表示するパネルが開きます。",
   "shortcuts.sequence.change_action": "操作を変更…",
   "shortcuts.sequence.choose": "選択…",
   "shortcuts.sequence.default_symbol": "フォルダ",

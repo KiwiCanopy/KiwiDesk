@@ -2721,6 +2721,7 @@
   "shortcuts.sequence.app": "App…",
   "shortcuts.sequence.apple_shortcut": "Apple-Kurzbefehl…",
   "shortcuts.sequence.caption": "Auch bekannt als Leader-Taste. Drück den ersten Kurzbefehl (den Leader), und ein Feld zeigt die nächsten Tasten. Eine Taste kann weitere Tasten öffnen; die letzte führt ihre Aktion aus. esc bricht ab, ⌫ geht einen Schritt zurück.",
+  "shortcuts.sequence.card_empty": "Noch ist keine Tastenfolge eingerichtet. Füge eine hinzu — ihr erster Kurzbefehl öffnet ein Feld mit den nächsten Tasten.",
   "shortcuts.sequence.change_action": "Aktion ändern…",
   "shortcuts.sequence.choose": "Auswählen…",
   "shortcuts.sequence.default_symbol": "Ordner",
