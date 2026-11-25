@@ -116,6 +116,7 @@ extension InterpolatedLabelTests {
         "kiwishelf.edge.screen.absent_name": 1,  // #3612
         "kiwishelf.scope.help": 3,  // #3612
         "kiwishelf.scope.every_screen": 1,  // #3612
+        "kiwishelf.show.screen.app_bar.inherit.help": 1,  // #3618
         // #3471: the Off pointer names its page; the scan does not
         // read the catalog row it also names.
         "kiwishelf.durations.animations_off.link": 1,
@@ -339,8 +340,7 @@ extension InterpolatedLabelTests {
         "layout_defaults.maximize.xref_link": 1,
         "shortcuts.maximize.xref_link": 1,
         "layout_defaults.maximize.caption.help": 1,
-        // The lens page's other-layer caption names Shortcuts
-        // (#2103).
+        // The lens page's other-layer caption names Shortcuts (#2103).
         "kiwivision.lens.chord_elsewhere": 1,
         // #2258: the Add to Claude Desktop failure names Copy Setup
         // Prompt.
