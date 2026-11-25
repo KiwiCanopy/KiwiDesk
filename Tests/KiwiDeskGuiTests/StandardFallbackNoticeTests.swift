@@ -34,13 +34,15 @@ struct StandardFallbackNoticeTests {
         #expect(!admit(1, defaults: defaults))
     }
 
-    @Test("the window sits above the bars and closes like OK")
+    @Test("the window takes the update chrome, above the bars")
     func window() {
         LocalizationManager.shared.select("en")
         let window = StandardFallbackNotice.makeWindow(screenCount: 2) {}
         #expect(window.level == BarPanel.aboveLevel)
         #expect(window.title == "Spaces for 2 Screens")
         #expect(window.styleMask.contains(.closable))
+        #expect(window.titleVisibility == .hidden)
+        #expect(!window.isOpaque)
         #expect(!window.isReleasedWhenClosed)
     }
 
@@ -89,6 +91,8 @@ struct StandardFallbackNoticeTests {
             "Sources/KiwiDesk/StandardNotice/StandardFallbackView.swift"
         )
         #expect(view.contains(".keyboardShortcut(.defaultAction)"))
+        #expect(view.contains(".focused($focused)"))
+        #expect(view.contains(".onAppear{focused=true}"))
         #expect(view.contains(".onExitCommand(perform:onOK)"))
     }
 

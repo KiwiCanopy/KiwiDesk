@@ -71,37 +71,71 @@ enum StandardFallbackWords {
     }
 }
 
-/// The notice's content: the lead with its help, the body, OK.
-/// OK changes nothing, so Return and Escape both give it.
+/// The notice's content, laid out as the update window's checking
+/// state: the app icon beside the lead and its help, the body, and
+/// one OK in the footer bar.
 struct StandardFallbackView: View {
     let screenCount: Int
     let onOK: () -> Void
+    /// Alert-sized, as `UpdateCheckingView`.
+    static let width: CGFloat = 400
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(StandardFallbackWords.lead(screenCount))
-                    .font(.headline)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityAddTraits(.isHeader)
-                HelpButton(
-                    explanation: StandardFallbackWords.help(screenCount)
-                )
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 16) {
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 48, height: 48)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(StandardFallbackWords.lead(screenCount))
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(SettingsTheme.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityAddTraits(.isHeader)
+                        HelpButton(
+                            explanation: StandardFallbackWords.help(
+                                screenCount
+                            )
+                        )
+                    }
+                    Text(StandardFallbackWords.body(screenCount))
+                        .font(.system(size: 13))
+                        .foregroundStyle(SettingsTheme.ink2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
             }
-            Text(StandardFallbackWords.body(screenCount))
-                .font(.callout)
-                .foregroundStyle(SettingsTheme.ink2)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack {
-                Spacer()
-                Button(L("standard_fallback.ok", "OK"), action: onOK)
-                    .keyboardShortcut(.defaultAction)
-                    .settingsActionButton()
-            }
+            .padding(.top, 4)
+            .padding(.horizontal, UpdateWindowMetrics.inset)
+            .padding(.bottom, 22)
+            StandardFallbackFooter(onOK: onOK)
         }
-        .padding(EdgeInsets(top: 18, leading: 20, bottom: 16, trailing: 20))
-        .frame(width: 360)
-        .background(SettingsTheme.card)
+        .frame(width: Self.width)
+        .updateWindowGround()
+    }
+}
+
+/// One OK, which Return and Escape both answer — the notice
+/// changes nothing, so there is nothing to decline. OK takes the
+/// focus on appear so Escape reaches `onExitCommand`, as What's
+/// new's footer does.
+struct StandardFallbackFooter: View {
+    let onOK: () -> Void
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button(L("standard_fallback.ok", "OK"), action: onOK)
+                .settingsActionButton()
+                .keyboardShortcut(.defaultAction)
+                .focused($focused)
+        }
+        .updateFooterBar()
+        .onAppear { focused = true }
+        // Escape answers OK too; a Button cannot carry both.
         .onExitCommand(perform: onOK)
     }
 }

@@ -143,7 +143,7 @@ struct ReduceMotionReachTests {
         "Settings/SettingsWindowController.swift":
             (1, "SettingsView writes macOS's setting, live"),
         "StandardNotice/StandardFallbackNotice.swift":
-            (1, "ReduceMotion.isOn at open"),
+            (1, "a measuring probe; the window is UpdateWindowChrome's"),
         "Shortcuts/KeySequenceHintController.swift":
             (1, "ReduceMotion.isOn at draw"),
         "Updates/UpdateCheckingWindowController.swift":

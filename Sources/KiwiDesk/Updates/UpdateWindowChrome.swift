@@ -2,10 +2,11 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The one window every update answer shares (#1542, #1849):
-/// titled, not tiled — it carries no `OwnWindowTiling` mark — not
-/// miniaturizable, closable, `UpdateWindowMetrics.width` wide and
-/// opening at its content between the ruled heights.
+/// The one window every update answer shares (#1542, #1849),
+/// borrowed by the Standard notice (#3646): titled, not tiled —
+/// it carries no `OwnWindowTiling` mark — not miniaturizable,
+/// closable, `UpdateWindowMetrics.width` wide and opening at its
+/// content between the ruled heights.
 @MainActor
 enum UpdateWindowChrome {
     /// `showMe` is a spotlight row's hand-off to Settings (#2038),

@@ -36,8 +36,10 @@ final class StandardFallbackNotice: NSObject, NSWindowDelegate {
 
     /// Whether the notice for `count` shows now, recording the
     /// count either way it is answered: shown, or held while the
-    /// tour owns the screen, which already narrates the Spaces on
-    /// it. A count recorded on this Mac never shows again.
+    /// tour owns the screen. A count recorded on this Mac never
+    /// shows again, so a screen connected mid-tour is not
+    /// announced later — the trade for never showing the notice
+    /// at an unrelated moment after the tour.
     static func admit(
         count: Int,
         tourShowing: Bool,
@@ -68,32 +70,29 @@ final class StandardFallbackNotice: NSObject, NSWindowDelegate {
         notice.show()
     }
 
-    /// The notice's window, built but not shown.
+    /// The notice's window, built but not shown: the update
+    /// window's alert-sized chrome (`UpdateCheckingWindowController`
+    /// is the template), titled for VoiceOver and the Window menu.
     static func makeWindow(
         screenCount: Int,
         onOK: @escaping () -> Void
     ) -> NSWindow {
-        let window = NSWindow(
-            contentRect: .zero,
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
+        let view = StandardFallbackView(
+            screenCount: screenCount,
+            onOK: onOK
+        )
+        let probe = NSHostingView(
+            rootView: LocaleScopedRoot { view }
+                .environmentObject(LocalizationManager.shared)
+        )
+        let window = UpdateWindowChrome.window(
+            root: view,
+            height: probe.fittingSize.height + UpdateWindowMetrics.titleBar,
+            width: StandardFallbackView.width
         )
         window.title = StandardFallbackWords.title(screenCount)
-        window.contentView = NSHostingView(
-            rootView: LocaleScopedRoot {
-                StandardFallbackView(
-                    screenCount: screenCount,
-                    onOK: onOK
-                )
-            }
-            .environmentObject(LocalizationManager.shared)
-            .environment(\.kiwiDeskReduceMotion, ReduceMotion.isOn)
-        )
-        window.setContentSize(window.contentView?.fittingSize ?? .zero)
         // Above the bars, as the tour is once its grant lands.
         window.level = BarPanel.aboveLevel
-        window.isReleasedWhenClosed = false
         return window
     }
 
