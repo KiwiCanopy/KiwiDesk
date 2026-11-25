@@ -285,7 +285,7 @@ struct DesktopsStateTests {
         let drawn = state.ordered(state.place!).map(\.id.raw)
         #expect(drawn == [7, 1, 2, 3, 4, 5, 6])
         let empty = DesktopsPlace(screen: 1, desktop: 0, line: 1)
-        #expect(!state.hasMatch(empty))
+        #expect(!state.reaches(empty))
     }
 
     @Test("⌘ digits name the selected row's Desktops; ⇧ moves yours")

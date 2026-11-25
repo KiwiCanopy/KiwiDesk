@@ -54,10 +54,10 @@ extension JumpModel {
         guard modifiers.isDisjoint(with: [.option, .command]) else { return }
         if state.isCarrying || modifiers.contains(.shift) {
             let moveHere = !state.isCarrying
-            return handleDesktops(.pick(moveHere: moveHere), repeated: false)
+            return clickDesktops(.pick(moveHere: moveHere))
         }
         if opens {
-            handleDesktops(.pick(moveHere: false), repeated: false)
+            clickDesktops(.pick(moveHere: false))
         } else if let desktop = state.desktop(place) {
             onDesktopsAction(.jumpDesktop(desktop))
         }
@@ -84,17 +84,17 @@ extension JumpModel {
         if state.isCarrying, !held.contains(.command) {
             state.select(place)
             desktops = state
-            return handleDesktops(.pick(moveHere: false), repeated: false)
+            return clickDesktops(.pick(moveHere: false))
         }
         state.select(window: id, in: place)
         desktops = state
         if held.contains(.command) {
-            handleDesktops(.pickUp, repeated: false)
+            clickDesktops(.pickUp)
         } else if held.contains(.option) {
-            handleDesktops(.swapHere, repeated: false)
+            clickDesktops(.swapHere)
         } else {
             let moveHere = held.contains(.shift)
-            handleDesktops(.pick(moveHere: moveHere), repeated: false)
+            clickDesktops(.pick(moveHere: moveHere))
         }
     }
 
@@ -130,6 +130,15 @@ extension JumpModel {
         answer(.act(.drop(moving, target, follow: false)))
     }
 
+    /// A click's press on what it selected: a click reaches a line
+    /// the query dims, so it skips the keys' no-match beep (#3624).
+    private func clickDesktops(_ key: JumpKey) {
+        guard var state = desktops else { return }
+        let outcome = state.click(key)
+        desktops = state
+        answer(outcome)
+    }
+
     private func answer(_ outcome: DesktopsOutcome) {
         switch outcome {
         case .moved:
@@ -157,7 +166,6 @@ extension JumpModel {
         let query = desktops?.query ?? ""
         enterDesktops()
         guard var state = desktops else { return }
-        if !query.isEmpty { state.setQuery(query) }
         let overview = state.overview
         for (screen, row) in overview.screens.enumerated()
         where row.display == target.display {
@@ -173,6 +181,8 @@ extension JumpModel {
                 )
             }
         }
+        // Last, so a target the query dims gives way to a match.
+        if !query.isEmpty { state.setQuery(query) }
         desktops = state
         // The panel sizes only through its refit (#3570).
         onResultsChange()
@@ -187,7 +197,6 @@ extension JumpModel {
         else { return }
         let overview = loadDesktops()
         var fresh = state(of: overview)
-        if !old.query.isEmpty { fresh.setQuery(old.query) }
         if let place = old.place, let line = fresh.line(place) {
             if let id = old.window,
                 line.windows.contains(where: { $0.id == id })
@@ -197,6 +206,8 @@ extension JumpModel {
                 fresh.select(place)
             }
         }
+        // Last, so a selection the fresh read dims gives way.
+        if !old.query.isEmpty { fresh.setQuery(old.query) }
         let pids = Set(
             overview.screens.flatMap(\.desktops).flatMap(\.spaces)
                 .flatMap(\.windows).map(\.pid)

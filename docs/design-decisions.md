@@ -17103,6 +17103,32 @@ screen and closes it (#3165). Inside a Space ↑ ↓ take the places'
 route (#3169): a line with windows is re-entered on the slot the
 selection left, an empty one selected.
 
+*Amended* (owner with the ui-designer, 2026-11-25, #3624): the
+search is match-only, as the switcher's strip is (#3135). Under a
+query the keys land only on matching lines and windows, ← → skip a
+screen with none, and a query that stops matching the selected
+line moves the selection to the first match down its column, then
+the next column's; a click still reaches a dimmed line, even while
+nothing matches. A selection left on a dimmed line let ↩ act on a
+place the query hid. While a window is carried, the query that
+stood at the pick-up reaches every line and dims none, because a
+drop's target is a place, often an empty Space no query can
+match; the windows stay match-only, as their icons stay dimmed. A
+query edited during the carry steers it like any search, until the
+next pick-up or the carry's end, so typing finds a drop target and
+↩ drops on a match: a field that took text mid-carry and moved
+nothing was a dead input. Clearing the query at the pick-up
+instead would break picking up several matches in a row. Esc
+clears the field before it ends the carry, since that query is the
+newer layer. Typing never switches; ↩ does. A typed number naming
+Desktop N was weighed and deferred until users ask for it: nothing
+in the panel could show it at first sight, so it would be found
+only in the docs, and ⌘N already reaches the first nine. Prefix
+modes (`d:`, `a:`, `w:`, `s:`) were refused on the same ground:
+hidden syntax the panel never shows, whose `a:` and `w:` the plain
+query already answers. `DesktopsSearchTests` and
+`DesktopsSearchSettleTests` hold it.
+
 **KiwiHub on a split screen reads "here" per area (#3572, owner
 ruling with the ui-designer 2026-11-23).** [Rationale] An area is where a
 user's Spaces live once a screen is split (#3517), so "here" read
