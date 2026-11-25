@@ -42,7 +42,7 @@ struct SpaceScreenFingerprintTests {
 
     /// Each Space object of `get_state`, by id.
     private func spaces(_ core: KiwiCore) -> [String: [String: JSONValue]] {
-        guard case .object(let root) = core.stateJSON(),
+        guard case .object(let root)? = core.execute("get_state").data,
             case .array(let list)? = root["spaces"]
         else { return [:] }
         var byID: [String: [String: JSONValue]] = [:]
@@ -89,11 +89,17 @@ struct SpaceScreenFingerprintTests {
         #expect(byID["a"]?["fingerprint"] == .string(Self.left.fingerprint))
     }
 
+    /// Screens are connected, so a lookup that ignored the Space's
+    /// own placement would leak one of theirs.
     @Test("a Space on no screen has a nil fingerprint")
     func unplacedSpaceHasNone() {
-        let core = makeTestCore()
+        let saved = PositionalDisplays.mainIDOverride
+        defer { PositionalDisplays.mainIDOverride = saved }
+        let core = twoScreens()
         core.state.workspaces.ensureSpace(SpaceID("loose"))
-        #expect(spaces(core)["loose"]?["fingerprint"] == .null)
+        let loose = spaces(core)["loose"]
+        #expect(loose?["display"] == .null)
+        #expect(loose?["fingerprint"] == .null)
     }
 
     /// The #3598 trap: `display` is 1, which set_edge reads as the

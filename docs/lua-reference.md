@@ -10605,19 +10605,23 @@ Space whose `shown` is true and whose `display` is D is the one
 included, from these two queries. A bar re-reads them on
 `space_change`, `desktop_change` and `monitor_change`.
 
+On a screen [split into areas](#set_display_areas) each space
+object also has `area`, the key of the area it sits in, as
+`list_monitors` prints it in `areas[].key`; `null` on a screen that
+is not split. Each area shows its own Space, so several Spaces with
+one `display` can be `shown` at once; the one with a given `area`
+is that area's `areas[].space_id` in `list_monitors`.
+
 :::unreleased
 `display` is the `list_monitors` id, macOS's own number for the
-screen. It is not the screen position that screen verbs such as
-[`space_bar.set_edge`](#space_barset_edge) read from a number, and
-the two often look alike: a `display` of `1` passed as a screen
-writes the main screen, wherever the Space sits. Each space object
-also has `fingerprint`, the `list_monitors` fingerprint of its
-screen (`nil` for a Space on no screen), which every screen verb
-takes as is. Two identical screens can share one fingerprint, as
-they share every per-screen setting
-([#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734)). On a
-split screen the fingerprint names the first area, so pass the
-Space's area first:
+screen, not the [screen position](#move_space_to_display) a screen
+verb reads from a number; the two often look alike, so a `display`
+of `1` passed to one names the main screen wherever the Space sits.
+Each space object also has `fingerprint`, the `list_monitors`
+fingerprint of its screen (`nil` for a Space on no screen), which
+every screen verb takes as is. A verb that takes an area, such as
+[`space_bar.set_edge`](#space_barset_edge), reads a fingerprint as
+the screen's first area, so pass the Space's `area` first:
 
 ```lua
 local state = KiwiDesk.get_state()
@@ -10629,15 +10633,12 @@ end
 ```
 
 To name the screen instead, look `display` up in `list_monitors`:
-the entry whose `id` equals it has the screen's `name`.
+the entry whose `id` equals it has the screen's `name`. Two
+identical screens macOS leaves unnumbered share one fingerprint,
+and so every setting kept by it
+([twin screens](accepted-limitations.md),
+[#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734)).
 :::
-
-On a screen [split into areas](#set_display_areas) each space
-object also has `area`, the key of the area it sits in, as
-`list_monitors` prints it in `areas[].key`; `null` on a screen that
-is not split. Each area shows its own Space, so several Spaces with
-one `display` can be `shown` at once; the one with a given `area`
-is that area's `areas[].space_id` in `list_monitors`.
 
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
@@ -10816,6 +10817,13 @@ window on a Space no screen shows, or parked out of sight, has
 `frame` `null`, and `visibility` too where no screen shows it; a
 full-screen window has no `visibility`.
 
+:::unreleased
+`display` is the `list_monitors` id, not the
+[screen position](#move_space_to_display) a screen verb reads from
+a number. To hand a window's screen to one, pass the `fingerprint`
+of its Space from [`get_state`](#get_state).
+:::
+
 `list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
@@ -10841,14 +10849,6 @@ parked out of sight or minimized — has `z` `null`. The list's own
 order is the Spaces' rows, not the stacking order: sort by `z` for
 that. A window KiwiDesk does not track, such as a menu, counts
 toward no rank, though it may cover a window.
-
-:::unreleased
-`display` is the `list_monitors` id, not the screen position that
-screen verbs read from a number. To hand a window's screen to one,
-pass the `fingerprint` of its Space from
-[`get_state`](#get_state), or of the `list_monitors` entry whose
-`id` is that `display`.
-:::
 
 Each entry also carries `title`, the window's title as `get_state`
 has it, so a list reads without a second call. Titles need not be
