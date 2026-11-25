@@ -157,10 +157,14 @@ struct LayerPassGestureTests {
         #expect(model.config.gesture["Coding"][swipe] == nil)
     }
 
-    /// A new row on a layer only Work holds stays Work's: a shared
-    /// pick there would write the layer's map into the base.
-    @Test("a row on an unshared layer lands on its holders alone")
-    func unsharedLayerStaysOwn() throws {
+    /// A new row on a layer only Work holds stays Work's, with no
+    /// pick and with a shared one: either would otherwise write the
+    /// layer's map into the base.
+    @Test(
+        "a row on an unshared layer lands on its holders alone",
+        arguments: [false, true]
+    )
+    func unsharedLayerStaysOwn(sharedPick: Bool) throws {
         let core = makeTestCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
@@ -173,6 +177,13 @@ struct LayerPassGestureTests {
         model.reload()
         model.nav.shortcutsLayer = "Solo"
         model.gestureLayerMap[tap] = .bound(.run(LuaAction(lua: "y()")))
+        if sharedPick {
+            var edits = model.reachEdits
+            edits.reach[.gesture] = [
+                LayerGestureKey("Solo", tap).spelling: .shared(joining: [])
+            ]
+            model.reachEdits = edits
+        }
         let encoded = try #require(model.encodedReach)
         let base = encoded.gestures.gestureBase(
             original: encoded.storedGestureBase,
