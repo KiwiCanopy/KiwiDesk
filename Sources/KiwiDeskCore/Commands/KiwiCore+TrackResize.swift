@@ -197,7 +197,7 @@ extension KiwiCore {
             cueWeightLimit(
                 window,
                 mate: tiled[ranges[StackLayout.nearestMate(of: track)]]
-                    .first,
+                    .first(where: { $0 != window }),
                 delta: delta,
                 axis: acrossAxis
             )

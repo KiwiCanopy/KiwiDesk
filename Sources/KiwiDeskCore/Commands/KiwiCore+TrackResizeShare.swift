@@ -24,9 +24,10 @@ extension KiwiCore {
         // tiled-sticky traveler (#414 v2) is not in
         // `space.windows`, so an entry under its id could never
         // be pruned (orphan; recycled-id hazard, #308) — refuse
-        // it, mirroring the across-track head guard above. The
-        // mouse path hands the DRAGGED window, which can be a
-        // traveler; the keyboard path's `space.focused` cannot.
+        // it, mirroring the across-track head guard in
+        // `resizeTrackWeight`. The mouse path hands the DRAGGED
+        // window, which can be a traveler; the keyboard path's
+        // `space.focused` cannot.
         guard space.windows.contains(focused) else {
             return .fail(
                 "a tiled sticky window can be resized only "

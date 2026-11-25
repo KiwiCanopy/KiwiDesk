@@ -1,0 +1,115 @@
+import CoreGraphics
+import Foundation
+
+/// Whether a BSP keyboard press moves anything the press asks for
+/// (#2969): judged on the layout at the ratio the press would write,
+/// before it writes. The direction stays #122's midpoint rule.
+extension KiwiCore {
+    /// True where the press at `proposed` moves `focused` the
+    /// press's way, or — for a window on no split of the axis — moves
+    /// a mate, or where nothing on the axis divides, which the writer
+    /// names (#1258, #1259). Otherwise cues the limit, naming a mate
+    /// at its floor where there is one, and returns false: the press
+    /// writes nothing and a hold ends.
+    func bspPressMoves(
+        _ focused: WindowID,
+        axis: String,
+        delta: Double,
+        to proposed: Double,
+        space: Space
+    ) -> Bool {
+        guard let screen = TilingEngine.screen(for: space.id, in: state)
+        else { return true }
+        let input = tiler.layoutInput(
+            state: state,
+            space: space,
+            screen: screen
+        )
+        guard input.tiled.contains(focused) else { return true }
+        let horizontal = axis == "x"
+        func frames(at ratio: Double) -> [WindowID: CGRect] {
+            var context = input.context
+            if horizontal {
+                context.bsp.splitRatioH = Self.storedBspRatio(ratio)
+            } else {
+                context.bsp.splitRatioV = Self.storedBspRatio(ratio)
+            }
+            return LayoutEngine.calculate(
+                mode: input.space.mode,
+                windows: input.tiled,
+                context: context
+            )
+        }
+        func length(_ frame: CGRect?) -> CGFloat {
+            frame.map { horizontal ? $0.width : $0.height } ?? 0
+        }
+        let base =
+            horizontal
+            ? input.context.bsp.splitRatioH : input.context.bsp.splitRatioV
+        let now = frames(at: base)
+        let next = frames(at: proposed)
+        let sides = BspSplit.sides(
+            of: input.tiled,
+            slots: now,
+            bounds: tiler.layoutBounds(on: screen, for: space),
+            horizontal: horizontal,
+            chain: bspChain(of: space, on: screen)?.zone
+        )
+        let mates = sides.first + sides.second
+        guard !mates.isEmpty else { return true }
+        let moved: Bool
+        if mates.contains(focused) {
+            let change = length(next[focused]) - length(now[focused])
+            moved = change * (delta < 0 ? -1 : 1) > Self.pressMovesTolerance
+        } else {
+            moved = mates.contains {
+                abs(length(next[$0]) - length(now[$0]))
+                    > Self.pressMovesTolerance
+            }
+        }
+        guard !moved else { return true }
+        cueBspLimit(focused, axis: axis, delta: delta, mates: mates, now)
+        return false
+    }
+
+    /// Below this many points a trial moved nothing.
+    private static let pressMovesTolerance: CGFloat = 0.01
+
+    /// The cue for a BSP press that moves nothing it asks for: the
+    /// mate nearest `focused` sitting at its floor, where one does,
+    /// else the window's own minimum on a shrink or the boundary on a
+    /// grow.
+    private func cueBspLimit(
+        _ focused: WindowID,
+        axis: String,
+        delta: Double,
+        mates: [WindowID],
+        _ frames: [WindowID: CGRect]
+    ) {
+        let horizontal = axis == "x"
+        func length(_ id: WindowID) -> Double {
+            Double(
+                frames[id].map { horizontal ? $0.width : $0.height } ?? 0
+            )
+        }
+        let centre = frames[focused].map { CGPoint(x: $0.midX, y: $0.midY) }
+        let atFloor = mates.filter {
+            $0 != focused
+                && length($0) <= plannedMinSize(of: $0, axis: axis) + 1
+        }
+        let stuck = atFloor.min { a, b in
+            func distance(_ id: WindowID) -> CGFloat {
+                guard let centre, let frame = frames[id] else { return 0 }
+                return hypot(frame.midX - centre.x, frame.midY - centre.y)
+            }
+            return distance(a) < distance(b)
+        }
+        if let stuck {
+            refuseGrowAtNeighborMinimum(focused, anchor: stuck, axis: axis)
+        } else if delta < 0 {
+            refuseShrinkAtMinimum(focused, axis: axis)
+        } else {
+            refuseGrowAtBoundary(focused, axis: axis)
+        }
+    }
+}

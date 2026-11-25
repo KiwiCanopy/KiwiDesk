@@ -302,14 +302,19 @@ extension KiwiCore {
         )
     }
 
+    /// The store's own 0.1...0.9 bound on a BSP ratio.
+    static func storedBspRatio(_ value: Double) -> Double {
+        min(max(value, 0.1), 0.9)
+    }
+
     /// The per-axis store write both paths above share, with the
-    /// store's own 0.1...0.9 clamp applied once.
+    /// store's own bound applied once.
     private func writeBspRatio(
         _ value: Double,
         axis: String,
         space: Space
     ) {
-        let stored = min(max(value, 0.1), 0.9)
+        let stored = Self.storedBspRatio(value)
         if axis == "x" {
             writeSplitRatioH(stored, for: space.id)
         } else {

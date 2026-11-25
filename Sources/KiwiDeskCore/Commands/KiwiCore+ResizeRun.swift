@@ -222,7 +222,7 @@ extension KiwiCore {
     /// did. Only a press pushes (#2709), so a hold cannot hide windows
     /// faster than they can be pulled back, and stopping there is no
     /// refusal.
-    func endGlideStep() -> Bool {
+    private func endGlideStep() -> Bool {
         guard keys.isApplyingGlideStep else { return false }
         keys.endGlide()
         return true
@@ -240,8 +240,10 @@ extension KiwiCore {
         guard !endGlideStep() else { return }
         if delta < 0 {
             refuseShrinkAtMinimum(window, axis: axis)
-        } else if let mate {
+        } else if let mate, mate != window {
             refuseGrowAtNeighborMinimum(window, anchor: mate, axis: axis)
+        } else {
+            refuseGrowAtBoundary(window, axis: axis)
         }
     }
 

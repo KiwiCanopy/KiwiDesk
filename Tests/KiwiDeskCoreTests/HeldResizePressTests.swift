@@ -10,7 +10,9 @@ import Testing
 /// cues, so a hold ends where nothing more can move — never a bounce
 /// between two widths, never a silent press. The display, gaps and
 /// floor are pinned (#531, #660). `.enabled(if:)` because the
-/// writers resolve the Space's screen.
+/// writers resolve the Space's screen. Main-actor spend: about 9000
+/// `resize` presses, each a command, a retile and two frame reads,
+/// some 10 s serialized on a dev Mac.
 @Suite(
     "Held resize: every press moves or cues (#2969)",
     .serialized,
@@ -70,7 +72,9 @@ struct HeldResizePressTests {
 
     /// Holds `resize axis step` for `presses` presses: each one must
     /// move the focused window the way it asks or cue, and the hold
-    /// must reach a cue — the point it ends.
+    /// must reach a cue — the point it ends. Answers how many presses
+    /// moved, so a hold that cues at once is told from one that ends.
+    @discardableResult
     private func hold(
         _ core: KiwiCore,
         focus: UInt32,
@@ -78,8 +82,9 @@ struct HeldResizePressTests {
         step: Double,
         presses: Int = 400,
         _ label: String
-    ) {
+    ) -> Int {
         var cues = 0
+        var moves = 0
         core.borders.onResizeRefusal = { _ in cues += 1 }
         let window = WindowID(focus)
         func length() -> CGFloat {
@@ -103,21 +108,24 @@ struct HeldResizePressTests {
                 let after = core.tiler.calculatedFrames(state: core.state)
                 let mateMoved = frames.contains { id, frame in
                     guard let now = after[id] else { return true }
-                    return abs(now.width - frame.width) > 0.5
-                        || abs(now.height - frame.height) > 0.5
+                    return abs(now.width - frame.width) > 0.01
+                        || abs(now.height - frame.height) > 0.01
                 }
                 #expect(mateMoved || cues > cued, note)
             } else {
                 let moved = (length() - before) * (step < 0 ? -1 : 1)
-                #expect(moved > 0.5 || cues > cued, note)
+                #expect(moved > 0.01 || cues > cued, note)
             }
-            if cues > cued { return }
+            if cues > cued { return moves }
+            moves += 1
         }
         Issue.record(Comment(rawValue: "\(label): the hold never ends"))
+        return moves
     }
 
     @Test("BSP: a window on the shared ratio's peak cues, never bounces")
     func bspBounce() {
+        var moves = 0
         for (width, height) in [(1220.0, 820.0), (2560.0, 1440.0)] {
             for focus in UInt32(1)...4 {
                 for step in [5.0, -5.0] {
@@ -129,7 +137,7 @@ struct HeldResizePressTests {
                             width: width,
                             height: height
                         )
-                        hold(
+                        moves += hold(
                             core,
                             focus: focus,
                             axis: axis,
@@ -140,10 +148,14 @@ struct HeldResizePressTests {
                 }
             }
         }
+        // The holds move before they end: a press that cued at once
+        // would pass every per-press clause.
+        #expect(moves >= 1200, "\(moves) moving presses")
     }
 
     @Test("BSP: a ratio at the store's bound cues on a wide screen")
     func bspRatioBound() {
+        var moves = 0
         for focus in UInt32(1)...6 {
             for step in [5.0, -5.0] {
                 let core = makeSpace(
@@ -153,20 +165,22 @@ struct HeldResizePressTests {
                     width: 4000,
                     height: 4000
                 )
-                hold(
+                moves += hold(
                     core,
                     focus: focus,
                     axis: "x",
                     step: step,
-                    presses: 1000,
+                    presses: 600,
                     "w\(focus) x\(step)"
                 )
             }
         }
+        #expect(moves >= 1300, "\(moves) moving presses")
     }
 
     @Test("Track: a track weight at its limit cues across the tracks")
     func trackWeightLimit() {
+        var moves = 0
         for width in [4000.0, 5120.0] {
             for focus in UInt32(1)...2 {
                 for step in [5.0, -5.0] {
@@ -182,16 +196,49 @@ struct HeldResizePressTests {
                             args: [.string("own_track")]
                         )
                     }
-                    hold(
+                    moves += hold(
                         core,
                         focus: focus,
                         axis: "x",
                         step: step,
-                        presses: 1000,
+                        presses: 600,
                         "\(Int(width)) w\(focus) x\(step)"
                     )
                 }
             }
         }
+        #expect(moves >= 1300, "\(moves) moving presses")
+    }
+
+    @Test("BSP: a full-span window's hold ends on the stuck neighbour")
+    func fullSpanHoldBlamesTheNeighbour() throws {
+        // w1 holds the whole height; its height press moves w2/w3's
+        // split until w2 stops at its floor, and every press after
+        // that names w2, never w1 (#1259).
+        let core = makeSpace(
+            "bsp",
+            windows: 3,
+            focus: 1,
+            width: 2560,
+            height: 1440
+        )
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        for _ in 0..<300 {
+            core.execute("resize", args: [.string("y"), .number(-5)])
+            core.retile(animated: false)
+        }
+        let last = try #require(refusals.last)
+        #expect(refusals.count > 1)
+        #expect(
+            last
+                == .neighborMinimum(
+                    anchor: WindowID(2),
+                    focused: WindowID(1),
+                    axis: "y",
+                    appBound: false,
+                    anchorApp: "App2"
+                )
+        )
     }
 }
