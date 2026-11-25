@@ -143,12 +143,18 @@ struct DesktopsRefusalFooterTests {
         let state = DesktopsStateTests.state(overview)
         let place = DesktopsPlace(screen: 1, desktop: 1, line: 1)
         let target = try #require(state.target(place))
-        model.setDesktopsQuery("Safari")
         model.reloadDesktops(selecting: target)
         #expect(model.desktops?.place == place)
         #expect(model.desktops?.isCarrying == false)
-        // A search typed before the drop stays (#3165).
+        // A search typed before the drop stays (#3165); a target it
+        // dims gives way to its match (#3624).
+        model.setDesktopsQuery("Safari")
+        model.reloadDesktops(selecting: target)
         #expect(model.desktops?.query == "Safari")
+        #expect(
+            model.desktops?.place
+                == DesktopsPlace(screen: 1, desktop: 1, line: 0)
+        )
     }
 
     /// The plain drop runs ahead of the close and reads the desk

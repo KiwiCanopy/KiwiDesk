@@ -80,7 +80,7 @@ struct DesktopsState: Equatable {
     var selectedLine: DesktopOverview.SpaceLine? { place.flatMap(line) }
 
     /// A line's windows as drawn: matches first, each part in its
-    /// Space's order (#1229 ▸ Search).
+    /// Space's order (#1229, #3624).
     func ordered(_ place: DesktopsPlace) -> [DesktopOverview.Window] {
         guard let windows = line(place)?.windows else { return [] }
         let hit = windows.filter { matches($0, at: place) }
@@ -122,11 +122,6 @@ struct DesktopsState: Equatable {
     mutating func setQuery(_ text: String) {
         query = text
         offsets = [:]
-        if let window, let place, let found = overview.window(window),
-            !reaches(found, at: place)
-        {
-            self.window = nil
-        }
         settle()
         reveal()
     }
@@ -177,6 +172,7 @@ struct DesktopsState: Equatable {
     mutating func togglePick(_ id: WindowID) -> DesktopOverview.CarryBlock? {
         if let index = carried.firstIndex(of: id) {
             carried.remove(at: index)
+            if carried.isEmpty { settle() }
             return nil
         }
         if let block = pickBlock(id) { return block }

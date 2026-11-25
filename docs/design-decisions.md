@@ -17108,17 +17108,19 @@ search is match-only, as the switcher's strip is (#3135). Under a
 query the keys land only on matching lines and windows, ← → skip a
 screen with none, and a query that stops matching the selected
 line moves the selection to the first match down its column, then
-the next column's; a click still reaches a dimmed line. A
+the next column's, a number's on its Desktop's landing line; a
+click still reaches a dimmed line, even while nothing matches. A
 selection left on a dimmed line let ↩ act on a place the query
 hid. While a window is carried the keys reach every line and no
-line dims, because a drop's target is a place, not a match. An
+line dims, because a drop's target is a place, not a match; the
+windows stay match-only, as their icons stay dimmed. An
 all-digit query names Desktop N in each column, as ⌘N counts, and
 no window text, so a Desktop past 10 is two keys away; out of range
 it matches nothing, and `0` is no alias for 10, since a typed 10
-reaches that Desktop. Typing selects and ↩ jumps. Prefix modes
+reaches that Desktop. Typing never switches; ↩ does. Prefix modes
 (`d:`, `a:`, `w:`, `s:`) were refused: hidden syntax the panel
 never shows, whose `a:` and `w:` the plain query already answers.
-`DesktopsSearchTests` holds it.
+`DesktopsSearchTests` and `DesktopsSearchSettleTests` hold it.
 
 **KiwiHub on a split screen reads "here" per area (#3572, owner
 ruling with the ui-designer 2026-11-23).** [Rationale] An area is where a

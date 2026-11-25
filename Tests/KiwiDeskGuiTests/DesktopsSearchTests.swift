@@ -128,7 +128,7 @@ struct DesktopsSearchTests {
         let column = state.columnOrder(screen: 0)
         let keys = Array(repeating: JumpKey.step(1), count: column.count)
         #expect(Self.visits(&state, keys) == Set(column))
-        #expect(column.allSatisfy(state.hasMatch))
+        #expect(column.allSatisfy(state.reaches))
         // The icons keep their emphasis.
         let safari = Self.window(3, "Safari")
         #expect(!state.matches(safari, at: Self.place(2)))
@@ -185,7 +185,7 @@ struct DesktopsSearchTests {
         state.setQuery("3")
         let notes = Self.window(2, "Notes", title: "v3")
         #expect(!state.matches(notes, at: Self.place(1)))
-        #expect(!state.hasMatch(Self.place(1)))
+        #expect(!state.reaches(Self.place(1)))
         let terminal = Self.window(4, "Terminal")
         #expect(state.matches(terminal, at: Self.place(3)))
     }

@@ -20,7 +20,7 @@ extension DesktopsState {
         guard
             let next = Self.step(
                 from: place,
-                among: order.filter(hasMatch),
+                among: order.filter(reaches),
                 order: order,
                 delta,
                 wrap: wrap
@@ -36,7 +36,7 @@ extension DesktopsState {
         guard let place else { return }
         let screens = Array(overview.screens.indices)
         let stops = screens.filter {
-            columnOrder(screen: $0).contains(where: hasMatch)
+            columnOrder(screen: $0).contains(where: reaches)
         }
         guard
             let screen = Self.step(
@@ -55,16 +55,6 @@ extension DesktopsState {
             : nearestLine(to: place, on: screen, desktop: desktop)
         let kept = clamped(screen: screen, desktop: desktop, line: line)
         select(nearestMatch(to: kept) ?? kept)
-    }
-
-    /// The match down `place`'s column nearest it, `place` itself
-    /// where it matches; a tie goes up.
-    func nearestMatch(to place: DesktopsPlace) -> DesktopsPlace? {
-        let order = columnOrder(screen: place.screen)
-        guard let at = order.firstIndex(of: place) else { return nil }
-        return order.indices.filter { hasMatch(order[$0]) }
-            .min { abs($0 - at) < abs($1 - at) }
-            .map { order[$0] }
     }
 
     /// The line of `desktop` on `screen` whose top lies nearest the
@@ -121,7 +111,7 @@ extension DesktopsState {
         guard
             let target = Self.step(
                 from: place,
-                among: order.filter(hasMatch),
+                among: order.filter(reaches),
                 order: order,
                 delta,
                 wrap: wrap
@@ -152,6 +142,14 @@ extension DesktopsState {
             desktop: index,
             line: desktops[index].landingLine
         )
+    }
+
+    /// Whether `place` lies on Desktop `number` (1-based) of its
+    /// column, as `numbered` counts.
+    func isNumbered(_ place: DesktopsPlace, _ number: Int?) -> Bool {
+        guard let number else { return false }
+        return numbered(number - 1, screen: place.screen)?.desktop
+            == place.desktop
     }
 
     /// How many Desktops the selected column's digits reach.
@@ -200,8 +198,8 @@ extension DesktopsState {
 
     /// One step from `item` among `stops`, the items of `order` the
     /// keys may land on. From an item that is no stop, the step
-    /// lands on the nearest stop in its direction, and wraps to
-    /// the far end only on a fresh press.
+    /// lands on the nearest stop in its direction, and past the
+    /// last one takes the list step's wrap from that end.
     static func step<Item: Equatable>(
         from item: Item,
         among stops: [Item],
@@ -213,12 +211,21 @@ extension DesktopsState {
             return step(at, delta, count: stops.count, wrap: wrap)
                 .map { stops[$0] }
         }
-        guard let at = order.firstIndex(of: item) else { return nil }
-        let rank = { (stop: Item) in order.firstIndex(of: stop) ?? at }
-        let ahead =
-            delta > 0
-            ? stops.first { rank($0) > at } : stops.last { rank($0) < at }
-        guard wrap else { return ahead }
-        return ahead ?? (delta > 0 ? stops.first : stops.last)
+        guard let at = order.firstIndex(of: item), !stops.isEmpty else {
+            return nil
+        }
+        let before = stops.filter {
+            (order.firstIndex(of: $0) ?? at) < at
+        }.count
+        let land = delta > 0 ? before : before - 1
+        if stops.indices.contains(land) { return stops[land] }
+        // Past the last stop: the list step's own wrap from that end,
+        // which a held key never takes.
+        guard wrap else { return nil }
+        let edge = delta > 0 ? stops.count - 1 : 0
+        let by = delta > 0 ? 1 : -1
+        return stops[
+            JumpList.stepped(edge, by: by, count: stops.count, wrap: true)
+        ]
     }
 }

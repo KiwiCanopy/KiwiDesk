@@ -1,7 +1,7 @@
 import Foundation
 import KiwiDeskCore
 
-/// What the Desktops side's field asks for (#1229 ▸ Search, #3624):
+/// What the Desktops side's field asks for (#1229, #3624):
 /// an all-digit query names a Desktop by its number in each screen
 /// column, as ⌘N counts, and anything else is app and title text.
 enum DesktopsSearch: Equatable {
@@ -22,13 +22,14 @@ enum DesktopsSearch: Equatable {
     }
 
     private static func isDigit(_ character: Character) -> Bool {
-        ("0"..."9").contains(character)
+        character.isASCII && character.isWholeNumber
     }
 }
 
 /// Matching and match-only reach (#3624 ▸ Ruling, after #3135):
 /// under a query the keys land only on matches, save that a carry
-/// reaches every line, since a drop's target is a place.
+/// reaches every line, since a drop's target is a place. Windows
+/// stay match-only during a carry, as their icons stay dimmed.
 extension DesktopsState {
     var search: DesktopsSearch { DesktopsSearch(query) }
 
@@ -41,33 +42,34 @@ extension DesktopsState {
     ) -> Bool {
         switch search {
         case .all: return true
-        case .number(let number): return place.desktop + 1 == number
+        case .number(let number): return isNumbered(place, number)
         case .text(let text):
             return window.app.localizedCaseInsensitiveContains(text)
                 || window.title.localizedCaseInsensitiveContains(text)
         }
     }
 
-    /// Whether the keys may land on `place`; a place they may not
-    /// dims. Everything is reachable while nothing is typed or a
+    /// Whether the keys may land on `place`; a line they may not
+    /// dims. Every line is reachable while nothing is typed or a
     /// window is carried.
-    func hasMatch(_ place: DesktopsPlace) -> Bool {
+    func reaches(_ place: DesktopsPlace) -> Bool {
         switch search {
         case .all: return true
         case _ where isCarrying: return true
-        case .number(let number): return place.desktop + 1 == number
+        case .number(let number): return isNumbered(place, number)
         case .text:
             let windows = line(place)?.windows ?? []
             return windows.contains { matches($0, at: place) }
         }
     }
 
-    /// Whether the keys may land on `window` inside `place`.
+    /// Whether the keys may land on `window` inside `place`: the
+    /// windows whose icons the query leaves undimmed.
     func reaches(
         _ window: DesktopOverview.Window,
         at place: DesktopsPlace
     ) -> Bool {
-        isCarrying || matches(window, at: place)
+        matches(window, at: place)
     }
 
     /// The windows of `place` the keys may land on, as drawn.
@@ -75,30 +77,48 @@ extension DesktopsState {
         ordered(place).filter { reaches($0, at: place) }
     }
 
-    /// True while a query matches no place: the keys that move or
-    /// act beep and the selection stays.
+    /// True while a typed query matches no place: the keys that move
+    /// or act beep and the selection stays.
     var matchesNothing: Bool {
-        overview.screens.indices.allSatisfy { screen in
-            !columnOrder(screen: screen).contains(where: hasMatch)
+        guard search != .all else { return false }
+        return overview.screens.indices.allSatisfy { screen in
+            !columnOrder(screen: screen).contains(where: reaches)
         }
     }
 
     /// The place a query lands on in `screen`'s column: Desktop N's
     /// landing line for a number, else the first match down it.
     func firstMatch(screen: Int) -> DesktopsPlace? {
-        if case .number(let number?) = search, !isCarrying,
+        if case .number(let number?) = search,
             let place = numbered(number - 1, screen: screen)
         {
             return place
         }
-        return columnOrder(screen: screen).first(where: hasMatch)
+        return columnOrder(screen: screen).first(where: reaches)
     }
 
-    /// Moves a selection the query dims to the first match in its
-    /// screen's column, then the next column's; a selection still
-    /// matching stays.
+    /// The match down `place`'s column nearest it, `place` itself
+    /// where it matches; a tie goes up.
+    func nearestMatch(to place: DesktopsPlace) -> DesktopsPlace? {
+        let order = columnOrder(screen: place.screen)
+        guard let at = order.firstIndex(of: place) else { return nil }
+        return order.indices.filter { reaches(order[$0]) }
+            .min { abs($0 - at) < abs($1 - at) }
+            .map { order[$0] }
+    }
+
+    /// Puts the selection where the keys may land, the one door every
+    /// query change and carry end passes (#3624): a window the query
+    /// dims leaves the Space, and a line it dims gives way to the
+    /// first match in its screen's column, then the next column's.
+    /// A selection still matching stays.
     mutating func settle() {
-        guard let place, !hasMatch(place) else { return }
+        if let window, let place, let found = overview.window(window),
+            !reaches(found, at: place)
+        {
+            leave()
+        }
+        guard let place, !reaches(place) else { return }
         let screens = overview.screens.indices
         let order =
             screens.filter { $0 >= place.screen }

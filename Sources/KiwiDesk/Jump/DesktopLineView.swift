@@ -50,7 +50,7 @@ struct DesktopLineView: View {
         .padding(.horizontal, DesktopsGeometry.linePadding)
         .frame(height: geometry.line)
         .background(ground)
-        .opacity(state.hasMatch(place) ? 1 : 0.45)
+        .opacity(state.reaches(place) ? 1 : 0.45)
         .contentShape(Rectangle())
         .onTapGesture { click() }
         .desktopsHover(.place(place), pointer)
