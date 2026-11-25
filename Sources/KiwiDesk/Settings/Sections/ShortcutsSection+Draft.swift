@@ -6,11 +6,23 @@ extension ShortcutsSection {
     var advancedDrawerCaption: String {
         L(
             "shortcuts.advanced.caption",
-            "Bind any Lua to a hotkey. This is the "
+            "This is the "
                 + "power-user escape hatch — the "
                 + "groups above cover the built-in "
                 + "actions."
         )
+    }
+
+    /// The Lua bindings section's shut line: the selected layer's
+    /// bindings by name once one exists, or what one is.
+    var luaSummary: String {
+        let names = bindingsBinding.wrappedValue
+            .filter(ShortcutsGates.isLuaBinding)
+            .map(AdvancedLuaGroup.rowName)
+        guard !names.isEmpty else {
+            return L("shortcuts.lua.summary", "Bind any Lua to a key")
+        }
+        return LocalizedList.join(names)
     }
 
     /// Family-to-rows expansion for the selected layer.

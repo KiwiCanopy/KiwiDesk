@@ -37,6 +37,8 @@ struct SettingsCatalogArgumentTests {
         // to the one `SettingsSection` it is (#1741); its mount
         // takes the drawer outright, counted by the needle above.
         "SettingsCollapsibleSection.swift: control",
+        // One branch per segment; the collapsible one is counted.
+        "LayersCard.swift: SettingsCatalog.shortcuts.layersCard.control",
         // No card titles the Mouse & Trackpad part (#3184).
         "GesturesPart.swift: SettingsCatalog.shortcuts.gestures.control",
         // The self-anchoring control hands its descriptor to a
@@ -163,8 +165,7 @@ struct SettingsCatalogArgumentTests {
         // #678 Phase 3 is +5 net: eight new colour declarations
         // plus Size & float's disclosure in, the two interim
         // colour cards and their two Advanced-colors drawers out.
-        // Turn 10 adds Layout Defaults' live-preview and
-        // spaces-using cards: 48.
+        // 48 since turn 10: Layout Defaults' preview, spaces cards.
         // 47 since turn 14b merged General's two cards.
         // 49 since turn 13a: Profiles' "Which profile loads"
         // card and its "For other setups" preset drawer, each
@@ -176,8 +177,7 @@ struct SettingsCatalogArgumentTests {
         // 49 since #754: the Borders card, mounted once.
         // 50 since #793, 51 since #794: two panel-mounted scenes.
         // 51 since #875: deleted the install inventory card.
-        // 52 since #1019: About's Guide link self-anchors.
-        // 53 since #1307: the Liquid Glass card.
+        // 52 since #1019: Guide link; 53 since #1307: Liquid Glass.
         // 61 since #1250: General ▸ Files & Reset's eight rows
         // self-anchor as the drawer's CHILDREN, each mounted
         // once — the first direct child mounts (the gap rows
