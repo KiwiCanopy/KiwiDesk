@@ -103,8 +103,9 @@ jobs:
             echo "::error::tag $TAG is not X.Y.Z"; exit 1; }
           MAJOR="${BASH_REMATCH[1]}"; MINOR="${BASH_REMATCH[2]}"; PATCH="${BASH_REMATCH[3]}"
 
-          NEXT=("$MAJOR.$MINOR.$((PATCH + 1))")
-          if [ "$PATCH" -eq 0 ]; then NEXT+=("$MAJOR.$((MINOR + 1)).0"); fi
+          # A patch milestone is never opened ahead: a patch is not
+          # planned, so its milestone is made by hand when one ships.
+          NEXT=("$MAJOR.$((MINOR + 1)).0")
           if [ "$PATCH" -eq 0 ] && [ "$MINOR" -eq 0 ]; then NEXT+=("$((MAJOR + 1)).0.0"); fi
 
           for m in "${NEXT[@]}"; do
