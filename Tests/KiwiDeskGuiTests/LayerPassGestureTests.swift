@@ -9,7 +9,9 @@ import Testing
 /// base's and each profile's map with the layer, drops them with a
 /// delete everywhere, keeps the base on a delete here, and drops a
 /// profile's own map when the profile leaves the layer. Work is
-/// loaded and edited; Home carries its own "Coding" map.
+/// loaded and edited; Home carries its own "Coding" map. Main-actor
+/// spend: one test core, three small file writes and one model
+/// reload per test; no scan, no AppKit layout.
 @Suite("Layer pass over gestures (#3535)", .serialized)
 @MainActor
 struct LayerPassGestureTests {

@@ -29,19 +29,14 @@ public enum ShortcutBaseSwitch {
         config.layers = config.layers.map {
             move($0, onto: base, liveSpaces: live) { _ in false }.layer
         }
-        // `default` moves even with no map: its seeds alone can
-        // leave a row pinned.
-        var moved = LayerGestures()
-        for layer in Set(config.gesture.layers).union([KeyLayer.defaultName]) {
-            moved[layer] =
-                GestureBaseSwitch.move(
-                    config.gesture[layer],
-                    from: config.shortcutBase,
-                    onto: base,
-                    layer: layer
-                ).map
+        config.gesture = config.gesture.mapLayers { layer, map in
+            GestureBaseSwitch.move(
+                map,
+                from: config.shortcutBase,
+                onto: base,
+                layer: layer
+            ).map
         }
-        config.gesture = moved
         config.shortcutBase = base
     }
 
