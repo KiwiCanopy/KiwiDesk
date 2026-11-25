@@ -72,12 +72,19 @@ extension KiwiCore {
     func stateJSON() -> JSONValue {
         // The same set `list_windows`' `shown` reads (#3549).
         let shown = state.workspaces.visibleSpaces
+        let displays = state.workspaces.allDisplays
         let spaces = state.workspaces.allSpaces.map { space in
+            let display = state.workspaces.display(of: space.id)
             var object: [String: JSONValue] = [
                 "id": .string(space.id.raw),
                 // The screen it sits on, the `list_monitors` id.
-                "display": state.workspaces.display(of: space.id)
-                    .map { .number(Double($0.raw)) } ?? .null,
+                "display": display.map { .number(Double($0.raw)) }
+                    ?? .null,
+                // That screen's `list_monitors` fingerprint, which
+                // every screen verb takes (#3628).
+                "fingerprint": display.flatMap { id in
+                    displays.first { $0.id == id }
+                }.map { .string($0.fingerprint) } ?? .null,
                 "shown": .bool(shown.contains(space.id)),
                 // Its area's key on a split screen, `list_monitors`'
                 // `areas[].key` (#3517); null on an unsplit one.

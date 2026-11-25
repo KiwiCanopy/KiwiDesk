@@ -10605,6 +10605,30 @@ Space whose `shown` is true and whose `display` is D is the one
 included, from these two queries. A bar re-reads them on
 `space_change`, `desktop_change` and `monitor_change`.
 
+:::unreleased
+`display` is the `list_monitors` id, macOS's own number for the
+screen. It is not the screen position that screen verbs such as
+[`space_bar.set_edge`](#space_barset_edge) read from a number, and
+the two often look alike: a `display` of `1` passed as a screen
+writes the main screen, wherever the Space sits. Each space object
+also has `fingerprint`, the `list_monitors` fingerprint of its
+screen (`nil` for a Space on no screen), which every screen verb
+takes as is. On a split screen the fingerprint names the first
+area, so pass the Space's area first:
+
+```lua
+local state = KiwiDesk.get_state()
+for _, space in ipairs(state.spaces) do
+    if space.id == state.active_space then
+        space_bar.set_edge("left", space.area or space.fingerprint)
+    end
+end
+```
+
+To name the screen instead, look `display` up in `list_monitors`:
+the entry whose `id` equals it has the screen's `name`.
+:::
+
 On a screen [split into areas](#set_display_areas) each space
 object also has `area`, the key of the area it sits in, as
 `list_monitors` prints it in `areas[].key`; `null` on a screen that
@@ -10814,6 +10838,14 @@ parked out of sight or minimized — has `z` `null`. The list's own
 order is the Spaces' rows, not the stacking order: sort by `z` for
 that. A window KiwiDesk does not track, such as a menu, counts
 toward no rank, though it may cover a window.
+
+:::unreleased
+`display` is the `list_monitors` id, not the screen position that
+screen verbs read from a number. To hand a window's screen to one,
+pass the `fingerprint` of its Space from
+[`get_state`](#get_state), or of the `list_monitors` entry whose
+`id` is that `display`.
+:::
 
 Each entry also carries `title`, the window's title as `get_state`
 has it, so a list reads without a second call. Titles need not be
