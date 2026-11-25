@@ -89,6 +89,38 @@ struct DesktopsSearchSettleTests {
         #expect(state.click(.pick(moveHere: false)) == .act(.jump(target)))
     }
 
+    @MainActor
+    @Test("a model click acts while nothing matches, with no beep")
+    func modelClickSkipsTheBeep() throws {
+        final class Box {
+            var actions: [DesktopsAction] = []
+            var beeps = 0
+        }
+        let box = Box()
+        let model = JumpModel(
+            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
+            icons: [:],
+            rowCap: 6
+        )
+        model.loadDesktops = { Search.overview() }
+        model.onDesktopsAction = { box.actions.append($0) }
+        model.onDeadKey = { box.beeps += 1 }
+        model.setScope(.desktops)
+        model.setDesktopsQuery("zzz")
+        let target = try #require(model.desktops?.target(Self.place(2)))
+        model.clickPlace(Self.place(2), count: 1, modifiers: [], opens: true)
+        #expect(box.actions == [.jump(target)])
+        #expect(box.beeps == 0)
+    }
+
+    @Test("a query with no match on a later screen settles on an earlier")
+    func settleWrapsToEarlierScreens() {
+        var state = Search.state()
+        state.select(DesktopsPlace(screen: 1, desktop: 0, line: 0))
+        state.setQuery("ter")
+        #expect(state.place == Self.place(3))
+    }
+
     @Test("⌘↓ on a dimmed line beeps; an empty one still refuses")
     func openDimmedBeeps() {
         var state = Search.state()
