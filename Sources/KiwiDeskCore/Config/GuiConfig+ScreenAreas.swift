@@ -99,7 +99,7 @@ extension TilingSettings {
         appBarStyle.moveScreen(old, to: new)
         kiwishelf.pocketEdges.moveScreen(old, to: new)
         Self.move(old, to: new, in: &spaceBarStyle.visibilityOverride)
-        Self.move(old, to: new, in: &appBarStyle.visibilityOverride)
+        eachAppBarVisibilityMap { Self.move(old, to: new, in: &$0) }
     }
 
     /// A merged-away area's Show moved to the area that absorbed it

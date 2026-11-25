@@ -53,7 +53,7 @@ extension SettingsModel {
             Set(set.monitors).reduce(0) { $0 + areaKeys(of: $1).count } > 1
         }
             || config.settings[keyPath: bar].screensDiffer
-            || show.map(hasScreenShows) == true
+            || show.map { !screenShowKeys($0).isEmpty } == true
     }
 
     /// The keys a screen's rows take: its areas' on a split screen
@@ -86,14 +86,7 @@ extension SettingsModel {
         for (screen, count) in counts {
             for key in areaKeys(of: screen) { keyed[key] = count }
         }
-        let shows: [String] =
-            switch show {
-            case .space?:
-                Array(config.settings.spaceBarStyle.visibilityOverride.keys)
-            case .app?:
-                Array(config.settings.appBarStyle.visibilityOverride.keys)
-            case nil: []
-            }
+        let shows = show.map { Array(screenShowKeys($0)) } ?? []
         for key in Array(config.settings[keyPath: bar].edgeOverride.keys)
             + shows
         {

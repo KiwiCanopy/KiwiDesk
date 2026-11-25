@@ -16,15 +16,18 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("app_bar.set_".count)
         )
-        if field == "visibility", args.count < 2 {
-            return .fail(Self.appBarVisibilityNeedsAScreen)
-        }
+        // A layout's own field parses here too, so only the
+        // style's own fields dispatch (#3618).
+        guard
+            AppBarStyle.CodingKeys.allCases.contains(where: {
+                BarStyleKeys.setterField(of: $0.stringValue) == field
+            })
+        else { return .fail("unknown bar setting: \(field)") }
         let calls: [[JSONValue]]
         switch screenResolvedBarArgs(field: field, args) {
         case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }
-        // A physical screen names each of its areas (#3517).
         for given in calls {
             switch AppBarCommandSetting.parse(field: field, args: given)
             {
@@ -123,8 +126,9 @@ extension KiwiCore {
     }
 
     /// Applies a layout's `*.set_app_bar_<field>` override.
-    /// `visibility` is the layout's own concrete value (#761);
-    /// every other field writes an override of the global style.
+    /// `visibility` is the layout's own concrete value (#761), or
+    /// with a screen that screen's or area's (#3618); every other
+    /// field writes an override of the global style.
     func applyBarOverride(
         field: String,
         _ args: [JSONValue],
@@ -138,19 +142,24 @@ extension KiwiCore {
         })?.value {
             return .fail("the App Bar's \(field) is global: \(global)")
         }
-        switch AppBarCommandSetting.parse(field: field, args: args)
-        {
-        case .success(.screenVisibility):
-            return .fail(Self.appBarScreenVisibilityIsGlobal)
-        case .success(.visibility(let value)):
-            // A layout's own Show clears every area's (ruling 32).
-            tiler.settings.setAppBarVisibility(value, in: mode)
-            return .ok()
-        case .success(let setting):
-            setting.apply(to: &tiler.settings[keyPath: layout])
-            return .ok()
-        case .failure(let error):
-            return .fail(error.message)
+        let calls: [[JSONValue]]
+        switch screenResolvedBarArgs(field: field, args) {
+        case .success(let resolved): calls = resolved
+        case .failure(let error): return .fail(error.message)
         }
+        // A physical screen names each of its areas (#3517).
+        for given in calls {
+            switch AppBarCommandSetting.parse(field: field, args: given)
+            {
+            case .success(.visibility(let value)):
+                // A layout's own Show clears its areas' (ruling 32).
+                tiler.settings.setAppBarVisibility(value, in: mode)
+            case .success(let setting):
+                setting.apply(to: &tiler.settings[keyPath: layout])
+            case .failure(let error):
+                return .fail(error.message)
+            }
+        }
+        return .ok()
     }
 }

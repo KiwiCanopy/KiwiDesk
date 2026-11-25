@@ -1,17 +1,18 @@
 import Foundation
 
-/// A bar's visibility per area (#3517 ruling 30): the sparse
-/// `space_bar.visibility_override` / `app_bar.visibility_override`
-/// map, keyed by `ScreenAreaKey` — an unsplit screen by its bare
-/// fingerprint — taking the bar's own `always | auto | hidden`. An
-/// area with no entry keeps the bar's stored visibility. It resolves
+/// A bar's visibility per area (#3517 ruling 30, #3618): the sparse
+/// `space_bar.visibility_override` and each hosting layout's
+/// `<layout>.app_bar.visibility_override` map, keyed by
+/// `ScreenAreaKey` — an unsplit screen by its bare fingerprint —
+/// taking the bar's own `always | auto | hidden`. An area with no
+/// entry keeps that bar's stored visibility. It resolves
 /// in the one per-screen step, `TilingSettings.onScreen(_:)`, so an
 /// area's drawn and reserved strips read one answer (bars.md).
 extension TilingSettings {
     /// Whether either bar gives some area a visibility of its own.
     public var hasScreenVisibilities: Bool {
         !spaceBarStyle.visibilityOverride.isEmpty
-            || !appBarStyle.visibilityOverride.isEmpty
+            || appBarHosts.contains { !$0.visibilityOverride.isEmpty }
     }
 
     /// Whether some screen or area resolves differently from the
@@ -26,24 +27,36 @@ extension TilingSettings {
     public var screenKeys: [String] {
         Set(edgeScreens)
             .union(spaceBarStyle.visibilityOverride.keys)
-            .union(appBarStyle.visibilityOverride.keys)
+            .union(appBarHosts.flatMap(\.visibilityOverride.keys))
             .sorted()
     }
 
     /// Each bar's visibility as `screen` has it, its entries dropped
     /// so resolving again changes nothing: the Space Bar's stored
-    /// value replaced, and the App Bar's in every layout that carries
-    /// one — never giving a layout an App Bar it lacks.
+    /// value replaced, and each hosting layout's App Bar by its own
+    /// entry — never giving a layout an App Bar it lacks.
     mutating func resolveVisibilities(on screen: String?) {
         let space = screen.flatMap { spaceBarStyle.visibilityOverride[$0] }
-        let app = screen.flatMap { appBarStyle.visibilityOverride[$0] }
         spaceBarStyle.visibilityOverride = [:]
-        appBarStyle.visibilityOverride = [:]
         if let space { spaceBarStyle.visibility = space }
-        guard let app else { return }
         for mode in LayoutMode.allCases {
             guard let path = Self.appBarPath(for: mode) else { continue }
-            self[keyPath: path].visibility = app
+            let app = screen.flatMap {
+                self[keyPath: path].visibilityOverride[$0]
+            }
+            self[keyPath: path].visibilityOverride = [:]
+            if let app { self[keyPath: path].visibility = app }
+        }
+    }
+
+    /// Every hosting layout's per-area App Bar map, rewritten by
+    /// `body`: the merge, split and forget doors' one walk.
+    mutating func eachAppBarVisibilityMap(
+        _ body: (inout [String: ShelfVisibility]) -> Void
+    ) {
+        for mode in LayoutMode.allCases {
+            guard let path = Self.appBarPath(for: mode) else { continue }
+            body(&self[keyPath: path].visibilityOverride)
         }
     }
 }
@@ -66,9 +79,9 @@ extension SpaceBarStyle {
     }
 }
 
-extension AppBarStyle {
-    /// One screen's or area's App Bar visibility (#3517); nil, which
-    /// follows each layout's own, stores nothing.
+extension LayoutAppBar {
+    /// One screen's or area's visibility for this layout's App Bar
+    /// (#3618); nil, which follows the layout's own, stores nothing.
     public mutating func setVisibility(
         _ value: ShelfVisibility?,
         on screen: String

@@ -31,7 +31,9 @@ struct SettingsDraftDiffTests {
         config.settings.spaceBarStyle.edgeOverride["S:1x1"] = .left
         config.settings.appBarStyle.edgeOverride["S:1x1"] = .left
         config.settings.spaceBarStyle.visibilityOverride["S:1x1"] = .hidden
-        config.settings.appBarStyle.visibilityOverride["S:1x1"] = .hidden
+        config.settings.monocle.appBar.visibilityOverride["S:1x1"] = .hidden
+        config.settings.scrolling.appBar.visibilityOverride["S:1x1"] =
+            .hidden
         config.settings.kiwishelf.pocketEdgeOverride["S:1x1"] = .left
         config.spaces = ["work"]
         config.spaceModes = ["work": .grid]

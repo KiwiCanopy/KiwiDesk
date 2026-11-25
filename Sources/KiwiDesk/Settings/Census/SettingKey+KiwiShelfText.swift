@@ -25,8 +25,10 @@ extension KiwiShelfKey {
             return .text("kiwishelf.edge.per_screen.app_bar")
         case .spaceBarScreenVisibility:
             return .text("kiwishelf.show.per_screen.space_bar")
-        case .appBarScreenVisibility:
-            return .text("kiwishelf.show.per_screen.app_bar")
+        case .monocleAppBarScreenVisibility:
+            return .text("kiwishelf.show.per_screen.monocle")
+        case .scrollingAppBarScreenVisibility:
+            return .text("kiwishelf.show.per_screen.scrolling")
         case .thickness:
             return .text(
                 "kiwishelf.thickness",

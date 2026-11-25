@@ -133,7 +133,6 @@ settings.appBarStyle.edge
 settings.appBarStyle.edgeOverride[screen]
 settings.appBarStyle.groupAdjacentWindows
 settings.appBarStyle.titleCap
-settings.appBarStyle.visibilityOverride[screen]
 settings.borderStyle.cornerStyle
 settings.borderStyle.enabled
 settings.borderStyle.focusedColor
@@ -221,6 +220,7 @@ settings.minWindowSizes.stack.width
 settings.minWindowSizes.track.height
 settings.minWindowSizes.track.width
 settings.monocle.appBar.visibility
+settings.monocle.appBar.visibilityOverride[screen]
 settings.monocle.hideStyle
 settings.monocle.maximizeWindows
 settings.monocle.newWindowPlacement
@@ -239,6 +239,7 @@ settings.kiwishelf.menuBarIcon
 settings.kiwishelf.menuBarIcon
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
+settings.scrolling.appBar.visibilityOverride[screen]
 settings.scrolling.fillWhenAlone
 settings.scrolling.newWindowPlacement
 settings.scrolling.orientation

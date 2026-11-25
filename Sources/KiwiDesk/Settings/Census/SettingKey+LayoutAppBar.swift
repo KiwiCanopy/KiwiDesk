@@ -73,6 +73,9 @@ extension SettingKey {
         switch self {
         case .layoutAppBar(.monocleAppBarVisibility): return .monocle
         case .layoutAppBar(.scrollingAppBarVisibility): return .scrolling
+        case .kiwishelf(.monocleAppBarScreenVisibility): return .monocle
+        case .kiwishelf(.scrollingAppBarScreenVisibility):
+            return .scrolling
         default: return nil
         }
     }

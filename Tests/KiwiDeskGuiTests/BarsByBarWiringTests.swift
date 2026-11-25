@@ -45,8 +45,10 @@ struct BarsByBarWiringTests {
         case .kiwishelf(.spaceBarScreenVisibility):
             ".kiwishelfSpaceBarScreenShows)"
         case .kiwishelf(.appBarScreenEdge): ".kiwishelfAppBarScreenEdges)"
-        case .kiwishelf(.appBarScreenVisibility):
-            ".kiwishelfAppBarScreenShows)"
+        case .kiwishelf(.monocleAppBarScreenVisibility):
+            ".kiwishelfMonocleScreenShows)"
+        case .kiwishelf(.scrollingAppBarScreenVisibility):
+            ".kiwishelfScrollingScreenShows)"
         case .kiwishelf(.pocketScreenEdge): ".kiwishelfPocketScreenEdges)"
         case .kiwishelf(.pocketPosition): "pocketPositionRows"
         default: nil
@@ -88,14 +90,22 @@ struct BarsByBarWiringTests {
     @Test("a picked area's rows edit it; the Pocket's others grey")
     func areaRowsEditTheArea() throws {
         let each = try squashed("KiwiShelfCard+Each.swift")
-        for (show, edged, block) in [
-            ("space", "spaceBarStyle", "spaceBar"),
-            ("app", "appBarStyle", "appBar"),
+        // The App Bar's Show takes one row per layout (#3618).
+        let shows = [
+            "spaceBar": "areaShow(.spaceBar,Self.showLabel,on:key,"
+                + "bar:.spaceBar)",
+            "appBar": ["monocle", "scrolling"].map {
+                "areaShow(.appBar(.\($0)),Self.showIn(.\($0)),on:key,"
+                    + "bar:.appBar)"
+            }.joined(),
+        ]
+        for (edged, block) in [
+            ("spaceBarStyle", "spaceBar"), ("appBarStyle", "appBar"),
         ] {
             #expect(
                 each.contains(
                     "ifletkey=activeScope{"
-                        + "areaShow(.\(show),on:key,bar:.\(block))"
+                        + (shows[block] ?? "")
                         + "areaEdge(\\.\(edged),on:key,bar:.\(block))"
                         + "}else{"
                 )
@@ -139,7 +149,8 @@ struct BarsByBarWiringTests {
         #expect(each.contains("letoffered=model.offersScreenScopes"))
         for child in [
             "kiwishelfSpaceBarScreenEdges", "kiwishelfSpaceBarScreenShows",
-            "kiwishelfAppBarScreenEdges", "kiwishelfAppBarScreenShows",
+            "kiwishelfAppBarScreenEdges", "kiwishelfMonocleScreenShows",
+            "kiwishelfScrollingScreenShows",
             "kiwishelfPocketScreenEdges", "screenOrArea",
         ] {
             #expect(

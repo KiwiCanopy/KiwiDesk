@@ -121,8 +121,12 @@ struct SettingsRevertRegisterTests {
         if followers.contains("settings.spaceBarStyle.visibility") {
             maps.append("settings.spaceBarStyle.visibilityOverride")
         }
-        if followers.contains(where: { $0.hasSuffix(".appBar.visibility") }) {
-            maps.append("settings.appBarStyle.visibilityOverride")
+        // Each layout's App Bar Show clears that layout's map (#3618).
+        for follower in followers
+        where follower.hasSuffix(
+            ".appBar.visibility"
+        ) {
+            maps.append(follower + "Override")
         }
         return maps
     }

@@ -6,7 +6,7 @@ extension SettingsValueReadout {
     /// One row per screen or area whose Show changed, labelled with
     /// the bar's per-screen label and the key's screen, each side
     /// the value that screen shows: its own, else `own` — the Space
-    /// Bar's own value — or Per layout for the App Bar.
+    /// Bar's own value — or Inherit for a layout's App Bar (#3618).
     static func screenShowRows(
         _ census: SettingKey,
         _ old: [String: ShelfVisibility],
@@ -14,11 +14,9 @@ extension SettingsValueReadout {
         own: (old: ShelfVisibility, new: ShelfVisibility)?,
         splits: [String: ScreenSplit]
     ) -> [SettingsDiffRow] {
-        let base =
-            census == .kiwishelf(.appBarScreenVisibility)
-            ? appBarScreenShowLabel : spaceBarScreenShowLabel
+        let base = label(for: census)
         let name: (ShelfVisibility?) -> String = { value in
-            guard let value else { return SettingsModel.perLayout }
+            guard let value else { return SettingsModel.inheritShow }
             return AppBarOptions.visibility.first { $0.0 == value }?.1 ?? ""
         }
         let before = { (key: String) in old[key] ?? own?.old }
@@ -42,16 +40,6 @@ extension SettingsValueReadout {
                     new: name(after(key))
                 )
             }
-    }
-
-    /// The census labels of the two rows, spelled where the scanner
-    /// reads them.
-    static var spaceBarScreenShowLabel: String {
-        L("kiwishelf.show.per_screen.space_bar", "Space Bar: Show per screen")
-    }
-
-    static var appBarScreenShowLabel: String {
-        L("kiwishelf.show.per_screen.app_bar", "App Bar: Show per screen")
     }
 
     /// One row per screen or area whose own edge changed (#1948,

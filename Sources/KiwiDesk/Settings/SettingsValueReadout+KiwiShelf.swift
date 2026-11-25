@@ -66,11 +66,19 @@ extension SettingsValueReadout {
                 ),
                 splits: new.settings.displayAreas
             )
-        case .appBarScreenVisibility:
+        case .monocleAppBarScreenVisibility:
             return screenShowRows(
                 census,
-                old.settings.appBarStyle.visibilityOverride,
-                new.settings.appBarStyle.visibilityOverride,
+                old.settings.monocle.appBar.visibilityOverride,
+                new.settings.monocle.appBar.visibilityOverride,
+                own: nil,
+                splits: new.settings.displayAreas
+            )
+        case .scrollingAppBarScreenVisibility:
+            return screenShowRows(
+                census,
+                old.settings.scrolling.appBar.visibilityOverride,
+                new.settings.scrolling.appBar.visibilityOverride,
                 own: nil,
                 splits: new.settings.displayAreas
             )

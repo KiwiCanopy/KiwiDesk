@@ -33,8 +33,10 @@ extension APIReference {
             .choice("placement", SpawnPlacement.self)
         ),
         "set_app_bar_visibility": APIRecord(
-            "Sets the monocle App Bar to always, auto or hidden.",
-            .choice("visibility", ShelfVisibility.self)
+            "Sets the monocle App Bar to always, auto or hidden, "
+                + "or on one screen or area.",
+            .choice("visibility", ShelfVisibility.self),
+            .text("screen", optional: true)
         ),
         "set_app_bar_active_indicator": APIRecord(
             "Overrides the App Bar's focus marker for this "

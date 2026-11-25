@@ -13,6 +13,10 @@ public struct LayoutAppBar: Sendable, Equatable {
     /// or shows only on its shortcut (#761) — the layout's own
     /// value, since only some layouts carry the bar.
     public var visibility: ShelfVisibility = .always
+    /// A screen's or area's own visibility for this layout's bar,
+    /// keyed by its `ScreenAreaKey` (#3517, #3618); a key with no
+    /// entry takes `visibility`. Resolved only in `onScreen(_:)`.
+    public var visibilityOverride: [String: ShelfVisibility] = [:]
 
     public var activeIndicator: ActiveIndicator?
     public var titleCap: Int?

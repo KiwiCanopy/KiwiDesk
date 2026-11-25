@@ -92,7 +92,8 @@ struct BarVisibilityMasterTests {
                 == Set(SettingKey.masterWrites[.kiwishelf(.visibility)] ?? [])
                 .union([
                     "settings.spaceBarStyle.visibilityOverride",
-                    "settings.appBarStyle.visibilityOverride",
+                    "settings.monocle.appBar.visibilityOverride",
+                    "settings.scrolling.appBar.visibilityOverride",
                 ])
         )
     }

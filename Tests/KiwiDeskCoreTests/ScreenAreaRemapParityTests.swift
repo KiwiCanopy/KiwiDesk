@@ -52,7 +52,8 @@ private func populated() -> GuiConfig {
     config.settings.appBarStyle.edgeOverride[key] = .left
     config.settings.kiwishelf.pocketEdgeOverride[key] = .right
     config.settings.spaceBarStyle.visibilityOverride[key] = .hidden
-    config.settings.appBarStyle.visibilityOverride[key] = .auto
+    config.settings.monocle.appBar.visibilityOverride[key] = .auto
+    config.settings.scrolling.appBar.visibilityOverride[key] = .hidden
     config.appWide = AppWideSettings()
     config.look = LookBody(
         style: ["space_bar.edge_override": .object([key: .string("top")])],
