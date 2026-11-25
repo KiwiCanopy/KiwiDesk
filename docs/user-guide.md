@@ -553,10 +553,8 @@ screen snaps the window back. Floating windows show no overlay
 and cannot be dropped onto a tiled slot; use *make tiled* first
 ([Accepted limitations](accepted-limitations.md)).
 
-:::unreleased
 On a screen split into areas, dragging into another area moves
 the window there live too, the same way.
-:::
 
 A floating window dropped on another screen moves into the Space
 that screen shows, and stays where you let go of it, clear of
@@ -650,12 +648,10 @@ Floating windows come last, past a thin line and the floating
 symbol. They cannot be dragged; **Tile Window** on the item's
 right-click menu tiles one.
 
-:::unreleased
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
 flat look instead, the ghost a blur.
-:::
 
 It covers the floating mark too.
 
@@ -716,11 +712,9 @@ The menu bar icon can show the Space each screen is showing — its
 icon, or its name where it has none — with the active layer's icon
 ahead of them.
 
-:::unreleased
 What the menu bar icon shows is Settings ▸ Bars & Pocket ▸ KiwiShelf ▸
 When a bar is out of view ▸ **Menu bar icon**; at its default, Auto,
 it stands in for the Space Bar wherever a screen shows none at rest.
-:::
 
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty
@@ -1027,11 +1021,9 @@ with** on the Spaces step, in place of a preset of that name.
 
 **Open Settings** ships on `⌃⌥,` as well.
 
-:::unreleased
 `⌃⌥Z` takes back the last change to the space's arrangement and
 `⌃⌥⇧Z` makes it again
 ([`undo_layout`](lua-reference.md#undo_layout)).
-:::
 
 `⌃⌥` moves your focus, `⇧` acts on the window — swaps it or
 sends it to a space — and `⌘` steps through the spaces or sends
@@ -1102,9 +1094,7 @@ shortcuts you added under **Open applications** and **Lua
 bindings** except one sitting on a key a default needs; the
 confirmation counts those.
 
-:::unreleased
 Keys under **Apple Shortcuts** are kept the same way.
-:::
 
 **Restore…** puts the defaults back in the profile you are
 editing. When another profile has changed them too, the
@@ -1397,12 +1387,10 @@ opens a GitHub bug report with your KiwiDesk and macOS versions,
 screen count and Desktop mode filled in. The exported log also
 lists the settings you changed.
 
-:::unreleased
 It first asks whether to include a log. **Export Log** asks where
 to save the range you pick, starting in Downloads, then opens the
 report; drag the log in if you want it attached. Nothing is
 uploaded for you.
-:::
 
 **Shortcut not working?**  
 Check Shortcuts for a ⚠️ marker ([Conflict

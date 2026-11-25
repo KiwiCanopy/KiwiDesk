@@ -456,7 +456,6 @@ end
 > sketchybar hooks because "the GUI owns the config now" —
 > that silently kills the bar.
 
-:::unreleased
 ### Multiple screens
 
 With more than one screen, the widget above brightens only
@@ -541,9 +540,7 @@ on show and place the Space and its window slots on its screen:
 
 Moving a Space to another screen sends `space_change`, which
 redraws the bar.
-:::
 
-:::unreleased
 ### Screens split into areas
 
 A screen [split into areas](../lua-reference.md#set_display_areas)
@@ -675,7 +672,6 @@ Moving a Space to another area sends `space_change`, which redraws
 the bar. Splitting a screen or making it whole again can send no event,
 and then the bar regroups on the next one; run
 `sketchybar --trigger kiwidesk_update` to regroup it at once.
-:::
 
 ### Cold-start race condition
 

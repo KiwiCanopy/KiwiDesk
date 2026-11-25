@@ -4361,7 +4361,6 @@ heal, which is the standing exception. The noun is **sizing** — the collective
 of a layout's size adjustments (`.claude/rules/config-vocabulary.md`
 ▸ noun glossary).
 
-:::unreleased
 **Layout undo validates instead of hooking, and keeps a history
 per Space (#3515).** A step stores every Space it touched before
 and after, its sizes read through the session layer and filed
@@ -4401,7 +4400,6 @@ with two input sources that place Z apart the pair can read as
 changed from its default while the other one is active; recording
 the seeded key was rejected, since it costs a stored-value crossing
 for a residue of that size.
-:::
 
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
 ratios are rejected.** With `resize("x")` and `resize("y")`
@@ -6409,7 +6407,6 @@ new default (the #1255 reading, owner ruling 2026-09-26). An
 `ConfigMigration` carve-out): `set_float_nudge` joins
 `APIReference.retired`, so the call fails naming its replacement.
 
-:::unreleased
 *A fixed size beside it (#3554).* `set_float_size(w, h)` replaces
 the derived size in the centred branch alone, so the precedence is
 remembered frame, then `float_size`, then the derived size; the one
@@ -6421,7 +6418,6 @@ shape and the app's limits, so a GUI field would put a choice before
 every user to serve one workflow, and a fixed size in points suits
 one screen and not the next, which a caption could not say. Presets
 are bindings calling the verb, not a stored map.
-:::
 
 **`resize` reads the *effective* float, so a floating-mode space
 resizes like a flag-float
@@ -14859,7 +14855,6 @@ its Space Bar is not drawn at rest — Hidden, or Auto unless an
 Always bar shares its edge — since the menu bar is then the one
 place that names the Space until the pointer reveals the bar.
 
-:::unreleased
 **Amended (#3532, owner 2026-11-20): what the menu bar item shows
 is now a setting.** The owner asked for the choice the entry above
 said nobody had asked for. Some users want the Space Bar on screen
@@ -14877,7 +14872,6 @@ no `ConfigMigration`: an absent key decodes as `auto`, which is
 what every existing profile showed. A later default other than
 `auto` owes that migration after all: an absent key decodes as the
 default, so the flip would change every stored profile's menu bar.
-:::
 
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed and
@@ -16626,7 +16620,6 @@ and the Windows list past its nine rows, fade the edge that cuts
 them rather than cueing it in words* (▸ *Superseded (#3249)* under
 the shortcuts sheet's scroll).
 
-:::unreleased
 *Amended (#3570, owner with ui-designer, 2026-11-23; field row by
 Amendment 4): the fixed 720 pt width becomes a field row that rides
 the panel's edges, and the one ceiling becomes a ceiling per side.*
@@ -16694,7 +16687,6 @@ a selection only because they act on it, and VoiceOver already moves
 row by row, so a read cursor added for column-hopping would teach
 the wrong thing (`ShortcutsColumnPlanTests`,
 `ShortcutsColumnKeysTests`).
-:::
 
 **An Apps row says its action in its title** (#3448, owner on
 ui-designer's recommendation, 2026-11-18). A key set to gather or
@@ -16804,10 +16796,8 @@ Space another screen shows, `swap` naming both windows —
 switching there first would meet a preflight whose frontmost app
 has not followed — with the switch to that Space after the trade.
 
-:::unreleased
 *Amended* (#3572): "your window" is the focus of the Space shown in
 the area KiwiHub opened over, the same "here" Move here reads.
-:::
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
@@ -16914,7 +16904,6 @@ selected Desktop's column otherwise. Every other KiwiHub hover keeps the grey li
 hovered window icon's ground included, and the ✓ beside the shown
 Desktop stays in its own ink (#3210).
 
-:::unreleased
 *Amended (#3602, owner with the ui-designer, 2026-11-24):* the
 ring goes round the Desktop's card, which is a column with
 separate Spaces and a row with shared Desktops. The argument is
@@ -16923,7 +16912,6 @@ shared Desktops a title click switches every screen, so it
 reaches the whole row. The header click still lands in the
 column of the screen or area KiwiHub opened over, and the header
 is no keyboard stop.
-:::
 
 Under *Tint KiwiHub and plates* (#2569) the panel wears the bars'
 look (▸ the shortcuts panel entry), so its marks take the look's
@@ -16987,7 +16975,6 @@ lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
 
-:::unreleased
 *Amended (#3570 ▸ Ruling 6): the Profile line shows only
 with two or more profiles.* With one profile the line offered a
 switch to where the user already is, and a third line to step past
@@ -16995,7 +16982,6 @@ on every ↓; Save as New Profile… leaves with it, the Settings
 Profiles page being where a second profile is made. The
 look picker stays its own full-screen surface (#3038), never a
 fourth line.
-:::
 
 **The Desktops side is KiwiHub's overview of the whole desk (#1229,
 owner ruling 2026-11-01).** The Space Bar answers what is on the
@@ -17029,7 +17015,6 @@ screen rows stand whole under the panel's cap (`DesktopsGeometry`
 holds the numbers). A row stands as tall as its own deepest
 Desktop and never grows with window count, because icons squeezed
 below a readable size answer nothing.
-:::unreleased
 *Amended* (owner with the ui-designer, 2026-11-23, #3570 ruling 4,
 #3572 ruling 4): one column per screen in the same physical order,
 its Desktops stacked downward, in place of a row per screen. ↑↓
@@ -17046,9 +17031,7 @@ marked "here": the starting selection already lands on the shown
 Space of the area KiwiHub opened over, so a caption would say it
 twice; "main" stays, since nothing else names the screen with the
 menu bar.
-:::
 
-:::unreleased
 *Amended* (owner with the ui-designer, 2026-11-24, #3602): with
 "Displays have separate Spaces" off and two or more screens, the
 side draws one row per Desktop instead, the screens still columns
@@ -17072,7 +17055,6 @@ they left, ↑↓ still walk one screen's lines. The ✓ is the row's
 column. One screen, or separate Spaces on, keeps the columns
 above: there each screen's Desktops are its own, and a row would
 pair Desktops that share nothing but a number.
-:::
 
 KiwiDesk keeps no Space set per Desktop (state-and-layout.md), so
 every Desktop of a screen lists that screen's live Spaces: a
@@ -17121,7 +17103,6 @@ screen and closes it (#3165). Inside a Space ↑ ↓ take the places'
 route (#3169): a line with windows is re-entered on the slot the
 selection left, an empty one selected.
 
-:::unreleased
 **KiwiHub on a split screen reads "here" per area (#3572, owner
 ruling with the ui-designer 2026-11-23).** [Rationale] An area is where a
 user's Spaces live once a screen is split (#3517), so "here" read
@@ -17151,7 +17132,6 @@ alone still says where it is. The unfiled line stays last under no
 header, because its windows belong to no area yet. A title click
 and the opening selection land on one line, the "here" area's
 shown Space, so a click never lands where the panel did not open.
-:::
 
 **A KiwiHub list wraps on a fresh press and stops on a held key
 (#2897, owner ruling 2026-11-01).** This reverses #1875's
@@ -18321,7 +18301,6 @@ badge, drawn without a direction, since either arrow alone would
 be half the truth. A search that names a gesture brings its badge
 to the front, so a hit never matches a gesture the row hides.
 
-:::unreleased
 *Amended (#3570, ui-designer, 2026-11-23): the badge and chord
 columns are measured per column of the sheet, and a section with no
 keyboard chord keeps no chord slot and no divider, so its badges
@@ -18330,7 +18309,6 @@ align to the column's right edge* (`ShortcutSectionChordSlotTests`).
 row of keys to sit on share one Gestures row wearing every badge, as
 a keyed row does, so a command appears once*
 (`ShortcutGestureBadgeTests`).
-:::
 
 **A multi-finger swipe also fires on a quick flick, decided at
 the release (#1873).** macOS takes a quick, short swipe as a whole
@@ -20550,9 +20528,7 @@ Each bar holds the rest.
 too, and its drawer is *Each bar and Pocket*, as Show's is (▸ *a
 bar's edge may differ per screen*).
 
-:::unreleased
 *Amended* (#3612): ▸ *The bar cards share one canonical row order*.
-:::
 
 A shortcut shows only the bar it names. On an `always` bar it
 refuses with a pill on the bar, since the verb cannot show more of
@@ -20745,7 +20721,6 @@ Dock stays shown for as long as the pointer stays there. So:
   owner wants it to travel with a look, and a palette key, since
   palettes carry colour alone.
 
-:::unreleased
 
 - *Thicker by default* (owner, 2026-11-23, #3586), amending the
   bullet above: **the default and every bundled look's pick rise
@@ -20761,7 +20736,6 @@ Dock stays shown for as long as the pointer stays there. So:
   again. Refused: adding 2 to every stored 2–4, and matching each
   profile against the 5.0 bundled looks.
 
-:::
 
 - *Easier to see at rest* (owner, 2026-11-19, #3514, after rounds
   with native prototypes on their own wallpapers), amending the
@@ -21308,9 +21282,7 @@ nothing about the option, while the `?` names the one thing that
 unlocks it, a profile for more screens, so the grey promises
 nothing a setting would have to keep.
 
-:::unreleased
 *Amended* (#3612): ▸ *The bar cards share one canonical row order*.
-:::
 
 *Amended: the pocket's edge may differ per screen too.*
 ([#3376](https://github.com/KiwiCanopy/KiwiDesk/issues/3376),
@@ -21336,11 +21308,8 @@ Per screen rows of its own beside each bar's, and the separate
 Pocket edge row is gone: two rows writing one value would let the
 master and the row disagree about which was the pocket's edge.
 
-:::unreleased
 *Amended* (#3612): ▸ *The bar cards share one canonical row order*.
-:::
 
-:::unreleased
 *Amended: a bar's edge and Show may differ per area.*
 ([#3517](https://github.com/KiwiCanopy/KiwiDesk/issues/3517),
 rulings 7, 14, 16, 22, 30 and 32, owner 2026-11-22.) A screen
@@ -21384,7 +21353,6 @@ while an entry stands. Settings writes the entries where it writes
 the edge — the bar's Show and Position for the screen or area the
 picker picks (#3612) — so an area's bars have one home; a
 forgotten screen setup drops them with its edges.
-:::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
@@ -22191,7 +22159,6 @@ place: the value still picks the end of the shelf the Pocket takes,
 places it in the strip under Hidden, and governs every screen that
 does not share an edge — so hiding it would hide a working control.
 
-:::unreleased
 *Amended (#3612, owner 2026-11-24):* the card is grouped by bar, and
 a screen or area is set up by picking it first. The Show and Position
 masters lead the card, and one *Each bar and Pocket* drawer hangs
@@ -22215,7 +22182,6 @@ to keep. Menu bar icon, Handle thickness, Reveal and Durations follow
 under the heading *When a bar is out of view* — not "hidden", which
 is a Show choice — then Alignment, Thickness, Style and Margins as
 before.
-:::
 
 **Choices stay open; numbers go in one drawer per bar card (#2507,
 owner ruling 2026-10-21).** Nothing hides rows by experience

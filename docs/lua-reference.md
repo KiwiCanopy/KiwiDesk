@@ -339,12 +339,10 @@ focused window's ring bumps toward the step, as at the end of a
 row, and nothing switches. A screen with one Space stops there
 too. A wrap slides in the key's direction.
 
-:::unreleased
 On a screen [split into areas](#set_display_areas) each area has
 its own Space order: the key steps the area the focused window is
 in, the gesture the area under the pointer, and a wrap stays in
 that area.
-:::
 
 Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
 gets them through **Default shortcuts ▸ Restore…**.
@@ -439,12 +437,10 @@ focused window's ring bumps and the command fails with `no other screen`;
 `no screen <direction> of focus`. Each visit also counts in the
 [Space history](#focus_space_back--focus_space_forward).
 
-:::unreleased
 On a screen [split into areas](#set_display_areas) each area
 counts as a screen here: `focus_display_last` returns to the area
 you were last in, and `focus_display` reaches the nearest area in
 that direction.
-:::
 
 `focus_display_last` is **Go to last screen** under Settings ▸
 Shortcuts ▸ Built-in ▸ Focus, with no default chord; `focus_display` is
@@ -752,11 +748,9 @@ placement says; `pin_space_to_display` makes it stick. Creates the
 space if it does not exist. Floating members are re-anchored
 onto the new screen, keeping their relative position.
 
-:::unreleased
 On a screen [split into areas](#set_display_areas) each area
 shows one Space at a time, and the screen reference also takes
 an area key or an area's name.
-:::
 
 **Example:**
 
@@ -790,7 +784,6 @@ KiwiDesk.pin_space_to_display("mail", 2)
 
 ### set_display_areas
 
-:::unreleased
 **Expects:** a screen reference (same forms as
 `move_space_to_display`), then either nothing, or a direction —
 `"side_by_side"` or `"stacked"` — and one size in points per area,
@@ -830,7 +823,6 @@ for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
 **Per area**. The screen verbs' directions and last screen reach
 areas too ([`focus_display`](#focus_display_last--focus_display)).
 A macOS Desktop switch switches all of a screen's areas together.
-:::
 
 **Example:**
 
@@ -841,7 +833,6 @@ KiwiDesk.set_display_areas(1)                -- whole again
 
 ### set_display_area_name
 
-:::unreleased
 **Expects:** an area key, as `list_monitors` prints it in
 `areas[].key`, then a name.
 
@@ -851,7 +842,6 @@ Bottom; on a nested split Middle Top, Top Left and the like; Area 1
 onwards once a row or column holds four areas, or an area is split
 three levels deep); an empty name goes back to the position. A name made only of digits, or one another
 area or screen already has, is refused.
-:::
 
 **Example:**
 
@@ -1195,7 +1185,6 @@ KiwiDesk.reset_layout_sizing("all")
 
 ### undo_layout
 
-:::unreleased
 **Expects:** nothing.
 
 **Does:** takes back the last change to the active space's
@@ -1222,7 +1211,6 @@ Shortcuts ▸ Built-in ▸ Size & float. The default sits on the key
 that types Z on the keyboard layout active when it is added, or on
 the US Z key where that layout types no Z, and then stays on that
 key.
-:::
 
 **Example:**
 
@@ -1232,14 +1220,12 @@ KiwiDesk.undo_layout()
 
 ### redo_layout
 
-:::unreleased
 **Expects:** nothing.
 
 **Does:** makes again the change [`undo_layout`](#undo_layout)
 took back. Any new change to the space clears what redo could
 make again. `⌃⌥⇧Z` runs it by default, on the same key as undo,
 listed as **Redo layout change**.
-:::
 
 **Example:**
 
@@ -1300,11 +1286,9 @@ toggle. Replaces `set_float_nudge`: a saved setting that had the
 nudge off becomes `"keep"`, while an `init.lua` call to
 `set_float_nudge` fails naming this verb and must be renamed.
 
-:::unreleased
 [`set_float_size`](#set_float_size) replaces that measured size with
 one you choose. Either size is at least the Floating layout's
 [`set_min_window_size`](#set_min_window_size).
-:::
 
 **Example:**
 
@@ -1314,7 +1298,6 @@ KiwiDesk.set_float_placement("keep")
 
 ### set_float_size
 
-:::unreleased
 **Expects:** a width and a height in points, both positive; or
 nothing.
 
@@ -1332,7 +1315,6 @@ arguments. Global (per profile, all spaces); no Settings toggle.
 ```lua
 KiwiDesk.set_float_size(1100, 800)
 ```
-:::
 
 ### set_float_scale_on_display_change
 
@@ -1375,11 +1357,9 @@ window with no overlay — stays silent.
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent.
 
-:::unreleased
 A refused or empty [`undo_layout`](#undo_layout) or
 [`redo_layout`](#redo_layout) draws nothing: the sound is its only
 cue.
-:::
 
 A held chord stops silently at a limit: it neither draws nor sounds.
 A fresh press there does both.
@@ -1424,11 +1404,9 @@ screen the focused window is on; `all_screens` keeps one history
 across every screen, so going back may move you to another
 screen. With one screen the two are the same.
 
-:::unreleased
 On a screen [split into areas](#set_display_areas), `per_screen`
 keeps one history per area and steps the area the focused window
 is in.
-:::
 
 [`focus_space_last`](#focus_space_last) reads the same history.
 
@@ -1548,7 +1526,6 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 (another remapping tool, `hidutil` by hand), the verb refuses
 and leaves it alone.
 
-:::unreleased
 KiwiDesk re-checks the mapping when the Shortcuts page opens, when
 the **Hyper key** row records the key it already holds, when
 Settings saves and after a wake or an unlock (#3550): a mapping
@@ -1557,7 +1534,6 @@ off as above. Nothing else watches it, so a mapping another tool
 breaks in between stays broken until one of those happens, the
 verb runs, Take Over is pressed or KiwiDesk starts managing
 windows again.
-:::
 
 Save **⌃⌥Space**, which a KiwiDesk row wins; on **⌃Space** the row
 and macOS both answer
@@ -2760,10 +2736,8 @@ visible frame with no gaps, parked windows included. Both bars read
 as Hidden in Monocle, so `space_bar.toggle_reveal()` and
 `app_bar.toggle_reveal()` still show a bar over the window.
 
-:::unreleased
 Under [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)'s
 default, `"auto"`, the menu-bar item names the Space.
-:::
 
 The pocket rests there as its handle while
 [`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
@@ -3247,10 +3221,8 @@ the fill, opaque, where
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
 on.
 
-:::unreleased
 The [drag ghost](#drag--drop-rearranging) is such a plate, so it
 draws the same way.
-:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -3334,10 +3306,8 @@ keeps the glass of KiwiHub and those plates light, and a dark
 fill keeps it dark, whatever Settings' Appearance says.
 They draw as with `false` while the fill has no color.
 
-:::unreleased
 The [drag ghost](#drag--drop-rearranging) wears the fill the same
 way, as the plates a Space switch slides.
-:::
 
 While their glass is off, and below macOS 26, they wear the fill
 at its own alpha, as one even color over their blurred
@@ -3477,10 +3447,8 @@ kiwishelf.set_highlight_width(3)
 
 ### kiwishelf.set_handle_thickness
 
-:::unreleased
 **Expects:** points, 2–6 (default `5`); a value is rounded to a
 whole point and kept within the range.
-:::
 
 **Does:** sets how thick an Auto bar's handle and the Pocket's tab
 draw at the screen edge. The handle stays flush on the edge and
@@ -3901,7 +3869,6 @@ The row greys only while the pocket is `"hidden"` too.
 kiwishelf.set_maximized_visibility("hidden")
 ```
 
-:::unreleased
 ### kiwishelf.set_menu_bar_icon
 
 **Expects:** `"auto"`, `"logo"`, `"identifier"` or `"layout"`
@@ -3936,7 +3903,6 @@ under **When a bar is out of view**. A look never carries it.
 ```lua
 kiwishelf.set_menu_bar_icon("layout")
 ```
-:::
 
 ### KiwiShelf colours
 
@@ -4277,7 +4243,6 @@ overrides are the same setters prefixed with the layout name:
 The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
 no per-layout override either.
 
-:::unreleased
 A layout's `set_app_bar_visibility` takes an optional screen,
 named as [`space_bar.set_edge`](#space_barset_edge) names one: with
 it, the visibility is that layout's on that screen or area alone,
@@ -4289,7 +4254,6 @@ Settings ▸ Bars & Pocket ▸ KiwiShelf writes them as **Show in
 Monocle** and **Show in Scrolling** in **Each bar and Pocket** once
 its **Screen or area** picker picks a screen or area; **Inherit**
 there is no value of its own.
-:::
 
 **Example:**
 
@@ -4299,11 +4263,9 @@ scroll.set_app_bar_visibility("hidden")
 scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
-:::unreleased
 ```lua
 monocle.set_app_bar_visibility("hidden", "LG HDR 4K:3840x2160")
 ```
-:::
 
 `monocle.set_app_bar_enabled` and `scroll.set_app_bar_enabled`
 are retired: `false` is `"hidden"`.
@@ -4380,11 +4342,9 @@ App Bar in monocle and scrolling.
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
   in the same reveal style.
 
-:::unreleased
 While [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)
 is `"auto"`, its default, the menu bar shows the Space each screen
 is on wherever its Space Bar is not drawn at rest.
-:::
 
 An `"auto"` bar's handle is a thin line along the
 bar's whole length, flush on the edge: a capsule in the label ink,
@@ -4461,7 +4421,6 @@ place.
 space_bar.set_visibility("auto")
 ```
 
-:::unreleased
 **Per screen:** a second argument names a screen, in the forms
 [`space_bar.set_edge`](#space_barset_edge) takes, and the value is
 that screen's alone. Naming the bar's own value returns a screen to
@@ -4475,7 +4434,6 @@ screen or area.
 ```lua
 space_bar.set_visibility("hidden", "LG HDR 4K:3840x2160")
 ```
-:::
 
 ### space_bar.toggle_reveal
 
@@ -4544,7 +4502,6 @@ screen's own untouched. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
 fingerprint.
 
-:::unreleased
 **Per area:** on a screen split into areas, each area has its own
 edge. A screen named by number or by name sets every area of it;
 its fingerprint names its first area alone, and an area is named
@@ -4554,7 +4511,6 @@ screens, so the edges collapse only once every area sits on one
 edge. Splitting an area in Settings gives the new area the edges
 and visibilities of the area it came from; areas a
 `set_display_areas` list creates start at the bars' own.
-:::
 
 ```lua
 space_bar.set_edge("top")
@@ -4885,7 +4841,6 @@ swaps the two; dropping anywhere else snaps the window back.
 While you drag, KiwiDesk can draw two markers, each just below the
 window you are holding:
 
-:::unreleased
 - **Drop zone** (`drag.set_drop_zone_enabled`, on by default): a
   light wash of the focus border colour
   ([`border.set_focused_color`](#borderset_focused_color)) with a
@@ -4898,18 +4853,15 @@ window you are holding:
   displaced window would move. It wears KiwiShelf's Fill while
   [`kiwishelf.set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
   is on.
-:::
 
 Both take their corners from
 [`border.set_corner_style`](#borderset_corner_style), and neither
 takes a colour setting of its own.
 
-:::unreleased
 Over another screen, or another [area](#set_display_areas) of a
 split screen, whose Space has no tiled window, the drop zone marks
 where the window lands there. A floating Space and a screen
 showing a full-screen app draw none.
-:::
 
 ### drag.set_drop_zone_enabled
 
@@ -4940,14 +4892,12 @@ drag.set_ghost_enabled(true)
 
 **Expects:** a boolean (default `true`).
 
-:::unreleased
 **Does:** draws the ghost's plate as macOS 26 Liquid Glass. Off,
 below macOS 26, or while macOS's Reduce transparency is on, the
 plate is the system blur material, wearing the Fill flat when it
 is tinted, as the Space-switch plates do. The drop zone draws no glass. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
-:::
 
 **Example:**
 
@@ -5014,10 +4964,8 @@ touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
 
-:::unreleased
 The drag markers draw lines of a fixed width; they take the corner
 style from the border, and the drop zone also its focused colour.
-:::
 
 **Example:**
 
@@ -5882,10 +5830,8 @@ Out of the box these are bound:
 | `pinch_together` | ⌃⌥ | Toggle floating ([`toggle_floating`](#toggle_floating)) |
 | `pinch_together4` | ⌃⌥ | The window switcher |
 
-:::unreleased
 ⌃⌥ pinch together toggles floating. A pinch row set to another
 action keeps it.
-:::
 
 `hover_move`, the clicks and the side buttons are unbound. In a
 setup the Settings app manages, with Settings ▸ Shortcuts ▸
@@ -6855,7 +6801,6 @@ end)
 
 ### size_floating
 
-:::unreleased
 **Expects:** a width and a height in points, both positive; or
 nothing.
 
@@ -6889,7 +6834,6 @@ KiwiDesk.bind("ctrl+alt+shift+3", function()
     KiwiDesk.size_floating(1400, 1000)
 end)
 ```
-:::
 
 ### move_floating
 
@@ -7065,10 +7009,8 @@ shows on another — visible on every space of that one screen,
 not on other screens. Moving it to a space on another screen re-homes
 it there. Overrides global sticky if the window already had it.
 
-:::unreleased
 On a screen [split into areas](#set_display_areas) the window
 draws in the area its home space lays out in.
-:::
 
 **Example:**
 
@@ -7156,10 +7098,8 @@ or KiwiDesk's own restart leaves it filling the screen. Bound to
 The bars are not stood down: both bars read as `"hidden"` on that
 screen, so a bar's shortcut shows it over the window.
 
-:::unreleased
 Under [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)'s
 default, `"auto"`, the menu-bar item names the Space.
-:::
 
 The pocket rests there as its handle while
 [`kiwishelf.set_maximized_visibility`](#kiwishelfset_maximized_visibility)
@@ -7482,12 +7422,10 @@ row under Shortcuts ▸ Built-in ▸ Size & float. Default `false`. A
 profile's own value wins. For this session only. Every bar and the Pocket then act as if set to Hidden on that
 Space: gone at rest, and a bar's shortcut still shows it.
 
-:::unreleased
 Wherever [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)
 lists the Space — on that Space under `"auto"`, and always under
 `"identifier"` and `"layout"` — the menu-bar item adds the pause
 symbol after it.
-:::
 
 **Example:**
 
@@ -8090,7 +8028,6 @@ KiwiDesk.bind("ctrl+shift+i", function()
 end)
 ```
 
-:::unreleased
 ### run_shortcut
 
 **Expects:** the name of one of your Apple Shortcuts, exactly as
@@ -8125,7 +8062,6 @@ KiwiDesk.bind("ctrl+alt+m", function()
     KiwiDesk.run_shortcut("Start Meeting")
 end)
 ```
-:::
 
 ## User Interface
 
@@ -8148,7 +8084,6 @@ live glance at the active layer's bindings.
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts.
 
-:::unreleased
 A list too long for one column above the screen's bottom splits
 into as many columns as the screen holds, up to three, read down
 each column in turn, the earlier columns never shorter, with
@@ -8157,7 +8092,6 @@ a search matches it. A section may go on in the next column
 under its title again. The panel's width and its columns are set
 when the side opens; typing moves rows between the same columns
 and changes only the height. The columns scroll together.
-:::
 
 The panel also lists every bound [gesture](#gesture-actions), once
 each. A gesture whose action has a row is a badge on that row: the
@@ -8167,10 +8101,8 @@ fewest fingers — and the rest behind **+N**, which names them on
 hover. Every other gesture is a row under **Gestures**. Typing a
 gesture's name finds its row and brings that badge to the front.
 
-:::unreleased
 Gestures that run the same action share one row under
 **Gestures**, wearing each badge.
-:::
 
 The `"windows"` side is the **window switcher**, its field at
 Spotlight's height on the screen under the pointer. It lists every
@@ -8182,13 +8114,11 @@ app. Typing narrows the list by app name, then by title. While a
 lens's apps come first and every other app's follow under **Other
 apps**, while you type too. Moving the mouse over a row selects it.
 
-:::unreleased
 On a screen split into areas, KiwiHub opens centred over the area
 under the pointer, and that area is "here" on every side: Move here
 files into the Space it shows, Swap here's "yours" is that Space's
 focused window, and the View side's Layout line acts on that Space.
 An unsplit screen is one area.
-:::
 
 A window in the [pocket](#pocket) is listed after the hidden apps,
 under **Pocket**.
@@ -8268,11 +8198,9 @@ panel, the current item on each marked ✓.
   KiwiVision ready to name a lens; ⌘1–9 and ↓ skip it, and a
   Lua-owned setup greys it.
 
-:::unreleased
 The **Profile** line, **Save as New Profile…** with it, shows only
 while two or more profiles are saved; **↑** and **↓** then step from
 Layout to KiwiVision.
-:::
 
 Keys on this side:
 
@@ -8336,7 +8264,6 @@ panel has the keyboard.
 - **Escape** steps back: the picked windows, the open Space, the
   typing, then KiwiHub.
 
-:::unreleased
 The overview lays each screen out as a column instead, left to
 right, its Desktops stacked downward; past the panel's width the
 columns scroll sideways, and past its height each column scrolls
@@ -8347,9 +8274,7 @@ lists its Spaces under each area's name, each area marking the
 Space it shows, with **Not in a Space yet** last; clicking a
 Desktop's title goes to the Space shown in the area KiwiHub opened
 over, else in the first area.
-:::
 
-:::unreleased
 With **Displays have separate Spaces** off and two or more screens,
 the overview draws one row per Desktop instead, the screens still
 columns: the Desktop's name, its ✓ and its profile head the row on
@@ -8357,7 +8282,6 @@ the left, and the whole grid scrolls down as one under the screens'
 names. **←** **→** stay on the Desktop and land on the Space beside
 the one you left. A click on a row's name goes to the Desktop as a
 title click does.
-:::
 
 **Tab** reaches it from View, and **⇧Tab** from Windows.
 
@@ -8944,13 +8868,11 @@ Where the status item lists Spaces, the layer's icon — or the
 two-character cut of its name — leads them, the way it leads the
 bar.
 
-:::unreleased
 Which Spaces it lists is
 [`kiwishelf.set_menu_bar_icon`](#kiwishelfset_menu_bar_icon)'s;
 under its default, `"auto"`, it lists the Space a screen is showing
 wherever that screen's Space Bar draws nothing at rest
 ([`space_bar.set_visibility`](#space_barset_visibility)).
-:::
 
 **Example:**
 
@@ -9914,12 +9836,10 @@ set becomes the default unless the count already has another.
   a setup no profile holds (`reason: "unknown_setup"`). Settings ▸
   Profiles ▸ **Known screen setups** does the same.
 
-:::unreleased
 `forget_monitor_set` also drops the bars' per-screen visibilities
 (`space_bar.visibility_override`, each layout's
 `app_bar.visibility_override`)
 for the screens whose edges it drops.
-:::
 
 **Example:**
 
@@ -10675,7 +10595,6 @@ carry `track_breaks` (ids of the windows that start a track,
 #128) and, while a track holds an uneven cross-axis split,
 `track_weights` (head window id → session weight).
 
-:::unreleased
 Each space object also has `display`, the `list_monitors` id of
 the screen it sits on, `nil` for a Space on no screen, and `shown`:
 whether KiwiDesk shows it on that screen now. The active Space is
@@ -10685,16 +10604,13 @@ Space whose `shown` is true and whose `display` is D is the one
 `list_monitors` names as D's `space_id`, so a bar can draw each screen's Spaces, empty ones
 included, from these two queries. A bar re-reads them on
 `space_change`, `desktop_change` and `monitor_change`.
-:::
 
-:::unreleased
 On a screen [split into areas](#set_display_areas) each space
 object also has `area`, the key of the area it sits in, as
 `list_monitors` prints it in `areas[].key`; `null` on a screen that
 is not split. Each area shows its own Space, so several Spaces with
 one `display` can be `shown` at once; the one with a given `area`
 is that area's `areas[].space_id` in `list_monitors`.
-:::
 
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
@@ -10877,13 +10793,10 @@ full-screen window has no `visibility`.
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
 
-:::unreleased
 It also reports `space_id`, the Space that screen shows (`null`
 while it shows none) — on a screen that is not split, the Space
 [`get_state`](#get_state) marks `shown` on that `display`.
-:::
 
-:::unreleased
 On a screen [split into areas](#set_display_areas), `areas` lists
 each area in reading order with its `key`, `name` (`null` for none
 given), `x`, `y`, `w` and `h` in the screen's own points, and
@@ -10891,7 +10804,6 @@ given), `x`, `y`, `w` and `h` in the screen's own points, and
 is always its first area's, `areas[0].space_id`, whichever area
 has the focus, and `layout_frame` is that Space's. On a screen that
 is not split, `areas` is empty.
-:::
 
 Each `list_windows` entry also carries `app`, `pid`, `index` (the
 window's place in its Space's row, from 1; `null` for a window no
