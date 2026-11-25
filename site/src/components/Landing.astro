@@ -465,9 +465,8 @@ const jsonLd = [
                three locales could not have stayed at every width.
                /compare/ is reached from the hero, #calm and every
                footer. */}
-          {/* Release Notes: shown in Nerd mode (dev-only). "What changed"
-               is accessible to everyone via the footer and About window. */}
-          <a class="nav__link nav__link--changelog dev-only"
+          {/* Release Notes: shown in both modes (owner, 2026-11-25). */}
+          <a class="nav__link nav__link--changelog"
             href={`${homeHref}changelog/`}>{t.nav_changelog}</a>
           {/* Docs + GitHub live in the DOM always but are hidden in
                Simple mode (dev-only, via .dev-only). */}
@@ -566,15 +565,6 @@ const jsonLd = [
             </span>
           </button>
 
-          {/* Ko-fi support button — last in the cluster, icon-only
-               and compact. Reads as LESS obtrusive than a worded
-               link: a small, recognizable control sitting quietly
-               among the toggles. aria-label carries the meaning. */}
-          <a class="nav__support" href={kofi} target="_blank"
-            rel="noopener" aria-label={t.nav_support_aria} title={t.nav_support_aria}>
-            <img class="kofi-icon" src={kofiIcon.src} alt=""
-              aria-hidden="true" width="20" height="16" />
-          </a>
         </div>
       </div>
     </nav>

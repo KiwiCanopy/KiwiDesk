@@ -528,7 +528,6 @@
   "nav_lang_en": "English",
   "nav_lang_label": "言語を選択",
   "nav_support": "支援する",
-  "nav_support_aria": "Ko-fi で支援する",
   "nav_theme_label": "配色テーマを切り替える",
   "nix_cmt": "# アップデートは home-manager switch で届きます",
   "nix_code_aria": "Home Manager で KiwiDesk をインストールする",
