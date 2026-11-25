@@ -528,7 +528,6 @@
   "nav_lang_en": "English",
   "nav_lang_label": "Sprache wählen",
   "nav_support": "Support",
-  "nav_support_aria": "Auf Ko-fi unterstützen",
   "nav_theme_label": "Farbschema wechseln",
   "nix_cmt": "# Updates kommen mit home-manager switch",
   "nix_code_aria": "KiwiDesk mit Home Manager installieren",
