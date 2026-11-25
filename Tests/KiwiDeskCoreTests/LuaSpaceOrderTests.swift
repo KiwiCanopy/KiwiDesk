@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -7,6 +8,8 @@ import Testing
 /// first references each Space, on every load (#3625): undeclared
 /// Spaces keep their relative order behind, an active profile's
 /// order still wins, and a GUI-managed config keeps the sidecar's.
+/// A held or temporary Space needs a live arrangement, whose own
+/// order then wins, so the trailing case is a command-made Space.
 @Suite("Lua-owned Space order (#3625)", .serialized)
 @MainActor
 struct LuaSpaceOrderTests {
@@ -77,6 +80,7 @@ struct LuaSpaceOrderTests {
     @Test("a Space a helper touches first leads the order")
     func firstReferenceDecides() throws {
         let core = makeCore()
+        live(["Code", "Comms", "Notes"], on: core)
         try writeInitLua(
             """
             KiwiDesk.set_mode("Notes", "stack")
@@ -85,6 +89,33 @@ struct LuaSpaceOrderTests {
         )
         core.loadConfig()
         #expect(order(core) == ["Notes", "Code", "Comms"])
+    }
+
+    /// `create_space` resolves every live Space onto the display
+    /// while the run's ledger is open; placing a live Space must
+    /// not enter it, or the live order wins over the script.
+    @Test("a display resolve inside the run keeps the script's order")
+    func displayResolveKeepsTheScript() throws {
+        let core = makeCore()
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "A",
+                frame: CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            )
+        )
+        live(["C", "A", "B"], on: core)
+        try writeInitLua(
+            """
+            KiwiDesk.set_gap_global(10)
+            KiwiDesk.create_space("A")
+            KiwiDesk.set_mode("B", "stack")
+            KiwiDesk.set_mode("C", "stack")
+            """,
+            core: core
+        )
+        core.loadConfig()
+        #expect(order(core) == ["A", "B", "C"])
     }
 
     @Test("an undeclared Space keeps its place behind the declared")

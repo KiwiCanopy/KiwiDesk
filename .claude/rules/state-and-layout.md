@@ -95,9 +95,9 @@ editing here:
   `StateCoordinator.placeholderSpace`, and the next config load
   retires it through `retirePlaceholderSpace` unless a source
   declares it — asked of the sources (`declaredSources(of:)` and
-  the sidecar's list), never of `referenced`, which the display
-  resolve fills with every live Space. An unarmed seed is a Space
-  nobody made that every launch brings back
+  the sidecar's list), never of `referenced`, which records what a
+  run touched rather than what a source declares. An unarmed seed
+  is a Space nobody made that every launch brings back
   (`PlaceholderSpaceTests`).
 - **A Lua-owned config's Space order is `init.lua`'s
   first-reference order, imposed on every load (#3625).** Keep
@@ -105,9 +105,11 @@ editing here:
   through the one `applyLuaSpaceOrder` in `loadConfig`'s
   non-GUI-managed branch, ahead of `reapplyActiveProfileState`, so
   an active profile's order still wins; a Space the run never named
-  keeps its relative order behind. A second Lua-side order source —
-  a `set_space_order` verb — is held by the owner and owes a ruling
-  (`LuaSpaceOrderTests`).
+  keeps its relative order behind. A door that places or shows a
+  Space enters only a Space it creates in `referenced`, or the run
+  reimposes the live order (`LuaSpaceOrderTests` ▸
+  `displayResolveKeepsTheScript`). A second Lua-side order source,
+  such as a `set_space_order` verb, owes a ruling on #3625.
 - **Never store which Space a window holds PER DESKTOP; do store
   it per PROFILE (#1230).** The two look alike and are
   opposites, and the discriminator is **when the record is
