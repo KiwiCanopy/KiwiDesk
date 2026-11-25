@@ -73,7 +73,9 @@ enum StandardFallbackWords {
 
 /// The notice's content, laid out as the update window's checking
 /// state: the app icon beside the lead and its help, the body, and
-/// one OK in the footer bar.
+/// one OK in the footer bar. Its text takes the hierarchical styles,
+/// which follow what the glass shows; a fixed ink read badly in
+/// light mode over a dark backdrop (owner, 2026-11-25).
 struct StandardFallbackView: View {
     let screenCount: Int
     let onOK: () -> Void
@@ -91,7 +93,7 @@ struct StandardFallbackView: View {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text(StandardFallbackWords.lead(screenCount))
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(SettingsTheme.ink)
+                            .foregroundStyle(.primary)
                             .fixedSize(horizontal: false, vertical: true)
                             .accessibilityAddTraits(.isHeader)
                         HelpButton(
@@ -102,7 +104,7 @@ struct StandardFallbackView: View {
                     }
                     Text(StandardFallbackWords.body(screenCount))
                         .font(.system(size: 13))
-                        .foregroundStyle(SettingsTheme.ink2)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)

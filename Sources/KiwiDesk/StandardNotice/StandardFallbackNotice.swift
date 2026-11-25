@@ -51,10 +51,12 @@ final class StandardFallbackNotice: NSObject, NSWindowDelegate {
         return !tourShowing
     }
 
+    /// `show` is the seam a test reads; the app shows the window.
     static func present(
         _ fallback: StandardFallback,
         tourShowing: Bool,
-        defaults: UserDefaults = AppDefaults.store
+        defaults: UserDefaults = AppDefaults.store,
+        show: (StandardFallbackNotice) -> Void = { $0.show() }
     ) {
         guard
             admit(
@@ -65,9 +67,7 @@ final class StandardFallbackNotice: NSObject, NSWindowDelegate {
         else { return }
         // A newer count replaces the notice still up.
         open?.window?.close()
-        let notice = StandardFallbackNotice(fallback)
-        open = notice
-        notice.show()
+        show(StandardFallbackNotice(fallback))
     }
 
     /// The notice's window, built but not shown: the update
@@ -101,6 +101,7 @@ final class StandardFallbackNotice: NSObject, NSWindowDelegate {
     }
 
     private func show() {
+        Self.open = self
         let window = Self.makeWindow(
             screenCount: fallback.screenCount
         ) { [weak self] in self?.window?.close() }

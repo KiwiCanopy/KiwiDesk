@@ -25,6 +25,33 @@ struct StandardFallbackNoticeTests {
         )
     }
 
+    @Test("present shows a count once, and nothing under the tour")
+    func presentObeysAdmit() {
+        let (defaults, name) = makeScratchDefaults()
+        defer { TestScratch.remove(name) }
+        var shown: [Int] = []
+        let record = { (notice: StandardFallbackNotice) in
+            shown.append(notice.fallback.screenCount)
+        }
+        for _ in 0..<2 {
+            StandardFallbackNotice.present(
+                StandardFallback(screenCount: 1),
+                tourShowing: false,
+                defaults: defaults,
+                show: record
+            )
+        }
+        StandardFallbackNotice.present(
+            StandardFallback(screenCount: 2),
+            tourShowing: true,
+            defaults: defaults,
+            show: record
+        )
+        #expect(shown == [1])
+        #expect(StandardFallbackShown.wasShown(1, in: defaults))
+        #expect(StandardFallbackShown.wasShown(2, in: defaults))
+    }
+
     @Test("the tour holds the notice and records the count")
     func tourRecords() {
         let (defaults, name) = makeScratchDefaults()
@@ -77,7 +104,11 @@ struct StandardFallbackNoticeTests {
         )
         #expect(wire.contains("core.onStandardFallback={"))
         #expect(wire.contains("StandardFallbackNotice.present("))
-        #expect(wire.contains("onboardingWindow?.isVisible==true"))
+        #expect(
+            wire.contains(
+                "tourShowing:self?.onboardingWindow?.isVisible==true)"
+            )
+        )
         let notice = try source(
             "Sources/KiwiDesk/StandardNotice/StandardFallbackNotice.swift"
         )
@@ -94,6 +125,10 @@ struct StandardFallbackNoticeTests {
         #expect(view.contains(".focused($focused)"))
         #expect(view.contains(".onAppear{focused=true}"))
         #expect(view.contains(".onExitCommand(perform:onOK)"))
+        // Text follows the glass, never a fixed ink (owner).
+        #expect(view.contains(".foregroundStyle(.primary)"))
+        #expect(view.contains(".foregroundStyle(.secondary)"))
+        #expect(!view.contains("SettingsTheme.ink"))
     }
 
     /// Only the two screen-change doors announce; the re-choices
