@@ -8264,6 +8264,16 @@ panel has the keyboard.
 - **Escape** steps back: the picked windows, the open Space, the
   typing, then KiwiHub.
 
+:::unreleased
+Typing a number instead, such as `12`, finds Desktop 12 in each
+screen's column, counted as **⌘1**–**⌘9** count, and no window's
+name or title. While anything is typed, the arrows land only on
+what matches, and when the selected Space stops matching the
+selection moves to the first match; typing never switches,
+**Return** does. While windows ride along the arrows reach every
+Space again, since they drop on a Space, not on a match.
+:::
+
 The overview lays each screen out as a column instead, left to
 right, its Desktops stacked downward; past the panel's width the
 columns scroll sideways, and past its height each column scrolls

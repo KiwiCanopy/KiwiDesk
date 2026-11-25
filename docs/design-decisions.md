@@ -17103,6 +17103,23 @@ screen and closes it (#3165). Inside a Space ↑ ↓ take the places'
 route (#3169): a line with windows is re-entered on the slot the
 selection left, an empty one selected.
 
+*Amended* (owner with the ui-designer, 2026-11-25, #3624): the
+search is match-only, as the switcher's strip is (#3135). Under a
+query the keys land only on matching lines and windows, ← → skip a
+screen with none, and a query that stops matching the selected
+line moves the selection to the first match down its column, then
+the next column's; a click still reaches a dimmed line. A
+selection left on a dimmed line let ↩ act on a place the query
+hid. While a window is carried the keys reach every line and no
+line dims, because a drop's target is a place, not a match. An
+all-digit query names Desktop N in each column, as ⌘N counts, and
+no window text, so a Desktop past 10 is two keys away; out of range
+it matches nothing, and `0` is no alias for 10, since a typed 10
+reaches that Desktop. Typing selects and ↩ jumps. Prefix modes
+(`d:`, `a:`, `w:`, `s:`) were refused: hidden syntax the panel
+never shows, whose `a:` and `w:` the plain query already answers.
+`DesktopsSearchTests` holds it.
+
 **KiwiHub on a split screen reads "here" per area (#3572, owner
 ruling with the ui-designer 2026-11-23).** [Rationale] An area is where a
 user's Spaces live once a screen is split (#3517), so "here" read

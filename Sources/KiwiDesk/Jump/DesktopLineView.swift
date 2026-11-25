@@ -153,7 +153,7 @@ struct DesktopLineView: View {
                         isSelected: state.window == window.id,
                         isPicked: state.carried.contains(window.id),
                         isLast: line?.lastFocused == window.id,
-                        isMatch: state.matches(window),
+                        isMatch: state.matches(window, at: place),
                         onFill: wearsFill,
                         dragged: dragged(window.id),
                         pointer: pointer,

@@ -63,6 +63,8 @@ extension DesktopsState {
 
     /// One press, as `JumpKey` reads it on this side.
     mutating func press(_ key: JumpKey, repeated: Bool) -> DesktopsOutcome {
+        // A query matching nothing leaves the keys nowhere to land.
+        if matchesNothing, key.movesOrPicks { return .dead }
         switch key {
         case .step(let delta):
             if isInside {
@@ -176,5 +178,16 @@ extension DesktopsState {
             return .refuse(.alreadyThere(target.space))
         }
         return .act(.drop(moving, target, follow: follow))
+    }
+}
+
+extension JumpKey {
+    /// A Desktops key that moves the selection or acts on it, which
+    /// a query matching nothing turns into a beep (#3624).
+    fileprivate var movesOrPicks: Bool {
+        switch self {
+        case .step, .page, .side, .openSpace, .pick, .follow: true
+        default: false
+        }
     }
 }

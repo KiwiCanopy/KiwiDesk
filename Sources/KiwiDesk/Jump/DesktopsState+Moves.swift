@@ -8,38 +8,63 @@ import KiwiDeskCore
 /// can; in the shared-Desktop grid they stay in the Desktop's row
 /// and land on the line nearest the one they left (#3602). Inside
 /// a Space ←→ walk its windows and ↑↓ take the places' route,
-/// re-entering where a line holds windows (#3169). A fresh press
-/// wraps at an end, a held key stops there (#2897).
+/// re-entering where a line holds windows (#3169). Under a query
+/// every move lands only on a match (#3624), stepping past dimmed
+/// lines, windows and screens. A fresh press wraps at an end, a
+/// held key stops there (#2897).
 extension DesktopsState {
     /// ↑ / ↓ among places.
     mutating func moveLine(_ delta: Int, wrap: Bool) {
         guard let place else { return }
         let order = columnOrder(screen: place.screen)
-        guard let index = order.firstIndex(of: place) else { return }
         guard
-            let next = Self.step(index, delta, count: order.count, wrap: wrap)
+            let next = Self.step(
+                from: place,
+                among: order.filter(hasMatch),
+                order: order,
+                delta,
+                wrap: wrap
+            )
         else { return }
-        select(order[next])
+        select(next)
     }
 
     /// ← / → among screens, keeping the Desktop and the line where
-    /// the next screen has them.
+    /// the next screen has them; under a query, skipping a screen
+    /// with no match and landing on the match nearest that place.
     mutating func moveScreen(_ delta: Int, wrap: Bool) {
         guard let place else { return }
-        let screens = overview.screens.indices.filter {
-            !overview.screens[$0].desktops.isEmpty
+        let screens = Array(overview.screens.indices)
+        let stops = screens.filter {
+            columnOrder(screen: $0).contains(where: hasMatch)
         }
-        guard let at = screens.firstIndex(of: place.screen),
-            let next = Self.step(at, delta, count: screens.count, wrap: wrap)
+        guard
+            let screen = Self.step(
+                from: place.screen,
+                among: stops,
+                order: screens,
+                delta,
+                wrap: wrap
+            )
         else { return }
-        let screen = screens[next]
         let desktops = overview.screens[screen].desktops
         let desktop = min(place.desktop, desktops.count - 1)
         let line =
             geometry.grid == nil
             ? place.line
             : nearestLine(to: place, on: screen, desktop: desktop)
-        select(clamped(screen: screen, desktop: desktop, line: line))
+        let kept = clamped(screen: screen, desktop: desktop, line: line)
+        select(nearestMatch(to: kept) ?? kept)
+    }
+
+    /// The match down `place`'s column nearest it, `place` itself
+    /// where it matches; a tie goes up.
+    func nearestMatch(to place: DesktopsPlace) -> DesktopsPlace? {
+        let order = columnOrder(screen: place.screen)
+        guard let at = order.firstIndex(of: place) else { return nil }
+        return order.indices.filter { hasMatch(order[$0]) }
+            .min { abs($0 - at) < abs($1 - at) }
+            .map { order[$0] }
     }
 
     /// The line of `desktop` on `screen` whose top lies nearest the
@@ -70,12 +95,19 @@ extension DesktopsState {
 
     /// ← / → inside a Space: the next window as drawn.
     mutating func stepWindow(_ delta: Int, wrap: Bool) {
-        guard let place, let index = windowIndex else { return }
-        let drawn = ordered(place)
+        guard let place, let window else { return }
+        let drawn = ordered(place).map(\.id)
+        let stops = reachable(place).map(\.id)
         guard
-            let next = Self.step(index, delta, count: drawn.count, wrap: wrap)
+            let next = Self.step(
+                from: window,
+                among: stops,
+                order: drawn,
+                delta,
+                wrap: wrap
+            )
         else { return }
-        select(window: drawn[next].id, in: place)
+        select(window: next, in: place)
     }
 
     /// ↑ / ↓ inside a Space: the same route as among places
@@ -86,11 +118,18 @@ extension DesktopsState {
         guard let place, let index = windowIndex else { return }
         let slot = index - offset(place)
         let order = columnOrder(screen: place.screen)
-        guard let at = order.firstIndex(of: place),
-            let next = Self.step(at, delta, count: order.count, wrap: wrap)
+        guard
+            let target = Self.step(
+                from: place,
+                among: order.filter(hasMatch),
+                order: order,
+                delta,
+                wrap: wrap
+            )
         else { return }
-        let target = order[next]
-        let drawn = ordered(target)
+        // Matches lead the drawn order, so the reachable windows
+        // are its first ones.
+        let drawn = reachable(target)
         guard !drawn.isEmpty else { return select(target) }
         let pick = min(offset(target) + slot, drawn.count - 1)
         select(window: drawn[pick].id, in: target)
@@ -100,10 +139,16 @@ extension DesktopsState {
     /// selected screen's column, on its landing line.
     func desktop(digit index: Int) -> DesktopsPlace? {
         guard let place else { return nil }
-        let desktops = overview.screens[place.screen].desktops
+        return numbered(index, screen: place.screen)
+    }
+
+    /// Desktop `index` (0-based) of `screen`'s column, as ⌘N and a
+    /// typed number count, on its landing line.
+    func numbered(_ index: Int, screen: Int) -> DesktopsPlace? {
+        let desktops = overview.screens[screen].desktops
         guard desktops.indices.contains(index) else { return nil }
         return clamped(
-            screen: place.screen,
+            screen: screen,
             desktop: index,
             line: desktops[index].landingLine
         )
@@ -151,5 +196,29 @@ extension DesktopsState {
         guard count > 0 else { return nil }
         let next = JumpList.stepped(index, by: delta, count: count, wrap: wrap)
         return next == index ? nil : next
+    }
+
+    /// One step from `item` among `stops`, the items of `order` the
+    /// keys may land on. From an item that is no stop, the step
+    /// lands on the nearest stop in its direction, and wraps to
+    /// the far end only on a fresh press.
+    static func step<Item: Equatable>(
+        from item: Item,
+        among stops: [Item],
+        order: [Item],
+        _ delta: Int,
+        wrap: Bool
+    ) -> Item? {
+        if let at = stops.firstIndex(of: item) {
+            return step(at, delta, count: stops.count, wrap: wrap)
+                .map { stops[$0] }
+        }
+        guard let at = order.firstIndex(of: item) else { return nil }
+        let rank = { (stop: Item) in order.firstIndex(of: stop) ?? at }
+        let ahead =
+            delta > 0
+            ? stops.first { rank($0) > at } : stops.last { rank($0) < at }
+        guard wrap else { return ahead }
+        return ahead ?? (delta > 0 ? stops.first : stops.last)
     }
 }
