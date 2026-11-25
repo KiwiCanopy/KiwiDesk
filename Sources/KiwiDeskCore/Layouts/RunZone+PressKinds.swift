@@ -185,15 +185,63 @@ extension RunZone {
                 refusal: .atMinimum
             )
         }
+        let stepped = StackLayout.weightStep(
+            weights: shown.map { line.weights[$0] },
+            at: at,
+            delta: Double(delta),
+            span: Double(extra),
+            minSizes: Array(repeating: 0, count: shown.count)
+        ).value
+        guard
+            let weight = honestWeight(
+                stepped,
+                line,
+                index,
+                by: delta,
+                in: context
+            )
+        else {
+            let anchor = members[shown[StackLayout.nearestMate(of: at)]]
+            return Press(
+                cue: delta < 0 ? .ownMinimum : .neighborMinimum(anchor),
+                refusal: .atMinimum
+            )
+        }
         var press = Press()
-        press.weight =
-            StackLayout.weightStep(
-                weights: shown.map { line.weights[$0] },
-                at: at,
-                delta: Double(delta),
-                span: Double(extra),
-                minSizes: Array(repeating: 0, count: shown.count)
-            ).value
+        press.weight = weight
         return press
+    }
+
+    /// `stepped` where the render keeps its split, else the weight
+    /// that moves the window the way the press asks, nearest the
+    /// length asked; nil where none does. A step crossing the whole
+    /// split redraws every share, which can move it the other way
+    /// (#2967).
+    private func honestWeight(
+        _ stepped: Double,
+        _ line: Line,
+        _ index: Int,
+        by delta: CGFloat,
+        in context: LayoutContext
+    ) -> Double? {
+        let id = members[index]
+        var trial = context
+        trial.stackWeights[id] = stepped
+        let isRun = run(in: context) != nil
+        if (run(in: trial) != nil) == isRun { return stepped }
+        let drawn = line.drawn[index]
+        let target = drawn + delta
+        let sense: CGFloat = delta < 0 ? -1 : 1
+        return
+            ([stepped]
+            + weightCandidates(
+                for: id,
+                at: target,
+                floor: line.bare[index],
+                in: context
+            ))
+            .map { ($0, drawnLength(of: id, weight: $0, in: context)) }
+            .filter { ($0.1 - drawn) * sense > Self.unchangedTolerance }
+            .min { abs($0.1 - target) < abs($1.1 - target) }?.0
     }
 }
