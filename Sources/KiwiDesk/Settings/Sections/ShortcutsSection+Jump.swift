@@ -11,32 +11,12 @@ extension ShortcutsSection {
     ) -> some View {
         ShortcutsJumpBar(
             tracker: jumpTracker,
-            readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
-            spokenReadout: editingReadout(selected),
-            readoutIcon: ShortcutGlyph(
-                layer: selected,
-                in: model.config.layers
-            ),
             groups: ShortcutsJumpGroup.shown(
                 desktopsDrawn: MacOSDesktopsGroup.hasRows(expander)
             )
         ) { group in
             jump(to: group, proxy: proxy)
         }
-    }
-
-    /// Names the edited layer once there is a choice — the one
-    /// `layersExist` reading, asked rather than counted (#1127).
-    /// Drawn with the name cut to fit, spoken with it whole.
-    private func editingReadout(_ name: String) -> String? {
-        guard ShortcutsGates(config: model.config).layersExist else {
-            return nil
-        }
-        return L(
-            "shortcuts.editing_layer",
-            "Editing the \u{201C}%1$@\u{201D} layer",
-            name
-        )
     }
 
     private func jump(

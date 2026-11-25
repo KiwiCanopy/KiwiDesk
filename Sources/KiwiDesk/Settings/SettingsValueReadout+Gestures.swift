@@ -11,27 +11,44 @@ import KiwiDeskCore
 /// changed.
 extension SettingsValueReadout {
     static func gestureRows(
+        old: LayerGestures,
+        new: LayerGestures,
+        shortcutBase: ShortcutBase
+    ) -> [SettingsDiffRow] {
+        // `default` first, then the rest by name.
+        let layers = Set(old.layers).union(new.layers).sorted {
+            let first = KeyLayer.defaultName
+            return $0 == first || ($1 != first && $0 < $1)
+        }
+        return layers.flatMap { layer in
+            gestureRows(
+                old: old[layer],
+                new: new[layer],
+                scope: GestureSeedScope(
+                    shortcutBase: shortcutBase,
+                    layer: layer
+                )
+            )
+        }
+    }
+
+    /// One layer's rows.
+    private static func gestureRows(
         old: GestureMap,
         new: GestureMap,
-        shortcutBase: ShortcutBase
+        scope: GestureSeedScope
     ) -> [SettingsDiffRow] {
         let changed = Set(old.entries.keys).union(new.entries.keys)
             .filter { old[$0] != new[$0] }
             .sorted()
         let before = {
-            GestureListEdits.action(
-                of: $0,
-                in: old,
-                shortcutBase: shortcutBase
-            )
+            GestureListEdits.action(of: $0, in: old, scope: scope)
         }
         let after = {
-            GestureListEdits.action(
-                of: $0,
-                in: new,
-                shortcutBase: shortcutBase
-            )
+            GestureListEdits.action(of: $0, in: new, scope: scope)
         }
+        let at = { LayerGestureKey(scope.layer, $0) }
+        let name = { rowName($0, layer: scope.layer) }
         var left = changed.filter { before($0) != nil && after($0) == nil }
         var rows: [SettingsDiffRow] = []
         var moved: Set<GestureKey> = []
@@ -44,30 +61,48 @@ extension SettingsValueReadout {
             var row = SettingsDiffRow.change(
                 .shortcuts(.gestureBindings),
                 instance: GestureRowInstance.move(
-                    from: from,
-                    to: key
+                    from: at(from),
+                    to: at(key)
                 ).spelling,
                 label: GestureListWords.value(action, on: key.input),
-                old: GestureListWords.rowName(from),
-                new: GestureListWords.rowName(key)
+                old: name(from),
+                new: name(key)
             )
-            row.subject = subject(key)
-            row.pairedSubject = subject(from)
+            row.subject = subject(at(key))
+            row.pairedSubject = subject(at(from))
             rows.append(row)
         }
         for key in changed where !moved.contains(key) {
-            let words = words(of: key, before(key), after(key))
+            let words = words(
+                of: key,
+                named: name(key),
+                before(key),
+                after(key)
+            )
             var row = SettingsDiffRow.change(
                 .shortcuts(.gestureBindings),
-                instance: GestureRowInstance.key(key).spelling,
+                instance: GestureRowInstance.key(at(key)).spelling,
                 label: words.label,
                 old: words.old,
                 new: words.new
             )
-            row.subject = subject(key)
+            row.subject = subject(at(key))
             rows.append(row)
         }
         return rows
+    }
+
+    /// A row's name: its gesture and keys, and its layer where that
+    /// is not the default one (#3535).
+    static func rowName(_ key: GestureKey, layer: String) -> String {
+        let row = GestureListWords.rowName(key)
+        guard layer != KeyLayer.defaultName else { return row }
+        return L(
+            "shortcuts.gestures.layer_row",
+            "%1$@ in the \u{201C}%2$@\u{201D} layer",
+            row,
+            layer
+        )
     }
 
     /// A key's row words: where one direction alone changed, that
@@ -76,11 +111,11 @@ extension SettingsValueReadout {
     /// values.
     private static func words(
         of key: GestureKey,
+        named row: String,
         _ before: GestureAction?,
         _ after: GestureAction?
     ) -> (label: String, old: String, new: String) {
         let input = key.input
-        let row = GestureListWords.rowName(key)
         if let was = GestureListEdits.arms(of: before, on: input),
             let now = GestureListEdits.arms(of: after, on: input)
         {
@@ -111,7 +146,7 @@ extension SettingsValueReadout {
 
     /// The reach subject a gesture row folds on (#3225): its key; a
     /// move folds on both of its keys.
-    private static func subject(_ key: GestureKey) -> ReachSubject {
+    private static func subject(_ key: LayerGestureKey) -> ReachSubject {
         ReachSubject(family: .gesture, key: key.spelling)
     }
 }

@@ -29,12 +29,14 @@ public enum ShortcutBaseSwitch {
         config.layers = config.layers.map {
             move($0, onto: base, liveSpaces: live) { _ in false }.layer
         }
-        config.gesture =
+        config.gesture = config.gesture.mapLayers { layer, map in
             GestureBaseSwitch.move(
-                config.gesture,
+                map,
                 from: config.shortcutBase,
-                onto: base
+                onto: base,
+                layer: layer
             ).map
+        }
         config.shortcutBase = base
     }
 

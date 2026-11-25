@@ -34,7 +34,10 @@ struct GestureMigrationDragTests {
     private func map(_ object: [String: Any]?) throws -> GestureMap {
         let value = try #require(object?["gesture"])
         let data = try JSONSerialization.data(withJSONObject: value)
-        return try JSONDecoder().decode(GestureMap.self, from: data)
+        // The whole chain runs, so the map lands on `default` (#3535).
+        return try JSONDecoder().decode(LayerGestures.self, from: data)[
+            KeyLayer.defaultName
+        ]
     }
 
     @Test("a move onto the resize seed keeps its row")
@@ -75,13 +78,16 @@ struct GestureMigrationDragTests {
                 """#
         )
         #expect(root["modifier_drag"] == nil)
-        let stored = root["gesture"] as? [String: Any] ?? [:]
+        let stored =
+            (root["gesture"] as? [String: Any])?["default"]
+            as? [String: Any] ?? [:]
         #expect(!stored.keys.contains { $0.hasPrefix("drag") })
         let gestures = stored.isEmpty ? GestureMap() : try map(root)
         let resolved = GestureSeeds.resolved(
             base: gestures,
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(
             resolved[GestureKey(.drag, [.control, .option])] == .grab(.move)
@@ -107,7 +113,8 @@ struct GestureMigrationDragTests {
         let resolved = GestureSeeds.resolved(
             base: gestures,
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(
             resolved[GestureKey(.drag, [.control, .command])] == .grab(.move)

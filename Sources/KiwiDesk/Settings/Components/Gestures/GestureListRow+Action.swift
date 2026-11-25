@@ -117,8 +117,8 @@ extension GestureListRow {
         GestureListEdits.set(
             action,
             at: key,
-            in: &model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: &model.gestureLayerMap,
+            scope: model.gestureScope
         )
     }
 }
@@ -148,7 +148,7 @@ extension GestureListRow {
             RuleReachControl(
                 model: model,
                 family: .gesture,
-                app: key.spelling,
+                app: model.gestureReachKey(key),
                 subject: GestureListWords.rowName(key),
                 reading: reading,
                 value: GestureListWords.value(action, on: key.input)
@@ -158,7 +158,7 @@ extension GestureListRow {
 
     var reachReading: RuleReachReading? {
         guard model.offersReachColumn, action != nil else { return nil }
-        return model.gestureReach(key.spelling)
+        return model.gestureReach(model.gestureReachKey(key))
     }
 
     /// The trash asks how far a removal reaches only where another

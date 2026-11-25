@@ -2,21 +2,13 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The pinned jump bar over Shortcuts ▸ Built-in (#1520, #3184): a
-/// "Jump to" caption line carrying the edited layer's name at its
-/// trailing end, over one chip per group, wrapping rather than
-/// scrolling. It sits on the page ground, and draws its lower
+/// "Jump to" caption over one chip per group, wrapping rather than
+/// scrolling; the layer strip above the switcher names the edited
+/// layer (#3535). It sits on the page ground, and draws its lower
 /// hairline once content slides under it.
 struct ShortcutsJumpBar: View {
     /// The one reader of `tracker.reading` (#1520).
     let tracker: ShortcutsJumpTracker
-    /// "Editing the “x” layer", or nil where there is no choice.
-    let readout: String?
-    /// The same sentence with the layer's full name, for
-    /// VoiceOver; nil speaks what is drawn.
-    var spokenReadout: String? = nil
-    /// The edited layer's icon, ahead of the whole sentence; nil
-    /// for `default` and a layer without one (#3431).
-    var readoutIcon: ShortcutGlyph? = nil
     /// The chips drawn, in page order.
     let groups: [ShortcutsJumpGroup]
     let jump: (ShortcutsJumpGroup) -> Void
@@ -24,16 +16,6 @@ struct ShortcutsJumpBar: View {
 
     /// Gaps between chips and between wrapped lines.
     static let spacing: CGFloat = 6
-
-    /// The longest layer name the readout spells whole; a longer
-    /// one is cut inside the sentence, never the sentence itself.
-    static let nameLimit = 32
-
-    /// `name`, cut to `nameLimit` with an ellipsis.
-    static func shownName(_ name: String) -> String {
-        guard name.count > nameLimit else { return name }
-        return String(name.prefix(nameLimit - 1)) + "…"
-    }
 
     var body: some View {
         content
@@ -50,53 +32,13 @@ struct ShortcutsJumpBar: View {
             }
     }
 
-    /// The caption line over the chips; header chrome, so it goes
-    /// with the chrome step and leaves the bare chips.
+    /// The caption over the chips; header chrome, so it goes with
+    /// the chrome step and leaves the bare chips.
     private var content: some View {
         VStack(alignment: .leading, spacing: Self.spacing) {
-            if !width.collapsesChrome { captionLine }
+            if !width.collapsesChrome { caption }
             chips
         }
-    }
-
-    /// The caption, and the readout at its trailing end where both
-    /// fit; otherwise the readout wraps under the caption.
-    @ViewBuilder private var captionLine: some View {
-        if let readout {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: 0) {
-                    caption
-                    Spacer(minLength: 12)
-                    readoutText(readout).fixedSize()
-                }
-                VStack(alignment: .leading, spacing: Self.spacing) {
-                    caption
-                    readoutText(readout)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        } else {
-            caption
-        }
-    }
-
-    /// The icon leads the sentence, never sits inside it, since
-    /// word order differs per locale; it stays with the text on a
-    /// wrap and VoiceOver hears the sentence alone (#3431).
-    private func readoutText(_ text: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 4) {
-            if let readoutIcon {
-                ShortcutGlyphView(
-                    glyph: readoutIcon,
-                    side: ShortcutLayerChip.iconSide
-                )
-            }
-            Text(text)
-        }
-        .font(.callout)
-        .foregroundStyle(SettingsTheme.ink2)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(spokenReadout ?? text)
     }
 
     private var chips: some View {

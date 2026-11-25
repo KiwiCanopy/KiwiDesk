@@ -100,11 +100,11 @@ struct ReachRowFoldFamilyTests {
         let key = GestureKey(.rightClick, [.control])
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        config.gesture[key] = .bound(
+        config.gesture[KeyLayer.defaultName][key] = .bound(
             .run(LuaAction(lua: lua, kind: .custom))
         )
         let model = try makeModel(config, others: ["Home", "Away"])
-        model.config.gesture[key] = .bound(
+        model.config.gesture[KeyLayer.defaultName][key] = .bound(
             .run(LuaAction(lua: "KiwiDesk.cycle_mode()", kind: .custom))
         )
 

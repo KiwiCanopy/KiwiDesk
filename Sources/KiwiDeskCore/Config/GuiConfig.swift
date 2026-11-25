@@ -60,10 +60,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The scroll gestures' global base (#1656); a profile
     /// diverges through `Profile.scrollGesture`.
     public var scrollGesture: ScrollGestureBase = .defaults
-    /// The mouse and trackpad gesture bindings' global base over
-    /// the seeds (#3199), sparse; a profile diverges through
-    /// `Profile.gesture`.
-    public var gesture = GestureMap()
+    /// The mouse and trackpad gesture bindings' global base, one
+    /// sparse map per layer (#3199, #3535); a profile diverges
+    /// through `Profile.gesture`.
+    public var gesture = LayerGestures()
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
@@ -219,12 +219,13 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 ScrollGestureBase.self,
                 forKey: .scrollGesture
             ) ?? .defaults
-        // Additive since #3199: absence follows the seeds.
+        // Additive since #3199: absence follows the seeds. Per layer
+        // since #3535 (`migratingGesturesOntoLayers`).
         gesture =
             try container.decodeIfPresent(
-                GestureMap.self,
+                LayerGestures.self,
                 forKey: .gesture
-            ) ?? GestureMap()
+            ) ?? LayerGestures()
         // Additive since #1655: absence is the default.
         spaceHistory =
             try container.decodeIfPresent(

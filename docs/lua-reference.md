@@ -5665,6 +5665,16 @@ Each row's **Applies to** picks the profiles it reaches, as a
 written to the base or a profile's own bindings
 ([Gesture storage](#gesture-storage)).
 
+:::unreleased
+Gesture bindings belong to a keybinding layer, as keys do, and
+only the active layer's fire. A gesture the active layer does not
+bind does nothing: switching to a layer that binds no gestures
+turns every gesture off while it is active, the defaults included,
+which belong to `default` ([Gestures](user-guide.md#gestures)).
+Only a layer `KiwiDesk.define_layer` or the Settings app defines
+can be switched to.
+:::
+
 ### Gesture inputs
 
 | Input | What the hand does | Binds |
@@ -5953,14 +5963,15 @@ under those keys reaches the window under the pointer.
 
 ### Gesture storage
 
-The bindings are stored in `gui.json` as the `gesture` object, the
-base every profile starts with, laid over the defaults above. A
-profile file may carry a `gesture` object of the same shape, which
-outranks the base key by key. A key is the input, then `:` and its
-keys by their full names in the order
+The bindings are stored as gesture maps in `gui.json`'s `gesture`
+object, the base every profile starts with, laid over the defaults
+above. A profile file may carry a `gesture` object of the same
+shape, which outranks the base key by key. In a map, a key is the
+input, then `:` and its keys by their full names in the order
 `hyper+control+option+shift+command` (`"wheel:control+option"`,
-`"wheel:hyper"`), or the input alone where it holds none. A key the object leaves out
-inherits, and `null` turns it off, a default included. A binding
+`"wheel:hyper"`), or the input alone where it holds none. A key the
+map leaves out inherits, and `null` turns it off, a default
+included. A binding
 stores Lua under `lua`, with the shortcut row's optional `kind`,
 `desc`, `group` and `symbol`; a family under `family`; a grab
 under `grab`; and a table of directions under `split`, each
@@ -5968,7 +5979,7 @@ direction holding a Lua binding and each axis (`left_right`,
 `up_down`) a family:
 
 ```json
-"gesture": {
+{
   "tap3": null,
   "tap5": { "lua": "KiwiDesk.cycle_mode()", "kind": "custom" },
   "swipe5:control+option": { "family": "focus" },
@@ -5995,6 +6006,23 @@ that holds a family, or both axes on one family, which is that
 family whole. A
 binding [`gesture.bind`](#gesturebind) would refuse is kept and
 does nothing.
+
+:::unreleased
+The `gesture` object holds one such map per keybinding layer,
+keyed by the layer's name, in `gui.json` and in a profile file
+alike. The `default` layer's map lies over the defaults; every
+other layer's binds only what it names. Renaming a layer in the
+Settings app carries its map, and deleting it drops it. A file an
+earlier release wrote, whose `gesture` object is one map, moves
+that map under `default` on its next load.
+
+```json
+"gesture": {
+  "default": { "tap3": null },
+  "Coding": { "swipe3:control+option": { "family": "space" } }
+}
+```
+:::
 
 A file a release before this one wrote is moved on its next load:
 `trackpad_gesture`'s slots, `modifier_drag`'s `move` and `resize`
@@ -6070,6 +6098,18 @@ gesture.bind("wheel", "control+option+command", {
 })
 ```
 
+:::unreleased
+A fourth argument names the keybinding layer the binding is on,
+`default` when it is left out; an empty name fails. A binding on a
+layer fires only while that layer is active
+([Gestures](#gestures)), and a layer named before
+`KiwiDesk.define_layer` defines it keeps its bindings.
+
+```lua
+gesture.bind("swipe3", "control+option", "space", "Coding")
+```
+:::
+
 ### gesture.unbind
 
 **Expects:** an input and keys, as for
@@ -6084,6 +6124,11 @@ included.
 gesture.unbind("tap3", "")
 gesture.unbind("drag", "control+option")
 ```
+
+:::unreleased
+A third argument names the layer, as for
+[`gesture.bind`](#gesturebind).
+:::
 
 ### scroll_gesture.set_pan
 

@@ -67,7 +67,8 @@ struct GestureBindingTests {
         let resolved = GestureSeeds.resolved(
             base: GestureMap(),
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         // The trackpad ladder (#1873 ▸ Ruling 2026-11-15): two
         // fingers windows, three Spaces and their overview, four
@@ -197,7 +198,8 @@ struct GestureBindingTests {
         let resolved = GestureSeeds.resolved(
             base: base,
             profile: profile,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(resolved[GestureKey(.tap3)] == .run(LuaAction(lua: "p()")))
         #expect(resolved[GestureKey(.tap4)] == nil)
@@ -205,7 +207,8 @@ struct GestureBindingTests {
             GestureSeeds.resolved(
                 base: base,
                 profile: nil,
-                shortcutBase: .standard
+                shortcutBase: .standard,
+                layer: KeyLayer.defaultName
             )[
                 GestureKey(.tap3)
             ] == nil

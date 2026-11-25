@@ -103,15 +103,17 @@ struct GuiConfigParityTests {
             longSwipes: true,
             stepLength: 25
         )
-        config.gesture = GestureMap([
-            GestureKey(.tap3): .unbound,
-            GestureKey(.swipe3, [.control, .option]): .bound(
-                .family(.focus)
-            ),
-            GestureKey(.hoverMove, [.option, .command]): .bound(
-                .grab(.move)
-            ),
-        ])
+        config.gesture = LayerGestures(
+            defaultLayer: GestureMap([
+                GestureKey(.tap3): .unbound,
+                GestureKey(.swipe3, [.control, .option]): .bound(
+                    .family(.focus)
+                ),
+                GestureKey(.hoverMove, [.option, .command]): .bound(
+                    .grab(.move)
+                ),
+            ])
+        )
         config.spaceHistory = .allScreens
         config.modeCycle = [.grid, .monocle]
         config.focusWrap = .off

@@ -22,7 +22,9 @@ struct GestureReachModelTests {
         config.spaces = [SpaceID("1")]
         try core.guiConfigStore.save(config)
         var work = profile("Work")
-        work.gesture = GestureMap([own: .bound(.run(lua))])
+        work.gesture = LayerGestures(
+            defaultLayer: GestureMap([own: .bound(.run(lua))])
+        )
         try core.profiles.save(work)
         try core.profiles.write(profile("Home"))
         let model = makeTestModel(core: core)
@@ -43,10 +45,13 @@ struct GestureReachModelTests {
     @Test("the loaded page shows its own row; gui.json keeps the base")
     func loadedPageIsOwn() throws {
         let model = try makeModel()
-        #expect(model.config.gesture[own] == .bound(.run(lua)))
+        #expect(
+            model.config.gesture[KeyLayer.defaultName][own]
+                == .bound(.run(lua))
+        )
         let row = try #require(model.gestureReach(own.spelling))
         #expect(!row.shared && row.users == ["Work"])
-        #expect(model.sidecarConfig.gesture[own] == nil)
+        #expect(model.sidecarConfig.gesture[KeyLayer.defaultName][own] == nil)
     }
 
     @Test("ticking Home writes Work's row into Home's file")
@@ -55,10 +60,16 @@ struct GestureReachModelTests {
         model.setProfile(.gesture, own.spelling, "Home", true)
         model.updateActiveProfile()
         #expect(
-            try model.core.profiles.read(name: "Home").gesture?[own]
+            try model.core.profiles.read(name: "Home").gesture?[
+                KeyLayer.defaultName
+            ][own]
                 == .bound(.run(lua))
         )
-        #expect(model.core.guiConfigStore.load()?.gesture[own] == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][
+                own
+            ] == nil
+        )
     }
 
     @Test("a re-keyed row keeps its reach in every profile it held")
@@ -69,16 +80,21 @@ struct GestureReachModelTests {
 
         let moved = GestureKey(.rightClick, [.option])
         model.carryPick(.gesture, from: own.spelling, to: moved.spelling)
-        model.config.gesture[own] = nil
-        model.config.gesture[moved] = .bound(.run(lua))
+        model.config.gesture[KeyLayer.defaultName][own] = nil
+        model.config.gesture[KeyLayer.defaultName][moved] = .bound(.run(lua))
         model.updateActiveProfile()
 
         for name in ["Work", "Home"] {
-            let map = try model.core.profiles.read(name: name).gesture
+            let map = try model.core.profiles.read(name: name)
+                .gesture?[KeyLayer.defaultName]
             #expect(map?[moved] == .bound(.run(lua)), "\(name)")
             #expect(map?[own] == nil, "\(name)")
         }
-        #expect(model.core.guiConfigStore.load()?.gesture[moved] == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][
+                moved
+            ] == nil
+        )
     }
 
     @Test("a listed re-key reads as one move row, its reach folded")
@@ -90,8 +106,8 @@ struct GestureReachModelTests {
 
         let moved = GestureKey(.rightClick, [.option])
         model.carryPick(.gesture, from: own.spelling, to: moved.spelling)
-        model.config.gesture[own] = nil
-        model.config.gesture[moved] = .bound(.run(lua))
+        model.config.gesture[KeyLayer.defaultName][own] = nil
+        model.config.gesture[KeyLayer.defaultName][moved] = .bound(.run(lua))
 
         let rows = SettingsDiffRowSource.rows(for: model).filter {
             $0.key == .shortcuts(.gestureBindings)
@@ -116,7 +132,7 @@ struct GestureReachModelTests {
         let carry = body.range(of: "model.carryPick(.gesture")
         let move = body.range(of: "GestureListEdits.rekey(")
         #expect(carry != nil && move != nil)
-        let lands = body.range(of: "model.config.gesture = map")
+        let lands = body.range(of: "model.gestureLayerMap = map")
         if let carry, let move, let lands {
             #expect(move.lowerBound < carry.lowerBound)
             #expect(carry.lowerBound < lands.lowerBound)
@@ -132,7 +148,7 @@ struct GestureReachModelTests {
         let core = makeTestCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        config.gesture[own] = .bound(.run(lua))
+        config.gesture[KeyLayer.defaultName][own] = .bound(.run(lua))
         try core.guiConfigStore.save(config)
         try core.profiles.save(profile("Work"))
         try core.profiles.write(profile("Home"))
@@ -142,14 +158,25 @@ struct GestureReachModelTests {
         model.dropGesturePick(own.spelling, shared: true)
         GestureListEdits.remove(
             own,
-            in: &model.config.gesture,
-            shortcutBase: .standard
+            in: &model.config.gesture[KeyLayer.defaultName],
+            scope: .defaultLayer(on: .standard)
         )
         model.updateActiveProfile()
 
-        #expect(core.guiConfigStore.load()?.gesture[own] == .bound(.run(lua)))
-        #expect(try core.profiles.read(name: "Work").gesture?[own] == .unbound)
-        #expect(try core.profiles.read(name: "Home").gesture?[own] == nil)
+        #expect(
+            core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][own]
+                == .bound(.run(lua))
+        )
+        #expect(
+            try core.profiles.read(name: "Work").gesture?[
+                KeyLayer.defaultName
+            ][own] == .unbound
+        )
+        #expect(
+            try core.profiles.read(name: "Home").gesture?[
+                KeyLayer.defaultName
+            ][own] == nil
+        )
     }
 
     /// The wiring the model tests above cannot reach: the refused
@@ -164,7 +191,7 @@ struct GestureReachModelTests {
         )
         #expect(
             body.contains(
-                "model.dropGesturePick(key.spelling, "
+                "model.dropGesturePick(reachKey, "
                     + "shared: sharedReach != nil)"
             )
         )

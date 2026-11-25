@@ -12787,6 +12787,12 @@ is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs
 nothing at rest, and a drawer around it is chrome.
 
+:::unreleased
+*Amended (#3535):* Modifier keys is Built-in's one collapsible
+card; the layer pick is a strip above the Shortcuts switcher
+(*One page, three parts*).
+:::
+
 Per-Space Customize… is the one offer that left the menu (#2674,
 owner ruling 2026-10-27, amending this entry): every Space row
 carries a small icon-only Customize button, its badge counting
@@ -14807,6 +14813,12 @@ too*). Saved
 profiles get the same affordance: a pencil beside the
 profile name renames immediately — file, adopted name, and
 Desktop bindings follow, like Delete and make default.
+
+:::unreleased
+*Amended (#3535):* once a layer exists the strip is page-wide,
+above the Shortcuts switcher, and the switch rows are Personal ▸
+Layers' card; until then the card holds the strip.
+:::
 
 **Shortcut layers are the layering mechanism**: a layer switch
 gives a whole second set of single-key bindings, ergonomically
@@ -17780,13 +17792,39 @@ Home, the other two add a navigator.
   hidden — would stand, which is why it is a condition of the
   ruling rather than a nicety.
 
-**A rule above the Layers card parts what applies everywhere
-from the layer's own rows** (owner 2026-11-08). Everything under
-"Editing the X layer" reads as belonging to that layer, so the
-Layers card leads only what is layer-scoped, and Built-in's
-Modifier keys card above it belongs to no layer. The page draws a
-rule between the two, so its two bands read apart without the
-jump bar.
+:::unreleased
+*Amended (#3535, owner 2026-11-20 and 2026-11-25):* **a layer
+binds gestures as it binds keys**, so Mouse & Trackpad is the
+picked layer's part too, and "a layer does not act on a gesture"
+above is spent. There is no fall-through: a gesture the active
+layer does not bind runs nothing, as a key does not, so a layer
+that binds none turns every gesture off while it is active and
+the part says so over its empty cards. Fall-through would make
+gestures the one place a layer inherits, and a layer meant to
+free the mouse for a game would keep every default; an "inherit
+default's gestures" switch per layer stays possible later, as a
+field beside the map. Restore Defaults is drawn on `default`
+alone, whose map alone lies over the seeds.
+
+**The layer pick is page-wide, a strip above the switcher**
+(owner 2026-11-25, after a ui-designer consult and a preview).
+With all three parts per layer, a pick inside one part would read
+as that part's, so the chips, ✎ and + sit above Built-in |
+Personal | Mouse & Trackpad and stay put while the parts swap
+under them. The whole Layers card above the switcher was refused:
+it is tall, pushes the page's first choice below the fold, and
+puts key rows on the gesture part. The strip is drawn only once a
+layer other than `default` exists, since a pick with one choice
+decides nothing; until then Personal's Layers card holds the
+strip as the offer, and after it the card holds the "Switch to
+layer" keys. Built-in loses its Layers card, so Restore sits
+right under Modifier keys, and its jump bar loses the "Editing
+the X layer" line, which the strip says. Modifier keys and
+Natural scrolling, which belong to no layer, say so once a layer
+exists. This retires "Layers stays a shut card on Built-in" and
+"Layers draws on Built-in and Personal" above, and moves the rule
+below to sit under Modifier keys, above the first part after it.
+:::
 
 **Its entries are grouped by where the hand is** — on your
 windows, anywhere holding a modifier, on the KiwiShelf — never by

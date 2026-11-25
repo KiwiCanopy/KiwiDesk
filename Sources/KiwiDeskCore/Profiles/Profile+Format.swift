@@ -54,10 +54,12 @@ extension Profile {
     /// loses the point `step_distance` (`migratingStepDistanceOut`),
     /// 41 settings wearing a bundled palette with an Automatic
     /// handle take that palette's handle colour (#3409,
-    /// `migratingHandleStamp`).
+    /// `migratingHandleStamp`), 42 the `gesture` map is one map
+    /// per layer, today's the default layer's (#3535,
+    /// `migratingGesturesOntoLayers`).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 41
+    public static let currentFormat = 42
 }

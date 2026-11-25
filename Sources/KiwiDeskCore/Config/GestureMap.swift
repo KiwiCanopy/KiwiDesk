@@ -12,10 +12,11 @@ public enum GestureEntry: Hashable, Sendable {
     }
 }
 
-/// The sparse binding map (#3199 ruling ▸ Storage): keyed by input
-/// and keys, a key it does not name inherits. The same shape stores
-/// the global base in `gui.json`, laid over the seeds, and a
-/// profile's override, laid over the base.
+/// One layer's sparse binding map (#3199 ruling ▸ Storage): keyed
+/// by input and keys, a key it does not name inherits. The same
+/// shape stores a layer's global base in `gui.json`, laid over that
+/// layer's seeds, and a profile's override, laid over the base;
+/// `LayerGestures` holds one per layer (#3535).
 public struct GestureMap: Hashable, Sendable {
     public var entries: [GestureKey: GestureEntry]
 
@@ -34,15 +35,16 @@ public struct GestureMap: Hashable, Sendable {
     }
 
     /// The sparse override that turns `base` into `edited`, both
-    /// laid over the seeds on `shortcutBase`; nil where they
+    /// laid over `layer`'s seeds on `shortcutBase`; nil where they
     /// resolve alike.
     public static func diff(
         base: GestureMap,
         edited: GestureMap,
-        shortcutBase: ShortcutBase
+        shortcutBase: ShortcutBase,
+        layer: String
     ) -> GestureMap? {
         var out = GestureMap()
-        let seeds = GestureSeeds.seeds(on: shortcutBase)
+        let seeds = GestureSeeds.seeds(on: shortcutBase, layer: layer)
         let keys = Set(base.entries.keys).union(edited.entries.keys)
         for key in keys {
             let new = edited.resolved(key, seeds)
@@ -125,7 +127,7 @@ public enum GestureSeeds {
         .run(navigationStep(lua))
     }
 
-    /// The bound keys once `base` lies over the seeds on
+    /// The bound keys once `base` lies over `layer`'s seeds on
     /// `shortcutBase` and `profile` over that. A refused binding is
     /// dropped, since a hand-edited file reaches what the verb
     /// refuses, and so is a click or a hover_move whose keys a drag
@@ -134,11 +136,12 @@ public enum GestureSeeds {
     public static func resolved(
         base: GestureMap,
         profile: GestureMap?,
-        shortcutBase: ShortcutBase
+        shortcutBase: ShortcutBase,
+        layer: String
     ) -> [GestureKey: GestureAction] {
-        var out = seeds(on: shortcutBase)
-        for layer in [base, profile ?? GestureMap()] {
-            for (key, entry) in layer.entries {
+        var out = seeds(on: shortcutBase, layer: layer)
+        for map in [base, profile ?? GestureMap()] {
+            for (key, entry) in map.entries {
                 out[key] = entry.action
             }
         }
@@ -170,12 +173,14 @@ public enum GestureSeeds {
         of key: GestureKey,
         base: GestureMap,
         profile: GestureMap?,
-        shortcutBase: ShortcutBase
+        shortcutBase: ShortcutBase,
+        layer: String
     ) -> GestureRefusal? {
         let resolved = Self.resolved(
             base: base,
             profile: profile,
-            shortcutBase: shortcutBase
+            shortcutBase: shortcutBase,
+            layer: layer
         )
         if key.input == .drag {
             let shadowed = resolved.keys.contains {

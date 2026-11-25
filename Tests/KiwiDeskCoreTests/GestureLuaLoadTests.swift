@@ -80,7 +80,7 @@ struct GestureLuaLoadTests {
     )
     func adoptKeeps(staleSidecar: Bool) throws {
         var stale = GuiConfig()
-        stale.gesture[GestureKey(.tap5)] = .bound(
+        stale.gesture[KeyLayer.defaultName][GestureKey(.tap5)] = .bound(
             .run(LuaAction(lua: "KiwiDesk.focus_space_last()"))
         )
         let core = try makeCore(
@@ -94,7 +94,9 @@ struct GestureLuaLoadTests {
         #expect(core.isGuiManaged)
         #expect(tap5(core) == expected)
         #expect(
-            core.guiConfigStore.load()?.gesture[GestureKey(.tap5)]
+            core.guiConfigStore.load()?.gesture[KeyLayer.defaultName][
+                GestureKey(.tap5)
+            ]
                 == .bound(expected)
         )
         let file = try String(

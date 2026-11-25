@@ -36,7 +36,8 @@ public final class TouchGestures {
         GestureSeeds.resolved(
             base: GestureMap(),
             profile: nil,
-            shortcutBase: ShortcutBase.standard
+            shortcutBase: ShortcutBase.standard,
+            layer: KeyLayer.defaultName
         )
     )
     /// Whether a swipe keeps its direction: the trackpad's Natural

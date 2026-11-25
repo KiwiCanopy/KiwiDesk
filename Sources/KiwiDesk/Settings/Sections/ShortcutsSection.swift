@@ -56,6 +56,7 @@ struct ShortcutsSection: View {
         let expander = self.expander
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
+                layerStrip
                 segmentControl(proxy)
                 if segment == .builtIn {
                     jumpBar(proxy, expander: expander)

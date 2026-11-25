@@ -52,8 +52,8 @@ struct GestureListRow: View {
     var action: GestureAction? {
         GestureListEdits.action(
             of: key,
-            in: model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: model.gestureLayerMap,
+            scope: model.gestureScope
         )
     }
 
@@ -87,7 +87,11 @@ struct GestureListRow: View {
                     sharedFrom: sharedReach
                 ) { removal in
                     if action != nil {
-                        model.recordRemoval(.gesture, key.spelling, removal)
+                        model.recordRemoval(
+                            .gesture,
+                            model.gestureReachKey(key),
+                            removal
+                        )
                     }
                     onRemove()
                 }
@@ -185,8 +189,8 @@ struct GestureListRow: View {
         }
         if let held = GestureListEdits.heldByDrag(
             key,
-            in: model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: model.gestureLayerMap,
+            scope: model.gestureScope
         ) {
             return GestureRefusalWords.sentence(held, hyperOff: hyperOff)
         }
@@ -242,17 +246,15 @@ struct GestureListRow: View {
         if let refusal = target.refusal ?? action?.refusal(on: target) {
             return GestureRefusalWords.sentence(refusal, hyperOff: hyperOff)
         }
-        var base = model.config.gesture
-        GestureListEdits.remove(
-            key,
-            in: &base,
-            shortcutBase: model.config.shortcutBase
-        )
+        var base = model.gestureLayerMap
+        let scope = model.gestureScope
+        GestureListEdits.remove(key, in: &base, scope: scope)
         return GestureSeeds.shadowRefusal(
             of: target,
             base: base,
             profile: nil,
-            shortcutBase: model.config.shortcutBase
+            shortcutBase: scope.shortcutBase,
+            layer: scope.layer
         ).map { GestureRefusalWords.sentence($0, hyperOff: hyperOff) }
     }
 
@@ -260,18 +262,21 @@ struct GestureListRow: View {
         clash = nil
         guard target != key, !others.contains(target) else { return }
         if action != nil {
-            var map = model.config.gesture
+            var map = model.gestureLayerMap
             guard
                 GestureListEdits.rekey(
                     key,
                     to: target,
                     in: &map,
-                    shortcutBase: model.config.shortcutBase
+                    scope: model.gestureScope
                 )
             else { return }
             // The pick moves while the old key still reads (#3225).
-            model.carryPick(.gesture, from: key.spelling, to: target.spelling)
-            model.config.gesture = map
+            let (from, to) = (
+                model.gestureReachKey(key), model.gestureReachKey(target)
+            )
+            model.carryPick(.gesture, from: from, to: to)
+            model.gestureLayerMap = map
         }
         entry.key = target
     }
@@ -292,11 +297,12 @@ struct GestureListRow: View {
             return
         }
         if action != nil {
-            model.dropGesturePick(key.spelling, shared: sharedReach != nil)
+            let reachKey = model.gestureReachKey(key)
+            model.dropGesturePick(reachKey, shared: sharedReach != nil)
             GestureListEdits.remove(
                 key,
-                in: &model.config.gesture,
-                shortcutBase: model.config.shortcutBase
+                in: &model.gestureLayerMap,
+                scope: model.gestureScope
             )
         }
         onUnbound()

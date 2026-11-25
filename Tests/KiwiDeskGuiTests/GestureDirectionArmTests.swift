@@ -95,8 +95,8 @@ struct GestureDirectionArmTests {
             )
         )
         let rows = SettingsValueReadout.gestureRows(
-            old: old,
-            new: new,
+            old: LayerGestures(defaultLayer: old),
+            new: LayerGestures(defaultLayer: new),
             shortcutBase: .standard
         )
         let row = try #require(rows.first)

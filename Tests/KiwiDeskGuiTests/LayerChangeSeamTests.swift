@@ -55,10 +55,11 @@ struct LayerChangeSeamTests {
         #expect(manager.occurrences(of: "onLayerChange(") == 1)
     }
 
-    /// One writer in production, and it is the emitter's; the
-    /// GUI reads the event off the bus — its one remaining sink
-    /// closes the shortcuts panel, the menu bar's layer glyph
-    /// having moved onto the Space Bar's refresh (#1413).
+    /// One writer in production, and it is the emitter's, after
+    /// the gestures re-resolve onto the new layer (#3535); the GUI
+    /// reads the event off the bus — its one remaining sink closes
+    /// the shortcuts panel, the menu bar's layer glyph having moved
+    /// onto the Space Bar's refresh (#1413).
     @Test("Core wires the seam to the emitter, and nothing else")
     func oneWriter() throws {
         let bootstrap = try squashed(
@@ -66,8 +67,17 @@ struct LayerChangeSeamTests {
         )
         #expect(
             bootstrap.contains(
-                "keys.onLayerChange={[weakself]from,toin"
-                    + "self?.emitLayerChange(from:from,to:to)}"
+                "keys.onLayerChange={[weakself]inself?.layerChanged($0,$1)}"
+            )
+        )
+        let gestures = try squashed(
+            "Sources/KiwiDeskCore/App/KiwiCore+Gestures.swift"
+        )
+        #expect(
+            gestures.contains(
+                "funclayerChanged(_from:String,_to:String){"
+                    + "layerChangedGestures()"
+                    + "emitLayerChange(from:from,to:to)}"
             )
         )
         #expect(

@@ -185,17 +185,32 @@ because two real clients now remove drift — see
   GUI's catalogue since a gesture-only verb has no keyboard default
   (`TrackpadSeedCatalogueTests` ▸ `seedsAreCatalogueRows`).
   **A reader of the seeds takes them on the stored shortcut base
-  (#3444)**: `GestureSeeds.seeds(on:)`, the base a required
-  argument down every resolve, never the `⌃⌥` table read bare, so
-  a seed lands on `✦` for a Hyper user as a keyboard default does.
+  and the layer (#3444, #3535)**: `GestureSeeds.seeds(on:layer:)`
+  or a `GestureSeedScope`, both required down every resolve, never
+  the `⌃⌥` table read bare, so a seed lands on `✦` for a Hyper user
+  as a keyboard default does and a layer other than `default` lies
+  over none (`LayerGestureResolveTests`).
   The switch renames the stored gesture keys through the one
-  `GestureBaseSwitch.move` — the draft's map in
-  `ShortcutBaseSwitch.apply`, the shared map and every profile's
+  `GestureBaseSwitch.move` — the draft's maps, layer by layer, in
+  `ShortcutBaseSwitch.apply`, the shared maps and every profile's
   override (`GestureMap.following`) in
   `RuleReachSnapshot.moveGestureBase`, which the layer pass lays
   beside `moveShortcutBase` — and the rows it leaves on `⌃⌥` are
   `GestureBaseSwitch.kept`'s, never a GUI rule beside it
   (`GestureBaseSwitchTests`, `ShortcutBaseGestureTests`).
+- **The gesture maps are per keybinding layer (#3535).** Mint and
+  parse a gesture reach key through `LayerGestureKey` alone: a bare
+  `GestureKey(spelling:` reads `default`'s rows and silently drops
+  every other layer's. The parse is guarded
+  (`GestureKeySpellingDoorTests`); a mint is review's. Every layer
+  edit — rename, delete, revert, a profile leaving the layer —
+  carries the layer's gesture maps in the draft
+  (`LayerGestures.renaming` / `removing`) and in the layer pass
+  (`RuleReachSnapshot.renameGestureLayers` / `dropGestureLayer`),
+  never one half. A gesture pick on a layer other than `default`
+  names only the layer's holders, as a key row's does
+  (`LayerGesturePicks.keep` / `scoped`, beside `LayerRowPicks`'s)
+  (`LayerPassGestureTests`, `ShortcutsLayerStripTests`).
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took
@@ -2228,6 +2243,8 @@ adopted as clean (`storedTilingFailureAdoptsRules`).
 **A layer edit enters the snapshot through the one layer pass
 (#2022).** Lay a layer's delete, rename or membership over the
 stored shortcut files through `RuleReachSnapshot.rewriteLayers`,
+and over the stored gesture maps through `renameGestureLayers` /
+`dropGestureLayer` beside it (#3535, `LayerPassGestureTests`),
 called from `SettingsModel.layeredReach` alone and AHEAD of the
 row encode — a pass after a row edit is refused rather than
 dropping it (`LayerReachSnapshotTests` ▸

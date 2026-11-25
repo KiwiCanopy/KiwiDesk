@@ -20,7 +20,7 @@ struct GestureDiffRowsTests {
                 from,
                 to: to,
                 in: &base,
-                shortcutBase: .standard
+                scope: .defaultLayer(on: .standard)
             )
         )
         return base
@@ -30,13 +30,16 @@ struct GestureDiffRowsTests {
     func moveIsOneRow() throws {
         LocalizationManager.shared.select("en")
         let rows = SettingsValueReadout.gestureRows(
-            old: GestureMap(),
-            new: moved(),
+            old: LayerGestures(defaultLayer: GestureMap()),
+            new: LayerGestures(defaultLayer: moved()),
             shortcutBase: .standard
         )
         #expect(rows.count == 1)
         let row = try #require(rows.first)
-        let move = GestureRowInstance.move(from: from, to: to)
+        let move = GestureRowInstance.move(
+            from: LayerGestureKey("default", from),
+            to: LayerGestureKey("default", to)
+        )
         #expect(row.id.contains(move.spelling))
         #expect(GestureRowInstance(instance: move.spelling) == move)
     }
@@ -44,16 +47,19 @@ struct GestureDiffRowsTests {
     @Test("a move row's revert takes both keys back")
     func moveRevertsTogether() throws {
         let model = makeTestModel()
-        model.cleanConfig.gesture = GestureMap()
-        model.config.gesture = moved()
+        model.cleanConfig.gesture = LayerGestures(defaultLayer: GestureMap())
+        model.config.gesture = LayerGestures(defaultLayer: moved())
         let writer = try #require(
             SettingsRevertRegister.writers[.shortcuts(.gestureBindings)]
         )
         writer.apply(
             model,
-            GestureRowInstance.move(from: from, to: to).spelling
+            GestureRowInstance.move(
+                from: LayerGestureKey("default", from),
+                to: LayerGestureKey("default", to)
+            ).spelling
         )
-        #expect(model.config.gesture == GestureMap())
+        #expect(model.config.gesture.isEmpty)
     }
 
     @Test("a stored change that keeps the action still gets a row")
@@ -62,12 +68,12 @@ struct GestureDiffRowsTests {
         let seed = GestureListEdits.action(
             of: from,
             in: old,
-            shortcutBase: .standard
+            scope: .defaultLayer(on: .standard)
         )!
         old[from] = .bound(seed)
         let rows = SettingsValueReadout.gestureRows(
-            old: old,
-            new: GestureMap(),
+            old: LayerGestures(defaultLayer: old),
+            new: LayerGestures(defaultLayer: GestureMap()),
             shortcutBase: .standard
         )
         #expect(rows.count == 1)

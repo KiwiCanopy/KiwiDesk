@@ -21,7 +21,8 @@ struct GestureDragKeysTests {
         let resolved = GestureSeeds.resolved(
             base: base,
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(resolved[GestureKey(.click, keys)] == nil)
         #expect(resolved[GestureKey(.click, [.shift, .command])] != nil)
@@ -34,7 +35,8 @@ struct GestureDragKeysTests {
                 GestureKey(.hoverMove, pan): .bound(.grab(.move))
             ]),
             profile: nil,
-            shortcutBase: .standard
+            shortcutBase: .standard,
+            layer: KeyLayer.defaultName
         )
         #expect(resolved[GestureKey(.hoverMove, pan)] == nil)
         let settings = ModifierDragSettings([

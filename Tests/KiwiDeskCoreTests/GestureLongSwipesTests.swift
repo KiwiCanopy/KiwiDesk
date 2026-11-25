@@ -14,7 +14,7 @@ struct GestureLongSwipesTests {
     func seedsReach() {
         #expect(
             GestureSeeds.longSwipesApply(
-                base: GestureMap(),
+                base: LayerGestures(defaultLayer: GestureMap()),
                 profile: nil,
                 shortcutBase: .standard
             )
@@ -29,7 +29,7 @@ struct GestureLongSwipesTests {
         base[GestureKey(.swipe2, pan)] = .unbound
         #expect(
             !GestureSeeds.longSwipesApply(
-                base: base,
+                base: LayerGestures(defaultLayer: base),
                 profile: nil,
                 shortcutBase: .standard
             )
@@ -44,7 +44,7 @@ struct GestureLongSwipesTests {
         base[GestureKey(.swipe2, step)] = .bound(.family(.walk))
         #expect(
             GestureSeeds.longSwipesApply(
-                base: base,
+                base: LayerGestures(defaultLayer: base),
                 profile: nil,
                 shortcutBase: .standard
             )
@@ -54,7 +54,7 @@ struct GestureLongSwipesTests {
         )
         #expect(
             GestureSeeds.longSwipesApply(
-                base: base,
+                base: LayerGestures(defaultLayer: base),
                 profile: nil,
                 shortcutBase: .standard
             )
@@ -64,7 +64,7 @@ struct GestureLongSwipesTests {
         )
         #expect(
             !GestureSeeds.longSwipesApply(
-                base: base,
+                base: LayerGestures(defaultLayer: base),
                 profile: nil,
                 shortcutBase: .standard
             )
@@ -78,8 +78,8 @@ struct GestureLongSwipesTests {
         profile[GestureKey(.swipe2, pan)] = .unbound
         #expect(
             !GestureSeeds.longSwipesApply(
-                base: GestureMap(),
-                profile: profile,
+                base: LayerGestures(defaultLayer: GestureMap()),
+                profile: LayerGestures(defaultLayer: profile),
                 shortcutBase: .standard
             )
         )

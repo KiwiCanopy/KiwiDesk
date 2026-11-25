@@ -75,7 +75,8 @@ struct TouchGesturesTests {
             GestureSeeds.resolved(
                 base: GestureMap(),
                 profile: nil,
-                shortcutBase: .standard
+                shortcutBase: .standard,
+                layer: KeyLayer.defaultName
             ),
             natural: true
         )

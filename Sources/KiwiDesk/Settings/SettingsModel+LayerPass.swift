@@ -116,7 +116,7 @@ extension SettingsModel {
         }
         let gestures = config.gesture
         try snapshot.moveGestureBase(onto: base) {
-            gestures[$0]?.action != nil
+            gestures[$0.layer][$0.key]?.action != nil
         }
     }
 
@@ -147,6 +147,13 @@ extension SettingsModel {
                 Dictionary(uniqueKeysWithValues: reached.map { ($0, drop) }),
                 base: removal == .here ? nil : drop
             )
+            // Every profile on a delete everywhere: one holding the
+            // layer's gestures alone too (#3535).
+            try snapshot.dropGestureLayer(
+                name,
+                profiles: removal == .here ? [editing] : nil,
+                base: removal != .here
+            )
         }
     }
 
@@ -172,6 +179,7 @@ extension SettingsModel {
             Dictionary(uniqueKeysWithValues: holders.map { ($0, rename) }),
             base: inBase ? rename : nil
         )
+        try snapshot.renameGestureLayers(map)
     }
 
     /// `layers` with each layer it holds renamed by `map`, through a
@@ -215,18 +223,25 @@ extension SettingsModel {
         }
         let drop = { KeybindingCatalog.deleteLayer(in: $0, named: name) }
         var transforms: [String: ([KeyLayer]) -> [KeyLayer]] = [:]
+        var leaving: [String] = []
         for profile in table.profiles {
             let has = table.resolved(name, for: profile) != nil
             let wants =
                 members.profiles.contains(profile) || profile == editing
             if wants && !has { transforms[profile] = add }
-            if !wants && has { transforms[profile] = drop }
+            if !wants && has {
+                transforms[profile] = drop
+                leaving.append(profile)
+            }
         }
         let inBase = table.base[name] != nil
         let base: (([KeyLayer]) -> [KeyLayer])? =
             members.shared == inBase ? nil : (members.shared ? add : drop)
         guard !transforms.isEmpty || base != nil else { return }
         try snapshot.rewriteLayers(transforms, base: base)
+        // A profile leaving the layer leaves its own gestures there
+        // too; the shared base stays for the members (#3535).
+        try snapshot.dropGestureLayer(name, profiles: leaving, base: false)
     }
 }
 
@@ -237,7 +252,7 @@ struct LayeredReachCache {
         let page: [KeyLayer]
         let profile: String?
         let switchedBase: ShortcutBase?
-        let gesture: GestureMap?
+        let gesture: LayerGestures?
         let spaces: [SpaceID]
     }
 
@@ -257,7 +272,7 @@ struct EncodedReachCache {
         let floatRules: [String]
         let layers: [KeyLayer]
         let scrollGesture: ScrollGestureBase
-        let gesture: GestureMap
+        let gesture: LayerGestures
         let spaceHistory: SpaceHistoryKind
         let focusWrap: FocusWrap
         let modeCycle: [LayoutMode]

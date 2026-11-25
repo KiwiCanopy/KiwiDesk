@@ -21,8 +21,8 @@ struct GestureAxisRow: View {
     private var action: GestureAction? {
         GestureListEdits.action(
             of: key,
-            in: model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: model.gestureLayerMap,
+            scope: model.gestureScope
         )
     }
 
@@ -122,8 +122,8 @@ struct GestureAxisRow: View {
         GestureListEdits.set(
             saved,
             at: key,
-            in: &model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: &model.gestureLayerMap,
+            scope: model.gestureScope
         )
     }
 }

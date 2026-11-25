@@ -23,7 +23,7 @@ struct ShortcutBaseGestureTests {
         let core = makeTestCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
-        config.gesture = base
+        config.gesture = LayerGestures(defaultLayer: base)
         try core.guiConfigStore.save(config)
         try core.profiles.save(profile("Work", nil))
         try core.profiles.write(profile("Home", home))
@@ -39,7 +39,7 @@ struct ShortcutBaseGestureTests {
             spaces: [SpaceID("1")],
             spaceModes: [:],
             settings: TilingSettings(),
-            gesture: gesture
+            gesture: gesture.map { LayerGestures(defaultLayer: $0) }
         )
     }
 
@@ -50,9 +50,9 @@ struct ShortcutBaseGestureTests {
         model.setShortcutBase(.hyper)
         #expect(model.config.gesture.isEmpty)
         let page = GestureListEdits.rows(
-            in: model.config.gesture,
+            in: model.config.gesture[KeyLayer.defaultName],
             on: .mouse,
-            shortcutBase: model.config.shortcutBase
+            scope: .defaultLayer(on: model.config.shortcutBase)
         )
         #expect(page.contains(GestureKey(.drag, hyper)))
         #expect(!page.contains(GestureKey(.drag, pan)))
@@ -71,7 +71,9 @@ struct ShortcutBaseGestureTests {
         model.setShortcutBase(.hyper)
         // Vacuity: the switch moved the stored row.
         #expect(
-            model.config.gesture[GestureKey(.wheel, hyper.union(.shift))]
+            model.config.gesture[KeyLayer.defaultName][
+                GestureKey(.wheel, hyper.union(.shift))
+            ]
                 == .bound(.family(.space))
         )
         let rows = SettingsDiffRowSource.rows(for: model)
@@ -96,8 +98,14 @@ struct ShortcutBaseGestureTests {
         model.updateActiveProfile()
         #expect(core.guiConfigStore.load()?.shortcutBase == .hyper)
         let stored = try core.profiles.read(name: "Home")
-        #expect(stored.gesture?[GestureKey(.drag, hyper)] == .unbound)
-        #expect(stored.gesture?[GestureKey(.drag, pan)] == nil)
+        #expect(
+            stored.gesture?[KeyLayer.defaultName][GestureKey(.drag, hyper)]
+                == .unbound
+        )
+        #expect(
+            stored.gesture?[KeyLayer.defaultName][GestureKey(.drag, pan)]
+                == nil
+        )
     }
 
     @Test("a seed whose ✦ key a row holds stays and is listed")
@@ -107,7 +115,7 @@ struct ShortcutBaseGestureTests {
         let (model, _) = try model(base: base)
         model.setShortcutBase(.hyper)
         #expect(
-            model.config.gesture[GestureKey(.drag, pan)]
+            model.config.gesture[KeyLayer.defaultName][GestureKey(.drag, pan)]
                 == .bound(.grab(.move))
         )
         let left = model.gestureRowsLeftOnStandard
@@ -127,12 +135,16 @@ struct ShortcutBaseGestureTests {
         model.updateActiveProfile()
         let stored = try #require(core.guiConfigStore.load())
         #expect(stored.shortcutBase == .hyper)
-        #expect(stored.gesture[GestureKey(.drag, pan)] == .bound(.grab(.move)))
+        #expect(
+            stored.gesture[KeyLayer.defaultName][GestureKey(.drag, pan)]
+                == .bound(.grab(.move))
+        )
         let home = try core.profiles.read(name: "Home")
         let resolved = GestureSeeds.resolved(
-            base: stored.gesture,
-            profile: home.gesture,
-            shortcutBase: .hyper
+            base: stored.gesture[KeyLayer.defaultName],
+            profile: home.gesture?[KeyLayer.defaultName],
+            shortcutBase: .hyper,
+            layer: KeyLayer.defaultName
         )
         #expect(resolved[GestureKey(.drag, pan)] == .grab(.move))
         #expect(resolved[GestureKey(.drag, hyper)] == .grab(.resize))
@@ -148,12 +160,15 @@ struct ShortcutBaseGestureTests {
         GestureListEdits.set(
             .grab(.resize),
             at: GestureKey(.drag, pan),
-            in: &model.config.gesture,
-            shortcutBase: model.config.shortcutBase
+            in: &model.config.gesture[KeyLayer.defaultName],
+            scope: .defaultLayer(on: model.config.shortcutBase)
         )
         let after = model.layeredReach?.storedGestureBase
         #expect(before != after)
-        #expect(after?[GestureKey(.drag, pan)] == .bound(.grab(.move)))
+        #expect(
+            after?[KeyLayer.defaultName][GestureKey(.drag, pan)]
+                == .bound(.grab(.move))
+        )
     }
 
     @Test("another profile's own ⌃⌥ row is listed")
@@ -175,7 +190,7 @@ struct ShortcutBaseGestureTests {
         base[GestureKey(.drag, hyper)] = .bound(.grab(.resize))
         let (model, _) = try model(base: base)
         model.setShortcutBase(.hyper)
-        #expect(model.config.gesture != base)
+        #expect(model.config.gesture[KeyLayer.defaultName] != base)
         let row = try #require(
             SettingsDiffRowSource.rows(for: model).first {
                 $0.key == .shortcuts(.shortcutBase)
@@ -183,6 +198,6 @@ struct ShortcutBaseGestureTests {
         )
         model.revert(row)
         #expect(model.config.shortcutBase == .standard)
-        #expect(model.config.gesture == base)
+        #expect(model.config.gesture[KeyLayer.defaultName] == base)
     }
 }

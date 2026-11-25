@@ -62,7 +62,9 @@ extension SettingsModel {
 
     /// A gesture key's row name in the reach rows (#3225).
     static func gestureName(_ spelling: String) -> String {
-        GestureKey(spelling: spelling).map(GestureListWords.rowName)
+        LayerGestureKey(spelling: spelling).map {
+            SettingsValueReadout.rowName($0.key, layer: $0.layer)
+        }
             ?? spelling
     }
 

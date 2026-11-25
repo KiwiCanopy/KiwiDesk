@@ -119,15 +119,24 @@ extension SettingsModel {
             reach: reachEdits.reach[.scroll] ?? [:],
             removal: [:]
         )
+        let gestureCurrent = gestureEncodeCurrent(
+            config.gesture,
+            snapshot.gestures,
+            editing
+        )
         snapshot.gestures = RuleReachDraft.encode(
             snapshot.gestures,
-            current: RuleReachTable<GestureAction>.gestureSeedsUnder(
-                config.gesture,
-                shortcutBase: config.shortcutBase
-            ),
+            current: gestureCurrent,
             editing: editing,
             isLoaded: reachIsLoaded,
-            reach: reachEdits.reach[.gesture] ?? [:],
+            reach: LayerGesturePicks.scoped(
+                reachEdits.reach[.gesture] ?? [:],
+                page: gestureCurrent,
+                layers: snapshot.layerTable,
+                gestures: snapshot.gestures,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            ),
             removal: reachEdits.removal[.gesture] ?? [:]
         )
         snapshot.spaceHistory = RuleReachDraft.encode(

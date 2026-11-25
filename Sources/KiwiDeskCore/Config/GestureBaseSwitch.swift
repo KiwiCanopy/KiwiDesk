@@ -30,19 +30,20 @@ public enum GestureBaseSwitch {
         public let action: GestureAction?
     }
 
-    /// `map`, laid over the seeds on `old`, moved onto `new` —
-    /// save the keys `staying` names, which keep their keys.
+    /// `map`, laid over `layer`'s seeds on `old`, moved onto `new`
+    /// — save the keys `staying` names, which keep their keys.
     public static func move(
         _ map: GestureMap,
         from old: ShortcutBase,
         onto new: ShortcutBase,
+        layer: String,
         staying: (GestureKey) -> Bool = { _ in false }
     ) -> Moved {
         guard old != new else {
             return Moved(map: map, moves: [:], kept: [])
         }
-        let oldSeeds = GestureSeeds.seeds(on: old)
-        let newSeeds = GestureSeeds.seeds(on: new)
+        let oldSeeds = GestureSeeds.seeds(on: old, layer: layer)
+        let newSeeds = GestureSeeds.seeds(on: new, layer: layer)
         let keys = Set(oldSeeds.keys).union(map.entries.keys)
         func resolved(_ key: GestureKey) -> GestureAction? {
             map.resolved(key, oldSeeds)

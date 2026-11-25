@@ -212,16 +212,19 @@ extension APIReference {
 
     static let gestureRecords: [String: APIRecord] = [
         "bind": APIRecord(
-            "Binds a gesture held with keys to a family, move or "
-                + "resize, Lua, or a direction table.",
+            "Binds a gesture held with keys to a family, a grab, Lua "
+                + "or directions, on a layer.",
             .choice("gesture", GestureInput.self),
             .text("keys"),
-            .text("action")
+            .text("action"),
+            .text("layer", optional: true)
         ),
         "unbind": APIRecord(
-            "Turns a gesture held with keys off, a default included.",
+            "Turns a gesture held with keys off, a default included, "
+                + "on a layer.",
             .choice("gesture", GestureInput.self),
-            .text("keys")
+            .text("keys"),
+            .text("layer", optional: true)
         ),
     ]
 

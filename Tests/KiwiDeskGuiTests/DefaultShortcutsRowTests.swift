@@ -109,12 +109,14 @@ struct DefaultShortcutsRowTests {
         #expect(model.nav.shortcutsLayer == "work")
     }
 
-    @Test("the row mounts once, between Layers and the groups")
+    /// Layers left Built-in for the strip above the switcher
+    /// (#3535), so the row follows Modifier keys and its rule.
+    @Test("the row mounts once, between Modifier keys and the groups")
     func mountsUnderLayers() throws {
         let parts = ShortcutsPagePart.parts(in: .builtIn)
-        let layers = try #require(parts.firstIndex(of: .layers))
-        #expect(parts.firstIndex(of: .defaultShortcuts) == layers + 1)
-        #expect(parts.firstIndex(of: .showHide) == layers + 2)
+        let keys = try #require(parts.firstIndex(of: .modifierKeys))
+        #expect(parts.firstIndex(of: .defaultShortcuts) == keys + 1)
+        #expect(parts.firstIndex(of: .showHide) == keys + 2)
         #expect(
             ShortcutsPagePart(SettingsContainer.defaultShortcuts)
                 == .defaultShortcuts
