@@ -229,8 +229,9 @@ extension KiwiCore {
     }
 
     /// A weight at its limit moves nothing: a hold just ends there
-    /// and a press cues, as a Stack zone's weight does (#2709,
-    /// #2969). `mate` is the neighbour a grow names.
+    /// and a press cues, mirroring `pushOrCue`'s spent arms (#2709,
+    /// #2969), so a change to one owes the other. `mate` is the
+    /// neighbour a grow names.
     func cueWeightLimit(
         _ window: WindowID,
         mate: WindowID?,

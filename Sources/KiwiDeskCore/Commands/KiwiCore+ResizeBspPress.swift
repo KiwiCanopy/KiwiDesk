@@ -10,7 +10,10 @@ extension KiwiCore {
     /// a mate, or where nothing on the axis divides, which the writer
     /// names (#1258, #1259). Otherwise cues the limit, naming a mate
     /// at its floor where there is one, and returns false: the press
-    /// writes nothing and a hold ends.
+    /// writes nothing and a hold ends. Judged on the laid-out slots,
+    /// not the placed frames: a slot a floor overhang lands back
+    /// inward can move while its drawn frame stays, a press this
+    /// cannot see (the writer's under-clamp residue).
     func bspPressMoves(
         _ focused: WindowID,
         axis: String,
@@ -68,7 +71,16 @@ extension KiwiCore {
             }
         }
         guard !moved else { return true }
-        cueBspLimit(focused, axis: axis, delta: delta, mates: mates, now)
+        // The side the ratio's move squeezes, read off the move's own
+        // direction as the writer reads its binding side.
+        let squeezed = proposed < base ? sides.first : sides.second
+        cueBspLimit(
+            focused,
+            axis: axis,
+            delta: delta,
+            squeezed: squeezed,
+            now
+        )
         return false
     }
 
@@ -76,14 +88,14 @@ extension KiwiCore {
     private static let pressMovesTolerance: CGFloat = 0.01
 
     /// The cue for a BSP press that moves nothing it asks for: the
-    /// mate nearest `focused` sitting at its floor, where one does,
-    /// else the window's own minimum on a shrink or the boundary on a
-    /// grow.
+    /// mate on the `squeezed` side nearest `focused` sitting at its
+    /// floor (#1259's blame), where one does, else the window's own
+    /// minimum on a shrink or the boundary on a grow.
     private func cueBspLimit(
         _ focused: WindowID,
         axis: String,
         delta: Double,
-        mates: [WindowID],
+        squeezed: [WindowID],
         _ frames: [WindowID: CGRect]
     ) {
         let horizontal = axis == "x"
@@ -93,7 +105,7 @@ extension KiwiCore {
             )
         }
         let centre = frames[focused].map { CGPoint(x: $0.midX, y: $0.midY) }
-        let atFloor = mates.filter {
+        let atFloor = squeezed.filter {
             $0 != focused
                 && length($0) <= plannedMinSize(of: $0, axis: axis) + 1
         }
