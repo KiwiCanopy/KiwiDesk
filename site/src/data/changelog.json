@@ -8,6 +8,7 @@
       "prerelease": false,
       "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v5.1.0",
       "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.1.0/KiwiDesk-5.1.0.dmg",
+      "image": "/releases/5.1.0.png",
       "summary": "KiwiDesk 5.1.0 lets you split a wide screen into areas, each with its own Spaces, and step back and forth through how you arranged your windows.",
       "spotlight": [
         {
