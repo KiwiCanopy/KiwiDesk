@@ -123,7 +123,6 @@ struct RunZonePressPropertyTests {
                 let side: RunZone.PushSide =
                     [.start, .end, .both][random.next(3)]
                 let drawn = zone.frames(in: context)[id]?.width ?? 0
-                let wasRun = zone.run(in: context) != nil
                 guard
                     let press = zone.press(
                         id,
@@ -169,15 +168,11 @@ struct RunZonePressPropertyTests {
                 let pulledEveryone =
                     press.visible == zone.members.indices
                     && before != zone.members.indices
-                // A weight step can cross the render's whole split,
-                // which redraws every share (#2967). A pull's weight
-                // can only come near what it asks.
-                let crossed =
-                    wasRun != (zone.run(in: context) != nil)
-                if delta > 0, !crossed {
+                // A pull's weight can only come near what it asks.
+                if delta > 0 {
                     #expect(now >= drawn - 1, note)
                 }
-                if delta < 0, !crossed, !pulledEveryone {
+                if delta < 0, !pulledEveryone {
                     #expect(now <= drawn + 1, note)
                 }
                 // A press that cues nothing moved something: a silent

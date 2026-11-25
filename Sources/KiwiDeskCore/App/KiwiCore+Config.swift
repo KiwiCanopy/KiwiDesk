@@ -117,7 +117,7 @@ extension KiwiCore {
         // here as an issue to stay visible (#39).
         var typos: [ConfigIssue] = []
         luaAreaSplits.beginLoad()  // settled at the tail (#3573)
-        initDeclaredSpaces = recordingSpaceReferences {
+        let declaredOrder = recordingSpaceReferences {
             typos = recordingTypoIssues {
                 if case .failure(let error) = fresh.runFile(
                     configURL
@@ -133,6 +133,7 @@ extension KiwiCore {
                 }
             }
         }
+        initDeclaredSpaces = Set(declaredOrder)
         issues.append(contentsOf: typos)
         // A sidecar that no longer decodes hides the user's rules
         // from the editor and the loader: half-loaded, so shown.
@@ -162,6 +163,7 @@ extension KiwiCore {
         } else {
             applyConfigGlobals(from: fresh)
             captureLuaKeybindings(from: fresh)
+            applyLuaSpaceOrder(declaredOrder)
         }
         // Lua declarations are only the global base. Put the
         // active profile's tiling and sparse behavior overrides
@@ -205,20 +207,6 @@ extension KiwiCore {
         // that no longer decodes.
         configLoadIssues = issues
         refreshConfigIssues()
-    }
-
-    /// The ids `ensureSpace` is handed while `body` runs — the
-    /// braces are the window, so the script's asks can never be
-    /// read after a later ensurer's. A run ledger rather than a
-    /// before/after diff of the space set: a reload's
-    /// `create_space` of a live space changes nothing a diff could
-    /// see (#1509).
-    private func recordingSpaceReferences(
-        _ body: () -> Void
-    ) -> Set<SpaceID> {
-        state.workspaces.referenced = []
-        body()
-        return state.workspaces.referenced
     }
 
     private var unreadableSidecarIssue: ConfigIssue {

@@ -68,6 +68,24 @@ extension RunZone {
             heads: context.runHeads,
             tails: context.runTails
         )
+        return
+            weightCandidates(for: id, at: length, floor: floor, in: context)
+            .min {
+                abs(drawnLength(of: id, weight: $0, in: plain) - length)
+                    < abs(drawnLength(of: id, weight: $1, in: plain) - length)
+            }
+            ?? StackLayout.weightRange.lowerBound
+    }
+
+    /// The weights that may draw `id` at `length`: the range's two
+    /// ends and the weight each split, whole or floor-and-share,
+    /// needs for it. Each draws `length` only where its split holds.
+    func weightCandidates(
+        for id: WindowID,
+        at length: CGFloat,
+        floor: CGFloat,
+        in context: LayoutContext
+    ) -> [Double] {
         let others = members.filter { $0 != id }
         let total = others.reduce(0.0) {
             $0 + plainWeight(of: $1, in: context)
@@ -78,23 +96,25 @@ extension RunZone {
             whole > part && part > 0 ? Double(part / (whole - part)) : nil
         }
         let range = StackLayout.weightRange
-        let candidates =
-            [range.lowerBound, range.upperBound]
+        return
+            ([range.lowerBound, range.upperBound]
             + [
                 ratio(length, of: available),
                 ratio(length - floor, of: available - bare.reduce(0, +)),
-            ].compactMap { $0.map { $0 * total } }
-        func drawn(_ weight: Double) -> CGFloat {
-            var trial = plain
-            trial.stackWeights[id] = weight
-            let frame = frames(in: trial)[id]
-            return (vertical ? frame?.height : frame?.width) ?? 0
-        }
-        return
-            candidates
+            ].compactMap { $0.map { $0 * total } })
             .map { min(max($0, range.lowerBound), range.upperBound) }
-            .min { abs(drawn($0) - length) < abs(drawn($1) - length) }
-            ?? range.lowerBound
+    }
+
+    /// The length the render draws `id` at with `weight`.
+    func drawnLength(
+        of id: WindowID,
+        weight: Double,
+        in context: LayoutContext
+    ) -> CGFloat {
+        var trial = context
+        trial.stackWeights[id] = weight
+        let frame = frames(in: trial)[id]
+        return (vertical ? frame?.height : frame?.width) ?? 0
     }
 
     /// The members whose stored length this zone plans — what the
@@ -106,5 +126,22 @@ extension RunZone {
                 members[$0]
             }
         )
+    }
+
+    /// `heads` and `tails` with this zone's ends set to show
+    /// `visible`, every other zone's left as stored — what a
+    /// writer stores as `Space.runHeads` and `runTails`.
+    public func ends(
+        showing visible: Range<Int>,
+        heads: Set<WindowID>,
+        tails: Set<WindowID>
+    ) -> (heads: Set<WindowID>, tails: Set<WindowID>) {
+        var heads = heads.subtracting(members)
+        var tails = tails.subtracting(members)
+        if visible.lowerBound > 0 { heads.insert(members[visible.lowerBound]) }
+        if visible.upperBound < members.count {
+            tails.insert(members[visible.upperBound - 1])
+        }
+        return (heads, tails)
     }
 }
