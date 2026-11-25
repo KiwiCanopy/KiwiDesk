@@ -82,6 +82,17 @@ struct DesktopsCarryQueryTests {
         #expect(!state.isCarrying)
     }
 
+    @Test("with nothing carried, typing leads nothing and Esc leaves")
+    func noCarryNoLead() {
+        var state = Search.state()
+        state.setQuery("ter")
+        #expect(!state.queryLeadsCarry)
+        _ = state.press(.openSpace, repeated: false)
+        _ = state.press(.escape, repeated: false)
+        #expect(!state.isInside)
+        #expect(state.query == "ter")
+    }
+
     @Test("the carry's end ends the query's lead")
     func carryEndResets() {
         var state = Self.carrying()
