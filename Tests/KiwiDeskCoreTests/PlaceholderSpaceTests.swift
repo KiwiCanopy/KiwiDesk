@@ -84,7 +84,8 @@ struct PlaceholderSpaceTests {
             core
         )
         core.loadConfig()
-        #expect(liveSpaces(core) == ["1", "Work"])
+        // The script names `Work` first, so it leads (#3625).
+        #expect(liveSpaces(core) == ["Work", "1"])
     }
 
     @Test("a display resolve inside the script declares nothing")

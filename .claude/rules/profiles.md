@@ -1072,7 +1072,12 @@ The obligations below bind this directory:
   too; the boot scan's first `.displaysChanged` fires it, through
   the core's event handler (`DesktopBindingFitTests` ▸
   `bootDisplayEventFiresIt` pushes that event rather than calling
-  the ladder by hand). The count
+  the ladder by hand). So does a screen `pin_space_to_display`
+  names while no screen is reported (#3631): it is held, and the
+  same arm stores it ahead of its settle/`handleMonitorChange`
+  branch, so the one total resolve places it; a config load
+  clears what is held (`BootSpacePinTests` ▸ `bootPinApplies`).
+  The count
   judgement itself is `DesktopBindingRefusal.of`, public so the
   Desktops row narrates the verdict instead of re-deriving it.
   The argument is `docs/design-decisions.md` ▸ Profiles ▸ *A

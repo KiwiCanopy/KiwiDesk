@@ -255,12 +255,12 @@ public final class KiwiCore {
     /// window re-filed while AWAY (`refileAway`), which keeps its
     /// Desktop frame; and a swap's trade (#2509), never a float.
     var refiledWindows: Set<WindowID> = []
-
-    /// The live arrangement's space→monitor fingerprint pins, adopted
-    /// from the active profile's matching monitor set and edited by the
-    /// GUI Canvas (#36). Internal: the GUI reads placement via
-    /// `loadGuiConfig` and writes it via `applyProfileScopedState`.
+    /// The live space→monitor fingerprint pins: the active profile's,
+    /// edited by the GUI Canvas (#36), which reads them via
+    /// `loadGuiConfig` and writes via `applyProfileScopedState`.
     var spacePins: [SpaceID: String] = [:]
+    /// Pins declared before any screen was known (#3631).
+    var pendingSpacePins: [SpaceID: JSONValue] = [:]
     /// Spaces in the *Main* role, following the main screen (#36).
     var mainSpaces: Set<SpaceID> = []
     /// The empty-display heal's seed per monitor fingerprint (#1175),

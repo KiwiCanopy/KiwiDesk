@@ -85,32 +85,79 @@ extension KiwiCore {
     /// `gui.json` — under a GUI-managed config the Settings Canvas
     /// stays the persistent pin owner, so a pin set here is a
     /// session override there. Under a Lua-managed config the
-    /// declarative `init.lua` re-exec is the persistence.
+    /// declarative `init.lua` re-exec is the persistence. While no
+    /// screen is reported the pin is held and answers ok unjudged;
+    /// an unmatched name is logged at the first report (#3631).
     func pinSpaceToDisplay(
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard let raw = args.first?.stringValue else {
-            return .fail("expected space id")
+        let stored = storeSpacePin(args)
+        guard case .stored(let space) = stored else {
+            return stored.response
         }
-        guard
-            let area = resolveAreaArg(args.count > 1 ? args[1] : nil),
-            let key = state.workspaces[placement: area]?.key
-        else {
-            return .fail("expected display index or name")
-        }
-        let space = SpaceID(raw)
-        state.workspaces.ensureSpace(space)
-        spacePins[space] = key.description
-        // A pin and the Main role are mutually exclusive
-        // placements (`SpacePlacement` precedence); a fresh pin
-        // wins, so drop any stale Main designation.
-        mainSpaces.remove(space)
         // Places the pinned Space alone, so another Space's hand
         // move holds (#3578); the resolve re-anchors the floats of
         // whatever it relocates (#444), a heal's seed included.
         resolveSpaceDisplays(of: [space])
         retile(pass: .apply)
         emitSpaceChange()
+        return .ok()
+    }
+
+    /// Writes the pin `args` name into `spacePins`, or holds it in
+    /// `pendingSpacePins` while no screen is known: a cold boot
+    /// runs `init.lua` before any is published (#3631). Resolves
+    /// nothing; the caller places.
+    private func storeSpacePin(_ args: [JSONValue]) -> SpacePinStore {
+        guard let raw = args.first?.stringValue else {
+            return .refused(.fail("expected space id"))
+        }
+        let space = SpaceID(raw)
+        let arg = args.count > 1 ? args[1] : nil
+        if state.workspaces.allDisplays.isEmpty, let arg {
+            state.workspaces.ensureSpace(space)
+            pendingSpacePins[space] = arg
+            return .held
+        }
+        guard
+            let area = resolveAreaArg(arg),
+            let key = state.workspaces[placement: area]?.key
+        else {
+            return .refused(.fail("expected display index or name"))
+        }
+        state.workspaces.ensureSpace(space)
+        spacePins[space] = key.description
+        // A pin and the Main role are mutually exclusive
+        // placements (`SpacePlacement` precedence); a fresh pin
+        // wins, so drop any stale Main designation.
+        mainSpaces.remove(space)
+        return .stored(space)
+    }
+
+    /// Stores the pins held while no screen was known, at the first
+    /// `.displaysChanged` and ahead of its one total resolve, so no
+    /// pin places alone and leaves a screen to the heal (#3631). A
+    /// name no screen matches is refused as it would be live.
+    func drainPendingSpacePins() {
+        let pending = pendingSpacePins
+        pendingSpacePins = [:]
+        for (space, arg) in pending {
+            let stored = storeSpacePin([.string(space.raw), arg])
+            if let reason = stored.response.error {
+                onLog("pin_space_to_display(\(space.raw)): \(reason)")
+            }
+        }
+    }
+}
+
+/// `storeSpacePin`'s outcome: written, held for a screen, refused.
+private enum SpacePinStore {
+    case stored(SpaceID)
+    case held
+    case refused(CommandResponse)
+
+    var response: CommandResponse {
+        if case .refused(let response) = self { return response }
         return .ok()
     }
 }

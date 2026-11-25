@@ -1820,6 +1820,15 @@ renamed in place from the Settings app's **Spaces** section; the
 rename is persisted and follows the id everywhere it is used —
 its layout mode, app rules, screen pins, and any keybindings.
 
+:::unreleased
+When `init.lua`
+[owns the config](#what-coexists-with-the-settings-app-and-what-doesnt),
+the order in which its run first refers to each Space through a
+KiwiDesk call is the Space order, on every load. Spaces it never
+refers to follow in their own order, and an active profile's
+order still wins.
+:::
+
 ### How inactive spaces hide their windows
 
 Switching spaces parks the other spaces' tiled windows in a
@@ -10623,6 +10632,34 @@ is not split. Each area shows its own Space, so several Spaces with
 one `display` can be `shown` at once; the one with a given `area`
 is that area's `areas[].space_id` in `list_monitors`.
 
+:::unreleased
+`display` is the `list_monitors` id, macOS's own number for the
+screen, not the [screen position](#move_space_to_display) a screen
+verb reads from a number; the two often look alike, so a `display`
+of `1` passed to one names the main screen wherever the Space sits.
+Each space object also has `fingerprint`, the `list_monitors`
+fingerprint of its screen (`nil` for a Space on no screen), which
+every screen verb takes as is. A verb that takes an area, such as
+[`space_bar.set_edge`](#space_barset_edge), reads a fingerprint as
+the screen's first area, so pass the Space's `area` first:
+
+```lua
+local state = KiwiDesk.get_state()
+for _, space in ipairs(state.spaces) do
+    if space.id == state.active_space then
+        space_bar.set_edge("left", space.area or space.fingerprint)
+    end
+end
+```
+
+To name the screen instead, look `display` up in `list_monitors`:
+the entry whose `id` equals it has the screen's `name`. Two
+identical screens that macOS leaves unnumbered share one
+fingerprint, and so share every setting stored by it
+([twin screens](accepted-limitations.md),
+[#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734)).
+:::
+
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
 [flip](#stacktoggle_stack_position) included.
@@ -10799,6 +10836,13 @@ points from the top-left of the main screen, y growing down. A
 window on a Space no screen shows, or parked out of sight, has
 `frame` `null`, and `visibility` too where no screen shows it; a
 full-screen window has no `visibility`.
+
+:::unreleased
+`display` is the `list_monitors` id, not the
+[screen position](#move_space_to_display) a screen verb reads from
+a number. To hand a window's screen to one, pass the `fingerprint`
+of its Space from [`get_state`](#get_state).
+:::
 
 `list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
 `height`) in the same coordinates, and `layout_frame`, the area
