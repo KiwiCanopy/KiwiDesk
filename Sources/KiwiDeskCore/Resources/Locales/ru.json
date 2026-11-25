@@ -1339,6 +1339,7 @@
   "kiwivision.lens.delay.off": "Выкл.",
   "kiwivision.lens.delay.seconds": "%1$@ с",
   "kiwivision.lens.delete": "Удалить линзу…",
+  "kiwivision.lens.delete.cancel": "Отменить",
   "kiwivision.lens.delete.confirm": "Удалить",
   "kiwivision.lens.delete.message": "Её сочетание клавиш удаляется вместе с ней. Ничего не изменится, пока ты не сохранишь.",
   "kiwivision.lens.delete.title": "Удалить линзу «%1$@»?",

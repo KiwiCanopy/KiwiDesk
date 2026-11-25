@@ -37,6 +37,9 @@ struct KiwiVisionLensHeader: View {
                     deleting = LensDeleteRequest(id: lens)
                 }
                 .buttonStyle(.bordered)
+                // The window's accent tint would replace the system
+                // red the role draws (#3263 amendment, #3630).
+                .tint(SettingsTheme.danger)
             }
             NavRow(
                 model: model,
@@ -67,6 +70,11 @@ struct KiwiVisionLensHeader: View {
                 model.deleteLens(request.id)
                 model.nav.kiwiVisionLens = nil
             }
+            Button(
+                L("kiwivision.lens.delete.cancel", "Cancel"),
+                role: .cancel
+            ) {}
+            .keyboardShortcut(.defaultAction)
         } message: { _ in
             Text(KiwiVisionLensWords.deleteMessage)
         }
