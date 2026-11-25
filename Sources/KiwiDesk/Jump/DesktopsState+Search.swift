@@ -2,14 +2,19 @@ import KiwiDeskCore
 
 /// Matching and match-only reach (#3624 ▸ Ruling, after #3135):
 /// under a query the keys land only on matches, save that a carry
-/// reaches every line, since a drop's target is a place. Windows
-/// stay match-only during a carry, as their icons stay dimmed.
+/// reaches every line under a query standing at its pick-up, since
+/// a drop's target is a place; a query edited during the carry
+/// steers it like a search. Windows stay match-only during a carry,
+/// as their icons stay dimmed.
 extension DesktopsState {
     /// Whether the keys may land on `place`; a line they may not
-    /// dims. Every line is reachable while nothing is typed or a
-    /// window is carried.
+    /// dims. Every line is reachable while nothing is typed, or
+    /// while a window is carried under the query standing at its
+    /// pick-up.
     func reaches(_ place: DesktopsPlace) -> Bool {
-        guard !query.isEmpty, !isCarrying else { return true }
+        guard !query.isEmpty, !isCarrying || queryLeadsCarry else {
+            return true
+        }
         return line(place)?.windows.contains(where: matches) ?? false
     }
 

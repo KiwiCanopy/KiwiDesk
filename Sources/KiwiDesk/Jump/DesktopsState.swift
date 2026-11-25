@@ -25,6 +25,10 @@ struct DesktopsState: Equatable {
     /// Picked windows, in pick order.
     private(set) var carried: [WindowID] = []
     private(set) var query = ""
+    /// True once the query is edited during the carry, until the
+    /// next pick-up or the carry's end: the query then steers the
+    /// carry like a search (#3624).
+    private(set) var queryLeadsCarry = false
     /// Each line's first shown slot, where it scrolled.
     private(set) var offsets: [DesktopsPlace: Int] = [:]
 
@@ -128,6 +132,7 @@ struct DesktopsState: Equatable {
     /// leaves the Space for its place.
     mutating func setQuery(_ text: String) {
         query = text
+        queryLeadsCarry = isCarrying && !text.isEmpty
         offsets = [:]
         settle()
         reveal()
@@ -179,11 +184,12 @@ struct DesktopsState: Equatable {
     mutating func togglePick(_ id: WindowID) -> DesktopOverview.CarryBlock? {
         if let index = carried.firstIndex(of: id) {
             carried.remove(at: index)
-            if carried.isEmpty { settle() }
+            if carried.isEmpty { endCarry() }
             return nil
         }
         if let block = pickBlock(id) { return block }
         carried.append(id)
+        queryLeadsCarry = false
         return nil
     }
 
@@ -196,6 +202,11 @@ struct DesktopsState: Equatable {
     /// once nothing rides along moves to a match.
     mutating func cancelCarry() {
         carried = []
+        endCarry()
+    }
+
+    private mutating func endCarry() {
+        queryLeadsCarry = false
         settle()
     }
 

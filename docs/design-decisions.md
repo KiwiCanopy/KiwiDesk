@@ -17110,10 +17110,17 @@ screen with none, and a query that stops matching the selected
 line moves the selection to the first match down its column, then
 the next column's; a click still reaches a dimmed line, even while
 nothing matches. A selection left on a dimmed line let ↩ act on a
-place the query hid. While a window is carried the keys reach
-every line and no line dims, because a drop's target is a place,
-not a match; the windows stay match-only, as their icons stay
-dimmed. Typing never switches; ↩ does. A typed number naming
+place the query hid. While a window is carried, the query that
+stood at the pick-up reaches every line and dims none, because a
+drop's target is a place, often an empty Space no query can
+match; the windows stay match-only, as their icons stay dimmed. A
+query edited during the carry steers it like any search, until the
+next pick-up or the carry's end, so typing finds a drop target and
+↩ drops on a match: a field that took text mid-carry and moved
+nothing was a dead input. Clearing the query at the pick-up
+instead would break picking up several matches in a row. Esc
+clears that query before it ends the carry, since it is the newer
+layer. Typing never switches; ↩ does. A typed number naming
 Desktop N was weighed and deferred until users ask for it: nothing
 in the panel could show it at first sight, so it would be found
 only in the docs, and ⌘N already reaches the first nine. Prefix

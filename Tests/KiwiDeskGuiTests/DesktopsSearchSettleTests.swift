@@ -31,14 +31,14 @@ struct DesktopsSearchSettleTests {
     @Test("putting the last window back settles the selection")
     func putBackSettles() {
         var state = Search.state()
-        state.select(window: WindowID(1), in: Self.place(1))
-        _ = state.click(.pickUp)
         state.setQuery("ter")
-        // A carry reaches every line, so nothing moved.
-        #expect(state.place == Self.place(1))
-        // A ⌘-click on its icon puts it back.
-        state.select(window: WindowID(1), in: Self.place(1))
-        _ = state.click(.pickUp)
+        _ = state.press(.openSpace, repeated: false)
+        _ = state.press(.pickUp, repeated: false)
+        _ = state.press(.leaveSpace, repeated: false)
+        // The standing query reaches every line during the carry.
+        _ = state.press(.step(2), repeated: false)
+        #expect(state.place == Self.place(4))
+        _ = state.togglePick(WindowID(4))
         #expect(!state.isCarrying)
         #expect(state.place == Self.place(3))
         #expect(state.window == nil)

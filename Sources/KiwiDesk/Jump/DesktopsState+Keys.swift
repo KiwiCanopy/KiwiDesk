@@ -130,10 +130,12 @@ extension DesktopsState {
         }
     }
 
-    /// Esc steps back one layer: the carry, the Space, the search,
-    /// then the panel.
+    /// Esc steps back one layer: a query typed during the carry,
+    /// the carry, the Space, the search, then the panel.
     private mutating func escape() -> DesktopsOutcome {
-        if isCarrying {
+        if queryLeadsCarry {
+            setQuery("")
+        } else if isCarrying {
             cancelCarry()
         } else if isInside {
             leave()
