@@ -30,10 +30,8 @@ Query state on demand:
 "$KIWIDESK" list_monitors | jq
 ```
 
-:::unreleased
 [Commands](../cli.md#commands) has a `jq` filter that groups
 the Spaces by screen.
-:::
 
 The event stream is useful for durable external daemons, shell
 functions, or tools that run in a different sandbox than
