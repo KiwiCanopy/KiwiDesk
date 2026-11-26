@@ -48,10 +48,8 @@ extension SettingsModel {
     /// The connected screen left unnumbered at `number`'s place, nil
     /// where no connected screen holds the number at all (#3688).
     func unnumberedScreen(at number: Int) -> Display? {
-        guard screenOrder.unnumbered.contains(number),
-            screenOrder.fingerprints.indices.contains(number - 1)
+        guard let fingerprint = screenOrder.unnumberedFingerprint(at: number)
         else { return nil }
-        let fingerprint = screenOrder.fingerprints[number - 1]
         return displays.first { $0.fingerprint == fingerprint }
     }
 
