@@ -14,10 +14,12 @@ what broke and what they missed. If you have an idea, I'd like to
 hear it.
 
 Where it is heading: today KiwiDesk assumes that each screen setup
-wants its own configuration. Many people want the opposite: the same
-Spaces, splits and settings at home, at the office and on the go,
-whatever screens they plug in. The next releases move KiwiDesk
-towards that, one step at a time.
+wants its own configuration. That makes sense when setups have
+different screen sizes and so call for different layouts or
+workflows. Some people want the opposite: the same Spaces, splits and
+settings at home, at the office and on the go, whatever screens they
+plug in. The next releases move KiwiDesk towards that, one step at a
+time.
 
 <!--
 KiwiDesk's "What's new" window shows the section below (#1813), so
