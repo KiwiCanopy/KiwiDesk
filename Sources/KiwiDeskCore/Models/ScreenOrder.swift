@@ -44,6 +44,12 @@ public struct ScreenOrder: Equatable, Sendable {
         return ScreenSlotKey(number: index + 1, areaID: key.areaID)
     }
 
+    /// Whether a screen of this order holds `slot`'s number; a
+    /// stored number it does not hold waits, and a write keeps it.
+    public func holds(_ slot: ScreenSlotKey) -> Bool {
+        slot.number <= fingerprints.count
+    }
+
     /// Every number `fingerprint` holds (two for twins).
     public func numbers(of fingerprint: String) -> [Int] {
         fingerprints.indices
@@ -67,9 +73,7 @@ public struct ScreenOrder: Equatable, Sendable {
         runtime: [SpaceID: String],
         over stored: [SpaceID: ScreenSlotKey]
     ) -> [SpaceID: ScreenSlotKey] {
-        var result = stored.filter {
-            $0.value.number > fingerprints.count
-        }
+        var result = stored.filter { !holds($0.value) }
         for (space, pin) in runtime {
             if let slot = slot(of: ScreenAreaKey(parsing: pin)) {
                 result[space] = slot

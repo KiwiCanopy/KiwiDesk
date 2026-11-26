@@ -66,5 +66,13 @@ struct StoredDraftScreenOrderTests {
         #expect(model.pin(of: "2") == "B:100x100")
         model.place("3", .screen("A:100x100"))
         #expect(model.config.spacePins["3"] == ScreenSlotKey(number: 2))
+        model.saveEditedProfile()
+        let saved = try core.profiles.read(name: "Other")
+        #expect(
+            saved.spaceMonitorMap == [
+                "2": ScreenSlotKey(number: 1)!,
+                "3": ScreenSlotKey(number: 2)!,
+            ]
+        )
     }
 }

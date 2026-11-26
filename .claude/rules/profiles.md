@@ -2025,10 +2025,12 @@ loaded with it. The obligations:
   that profile holds for the connected screens** —
   `KiwiCore.screenOrder(for:)`, `liveScreenOrder` for the live one,
   `Profile.runtimePins(on:)` — never an order of a reader's own,
-  and write `Profile.spaceMonitorMap` only through its doors,
-  `storePins`, `takePins` and `pin`, each naming the order it
-  numbers in. A Settings draft of a stored profile is numbered in
-  that profile's order, never the live one's
+  and write `Profile.spaceMonitorMap` only through its doors:
+  `storePins`, which numbers through the order it is handed, and
+  `takePins` and `pin`, whose caller hands numbers already in this
+  profile's order — a Settings draft gets them only from
+  `screenOrder(holding:)` over that profile's sets, never the live
+  one's
   (`NumberedPinsSharedTests`, `StoredDraftScreenOrderTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and

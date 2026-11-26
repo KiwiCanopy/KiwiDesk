@@ -43,11 +43,11 @@ extension Profile {
     }
 
     /// Replaces the arrangement, its pins included; a stored number
-    /// past the screen count stays for a Space `set` keeps and does
+    /// `order` does not hold stays for a Space `set` keeps and does
     /// not pin (#3647 ▸ no-fit ruling).
-    mutating func replaceSpaces(with set: SpaceSet) {
+    mutating func replaceSpaces(with set: SpaceSet, order: ScreenOrder) {
         let waiting = spaceMonitorMap.filter {
-            $0.value.number > monitorCount && set.pins[$0.key] == nil
+            !order.holds($0.value) && set.pins[$0.key] == nil
                 && set.spaces.contains($0.key)
         }
         spaces = set.spaces

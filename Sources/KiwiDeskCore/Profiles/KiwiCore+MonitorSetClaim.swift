@@ -62,8 +62,7 @@ extension KiwiCore {
         to profile: inout Profile
     ) throws -> [String] {
         if profile.set(matching: monitors) == nil {
-            let held = profiles.allProfiles().lazy
-                .compactMap { $0.set(matching: monitors) }.first
+            let held = heldSet(matching: monitors)
             profile.upsert(
                 held
                     ?? (isConnectedMonitorSet(monitors)

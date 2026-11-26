@@ -56,8 +56,13 @@ extension KiwiCore {
     /// its stored order; nil where none does.
     var heldLiveSet: MonitorSet? {
         let live = liveFingerprints
-        guard !live.isEmpty else { return nil }
-        return profiles.allProfiles().lazy
-            .compactMap { $0.set(matching: live) }.first
+        return live.isEmpty ? nil : heldSet(matching: live)
+    }
+
+    /// The set covering `monitors` as the profile holding it stores
+    /// it — the order a claim or a create keeps (#3647).
+    func heldSet(matching monitors: [String]) -> MonitorSet? {
+        profiles.allProfiles().lazy
+            .compactMap { $0.set(matching: monitors) }.first
     }
 }

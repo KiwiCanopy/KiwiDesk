@@ -28,7 +28,7 @@ struct MonitorSetMatchSeamTests {
         #expect(files.count > 100, "the scan found the trees")
         let compare = try NSRegularExpression(
             pattern: #"\.monitors(==|!=)|(==|!=)[\w.?]*\.monitors(?![\w.])|"#
-                + #"\.monitors\.sorted\(\)|Set\([\w.$]*map\(\\\.monitors\)"#
+                + #"\.monitors\.sorted\(\)|Set\(.*\bmap\(\\\.monitors\)"#
         )
         var found: [String] = []
         for file in files where file.lastPathComponent != "MonitorSet.swift" {

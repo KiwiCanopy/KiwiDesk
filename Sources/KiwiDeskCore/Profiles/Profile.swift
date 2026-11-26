@@ -319,7 +319,7 @@ public struct Profile: Codable, Sendable, Equatable {
 
     /// Takes pins already numbered in this profile's own order: a
     /// draft seeded from it, a Revert of its own.
-    public mutating func takePins(_ stored: [SpaceID: ScreenSlotKey]) {
+    mutating func takePins(_ stored: [SpaceID: ScreenSlotKey]) {
         spaceMonitorMap = stored
     }
 

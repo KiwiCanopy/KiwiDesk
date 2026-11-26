@@ -130,7 +130,11 @@ extension Profile {
             settings = leaves.applied(to: settings)
             spaceModes.merge(leaves.spaceModes) { $1 }
         case .replaceSpaces(let set):
-            replaceSpaces(with: set)
+            replaceSpaces(
+                with: set,
+                order: monitorSets.order(matching: monitors)
+                    ?? ScreenOrder(monitors)
+            )
         }
     }
 }
