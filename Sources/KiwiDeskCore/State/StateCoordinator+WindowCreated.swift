@@ -151,15 +151,18 @@ extension StateCoordinator {
                 }
             )
         } else {
-            workspaces.add(
-                window.id,
-                to: target,
-                placement: tilingOff
-                    ? .last
-                    : spawnOverride[target]
-                        ?? spawnPlacements[mode]
-                        ?? .afterFocused
+            let placement =
+                tilingOff
+                ? .last
+                : spawnOverride[target] ?? spawnPlacements[mode]
+                    ?? .afterFocused
+            effects.spawnPlaced = .init(
+                window: window.id,
+                space: target,
+                placement: placement,
+                anchor: workspaces[target]?.focused
             )
+            workspaces.add(window.id, to: target, placement: placement)
             // Floating window in own_track space gets dormant break marker
             // (#160).
             if track?.newWindow == .ownTrack {

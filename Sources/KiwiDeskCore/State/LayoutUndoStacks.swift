@@ -111,6 +111,52 @@ public struct LayoutUndoStacks: Sendable {
         }
     }
 
+    /// Whether no Space holds a step.
+    public var isEmpty: Bool { undo.isEmpty && redo.isEmpty }
+
+    /// Whether `space`'s history sits at `live` (#3601): each stack
+    /// empty, or its top step leaving the Space as `live`.
+    public func sits(_ space: SpaceID, at live: SpaceArrangement)
+        -> Bool
+    {
+        let undoTop = undo[space]?.last.map { $0.after[space] == live }
+        let redoTop = redo[space]?.last.map { $0.before[space] == live }
+        return undoTop != false && redoTop != false
+    }
+
+    /// Rewrites every side of every step by `transform`, given the
+    /// side's Space, on each copy of a linked step alike (#3601),
+    /// then drops a step left changing nothing, keeping the steps
+    /// around it: its before equalled its after.
+    public mutating func rebase(
+        _ transform: (SpaceID, SpaceArrangement) -> SpaceArrangement
+    ) {
+        for stack in [Stack.undo, .redo] {
+            var rebased: [UInt64: LayoutStep] = [:]
+            for step in steps(stack).values.joined()
+            where rebased[step.id] == nil {
+                var step = step
+                for (space, side) in step.before {
+                    step.before[space] = transform(space, side)
+                }
+                for (space, side) in step.after {
+                    step.after[space] = transform(space, side)
+                }
+                rebased[step.id] = step
+            }
+            edit(stack) { stacks in
+                for (space, list) in stacks {
+                    let kept = list.compactMap { step in
+                        rebased[step.id].flatMap {
+                            $0.before == $0.after ? nil : $0
+                        }
+                    }
+                    stacks[space] = kept.isEmpty ? nil : kept
+                }
+            }
+        }
+    }
+
     private func steps(_ stack: Stack) -> [SpaceID: [LayoutStep]] {
         stack == .undo ? undo : redo
     }

@@ -5,8 +5,9 @@ import Testing
 
 /// `SpaceArrangement` hand-mirrors `Space`'s stored fields for
 /// layout undo (#3515, parity-tests.md): every field is copied, or
-/// ruled out here with its reason, and `Space.restore` writes back
-/// every field it copied.
+/// ruled out here with its reason, `Space.restore` writes back
+/// every field it copied, and an undo rebase carries every
+/// window-keyed field for a window it inserts (#3601).
 @Suite("Space arrangement parity (#3515)")
 struct SpaceArrangementParityTests {
     /// `Space` fields a step leaves out, each with why.
@@ -68,5 +69,49 @@ struct SpaceArrangementParityTests {
         #expect(wrote)
         let restored = SpaceArrangement(target, sessionSizes: sizing)
         #expect(restored == saved)
+    }
+    @Test("an inserted window carries every window-keyed field")
+    func insertCarriesWindowFields() {
+        let a = WindowID(1)
+        let new = WindowID(9)
+        var live = Space(
+            id: SpaceID("1"),
+            mode: .track,
+            windows: [a, new],
+            stackWeights: [new: 2],
+            trackBreaks: [new],
+            handedBreaks: [new],
+            trackWeights: [new: 1.5]
+        )
+        live.runSizes = [new: RunSize(share: 0.6, zone: 1)]
+        let after = SpaceArrangement(live, sessionSizes: sizing)
+        let step = SpaceArrangement(
+            Space(id: SpaceID("1"), mode: .track, windows: [a]),
+            sessionSizes: sizing
+        )
+        let rebased = step.inserting(
+            new,
+            placement: .last,
+            anchor: nil,
+            from: after
+        )
+        // Every window-keyed field: the fixture fills it, so a new
+        // one reads empty here until the fixture and `inserting`
+        // carry it too.
+        let keyed = Mirror(reflecting: after).children.filter {
+            "\(type(of: $0.value))".contains("WindowID")
+                && $0.label != "windows"
+        }
+        #expect(keyed.count >= 5)
+        let carried = Dictionary(
+            uniqueKeysWithValues: Mirror(reflecting: rebased).children
+                .compactMap { c in c.label.map { ($0, "\(c.value)") } }
+        )
+        for child in keyed {
+            let label = child.label ?? "?"
+            #expect("\(child.value)" != "[:]", "\(label) unfilled")
+            #expect("\(child.value)" != "[]", "\(label) unfilled")
+            #expect(carried[label] == "\(child.value)", "\(label)")
+        }
     }
 }
