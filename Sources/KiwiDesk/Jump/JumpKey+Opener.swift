@@ -36,14 +36,14 @@ extension JumpKey {
     }
 
     /// Whether the press is the last-app opener's own chord, read
-    /// as `isBack` reads its ⇧ form (#3667).
+    /// as `isBack` reads its ⇧ form (#3667). A tap's key fits no
+    /// press, and a ✦ chord is one no held modifier spells.
     static func isOpener(
         keyCode: UInt16,
         modifiers: NSEvent.ModifierFlags,
         opener: KeyCombo?
     ) -> Bool {
-        guard let opener, !opener.isTap,
-            !opener.modifiers.contains(.hyper),
+        guard let opener, !opener.modifiers.contains(.hyper),
             let code = UInt16(exactly: opener.keyCode)
         else { return false }
         let held = modifiers.intersection(

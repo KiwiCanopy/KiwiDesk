@@ -75,7 +75,10 @@ extension JumpFooter {
                     key: enter,
                     chord: .control
                 ),
-                DesktopsHint(text: DesktopsText.cancel),
+                DesktopsHint(
+                    text: DesktopsText.cancel,
+                    key: JumpKey.escapeKey
+                ),
             ]
             if desktops.isInside { return carry + [pick, back, next] }
             let drop = DesktopsHint(
