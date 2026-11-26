@@ -124,7 +124,7 @@ extension RunZone {
 
     /// Below this many points a press moved nothing the screen
     /// shows.
-    static let unchangedTolerance: CGFloat = 0.5
+    static let unchangedTolerance = StackLayout.unshownChange
 
     /// The run as the render plans it: each member's planned, held
     /// (its stored length, even taking the rest) and bare length, its
