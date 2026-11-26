@@ -12,6 +12,8 @@ struct LookPickerBackdrop: View {
     /// The look the last step left, drawn under the incoming one.
     @State private var under: LookPickerEntry?
     @State private var progress: CGFloat = 1
+    /// The latest swap, so only its landing drops `under`.
+    @State private var swap = 0
 
     var body: some View {
         ZStack {
@@ -38,10 +40,12 @@ struct LookPickerBackdrop: View {
         .onChange(of: model.selection) { old, _ in
             under = model.cards.indices.contains(old) ? model.cards[old] : nil
             progress = 0
+            swap += 1
+            let current = swap
             withAnimation(reduceMotion ? nil : LookPickerRow.spring) {
                 progress = 1
             } completion: {
-                if progress == 1 { under = nil }
+                if current == swap { under = nil }
             }
         }
         .frame(width: geometry.screen.width, height: geometry.screen.height)
