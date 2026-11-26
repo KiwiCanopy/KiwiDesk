@@ -76,21 +76,20 @@ struct KiwiHubHeldTapTests {
         _ = tap.handledForTesting(.flagsChanged, try flags(0))
     }
 
-    private func doubleTapRig() throws -> (KeyboardTap, Fired) {
+    private func doubleTapRig() throws -> (KeyboardTap, Fired, TapClock) {
         let fired = Fired()
-        let tap = unstarted([.modifierTaps], TapClock()) {
-            fired.append($0)
-        }
+        let clock = TapClock()
+        let tap = unstarted([.modifierTaps], clock) { fired.append($0) }
         let combo = try #require(KeyCombo.parse("cmd+cmd"))
         tap.setRows(
             KeyboardTapRows(taps: [ModifierTapRow(combo: combo, id: 1)])
         )
-        return (tap, fired)
+        return (tap, fired, clock)
     }
 
     @Test("a held ⌘⌘ fires nothing; released, it fires")
     func heldDoubleTap() throws {
-        let (tap, fired) = try doubleTapRig()
+        let (tap, fired, _) = try doubleTapRig()
         tap.holdTaps(.all)
         try self.tap(tap, device: 0x08)
         try self.tap(tap, device: 0x08)
@@ -99,6 +98,19 @@ struct KiwiHubHeldTapTests {
         try self.tap(tap, device: 0x08)
         try self.tap(tap, device: 0x08)
         #expect(fired.ids == [1])
+    }
+
+    /// The detector reads the tap's clock: a second tap past the
+    /// gap starts a new count rather than finishing the double.
+    @Test("a second tap past the gap is no double")
+    func slowSecondTap() throws {
+        let (tap, fired, clock) = try doubleTapRig()
+        try self.tap(tap, device: 0x08)
+        clock.advance(by: Self.pastTheGap)
+        try self.tap(tap, device: 0x08)
+        #expect(fired.ids.isEmpty)
+        try self.tap(tap, device: 0x08)
+        #expect(fired.ids == [1], "a quick pair still fires")
     }
 
     @Test("a held tap leader opens no sequence")
@@ -159,7 +171,9 @@ struct KiwiHubHeldTapTests {
         let (control, controlFired, controlClock) = try lapseRig()
         try tap(control, device: 0x10)
         #expect(controlFired.ids.isEmpty, "a single waits on its double")
-        controlClock.advance(by: Self.pastTheGap)
+        controlClock.advance(by: ModifierTapDetector.gapLimit - 0.01)
+        #expect(controlFired.ids.isEmpty, "it waits the whole gap")
+        controlClock.advance(by: 0.02)
         #expect(controlFired.ids == [1])
 
         let (atTap, atTapFired, atTapClock) = try lapseRig()
