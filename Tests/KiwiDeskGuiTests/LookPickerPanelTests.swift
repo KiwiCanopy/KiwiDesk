@@ -67,4 +67,38 @@ struct LookPickerPanelTests {
         _ = panel.performKeyEquivalent(with: chord("s", 1))
         #expect(keys == [.save], "not key, the panel claims nothing")
     }
+
+    @Test("the reveal ends on a key or a release, never a press")
+    func revealInput() {
+        typealias Panel = LookPickerPanel
+        #expect(Panel.duringReveal(.keyDown) == .interrupt)
+        #expect(Panel.duringReveal(.leftMouseUp) == .interrupt)
+        #expect(Panel.duringReveal(.rightMouseUp) == .interrupt)
+        #expect(Panel.duringReveal(.leftMouseDown) == .swallow)
+        #expect(Panel.duringReveal(.otherMouseDown) == .swallow)
+        #expect(Panel.duringReveal(.mouseMoved) == .pass)
+    }
+
+    @Test("a click's close holds the panel unseen, then orders it out")
+    func clickHold() throws {
+        let controller = LookPickerController(core: makeTestCore())
+        var later: [@MainActor () -> Void] = []
+        controller.after = { _, work in later.append(work) }
+        controller.reduceMotion = { true }
+        controller.show()
+        let panel = try #require(controller.panel)
+        controller.clickHold = { _ in 0.3 }
+        controller.close()
+        #expect(!controller.isOpen, "closed for the shortcut at once")
+        #expect(panel.alphaValue == PanelPresence.holdAlpha)
+        #expect(panel.contentView != nil, "still up for the release")
+        later.forEach { $0() }
+        #expect(!panel.isVisible)
+        #expect(panel.alphaValue == 1)
+        #expect(panel.contentView == nil)
+        controller.clickHold = { _ in 0 }
+        controller.show()
+        controller.close()
+        #expect(controller.panel?.contentView == nil, "no click, no hold")
+    }
 }

@@ -64,23 +64,33 @@ final class LookPickerPanel: NSPanel {
     }
 
     override func sendEvent(_ event: NSEvent) {
-        switch event.type {
-        case .keyDown:
-            if revealing() { return onInterrupt() }
-            if let key = key(for: event) {
-                onKey(key, event.isARepeat)
-                return
+        if revealing() {
+            switch Self.duringReveal(event.type) {
+            case .interrupt: return onInterrupt()
+            case .swallow: return
+            case .pass: break
             }
-        // A click ends the reveal at its release, which the close
-        // holds for (#3209); the press itself lands on nothing.
-        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            if revealing() { return }
-        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            if revealing() { return onInterrupt() }
-        default:
-            break
+        } else if event.type == .keyDown, let key = key(for: event) {
+            onKey(key, event.isARepeat)
+            return
         }
         super.sendEvent(event)
+    }
+
+    enum RevealInput: Equatable { case interrupt, swallow, pass }
+
+    /// What an event does while the puddle plays: a key ends it, a
+    /// click ends it at its release, which the close holds for
+    /// (#3209), and the press itself lands on nothing.
+    static func duringReveal(_ type: NSEvent.EventType) -> RevealInput {
+        switch type {
+        case .keyDown, .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            .interrupt
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            .swallow
+        default:
+            .pass
+        }
     }
 
     /// What `event` means here; nil hands it on (the field's typing).

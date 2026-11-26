@@ -32,6 +32,11 @@ final class LookPickerController: NSObject {
         }
     }
 
+    /// Seam for how long a click's close holds the panel (#3209).
+    var clickHold: (NSWindow?) -> TimeInterval = {
+        PanelPresence.clickHoldNow(on: $0)
+    }
+
     /// How long the reveal waits for Core's "desk ready" at most:
     /// #3478's wallpaper confirmation (#3038 ▸ Ruling, step 1).
     static let readyCap: TimeInterval = 0.4
@@ -42,7 +47,9 @@ final class LookPickerController: NSObject {
         super.init()
     }
 
-    var isOpen: Bool { panel?.isVisible == true }
+    /// Up and not closing: a panel held for a click (#3209) is
+    /// already closed, so the shortcut opens it again.
+    var isOpen: Bool { model != nil && panel?.isVisible == true }
 
     /// The shortcut: opens the picker, or closes it, never undoing.
     func toggle() {
@@ -99,7 +106,7 @@ final class LookPickerController: NSObject {
     /// of the double-click interval, so a second press lands on it
     /// (#3209).
     func close() {
-        let hold = PanelPresence.clickHoldNow(on: panel)
+        let hold = clickHold(panel)
         opening += 1
         revealing = false
         model = nil
