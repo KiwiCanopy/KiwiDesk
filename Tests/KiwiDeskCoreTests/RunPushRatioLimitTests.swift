@@ -74,6 +74,31 @@ extension RunPushCommandTests {
         }
     }
 
+    @Test("BSP: a window spanning the axis names the bound it presses")
+    func bspSpanningWindowAtTheBound() {
+        // w1 spans the height; its y press moves the split of w2 and
+        // w3, which no step moves past the stored bound.
+        var cued: [ResizeRefusal] = []
+        let presses = [(0.9, 5.0), (0.9, -5.0), (0.1, 5.0), (0.1, -5.0)]
+        for (ratio, step) in presses {
+            // 4000 tall keeps every floor far off at either bound.
+            let (core, _) = makeSpace(
+                "bsp",
+                windows: 3,
+                focus: 1,
+                height: 4000
+            ) { $0.execute("bsp.set_ratio_v", args: [.number(ratio)]) }
+            for refusal in refusals(core, "y", step) {
+                cued.append(refusal)
+                #expect(
+                    refusal == .ratioLimit(w(1), axis: "y", grows: step > 0),
+                    Comment(rawValue: "ratio \(ratio) step \(step)")
+                )
+            }
+        }
+        #expect(!cued.isEmpty)
+    }
+
     @Test("Track: a track weight at its limit says the share is spent")
     func trackWeightAtItsLimit() {
         let range = TrackLayout.weightRange
@@ -106,6 +131,8 @@ extension RunPushCommandTests {
         }
     }
 
+    /// Through the run's own press (`RunZone.limitPress`): the zone
+    /// does not fit whole at the weight's limit.
     @Test("Stack: a window at its floor says so at the weight's limit too")
     func stackFloorWinsOverTheLimit() {
         // The stack zone's two 300-pt floors and three 10-pt gaps
