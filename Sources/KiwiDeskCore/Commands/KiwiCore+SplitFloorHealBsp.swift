@@ -10,7 +10,7 @@ extension KiwiCore {
     /// re-reading the layout after each so a deeper split heals in
     /// the geometry the shallower one's heal left. Only the LOCAL
     /// members' floors count (#944's traveler ruling): a visitor's
-    /// split is left alone and its floor reads as the setting.
+    /// floor reads as the setting.
     func healBspSplits(
         of space: Space,
         shown: Bool,
@@ -28,7 +28,6 @@ extension KiwiCore {
             guard depth < splits.count else { return }
             let local = Set(state.localTiledMembers(of: live))
             defer { depth += 1 }
-            guard local.contains(splits[depth].owner) else { continue }
             healBspSplit(
                 splits[depth],
                 space: live,

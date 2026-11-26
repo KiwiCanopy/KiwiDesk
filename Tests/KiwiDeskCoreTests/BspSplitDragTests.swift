@@ -173,6 +173,8 @@ extension RunPushCommandTests {
         core.execute("bsp.set_ratio_h", args: [.number(0.5)])
         #expect(splits(core, id).horizontal.isEmpty)
         #expect(!splits(core, id).vertical.isEmpty)
+        core.execute("bsp.set_ratio_v", args: [.number(0.5)])
+        #expect(core.sessionRatios(of: id).bspSplits == nil)
     }
 
     @Test("BSP: a Space's ratio override clears that axis's splits")
