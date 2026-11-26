@@ -21442,6 +21442,14 @@ in the one per-screen step, so an area whose bars are Hidden draws
 and reserves nothing. Thickness, margins and the rest stay one
 value, as before.
 
+:::unreleased
+*Amended (#3647): the per-screen and per-area maps are keyed by
+the number.* A screen's or an area's bar edge, Show and pocket edge
+belong to the number its screen holds (▸ *A profile numbers its
+screens per screen count*), so the same values follow the number
+onto another desk.
+:::
+
 The Space Bar keeps one visibility, so an area given the bar's own
 value stores nothing, as a screen given its bar's edge does. The
 App Bar's visibility is each layout's own, so its area map is each
@@ -23970,6 +23978,13 @@ consequences:
   why.** A scripted save that changes another file must not do it
   silently.
 
+:::unreleased
+*Amended (#3647): a set changing hands carries no pins.* Pins
+belong to a profile's screen numbers (▸ *A profile numbers its
+screens per screen count*), so the claimant's own numbers apply to
+the set it takes, and the profile it leaves keeps its pins.
+:::
+
 *Forgetting a setup is its own act (#3324, owner, 2026-11-14,
 amending the above).* The setup chips on a profile row stay
 claim-only: they carry no ×, and a chip never removes a set,
@@ -24006,6 +24021,14 @@ page's chips do, the list form of the locale, rather than the
 "+" the ruling sketched, so one setup never reads two ways on one
 page.
 
+:::unreleased
+*Amended (#3647):* a forget drops only the setup's order. The pins
+and the bars' and pocket's per-screen values belong to the
+profile's screen numbers, so they stay, on a profile left dormant
+too, and the clearing of per-screen bar edges above ends with the
+fingerprint-keyed maps.
+:::
+
 *The card's order (#3374, owner, 2026-11-17, amending the above).*
 The connected setup leads, then the rest by screen count, then by
 the screens' names collated in the app's language (the one the
@@ -24017,6 +24040,89 @@ the row a user points at; the card adds only the rules. Ordering
 by holder, as the card first did, scattered setups of one count
 across the list, and a user looks for a setup by its screens, not
 by which profile holds it.
+
+:::unreleased
+**[Principle]**
+
+**A profile numbers its screens per screen count, and a screen
+setup is an order
+([#3647](https://github.com/KiwiCanopy/KiwiDesk/issues/3647),
+owner, 2026-11-25).** A profile saved for two screens has a Screen
+1 and a Screen 2, and each number carries what used to belong to
+one physical screen: its Screen pins, its area split and every
+per-screen setting, the bars' and the pocket's per-screen maps
+included. A saved screen setup stores only which physical screen
+holds which number, as an ordered list of screens. Every setup of
+one count then shares one pinning: a cowork monitor stands in for
+the home one, an iPad beside the laptop takes what the widescreen
+had, and an edit made at home is there at the cowork desk.
+
+Pins stored per setup, keyed by each screen's fingerprint, made a
+profile a set of unrelated layouts, one per desk. A desk the
+profile had not met loaded it with no pins at all, every Space
+falling to the main screen, and an edit made on one desk reached
+no other. Any per-setup copy of the pins has the second problem:
+two copies drift apart on the first edit of either. A number held
+by whichever screen the setup names has neither.
+
+The consequences:
+- **Numbers, not hardware, own every per-screen value.** No stored
+  map stays keyed by a screen's fingerprint beside the numbers; a
+  map left behind is a second answer to which screen a value
+  belongs to, and the two disagree the first time a setup's order
+  changes.
+- **One projection crosses between the two.** The runtime keeps
+  its fingerprint keys — the placements, the split sync, the area
+  keys — behind one function: a number to the fingerprint of the
+  screen that holds it, at an apply, and back, at a Save. Every
+  write of a fingerprint-keyed runtime map reaches storage through
+  that function alone, `storeSplit` and the Lua split record
+  included. `set_display_areas` and the per-screen setters keep
+  their arguments, and a fingerprint now names the number that
+  screen holds. #3640's held calls replay through those verbs'
+  bodies (`storeDisplayAreas`, the bars' commands), so they reach
+  the same door.
+- **A Save writes the connected setup's order and the
+  number-keyed values**, nothing keyed by a fingerprint.
+- **A setup is an order, matched as a set.** Which profile a set
+  of screens loads is still the sorted comparison, so matching is
+  unchanged; the order is stored beside it (`MonitorSet.monitors`)
+  and says only which screen is Screen 1.
+- **A setup the profile has not met is numbered left to right**,
+  ties top to bottom, for the session. Main-first was refused: it
+  settles only Screen 1 and repeats the Main role.
+- **The Main role stays as it is and outranks a Screen pin**, a
+  number's pin included.
+- **The user renumbers on the Screens page.** Each card's badge
+  always reads "Screen N", never a bare numeral, since Spaces
+  default to numeric names and a "1" over a "1" chip reads as one
+  thing. Its pop-up offers each number, then **Don't Number This
+  Screen**; picking a number another screen holds swaps the two,
+  and the card's menu carries the same items for the keyboard and
+  VoiceOver. A screen with no number reads "Gets a new Space" and
+  gets one, as the #1175 heal seeds one. Dragging a card to swap is
+  later: cards are already drop targets for Space chips.
+- **A split is stored as shares of the screen**, per-mille, and
+  resolved to points on whichever screen holds the number. A
+  screen may not take a number whose split would put an area under
+  `TilingSettings.areaFloor(along:)` there: that number is greyed
+  in the pop-up, with "Screen 1's areas would be narrower than the
+  minimum window size here." ("shorter" for a top-to-bottom
+  split).
+- **Twin screens share one split.** Two screens with one
+  fingerprint can hold two numbers, but the runtime keys an area
+  by fingerprint, so both draw the lower number's split.
+- **The crossing is one `ConfigMigration` step**, run through
+  `MigrationBackup.migrateInPlace` like every step. Slot k is the
+  stored `monitors[k]`; where two setups of one count pin
+  differently, the first stored setup wins; a split's points
+  become shares from the size each fingerprint carries
+  (`Name:WxH`), so no screen needs to be connected. A hand-edited
+  `space_monitor_map` crosses with the rest.
+- **Copy says which form of a screen's name it means.** Known
+  screen setups keeps naming screens by name, since every setup
+  there has its own Screen 1.
+:::
 
 **[Principle]**
 
@@ -24535,6 +24641,13 @@ pin is stored against, so a pinned space may open on either. A
 list hides that second one; a picture cannot, and an unexplained
 duplicate reads as a bug in the drawing rather than a limit of the
 identity.
+
+:::unreleased
+*Amended (#3647):* a pin now follows a screen number rather than
+`name:WxH`, so twins may hold two numbers; which twin holds which
+is arbitrary within their one identity (▸ *A profile numbers its
+screens per screen count*).
+:::
 
 **Chips: pinned, follows-main, automatic.** Semantic micro-icons
 (pin, arrow) rather than border styles alone (accessibility), and
