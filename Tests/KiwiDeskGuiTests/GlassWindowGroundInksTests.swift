@@ -4,24 +4,26 @@ import Testing
 
 @testable import KiwiDesk
 
-/// `glassFallbackInks` (#3650): where `glassChrome` draws its
-/// fallback, a descendant's `.primary` / `.secondary` resolve to
-/// the inks handed in; on glass they stay the system's. Rendered
-/// with marker hues so a pixel says which style drew; the render's
+/// `glassWindowGround`'s inks (#3650): where the fallback draws, a
+/// descendant's `.primary` / `.secondary` resolve to the inks
+/// handed in; on glass they stay the system's. Rendered with
+/// marker hues so a pixel says which style drew; the render's
 /// colour space shifts a hue a little, so a channel must dominate.
 /// `@MainActor` for `ImageRenderer`: four 20 pt renders.
 @MainActor
-@Suite("Glass fallback inks (#3650)")
-struct GlassFallbackInksTests {
+@Suite("Glass window ground inks (#3650)")
+struct GlassWindowGroundInksTests {
     /// The centre pixel's RGB of a square filled with `style`.
     private static func centre(
         _ style: some ShapeStyle,
-        enabled: Bool
+        glass: Bool
     ) throws -> (r: Int, g: Int, b: Int) {
         let view = Rectangle().fill(style)
             .frame(width: 20, height: 20)
-            .glassFallbackInks(
-                enabled: enabled,
+            .glassWindowGround(
+                enabled: glass,
+                variant: .regular,
+                fallback: AnyShapeStyle(Color.clear),
                 primary: Color(.sRGB, red: 1, green: 0, blue: 0),
                 secondary: Color(.sRGB, red: 0, green: 0, blue: 1)
             )
@@ -43,12 +45,12 @@ struct GlassFallbackInksTests {
 
     @Test("the fallback resolves the hierarchical styles to the inks")
     func fallbackTakesTheInks() throws {
-        let primary = try Self.centre(.primary, enabled: false)
+        let primary = try Self.centre(.primary, glass: false)
         #expect(
             primary.r - max(primary.g, primary.b) > 150,
             "primary: \(primary)"
         )
-        let secondary = try Self.centre(.secondary, enabled: false)
+        let secondary = try Self.centre(.secondary, glass: false)
         #expect(
             secondary.b - max(secondary.r, secondary.g) > 150,
             "secondary: \(secondary)"
@@ -56,11 +58,15 @@ struct GlassFallbackInksTests {
     }
 
     /// The negative control: on glass the system's styles draw, a
-    /// neutral grey with no marker hue in it.
-    @Test("glass keeps the system's styles")
+    /// neutral grey with no marker hue in it. Below macOS 26 the
+    /// ground always falls back, so there is no glass to test.
+    @Test(
+        "glass keeps the system's styles",
+        .enabled(if: GlassChromeVariant.drawable)
+    )
     func glassKeepsTheSystemStyles() throws {
         for style in [AnyShapeStyle(.primary), AnyShapeStyle(.secondary)] {
-            let drawn = try Self.centre(style, enabled: true)
+            let drawn = try Self.centre(style, glass: true)
             #expect(
                 abs(drawn.r - drawn.b) < 8 && abs(drawn.r - drawn.g) < 8,
                 "glass drew a marker hue: \(drawn)"

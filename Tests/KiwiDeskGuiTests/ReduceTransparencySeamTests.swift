@@ -189,7 +189,7 @@ struct ReduceTransparencySeamTests {
     /// the same OS value, not a second gate, and joins here with
     /// its reason; a second `glassGround` gate cannot.
     private static let allowedGuiReaders: [String: String] = [
-        "GlassChrome.swift": "gates the glass branch",
+        "GlassChrome.swift": "gates the glass branch and its inks (#3650)",
         "PanelGlass.swift": "takes the panels' Fill inks down (#2569)",
         // A grey under the same OS value, not a second gate (#1418).
         "GlassCard.swift": "greys the Liquid Glass row with its reason",

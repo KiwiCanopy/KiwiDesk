@@ -146,27 +146,19 @@ extension View {
     /// The regular glass adapts to the backdrop, not the appearance:
     /// text drawn on it takes `.primary` / `.secondary`, which the
     /// page fallback resolves to `ink` / `ink2`; text on a card
-    /// keeps a concrete `SettingsTheme` ink (#3650).
+    /// keeps a concrete `SettingsTheme` ink (#3650). The #3646
+    /// notice shares this ground.
     func updateWindowGround() -> some View {
         // The tint BELOW the glass, so the ground sits outside the
         // tinted environment (gui.md, as `JumpPanelView`).
-        glassFallbackInks(
-            enabled: true,
-            primary: SettingsTheme.ink,
-            secondary: SettingsTheme.ink2
-        )
-        .tint(SettingsTheme.accent)
-        .background {
-            Color.clear
-                .glassChrome(
-                    in: Rectangle(),
-                    enabled: true,
-                    variant: .regular,
-                    tint: nil,
-                    fallback: AnyShapeStyle(SettingsTheme.page)
-                )
-                .ignoresSafeArea()
-        }
+        tint(SettingsTheme.accent)
+            .glassWindowGround(
+                enabled: true,
+                variant: .regular,
+                fallback: AnyShapeStyle(SettingsTheme.page),
+                primary: SettingsTheme.ink,
+                secondary: SettingsTheme.ink2
+            )
     }
 }
 

@@ -90,18 +90,22 @@ private struct GlassChrome<S: Shape>: ViewModifier {
 }
 
 extension View {
-    /// Gives descendant `.primary` / `.secondary` concrete inks
-    /// where `glassChrome` draws its fallback, and leaves the
-    /// system's adaptive styles on glass (#3650). `enabled` is the
-    /// same caller's WHETHER that `glassChrome` takes.
-    func glassFallbackInks(
+    /// A window's ground: `glassChrome` in a rectangle behind the
+    /// content, up behind the title bar. Text on it takes `.primary`
+    /// / `.secondary`: the system's adaptive styles on glass, and
+    /// `primary` / `secondary` where the fallback draws (#3650).
+    func glassWindowGround(
         enabled: Bool,
+        variant: GlassChromeVariant,
+        fallback: AnyShapeStyle,
         primary: Color,
         secondary: Color
     ) -> some View {
         modifier(
-            GlassFallbackInks(
+            GlassWindowGround(
                 enabled: enabled,
+                variant: variant,
+                fallback: fallback,
                 primary: primary,
                 secondary: secondary
             )
@@ -109,22 +113,38 @@ extension View {
     }
 }
 
-/// The fallback's side of `GlassChrome`'s gate, read from the same
-/// environment value so the inks and the ground never disagree.
-private struct GlassFallbackInks: ViewModifier {
+/// Decides glass once and hands that one answer to the ground and
+/// the inks, so the two never disagree. One branch, so a flip of
+/// Reduce transparency keeps the window's state.
+private struct GlassWindowGround: ViewModifier {
     @Environment(\.accessibilityReduceTransparency)
     private var reduceTransparency
 
     let enabled: Bool
+    let variant: GlassChromeVariant
+    let fallback: AnyShapeStyle
     let primary: Color
     let secondary: Color
 
     func body(content: Content) -> some View {
-        if enabled && !reduceTransparency && GlassChromeVariant.drawable {
-            content
-        } else {
-            content.foregroundStyle(primary, secondary)
-        }
+        let glass =
+            enabled && !reduceTransparency && GlassChromeVariant.drawable
+        content
+            .foregroundStyle(
+                glass ? AnyShapeStyle(.primary) : AnyShapeStyle(primary),
+                glass ? AnyShapeStyle(.secondary) : AnyShapeStyle(secondary)
+            )
+            .background {
+                Color.clear
+                    .glassChrome(
+                        in: Rectangle(),
+                        enabled: glass,
+                        variant: variant,
+                        tint: nil,
+                        fallback: fallback
+                    )
+                    .ignoresSafeArea()
+            }
     }
 }
 

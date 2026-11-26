@@ -8,31 +8,48 @@ import Testing
 /// hierarchical styles, and text on a card, which has a fill of
 /// its own, keeps a concrete `SettingsTheme` ink. The glass adapts
 /// to the backdrop, so no offscreen render can tell the two
-/// apart; the guard is a scan of the eight Updates files that
-/// draw text. Off the main actor: one read of those files.
+/// apart; the guard is a scan of the Updates files that draw text
+/// or name an ink, each of which is ruled into one list below.
+///
+/// Out of reach: the links on the Next card take `linkHover()`'s
+/// `.secondary` / `.primary`, set outside these files.
+/// Off the main actor: one read of the Updates folder.
 @Suite("Update window text on glass and on cards (#3650)")
 struct UpdateGlassTextTests {
     /// Files whose text sits on the glass, with the hierarchical
     /// styles each one draws.
-    private static let onGlass: [(file: String, styles: [String])] = [
-        ("UpdateWindowView.swift", [".primary", ".secondary"]),
-        ("UpdateCheckingWindowController.swift", [".primary"]),
-        ("UpdateWindowFooter.swift", [".secondary"]),
+    private static let onGlass: [String: [String]] = [
+        "UpdateWindowView.swift": [".primary", ".secondary"],
+        "UpdateCheckingWindowController.swift": [".primary"],
+        "UpdateWindowFooter.swift": [".secondary"],
     ]
 
     /// Files whose text sits on a card or the Highlights panel.
-    private static let onCards = [
+    private static let onCards: Set<String> = [
         "UpdateNotesGroups.swift",
         "UpdateSpotlightRows.swift",
         "UpdateNotesMarkdown.swift",
         "NextOnMyListPanel.swift",
+        // The "no notes" card; its links on the glass name no ink.
+        "UpdateNotesScroll.swift",
     ]
 
-    private static func source(_ name: String) throws -> String {
-        let url = SourceScan.repoRoot(from: #filePath)
+    /// Files that draw text through a control styling its own.
+    private static let exempt: [String: String] = [
+        "UpdateNotesTabStrip.swift": "a segmented track with its fill",
+        "WhatsNewReleasePicker.swift": "a menu picker under its seal",
+    ]
+
+    private static var updates: URL {
+        SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Updates")
-            .appendingPathComponent(name)
-        return try String(contentsOf: url, encoding: .utf8)
+    }
+
+    private static func source(_ name: String) throws -> String {
+        try String(
+            contentsOf: updates.appendingPathComponent(name),
+            encoding: .utf8
+        )
     }
 
     /// `ink`, `ink2` or `ink3`; `warningInk` is a status colour,
@@ -41,10 +58,35 @@ struct UpdateGlassTextTests {
         /SettingsTheme\.ink\d?\b/
     }
 
-    /// A fixed ink DRAWN on text: the ground's fallback inks hand
-    /// `ink` and `ink2` to `glassFallbackInks`, which is no text.
+    /// A fixed ink DRAWN on text, as a style or an attribute.
     private static var drawnInk: Regex<Substring> {
         /(?:foregroundStyle\(|foregroundColor = )SettingsTheme\.ink\d?\b/
+    }
+
+    /// Every Updates file that draws text or names an ink is ruled
+    /// into exactly one list, so a new one cannot go unseen.
+    @Test("every text-drawing Updates file is ruled")
+    func everyFileIsRuled() throws {
+        let files = try SourceScan.swiftSources(under: Self.updates)
+        #expect(files.count >= 20, "scanned \(files.count) files")
+        var drawing: Set<String> = []
+        for file in files {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            if text.contains("Text(") || text.contains(Self.fixedInk) {
+                drawing.insert(file.lastPathComponent)
+            }
+        }
+        let lists = [
+            Set(Self.onGlass.keys), Self.onCards, Set(Self.exempt.keys),
+        ]
+        let ruled = lists.reduce(Set<String>()) { $0.union($1) }
+        let unruled = drawing.subtracting(ruled).sorted()
+        let stale = ruled.subtracting(drawing).sorted()
+        #expect(drawing == ruled, "unruled: \(unruled), stale: \(stale)")
+        #expect(
+            lists.map(\.count).reduce(0, +) == ruled.count,
+            "a file is ruled twice"
+        )
     }
 
     @Test("text on the glass takes the hierarchical styles")
@@ -64,11 +106,35 @@ struct UpdateGlassTextTests {
         }
     }
 
+    /// The fallback's 4.5:1 rests on the ground handing `ink` and
+    /// `ink2` to `glassWindowGround`; without it the fallback draws
+    /// the system's styles, which the contrast suite never measures.
+    @Test("the ground hands the fallback its inks")
+    func groundHandsTheInks() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.updates.appendingPathComponent("UpdateWindowView.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func updateWindowGround",
+                in: source
+            ),
+            "updateWindowGround is gone"
+        )
+        let squashed = body.split(whereSeparator: \.isWhitespace).joined()
+        let arguments = try #require(
+            SourceScan.callArguments(of: "glassWindowGround(", in: squashed),
+            "updateWindowGround no longer applies glassWindowGround"
+        )
+        #expect(arguments.contains("primary:SettingsTheme.ink,"))
+        #expect(arguments.contains("secondary:SettingsTheme.ink2"))
+    }
+
     /// A hierarchical style on a card would follow the glass while
     /// the card's fill does not: light text on a white card.
     @Test("text on a card keeps a concrete ink")
     func cardTextIsConcrete() throws {
-        let hierarchical = /\.foregroundStyle\(\.(primary|secondary)\)/
+        let hierarchical = /\.foregroundStyle\(\.(?:primary|secondary)\)/
         for file in Self.onCards {
             let text = try Self.source(file)
             #expect(

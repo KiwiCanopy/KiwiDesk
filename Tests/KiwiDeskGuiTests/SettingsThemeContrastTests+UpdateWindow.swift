@@ -10,7 +10,7 @@ import SwiftUI
 /// the chips (`chips`). The header and the footer sit on the
 /// glass and draw `.primary` / `.secondary` (#3650): on the glass
 /// those are the system's adaptive styles, which no fixed pairing
-/// can measure, and on the page fallback `glassFallbackInks`
+/// can measure, and on the page fallback `glassWindowGround`
 /// resolves them to `ink` / `ink2`, which the main list's
 /// `ink on page` and `ink2 on page` rows measure (#3111). The
 /// gold itself marks and never inks, so its edge is floored by
