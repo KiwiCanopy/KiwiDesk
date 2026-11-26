@@ -13,11 +13,21 @@ struct KeySequenceTapThreadTests {
         var ids: [UInt32] = []
     }
 
-    private func tap(_ leader: String) throws -> (KeyboardTap, Fired) {
+    /// The tap's clock, moved by hand (#3593).
+    private final class Now: @unchecked Sendable {
+        var seconds: TimeInterval = 100
+    }
+
+    private func tap(
+        _ leader: String,
+        now: Now = Now()
+    ) throws -> (KeyboardTap, Fired) {
         let fired = Fired()
         let tap = KeyboardTap.unstarted(
             consumers: [.sequences],
-            fire: { fired.ids.append($0) }
+            fire: { fired.ids.append($0) },
+            clock: { now.seconds },
+            scheduleLapse: { _, _ in }
         )
         let combo = try #require(KeyCombo.parse(leader))
         tap.setRows(
@@ -137,6 +147,34 @@ struct KeySequenceTapThreadTests {
         #expect(!dock.sequenceEvent(.leftMouseDown, click))
         #expect(
             dock.drainSequenceDecisions().map(\.outcome)
+                == [.stepped, .closed]
+        )
+    }
+
+    /// The capture a screenshot opened ends at its limit on the
+    /// tap's clock, so a later click closes the sequence.
+    @Test("a screenshot's capture ends at its limit")
+    func captureEndsAtItsLimit() throws {
+        let click = try #require(
+            CGEvent(
+                mouseEventSource: nil,
+                mouseType: .leftMouseDown,
+                mouseCursorPosition: .zero,
+                mouseButton: .left
+            )
+        )
+        let now = Now()
+        let (shooting, _) = try tap("ctrl+alt+space", now: now)
+        _ = shooting.sequenceEvent(
+            .keyDown,
+            try key(49, [.maskControl, .maskAlternate])
+        )
+        let shot = try key(21, [.maskCommand, .maskShift])  // ⌘⇧4
+        #expect(!shooting.sequenceEvent(.keyDown, shot))
+        now.seconds += KeySequenceRouter.captureLimit + 1
+        #expect(!shooting.sequenceEvent(.leftMouseDown, click))
+        #expect(
+            shooting.drainSequenceDecisions().map(\.outcome)
                 == [.stepped, .closed]
         )
     }

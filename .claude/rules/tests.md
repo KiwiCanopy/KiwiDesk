@@ -384,10 +384,13 @@ bite large test PRs:
   same clock, or a frozen stamp ages against a live read (#1852).
   `EchoClockSeamTests` counts no `ContinuousClock.now` or raw
   `clock_gettime_nsec_np` read, so a ledger stamped on one
-  (`DeferredTasks`' burst cap, `KeyboardTap.uptime()`) owes its
-  test a seam, or every real wait one-directional: a parked wait
-  seam, and real sleeps only as floors a slow runner widens
-  (`DeferredTasksTests`, #3567).
+  (`DeferredTasks`' burst cap) owes its test a seam, or every real
+  wait one-directional: a parked wait seam, and real sleeps only
+  as floors a slow runner widens (`DeferredTasksTests`, #3567).
+  Keep the keyboard tap's clock and lapse construction parameters
+  with no default, and step both by hand in a suite whose verdict
+  waits on a lapse, never sleeping past the gap (#3593,
+  `KiwiHubHeldTapTests` ▸ `heldLapse`).
   `makeTestCore` freezes the applier's, the ledger's and the
   core's wall clock (a stamp read in the same test cannot age),
   and `EchoClockSeamTests` holds the host uptime to those seams'

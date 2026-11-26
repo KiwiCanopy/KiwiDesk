@@ -93,7 +93,7 @@ extension KeyboardTap {
         let held = HotkeyModifiers.held(by: event.flags)
         let isRepeat =
             event.getIntegerValueField(.keyboardEventAutorepeat) != 0
-        let now = Self.uptime()
+        let now = clock()
         let (swallow, heard, decided, kept) = sequenceState.withLock {
             state -> (Bool, Bool, KeySequenceRouter.Outcome?, Bool) in
             state.takeClose()
