@@ -191,8 +191,8 @@ extension KiwiCore {
             minSizes: trackMins.map(\.size)
         )
         let value = outcome.value
-        if StackLayout.weightSpent(weights[track], by: delta),
-            !outcome.hitOwnMinimum, outcome.blockedByOther == nil
+        if outcome.spent, !outcome.hitOwnMinimum,
+            outcome.blockedByOther == nil
         {
             cueWeightLimit(window, delta: delta, axis: acrossAxis)
             return .ok()

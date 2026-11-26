@@ -195,7 +195,8 @@ extension RunZone {
     /// windows' floors leave, among the windows that take a share,
     /// with no minimum of its own, since the layout keeps the floors.
     /// Nil where no weight moves the window the way the press asks
-    /// (`checkedWeight`).
+    /// (`checkedWeight`), save a shrink clamped onto the limit in a run
+    /// hiding nothing, which answers as that limit (#3661).
     func weightStep(
         _ line: Line,
         _ index: Int,
@@ -229,7 +230,19 @@ extension RunZone {
                 by: delta,
                 in: context
             )
-        else { return nil }
+        else {
+            // A shrink the range clamps onto its limit, keeping a run
+            // that hides nothing, is that limit (#3661); one that
+            // flips the split is #2967's.
+            var trial = context
+            trial.stackWeights[members[index]] = stepped
+            let clamped =
+                delta < 0
+                && StackLayout.weightSpent(stepped, by: Double(delta))
+                && run(in: context)?.hides == false
+                && run(in: trial) != nil
+            return clamped ? limitPress(line, index, by: delta) : nil
+        }
         var press = Press()
         press.weight = weight
         return press
@@ -243,8 +256,10 @@ extension RunZone {
     /// and a step clamped at the weight's limit can move it by less
     /// than the screen shows (#3634). A nil for a run that still
     /// hides means the weight's limit, which `press` answers with a
-    /// length step. A whole-zone writer's floors keep its own step
-    /// from crossing (state-and-layout.md).
+    /// length step, and `weightStep` reads one for a run hiding
+    /// nothing (#3661): a change to the split test here owes both. A
+    /// whole-zone writer's floors keep its own step from crossing
+    /// (state-and-layout.md).
     private func checkedWeight(
         _ stepped: Double,
         _ line: Line,
