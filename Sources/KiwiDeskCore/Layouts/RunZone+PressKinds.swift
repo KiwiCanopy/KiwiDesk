@@ -218,13 +218,16 @@ extension RunZone {
         return press
     }
 
-    /// `stepped` where it keeps the render's split, else the weight
-    /// that moves the window the way `delta` presses, nearest the
-    /// length asked; nil where none does. A step that flips the split
-    /// between whole and floor-and-share redraws every share, which
-    /// can move the window the other way (#2967). A whole-zone
-    /// writer's floors keep its own step from crossing
-    /// (state-and-layout.md).
+    /// `stepped` where it keeps the render's split and moves the
+    /// window, else the weight that moves the window the way `delta`
+    /// presses, nearest the length asked; nil where none does. A step
+    /// that flips the split between whole and floor-and-share redraws
+    /// every share, which can move the window the other way (#2967),
+    /// and a step clamped at the weight's limit can move it by less
+    /// than the screen shows (#3634). A nil for a run that still
+    /// hides means the weight's limit, which `press` answers with a
+    /// length step. A whole-zone writer's floors keep its own step
+    /// from crossing (state-and-layout.md).
     private func checkedWeight(
         _ stepped: Double,
         _ line: Line,
@@ -235,10 +238,14 @@ extension RunZone {
         let id = members[index]
         var trial = context
         trial.stackWeights[id] = stepped
-        guard run(in: trial) == nil else { return stepped }
         let drawn = line.drawn[index]
-        let target = drawn + delta
         let sense: CGFloat = delta < 0 ? -1 : 1
+        guard run(in: trial) == nil else {
+            let moved = drawnLength(of: id, weight: stepped, in: context)
+            return (moved - drawn) * sense > Self.unchangedTolerance
+                ? stepped : nil
+        }
+        let target = drawn + delta
         return
             ([stepped]
             + weightCandidates(

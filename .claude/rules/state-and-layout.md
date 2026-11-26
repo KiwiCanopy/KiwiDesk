@@ -2454,8 +2454,13 @@ editing here:
   A run's weight step goes through `RunZone.checkedWeight`, which
   judges it against the render's split, since a step that flips
   between the whole split and floor-and-share redraws every share
-  (#2967, `RunZoneCrossingTests`). A whole-zone writer clamps its
-  step at floors no lower than the ones `fitsWhole` plans —
+  (#2967, `RunZoneCrossingTests`), and against the drawn move: a
+  run press takes a false `StackLayout.weightSpent` as room to
+  move only where the step's drawn change clears
+  `RunZone.unchangedTolerance`, and answers a smaller one as the
+  weight's limit (#3634, `RunZoneCrossingTests` ▸
+  `clampedStepIsTheLimit`). A whole-zone
+  writer clamps its step at floors no lower than the ones `fitsWhole` plans —
   `KiwiCore.plannedMinSize`, the clamp twin of
   `LayoutContext.plannedFloor` — so a floor input joins both, or a
   step crosses the split; a Grid's fixed cells are exempt, since a
