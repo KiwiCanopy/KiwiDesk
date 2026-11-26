@@ -1,3 +1,5 @@
+import CoreGraphics
+
 /// Stack layout shared domain rules: weight domain, partition, and resize
 /// math (#44, #67).
 extension StackLayout {
@@ -17,6 +19,12 @@ extension StackLayout {
         public let hitOwnMinimum: Bool
         /// Other index whose minimum size capped a grow.
         public let blockedByOther: Int?
+        /// The weight is at, or within a drawn half-point of, the limit
+        /// the press moves it toward (`weightSpent(_:at:to:span:by:)`,
+        /// #3661). Valid where `span` is the length the layout divides
+        /// by weight alone; a run press judges its own drawn move
+        /// through `RunZone.checkedWeight` (#3634).
+        public let spent: Bool
     }
 
     /// Safety margin (pt) added to a minimum before deriving its
@@ -53,6 +61,29 @@ extension StackLayout {
             ? weight >= weightRange.upperBound
             : weight <= weightRange.lowerBound
     }
+
+    /// Whether a step of `weights[index]` to `stepped` is at the
+    /// limit `delta` presses toward: there already, or clamped onto
+    /// it with a drawn change below `unshownChange`, the share of
+    /// `span` the screen cannot show (#3661).
+    static func weightSpent(
+        _ weights: [Double],
+        at index: Int,
+        to stepped: Double,
+        span: Double,
+        by delta: Double
+    ) -> Bool {
+        if weightSpent(weights[index], by: delta) { return true }
+        guard weightSpent(stepped, by: delta) else { return false }
+        let total = weights.reduce(0, +)
+        let after = total - weights[index] + stepped
+        guard total > 0, after > 0 else { return false }
+        let change = span * (stepped / after - weights[index] / total)
+        return abs(change) < Double(unshownChange)
+    }
+
+    /// Below this many points a step moved nothing the screen shows.
+    static let unshownChange: CGFloat = 0.5
 
     /// The member a refusal at `index` of a line names (#2709).
     static func nearestMate(of index: Int) -> Int {
@@ -115,13 +146,21 @@ extension StackLayout {
                 }
             }
         }
+        let clamped = Swift.min(
+            Swift.max(value, weightRange.lowerBound),
+            weightRange.upperBound
+        )
         return WeightStepOutcome(
-            value: Swift.min(
-                Swift.max(value, weightRange.lowerBound),
-                weightRange.upperBound
-            ),
+            value: clamped,
             hitOwnMinimum: hitOwnMinimum,
-            blockedByOther: blockedByOther
+            blockedByOther: blockedByOther,
+            spent: weightSpent(
+                weights,
+                at: index,
+                to: clamped,
+                span: span,
+                by: delta
+            )
         )
     }
 
