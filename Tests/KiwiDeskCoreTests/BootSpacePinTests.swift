@@ -54,6 +54,10 @@ struct BootSpacePinTests {
         core.state.workspaces.spaces(on: display.id)
     }
 
+    private func heldPins(_ core: KiwiCore) -> [SpaceID] {
+        core.heldScreenCalls.compactMap(\.pinnedSpace)
+    }
+
     private func dock(_ core: KiwiCore) {
         core.handle(.displaysChanged([Self.external, Self.builtIn]))
     }
@@ -74,7 +78,7 @@ struct BootSpacePinTests {
         #expect(spaces(core, on: Self.builtIn).contains("Comms"))
         #expect(!spaces(core, on: Self.external).contains("Comms"))
         #expect(core.spacePins["Comms"] == Self.builtIn.fingerprint)
-        #expect(core.pendingSpacePins.isEmpty)
+        #expect(core.heldScreenCalls.isEmpty)
         #expect(!log.contains { $0.hasPrefix("heal:") })
     }
 
@@ -93,7 +97,7 @@ struct BootSpacePinTests {
             """
         try writeLua(code, core)
         core.loadConfig()
-        #expect(Array(core.pendingSpacePins.keys) == ["Code"])
+        #expect(heldPins(core) == ["Code"])
         dock(core)
         #expect(core.spacePins["Comms"] == nil)
         #expect(core.spacePins["Code"] == Self.external.fingerprint)
@@ -103,9 +107,9 @@ struct BootSpacePinTests {
     func droppedSpaceForgetsItsPin() throws {
         let core = try makeCore(lua: Self.pinComms)
         core.loadConfig()
-        #expect(core.pendingSpacePins["Comms"] != nil)
+        #expect(heldPins(core).contains("Comms"))
         core.forwardWindows(of: "Comms", to: "Code")
-        #expect(core.pendingSpacePins["Comms"] == nil)
+        #expect(!heldPins(core).contains("Comms"))
         dock(core)
         #expect(core.state.workspaces["Comms"] == nil)
     }
@@ -119,6 +123,6 @@ struct BootSpacePinTests {
             args: [.string("Comms"), .string("No Such Screen")]
         )
         #expect(!response.isSuccess)
-        #expect(core.pendingSpacePins.isEmpty)
+        #expect(core.heldScreenCalls.isEmpty)
     }
 }

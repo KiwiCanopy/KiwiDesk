@@ -257,8 +257,8 @@ public final class KiwiCore {
     /// edited by the GUI Canvas (#36), which reads them via
     /// `loadGuiConfig` and writes via `applyProfileScopedState`.
     var spacePins: [SpaceID: String] = [:]
-    /// Pins declared before any screen was known (#3631).
-    var pendingSpacePins: [SpaceID: JSONValue] = [:]
+    /// Screen-naming calls held until a screen is known (#3640).
+    var heldScreenCalls: [HeldScreenCall] = []
     /// Spaces in the *Main* role, following the main screen (#36).
     var mainSpaces: Set<SpaceID> = []
     /// The empty-display heal's seed per monitor fingerprint (#1175),

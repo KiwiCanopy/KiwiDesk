@@ -24,7 +24,13 @@ extension KiwiCore {
             })
         else { return .fail("unknown bar setting: \(field)") }
         let calls: [[JSONValue]]
-        switch screenResolvedBarArgs(field: field, args) {
+        switch screenResolvedBarArgs(
+            field: field,
+            args,
+            replay: { [unowned self] in
+                self.barCommand(command, args)
+            }
+        ) {
         case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }
@@ -61,7 +67,13 @@ extension KiwiCore {
             command.dropFirst("space_bar.set_".count)
         )
         let calls: [[JSONValue]]
-        switch screenResolvedBarArgs(field: field, args) {
+        switch screenResolvedBarArgs(
+            field: field,
+            args,
+            replay: { [unowned self] in
+                self.spaceBarCommand(command, args)
+            }
+        ) {
         case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }
@@ -100,7 +112,8 @@ extension KiwiCore {
         switch screenResolvedEdgeArgs(
             field: field,
             screenField: "pocket_edge",
-            args
+            args,
+            replay: { [unowned self] in self.kiwishelfCommand(command, args) }
         ) {
         case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
@@ -143,7 +156,13 @@ extension KiwiCore {
             return .fail("the App Bar's \(field) is global: \(global)")
         }
         let calls: [[JSONValue]]
-        switch screenResolvedBarArgs(field: field, args) {
+        switch screenResolvedBarArgs(
+            field: field,
+            args,
+            replay: { [unowned self] in
+                self.applyBarOverride(field: field, args, into: mode)
+            }
+        ) {
         case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
         }

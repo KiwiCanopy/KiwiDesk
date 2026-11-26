@@ -186,36 +186,31 @@ struct ScreenEdgeVerbTests {
         #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
     }
 
-    /// Before the first display is published — `init.lua` at
-    /// boot — the screen list names the screens.
-    @Test(
-        "A screen is named before any display is published",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func namesAScreenAtBoot() throws {
-        let screen = try #require(NSScreen.screens.first)
-        let display = try #require(screen.kiwiDisplay)
+    /// Before the first display is published, outside a config
+    /// load, a screen number names nothing and refuses, while a
+    /// fingerprint needs no screen and lands at once; `init.lua`'s
+    /// own calls wait for a screen (#3640, `BootDisplayAreaTests`).
+    @Test("A screen is named before any display is published")
+    func namesAScreenAtBoot() {
         let core = makeTestCore()
         #expect(core.state.workspaces.allDisplays.isEmpty)
-        let saved = ScreenList.override
-        defer { ScreenList.override = saved }
-        ScreenList.override = { [screen] }
-        let main = PositionalDisplays.mainIDOverride
-        defer { PositionalDisplays.mainIDOverride = main }
-        PositionalDisplays.mainIDOverride = { display.id }
         #expect(
-            edge(core, "space_bar.set_edge", .string("left"), .number(1))
+            !edge(core, "space_bar.set_edge", .string("left"), .number(1))
                 .isSuccess
         )
         #expect(
-            core.tiler.settings.spaceBarStyle.edge(on: display.fingerprint)
-                == .left
+            edge(
+                core,
+                "app_bar.set_edge",
+                .string("left"),
+                .string(Self.left.fingerprint)
+            ).isSuccess
         )
-        ScreenList.override = { [] }
         #expect(
-            !edge(core, "app_bar.set_edge", .string("left"), .number(1))
-                .isSuccess
+            core.tiler.settings.appBarStyle.edgeOverride
+                == [Self.left.fingerprint: .left]
         )
+        #expect(core.heldScreenCalls.isEmpty)
     }
 
     @Test("A look sets the bars' edges and keeps each screen's own")

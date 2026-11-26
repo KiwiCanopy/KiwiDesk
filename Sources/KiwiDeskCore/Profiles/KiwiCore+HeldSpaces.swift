@@ -331,8 +331,9 @@ extension KiwiCore {
         rekeySessionRatios(source, to: target, under: origin.arrangement)
         // Its steps name the old id; they cannot validate (#3515).
         layoutHistory.history.clear(source)
-        if let pin = pendingSpacePins.removeValue(forKey: source) {
-            pendingSpacePins[target] = pin  // #3631
+        heldScreenCalls = heldScreenCalls.map {  // #3631
+            guard case .pin(source, let arg) = $0 else { return $0 }
+            return .pin(target, arg)
         }
     }
 }
