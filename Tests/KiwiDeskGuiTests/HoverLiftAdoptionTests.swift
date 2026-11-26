@@ -97,7 +97,7 @@ struct HoverLiftAdoptionTests {
     func choiceChipsTakeTheSurface() throws {
         for path in [
             "Settings/Components/Keybindings/KeyboardChrome.swift",
-            "Settings/Components/SpaceOverrides/SpacesPanelPreview.swift",
+            "Settings/Components/SpaceOverrides/SpacePreviewChipRow.swift",
         ] {
             #expect(
                 try squashed(path).occurrences(

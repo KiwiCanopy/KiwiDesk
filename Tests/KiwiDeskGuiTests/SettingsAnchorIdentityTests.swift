@@ -141,6 +141,9 @@ struct SettingsAnchorIdentityTests {
         // Scroll identity: the layer chips' follow, as the layout
         // strip's (#3263).
         "LayerStripEditor.swift": 1,
+        // Scroll identity: the Spaces preview chips' follow, as
+        // the layer chips' (#2990).
+        "SpacePreviewChipRow.swift": 1,
         // Unit identity: Maximize's Custom… field rebuilds on a
         // % | pt flip so its text shows the converted value
         // (#3460). A popover, so nothing there is a reveal target.

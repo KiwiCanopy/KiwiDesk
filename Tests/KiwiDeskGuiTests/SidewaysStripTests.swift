@@ -38,9 +38,6 @@ struct SidewaysStripTests {
     /// and an axis that opens `.vertical` are not seen.
     private static let allowed: [String: (count: Int, why: String)] = [
         "SidewaysStrip.swift": (1, "the container itself"),
-        "SpacesPanelPreview.swift": (
-            1, "chip widths vary, so a run needs measuring first (#2990)"
-        ),
         "ScreensPicture.swift": (
             1, "a two-axis canvas of screens, not a strip of items"
         ),
