@@ -70,7 +70,7 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue,
             let name = args.dropFirst().first?.stringValue
         else { return .fail("expected an area and a name") }
-        let key = ScreenAreaKey(parsing: raw)
+        let key = numberedArea(raw)?.1 ?? ScreenAreaKey(parsing: raw)
         guard var split = tiler.settings.displayAreas[key.fingerprint],
             let at = split.areas.firstIndex(where: {
                 $0.id == key.areaID
@@ -84,7 +84,7 @@ extension KiwiCore {
             screenNames: state.workspaces.allDisplays.map(\.name)
         ) {
         case .number?:
-            return .fail("an area name cannot be a number")
+            return .fail("an area name cannot be a number or N#id")
         case .taken?:
             return .fail("another area or screen is already named \(trimmed)")
         case nil:
@@ -187,7 +187,7 @@ extension KiwiCore {
     /// `list_monitors`' areas for `display`: each area's key, its
     /// name if any, and its rect in the screen's own points — read
     /// off the placement list, so it shows the split in effect.
-    func areasJSON(of display: Display) -> JSONValue {
+    func areasJSON(of display: Display, screen: Int?) -> JSONValue {
         let areas = state.workspaces.placements(of: display.id)
         guard areas.count > 1 else { return .array([]) }
         return .array(
@@ -195,6 +195,10 @@ extension KiwiCore {
                 let area = placement.area
                 return .object([
                     "key": .string(placement.key.description),
+                    // Screen N's area, as a script names it (#3647).
+                    "numbered_key": screen.flatMap {
+                        ScreenSlotKey(number: $0, areaID: area.id)
+                    }.map { .string($0.description) } ?? .null,
                     "name": area.name.map(JSONValue.string) ?? .null,
                     "x": .number(Double(area.x)),
                     "y": .number(Double(area.y)),

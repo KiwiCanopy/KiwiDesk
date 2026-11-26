@@ -21,7 +21,11 @@ extension ScreenArea {
         screenNames: [String]
     ) -> ScreenAreaNameProblem? {
         guard !name.isEmpty else { return nil }
-        if name.allSatisfy(\.isNumber) { return .number }
+        // `N#id` names Screen N's area in Lua (#3647), so it is a
+        // number too.
+        if name.allSatisfy(\.isNumber) || ScreenSlotKey(parsing: name) != nil {
+            return .number
+        }
         let otherArea = splits.contains { fingerprint, split in
             split.areas.contains {
                 $0.name == name

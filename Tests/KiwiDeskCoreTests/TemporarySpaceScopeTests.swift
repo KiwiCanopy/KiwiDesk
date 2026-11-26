@@ -47,9 +47,7 @@ struct TemporarySpaceScopeTests {
         let stored = try core.profiles.read(name: "desk")
         #expect(stored.spaces == (1...4).map { SpaceID($0) } + [SpaceID(7)])
         #expect(stored.spaceModes[SpaceID(7)] == .monocle)
-        let pins = try #require(
-            stored.runtimePins(on: core.liveFingerprints)
-        )
+        let pins = core.runtimePins(of: stored)
         #expect(pins[SpaceID(7)] == desk.dell.fingerprint)
         let declared = core.profiles.active?.declaredSpaces
         #expect(declared?.contains(SpaceID(7)) == true)

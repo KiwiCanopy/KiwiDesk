@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// The crossing between stored, number-keyed Screen pins and the
@@ -25,6 +26,50 @@ extension KiwiCore {
     public func screenOrder(holding sets: [MonitorSet]) -> ScreenOrder {
         sets.order(matching: liveFingerprints)
             ?? .leftToRight(state.workspaces.allDisplays)
+    }
+
+    /// `profile`'s pins as the runtime keys them on the connected
+    /// screens, through its order: a setup it does not hold is
+    /// numbered left to right, so its pins apply there too (#3647
+    /// ▸ lane 2). The one door every apply takes.
+    func runtimePins(of profile: Profile) -> [SpaceID: String] {
+        screenOrder(for: profile).runtime(profile.spaceMonitorMap)
+    }
+
+    /// `displays` that hold a number, in Screen N order, each with
+    /// it: what a number in Lua or the CLI, `list_monitors` and
+    /// `desktop_change` name (#3647). The number is the screen's
+    /// place in `liveScreenOrder`, so a gap stays a gap; twins take
+    /// theirs left to right, ties top to bottom.
+    func numberedScreens(
+        _ displays: [Display]
+    ) -> [(number: Int, display: Display)] {
+        var left = displays.sorted(by: ScreenOrder.precedes)
+        var result: [(number: Int, display: Display)] = []
+        for (index, fingerprint) in liveScreenOrder.fingerprints
+            .enumerated()
+        {
+            guard
+                let at = left.firstIndex(where: {
+                    $0.fingerprint == fingerprint
+                })
+            else { continue }
+            result.append((index + 1, left.remove(at: at)))
+        }
+        return result
+    }
+
+    /// The connected screen numbered `number`, nil where none is.
+    func screen(numbered number: Int) -> Display? {
+        numberedScreens(state.workspaces.allDisplays)
+            .first { $0.number == number }?.display
+    }
+
+    /// The number of the connected screen `id`, nil where it holds
+    /// none.
+    func screenNumber(of id: DisplayID) -> Int? {
+        numberedScreens(state.workspaces.allDisplays)
+            .first { $0.display.id == id }?.number
     }
 
     /// The live pins a write records, numbered on the live screens;

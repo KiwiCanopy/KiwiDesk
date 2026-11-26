@@ -79,7 +79,7 @@ extension KiwiCore {
                 profiles.markClean()
                 spacePins = keepingPins(
                     of: Set(liveTemporarySpaces),
-                    over: profile.runtimePins(on: fingerprints) ?? [:]
+                    over: runtimePins(of: profile)
                 )
                 returnHeldSpacesWithoutApply(to: profile)
             }
@@ -91,6 +91,12 @@ extension KiwiCore {
                         + "'\(profile.name)' (dirty)"
                 )
             } else {
+                // The same profile on a same-count setup it does not
+                // hold: its numbers land left to right (#3647).
+                spacePins = keepingPins(
+                    of: Set(liveTemporarySpaces),
+                    over: runtimePins(of: profile)
+                )
                 returnHeldSpacesWithoutApply(to: profile)
             }
             profiles.markDirty()
@@ -100,12 +106,20 @@ extension KiwiCore {
             // profile the Lua base survives reloads untouched (#36
             // promise), and Spaces resolve by pin, Main role, then
             // the numbered plan (#3294). A still-active profile
-            // keeps its tiling and its still-valid pins, but goes
-            // dirty — the same rule as load_profile onto other
-            // hardware.
+            // keeps its tiling and its pins, numbered on these
+            // screens, but goes dirty — the same rule as
+            // load_profile onto other hardware.
             guard isGuiManaged else {
-                if profiles.currentName != nil {
+                if let active = profiles.active {
                     profiles.markDirty()
+                    // Its pins follow its numbers here too (#3647
+                    // ▸ lane 2), read from adoption state; a number
+                    // past the screens waits.
+                    spacePins = keepingPins(
+                        of: Set(liveTemporarySpaces),
+                        over: screenOrder(holding: active.monitorSets)
+                            .runtime(active.screenPins)
+                    )
                 }
                 // NOT redundant with the deferred resolve:
                 // this branch retiles and emits below, and two

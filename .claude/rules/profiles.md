@@ -2024,7 +2024,9 @@ loaded with it. The obligations:
   fingerprint-keyed `spacePins` only through the order of the set
   that profile holds for the connected screens** —
   `KiwiCore.screenOrder(for:)`, `liveScreenOrder` for the live one,
-  `Profile.runtimePins(on:)` — never an order of a reader's own,
+  `KiwiCore.runtimePins(of:)`, which numbers a setup the profile
+  does not hold left to right (#3647 ▸ lane 2) — never an order of
+  a reader's own,
   and write `Profile.spaceMonitorMap` only through its doors:
   `storePins`, which numbers through the order it is handed, and
   `takePins` and `pin`, whose caller hands numbers already in this
@@ -2032,6 +2034,14 @@ loaded with it. The obligations:
   `screenOrder(holding:)` over that profile's sets, never the live
   one's
   (`NumberedPinsSharedTests`, `StoredDraftScreenOrderTests`).
+- **Read a screen number a user types or reads — a screen
+  argument, `N#id`, `list_monitors`, `desktop_change` — through
+  `KiwiCore.numberedScreens` or its `screen(numbered:)` /
+  `screenNumber(of:)`, never `PositionalDisplays`**, which only
+  assigns layouts and finds main (the heal leads, `numberedPlan`,
+  `ProfileComposition`, the tour, the starter), and never an array
+  index, so a gap in the order stays a gap (#3647,
+  `NumberedScreenArgumentTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and
   `forgetMonitorSet` (#3324) — never `Profile.release` beside it,

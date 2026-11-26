@@ -140,11 +140,11 @@ extension KiwiCore {
     }
 
     /// A screen-or-area argument (#3517 ruling 16), in order: a
-    /// number names a physical screen, as Desktop bindings count
-    /// them, and lands in its area 0; then a fingerprint or area
-    /// key, area 0 where the area is gone; then a screen's name,
-    /// its area 0; then an area's own name, refused where two
-    /// share it.
+    /// number names Screen N (#3647) and lands in its area 0; then
+    /// a fingerprint or area key, area 0 where the area is gone;
+    /// then `N#id`, Screen N's area; then a screen's name, its
+    /// area 0; then an area's own name, refused where two share
+    /// it.
     func resolveAreaArg(_ arg: JSONValue?) -> PlacementID? {
         let ws = state.workspaces
         if arg?.intValue != nil {
@@ -157,11 +157,29 @@ extension KiwiCore {
         }) {
             return ws.placement(keyed: key, on: screen.id)
         }
+        if let (screen, key) = numberedArea(raw) {
+            return ws.placement(keyed: key, on: screen.id)
+        }
         if let screen = resolveDisplayArg(arg) {
             return ws.leadPlacement(of: screen)
         }
         let named = ws.allPlacements.filter { $0.area.name == raw }
         return named.count == 1 ? named[0].id : nil
+    }
+
+    /// `N#id`: Screen N's area `id` (#3647), the screen it names and
+    /// its runtime key; nil for any other string or a number no
+    /// connected screen holds.
+    func numberedArea(_ raw: String) -> (Display, ScreenAreaKey)? {
+        guard let slot = ScreenSlotKey(parsing: raw), slot.areaID > 0
+        else { return nil }
+        guard let screen = screen(numbered: slot.number) else {
+            return nil
+        }
+        return (
+            screen,
+            ScreenAreaKey(fingerprint: screen.fingerprint, areaID: slot.areaID)
+        )
     }
 }
 

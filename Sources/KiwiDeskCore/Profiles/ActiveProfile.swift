@@ -38,6 +38,10 @@ struct ActiveProfile {
     /// Like the monitor sets it follows every write of the file,
     /// an "Applies to" edit included.
     let lensesLeftOut: Set<String>
+    /// Its number-keyed Screen pins — what a monitor change
+    /// re-numbers on the new screens without a read (#3647). Like
+    /// the monitor sets it follows every write of the file.
+    let screenPins: [SpaceID: ScreenSlotKey]
 
     init(_ profile: Profile) {
         name = profile.name
@@ -47,6 +51,7 @@ struct ActiveProfile {
         isStarterSetup = profile.isStarterSetup
         monitorSets = profile.monitorSets
         lensesLeftOut = Self.leftOut(profile)
+        screenPins = profile.spaceMonitorMap
     }
 
     private init(
@@ -56,7 +61,8 @@ struct ActiveProfile {
         monitorCount: Int,
         isStarterSetup: Bool,
         monitorSets: [MonitorSet],
-        lensesLeftOut: Set<String>
+        lensesLeftOut: Set<String>,
+        screenPins: [SpaceID: ScreenSlotKey]
     ) {
         self.name = name
         self.id = id
@@ -65,6 +71,7 @@ struct ActiveProfile {
         self.isStarterSetup = isStarterSetup
         self.monitorSets = monitorSets
         self.lensesLeftOut = lensesLeftOut
+        self.screenPins = screenPins
     }
 
     private static func leftOut(_ profile: Profile) -> Set<String> {
@@ -83,12 +90,13 @@ struct ActiveProfile {
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup,
             monitorSets: monitorSets,
-            lensesLeftOut: lensesLeftOut
+            lensesLeftOut: lensesLeftOut,
+            screenPins: screenPins
         )
     }
 
     /// The live profile after a write of its file: the monitor
-    /// sets and the lens reach follow it; the name and Spaces stay
+    /// sets, the lens reach and the pins follow it; the name and Spaces stay
     /// the apply's.
     func refiled(_ profile: Profile) -> ActiveProfile {
         guard profile.name == name else { return self }
@@ -99,7 +107,8 @@ struct ActiveProfile {
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup,
             monitorSets: profile.monitorSets,
-            lensesLeftOut: Self.leftOut(profile)
+            lensesLeftOut: Self.leftOut(profile),
+            screenPins: profile.spaceMonitorMap
         )
     }
 }

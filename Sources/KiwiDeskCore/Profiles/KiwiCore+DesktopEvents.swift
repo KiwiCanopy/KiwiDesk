@@ -7,9 +7,9 @@ extension KiwiCore {
     /// Emits one `desktop_change` per switch notification.
     ///
     /// Payload: `desktop` (the Desktop now current on the
-    /// display that switched), `monitor` (that display's 1-based
-    /// positional number — 1 is the main display, the same
-    /// numbering a Lua display argument takes), `profile`.
+    /// display that switched), `screen` (that display's Screen N,
+    /// the number a Lua display argument takes, #3647), `main`
+    /// (whether it is the main display), `profile`.
     ///
     /// Both inputs come from the handler's ONE topology reading:
     /// `snapshot` and the `changed` diff it derived. Which
@@ -27,7 +27,7 @@ extension KiwiCore {
     /// has no Mission Control number** — it arrived on a
     /// fullscreen/system space, the pre-#888 silence. The number
     /// is never back-filled from another display: a payload
-    /// pairing one display's `monitor` with another's
+    /// pairing one display's `screen` with another's
     /// `desktop` describes a switch that never happened
     /// (review, 2026-08-18).
     /// Sent once the switch's batch has tracked the arrivals, so a
@@ -64,52 +64,50 @@ extension KiwiCore {
             .flatMap { snapshot.number(of: $0) }
             ?? (switched == nil ? snapshot.authority : nil)
         guard let number else { return }
-        let monitor =
-            switched.flatMap {
-                monitorNumber(
-                    forUUID: $0,
-                    mainUUID: snapshot.mainUUID
-                )
-            } ?? 1
+        // Screen N, so whether it is the main screen is its own
+        // field (#3647, owner 2026-11-26). With no display to name —
+        // shared mode's synthetic one, no SkyLight — the main
+        // display answers; a display gone mid-switch names none.
+        let isMain = switched == nil || switched == snapshot.mainUUID
+        let screen =
+            isMain
+            ? mainScreenNumber(snapshot)
+            : switched.flatMap { screenNumber(forUUID: $0) }
+        let screenValue: JSONValue =
+            screen.map { .number(Double($0)) } ?? .null
+        let screenArg: LuaValue =
+            screen.map { .number(Double($0)) } ?? .none
         bus.emit(
             .desktopChange,
             data: .object([
                 "desktop": .number(Double(number)),
-                "monitor": .number(Double(monitor)),
+                "screen": screenValue,
+                "main": .bool(isMain),
                 "profile": profiles.currentName.map {
                     .string($0)
                 } ?? .null,
             ]),
             luaArgs: [
                 .number(Double(number)),
-                .number(Double(monitor)),
+                screenArg,
+                .bool(isMain),
             ]
         )
     }
 
-    /// Positional number of the display with this SkyLight
-    /// UUID: 1 is the main display, secondaries follow
-    /// left-to-right (`PositionalDisplays.ordered`). Nil when
-    /// no connected display carries the UUID (unplugged
+    /// Screen N of the display with this SkyLight UUID (#3647);
+    /// nil when no connected display carries it (unplugged
     /// mid-switch, or shared mode's synthetic identifier).
-    ///
-    /// Main arrives as the SNAPSHOT's `mainUUID` — the same
-    /// value the switch attribution used, not merely the same
-    /// seam re-read (review round 2, 2026-08-18) — so a switch
-    /// cannot be attributed to one display and numbered as
-    /// another.
-    private func monitorNumber(
-        forUUID uuid: String,
-        mainUUID: String?
-    ) -> Int? {
-        let displays = state.workspaces.allDisplays
-        let mainID = display(forUUID: mainUUID)
-        return
-            PositionalDisplays
-            .ordered(displays, mainID: mainID)
-            .firstIndex {
-                desktopMemory.readDisplayUUID($0.id) == uuid
-            }
-            .map { $0 + 1 }
+    private func screenNumber(forUUID uuid: String) -> Int? {
+        state.workspaces.allDisplays
+            .first { desktopMemory.readDisplayUUID($0.id) == uuid }
+            .flatMap { screenNumber(of: $0.id) }
+    }
+
+    /// The main display's Screen N: the one the snapshot names, else
+    /// the menu-bar screen.
+    private func mainScreenNumber(_ snapshot: DesktopSnapshot) -> Int? {
+        snapshot.mainUUID.flatMap(screenNumber(forUUID:))
+            ?? screenNumber(of: PositionalDisplays.liveMainID)
     }
 }

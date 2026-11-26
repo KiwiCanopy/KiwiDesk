@@ -87,6 +87,13 @@ extension KiwiCore {
                     ?? key.fingerprint
             ]
         }
+        if let (screen, key) = numberedArea(raw) {
+            return [
+                ws.placement(keyed: key, on: screen.id)
+                    .flatMap { ws[placement: $0]?.key.description }
+                    ?? screen.fingerprint
+            ]
+        }
         if let id = resolveDisplayArg(arg, among: displays) {
             return screenKeys(id)
         }

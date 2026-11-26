@@ -5,7 +5,8 @@ import Foundation
 /// `fingerprints[k - 1]`. The one crossing between the stored,
 /// number-keyed pins and the runtime's fingerprint-keyed ones; a
 /// reader takes `KiwiCore.liveScreenOrder`, never an order of its
-/// own.
+/// own, and a number a user types or reads takes
+/// `KiwiCore.numberedScreens`.
 public struct ScreenOrder: Equatable, Sendable {
     public let fingerprints: [String]
 
@@ -16,14 +17,17 @@ public struct ScreenOrder: Equatable, Sendable {
     /// The suggested numbering: left to right, ties top to bottom
     /// (AppKit frames, so a higher screen has the larger `maxY`).
     public static func leftToRight(_ displays: [Display]) -> ScreenOrder {
-        ScreenOrder(
-            displays.sorted {
-                if $0.frame.minX != $1.frame.minX {
-                    return $0.frame.minX < $1.frame.minX
-                }
-                return $0.frame.maxY > $1.frame.maxY
-            }.map(\.fingerprint)
-        )
+        ScreenOrder(displays.sorted(by: precedes).map(\.fingerprint))
+    }
+
+    /// Whether `a` comes before `b` left to right, ties top to
+    /// bottom: the one geometric order numbers are suggested and
+    /// twins told apart in.
+    public static func precedes(_ a: Display, _ b: Display) -> Bool {
+        if a.frame.minX != b.frame.minX {
+            return a.frame.minX < b.frame.minX
+        }
+        return a.frame.maxY > b.frame.maxY
     }
 
     /// The runtime key `slot` names, nil for a number past the order.

@@ -24,12 +24,6 @@ extension Profile {
         monitorSets.first { $0.matches(fingerprints) }
     }
 
-    /// The pins as the runtime keys them on the connected
-    /// `fingerprints`, through the matching set's order; nil where
-    /// no set matches (#3647).
-    public func runtimePins(on fingerprints: [String]) -> [SpaceID: String]? {
-        monitorSets.order(matching: fingerprints)?.runtime(spaceMonitorMap)
-    }
 }
 
 extension Profile {

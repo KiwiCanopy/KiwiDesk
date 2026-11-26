@@ -736,9 +736,19 @@ with the limits named there.
 ### move_space_to_display
 
 **Expects:** a space identifier, then a screen reference — a
-**number** (1-based position: `1` is the main screen,
-`2` the next left-to-right) or a **string** matching a connected
+**number** (see below) or a **string** matching a connected
 screen's fingerprint (as printed by `list_monitors`) or name.
+
+:::unreleased
+A number names **Screen N**, as `list_monitors` reports it in
+`screen`: the live profile's numbering for the connected screens,
+else left to right, ties top to bottom. A script that must name one
+screen whatever the numbering passes its fingerprint. A number a
+held `init.lua` call names before any screen is known —
+`pin_space_to_display`, a split, a bar's per-screen value — is
+numbered at the first screen report, by the profile live then; on a
+setup that profile does not hold, left to right.
+:::
 
 **Does:** moves the whole space to that screen **now** and
 shows it there (each screen shows one space at a time). A
@@ -755,7 +765,7 @@ an area key or an area's name.
 **Example:**
 
 ```lua
-KiwiDesk.move_space_to_display("mail", 2)      -- second screen
+KiwiDesk.move_space_to_display("mail", 2)      -- Screen 2
 KiwiDesk.move_space_to_display(3, "DELL U2723QE:3840x2160")
 ```
 
@@ -818,6 +828,12 @@ Once a screen is split, a screen argument —
 per-screen edge and visibility verbs and a layout's
 `set_app_bar_visibility` — also takes an area key, as
 `list_monitors` prints it in `areas[].key`, or an area's own name.
+
+:::unreleased
+`"N#id"` names Screen N's area `id`, as `list_monitors` prints it in
+`areas[].numbered_key`.
+:::
+
 A number or a screen's name names its first area; what it names
 for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
 **Per area**. The screen verbs' directions and last screen reach
@@ -842,6 +858,11 @@ Bottom; on a nested split Middle Top, Top Left and the like; Area 1
 onwards once a row or column holds four areas, or an area is split
 three levels deep); an empty name goes back to the position. A name made only of digits, or one another
 area or screen already has, is refused.
+
+:::unreleased
+The area may also be named `"N#id"`. A name shaped like `N#id` is
+refused too.
+:::
 
 **Example:**
 
@@ -9316,11 +9337,18 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
-| `desktop_change` | `desktop` (Desktop number now current on the screen that switched, counted across every screen), `monitor` (that screen's positional number; 1 is the main screen) |
+| `desktop_change` | `desktop` (Desktop number now current on the screen that switched, counted across every screen), `screen` (the number of the screen that switched; see below) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, counted across every screen, else `nil`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 | `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
+
+:::unreleased
+`desktop_change`'s `screen` is the switched screen's
+[Screen N](#move_space_to_display), and `main` says whether it is the
+main screen; the Lua callback receives the number second and `main`
+third. Test `main`, not the number, for the main screen.
+:::
 
 The window lifecycle events fire even when focus does not change
 (a background window opening or closing). `space` is always the
@@ -9889,6 +9917,13 @@ in this order:
    the managed vocabulary. With a hand-written — or hybrid — config,
    your Lua-declared tiling stays authoritative and spaces are only
    placed on screens: by their Screen pins, else by number.
+
+:::unreleased
+On a setup of its count it does not hold — a count default, or the
+live profile staying on after a screen change — a profile numbers
+the screens left to right, ties top to bottom, and its Screen pins
+apply in that order.
+:::
 
 Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.
@@ -10759,9 +10794,9 @@ one `display` can be `shown` at once; the one with a given `area`
 is that area's `areas[].space_id` in `list_monitors`.
 
 `display` is the `list_monitors` id, macOS's own number for the
-screen, not the [screen position](#move_space_to_display) a screen
+screen, not the [screen number](#move_space_to_display) a screen
 verb reads from a number; the two often look alike, so a `display`
-of `1` passed to one names the main screen wherever the Space sits.
+of `1` passed to one names Screen 1 wherever the Space sits.
 Each space object also has `fingerprint`, the `list_monitors`
 fingerprint of its screen (`nil` for a Space on no screen), which
 every screen verb takes as is. A verb that takes an area, such as
@@ -10962,13 +10997,18 @@ window on a Space no screen shows, or parked out of sight, has
 full-screen window has no `visibility`.
 
 `display` is the `list_monitors` id, not the
-[screen position](#move_space_to_display) a screen verb reads from
+[screen number](#move_space_to_display) a screen verb reads from
 a number. To hand a window's screen to one, pass the `fingerprint`
 of its Space from [`get_state`](#get_state).
 
 `list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
+
+:::unreleased
+It lists the screens as Screen 1 onwards, each with its number in
+`screen` and `main: true` on the main screen.
+:::
 
 It also reports `space_id`, the Space that screen shows (`null`
 while it shows none) — on a screen that is not split, the Space
@@ -10981,6 +11021,11 @@ given), `x`, `y`, `w` and `h` in the screen's own points, and
 is always its first area's, `areas[0].space_id`, whichever area
 has the focus, and `layout_frame` is that Space's. On a screen that
 is not split, `areas` is empty.
+
+:::unreleased
+Each area also carries `numbered_key`, `"N#id"`, the key a script
+names it by.
+:::
 
 Each `list_windows` entry also carries `app`, `pid`, `index` (the
 window's place in its Space's row, from 1; `null` for a window no

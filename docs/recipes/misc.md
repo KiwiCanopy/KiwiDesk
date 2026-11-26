@@ -130,8 +130,9 @@ KiwiDesk.define_layer("desk2", layer({
 -- Switch layer when the macOS Desktop changes. Only the main
 -- screen's Desktop counts ("Displays have separate Spaces"
 -- makes secondary screens report their own switches too):
-KiwiDesk.on("desktop_change", function(n, monitor)
-    if monitor ~= 1 then return end
+KiwiDesk.on("desktop_change", function(n, screen, main)
+    -- `main` is nil on releases before it; there 1 is the main screen.
+    if main == false or (main == nil and screen ~= 1) then return end
     KiwiDesk.switch_layer(n == 2 and "desk2" or "desk1")
 end)
 

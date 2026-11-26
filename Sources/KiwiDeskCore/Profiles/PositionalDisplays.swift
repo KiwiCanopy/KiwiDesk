@@ -2,7 +2,8 @@ import CoreGraphics
 import Foundation
 
 /// Positional monitor ordering for hardware-agnostic space layout defaults
-/// (#53).
+/// (#53). It assigns layouts and finds main; it is no screen number a
+/// user types or reads, which is `KiwiCore.numberedScreens` (#3647).
 public enum PositionalDisplays {
     /// ID of current main display (menu bar display); a test core
     /// memoizes it, the read being a WindowServer round trip
