@@ -51,7 +51,15 @@ editing here:
   CLEARS at `moveMembers` and `forwardWindows(of:to:)` rather than
   rekeying, since every step names the old id. A new `Space` field
   joins `SpaceArrangement` or that suite's ruled-out list
-  (`SpaceArrangementParityTests`). The argument is
+  (`SpaceArrangementParityTests`). A window opening or closing
+  rebases the stacks rather than clearing them (#3601), through
+  the event fold's rebase in `KiwiCore.handle` (`layoutUndoFold`
+  ahead of `state.apply`, `rebaseLayoutUndo` after the handler's
+  last write; `LayoutUndoRebaseTests`). A new door that changes
+  membership outside an act and should keep history goes through
+  that rebase, and a new spawn branch that should rebase sets
+  `AppliedEffects.spawnPlaced`; both are review's, since no scan
+  can name a membership door. The argument is
   `docs/design-decisions.md` ▸ *Layout undo validates instead of
   hooking*.
 - **A Space whose tiling is off is placed as Floating, through
