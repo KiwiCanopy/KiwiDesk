@@ -130,7 +130,7 @@ struct StripScrollerTests {
         #expect(
             Set(takers.keys) == [
                 "StripScrollerRoom.swift", "SidewaysStrip.swift",
-                "SpacesPanelPreview.swift", "OnboardingLooksRows.swift",
+                "OnboardingLooksRows.swift",
             ]
         )
         let home = try #require(takers["StripScrollerRoom.swift"])
@@ -159,15 +159,6 @@ struct StripScrollerTests {
                     + "contentWidth:run.total,viewport:scroll.viewport,"
                     + "floor:SettingsTheme.hoverShadowRoom))"
             ) == true
-        )
-        #expect(
-            takers["SpacesPanelPreview.swift"]?.contains(
-                "SpacePreviewChipRow{HStack(spacing:6)"
-            ) == true
-        )
-        #expect(
-            takers["SpacesPanelPreview.swift"]?.contains(Self.measuredRoom)
-                == true
         )
         try expectTourRowsTakeIt(takers)
     }

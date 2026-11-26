@@ -61,23 +61,7 @@ struct SpacesPanelPreview: View {
     // MARK: - The chip row
 
     private var chips: some View {
-        SpacePreviewChipRow {
-            HStack(spacing: 6) {
-                ForEach(spaces, id: \.raw) { candidate in
-                    chip(candidate)
-                }
-            }
-            .padding(.vertical, 2)
-        }
-    }
-
-    private func chip(_ candidate: SpaceID) -> some View {
-        SpacePreviewChip(
-            title: candidate.raw,
-            isOn: candidate == space
-        ) {
-            pick(candidate)
-        }
+        SpacePreviewChipRow(spaces: spaces, shown: space, pick: pick)
     }
 
     // MARK: - The scene
@@ -212,54 +196,5 @@ struct SpacesPanelPreview: View {
                 .font(.caption.monospacedDigit())
                 .settingsReadout()
         }
-    }
-}
-
-/// The preview's chips, scrolling sideways. Its widths are its own
-/// state, so a window resize never re-evaluates the panel's schematic.
-private struct SpacePreviewChipRow<Content: View>: View {
-    @ViewBuilder let content: Content
-    @State private var width: CGFloat = 0
-    @State private var viewport: CGFloat = 0
-
-    var body: some View {
-        ScrollView(.horizontal) {
-            content
-                .onGeometryChange(for: CGFloat.self) {
-                    $0.size.width
-                } action: {
-                    width = $0
-                }
-                .modifier(
-                    StripScrollerRoom(contentWidth: width, viewport: viewport)
-                )
-        }
-        .onGeometryChange(for: CGFloat.self) {
-            $0.size.width
-        } action: {
-            viewport = $0
-        }
-    }
-}
-
-/// One Space's chip in the preview's row: a choice chip, lifting
-/// under the pointer and drawn chosen while shown.
-private struct SpacePreviewChip: View {
-    let title: String
-    let isOn: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .choiceChip(selected: isOn)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(
-            isOn ? [.isButton, .isSelected] : .isButton
-        )
     }
 }
