@@ -40,21 +40,7 @@ struct SpacePreviewChipRow: View {
     }
 
     private func followed(in names: [String]) -> StripFollow<String>? {
-        Self.followed(focused: focusedChip, shown: shown?.raw, in: names)
-    }
-
-    /// The chip the strip brings into view: the focused one while it
-    /// is listed, else the shown Space's.
-    nonisolated static func followed(
-        focused: String?,
-        shown: String?,
-        in names: [String]
-    ) -> StripFollow<String>? {
-        let item = focused.flatMap { names.contains($0) ? $0 : nil } ?? shown
-        guard let item else { return nil }
-        return names.firstIndex(of: item).map {
-            StripFollow(id: item, index: $0)
-        }
+        .named(focused: focusedChip, else: shown?.raw, in: names)
     }
 
     private func chip(_ candidate: SpaceID) -> some View {

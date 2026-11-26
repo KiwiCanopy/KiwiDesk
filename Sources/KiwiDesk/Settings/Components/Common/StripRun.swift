@@ -13,6 +13,24 @@ struct StripFollow<ID: Hashable>: Equatable {
     let index: Int
 }
 
+extension StripFollow where ID == String {
+    /// A name-keyed strip's follow: the focused item while it is
+    /// listed in `names`, else `fallback`; nil when neither is.
+    nonisolated static func named(
+        focused: String?,
+        else fallback: String?,
+        in names: [String]
+    ) -> Self? {
+        let item =
+            focused.flatMap { names.contains($0) ? $0 : nil }
+            ?? fallback
+        guard let item else { return nil }
+        return names.firstIndex(of: item).map {
+            Self(id: item, index: $0)
+        }
+    }
+}
+
 /// A strip's items along its run, answering Core's overflow
 /// arithmetic (`ShelfOverflow`) for the fade and the focus follow.
 struct StripRun {

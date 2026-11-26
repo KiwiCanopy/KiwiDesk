@@ -33,17 +33,32 @@ struct SidewaysStripMeasuredTests {
         #expect(run.gap == 6 && run.endRoom == 4)
     }
 
-    /// Each measured strip writes its sizes from the item, reads its
-    /// run through `measured` and follows by name. A strip spelling
-    /// the run another way reds here.
+    /// A measured strip, the key its chips carry, the item it
+    /// follows when no chip is focused, and its chip builder call.
+    private static let strips = [
+        (
+            path: "Sections/LayerStripEditor.swift",
+            key: "name", fallback: "selected",
+            chip: "layerChip(name)"
+        ),
+        (
+            path: "Components/SpaceOverrides/SpacePreviewChipRow.swift",
+            key: "candidate.raw", fallback: "shown?.raw",
+            chip: "chip(candidate)"
+        ),
+    ]
+
+    /// Each measured strip writes each chip's size under its key,
+    /// reads its run through `measured`, and follows by name through
+    /// `StripFollow.named`, its chips scroll-addressable and
+    /// focusable by that key. A strip spelling any of it another way
+    /// reds here.
     @Test("each measured strip measures, runs and follows")
     func measuredWiring() throws {
-        for path in [
-            "Sections/LayerStripEditor.swift",
-            "Components/SpaceOverrides/SpacePreviewChipRow.swift",
-        ] {
-            let source = try Self.squashed(path)
-            let note = Comment(rawValue: path)
+        for strip in Self.strips {
+            let source = try Self.squashed(strip.path)
+            let key = strip.key
+            let note = Comment(rawValue: strip.path)
             #expect(!source.isEmpty, note)
             #expect(
                 source.contains("run:.measured(names,sizes:chipSizes,"),
@@ -52,19 +67,31 @@ struct SidewaysStripMeasuredTests {
             #expect(
                 source.contains(
                     ".onGeometryChange(for:CGSize.self){$0.size}"
-                        + "action:{chipSizes["
+                        + "action:{chipSizes[\(key)]=$0}"
                 ),
                 note
             )
             #expect(source.contains("followed:followed(in:names)"), note)
+            #expect(
+                source.contains(
+                    ".named(focused:focusedChip,else:"
+                        + "\(strip.fallback),in:names)"
+                ),
+                note
+            )
+            #expect(source.contains("\(strip.chip).id(\(key))"), note)
+            #expect(
+                source.contains(".focused($focusedChip,equals:\(key))"),
+                note
+            )
             #expect(!source.contains("StripRun(lengths:"), note)
         }
     }
 
-    @Test("the Spaces chips follow the focused chip, else the shown")
-    func spacesFollow() {
+    @Test("a named follow takes the listed focus, else the fallback")
+    func namedFollow() {
         let names = ["1", "2", "web"]
-        let follow = SpacePreviewChipRow.followed
+        let follow = StripFollow<String>.named
         #expect(
             follow("web", "1", names) == StripFollow(id: "web", index: 2)
         )
@@ -72,23 +99,7 @@ struct SidewaysStripMeasuredTests {
         #expect(
             follow("gone", "2", names) == StripFollow(id: "2", index: 1)
         )
+        #expect(follow(nil, "gone", names) == nil)
         #expect(follow(nil, nil, names) == nil)
-    }
-
-    @Test("the Spaces chips take focus and are named by their Space")
-    func spacesWiring() throws {
-        let source = try Self.squashed(
-            "Components/SpaceOverrides/SpacePreviewChipRow.swift"
-        )
-        #expect(source.contains("chip(candidate).id(candidate.raw)"))
-        #expect(
-            source.contains(".focused($focusedChip,equals:candidate.raw)")
-        )
-        #expect(
-            source.contains(
-                "Self.followed(focused:focusedChip,"
-                    + "shown:shown?.raw,in:names)"
-            )
-        )
     }
 }
