@@ -2,7 +2,8 @@ import CoreGraphics
 import Foundation
 
 /// One divider of a split screen (#3517 ruling 20): a full-span
-/// cut found in the area rects, never stored. `position` is the
+/// cut found in the area rects, never stored, or one segment of
+/// such a cut (#3611). `position` is the
 /// cut's x (`.sideBySide`) or y (`.stacked`) in screen points;
 /// `start`/`end` its extent along the other axis.
 public struct ScreenAreaCut: Equatable, Sendable {

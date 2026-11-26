@@ -17,15 +17,9 @@ struct AreaDividerDrag: Equatable {
     /// The in-flight split's cut that holds the dragged segment,
     /// joined segments included (accepted-limitations.md).
     let landed: ScreenAreaCut?
-    /// The stored cut's segment an ⌥-drag moves alone (#3611), in
-    /// the stored split; nil for a plain drag, which moves the line.
+    /// The part of a joined stored cut an ⌥-drag moves alone
+    /// (#3611), in the stored split; nil while the whole line moves.
     var segment: ScreenAreaCut? = nil
-
-    /// Whether the drag moves less than the whole stored `cut`.
-    func parts(_ cut: ScreenAreaCut) -> Bool {
-        guard let segment else { return false }
-        return segment.start != cut.start || segment.end != cut.end
-    }
 
     /// Whether the stored `cut` now moves with the drag: Core reads
     /// it onto the same cut as the dragged segment.
@@ -97,7 +91,10 @@ struct ScreenAreaDivider: View {
             if !dragging { (inside ? cursor : .arrow).set() }
         }
         .onContinuousHover { phase in
-            guard case .active(let at) = phase else { return }
+            guard case .active(let at) = phase else {
+                pointer = nil
+                return
+            }
             let along = sideBySide ? at.y : at.x
             pointer =
                 cut.start + Int((along / max(crossScale, 0.001)).rounded())
@@ -106,6 +103,8 @@ struct ScreenAreaDivider: View {
         .gesture(dragGesture)
         .help(joined ? segmentHint : "")
         .accessibilityElement()
+        // The tooltip names a pointer gesture VoiceOver cannot make.
+        .accessibilityHint(Text(verbatim: ""))
         .accessibilityLabel(spokenLabel)
         .accessibilityValue(spokenValue(split))
         .accessibilityAdjustableAction { direction in
@@ -123,10 +122,7 @@ struct ScreenAreaDivider: View {
 
     /// Whether the line holds more than one segment, where an
     /// ⌥-drag moves less than a plain drag (#3611).
-    private var joined: Bool {
-        let first = split.segment(of: cut, at: cut.start)
-        return first.end != cut.end
-    }
+    private var joined: Bool { split.isJoined(cut) }
 
     private var segmentHint: String {
         L(
@@ -179,10 +175,12 @@ struct ScreenAreaDivider: View {
             }
     }
 
-    /// The segment under the pointer while ⌥ is held at the drag's
-    /// start (#3611), else nil.
+    /// The segment under the pointer while ⌥ is held at the start
+    /// of a drag on a joined line (#3611), else nil.
     private func startedSegment() -> ScreenAreaCut? {
-        guard NSEvent.modifierFlags.contains(.option) else { return nil }
+        guard NSEvent.modifierFlags.contains(.option), joined else {
+            return nil
+        }
         return split.segment(of: cut, at: pointer ?? cut.start)
     }
 

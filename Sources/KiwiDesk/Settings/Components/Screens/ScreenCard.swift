@@ -173,8 +173,7 @@ struct ScreenCard: View {
             // A nested cut spans only its own box (#3541); a segment
             // in flight only its own piece (#3611).
             let across = side ? factor.height : factor.width
-            let piece = mine?.parts(stored) == true ? mine?.segment : nil
-            let shown = piece ?? cut
+            let shown = mine?.segment ?? cut
             let from = CGFloat(shown.start) * across
             let span = CGFloat(shown.end - shown.start) * across
             let band = ScreenAreaDivider.hitBand
@@ -198,7 +197,7 @@ struct ScreenCard: View {
             )
         }
         if let drag, let segment = drag.segment,
-            let stored = cuts[safe: drag.cut], drag.parts(stored)
+            let stored = cuts[safe: drag.cut]
         {
             AreaSegmentRest(stored: stored, segment: segment, scale: factor)
         }

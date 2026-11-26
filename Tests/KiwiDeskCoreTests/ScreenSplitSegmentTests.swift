@@ -48,12 +48,15 @@ struct ScreenSplitSegmentTests {
 
     @Test func pointerPicksItsRow() throws {
         let line = try joined(grid)
+        #expect(grid.isJoined(line))
         let top = grid.segment(of: line, at: 200)
         #expect(top.start == 0 && top.end == 500)
         #expect(top.leading == [0] && top.trailing == [1])
         let bottom = grid.segment(of: line, at: 700)
         #expect(bottom.start == 500 && bottom.end == 1000)
         #expect(bottom.leading == [2] && bottom.trailing == [3])
+        // A pointer on the break takes the segment after it.
+        #expect(grid.segment(of: line, at: 500) == bottom)
     }
 
     @Test func movingOneRowLeavesTheOther() throws {
@@ -85,6 +88,15 @@ struct ScreenSplitSegmentTests {
         let line = try joined(tee)
         let piece = tee.segment(of: line, at: 700)
         #expect(piece == line)
+        #expect(!tee.isJoined(line))
+        // Mirrored: the split side leads.
+        let eet = ScreenSplit(areas: [
+            area(0, 0, 0, 1000, 500), area(1, 0, 500, 1000, 500),
+            area(2, 1000, 0, 1000, 1000),
+        ])
+        let other = try joined(eet)
+        #expect(eet.segment(of: other, at: 700) == other)
+        #expect(!eet.isJoined(other))
     }
 
     /// Three rows line up; the middle one moves alone and the rects
@@ -102,6 +114,41 @@ struct ScreenSplitSegmentTests {
         let moved = rows.movingSegment(middle, to: 800, floor: 100)
         #expect(moved.position == 800)
         #expect(try cuts(moved.split).count == 5)
+    }
+
+    /// The line's left box is not cut where its right one is: a
+    /// tall area crosses that point, so moving either piece would
+    /// leave no divider to read. The line is one segment.
+    private var lopsided: ScreenSplit {
+        ScreenSplit(areas: [
+            area(0, 0, 0, 1000, 300), area(1, 0, 300, 400, 700),
+            area(2, 400, 300, 600, 200), area(3, 400, 500, 600, 500),
+            area(4, 1000, 0, 1000, 500), area(5, 1000, 500, 1000, 500),
+        ])
+    }
+
+    @Test func boxNotCutThereIsNoBreak() throws {
+        let line = try joined(lopsided)
+        #expect(!lopsided.isJoined(line))
+        #expect(lopsided.segment(of: line, at: 200) == line)
+    }
+
+    /// The belt: a piece whose move leaves no divider to read is
+    /// refused where it stands.
+    @Test func unreadableMoveIsRefused() throws {
+        let line = try joined(lopsided)
+        let top = ScreenAreaCut(
+            axis: .sideBySide,
+            position: 1000,
+            start: 0,
+            end: 500,
+            leading: [0, 2],
+            trailing: [4]
+        )
+        let moved = lopsided.movingSegment(top, to: 1100, floor: 100)
+        #expect(moved.position == line.position)
+        #expect(moved.split == lopsided)
+        #expect(lopsided.moving(top, to: 1100, floor: 100).position == 1100)
     }
 
     /// A segment stops at the floor of the areas beside it, as a
