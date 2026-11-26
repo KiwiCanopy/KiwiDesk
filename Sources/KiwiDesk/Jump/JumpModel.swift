@@ -110,6 +110,9 @@ final class JumpModel: ObservableObject {
     /// The last-app opener's chord from the live bindings, which
     /// the Windows footer names; nil where it is unbound (#3159).
     @Published var lastAppChord: String?
+    /// That opener as bound, which the footer lights under its
+    /// modifiers and turns to its back form under ⇧ (#3667).
+    @Published var lastAppCombo: KeyCombo?
     /// The live settings the panel draws: its glass, its paint and
     /// the layout tiles, kept current while it is open (#2604).
     @Published var settings = TilingSettings()

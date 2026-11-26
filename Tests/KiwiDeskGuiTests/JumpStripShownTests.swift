@@ -190,23 +190,23 @@ struct JumpStripShownTests {
         ).hints
     }
 
-    @Test("Windows lists ← → Apps and the opener's chord, last")
+    @Test("Windows lists ← → Apps and the opener's chord, ⇥ last")
     func footerHints() {
         LocalizationManager.shared.select("en")
         let full = footer(steps: true, chord: "⌥⇥")
-        let tail = ["← → Apps", "⇥ Shortcuts", "⌥⇥ Next app"]
+        let tail = ["← → Apps", "⌥⇥ Next app", "⇥ Shortcuts"]
         #expect(Array(full.suffix(3)) == tail)
         let bare = footer(steps: false, chord: nil)
         #expect(!bare.contains { $0.contains("Apps") })
         #expect(!bare.contains { $0.contains("Next app") })
         #expect(bare.count == full.count - 2)
-        // Navigation never lights: ↩ Jump stays the lit hint.
+        // ← → and the opener never light at rest: ↩ Jump and ⇥ do.
         let lit = JumpFooter(
             scope: .windows,
             stripSteps: true,
             lastAppChord: "⌥⇥"
-        ).leading
-        #expect(lit == 0)
+        ).lit
+        #expect(lit == [0, 6])
     }
 
     @Test("the hints reach the other sides not at all")

@@ -43,7 +43,8 @@ struct JumpFooterKeycapTests {
     /// Which modifier hints each language draws as keycaps, at its
     /// widest: the strip stepping and the last-app opener bound
     /// (#3249 ▸ Ruling 6). A catalog edit that moves a language
-    /// into or out of keycaps reds here, and is a ruling.
+    /// into or out of keycaps reds here, and is a ruling: fr and
+    /// pt-BR took two once ⇧⇥ and Previous app joined (#3667).
     @Test("each language's keycaps are pinned")
     func windowsKeycapsArePinned() throws {
         defer { LocalizationManager.shared.select("en") }
@@ -51,8 +52,8 @@ struct JumpFooterKeycapTests {
         // where even all three leave a held state too wide, so the
         // line sheds from the end.
         let pinned: [String: Int?] = [
-            "de": 2, "en": 0, "es": 0, "fr": 0, "it": 0, "ja": 0,
-            "ko": 0, "pt-BR": 0, "ru": nil, "zh-Hans": 0,
+            "de": 2, "en": 0, "es": 0, "fr": 2, "it": 0, "ja": 0,
+            "ko": 0, "pt-BR": 2, "ru": nil, "zh-Hans": 0,
             "zh-Hant": 0,
         ]
         let codes = try Self.locales()
@@ -63,7 +64,8 @@ struct JumpFooterKeycapTests {
             let footer = JumpFooter(
                 scope: .windows,
                 stripSteps: true,
-                lastAppChord: "⌥⇥"
+                lastAppChord: "⌥⇥",
+                lastAppCombo: KeyCombo.parse("option+tab")
             )
             let level = levels.first { level in
                 JumpFooter.heldStates.allSatisfy {
@@ -90,7 +92,7 @@ struct JumpFooterKeycapTests {
         ]
         for (held, lit) in expected {
             let footer = JumpFooter(scope: .windows, modifiers: held)
-            #expect(footer.leading == lit, "\(held)")
+            #expect(footer.windowsLeading == lit, "\(held)")
             let full = footer.windowsSlots(held: held)[lit].text
             for level in 0...JumpFooter.collapseOrder.count {
                 let drawn = footer.windowsDrawn(held: held, level: level)
@@ -103,14 +105,14 @@ struct JumpFooterKeycapTests {
                 scope: .windows,
                 modifiers: .shift,
                 selectionMoves: false
-            ).leading == nil
+            ).windowsLeading == nil
         )
         #expect(
             JumpFooter(
                 scope: .windows,
                 modifiers: .option,
                 selectionSwaps: false
-            ).leading == nil
+            ).windowsLeading == nil
         )
         let rest = JumpFooter(scope: .windows).windowsSlots(held: [])
         #expect(rest.allSatisfy { !$0.held })
@@ -138,14 +140,14 @@ struct JumpFooterKeycapTests {
             "ViewThatFits(in:.horizontal){ForEach(WindowsFit.steps(",
             "case.collapsed(letlevel):windowsStable(level)",
             "windowsRow(held:modifiers,level:levels,shown:shown,"
-                + "lit:leading)}}row([],fixed:false)",
+                + "lit:lit)}}row([],fixed:false)",
             "ForEach(Self.heldStates,id:\\.rawValue){"
                 + "windowsRow(held:$0,level:level).hidden()}",
-            "windowsRow(held:modifiers,level:level,lit:leading)",
+            "windowsRow(held:modifiers,level:level,lit:lit)",
             "collapsed.contains(index)&&!slot.held",
             // The row draws what `windowsDrawn` decided.
             "ForEach(Array(drawn.enumerated()),id:\\.offset)",
-            "iftext==slots[index].keycap{JumpKeycap(glyph:text)",
+            "iftext==all[index].keycap{JumpKeycap(glyph:text)",
             "reduceMotion?nil:.easeOut(", "value:drawn",
         ] {
             #expect(text.occurrences(of: needle) == 1, "\(needle)")

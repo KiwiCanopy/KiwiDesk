@@ -16800,6 +16800,28 @@ would refuse the selection. A hint whose words change under a
 press eases its width and fades its words over 150 ms, none under
 Reduce Motion, the curve a row's ⌘ digit takes (#1875).
 
+:::unreleased
+*Amended (#3667, owner via the ui-designer, 2026-11-26): every
+press live now lights, and ⇥ is one of them.* Lighting the pick
+alone left ⌘↓ Open Space secondary while ⌘ was held, and ⇥ — on
+Shortcuts the only press that does anything — never in ink. The
+lit hints are the pick, as above; every hint whose written chord
+is the held modifiers and would act; and the side switch whenever
+Tab under the held keys steps a side, with or without a selection.
+Bare navigation — ← →, ↑↓, Esc — never lights, or at rest the
+whole line would be ink and ink would say nothing; a dead chord
+lights nothing, as ⌥ outside a Space, where ⌥↩ has no window to
+swap. Under ⇧ the side switch reads "⇧⇥ <previous side>", since
+⇧⇥ steps back and plain ⇥ is no longer the press; under ⌥ or ⌘
+Tab is swallowed, so it keeps its words and goes secondary. On
+Windows ⇧⌥ turns Next app into "⌥⇧⇥ Previous app", the opener's
+back chord (#3135). The side switch is the last hint on every
+side, the carrying layer included, so the eye finds it at one end;
+on Windows it stands after Next app, and the line still sheds Next
+app first, then the side switch, then Apps — where a hint stands
+and when it goes are two orders.
+:::
+
 **Short of room, a modifier hint becomes its key before any hint
 goes (#3249).** Where a language's Windows line does not fit, Swap
 here, then the digits, then Move here draw as a bare keycap — ⌥,

@@ -904,6 +904,7 @@
   "jump.footer.jump": "%1$@ 이동",
   "jump.footer.move_here": "%1$@ 여기로 옮기기",
   "jump.footer.next_app": "%1$@ 다음 앱",
+  "jump.footer.previous_app": "%1$@ 이전 앱",
   "jump.footer.quick": "%1$@ 빠른 이동",
   "jump.footer.quick_move_here": "%1$@ 빠르게 여기로 옮기기",
   "jump.footer.quick_swap_here": "%1$@ 빠르게 여기와 교체",

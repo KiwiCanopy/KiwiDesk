@@ -904,6 +904,7 @@
   "jump.footer.jump": "%1$@ Перейти",
   "jump.footer.move_here": "%1$@ Переместить сюда",
   "jump.footer.next_app": "%1$@ Следующее приложение",
+  "jump.footer.previous_app": "%1$@ Предыдущее приложение",
   "jump.footer.quick": "%1$@ Быстрый переход",
   "jump.footer.quick_move_here": "%1$@ Быстро переместить сюда",
   "jump.footer.quick_swap_here": "%1$@ Быстро поменять местами здесь",

@@ -87,34 +87,35 @@ struct JumpPanelShapeTests {
         #expect(point.y + 300 == room.top)
     }
 
-    /// One hint lit: the pick that acts on the selection with the
-    /// modifiers held now (owner ruling 2026-10-13, #2246).
-    @Test("the footer lights the one live pick")
+    /// The live pick lights, and the side switch, last, wherever
+    /// Tab steps a side (#2246, amended by #3667).
+    @Test("the footer lights the live pick and the side switch")
     func footerLeads() {
         func lit(
             _ scope: JumpScope,
             _ modifiers: NSEvent.ModifierFlags = [],
             selection: Bool = true
-        ) -> Int? {
+        ) -> Set<Int> {
             JumpFooter(
                 scope: scope,
                 modifiers: modifiers,
                 hasSelection: selection
-            ).leading
+            ).lit
         }
-        #expect(lit(.windows) == 0)
-        #expect(lit(.windows, .shift) == 1)
-        #expect(lit(.windows, .command) == 3)
-        #expect(lit(.windows, [.shift, .command]) == 3)
-        #expect(lit(.view) == 0)
-        // ⇧ moves nothing here, so nothing lights under it (#2309).
-        #expect(lit(.view, .shift) == nil)
-        #expect(lit(.view, .command) == 1)
-        #expect(lit(.view, [.shift, .command]) == nil)
-        #expect(lit(.shortcuts) == nil)
-        #expect(lit(.shortcuts, .command) == nil)
-        #expect(lit(.windows, selection: false) == nil)
-        #expect(lit(.view, .command, selection: false) == nil)
+        // Windows ends in ⇥ at 4, View at 3; Tab needs no selection.
+        #expect(lit(.windows) == [0, 4])
+        #expect(lit(.windows, .shift) == [1, 4])
+        #expect(lit(.windows, .command) == [3])
+        #expect(lit(.windows, [.shift, .command]) == [3])
+        #expect(lit(.view) == [0, 3])
+        // ⇧ applies nothing here, so only ⇧⇥ lights (#2309).
+        #expect(lit(.view, .shift) == [3])
+        #expect(lit(.view, .command) == [1])
+        #expect(lit(.view, [.shift, .command]) == [])
+        #expect(lit(.shortcuts) == [0])
+        #expect(lit(.shortcuts, .command) == [])
+        #expect(lit(.windows, selection: false) == [4])
+        #expect(lit(.view, .command, selection: false) == [])
     }
 
     /// ⇧ alone moves the selected row; ⇧⌘ reaches every numbered

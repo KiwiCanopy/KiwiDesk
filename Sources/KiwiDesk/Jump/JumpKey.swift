@@ -57,7 +57,7 @@ enum JumpKey: Equatable {
     static let returnKey: UInt16 = 36
     private static let enter: UInt16 = 76
     private static let escapeKey: UInt16 = 53
-    private static let tab: UInt16 = 48
+    static let tab: UInt16 = 48
     private static let left: UInt16 = 123
     private static let right: UInt16 = 124
     private static let sKey: UInt16 = 1
