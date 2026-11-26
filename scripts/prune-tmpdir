@@ -20,12 +20,12 @@ A folder goes only when every clause holds:
 Nothing else in the temp dir is read past its name. Removal
 unlinks the vetted files through the folder's own descriptor and
 then calls rmdir, so a file that appears after the check keeps
-the folder. The default temp dir is `getconf
+the folder. The default temp dir is `$TMPDIR`, else `getconf
 DARWIN_USER_TEMP_DIR`. --timeout S ends the process after S
 seconds (SIGALRM), keeping what it has removed.
 
-`scripts/gate-lock` runs this inside its lock on the gated
-command's temp dir, and a failure never fails the gate. Exit 1:
+`scripts/gate-lock` runs this inside its lock on that default,
+the gated command's temp dir, and a failure never fails the gate. Exit 1:
 the temp dir cannot be read; 64: usage.
 """
 
@@ -45,6 +45,10 @@ USAGE = (
 
 
 def user_temp_dir() -> str:
+    """`$TMPDIR`, where the build tools write, else the per-user
+    temp dir."""
+    if os.environ.get("TMPDIR"):
+        return os.environ["TMPDIR"]
     try:
         out = subprocess.run(
             ["getconf", "DARWIN_USER_TEMP_DIR"],
@@ -129,11 +133,12 @@ def main(argv: "list[str]") -> int:
         except (IndexError, ValueError):
             print(USAGE, file=sys.stderr)
             return 64
-    root = root or user_temp_dir()
     if timeout is not None:
-        # A hard deadline: SIGALRM's default action ends the
-        # process, even one stalled inside a call.
+        # A hard deadline over everything after the arguments:
+        # SIGALRM's default action ends the process, even one
+        # stalled inside a call.
         signal.alarm(max(1, int(timeout)))
+    root = root or user_temp_dir()
     try:
         removed = sweep(root, time.time() - age * 60, apply)
     except OSError as error:

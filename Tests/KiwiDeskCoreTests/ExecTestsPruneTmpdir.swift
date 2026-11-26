@@ -59,7 +59,6 @@ struct ExecTestsPruneTmpdir {
             env["KIWIDESK_GATE_PRUNE_BELOW_GB"] = "0"
             env["KIWIDESK_GATE_DIR"] =
                 lock.deletingLastPathComponent().path
-            env["KIWIDESK_GATE_TMP_DIR"] = temp.path
             return env
         }
 
@@ -130,6 +129,10 @@ struct ExecTestsPruneTmpdir {
             at: linked,
             withIntermediateDirectories: false
         )
+        // Holding a leftover: a followed link would delete it.
+        let outsideKeep = linked.appendingPathComponent(".keep-directory")
+        files.createFile(atPath: outsideKeep.path, contents: Data())
+        try age(outsideKeep.path)
         try age(linked.path)
         try files.createSymbolicLink(
             at: desk.url("TemporaryDirectory.link"),
@@ -177,7 +180,9 @@ struct ExecTestsPruneTmpdir {
         for (name, goes) in Self.cases {
             #expect(desk.exists(name) != goes, "\(name)")
         }
-        for outside in ["outside/keep", "outside/empty"] {
+        for outside in [
+            "outside/keep", "outside/empty/.keep-directory",
+        ] {
             #expect(
                 FileManager.default.fileExists(
                     atPath: desk.root.appendingPathComponent(outside).path
@@ -261,11 +266,59 @@ struct ExecTestsPruneTmpdir {
     ) throws -> ScriptRun {
         var env = desk.environment
         env["KIWIDESK_GATE_WAIT"] = wait
+        // `spawn` pins the child's TMPDIR to the run's root; `env`
+        // re-points it, so the gate's own default path runs.
         return try spawn(
-            "/bin/bash",
-            [desk.script("gate-lock"), "echo", "gated"],
+            "/usr/bin/env",
+            [
+                "TMPDIR=\(desk.temp.path)/", "/bin/bash",
+                desk.script("gate-lock"), "echo", "gated",
+            ],
             environment: env,
             currentDirectory: desk.root
         )
+    }
+
+    /// `getconf` on PATH stalls and no `TMPDIR` is set, so the
+    /// script hangs resolving its dir; the alarm must end it.
+    @Test("the timeout alarm ends a stalled sweep")
+    func timeoutEndsAStall() throws {
+        let desk = try makeDesk()
+        defer { desk.remove() }
+        let bin = desk.root.appendingPathComponent("bin")
+        try FileManager.default.createDirectory(
+            at: bin,
+            withIntermediateDirectories: true
+        )
+        let pidFile = desk.root.appendingPathComponent("stall.pid")
+        let stub = bin.appendingPathComponent("getconf")
+        try """
+        #!/bin/sh
+        echo $$ > '\(pidFile.path)'
+        exec sleep 600 > /dev/null 2>&1
+        """.write(to: stub, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes(
+            [.posixPermissions: 0o755],
+            ofItemAtPath: stub.path
+        )
+        defer {
+            if let pid = try? String(contentsOf: pidFile, encoding: .utf8)
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+                let value = pid_t(pid)
+            {
+                kill(value, SIGKILL)
+            }
+        }
+        let started = Date()
+        let run = try spawn(
+            "/usr/bin/env",
+            [
+                "-u", "TMPDIR", "PATH=\(bin.path):/usr/bin:/bin",
+                desk.script("prune-tmpdir"), "--apply", "--timeout", "1",
+            ]
+        )
+        #expect(Date().timeIntervalSince(started) < 30)
+        #expect(run.status != 0, "\(run.stdout)\(run.stderr)")
+        #expect(desk.exists("TemporaryDirectory.empty"))
     }
 }
