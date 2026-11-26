@@ -43,15 +43,19 @@ extension KiwiCore {
     /// with no animation, and written into the live profile's file
     /// (with no profile live it lasts the session). `ready` runs at
     /// most once, after the frames are issued — a held pass
-    /// (`MotionGate`) may still place them later. #3478 sets the
-    /// look's picture here and calls `ready` on its confirmation.
+    /// (`MotionGate`) may still place them later. A look with a
+    /// picture sets it through the pick's `lookWallpaper` write, and
+    /// `ready` waits for macOS to report it on every screen (#3478);
+    /// the caller caps that wait.
     public func wearPickedLook(
         _ look: ShelfLook,
         ready: @escaping @MainActor () -> Void
     ) {
+        let before = tiler.settings.lookWallpaper
         let pick: SettingsEdit = { look.pick(into: &$0) }
         writeTourEditThrough(live: pick, stored: pick, animated: false)
-        ready()
+        reassertWallpaper(ifUnchangedFrom: before)
+        awaitWallpaperShown(ready: ready)
     }
 
     /// Saves the worn look under `base`, or the first free

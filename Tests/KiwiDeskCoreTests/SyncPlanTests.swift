@@ -94,6 +94,9 @@ struct SyncScanTests {
         return root
     }
 
+    /// A look picture's library name (#3478).
+    static let picture = String(repeating: "c", count: 64) + ".png"
+
     @Test("Setup files and profiles are synced; the rest is not")
     func syncedPaths() throws {
         let root = try folder([
@@ -103,14 +106,15 @@ struct SyncScanTests {
             "gui 2.json", ".gui.json.icloud", "profiles/.DS_Store",
             "profiles/Work (conflicted copy 2026-10-19).json",
             ".kiwidesk-incoming-1", "machine.json",
+            "wallpapers/\(Self.picture)", "wallpapers/photo 2.png",
         ])
         #expect(
             SyncScan.syncedPaths(in: root) == [
                 "gui.json", "init.lua", "looks.json", "palettes.json",
-                "profiles/Work.json",
+                "profiles/Work.json", "wallpapers/\(Self.picture)",
             ]
         )
-        #expect(Set((SyncScan.hashes(in: root) ?? [:]).keys).count == 5)
+        #expect(Set((SyncScan.hashes(in: root) ?? [:]).keys).count == 6)
     }
 
     @Test("Each sync app's conflict copy is reported")

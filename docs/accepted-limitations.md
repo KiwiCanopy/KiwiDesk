@@ -137,6 +137,15 @@ needs no pointer
 :::
 
 :::unreleased
+A look sets the wallpaper of each screen's current Desktop. Other
+Desktops keep theirs until the look is applied there, and a screen
+showing a full-screen app keeps its own: the public call reaches one
+screen's current Desktop, and re-applying the picture on every
+Desktop visit would overwrite a picture set by hand for that Desktop
+([#3478](https://github.com/KiwiCanopy/KiwiDesk/issues/3478)).
+:::
+
+:::unreleased
 Two screens of one model that macOS left unnumbered share a
 fingerprint, so a Screen pin made on either is stored under the
 lower of their two numbers, and a Space pinned to the second twin

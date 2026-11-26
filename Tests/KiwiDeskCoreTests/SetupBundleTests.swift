@@ -153,7 +153,7 @@ struct SetupBundleTests {
                 == [
                     "format", "writtenBy", "config", "profiles",
                     "palettes", "looks", "profileBindings",
-                    "initLua",
+                    "initLua", "wallpapers",
                 ]
         )
         let text = String(decoding: data, as: UTF8.self)

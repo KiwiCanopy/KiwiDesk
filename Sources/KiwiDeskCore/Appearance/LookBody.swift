@@ -11,15 +11,20 @@ public struct LookBody: Codable, Sendable, Equatable {
     /// The authored look it was painted from
     /// (`TilingSettings.lookOrigin`), so every follower credits it.
     public var origin: ShelfLook?
+    /// The picture wearing it sets (`TilingSettings.lookWallpaper`,
+    /// #3478), so every follower sets it too.
+    public var wallpaper: LookWallpaper?
 
     public init(
         style: [String: JSONValue],
         colors: [String: String],
-        origin: ShelfLook? = nil
+        origin: ShelfLook? = nil,
+        wallpaper: LookWallpaper? = nil
     ) {
         self.style = style
         self.colors = colors
         self.origin = origin
+        self.wallpaper = wallpaper
     }
 
     /// The look `settings` wear: every styling and colour path.
@@ -27,7 +32,8 @@ public struct LookBody: Codable, Sendable, Equatable {
         self.init(
             style: LookKeys.extract(from: settings),
             colors: ColorPaletteKeys.extract(from: settings),
-            origin: settings.lookOrigin
+            origin: settings.lookOrigin,
+            wallpaper: settings.lookWallpaper
         )
     }
 
@@ -46,6 +52,7 @@ public struct LookBody: Codable, Sendable, Equatable {
             worn[keyPath: leaf] = settings[keyPath: leaf]
         }
         worn.lookOrigin = origin
+        worn.lookWallpaper = wallpaper?.admitted
         return worn
     }
 
@@ -65,12 +72,15 @@ public struct LookBody: Codable, Sendable, Equatable {
     /// one that differs only in its credit (#1740). Ownership
     /// verdicts read `isWorn`, the paint alone.
     public func isStamped(on settings: TilingSettings) -> Bool {
-        settings.lookOrigin == origin && isWorn(by: settings)
+        settings.lookOrigin == origin
+            && settings.lookWallpaper == wallpaper?.admitted
+            && isWorn(by: settings)
     }
 
     private enum CodingKeys: String, CodingKey {
         case style
         case colors
         case origin
+        case wallpaper
     }
 }

@@ -109,8 +109,27 @@ extension LooksShelf {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "\(look.name).json"
+        // Unchecked by default: a wallpaper is often a personal
+        // photo (#3478 ▸ Export).
+        let include = look.wallpaper.map { _ in
+            NSButton(
+                checkboxWithTitle: L(
+                    "looks.export.include_wallpaper",
+                    "Include wallpaper (%1$@)",
+                    look.name
+                ),
+                target: nil,
+                action: nil
+            )
+        }
+        include?.state = .off
+        panel.accessoryView = include
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        try? core.exportLook(look, to: url)
+        try? core.exportLook(
+            look,
+            to: url,
+            includingWallpaper: include?.state == .on
+        )
     }
 
     func importLook() {
@@ -119,8 +138,17 @@ extension LooksShelf {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        var withWallpaper = true
+        if core.lookFileCarriesWallpaper(at: url) {
+            guard let answer = askImportWallpaper() else { return }
+            withWallpaper = answer
+        }
         do {
-            try core.importLook(from: url, fallbackName: defaultName)
+            try core.importLook(
+                from: url,
+                fallbackName: defaultName,
+                withWallpaper: withWallpaper
+            )
             failure = nil
         } catch LookStore.StoreError.invalidFile {
             failure = L(
@@ -137,5 +165,38 @@ extension LooksShelf {
             failure = libraryFailure
         }
         reload()
+    }
+
+    /// Whether to bring a look file's wallpaper in; nil cancels.
+    /// With is the default, since the sender opted in (#3478).
+    private func askImportWallpaper() -> Bool? {
+        let alert = NSAlert()
+        alert.messageText = L(
+            "looks.import.wallpaper.title",
+            "This look comes with a wallpaper"
+        )
+        alert.informativeText = L(
+            "looks.import.wallpaper.body",
+            "Applying the look sets its wallpaper on each screen's "
+                + "current Desktop."
+        )
+        alert.addButton(
+            withTitle: L(
+                "looks.import.with_wallpaper",
+                "Import with Wallpaper"
+            )
+        )
+        alert.addButton(
+            withTitle: L(
+                "looks.import.without_wallpaper",
+                "Import without Wallpaper"
+            )
+        )
+        alert.addButton(withTitle: L("looks.import.cancel", "Cancel"))
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: return true
+        case .alertSecondButtonReturn: return false
+        default: return nil
+        }
     }
 }

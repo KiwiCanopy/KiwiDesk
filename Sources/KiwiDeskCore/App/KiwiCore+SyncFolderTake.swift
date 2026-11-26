@@ -134,6 +134,7 @@ extension KiwiCore {
                 profiles: profiles,
                 palettes: PaletteStore(directory: stage),
                 looks: LookStore(directory: stage),
+                wallpapers: WallpaperLibrary(configDirectory: stage),
                 bindings: false
             )
         else { throw .folderUnreadable }

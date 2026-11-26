@@ -222,7 +222,8 @@ struct SettingsSearchIndexTests {
                 // 18 since #1740: the gallery's two header doors.
                 // 19: "Tint KiwiHub and plates" lost its Liquid
                 // Glass gate (#2569 ▸ amendment), so it counts.
-                .looks: 19,
+                // 22: #3478's three wallpaper actions.
+                .looks: 22,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the

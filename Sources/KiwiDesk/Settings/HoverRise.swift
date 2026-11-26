@@ -27,10 +27,16 @@ private struct HoverRise<S: Shape>: ViewModifier {
             .offset(y: risen ? -SettingsTheme.hoverRise : 0)
             .contentShape(shape)
             .animation(
-                reduceMotion ? nil : .easeOut(duration: 0.12),
+                reduceMotion ? nil : HoverRiseTiming.animation,
                 value: risen
             )
     }
+}
+
+/// The rise's pace, shared by a host moving something laid over a
+/// risen tile with it (#3478's badge).
+enum HoverRiseTiming {
+    static let animation = Animation.easeOut(duration: 0.12)
 }
 
 extension View {

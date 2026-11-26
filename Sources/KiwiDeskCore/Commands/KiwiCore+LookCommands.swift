@@ -104,7 +104,9 @@ extension KiwiCore {
     /// Picks `look` over the live settings and nothing else: no
     /// file is written, so the change stays unkept (Ruling 4).
     func wearLook(_ look: ShelfLook) {
+        let before = tiler.settings.lookWallpaper
         look.pick(into: &tiler.settings)
+        reassertWallpaper(ifUnchangedFrom: before)
         // An explicit apply (§5): a look can move the shelf's edge.
         retile(pass: .apply)
     }
@@ -137,7 +139,7 @@ extension KiwiCore {
             return .fail("a bundled look cannot be deleted")
         }
         do {
-            try library.delete(name)
+            try deleteLook(name)
             onLookLibraryChanged()
             return .ok()
         } catch LookStore.StoreError.notFound {

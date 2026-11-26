@@ -103,6 +103,7 @@ extension SettingsRevertRegister {
             .leaf(\.settings.stickyStyle.liquidGlass),
         .colours(.borderSheen): .leaf(\.settings.borderStyle.sheen),
         .colours(.lookOrigin): .leaf(\.settings.lookOrigin),
+        .colours(.lookWallpaper): .leaf(\.settings.lookWallpaper),
         .colours(.animationsMaster): .leaf(\.settings.animations),
         .colours(.animationsOnWindowResize):
             .leaf(\.settings.animations.onWindowResize),

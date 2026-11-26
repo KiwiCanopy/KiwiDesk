@@ -126,8 +126,7 @@ public final class KiwiCore {
     /// the unstamped duplicate was honored as deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
-    /// The wall clock the core's `Date`-stamped ledgers stamp and age
-    /// on; a test freezes it (#1852, tests.md ▸ age-bounded ledgers).
+    /// The wall clock `Date`-stamped ledgers read; tests freeze it (#1852).
     var wallClock: () -> Date = Date.init
 
     /// Bumped per z-order raise sequence so a stale sequence's
@@ -221,6 +220,7 @@ public final class KiwiCore {
     /// authority and the Space memory's key (#1147), never a number.
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
+    let lookWallpaperSeams = LookWallpaperSeams()  // #3478
     let desktopCue = DesktopCueLedger()
     let cueHooks = CueHooks()
     /// The last native Desktop switch; focus during it changes no space.

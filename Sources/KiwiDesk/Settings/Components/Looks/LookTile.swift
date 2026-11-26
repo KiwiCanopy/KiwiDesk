@@ -19,7 +19,19 @@ struct LookTile: View {
     /// Told when the pointer enters and leaves, for a surface that
     /// previews the look under it (Simple, #2737 ruling 9).
     var hover: ((Bool) -> Void)?
+    /// A saved look's wallpaper badge, over the plate's corner and
+    /// outside the tile's button, whose label takes no clicks for a
+    /// menu inside it (#3478).
+    var badge: AnyView?
+    /// A picture file is dragged over this tile (#3478).
+    var dropping = false
     let apply: () -> Void
+    @ObservedObject var pictures = LookTilePictures.shared
+    /// The pointer over the tile or its badge, so moving onto the
+    /// badge keeps the tile risen and the badge rides with it.
+    @State private var pointerOver = false
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     var body: some View {
         let match = look.match(model.config.settings)
@@ -35,17 +47,43 @@ struct LookTile: View {
                 // Simple's line draws the name alone (#2737 ruling
                 // 3), so it reserves no caption room.
                 captionLines: captionLines
-                    ?? (caption == nil ? 0 : Self.captionRoom)
+                    ?? (caption == nil ? 0 : Self.captionRoom),
+                pointerOver: badge == nil ? nil : pointerOver
             ) {
-                LookPlate(settings: preview, spaceLabels: spaceLabels)
+                ZStack {
+                    LookPlate(
+                        settings: preview,
+                        spaceLabels: spaceLabels,
+                        picture: picture
+                    )
+                    if dropping { LookWallpaperDropCue() }
+                }
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onHover { hover?($0) }
         .accessibilityAddTraits(applied ? [.isSelected] : [])
         .accessibilityHint(help ?? "")
+        .accessibilityValue(wallpaperSpoken)
         .help(other ? restoreColorsHelp : (help ?? ""))
+        .overlay(alignment: .topTrailing) {
+            let risen = pointerOver && isEnabled && !applied
+            badge?.padding(Self.badgeInset)
+                .offset(y: risen ? -SettingsTheme.hoverRise : 0)
+                .animation(
+                    reduceMotion ? nil : HoverRiseTiming.animation,
+                    value: risen
+                )
+        }
+        .onHover {
+            pointerOver = $0
+            hover?($0)
+        }
+    }
+
+    /// The plate's inset in its tile, plus the badge's own.
+    private static var badgeInset: CGFloat {
+        PaletteTile<EmptyView>.inset + LookWallpaperBadge<EmptyView>.inset
     }
 
     /// The lines a captioned tile reserves: a description or a
@@ -55,6 +93,21 @@ struct LookTile: View {
     /// An imported look's caption, its author (#1740).
     @MainActor static func byline(_ author: String) -> String {
         L("looks.byline", "by %1$@", author)
+    }
+
+    /// Whether the look carries a picture (#3478): "With wallpaper",
+    /// or a count where it keeps one per screen.
+    private var wallpaperSpoken: String {
+        switch look.admitted.wallpaper?.count ?? 0 {
+        case 0: return ""
+        case 1: return L("looks.wallpaper.spoken_one", "With wallpaper")
+        case let n:
+            return L(
+                "looks.wallpaper.spoken_many",
+                "Wallpapers for screens: %1$d",
+                n
+            )
+        }
     }
 
     private var otherColorsNote: String {
@@ -70,6 +123,13 @@ struct LookTile: View {
             "looks.restore_colors.help",
             "Click to bring back this look's own colors."
         )
+    }
+
+    /// Screen 1's picture, or the one picture (#3478).
+    private var picture: CGImage? {
+        look.admitted.wallpaper?.name(forScreen: 1).flatMap {
+            pictures.image(named: $0, in: model.core.wallpaperLibrary)
+        }
     }
 
     private var preview: TilingSettings {

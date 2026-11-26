@@ -12183,9 +12183,10 @@ the repository that holds it, and this one is about 100 MB even as
 a shallow clone (#2258 ▸ Ruling).
 
 A look matched to the wallpaper is made from a screenshot the user
-hands the AI app; KiwiDesk never reads the wallpaper itself, since
+hands the AI app; KiwiDesk never reads the wallpaper unasked, since
 reading the desktop picture raised a macOS folder-access prompt
-(measured 2026-10-05, #1685 ▸ Ruling 6b). A wallpaper-colour verb
+(measured 2026-10-05, #1685 ▸ Ruling 6b). The one asked-for read is a
+look's Use Current Wallpaper, below. A wallpaper-colour verb
 reopens this only with a read that raises no prompt.
 
 The looks gallery names and links a look's wallpaper, never hosts
@@ -12193,6 +12194,37 @@ it (#2838, owner 2026-10-31). A look is shared under CC BY 4.0, and
 a wallpaper is rarely the submitter's to license, often a personal
 photo, and larger than the repo should carry; the link goes to the
 page it comes from, the way a look's font link does.
+
+:::unreleased
+A saved look may carry a wallpaper that wearing it sets (#3478).
+Setting a wallpaper is not reading one, so it takes no prompt. The
+one file read is **Use Current Wallpaper**, a deliberate click that
+accepts macOS's one-time folder prompt; every other check reads only
+the URL macOS reports. A picture joins a look only through Choose
+Wallpaper…, Use Current Wallpaper or a file dropped on the tile. A
+saved tile draws a badge at rest that opens those items, since a row
+menu and a drop are invisible until known (owner, 2026-11-26); a
+bundled tile draws none, as it can never take one. Save never
+captures one, so a wallpaper changed in System Settings is
+never overwritten by a look without one. The picture is copied, never
+referenced: a stored path breaks on a move, differs per Mac and would
+prompt later. The copy lives in the config folder's `wallpapers/`,
+named by its content hash, and the copy macOS wears is kept apart on
+this Mac, so a cleanup, a reset or a sync deletion never pulls the
+picture off screen; a copy goes once the library no longer holds its
+picture, since another Desktop may still wear it. One picture covers every screen;
+a look keeps one per #3647 screen number only where the screens
+showed different pictures. Wearing the look by any route sets it,
+through the one change of the worn settings' `look_wallpaper`, so a
+Desktop switch that keeps the same value reads nothing. A launch is
+no wear: re-setting at every start would overwrite a manual change.
+It reaches each screen's current Desktop only, never a full-screen
+app's Space, and re-applying it on every Desktop visit was refused,
+since it would overwrite a picture set by hand for that Desktop and
+change the picture visibly after each arrival. The gallery stays
+link-only; a look file carries its picture only where its export was
+asked to.
+:::
 
 ### Open at login
 

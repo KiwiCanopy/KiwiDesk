@@ -82,11 +82,15 @@ struct SetupBundleArtifactTests {
             )
         )
 
+        let picture = try core.wallpaperLibrary.add(
+            WallpaperLibraryTests.png()
+        )
         try core.lookLibrary.save(
             ShelfLook(
                 name: "Mine",
                 style: ["kiwishelf.thickness": .number(30)],
-                colors: [:]
+                colors: [:],
+                wallpaper: .all(picture)
             )
         )
 
@@ -108,6 +112,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
+                case .wallpapers: !(bundle.wallpapers ?? [:]).isEmpty
                 case .desktopBindings: bundle.profileBindings != nil
                 case .migrationBackups, .machineConfig, .syncStamp,
                     .syncLedger:

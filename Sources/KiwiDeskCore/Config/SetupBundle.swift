@@ -128,7 +128,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `[Profile]` alike.
     /// 54 = a profile's Screen pins are its own, keyed by screen
     /// number (#3647), in a bundle's `[Profile]`.
-    public static let currentFormat = 54
+    /// 55 = a bundle carries the pictures its looks set (#3478), so
+    /// an older build refuses it rather than restoring the looks
+    /// without them.
+    public static let currentFormat = 55
 
     public let format: Int
 
@@ -160,6 +163,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// The source's `init.lua`, carried only when the export asked
     /// (#2517); a restore replaces this Mac's only when asked too.
     public let initLua: String?
+    /// The look library's pictures by name (#3478), or nil for a
+    /// bundle written before they travelled, which a restore leaves
+    /// alone.
+    public let wallpapers: [String: Data]?
 
     public init(
         format: Int = SetupBundle.currentFormat,
@@ -169,7 +176,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         palettes: [ColorPalette],
         looks: [ShelfLook]? = nil,
         profileBindings: [DesktopKey: DesktopBinding]? = nil,
-        initLua: String? = nil
+        initLua: String? = nil,
+        wallpapers: [String: Data]? = nil
     ) {
         self.format = format
         self.writtenBy = writtenBy
@@ -179,6 +187,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         self.looks = looks
         self.profileBindings = profileBindings
         self.initLua = initLua
+        self.wallpapers = wallpapers
     }
 
     /// Whether this build can read the bundle format.
@@ -197,6 +206,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         case .guiConfig: return config != nil
         case .profiles, .palettes: return true
         case .looks: return looks != nil
+        case .wallpapers: return wallpapers != nil
         case .desktopBindings: return profileBindings != nil
         case .migrationBackups, .machineConfig, .syncStamp, .syncLedger:
             return false
@@ -207,7 +217,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// what a restore leaving `init.lua` alone writes.
     public var carriesSetup: Bool {
         config != nil || !profiles.isEmpty || !palettes.isEmpty
-            || !(looks ?? []).isEmpty
+            || !(looks ?? []).isEmpty || !(wallpapers ?? [:]).isEmpty
     }
 
     /// True when bundle carries nothing a restore could write.

@@ -24,6 +24,9 @@ public struct ShelfLook: Sendable, Equatable, Codable {
     /// The gallery id it was installed under (#1740), which a look
     /// started from it credits; nil for any other look.
     public var galleryID: String?
+    /// The picture wearing this look sets (#3478); nil for a look
+    /// that never touches the wallpaper, and for every bundled one.
+    public var wallpaper: LookWallpaper?
 
     public init(
         name: String,
@@ -31,7 +34,8 @@ public struct ShelfLook: Sendable, Equatable, Codable {
         colors: [String: String],
         author: String? = nil,
         basedOn: LookCredit? = nil,
-        galleryID: String? = nil
+        galleryID: String? = nil,
+        wallpaper: LookWallpaper? = nil
     ) {
         self.name = name
         self.style = style
@@ -39,6 +43,7 @@ public struct ShelfLook: Sendable, Equatable, Codable {
         self.author = author
         self.basedOn = basedOn
         self.galleryID = galleryID
+        self.wallpaper = wallpaper
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -48,6 +53,7 @@ public struct ShelfLook: Sendable, Equatable, Codable {
         case author
         case basedOn = "based_on"
         case galleryID = "gallery_id"
+        case wallpaper
     }
 }
 
@@ -76,6 +82,7 @@ extension ShelfLook {
         var out = self
         out.style = self.style.filter { style.contains($0.key) }
         out.colors = ColorPalette(name: "", colors: known).paintedColors
+        out.wallpaper = wallpaper?.admitted
         return out
     }
 

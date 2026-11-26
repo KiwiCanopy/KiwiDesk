@@ -15,7 +15,16 @@ extension ShelfLook {
     public func pick(into settings: inout TilingSettings) {
         let look = admitted
         look.apply(to: &settings)
-        settings.lookOrigin = recordsOrigin ? look : nil
+        settings.lookOrigin = recordsOrigin ? look.withoutWallpaper : nil
+        settings.lookWallpaper = look.wallpaper
+    }
+
+    /// This look without its picture: the origin a pick records,
+    /// since the worn picture's one home is `lookWallpaper` (#3478).
+    var withoutWallpaper: ShelfLook {
+        var out = self
+        out.wallpaper = nil
+        return out
     }
 
     /// The look `settings` wear now, under `name`, with the credit
