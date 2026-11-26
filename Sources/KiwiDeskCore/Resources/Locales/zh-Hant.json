@@ -1778,6 +1778,7 @@
   "menu.window.zoom": "縮放",
   "mode_cue.ax": "佈局：%1$@",
   "monitor_card.divider.ax": "%1$@與%2$@之間的分隔線",
+  "monitor_card.divider.segment.help": "按住 ⌥ Option 鍵拖移，只移動線的這一段。",
   "monitor_card.divider.size": "%1$d pt",
   "monitor_card.divider.size_fraction": "%1$d pt · %2$@",
   "monitor_card.divider.value.ax": "%1$@ %2$d 點，%3$@ %4$d 點",
