@@ -81,6 +81,9 @@ struct SettingsThemeContrastTests {
     /// their both-modes check is the same check twice, which is
     /// the point of running both.
     private let pairings: [Pairing] = [
+        // `ink` and `ink2` on page are also the update window's
+        // glass fallback, where `glassFallbackInks` resolves its
+        // `.primary` / `.secondary` (#3650).
         Pairing(
             "ink on page",
             SettingsTheme.ink,

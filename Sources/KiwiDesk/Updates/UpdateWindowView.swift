@@ -142,21 +142,31 @@ extension View {
     /// the overlays' switch (#1849). SwiftUI keeps the content
     /// below the transparent title bar; only the ground runs up
     /// behind the traffic lights.
+    ///
+    /// The regular glass adapts to the backdrop, not the appearance:
+    /// text drawn on it takes `.primary` / `.secondary`, which the
+    /// page fallback resolves to `ink` / `ink2`; text on a card
+    /// keeps a concrete `SettingsTheme` ink (#3650).
     func updateWindowGround() -> some View {
         // The tint BELOW the glass, so the ground sits outside the
         // tinted environment (gui.md, as `JumpPanelView`).
-        tint(SettingsTheme.accent)
-            .background {
-                Color.clear
-                    .glassChrome(
-                        in: Rectangle(),
-                        enabled: true,
-                        variant: .regular,
-                        tint: nil,
-                        fallback: AnyShapeStyle(SettingsTheme.page)
-                    )
-                    .ignoresSafeArea()
-            }
+        glassFallbackInks(
+            enabled: true,
+            primary: SettingsTheme.ink,
+            secondary: SettingsTheme.ink2
+        )
+        .tint(SettingsTheme.accent)
+        .background {
+            Color.clear
+                .glassChrome(
+                    in: Rectangle(),
+                    enabled: true,
+                    variant: .regular,
+                    tint: nil,
+                    fallback: AnyShapeStyle(SettingsTheme.page)
+                )
+                .ignoresSafeArea()
+        }
     }
 }
 
@@ -213,12 +223,12 @@ private struct UpdateWindowHeader: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(SettingsTheme.ink)
+                    .foregroundStyle(.primary)
                     .accessibilityAddTraits(.isHeader)
                 if !subtitle.isEmpty {
                     Text(subtitle)
                         .font(.system(size: 12))
-                        .foregroundStyle(SettingsTheme.ink2)
+                        .foregroundStyle(.secondary)
                 }
                 if let picking {
                     ReleasePicker(picking: picking)

@@ -89,6 +89,45 @@ private struct GlassChrome<S: Shape>: ViewModifier {
     }
 }
 
+extension View {
+    /// Gives descendant `.primary` / `.secondary` concrete inks
+    /// where `glassChrome` draws its fallback, and leaves the
+    /// system's adaptive styles on glass (#3650). `enabled` is the
+    /// same caller's WHETHER that `glassChrome` takes.
+    func glassFallbackInks(
+        enabled: Bool,
+        primary: Color,
+        secondary: Color
+    ) -> some View {
+        modifier(
+            GlassFallbackInks(
+                enabled: enabled,
+                primary: primary,
+                secondary: secondary
+            )
+        )
+    }
+}
+
+/// The fallback's side of `GlassChrome`'s gate, read from the same
+/// environment value so the inks and the ground never disagree.
+private struct GlassFallbackInks: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
+
+    let enabled: Bool
+    let primary: Color
+    let secondary: Color
+
+    func body(content: Content) -> some View {
+        if enabled && !reduceTransparency && GlassChromeVariant.drawable {
+            content
+        } else {
+            content.foregroundStyle(primary, secondary)
+        }
+    }
+}
+
 /// The glass finish, a legibility decision per surface (gui.md):
 /// `.regular` under dense text, `.clear` where nothing is read or
 /// a Fill carries the text (#2569).
