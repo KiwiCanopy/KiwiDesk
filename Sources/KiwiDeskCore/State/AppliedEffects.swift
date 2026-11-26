@@ -62,6 +62,18 @@ public struct AppliedEffects: Sendable {
     /// a new window gets (#1414/#1561, `ClosedReturnFocusTests`).
     var closedReturnPlacedAsNew = false
 
+    /// A new window the fold placed by `new_window_placement`, and
+    /// the focus that placement read (#3601): layout undo replays
+    /// the same insert into its stored steps.
+    var spawnPlaced: SpawnPlaced?
+
+    struct SpawnPlaced: Sendable, Equatable {
+        let window: WindowID
+        let space: SpaceID
+        let placement: SpawnPlacement
+        let anchor: WindowID?
+    }
+
     /// Snapshot of facts erased when destroying a tracked window (#674).
     struct RemovedWindow: Sendable {
         let app: String?

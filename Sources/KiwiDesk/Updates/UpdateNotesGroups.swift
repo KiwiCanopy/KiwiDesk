@@ -27,6 +27,8 @@ struct UpdateHighlightsPanel: View {
             }
             if !digest.cautions.isEmpty { cautions }
         }
+        // A fixed ground: hierarchical styles resolve to inks (#3650).
+        .foregroundStyle(SettingsTheme.ink, SettingsTheme.ink2)
         .padding(.horizontal, 17)
         .padding(.vertical, 15)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,11 +144,14 @@ struct UpdateNotesGroupList: View {
 
 extension View {
     /// The plain card every pane but Highlights sits in, so the
-    /// notes read on the window's glass (#1849).
+    /// notes read on the window's glass (#1849). Its fill is fixed,
+    /// so `.primary` / `.secondary` inside it, a link's included,
+    /// resolve to `ink` / `ink2` rather than follow the glass (#3650).
     func updateNotesCard() -> some View {
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         return
             self
+            .foregroundStyle(SettingsTheme.ink, SettingsTheme.ink2)
             .padding(.horizontal, 17)
             .padding(.vertical, 14)
             .frame(maxWidth: .infinity, alignment: .leading)

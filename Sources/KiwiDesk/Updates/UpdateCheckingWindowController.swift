@@ -85,7 +85,7 @@ struct UpdateCheckingView: View {
                         )
                     )
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(SettingsTheme.ink)
+                    .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                     ProgressView()
