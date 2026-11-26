@@ -1093,12 +1093,12 @@ The obligations below bind this directory:
   branch, so the one total resolve places it; a config load
   clears what is held (`BootSpacePinTests` ▸ `bootPinApplies`).
   A config load's split or bar per-screen value naming a screen by
-  number or name waits the same way, as does an area's name behind
-  a held split, in call order with the pins in the one
-  `heldScreenCalls`: held at its verb's own body (the split write,
-  the area name, the bars' screen seams) through `holdsScreenArg`
-  and replayed through that body, never a copy (#3640,
-  `BootDisplayAreaTests`); a report of no screen keeps the list.
+  number or name waits the same way, in call order with the pins in
+  the one `heldScreenCalls`: held at its verb's own body (the split
+  write, the bars' screen seams) through `holdsScreenArg`, an
+  area's name while a held split stands, and replayed through that
+  body, never a copy (#3640, `BootDisplayAreaTests`); a report of
+  no screen keeps the list.
   The count
   judgement itself is `DesktopBindingRefusal.of`, public so the
   Desktops row narrates the verdict instead of re-deriving it.
