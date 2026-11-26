@@ -123,7 +123,7 @@ extension KiwiCore {
         )
         if pressed.dropped { tiler.applier.releaseAllHolds() }
         let wait = max(pressed.landAt - spaceSlide.clock(), 0)
-        tiler.applier.holdWrites(incoming.map(\.id), until: .now() + wait)
+        tiler.applier.holdWrites(incoming.map(\.id), for: wait)
         return SpaceSlideRun(
             target: target,
             display: intent.display,

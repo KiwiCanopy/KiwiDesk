@@ -154,7 +154,7 @@ struct EdgeBandRightEdgeTests {
         case .instant:
             applier.applyInstant(id, target, setSize: true)
         case .held:
-            applier.holdWrites([id], until: .now() + 0.05)
+            applier.holdWrites([id], for: 0.05)
             applier.applyInstant(id, target, setSize: true)
         }
         // A generous guard, never a tight deadline (#344).

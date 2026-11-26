@@ -392,7 +392,12 @@ bite large test PRs:
   core's wall clock (a stamp read in the same test cannot age),
   and `EchoClockSeamTests` holds the host uptime to those seams'
   defaults, every wall-clock read left in Core to its classified
-  register, and the freeze to both twins. A frozen clock ties
+  register, and the freeze to both twins. Leave the held-write
+  clock, `FrameApplier.heldNow`, live in both twins: its landings
+  run on the live scheduler there, so a frozen clock holds every
+  plate slide and pocket landing for good. A suite stepping it
+  pins it together with `scheduleHeldLanding` on the applier it
+  builds (#3594, `FrameApplierHeldTests`). A frozen clock ties
   stamps written in sequence, so a test asserting which of two
   raises is NEWER writes explicit offsets. A test that wants the
   EXPIRY moves the clock ahead rather than sleeping past the

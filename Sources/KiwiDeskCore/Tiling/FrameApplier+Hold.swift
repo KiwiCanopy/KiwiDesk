@@ -47,7 +47,7 @@ final class HeldWrites: @unchecked Sendable {
     func hold(
         _ ids: some Sequence<WindowID>,
         until deadline: DispatchTime,
-        now: DispatchTime = .now()
+        now: DispatchTime
     ) {
         lock.lock()
         defer { lock.unlock() }
@@ -67,7 +67,7 @@ final class HeldWrites: @unchecked Sendable {
     }
 
     /// Whether `id` is held at `now`.
-    func isHeld(_ id: WindowID, now: DispatchTime = .now()) -> Bool {
+    func isHeld(_ id: WindowID, now: DispatchTime) -> Bool {
         lock.lock()
         defer { lock.unlock() }
         return deadlines[id].map { now < $0 } ?? false
@@ -79,7 +79,7 @@ final class HeldWrites: @unchecked Sendable {
         setSize: Bool,
         band: EdgeBand? = nil,
         lead: SizeLedWrite.Lead? = nil,
-        now: DispatchTime = .now()
+        now: DispatchTime
     ) -> Staging {
         lock.lock()
         defer { lock.unlock() }
@@ -136,7 +136,7 @@ final class HeldWrites: @unchecked Sendable {
 
     /// The staged write a release at `now` sends, or the later
     /// deadline it must wait for instead.
-    func release(_ id: WindowID, now: DispatchTime = .now()) -> Release {
+    func release(_ id: WindowID, now: DispatchTime) -> Release {
         lock.lock()
         defer { lock.unlock() }
         if let deadline = deadlines[id], now < deadline {
@@ -148,14 +148,12 @@ final class HeldWrites: @unchecked Sendable {
 }
 
 extension FrameApplier {
-    /// Holds every write to `ids` until `deadline`: the plate
-    /// slide's incoming windows (#1956), a take-out's window until
-    /// the brief pocket's plate lands (#2680).
-    func holdWrites(
-        _ ids: some Sequence<WindowID>,
-        until deadline: DispatchTime
-    ) {
-        held.hold(ids, until: deadline, now: heldNow())
+    /// Holds every write to `ids` for `wait` seconds on `heldNow`:
+    /// the plate slide's incoming windows (#1956), a take-out's
+    /// window until the brief pocket's plate lands (#2680).
+    func holdWrites(_ ids: some Sequence<WindowID>, for wait: TimeInterval) {
+        let now = heldNow()
+        held.hold(ids, until: now + max(wait, 0), now: now)
     }
 
     /// Ends every hold — the plate slide's play was dropped — and
@@ -220,7 +218,8 @@ extension FrameApplier {
         // meanwhile, which then toggles nothing.
         let atRest = own ? false : enhancedUIAtRest(pid)
         let generation = holds.generation(pid)
-        scheduleHeldLanding(queue(for: pid), deadline) {
+        let delay = Self.seconds(from: heldNow(), to: deadline)
+        scheduleHeldLanding(queue(for: pid), delay) {
             switch held.release(id, now: now()) {
             case .write(let entry):
                 if own {
@@ -247,6 +246,15 @@ extension FrameApplier {
                 break
             }
         }
+    }
+
+    nonisolated private static func seconds(
+        from now: DispatchTime,
+        to deadline: DispatchTime
+    ) -> TimeInterval {
+        guard deadline > now else { return 0 }
+        let nanos = deadline.uptimeNanoseconds - now.uptimeNanoseconds
+        return TimeInterval(nanos) / 1e9
     }
 
     nonisolated private static func write(

@@ -61,8 +61,8 @@ struct FrameApplierHeldTests {
             writeEUI: { _, on in counts.withLock { $0.eui.append(on) } }
         )
         applier.heldNow = { landings.now }
-        applier.scheduleHeldLanding = { _, deadline, landing in
-            landings.owed.append((deadline, landing))
+        applier.scheduleHeldLanding = { _, delay, landing in
+            landings.owed.append((landings.after(delay), landing))
         }
         return applier
     }
@@ -77,7 +77,7 @@ struct FrameApplierHeldTests {
         var owed: [@MainActor () -> Void] = []
         applier.scheduleResend = { _, work in owed.append(work) }
         let landing = landings.after(0.05)
-        applier.holdWrites([w], until: landing)
+        applier.holdWrites([w], for: 0.05)
         applier.applyInstant(w, frame, setSize: true, resend: true)
         landings.land(at: landing)
         #expect(owed.isEmpty)
@@ -90,7 +90,7 @@ struct FrameApplierHeldTests {
         let landings = Landings()
         let applier = makeApplier(counts, landings)
         let landing = landings.after(0.1)
-        applier.holdWrites([w], until: landing)
+        applier.holdWrites([w], for: 0.1)
         applier.applyInstant(w, frame, setSize: false)
         applier.applyInstant(w, frame, setSize: true)
         #expect(applier.held.isStaged(w))
@@ -112,7 +112,7 @@ struct FrameApplierHeldTests {
         let landings = Landings()
         let applier = makeApplier(counts, landings)
         let landing = landings.after(0.1)
-        applier.holdWrites([w], until: landing)
+        applier.holdWrites([w], for: 0.1)
         applier.apply(w, frame, setSize: false)
         #expect(applier.held.isStaged(w))
         #expect(counts.withLock { $0.written } == 0)
@@ -129,10 +129,10 @@ struct FrameApplierHeldTests {
         let landings = Landings()
         let applier = makeApplier(counts, landings)
         let first = landings.after(0.05)
-        applier.holdWrites([w], until: first)
+        applier.holdWrites([w], for: 0.05)
         applier.applyInstant(w, frame, setSize: false)
         let later = landings.after(0.2)
-        applier.holdWrites([w], until: later)
+        applier.holdWrites([w], for: 0.2)
         landings.land(at: first)
         #expect(counts.withLock { $0.written } == 0)
         // The reschedule hops through the main queue once.
@@ -153,7 +153,7 @@ struct FrameApplierHeldTests {
         let landings = Landings()
         let applier = makeApplier(counts, landings)
         let landing = landings.after(0.1)
-        applier.holdWrites([w], until: landing)
+        applier.holdWrites([w], for: 0.1)
         applier.applyInstant(w, frame, setSize: false)
         applier.retireApp(1, leftOn: true)
         landings.land(at: landing)
@@ -166,7 +166,7 @@ struct FrameApplierHeldTests {
         let counts = OSAllocatedUnfairLock(initialState: Counts())
         let landings = Landings()
         let applier = makeApplier(counts, landings)
-        applier.holdWrites([w], until: landings.after(60))
+        applier.holdWrites([w], for: 60)
         applier.applyInstant(w, frame, setSize: false)
         applier.releaseAllHolds()
         landings.land(at: landings.now)
@@ -180,7 +180,7 @@ struct FrameApplierHeldTests {
             OSAllocatedUnfairLock(initialState: Counts()),
             landings
         )
-        applier.holdWrites([w], until: landings.after(60))
+        applier.holdWrites([w], for: 60)
         applier.applyInstant(w, frame, setSize: false)
         applier.held.dropAll()
         #expect(!applier.held.isStaged(w))

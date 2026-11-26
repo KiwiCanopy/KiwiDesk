@@ -28,13 +28,13 @@ final class FrameApplier {
     /// The clock held writes are staged and released on; live by
     /// default, a test steps it to its landing (#3594).
     var heldNow: @Sendable () -> DispatchTime = { .now() }
-    /// Schedules a held landing on its app's queue at its deadline;
-    /// a test runs the landing by hand (#3594).
+    /// Runs a held landing on its app's queue after its delay; a
+    /// test runs the landing by hand (#3594).
     var scheduleHeldLanding:
         @MainActor (
-            DispatchQueue, DispatchTime, @escaping @Sendable () -> Void
-        ) -> Void = { queue, deadline, landing in
-            queue.asyncAfter(deadline: deadline, execute: landing)
+            DispatchQueue, TimeInterval, @escaping @Sendable () -> Void
+        ) -> Void = { queue, delay, landing in
+            queue.asyncAfter(deadline: .now() + delay, execute: landing)
         }
     /// Whose motion the writes in this turn are (#804): the open
     /// scope, and the one full reading (`KiwiCore.motionCause`,
