@@ -11,8 +11,8 @@ import Testing
 /// between two widths, never a silent press. The display, gaps and
 /// floor are pinned (#531, #660). `.enabled(if:)` because the
 /// writers resolve the Space's screen. Main-actor spend: about 9000
-/// `resize` presses, each a command, a retile and two frame reads,
-/// some 10 s serialized on a dev Mac.
+/// `resize` presses, each a command with its own retile and one
+/// frame read, some 8 s serialized on a dev Mac.
 @Suite(
     "Held resize: every press moves or cues (#2969)",
     .serialized,
@@ -87,25 +87,25 @@ struct HeldResizePressTests {
         var moves = 0
         core.borders.onResizeRefusal = { _ in cues += 1 }
         let window = WindowID(focus)
-        func length() -> CGFloat {
-            let frame = core.tiler.calculatedFrames(state: core.state)[window]
+        func length(_ frames: [WindowID: CGRect]) -> CGFloat {
+            let frame = frames[window]
             return (axis == "x" ? frame?.width : frame?.height) ?? 0
         }
+        // Each press's after-frames are the next press's before-frames,
+        // and `resize` retiles itself, so a press lays out once (#3654).
+        var frames = core.tiler.calculatedFrames(state: core.state)
         // A window spanning the axis is on no split of it: its press
         // sizes its mates (#1259), so a neighbour must move instead.
-        let extent = core.tiler.calculatedFrames(state: core.state)
-            .values.reduce(CGRect.null) { $0.union($1) }
+        let extent = frames.values.reduce(CGRect.null) { $0.union($1) }
         let spans =
-            length() >= (axis == "x" ? extent.width : extent.height) - 1
+            length(frames)
+            >= (axis == "x" ? extent.width : extent.height) - 1
         for press in 0..<presses {
-            let before = length()
-            let frames = core.tiler.calculatedFrames(state: core.state)
             let cued = cues
             core.execute("resize", args: [.string(axis), .number(step)])
-            core.retile(animated: false)
+            let after = core.tiler.calculatedFrames(state: core.state)
             let note = Comment(rawValue: "\(label) press \(press)")
             if spans {
-                let after = core.tiler.calculatedFrames(state: core.state)
                 let mateMoved = frames.contains { id, frame in
                     guard let now = after[id] else { return true }
                     return abs(now.width - frame.width) > 0.01
@@ -113,11 +113,13 @@ struct HeldResizePressTests {
                 }
                 #expect(mateMoved || cues > cued, note)
             } else {
-                let moved = (length() - before) * (step < 0 ? -1 : 1)
+                let moved =
+                    (length(after) - length(frames)) * (step < 0 ? -1 : 1)
                 #expect(moved > 0.01 || cues > cued, note)
             }
             if cues > cued { return moves }
             moves += 1
+            frames = after
         }
         Issue.record(Comment(rawValue: "\(label): the hold never ends"))
         return moves
@@ -226,7 +228,6 @@ struct HeldResizePressTests {
         core.borders.onResizeRefusal = { refusals.append($0) }
         for _ in 0..<300 {
             core.execute("resize", args: [.string("y"), .number(-5)])
-            core.retile(animated: false)
         }
         let last = try #require(refusals.last)
         #expect(refusals.count > 1)
@@ -264,7 +265,6 @@ struct HeldResizePressTests {
             core.borders.onResizeRefusal = { refusals.append($0) }
             for _ in 0..<600 where refusals.isEmpty {
                 core.execute("resize", args: [.string("x"), .number(step)])
-                core.retile(animated: false)
             }
             return refusals.first
         }
