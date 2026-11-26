@@ -1017,6 +1017,7 @@ with** on the Spaces step, in place of a preset of that name.
 | Toggle floating | `⌃⌥F` |
 | Toggle sticky everywhere | `⌃⌥S` |
 | Toggle KiwiVision | `⌃⌥V` |
+| Show look picker | `⌃⌥⇧L` |
 | Next / previous layout | `⌃⌥C` / `⌃⌥⇧C` |
 | Reset the space's sizes | `⌃⌥R` |
 | Maximize the window | `⌃⌥M` |
@@ -1059,6 +1060,13 @@ last, that window selected
 While KiwiHub has the keyboard, only a modifier tap set to one of
 its sides works, as that side's shortcut does; while another
 KiwiDesk panel has it, no modifier tap does.
+
+:::unreleased
+`⌃⌥⇧L` opens the **look picker** over the focused screen, and
+closes it again
+([`look.show_picker`](lua-reference.md#lookshow_picker)), listed
+under Shortcuts ▸ Built-in ▸ Show & hide ▸ KiwiDesk.
+:::
 
 `⌃⌥R` returns the focused space's sizes to what your profile set
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),

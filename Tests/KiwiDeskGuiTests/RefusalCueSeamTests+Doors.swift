@@ -69,7 +69,9 @@ extension RefusalCueSeamTests {
         // what keeps "a sound follows a pill" checkable at all.
         #expect(core.occurrences(of: "NSSound.beep()") == 1)
         // The GUI's beeps refuse nothing: a settings preview,
-        // and KiwiHub's dead ↩ chord (#2931, `JumpRefusalRowTests`).
+        // KiwiHub's dead ↩ chord (#2931, `JumpRefusalRowTests`), and
+        // the look picker's dead keys: ⌘S off the Current card, and
+        // a name Core refuses, which keeps the field open (#3038).
         let gui = try Self.tree("KiwiDesk")
         let general = try Self.file(
             Self.root.appendingPathComponent(
@@ -82,12 +84,18 @@ extension RefusalCueSeamTests {
                 "Sources/KiwiDesk/Jump/JumpPanelController.swift"
             )
         )
+        let picker = try Self.file(
+            Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/LookPicker/LookPickerController.swift"
+            )
+        )
         #expect(general.occurrences(of: "NSSound.beep()") == 1)
         // Derived from the beeps it names (#2938), so a beep moved
         // to another GUI file breaks the sum.
         let named =
             general.occurrences(of: "NSSound.beep()")
             + hub.occurrences(of: "model.onDeadKey={NSSound.beep()}")
+            + picker.occurrences(of: "model.onDeadKey={NSSound.beep()}")
         #expect(gui.occurrences(of: "NSSound.beep()") == named)
     }
 

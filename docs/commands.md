@@ -98,6 +98,12 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 |---|---|
 | [`kiwivision.toggle`](lua-reference.md#kiwivisiontoggle) | Turns KiwiVision on or off; named, turns that lens on, or off while it is on. |
 
+## look
+
+| Action | What it does |
+|---|---|
+| [`look.show_picker`](lua-reference.md#lookshow_picker) | Opens the look picker on the focused screen, or closes it if it is open. |
+
 ## pocket
 
 | Action | What it does |

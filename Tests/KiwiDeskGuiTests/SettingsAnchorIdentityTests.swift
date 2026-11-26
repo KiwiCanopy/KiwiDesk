@@ -122,6 +122,10 @@ struct SettingsAnchorIdentityTests {
         // a Settings destination, so nothing there is a reveal
         // target.
         "ModeCueView.swift": 1,
+        // Animation identity (#3038): the look picker's name fades
+        // out before the next one fades in. Not a Settings
+        // destination, so nothing there is a reveal target.
+        "LookPickerCaption.swift": 1,
         // Scroll identity: Jump to window scrolls its selected
         // row into view (#1875). Not a Settings destination, so
         // nothing there is a reveal target.

@@ -71,6 +71,18 @@ extension DefaultKeybindings {
         )
     }
 
+    /// The look picker on `⌃⌥⇧L` (#3038), L for look. Free in
+    /// `SystemShortcuts.map`, macOS's symbolic hotkeys and the
+    /// menus of every running app (read 2026-11-26).
+    public static func lookPickerRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+shift+l",
+            lua: ShelfLook.pickerLua,
+            kind: .navigation,
+            label: "Show look picker"
+        )
+    }
+
     /// Reset sizes in this Space on `⌃⌥R` (#2303), R for reset:
     /// `reset_layout_sizing` on the active Space. Free in
     /// `SystemShortcuts.map`, macOS's symbolic hotkeys and every

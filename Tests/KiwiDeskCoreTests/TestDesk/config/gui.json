@@ -291,6 +291,12 @@
           "lua" : "kiwivision.toggle()"
         },
         {
+          "combo" : "control+option+shift+l",
+          "kind" : "navigation",
+          "label" : "Show look picker",
+          "lua" : "look.show_picker()"
+        },
+        {
           "combo" : "control+option+r",
           "kind" : "navigation",
           "label" : "Reset sizes in this Space",

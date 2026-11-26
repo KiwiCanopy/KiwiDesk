@@ -5533,6 +5533,37 @@ look, delete it first.
 
 **Does:** deletes it. A bundled look cannot be deleted.
 
+### look.show_picker
+
+:::unreleased
+**Expects:** nothing.
+
+**Does:** opens the **look picker** over the focused screen, a
+card for every bundled and saved look, or closes it when it is
+open. Over the CLI it is `kiwidesk look.show_picker`. It is bound
+to `⌃⌥⇧L` by default, listed under Shortcuts ▸ Built-in ▸ Show &
+hide ▸ KiwiDesk as **Show look picker**.
+
+- **←** **→** move the selection and change nothing on the desk;
+  a fresh press wraps at either end, a held key stops there.
+- **Return**, or a click on the card, wears the selected look for
+  good: on screen and in the live profile's file, the windows
+  placed at once. With no profile live it lasts the session.
+  **Return** on the look already worn closes the picker.
+- A click on a look at the side selects it.
+- **Esc**, **⌘W**, `⌃⌥⇧L`, a click outside the cards, or another
+  app taking the keyboard closes the picker; closing never undoes
+  a look it wore.
+- When the worn look matches no look in the library, it comes
+  first as **Current**, and **⌘S** saves it under a quick name, a
+  fruit for its focus colour and the date ("Kiwi · Nov 24"). The
+  name opens for a rename: **Return** renames, **Esc** keeps the
+  quick name.
+
+Under KiwiDesk's Reduce Motion the picker cross-fades away after a
+wear instead of playing its reveal.
+:::
+
 **Example:**
 
 ```lua

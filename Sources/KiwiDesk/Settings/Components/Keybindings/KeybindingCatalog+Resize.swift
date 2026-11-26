@@ -43,6 +43,7 @@ extension KeybindingCatalog {
         makeDisplaySticky,
         makeUnsticky,
         openSettings,
+        showLookPicker,
     ]
 
     /// Resize row family identifiers (#678 Phase 3). Named, not

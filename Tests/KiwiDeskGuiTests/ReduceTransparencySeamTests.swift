@@ -183,11 +183,10 @@ struct ReduceTransparencySeamTests {
         )
     }
 
-    /// One reader of the OS flag in Core (`LiquidGlassGate`), and
-    /// in the GUI an `allowed` map of who may read the environment
-    /// value and why — a greying row reading it for its reason is
-    /// the same OS value, not a second gate, and joins here with
-    /// its reason; a second `glassGround` gate cannot.
+    /// One reader of the OS flag in Core (`LiquidGlassGate`); in the
+    /// GUI an `allowed` map of who may read the environment value
+    /// and why — a row reading it for its reason is the same value,
+    /// not a second gate; a second `glassGround` gate cannot.
     private static let allowedGuiReaders: [String: String] = [
         "GlassChrome.swift": "gates the glass branch and its inks (#3650)",
         "PanelGlass.swift": "takes the panels' Fill inks down (#2569)",
@@ -198,6 +197,7 @@ struct ReduceTransparencySeamTests {
         "KiwiVisionLevelsCard.swift": "greys Blur with its reason",
         "KiwiVisionPanelPreview.swift": "redraws on a flip (#2103)",
         "HeaderSearch.swift": "shadows the search card's fallback (#2399)",
+        "LookPickerView.swift": "keeps the wave's rim alone (#3038)",
     ]
 
     @Test("the OS flag has one home per tree")

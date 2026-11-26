@@ -271,4 +271,14 @@ enum KeybindingCatalog {
             L("keybinding.open_settings", "Open Settings")
         }
     )
+
+    /// The look picker (#3038), KiwiDesk's own surface beside
+    /// Settings, never a KiwiHub side.
+    static let showLookPicker = NavCommand(
+        label: "Show look picker",
+        lua: ShelfLook.pickerLua,
+        displayLabel: {
+            L("keybinding.show_look_picker", "Show look picker")
+        }
+    )
 }

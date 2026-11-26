@@ -29,6 +29,10 @@ extension KiwiCore {
             return saveLiveLook(args)
         case "look.delete":
             return deleteLook(args)
+        case "look.show_picker":
+            // The picker is the GUI's; no window moves (#3038).
+            uiBridge.onLookShowPicker()
+            return .ok()
         default:
             return .fail("unknown command: \(command)")
         }

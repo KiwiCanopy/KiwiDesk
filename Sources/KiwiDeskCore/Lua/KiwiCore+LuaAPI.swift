@@ -254,5 +254,9 @@ public struct UIBridgeHooks {
     /// steps the strip to the next app when that side is up.
     public var onKiwihubShowLastApp: @MainActor () -> Void = {}
 
+    /// `look.show_picker()` (#3038): opens the look picker on the
+    /// focused screen, or closes it while it is up.
+    public var onLookShowPicker: @MainActor () -> Void = {}
+
     public init() {}
 }

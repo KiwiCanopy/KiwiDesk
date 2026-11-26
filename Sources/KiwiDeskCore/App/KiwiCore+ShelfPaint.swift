@@ -102,15 +102,18 @@ extension KiwiCore {
         return settings
     }
 
-    /// Writes a tour step's edit live, retiles, and writes it
-    /// into the live profile's file.
+    /// Writes a tour step's or the look picker's edit live,
+    /// retiles, and writes it into the live profile's file;
+    /// `animated` as `retile`'s, false for the picker's wear under
+    /// its opaque overlay (#3038).
     func writeTourEditThrough(
         live: (inout TilingSettings) -> Void,
-        stored: @escaping SettingsEdit
+        stored: @escaping SettingsEdit,
+        animated: Bool? = nil
     ) {
         live(&tiler.settings)
         // An explicit apply (§5): a look can move the shelf's edge.
-        retile(pass: .apply)
+        retile(animated: animated, pass: .apply)
         writeThroughLiveProfile(.settings(stored))
     }
 }
