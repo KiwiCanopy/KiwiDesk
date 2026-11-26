@@ -167,4 +167,37 @@ struct RunZonePressLimitTests {
         #expect(press.visible == 0..<1)
         #expect(press.cue == nil)
     }
+
+    @Test("A shrink at the weight's floor names the share, or the floor")
+    func spentShrinkNamesTheLimit() throws {
+        // 1000 wide, two 300-pt floors: weight 0.1 still draws the
+        // window above its floor; the floors and the gap alone draw
+        // both at it (#3643).
+        let gap = context().gaps.inner.horizontal
+        for (width, cue) in [
+            (CGFloat(1000), RunZone.Press.Cue.weightLimit),
+            (600 + gap + 0.2, .ownMinimum),
+        ] {
+            let region = CGRect(x: 0, y: 0, width: width, height: 600)
+            let two = RunZone(
+                members: Array(ids[0..<2]),
+                region: region,
+                vertical: false
+            )
+            var spent = context(focus: 1)
+            spent.bounds = region
+            spent.stackWeights[ids[0]] = StackLayout.weightRange.lowerBound
+            let run = try #require(two.run(in: spent))
+            #expect(!run.hides)
+            let press = try #require(
+                two.press(ids[0], by: -5, toward: .end, in: spent)
+            )
+            #expect(press.cue == cue, Comment(rawValue: "\(width)"))
+            #expect(press.refusal == .atWeightLimit)
+            // A grow names the share even at the floor: the floor
+            // that stops a grow is a mate's.
+            let grow = two.limitPress(two.line(in: spent), 0, by: 5)
+            #expect(grow.cue == .weightLimit)
+        }
+    }
 }

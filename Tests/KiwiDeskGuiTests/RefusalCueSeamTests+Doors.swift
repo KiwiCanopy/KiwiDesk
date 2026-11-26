@@ -15,7 +15,8 @@ extension RefusalCueSeamTests {
     /// number, each verdict is that call.
     @Test("a minimum pill's verdict is derived or macOS's statement")
     func appBoundIsDerivedByTheBuilders() throws {
-        let pill = try Self.core("App/KiwiCore+SizeLimitPill.swift")
+        let pill = try Self.core("App/KiwiCore+ResizeRefusals.swift")
+        let funnel = try Self.core("App/KiwiCore+SizeLimitPill.swift")
         let verdicts = pill.occurrences(of: "appBound:")
         #expect(verdicts > 0)
         // macOS's statement is the one verdict with no derivation (#2994).
@@ -25,7 +26,9 @@ extension RefusalCueSeamTests {
         let report = try Self.core("Commands/KiwiCore+FixedSize.swift")
         #expect(!report.contains("soundPanelRefusal"))
         #expect(!report.contains("soundRefusal"))
-        #expect(pill.contains("keys.isFiring||tiler.applier.fixedSizeDoor"))
+        #expect(
+            funnel.contains("keys.isFiring||tiler.applier.fixedSizeDoor")
+        )
         #expect(
             verdicts
                 == pill.occurrences(of: "appBound:minimumIsAppBound(")
@@ -196,5 +199,57 @@ extension RefusalCueSeamTests {
         static func unsounded(_ n: Int) -> Calls { Calls(unsounded: n) }
 
         var description: String { "\(sounded) sounded, \(unsounded) not" }
+    }
+
+    /// The funnel's one caller file is the builders' (#1258, #3643):
+    /// a refusal built anywhere else is a second door to the
+    /// drawing, the bump and the sound.
+    @Test("only the builders call the refusal funnel")
+    func funnelHasOneCallerFile() throws {
+        let core = Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        var callers: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: core) {
+            let text = try Self.file(file)
+            let calls =
+                text.occurrences(of: "cueResizeRefusal(")
+                - text.occurrences(of: "funccueResizeRefusal(")
+            if calls > 0 { callers[file.lastPathComponent] = calls }
+        }
+        #expect(callers["KiwiCore+ResizeRefusals.swift", default: 0] > 0)
+        #expect(
+            Set(callers.keys) == ["KiwiCore+ResizeRefusals.swift"],
+            "found: \(callers)"
+        )
+    }
+
+    /// A weight writer reaches the ratio limit through the one
+    /// `cueWeightLimit`, which ends a hold first (#3643); the BSP
+    /// verdict is the other reader.
+    @Test("the ratio limit is cued from its two doors")
+    func ratioLimitHasTwoDoors() throws {
+        let core = Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        let doors = ["cueWeightLimit", "cueBspLimit"]
+        var bodies = 0
+        for name in doors {
+            let body = Self.stripped(
+                try SourceScan.functionBody(
+                    of: name,
+                    in: name == "cueWeightLimit"
+                        ? "KiwiCore+ResizeRun.swift"
+                        : "KiwiCore+ResizeBspPress.swift",
+                    under: "Commands"
+                )
+            )
+            bodies += body.occurrences(of: "refuseRatioLimit(")
+        }
+        var calls = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            let text = try Self.file(file)
+            calls +=
+                text.occurrences(of: "refuseRatioLimit(")
+                - text.occurrences(of: "funcrefuseRatioLimit(")
+        }
+        #expect(bodies == doors.count)
+        #expect(calls == bodies)
     }
 }

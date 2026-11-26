@@ -56,11 +56,10 @@ extension KiwiCore {
                 by: delta
             )
         let at = members.firstIndex(of: focused) ?? 0
-        if delta < 0, outcome.hitOwnMinimum || spent {
-            // A limit above the floor is no minimum: a hold just ends.
-            if outcome.hitOwnMinimum || !endGlideStep() {
-                refuseShrinkAtMinimum(focused, axis: axis)
-            }
+        if delta < 0, outcome.hitOwnMinimum {
+            refuseShrinkAtMinimum(focused, axis: axis)
+        } else if delta < 0, spent {
+            cueWeightLimit(focused, delta: delta, axis: axis)
         } else if delta > 0,
             let blocked = outcome.blockedByOther
                 ?? (spent ? StackLayout.nearestMate(of: at) : nil)
@@ -81,12 +80,15 @@ extension KiwiCore {
                 store(press, of: focused, in: found.zone, space: space)
                 return true
             }
-            if endGlideStep() { return false }
-            refuseGrowAtNeighborMinimum(
-                focused,
-                anchor: members[blocked],
-                axis: axis
-            )
+            if outcome.blockedByOther == nil {
+                cueWeightLimit(focused, delta: delta, axis: axis)
+            } else if !endGlideStep() {
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: members[blocked],
+                    axis: axis
+                )
+            }
         }
         return false
     }
@@ -195,6 +197,8 @@ extension KiwiCore {
         switch press.cue {
         case .ownMinimum:
             refuseShrinkAtMinimum(focused, axis: axis)
+        case .weightLimit:
+            cueWeightLimit(focused, delta: delta, axis: axis)
         case .neighborMinimum(let anchor):
             refuseGrowAtNeighborMinimum(focused, anchor: anchor, axis: axis)
         case .nothingToDivide:
@@ -228,24 +232,16 @@ extension KiwiCore {
         return true
     }
 
-    /// A weight at its limit moves nothing: a hold just ends there
-    /// and a press cues, mirroring `pushOrCue`'s spent arms (#2709,
-    /// #2969), so a change to one owes the other. `mate` is the
-    /// neighbour a grow names.
+    /// A weight at its limit above the floor moves nothing: a hold
+    /// just ends there and a press cues the limit (#2709, #2969,
+    /// #3643). Every weight writer's limit arm takes this one door.
     func cueWeightLimit(
         _ window: WindowID,
-        mate: WindowID?,
         delta: Double,
         axis: String
     ) {
         guard !endGlideStep() else { return }
-        if delta < 0 {
-            refuseShrinkAtMinimum(window, axis: axis)
-        } else if let mate, mate != window {
-            refuseGrowAtNeighborMinimum(window, anchor: mate, axis: axis)
-        } else {
-            refuseGrowAtBoundary(window, axis: axis)
-        }
+        refuseRatioLimit(window, axis: axis, grows: delta > 0)
     }
 
     /// Whether a drag shrinking `id` on `vertical`'s axis hands the

@@ -170,6 +170,10 @@ struct ResizeRefusalRenderingTests {
             .fullscreenCannotMove(window),
             .moveNeedsFloat(window),
             .moveAtBoundary(window, direction: .up),
+            .ratioLimit(window, axis: "y", grows: true),
+            .ratioLimit(window, axis: "y", grows: false),
+            .ratioMovesOtherWay(window, axis: "y", grows: true),
+            .ratioMovesOtherWay(window, axis: "y", grows: false),
         ].map(\.pillText)
         #expect(Set(texts).count == texts.count)
         #expect(texts.allSatisfy { !$0.isEmpty })

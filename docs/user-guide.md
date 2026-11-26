@@ -517,6 +517,15 @@ bounces and shows a frosted pill:
 - On a scrolling space, growing stops at a maximum the app
   enforces (System Settings will not grow past its own width).
 
+:::unreleased
+Where the split or the weight reaches its own limit before any
+window does, the pill says *Largest share reached* or *Smallest
+share reached*. In BSP one split ratio divides every level, so a
+window inside a nested pair can say *This window grows the other
+way* or *This window shrinks the other way*: the opposite press
+does what was asked.
+:::
+
 Where windows that do not fit wait behind a `+n` overflow mark, a
 grow along that line does not stop at the neighbour: the neighbour
 joins the windows waiting and the `+n` counts it. Shrinking a window

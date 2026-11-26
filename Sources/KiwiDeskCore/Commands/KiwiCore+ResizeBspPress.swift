@@ -61,9 +61,25 @@ extension KiwiCore {
         let mates = sides.first + sides.second
         guard !mates.isEmpty else { return true }
         let moved: Bool
-        if mates.contains(focused) {
+        let inSplit = mates.contains(focused)
+        if inSplit {
             let change = length(next[focused]) - length(now[focused])
             moved = change * (delta < 0 ? -1 : 1) > Self.pressMovesTolerance
+            // The opposite press would do what was asked (#3643): the
+            // shared ratio moves this window against the press.
+            let back: CGFloat =
+                moved
+                ? 0
+                : length(frames(at: base - (proposed - base))[focused])
+                    - length(now[focused])
+            if back * (delta < 0 ? 1 : -1) < -Self.pressMovesTolerance {
+                refuseRatioMovesOtherWay(
+                    focused,
+                    axis: axis,
+                    grows: delta > 0
+                )
+                return false
+            }
         } else {
             moved = mates.contains {
                 abs(length(next[$0]) - length(now[$0]))
@@ -79,6 +95,8 @@ extension KiwiCore {
             axis: axis,
             delta: delta,
             squeezed: squeezed,
+            atBound: Self.bspRatioSpent(base, to: proposed),
+            inSplit: inSplit,
             now
         )
         return false
@@ -87,15 +105,19 @@ extension KiwiCore {
     /// Below this many points a trial moved nothing.
     private static let pressMovesTolerance: CGFloat = 0.01
 
-    /// The cue for a BSP press that moves nothing it asks for: the
-    /// mate on the `squeezed` side nearest `focused` sitting at its
-    /// floor (#1259's blame), where one does, else the window's own
-    /// minimum on a shrink or the boundary on a grow.
+    /// The cue for a BSP press that moves nothing it asks for. A
+    /// floor wins over the ratio's limit: the mate on the `squeezed`
+    /// side nearest `focused` sitting at its floor (#1259's blame),
+    /// else the window's own floor on a shrink, else the largest or
+    /// smallest share — the stored bound, or for a window `inSplit`
+    /// the most the shared ratio gives it (#3643) — else the boundary.
     private func cueBspLimit(
         _ focused: WindowID,
         axis: String,
         delta: Double,
         squeezed: [WindowID],
+        atBound: Bool,
+        inSplit: Bool,
         _ frames: [WindowID: CGRect]
     ) {
         let horizontal = axis == "x"
@@ -116,10 +138,14 @@ extension KiwiCore {
             }
             return distance(a) < distance(b)
         }
+        let atOwnFloor =
+            length(focused) <= plannedMinSize(of: focused, axis: axis) + 1
         if let stuck {
             refuseGrowAtNeighborMinimum(focused, anchor: stuck, axis: axis)
-        } else if delta < 0 {
+        } else if delta < 0, atOwnFloor || !atBound {
             refuseShrinkAtMinimum(focused, axis: axis)
+        } else if atBound || inSplit {
+            refuseRatioLimit(focused, axis: axis, grows: delta > 0)
         } else {
             refuseGrowAtBoundary(focused, axis: axis)
         }

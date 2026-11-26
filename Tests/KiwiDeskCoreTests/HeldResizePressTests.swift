@@ -243,8 +243,8 @@ struct HeldResizePressTests {
     }
 
     /// The refusals a hold ends on where no mate sits at its floor:
-    /// the window itself, the boundary on a grow and its minimum on a
-    /// shrink (#2969's ruling; the wording is the existing pair).
+    /// the window itself, the ratio moving it the other way or the
+    /// ratio's stored bound by the press's sign (#2969, #3643).
     @Test("BSP: the inner window and the store bound refuse on the window")
     func refusalsNameTheWindow() {
         func lastRefusal(
@@ -268,19 +268,20 @@ struct HeldResizePressTests {
             }
             return refusals.first
         }
-        // A grow that would shrink the inner window of a nested pair.
+        // A grow held to the inner window's peak, where the one
+        // shared ratio gives it no larger share either way.
         #expect(
             lastRefusal(width: 1220, windows: 4, focus: 3, step: 5)
-                == .ownMaximum(WindowID(3), axis: "x", atBoundary: true)
+                == .ratioLimit(WindowID(3), axis: "x", grows: true)
         )
         // The store's bound on a desk where every floor is far off.
         #expect(
             lastRefusal(width: 4000, windows: 6, focus: 1, step: 5)
-                == .ownMaximum(WindowID(1), axis: "x", atBoundary: true)
+                == .ratioLimit(WindowID(1), axis: "x", grows: true)
         )
         #expect(
             lastRefusal(width: 4000, windows: 6, focus: 1, step: -5)
-                == .ownMinimum(WindowID(1), axis: "x", appBound: false)
+                == .ratioLimit(WindowID(1), axis: "x", grows: false)
         )
     }
 }

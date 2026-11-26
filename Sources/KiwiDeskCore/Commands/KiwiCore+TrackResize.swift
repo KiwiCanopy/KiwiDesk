@@ -194,13 +194,7 @@ extension KiwiCore {
         if StackLayout.weightSpent(weights[track], by: delta),
             !outcome.hitOwnMinimum, outcome.blockedByOther == nil
         {
-            cueWeightLimit(
-                window,
-                mate: tiled[ranges[StackLayout.nearestMate(of: track)]]
-                    .first(where: { $0 != window }),
-                delta: delta,
-                axis: acrossAxis
-            )
+            cueWeightLimit(window, delta: delta, axis: acrossAxis)
             return .ok()
         }
         if let focused = space.focused {
