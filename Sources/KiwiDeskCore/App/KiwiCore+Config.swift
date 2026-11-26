@@ -257,7 +257,7 @@ extension KiwiCore {
         // Read while `init.lua`'s last Spaces still count (#1790).
         let temporaries = Set(liveTemporarySpaces)
         initDeclaredSpaces = []
-        pendingSpacePins = [:]
+        heldScreenCalls = []
         // The session resize layer reseeds on reload (#458):
         // the config about to apply is the new truth, and a
         // shadowing session value would make an edited ratio

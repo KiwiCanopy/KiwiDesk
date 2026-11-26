@@ -1092,6 +1092,12 @@ The obligations below bind this directory:
   same arm stores it ahead of its settle/`handleMonitorChange`
   branch, so the one total resolve places it; a config load
   clears what is held (`BootSpacePinTests` ▸ `bootPinApplies`).
+  A split or a bar's per-screen value naming a screen by number
+  or name waits the same way, in call order with the pins in the
+  one `heldScreenCalls`, held at its verb's own body (the split
+  write, the bars' screen seams) through `holdsScreenArg` and
+  replayed through that body, never a copy (#3640,
+  `BootDisplayAreaTests`); a report of no screen keeps the list.
   The count
   judgement itself is `DesktopBindingRefusal.of`, public so the
   Desktops row narrates the verdict instead of re-deriving it.
@@ -2374,7 +2380,11 @@ and `set_display_area_name` do, and stores a split only through
 `storeSplit`. The load's tail makes whole, once, after the profile
 re-apply, each screen the last load split and this one does not
 name; a write the ledger never saw stays split across every
-reload (`LuaAreaSplitReloadTests`).
+reload (`LuaAreaSplitReloadTests`). A load that holds a split for
+the first screen report settles only once the drain stored it,
+and a held write of a load whose settings the profile re-apply
+replaced is dropped (#3640, `BootDisplayAreaTests` ▸
+`heldSplitDefersTheSettle`, `replacedLoadDropsItsHeldCalls`).
 
 ## Vocabulary
 

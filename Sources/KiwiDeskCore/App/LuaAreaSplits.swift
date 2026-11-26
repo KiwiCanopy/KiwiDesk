@@ -11,9 +11,21 @@ struct LuaAreaSplits {
     private var written: [String: ScreenSplit] = [:]
     /// What the last finished load left, by screen fingerprint.
     private(set) var lastLoad: [String: ScreenSplit] = [:]
+    /// The screens a finished load named while its held splits wait
+    /// for the first screen report (#3640); its settle waits too.
+    private var awaiting: Set<String>?
+    /// Set while the drain replays a call a load held, so its write
+    /// joins that load's record.
+    var replaying = false
 
-    /// Starts recording a config load.
+    /// Whether a config load is being recorded.
+    var isRecording: Bool { declared != nil }
+
+    /// Starts recording a config load. A load still waiting on held
+    /// splits ends as finished: the reset dropped what it held.
     mutating func beginLoad() {
+        if awaiting != nil { lastLoad = written }
+        awaiting = nil
         declared = []
         written = [:]
     }
@@ -30,9 +42,15 @@ struct LuaAreaSplits {
     /// Records a `set_display_areas` write while a load runs;
     /// `stored` is what the screen holds after it.
     mutating func note(_ fingerprint: String, _ stored: ScreenSplit?) {
-        guard declared != nil else { return }
-        declared?.insert(fingerprint)
-        written[fingerprint] = stored
+        if declared != nil {
+            declared?.insert(fingerprint)
+            written[fingerprint] = stored
+        } else if replaying, awaiting != nil {
+            awaiting?.insert(fingerprint)
+            written[fingerprint] = stored
+        } else if replaying {
+            lastLoad[fingerprint] = stored  // an abandoned load's
+        }
     }
 
     /// Follows a `set_display_area_name` onto a split Lua made —
@@ -54,19 +72,46 @@ struct LuaAreaSplits {
     /// one the last load split and this one did not name, whose
     /// stored split is still the one Lua left. `kept` is false
     /// when a profile replaced the settings, which then carry no
-    /// split of Lua's.
+    /// split of Lua's. A kept load `holding` a split for the first
+    /// screen report keeps its record open and settles in
+    /// `endHeld`, so a screen it names by number is never made
+    /// whole first.
     mutating func endLoad(
         stored: [String: ScreenSplit],
-        kept: Bool
+        kept: Bool,
+        holding: Bool
     ) -> [String] {
         guard let declared else { return [] }
+        self.declared = nil
+        if kept, holding {
+            awaiting = declared
+            return []
+        }
         defer {
-            self.declared = nil
             lastLoad = kept ? written : [:]
             written = [:]
         }
         guard kept else { return [] }
-        return lastLoad.keys.sorted().filter { fingerprint in
+        return dropped(declared: declared, stored: stored)
+    }
+
+    /// Ends a load whose held splits the drain stored, as `endLoad`
+    /// would have; nothing while no load waits.
+    mutating func endHeld(stored: [String: ScreenSplit]) -> [String] {
+        guard let declared = awaiting else { return [] }
+        awaiting = nil
+        defer {
+            lastLoad = written
+            written = [:]
+        }
+        return dropped(declared: declared, stored: stored)
+    }
+
+    private func dropped(
+        declared: Set<String>,
+        stored: [String: ScreenSplit]
+    ) -> [String] {
+        lastLoad.keys.sorted().filter { fingerprint in
             !declared.contains(fingerprint)
                 && stored[fingerprint] == lastLoad[fingerprint]
         }

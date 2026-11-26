@@ -6,11 +6,29 @@ extension KiwiCore {
     /// whole, once, through the same merge a `set_display_areas`
     /// with no sizes takes. `kept` is false when a profile
     /// replaced the settings, whose splits are then its own.
+    /// A held settings call of a load whose settings a profile
+    /// replaced is dropped, as the replace would have overwritten
+    /// it live (#3640).
     func settleLuaAreaSplits(kept: Bool) {
-        let dropped = luaAreaSplits.endLoad(
-            stored: tiler.settings.displayAreas,
-            kept: kept
+        if !kept { heldScreenCalls.removeAll(where: \.isLoadSettings) }
+        makeWhole(
+            luaAreaSplits.endLoad(
+                stored: tiler.settings.displayAreas,
+                kept: kept,
+                holding: heldScreenCalls.contains(where: \.isLoadSplit)
+            )
         )
+    }
+
+    /// The deferred tail of a load that held a split, once the
+    /// drain stored it (#3640).
+    func settleHeldLuaAreaSplits() {
+        makeWhole(
+            luaAreaSplits.endHeld(stored: tiler.settings.displayAreas)
+        )
+    }
+
+    private func makeWhole(_ dropped: [String]) {
         for fingerprint in dropped {
             guard let screen = splitScreen(.string(fingerprint))
             else { continue }

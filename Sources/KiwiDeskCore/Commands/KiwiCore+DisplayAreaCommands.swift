@@ -12,6 +12,19 @@ extension KiwiCore {
     /// w=, h=, id=, name=}, …})` takes the rects whole. The sizes or
     /// rects must tile the screen exactly.
     func setDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
+        let response = storeDisplayAreas(args)
+        if response.isSuccess { retile() }
+        return response
+    }
+
+    /// `set_display_areas`' write, without the retile: a screen
+    /// named by number or name while none is known waits for the
+    /// first report, whose drain replays this body (#3640).
+    func storeDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
+        if holdsScreenArg(args.first) {
+            holdSettingsCall(split: true) { self.storeDisplayAreas(args) }
+            return .ok()
+        }
         guard let screen = splitScreen(args.first) else {
             return .fail("unknown screen: \(args.first?.stringValue ?? "")")
         }
@@ -36,7 +49,6 @@ extension KiwiCore {
             screen.fingerprint,
             tiler.settings.displayAreas[screen.fingerprint]
         )
-        retile()
         return .ok()
     }
 

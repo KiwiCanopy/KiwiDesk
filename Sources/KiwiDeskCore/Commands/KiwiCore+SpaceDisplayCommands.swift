@@ -105,10 +105,10 @@ extension KiwiCore {
     }
 
     /// Writes the pin `args` name into `spacePins`, or holds it in
-    /// `pendingSpacePins` while no screen is known: a cold boot
-    /// runs `init.lua` before any is published (#3631). Resolves
+    /// `heldScreenCalls` while no screen is known: a cold boot runs
+    /// `init.lua` before any is published (#3631). Resolves
     /// nothing; the caller places.
-    private func storeSpacePin(_ args: [JSONValue]) -> SpacePinStore {
+    func storeSpacePin(_ args: [JSONValue]) -> SpacePinStore {
         guard let raw = args.first?.stringValue else {
             return .refused(.fail("expected space id"))
         }
@@ -116,7 +116,8 @@ extension KiwiCore {
         let arg = args.count > 1 ? args[1] : nil
         if state.workspaces.allDisplays.isEmpty, let arg {
             state.workspaces.ensureSpace(space)
-            pendingSpacePins[space] = arg
+            heldScreenCalls.removeAll { $0.pinnedSpace == space }
+            heldScreenCalls.append(.pin(space, arg))
             return .held
         }
         guard
@@ -133,25 +134,10 @@ extension KiwiCore {
         mainSpaces.remove(space)
         return .stored(space)
     }
-
-    /// Stores the pins held while no screen was known, at the first
-    /// `.displaysChanged` and ahead of its one total resolve, so no
-    /// pin places alone and leaves a screen to the heal (#3631). A
-    /// name no screen matches is refused as it would be live.
-    func drainPendingSpacePins() {
-        let pending = pendingSpacePins
-        pendingSpacePins = [:]
-        for (space, arg) in pending {
-            let stored = storeSpacePin([.string(space.raw), arg])
-            if let reason = stored.response.error {
-                onLog("pin_space_to_display(\(space.raw)): \(reason)")
-            }
-        }
-    }
 }
 
 /// `storeSpacePin`'s outcome: written, held for a screen, refused.
-private enum SpacePinStore {
+enum SpacePinStore {
     case stored(SpaceID)
     case held
     case refused(CommandResponse)
