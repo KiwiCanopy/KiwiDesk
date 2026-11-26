@@ -4366,13 +4366,24 @@ per Space (#3515).** A step stores every Space it touched before
 and after, its sizes read through the session layer and filed
 under its Desktop and arrangement key. Undo acts only while those
 Spaces still equal the step's after, so a change no bracket saw —
-a window opening or closing, a Desktop switch, a profile apply, a
-tab rekey — fails the comparison and clears the history by
-itself, and a step whose own key changed is never recorded. None
-of those paths carries a clear; the two that do clear explicitly
-are a config load, which runs as a bracket that may not be undone,
-and a Space renumbered or dropped, whose steps name an id that is
-gone. A new user act that should be undoable opens a bracket. Undo refuses rather than
+a Desktop switch, a profile apply, a tab rekey — fails the
+comparison and clears the history by itself, and a step whose own
+key changed is never recorded. None of those paths carries a
+clear; the two that do clear explicitly are a config load, which
+runs as a bracket that may not be undone, and a Space renumbered
+or dropped, whose steps name an id that is gone. A window opening
+or closing is the one membership change that rebases instead
+(#3601, owner 2026-11-24): the event fold, outside any bracket,
+removes a closed window from every stored step, dropping a step
+left changing nothing, and inserts a window `new_window_placement`
+placed into every step of its Space through the same
+`Space.insert`, beside its anchor or at the end where the step
+lacks it; the steps keep their label and coalescing group. It is
+eager, at the fold, because only there is the anchor known and the
+arrival's side effects — a track break handed on — told apart from
+a change no act saw, which still clears. A return by rank, a track
+spawn, a hide, a minimize and a move between Spaces no act made
+still clear, each awaiting a ruling of its own. A new user act that should be undoable opens a bracket. Undo refuses rather than
 skipping past the change, because reverting under a state the
 step never saw would write an arrangement nobody had. The history
 is per Space because `⌃⌥Z` should take back what is in front of

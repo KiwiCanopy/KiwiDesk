@@ -1200,9 +1200,20 @@ one sends it back while it is still the last step on both.
 
 Focus, scrolling, a Maximize and a floating window's position
 and size are not part of it. A change it did not record — a
-window opening or closing, a Desktop switch, a profile load, a
-config reload — makes the next undo fail and clears that space's
-history. A failed or empty undo from a key plays the refusal
+Desktop switch, a profile load, a config reload — makes the next
+undo fail and clears that space's history.
+
+:::unreleased
+A window closing keeps the history: it leaves every stored step,
+and a step that only moved it is gone. A new window keeps it too,
+joining each earlier step where its placement put it, beside the
+same window or at the start or end, and at the end of a step that
+lacks that window. A window that comes back from a hide, a
+minimize or another Desktop, or opens into a Track space, still
+clears the history.
+:::
+
+A failed or empty undo from a key plays the refusal
 sound when [`set_refusal_sound`](#set_refusal_sound) is on; a
 CLI or Lua caller gets the reason.
 

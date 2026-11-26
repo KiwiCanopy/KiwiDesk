@@ -50,8 +50,8 @@ extension KiwiCore {
             state.arrivalFocus = arrivalFocus(of: window)
             claimCrossSessionArrival(window)  // #1385
         }
-        // Read BEFORE the fold below overwrites/removes them —
-        // both helpers argue their consumer.
+        // Read BEFORE the fold below overwrites or removes them.
+        let undoFold = layoutUndoFold(for: event)  // #3601
         let preEventFrame = preEventFrame(of: event)
         let goneWindowPID = goneWindowPID(of: event)
         let priorDisplayCount = state.workspaces.allDisplays.count
@@ -345,5 +345,6 @@ extension KiwiCore {
             anchorBeforeFold: anchorBeforeFold,
             willRetile: willRetile
         )
+        rebaseLayoutUndo(undoFold, effects: effects, gone: goneReason)
     }
 }

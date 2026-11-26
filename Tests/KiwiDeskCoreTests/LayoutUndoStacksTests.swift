@@ -3,8 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The pure undo stacks (#3515): merging, the depth cap, and the
-/// partner cut a linked step owes.
+/// The pure undo stacks (#3515): merging, the depth cap, the
+/// partner cut a linked step owes, and the rebase over a window
+/// opening or closing (#3601).
 @Suite("Layout undo stacks (#3515)")
 struct LayoutUndoStacksTests {
     private let one = SpaceID("1")
@@ -131,5 +132,103 @@ struct LayoutUndoStacksTests {
         record(&stacks, [one: ([1], []), two: ([], [1])], label: "m")
         record(&stacks, [two: ([1], [1])], label: "x")
         #expect(stacks.candidate(.undo, of: one) == .blocked)
+    }
+    private func windows(_ stacks: LayoutUndoStacks, _ space: SpaceID)
+        -> [([UInt32], [UInt32])]
+    {
+        var copy = stacks
+        var out: [([UInt32], [UInt32])] = []
+        while case .ready(let step) = copy.candidate(.undo, of: space) {
+            copy.take(step, from: .undo)
+            out.append(
+                (
+                    step.before[space]?.windows.map(\.raw) ?? [],
+                    step.after[space]?.windows.map(\.raw) ?? []
+                )
+            )
+        }
+        return out
+    }
+
+    @Test("a rebase that empties a step drops it alone")
+    func rebaseDropsEmptiedStep() {
+        var stacks = LayoutUndoStacks()
+        record(&stacks, [one: ([1, 2, 3], [1, 3, 2])], label: "a")
+        record(&stacks, [one: ([1, 3, 2], [3, 1, 2])], label: "b", at: 5)
+        record(&stacks, [one: ([3, 1, 2], [2, 1, 3])], label: "c", at: 9)
+        // Window 1 closes: "b" moved only it, so it changes nothing;
+        // the steps on either side of it stay.
+        stacks.rebase { _, side in side.removing(WindowID(1)) }
+        let left = windows(stacks, one)
+        #expect(left.map(\.0) == [[3, 2], [2, 3]])
+        #expect(left.map(\.1) == [[2, 3], [3, 2]])
+    }
+
+    @Test("a rebase edits every copy of a linked step")
+    func rebaseReachesThePartner() {
+        var stacks = LayoutUndoStacks()
+        record(
+            &stacks,
+            [one: ([1, 2], [2]), two: ([3], [3, 1])],
+            label: "m"
+        )
+        stacks.rebase { _, side in side.removing(WindowID(3)) }
+        guard case .ready(let step) = stacks.candidate(.undo, of: two)
+        else {
+            Issue.record("the linked step was lost")
+            return
+        }
+        #expect(step.before[two]?.windows == [])
+        #expect(step.after[two]?.windows == [WindowID(1)])
+        #expect(stacks.candidate(.undo, of: one) == .ready(step))
+    }
+
+    @Test("history sits where each top step left the Space")
+    func sits() {
+        var stacks = LayoutUndoStacks()
+        #expect(stacks.sits(one, at: arrangement([9])))
+        record(&stacks, [one: ([1, 2], [2, 1])])
+        #expect(stacks.sits(one, at: arrangement([2, 1])))
+        #expect(!stacks.sits(one, at: arrangement([1, 2])))
+        guard case .ready(let step) = stacks.candidate(.undo, of: one)
+        else { return }
+        stacks.take(step, from: .undo)
+        // The redo's before is where an undo left the Space.
+        #expect(stacks.sits(one, at: arrangement([1, 2])))
+    }
+    private func placed(
+        _ ids: [UInt32],
+        _ placement: SpawnPlacement,
+        anchor: UInt32?
+    ) -> [UInt32] {
+        arrangement(ids).inserting(
+            WindowID(9),
+            placement: placement,
+            anchor: anchor.map(WindowID.init),
+            from: arrangement(ids + [9])
+        ).windows.map(\.raw)
+    }
+
+    @Test("an opened window joins each step by its own placement")
+    func insertByPlacement() {
+        // The ruling's example: beside its anchor in either order.
+        #expect(placed([1, 2, 3], .afterFocused, anchor: 1) == [1, 9, 2, 3])
+        #expect(placed([2, 1, 3], .afterFocused, anchor: 1) == [2, 1, 9, 3])
+        #expect(placed([1, 2, 3], .beforeFocused, anchor: 3) == [1, 2, 9, 3])
+        #expect(placed([1, 2, 3], .first, anchor: 2) == [9, 1, 2, 3])
+        #expect(placed([1, 2, 3], .last, anchor: 2) == [1, 2, 3, 9])
+        // An anchor the step does not hold sends it to the end.
+        #expect(placed([1, 2], .afterFocused, anchor: 5) == [1, 2, 9])
+        #expect(placed([1, 2], .beforeFocused, anchor: 5) == [1, 2, 9])
+    }
+
+    @Test("a closed window hands its track break on in each step")
+    func removeHandsTheBreak() {
+        var side = arrangement([1, 2, 3])
+        side.trackBreaks = [WindowID(1), WindowID(2)]
+        let removed = side.removing(WindowID(2))
+        #expect(removed.windows == [WindowID(1), WindowID(3)])
+        #expect(removed.trackBreaks == [WindowID(1), WindowID(3)])
+        #expect(side.removing(WindowID(7)) == side)
     }
 }
