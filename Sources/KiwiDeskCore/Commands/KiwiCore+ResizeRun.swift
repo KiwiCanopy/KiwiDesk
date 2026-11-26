@@ -47,8 +47,9 @@ extension KiwiCore {
         toward side: RunZone.PushSide,
         space: Space
     ) -> Bool {
-        // A weight already at its limit moves nothing, and a silent
-        // press never ends a hold.
+        // A weight at its limit, or clamped onto it short of a drawn
+        // half-point, moves nothing, and a silent press never ends a
+        // hold.
         let spent = members.count > 1 && outcome.spent
         let at = members.firstIndex(of: focused) ?? 0
         if delta < 0, outcome.hitOwnMinimum {

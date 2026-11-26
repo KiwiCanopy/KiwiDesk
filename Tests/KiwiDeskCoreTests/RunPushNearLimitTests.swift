@@ -29,12 +29,14 @@ extension RunPushCommandTests {
         return (seen, abs(length() - before))
     }
 
-    @Test("Track: a track a hair above its weight's limit cues the limit")
+    @Test("Track: a track a hair inside its weight's limit cues the limit")
     func trackNearTheLimitCues() {
+        // Each weight sits close enough that the clamp onto the bound
+        // draws under half a point on this desk.
         let range = TrackLayout.weightRange
         for (weight, step) in [
             (range.upperBound - 0.0003, 5.0),
-            (range.lowerBound + 0.0003, -5.0),
+            (range.lowerBound + 0.00002, -5.0),
         ] {
             let (core, id) = makeSpace(
                 "track",
@@ -56,15 +58,39 @@ extension RunPushCommandTests {
             #expect(
                 result.refusals == [
                     .ratioLimit(w(1), axis: "x", grows: step > 0)
-                ] || result.moved > 0.5,
+                ],
                 Comment(rawValue: "weight \(weight): \(result)")
             )
         }
     }
 
-    @Test("Stack: a zone weight a hair above its floor cues the limit")
+    @Test("Stack: a zone weight a hair inside its floor cues the limit")
     func stackNearTheLimitCues() {
-        for height in [1000.0, 1400.0, 2000.0, 4000.0] {
+        // 4000 tall keeps every window far above its floor, so the
+        // zone fits whole and the press reaches `pushOrCue`.
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 3,
+            focus: 2,
+            height: 4000
+        )
+        core.state.workspaces.withSpace(id) {
+            $0.stackWeights[w(2)] =
+                StackLayout.weightRange.lowerBound + 0.00002
+        }
+        core.retile(animated: false)
+        let result = pressed(core, w(2), "y", -5)
+        #expect(
+            result.refusals == [.ratioLimit(w(2), axis: "y", grows: false)],
+            Comment(rawValue: "\(result)")
+        )
+    }
+
+    /// A control: on these desks the press stops at the window's
+    /// floor before the weight's limit is read, so it cues that.
+    @Test("Stack: a zone weight a hair above its floor never goes silent")
+    func stackNearTheFloorCues() {
+        for height in [1000.0, 1400.0, 2000.0] {
             let (core, id) = makeSpace(
                 "stack",
                 windows: 3,
@@ -77,7 +103,6 @@ extension RunPushCommandTests {
             }
             core.retile(animated: false)
             let result = pressed(core, w(2), "y", -5)
-            // A window the tiny weight leaves at its floor says so.
             #expect(
                 !result.refusals.isEmpty || result.moved > 0.5,
                 Comment(rawValue: "height \(height): \(result)")

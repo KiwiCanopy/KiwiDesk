@@ -229,7 +229,19 @@ extension RunZone {
                 by: delta,
                 in: context
             )
-        else { return nil }
+        else {
+            // A shrink the range clamps onto its limit, keeping a run
+            // that hides nothing, is that limit (#3661); one that
+            // flips the split is #2967's.
+            var trial = context
+            trial.stackWeights[members[index]] = stepped
+            let clamped =
+                delta < 0
+                && StackLayout.weightSpent(stepped, by: Double(delta))
+                && run(in: context)?.hides == false
+                && run(in: trial) != nil
+            return clamped ? limitPress(line, index, by: delta) : nil
+        }
         var press = Press()
         press.weight = weight
         return press

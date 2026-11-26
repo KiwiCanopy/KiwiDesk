@@ -2463,7 +2463,12 @@ editing here:
   move only where the step's drawn change clears
   `RunZone.unchangedTolerance`, and answers a smaller one as the
   weight's limit (#3634, `RunZoneCrossingTests` ▸
-  `clampedStepIsTheLimit`). A whole-zone
+  `clampedStepIsTheLimit`). A Track or whole-zone weight writer takes
+  that verdict from `WeightStepOutcome.spent` and never the bare
+  `StackLayout.weightSpent(_:by:)`: the outcome judges by the span's
+  share, a run press by the render's redraw, and each caller takes
+  one (#3661, `RunPushCommandTests` ▸ `trackNearTheLimitCues`). A
+  whole-zone
   writer clamps its step at floors no lower than the ones `fitsWhole` plans —
   `KiwiCore.plannedMinSize`, the clamp twin of
   `LayoutContext.plannedFloor` — so a floor input joins both, or a

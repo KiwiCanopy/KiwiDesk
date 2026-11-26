@@ -200,4 +200,26 @@ struct RunZonePressLimitTests {
             #expect(grow.cue == .weightLimit)
         }
     }
+
+    @Test("A shrink clamped onto the weight's floor names the share")
+    func clampedShrinkNamesTheLimit() throws {
+        // 1000 wide, two 300-pt floors, a run hiding nothing: a step
+        // from a hair above 0.1 clamps onto it and draws under half a
+        // point, so it is the limit, not the window's floor (#3661).
+        let region = CGRect(x: 0, y: 0, width: 1000, height: 600)
+        let two = RunZone(
+            members: Array(ids[0..<2]),
+            region: region,
+            vertical: false
+        )
+        var near = context(focus: 1)
+        near.stackWeights[ids[0]] = StackLayout.weightRange.lowerBound + 0.0003
+        let run = try #require(two.run(in: near))
+        #expect(!run.hides)
+        let press = try #require(
+            two.press(ids[0], by: -5, toward: .end, in: near)
+        )
+        #expect(press.cue == .weightLimit)
+        #expect(press.refusal == .atWeightLimit)
+    }
 }
