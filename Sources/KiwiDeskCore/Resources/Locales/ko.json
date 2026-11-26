@@ -1778,6 +1778,7 @@
   "menu.window.zoom": "확대/축소",
   "mode_cue.ax": "레이아웃: %1$@",
   "monitor_card.divider.ax": "%1$@ 및 %2$@ 사이 구분선",
+  "monitor_card.divider.segment.help": "⌥ Option 키를 누른 채 드래그하면 선의 이 부분만 옮깁니다.",
   "monitor_card.divider.size": "%1$d pt",
   "monitor_card.divider.size_fraction": "%1$d pt · %2$@",
   "monitor_card.divider.value.ax": "%1$@ %2$d 포인트, %3$@ %4$d 포인트",

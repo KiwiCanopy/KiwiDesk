@@ -1778,6 +1778,7 @@
   "menu.window.zoom": "Zoom",
   "mode_cue.ax": "Layout: %1$@",
   "monitor_card.divider.ax": "Divider between %1$@ and %2$@",
+  "monitor_card.divider.segment.help": "Option-drag to move just this part of the line.",
   "monitor_card.divider.size": "%1$d pt",
   "monitor_card.divider.size_fraction": "%1$d pt · %2$@",
   "monitor_card.divider.value.ax": "%1$@ %2$d points, %3$@ %4$d points",

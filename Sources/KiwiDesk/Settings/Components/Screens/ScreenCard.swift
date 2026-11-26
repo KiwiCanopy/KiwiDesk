@@ -167,13 +167,15 @@ struct ScreenCard: View {
                 drag?.split.cut(holding: stored, at: stored.position)
                 ?? stored
             let side = cut.axis == .sideBySide
-            let dragged = drag?.cut == index ? drag?.position : nil
-            let position = dragged ?? cut.position
+            let mine = drag?.cut == index ? drag : nil
+            let position = mine?.position ?? cut.position
             let at = CGFloat(position) * (side ? factor.width : factor.height)
-            // A nested cut spans only its own box (#3541).
+            // A nested cut spans only its own box (#3541); a segment
+            // in flight only its own piece (#3611).
             let across = side ? factor.height : factor.width
-            let from = CGFloat(cut.start) * across
-            let span = CGFloat(cut.end - cut.start) * across
+            let shown = mine?.segment ?? cut
+            let from = CGFloat(shown.start) * across
+            let span = CGFloat(shown.end - shown.start) * across
             let band = ScreenAreaDivider.hitBand
             ScreenAreaDivider(
                 model: model,
@@ -182,6 +184,7 @@ struct ScreenCard: View {
                 index: index,
                 cut: stored,
                 scale: side ? factor.width : factor.height,
+                crossScale: across,
                 drag: $drag
             )
             .frame(
@@ -192,6 +195,11 @@ struct ScreenCard: View {
                 x: side ? at - band / 2 : from,
                 y: side ? from : at - band / 2
             )
+        }
+        if let drag, let segment = drag.segment,
+            let stored = cuts[safe: drag.cut]
+        {
+            AreaSegmentRest(stored: stored, segment: segment, scale: factor)
         }
     }
 
@@ -206,8 +214,9 @@ struct ScreenCard: View {
             )?[safe: drag.cut]
         {
             let side = cut.axis == .sideBySide
+            let moved = drag.segment ?? cut
             ForEach(
-                (cut.leading.prefix(1) + cut.trailing.prefix(1)),
+                (moved.leading.prefix(1) + moved.trailing.prefix(1)),
                 id: \.self
             ) { id in
                 if let unit = ScreenArrangement.unitAreas(of: split)

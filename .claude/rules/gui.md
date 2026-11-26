@@ -222,7 +222,10 @@ restated `20...80` satisfies on the day it is written.
   carry the bar values a split or merge owes, sizes and evens out
   the run the selection sits in through `ScreenSplit.run(holding:)`
   (#3541), lights the dividers a drag carries where Core's
-  `ScreenAreaCut.holds` reads them onto its cut, reads positions
+  `ScreenAreaCut.holds` reads them onto its cut, finds and moves
+  an ⌥-drag's segment through `ScreenSplit.segment(of:at:)`,
+  `isJoined` and `movingSegment`, never break points of its own
+  (#3611, `ScreenAreaSegmentWiringTests`), reads positions
   from `ScreenSplit.positions` and refuses
   a name through
   `ScreenArea.nameProblem` — never arithmetic or a rule of its own

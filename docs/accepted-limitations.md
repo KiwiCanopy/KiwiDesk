@@ -121,6 +121,14 @@ line again, merge the areas on one side and split them anew, or set
 the rects from Lua
 ([#3541](https://github.com/KiwiCanopy/KiwiDesk/issues/3541)).
 
+:::unreleased
+To move one part of such a line alone, hold Option while you drag
+it: only the areas beside the part under the pointer move, and that
+drag does not snap. Merging and splitting again stays the way that
+needs no pointer
+([#3611](https://github.com/KiwiCanopy/KiwiDesk/issues/3611)).
+:::
+
 For a screen with **no free bottom corner**, Settings ▸ Screens and
 the Mac Checklist offer to move one or more screens in your macOS
 screen arrangement so every screen has one, after you say yes

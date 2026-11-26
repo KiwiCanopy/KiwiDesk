@@ -1778,6 +1778,7 @@
   "menu.window.zoom": "Масштаб",
   "mode_cue.ax": "Раскладка: %1$@",
   "monitor_card.divider.ax": "Разделитель между «%1$@» и «%2$@»",
+  "monitor_card.divider.segment.help": "Перетащи с ⌥ Option, чтобы сдвинуть только эту часть линии.",
   "monitor_card.divider.size": "%1$d pt",
   "monitor_card.divider.size_fraction": "%1$d pt · %2$@",
   "monitor_card.divider.value.ax": "%1$@ — пунктов: %2$d; %3$@ — пунктов: %4$d",

@@ -1778,6 +1778,7 @@
   "menu.window.zoom": "拡大/縮小",
   "mode_cue.ax": "レイアウト：%1$@",
   "monitor_card.divider.ax": "%1$@と%2$@の間の区切り線",
+  "monitor_card.divider.segment.help": "⌥ Optionキーを押しながらドラッグすると、線のこの部分だけを動かせます。",
   "monitor_card.divider.size": "%1$d pt",
   "monitor_card.divider.size_fraction": "%1$d pt · %2$@",
   "monitor_card.divider.value.ax": "%1$@ %2$d ポイント、%3$@ %4$d ポイント",

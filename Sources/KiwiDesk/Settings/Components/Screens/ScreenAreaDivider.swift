@@ -17,6 +17,9 @@ struct AreaDividerDrag: Equatable {
     /// The in-flight split's cut that holds the dragged segment,
     /// joined segments included (accepted-limitations.md).
     let landed: ScreenAreaCut?
+    /// The part of a joined stored cut an ⌥-drag moves alone
+    /// (#3611), in the stored split; nil while the whole line moves.
+    var segment: ScreenAreaCut? = nil
 
     /// Whether the stored `cut` now moves with the drag: Core reads
     /// it onto the same cut as the dragged segment.
@@ -36,10 +39,15 @@ struct ScreenAreaDivider: View {
     let split: ScreenSplit
     let index: Int
     let cut: ScreenAreaCut
-    /// Card points per screen point.
+    /// Card points per screen point, along the cut's axis.
     let scale: CGFloat
+    /// Card points per screen point, along the line.
+    let crossScale: CGFloat
     @Binding var drag: AreaDividerDrag?
     @State private var hovering = false
+    /// Where the pointer last hovered along the line, in screen
+    /// points: the segment an ⌥-drag picks (#3611).
+    @State private var pointer: Int?
 
     /// The drawn band the pointer can take, centred on the line.
     static let hitBand: CGFloat = 8
@@ -82,9 +90,21 @@ struct ScreenAreaDivider: View {
             hovering = inside
             if !dragging { (inside ? cursor : .arrow).set() }
         }
+        .onContinuousHover { phase in
+            guard case .active(let at) = phase else {
+                pointer = nil
+                return
+            }
+            let along = sideBySide ? at.y : at.x
+            pointer =
+                cut.start + Int((along / max(crossScale, 0.001)).rounded())
+        }
         .onDisappear { if hovering { NSCursor.arrow.set() } }
         .gesture(dragGesture)
+        .help(joined ? segmentHint : "")
         .accessibilityElement()
+        // The tooltip names a pointer gesture VoiceOver cannot make.
+        .accessibilityHint(Text(verbatim: ""))
         .accessibilityLabel(spokenLabel)
         .accessibilityValue(spokenValue(split))
         .accessibilityAdjustableAction { direction in
@@ -98,6 +118,17 @@ struct ScreenAreaDivider: View {
             )
             model.writeAreaSplit(moved.split, on: display)
         }
+    }
+
+    /// Whether the line holds more than one segment, where an
+    /// ⌥-drag moves less than a plain drag (#3611).
+    private var joined: Bool { split.isJoined(cut) }
+
+    private var segmentHint: String {
+        L(
+            "monitor_card.divider.segment.help",
+            "Option-drag to move just this part of the line."
+        )
     }
 
     private var lineStyle: AnyShapeStyle {
@@ -123,7 +154,10 @@ struct ScreenAreaDivider: View {
                 let along =
                     sideBySide
                     ? value.translation.width : value.translation.height
-                let next = moved(by: along)
+                let segment =
+                    drag?.cut == index
+                    ? drag?.segment : startedSegment()
+                let next = moved(by: along, segment: segment)
                 if next.snap != nil, next.snap != drag?.snap {
                     NSHapticFeedbackManager.defaultPerformer.perform(
                         .alignment,
@@ -141,10 +175,41 @@ struct ScreenAreaDivider: View {
             }
     }
 
+    /// The segment under the pointer while ⌥ is held at the start
+    /// of a drag on a joined line (#3611), else nil.
+    private func startedSegment() -> ScreenAreaCut? {
+        guard NSEvent.modifierFlags.contains(.option), joined else {
+            return nil
+        }
+        return split.segment(of: cut, at: pointer ?? cut.start)
+    }
+
     /// The split with this divider dragged `along` drawn points:
     /// snapped by Core within `snapReach`, then clamped at the floor.
-    private func moved(by along: CGFloat) -> AreaDividerDrag {
+    /// A `segment` moves alone and never snaps (#3611).
+    private func moved(
+        by along: CGFloat,
+        segment: ScreenAreaCut?
+    ) -> AreaDividerDrag {
         let raw = cut.position + Int((along / max(scale, 0.001)).rounded())
+        if let segment {
+            let landed = split.movingSegment(
+                segment,
+                to: raw,
+                floor: model.areaFloor(cut.axis)
+            )
+            return AreaDividerDrag(
+                split: landed.split,
+                snap: nil,
+                cut: index,
+                position: landed.position,
+                landed: landed.split.cut(
+                    holding: segment,
+                    at: landed.position
+                ),
+                segment: segment
+            )
+        }
         let extent = split.extent.width
         let depth = split.extent.height
         let snapped = split.snapped(
