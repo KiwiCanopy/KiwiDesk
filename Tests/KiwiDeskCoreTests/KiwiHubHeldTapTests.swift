@@ -100,17 +100,19 @@ struct KiwiHubHeldTapTests {
         #expect(fired.ids == [1])
     }
 
-    /// The detector reads the tap's clock: a second tap past the
-    /// gap starts a new count rather than finishing the double.
-    @Test("a second tap past the gap is no double")
-    func slowSecondTap() throws {
+    /// The detector reads the tap's clock: a ⌘ held past
+    /// `pressLimit` is no tap, so the next pair is the double.
+    @Test("a long press is no tap")
+    func longPressIsNoTap() throws {
         let (tap, fired, clock) = try doubleTapRig()
+        let down = CGEventFlags.maskCommand.rawValue | 0x08
+        _ = tap.handledForTesting(.flagsChanged, try flags(down))
+        clock.advance(by: ModifierTapDetector.pressLimit + 0.01)
+        _ = tap.handledForTesting(.flagsChanged, try flags(0))
         try self.tap(tap, device: 0x08)
-        clock.advance(by: Self.pastTheGap)
+        #expect(fired.ids.isEmpty, "the long press began no double")
         try self.tap(tap, device: 0x08)
-        #expect(fired.ids.isEmpty)
-        try self.tap(tap, device: 0x08)
-        #expect(fired.ids == [1], "a quick pair still fires")
+        #expect(fired.ids == [1])
     }
 
     @Test("a held tap leader opens no sequence")
