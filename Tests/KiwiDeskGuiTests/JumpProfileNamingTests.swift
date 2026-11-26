@@ -204,11 +204,11 @@ struct JumpProfileNamingTests {
         LocalizationManager.shared.select("en")
         let footer = JumpFooter(scope: .view, naming: true)
         #expect(Array(footer.hints.prefix(2)) == ["↩ Save", "Esc Back"])
-        #expect(footer.leading == 0)
+        #expect(footer.lit == [0, 2])
         // A held ⌘ lights no digit: none picks while naming.
         var held = footer
         held.modifiers = [.command]
-        #expect(held.leading == nil)
+        #expect(held.lit == [])
         let wiring = try? SourceScan.blankedSource(
             at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
                 "Sources/KiwiDesk/Jump/JumpPanelView+Footer.swift"

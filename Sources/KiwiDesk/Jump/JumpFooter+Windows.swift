@@ -17,6 +17,23 @@ struct JumpFooterSlot: Equatable {
     /// Whether it is the hint the held modifiers pick, which keeps
     /// it worded.
     let held: Bool
+    var role = Role.own
+
+    /// What a slot is, which decides how early it sheds where the
+    /// line runs short (#3159, #3667).
+    enum Role {
+        case own, apps, opener, side
+
+        /// The highest sheds first, then the rest from the end.
+        var sheds: Int {
+            switch self {
+            case .own: 0
+            case .apps: 1
+            case .side: 2
+            case .opener: 3
+            }
+        }
+    }
 }
 
 extension JumpFooter {
@@ -64,8 +81,16 @@ extension JumpFooter {
         }
     }
 
-    /// The lit Windows hint: the pick, unless the selection would
-    /// refuse it (#2885).
+    /// The lit Windows opener: its entry where the held keys press
+    /// its chord, with or without a selection (#3667).
+    var windowsOpenerLit: Set<Int> {
+        guard openerLit(modifiers) else { return [] }
+        let slots = windowsSlots(held: modifiers)
+        return Set(slots.indices.filter { slots[$0].role == .opener })
+    }
+
+    /// The Windows pick: ↩'s or the digits', unless the selection
+    /// would refuse it (#2885).
     var windowsLeading: Int? {
         switch windowsPick(modifiers) {
         case .moveHere:
@@ -77,7 +102,7 @@ extension JumpFooter {
     }
 
     /// Jump, Move here, Swap here, the digits, then the navigation
-    /// hints, worded for `held`.
+    /// hints, worded for `held`, the side switch last (#3667).
     func windowsSlots(held: NSEvent.ModifierFlags) -> [JumpFooterSlot] {
         let worded = windowsPick(held)
         let own: [(WindowsHint, String, String?)] = [
@@ -101,9 +126,7 @@ extension JumpFooter {
                 held: keycap != nil && hint == worded
             )
         }
-            + windowsNavigation(sideHint).map {
-                JumpFooterSlot(text: $0, keycap: nil, held: false)
-            }
+            + windowsNavigation(held)
     }
 
     /// The Windows digits' hint: ⇧ and ⌥ already rewrite it to
@@ -124,23 +147,6 @@ extension JumpFooter {
             )
         }
         return L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9")
-    }
-
-    /// The Windows side's navigation hints, which never light
-    /// (#2246): ← → along the strip, the side switch, then the
-    /// last-app opener last, so it sheds first (#3159).
-    func windowsNavigation(_ other: String) -> [String] {
-        var hints: [String] = []
-        if stripSteps {
-            hints.append(L("jump.footer.apps", "%1$@ Apps", "← →"))
-        }
-        hints.append(other)
-        if let lastAppChord {
-            hints.append(
-                L("jump.footer.next_app", "%1$@ Next app", lastAppChord)
-            )
-        }
-        return hints
     }
 
     /// The fewest keycaps at which every held state fits, then, past
@@ -164,7 +170,7 @@ extension JumpFooter {
                         held: modifiers,
                         level: levels,
                         shown: shown,
-                        lit: leading
+                        lit: lit
                     )
                 }
             }
@@ -179,7 +185,7 @@ extension JumpFooter {
             ForEach(Self.heldStates, id: \.rawValue) {
                 windowsRow(held: $0, level: level).hidden()
             }
-            windowsRow(held: modifiers, level: level, lit: leading)
+            windowsRow(held: modifiers, level: level, lit: lit)
         }
         .fixedSize(horizontal: true, vertical: false)
     }
@@ -192,20 +198,21 @@ extension JumpFooter {
         held: NSEvent.ModifierFlags,
         level: Int,
         shown: Int? = nil,
-        lit: Int? = nil
+        lit: Set<Int> = []
     ) -> some View {
         let all = windowsSlots(held: held)
-        let slots = Array(all.prefix(shown ?? all.count))
+        let kept = Self.kept(all, shown: shown)
         let drawn = windowsDrawn(held: held, level: level, shown: shown)
         return HStack(spacing: 8) {
-            ForEach(Array(drawn.enumerated()), id: \.offset) { index, text in
-                if index > 0 { Text(verbatim: "·") }
-                if text == slots[index].keycap {
+            ForEach(Array(drawn.enumerated()), id: \.offset) { place, text in
+                let index = kept[place]
+                if place > 0 { Text(verbatim: "·") }
+                if text == all[index].keycap {
                     JumpKeycap(glyph: text).transition(.opacity)
                 } else {
                     Text(text)
                         .foregroundStyle(
-                            index == lit
+                            lit.contains(index)
                                 ? AnyShapeStyle(.primary)
                                 : AnyShapeStyle(.secondary)
                         )
@@ -223,8 +230,9 @@ extension JumpFooter {
 }
 
 extension JumpFooter {
-    /// What each slot of a Windows line draws: its words, or its
-    /// keycap where `level` collapses it and `held` does not word it.
+    /// What each kept slot of a Windows line draws: its words, or
+    /// its keycap where `level` collapses it and `held` does not
+    /// word it.
     func windowsDrawn(
         held: NSEvent.ModifierFlags,
         level: Int,
@@ -232,9 +240,8 @@ extension JumpFooter {
     ) -> [String] {
         let all = windowsSlots(held: held)
         let collapsed = Set(Self.collapseOrder.prefix(level).map(\.rawValue))
-        let slots = Array(all.prefix(shown ?? all.count))
-        return slots.indices.map { index in
-            let slot = slots[index]
+        return Self.kept(all, shown: shown).map { index in
+            let slot = all[index]
             return collapsed.contains(index) && !slot.held
                 ? slot.keycap ?? slot.text : slot.text
         }

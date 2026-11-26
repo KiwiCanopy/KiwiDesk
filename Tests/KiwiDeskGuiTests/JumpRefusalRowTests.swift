@@ -202,13 +202,13 @@ struct JumpRefusalRowTests {
         #expect(row(owns: true).shownRefusal == nil)
     }
 
-    @Test("a refused selection lights nothing under ⇧")
+    @Test("a refused selection lights only ⇧⇥ under ⇧")
     func footerUnderShift() {
         let footer = JumpFooter(
             scope: .windows,
             modifiers: .shift,
             selectionMoves: false
         )
-        #expect(footer.leading == nil)
+        #expect(footer.lit == [4])
     }
 }
