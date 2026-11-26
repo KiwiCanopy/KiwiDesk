@@ -5,69 +5,80 @@ import KiwiDeskCore
 /// in (#3159, #3667).
 extension JumpFooter {
     /// The Windows side's navigation hints: ← → along the strip,
-    /// the last-app opener, then the side switch last (#3667). The
-    /// opener sheds first (#3159), then the side switch, then ← →.
+    /// the last-app opener, then the side switch last (#3667).
     func windowsNavigation(
         _ held: NSEvent.ModifierFlags
     ) -> [JumpFooterSlot] {
-        func slot(_ text: String, sheds: Int) -> JumpFooterSlot {
-            JumpFooterSlot(text: text, keycap: nil, held: false, sheds: sheds)
+        func slot(_ text: String, _ role: JumpFooterSlot.Role)
+            -> JumpFooterSlot
+        {
+            JumpFooterSlot(text: text, keycap: nil, held: false, role: role)
         }
         var hints: [JumpFooterSlot] = []
         if stripSteps {
             hints.append(
-                slot(
-                    L("jump.footer.apps", "%1$@ Apps", "← →"),
-                    sheds: JumpFooterSlot.appsSheds
-                )
+                slot(L("jump.footer.apps", "%1$@ Apps", "← →"), .apps)
             )
         }
-        if let opener = openerHint(Self.held(held)) {
-            hints.append(slot(opener, sheds: JumpFooterSlot.openerSheds))
+        if let opener = openerHint(held) {
+            hints.append(slot(opener, .opener))
         }
-        hints.append(
-            slot(sideHint(held), sheds: JumpFooterSlot.sideSheds)
-        )
+        hints.append(slot(sideHint(held), .side))
         return hints
     }
 
+    /// The opener drawn, nil where it is unbound.
+    private var openerChord: String? {
+        lastAppCombo.map {
+            ChordGlyphs.render($0, layoutChar: LayoutKeyGlyph.char)
+        }
+    }
+
     /// The opener's entry for `held`: its back form where `held`
-    /// completes that chord, else Next app; nil where it is unbound.
+    /// presses that chord, else Next app; nil where it is unbound.
     func openerHint(_ held: NSEvent.ModifierFlags) -> String? {
-        guard let lastAppChord else { return nil }
-        if let back = completedBack(held) {
+        guard let openerChord else { return nil }
+        if let back = pressedBack(held) {
             return L(
                 "jump.footer.previous_app",
                 "%1$@ Previous app",
                 ChordGlyphs.render(back, layoutChar: LayoutKeyGlyph.char)
             )
         }
-        return L("jump.footer.next_app", "%1$@ Next app", lastAppChord)
+        return L("jump.footer.next_app", "%1$@ Next app", openerChord)
     }
 
-    /// The opener's back chord, where `held` is its modifiers.
-    private func completedBack(_ held: NSEvent.ModifierFlags) -> KeyCombo? {
+    /// The opener's back chord, where `held` with its key presses it,
+    /// read through the panel's own match.
+    private func pressedBack(_ held: NSEvent.ModifierFlags) -> KeyCombo? {
         guard let back = JumpKey.back(of: lastAppCombo),
-            KeyCombo(keyCode: UInt16(back.keyCode), flags: held) == back
+            let code = UInt16(exactly: back.keyCode),
+            JumpKey.isBack(
+                keyCode: code,
+                modifiers: held,
+                scope: .windows,
+                back: back
+            )
         else { return nil }
         return back
     }
 
-    /// Whether `held` completes the opener's chord or its back form.
+    /// Whether `held` presses the opener or its back form.
     func openerLit(_ held: NSEvent.ModifierFlags) -> Bool {
-        guard lastAppChord != nil, let opener = lastAppCombo?.registered
+        if pressedBack(held) != nil { return true }
+        guard let opener = lastAppCombo,
+            let code = UInt16(exactly: opener.keyCode)
         else { return false }
-        if completedBack(held) != nil { return true }
-        return KeyCombo(keyCode: UInt16(opener.keyCode), flags: held)
-            == opener
+        return JumpKey.isOpener(keyCode: code, modifiers: held, opener: opener)
     }
 
     /// The slots a line of `shown` keeps, in their order: the
-    /// highest `sheds` goes first, then the rest from the end.
+    /// opener goes first, then the side switch, then ← →, then the
+    /// rest from the end (#3159, #3667).
     static func kept(_ slots: [JumpFooterSlot], shown: Int?) -> [Int] {
         let shown = shown ?? slots.count
         let order = slots.indices.sorted {
-            (slots[$0].sheds, $0) > (slots[$1].sheds, $1)
+            (slots[$0].role.sheds, $0) > (slots[$1].role.sheds, $1)
         }
         let dropped = Set(order.prefix(max(slots.count - shown, 0)))
         return slots.indices.filter { !dropped.contains($0) }

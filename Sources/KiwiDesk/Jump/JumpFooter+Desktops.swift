@@ -28,83 +28,120 @@ struct DesktopsFooterState: Equatable {
     }
 }
 
+/// One Desktops hint: its words and the chord they name, which
+/// lights it where the held keys press the same key (#3667).
+struct DesktopsHint {
+    let text: String
+    /// The key the hint names; nil for the side switch, which
+    /// `JumpFooter.lit` lights itself.
+    var key: UInt16?
+    var chord: NSEvent.ModifierFlags = []
+    /// Whether the press would act on the selection.
+    var live = true
+}
+
 /// The Desktops side's hints, most important first, shed from the
 /// end; ↩ and ⇧↩, or ↩ ⌃↩ Esc while carrying, never shed, and the
 /// side switch stands last (#3667). Holding ⇧, ⌥ or ⌘ rewrites
 /// them as on the other sides.
 extension JumpFooter {
-    var desktopsHints: [String] {
+    var desktopsHints: [String] { desktopsEntries.map(\.text) }
+
+    var desktopsEntries: [DesktopsHint] {
         guard let desktops else { return [] }
-        let next = sideHint(modifiers)
+        let enter = JumpKey.returnKey
+        let digit = UInt16(JumpKey.digitRows[0])
+        let next = DesktopsHint(text: sideHint(modifiers))
         let digits =
             desktops.digits > 1
             ? "⌘1–\(desktops.digits)" : "⌘1"
-        let pick =
-            desktops.selectionPicked
-            ? DesktopsText.putBack : DesktopsText.pickUp
+        let pick = DesktopsHint(
+            text: desktops.selectionPicked
+                ? DesktopsText.putBack : DesktopsText.pickUp,
+            key: enter,
+            chord: .command,
+            live: desktops.selectionPickable
+        )
+        let back = DesktopsHint(
+            text: DesktopsText.back,
+            key: JumpKey.up,
+            chord: .command
+        )
         if desktops.isCarrying {
             let carry = [
-                DesktopsText.drop, DesktopsText.dropFollow,
-                DesktopsText.cancel,
+                DesktopsHint(text: DesktopsText.drop, key: enter),
+                DesktopsHint(
+                    text: DesktopsText.dropFollow,
+                    key: enter,
+                    chord: .control
+                ),
+                DesktopsHint(text: DesktopsText.cancel),
             ]
-            if desktops.isInside {
-                return carry + [pick, DesktopsText.back, next]
-            }
-            let drop = DesktopsText.dropDesktop(digits)
+            if desktops.isInside { return carry + [pick, back, next] }
+            let drop = DesktopsHint(
+                text: DesktopsText.dropDesktop(digits),
+                key: digit,
+                chord: .command
+            )
             return carry + (desktops.digits > 0 ? [drop] : []) + [next]
         }
+        let jump = DesktopsHint(text: DesktopsText.jump, key: enter)
         if desktops.isInside {
-            let second =
-                modifiers.contains(.option)
-                ? DesktopsText.swapHere : DesktopsText.moveHere
-            return [DesktopsText.jump, second, pick, DesktopsText.back, next]
+            let swaps = modifiers.contains(.option)
+            let second = DesktopsHint(
+                text: swaps ? DesktopsText.swapHere : DesktopsText.moveHere,
+                key: enter,
+                chord: swaps ? .option : .shift
+            )
+            return [jump, second, pick, back, next]
         }
-        let second = DesktopsText.moveThere
-        let desktop =
-            modifiers.contains(.shift)
-            ? DesktopsText.moveDesktop("⇧" + digits)
-            : DesktopsText.jumpDesktop(digits)
-        return [DesktopsText.jump, second, DesktopsText.openSpace]
+        let shifted = modifiers.contains(.shift)
+        let desktop = DesktopsHint(
+            text: shifted
+                ? DesktopsText.moveDesktop("⇧" + digits)
+                : DesktopsText.jumpDesktop(digits),
+            key: digit,
+            chord: shifted ? [.shift, .command] : .command
+        )
+        let open = DesktopsHint(
+            text: DesktopsText.openSpace,
+            key: JumpKey.down,
+            chord: .command
+        )
+        let there = DesktopsHint(
+            text: DesktopsText.moveThere,
+            key: enter,
+            chord: .shift
+        )
+        return [jump, there, open]
             + (desktops.digits > 0 ? [desktop] : []) + [next]
     }
 
-    /// The hints the held keys complete, as indices into
-    /// `desktopsHints`, the side switch aside (#3667): the chord
-    /// each hint is written with, where that press acts — a dead
-    /// chord lights nothing.
+    /// The hints the held keys press, as indices into
+    /// `desktopsHints`, the side switch aside (#3667): `JumpKey`
+    /// reads the held keys as it reads the hint's own chord, and
+    /// the press acts. A bare key lights only as ↩'s pick.
     var desktopsLit: Set<Int> {
-        guard let desktops else { return [] }
         let held = Self.held(modifiers)
-        let hasDigits = desktops.digits > 0
-        if desktops.isCarrying {
-            // ↩ Drop · ⌃↩ · Esc · then Pick up · ⌘↑ Back inside,
-            // or the ⌘ digits outside.
-            switch held {
-            case []: return [0]
-            case .command where desktops.isInside:
-                return desktops.selectionPickable ? [3, 4] : [4]
-            case .command: return hasDigits ? [3] : []
-            default: return []
+        func press(_ key: UInt16, _ chord: NSEvent.ModifierFlags) -> JumpKey? {
+            JumpKey.of(
+                keyCode: key,
+                modifiers: chord,
+                scope: .desktops,
+                naming: naming
+            )
+        }
+        let entries = desktopsEntries
+        return Set(
+            entries.indices.filter { index in
+                let hint = entries[index]
+                guard let key = hint.key, hint.live,
+                    !hint.chord.isEmpty || key == JumpKey.returnKey,
+                    let named = press(key, hint.chord)
+                else { return false }
+                return press(key, held) == named
             }
-        }
-        if desktops.isInside {
-            // ↩ Jump · ⇧↩ / ⌥↩ · ⌘↩ Pick up · ⌘↑ Back.
-            switch held {
-            case []: return [0]
-            case .shift, .option, [.shift, .option]: return [1]
-            case .command:
-                return desktops.selectionPickable ? [2, 3] : [3]
-            default: return []
-            }
-        }
-        // ↩ Jump · ⇧↩ there · ⌘↓ Open Space · the ⌘ digits.
-        switch held {
-        case []: return [0]
-        case .shift: return [1]
-        case .command: return hasDigits ? [2, 3] : [2]
-        case [.shift, .command]: return hasDigits ? [3] : []
-        default: return []
-        }
+        )
     }
 
     /// A refusal in place of the hints: the Windows side's glyph

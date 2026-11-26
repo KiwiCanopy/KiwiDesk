@@ -20,7 +20,6 @@ extension JumpPanelController {
     func reloadShortcutsIfShown() {
         guard isOpen, let model = currentModel else { return }
         model.chords = liveChords()
-        model.lastAppChord = lastAppChord()
         model.lastAppCombo = lastAppCombo()
         if model.scope == .shortcuts { model.reloadShortcuts() }
     }
@@ -163,15 +162,7 @@ extension JumpPanelController {
 
 /// The chords KiwiHub names, read from the live bindings.
 extension JumpPanelController {
-    /// The last-app opener's chord from the live bindings (#3159).
-    func lastAppChord() -> String? {
-        ShortcutsOpenBinding.comboGlyphs(
-            core: core,
-            lua: KiwiHubSide.lastAppLua
-        )
-    }
-
-    /// The last-app opener as bound (#3667).
+    /// The last-app opener from the live bindings (#3159, #3667).
     func lastAppCombo() -> KeyCombo? {
         ShortcutsOpenBinding.combo(core: core, lua: KiwiHubSide.lastAppLua)
     }

@@ -50,8 +50,8 @@ enum JumpKey: Equatable {
     /// ⌃↩ on Desktops: the move or the drop, and follow.
     case follow
 
-    private static let up: UInt16 = 126
-    private static let down: UInt16 = 125
+    static let up: UInt16 = 126
+    static let down: UInt16 = 125
     private static let pageUp: UInt16 = 116
     private static let pageDown: UInt16 = 121
     static let returnKey: UInt16 = 36
@@ -209,37 +209,6 @@ enum JumpKey: Equatable {
         default:
             return nil
         }
-    }
-
-    /// The Windows side's back key: the last-app opener's chord
-    /// with ⇧ added, as registered (#3135, owner 2026-11-09). None
-    /// for no opener, a tap, a chord already holding ⇧, or a bare
-    /// ⇥, whose ⇧ form is the previous side.
-    static func back(of opener: KeyCombo?) -> KeyCombo? {
-        guard let opener, !opener.isTap else { return nil }
-        let chord = opener.registered
-        guard !chord.modifiers.contains(.shift),
-            !(UInt16(chord.keyCode) == tab && chord.modifiers.isEmpty)
-        else { return nil }
-        return KeyCombo(
-            keyCode: chord.keyCode,
-            modifiers: chord.modifiers.union(.shift)
-        )
-    }
-
-    /// Whether the press is the Windows side's back key, the one
-    /// match `of` and the panel's opener latch share (#3135, #3168).
-    static func isBack(
-        keyCode: UInt16,
-        modifiers: NSEvent.ModifierFlags,
-        scope: JumpScope,
-        back: KeyCombo?
-    ) -> Bool {
-        guard scope == .windows, let back else { return false }
-        let held = modifiers.intersection(
-            [.shift, .command, .option, .control]
-        )
-        return KeyCombo(keyCode: keyCode, flags: held) == back
     }
 
     /// Whether the key is a ↩ chord or a ⌘ digit — a pick, the

@@ -64,7 +64,6 @@ struct JumpFooterKeycapTests {
             let footer = JumpFooter(
                 scope: .windows,
                 stripSteps: true,
-                lastAppChord: "⌥⇥",
                 lastAppCombo: KeyCombo.parse("option+tab")
             )
             let level = levels.first { level in

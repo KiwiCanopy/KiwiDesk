@@ -31,11 +31,9 @@ struct JumpFooter: View {
     /// Whether the Windows strip has more than one app to step
     /// through (#3159).
     var stripSteps = false
-    /// The last-app opener's live chord; nil where it is unbound,
-    /// which leaves its hint out (#3159).
-    var lastAppChord: String?
-    /// The opener as bound, which the held keys complete and whose
-    /// ⇧ form steps the strip back (#3135, #3667).
+    /// The last-app opener as bound; nil where it is unbound, which
+    /// leaves its hint out (#3159). Its ⇧ form steps the strip back
+    /// (#3135).
     var lastAppCombo: KeyCombo?
 
     @Environment(\.kiwiDeskReduceMotion) var reduceMotion
@@ -58,7 +56,7 @@ struct JumpFooter: View {
         return ViewThatFits(in: .horizontal) {
             // A side's leading hints never shed (#1229 ▸ Footer).
             ForEach((keeps...hints.count).reversed(), id: \.self) {
-                row(Array(hints.prefix($0)))
+                stable($0)
             }
             // Past every candidate the line truncates rather than
             // spill onto the side's controls.
@@ -67,6 +65,27 @@ struct JumpFooter: View {
         .font(.caption)
         .foregroundStyle(.secondary)
         .lineLimit(1)
+    }
+
+    /// The first `shown` hints as wide as under any held chord, so
+    /// a press re-words the line and never sheds the hint it lights
+    /// (#3667, as #3249 fits the Windows line).
+    private func stable(_ shown: Int) -> some View {
+        ZStack {
+            ForEach(Self.heldStates, id: \.rawValue) { held in
+                let footer = holding(held)
+                footer.row(Array(footer.hints.prefix(shown))).hidden()
+            }
+            row(Array(hints.prefix(shown)))
+        }
+        .fixedSize(horizontal: true, vertical: false)
+    }
+
+    /// This footer under `held`.
+    func holding(_ held: NSEvent.ModifierFlags) -> JumpFooter {
+        var footer = self
+        footer.modifiers = held
+        return footer
     }
 
     /// One candidate line of `shown`; a line that is not `fixed`
@@ -112,11 +131,12 @@ extension JumpFooter {
         if hasSelection {
             switch scope {
             case .desktops: lit = desktopsLit
-            case .windows: lit = windowsLit
+            case .windows: lit = Set([windowsLeading].compactMap { $0 })
             case .view: lit = Set([viewPick].compactMap { $0 })
             case .shortcuts: break
             }
         }
+        if scope == .windows { lit.formUnion(windowsOpenerLit) }
         let count = hints.count
         if count > 0, tabSteps(modifiers) { lit.insert(count - 1) }
         return lit

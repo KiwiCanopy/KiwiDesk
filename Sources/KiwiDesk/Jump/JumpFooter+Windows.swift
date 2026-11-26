@@ -17,15 +17,23 @@ struct JumpFooterSlot: Equatable {
     /// Whether it is the hint the held modifiers pick, which keeps
     /// it worded.
     let held: Bool
-    /// How early it sheds where the line runs short: the highest
-    /// first, then the rest from the end (#3159, #3667).
-    var sheds = 0
+    var role = Role.own
 
-    /// The navigation hints' `sheds`: the opener first (#3159),
-    /// then the side switch, then ← → (#3667).
-    static let openerSheds = 3
-    static let sideSheds = 2
-    static let appsSheds = 1
+    /// What a slot is, which decides how early it sheds where the
+    /// line runs short (#3159, #3667).
+    enum Role {
+        case own, apps, opener, side
+
+        /// The highest sheds first, then the rest from the end.
+        var sheds: Int {
+            switch self {
+            case .own: 0
+            case .apps: 1
+            case .side: 2
+            case .opener: 3
+            }
+        }
+    }
 }
 
 extension JumpFooter {
@@ -73,19 +81,12 @@ extension JumpFooter {
         }
     }
 
-    /// The lit Windows hints: the pick, and the opener's entry
-    /// where the held keys complete its chord (#3667).
-    var windowsLit: Set<Int> {
+    /// The lit Windows opener: its entry where the held keys press
+    /// its chord, with or without a selection (#3667).
+    var windowsOpenerLit: Set<Int> {
+        guard openerLit(modifiers) else { return [] }
         let slots = windowsSlots(held: modifiers)
-        var lit = Set([windowsLeading].compactMap { $0 })
-        if openerLit(Self.held(modifiers)),
-            let index = slots.firstIndex(where: {
-                $0.sheds == JumpFooterSlot.openerSheds
-            })
-        {
-            lit.insert(index)
-        }
-        return lit
+        return Set(slots.indices.filter { slots[$0].role == .opener })
     }
 
     /// The Windows pick: ↩'s or the digits', unless the selection

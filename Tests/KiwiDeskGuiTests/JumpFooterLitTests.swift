@@ -38,7 +38,6 @@ struct JumpFooterLitTests {
             scope: .windows,
             modifiers: held,
             stripSteps: true,
-            lastAppChord: "⌥⇥",
             lastAppCombo: KeyCombo.parse("option+tab")
         )
     }
@@ -101,6 +100,14 @@ struct JumpFooterLitTests {
         #expect(desktops(state, .shift).lit == [5])
         #expect(desktops(state, .option).lit == [])
         #expect(desktops(state, .command).lit == [3, 4])
+        // Carried out of the Space: Drop · ⌃↩ · Esc · digits · ⇥.
+        _ = state.press(.leaveSpace, repeated: false)
+        let out = desktops(state)
+        #expect(out.hints.count == 5)
+        #expect(out.hints.last == next(.desktops))
+        #expect(out.lit == [0, 4])
+        #expect(desktops(state, .command).lit == [3])
+        #expect(desktops(state, [.shift, .command]).lit == [])
     }
 
     @Test("Windows puts ⇥ last and lights the opener under ⌥")
@@ -135,6 +142,72 @@ struct JumpFooterLitTests {
         )
         #expect(!footer.hints.contains { $0.contains("app") })
         #expect(footer.lit == [2])
+    }
+
+    @Test("the opener lights only for a chord the keys can press")
+    func openerChords() {
+        LocalizationManager.shared.select("en")
+        func footer(
+            _ combo: String,
+            _ held: NSEvent.ModifierFlags,
+            selection: Bool = true
+        ) -> JumpFooter {
+            JumpFooter(
+                scope: .windows,
+                modifiers: held,
+                hasSelection: selection,
+                lastAppCombo: KeyCombo.parse(combo)
+            )
+        }
+        // A tap or a ✦ chord is drawn but never lit.
+        #expect(footer("rcmd", [.command]).lit == [3])
+        #expect(footer("hyper+tab", []).lit == [0, 5])
+        // ⌃ is read for the opener as the panel reads it.
+        #expect(footer("ctrl+option+tab", [.control, .option]).lit == [2, 4])
+        // The opener acts with nothing selected.
+        #expect(footer("option+tab", .option, selection: false).lit == [4])
+    }
+
+    @Test("the side switch is the last hint everywhere")
+    func sideSwitchIsLast() throws {
+        LocalizationManager.shared.select("en")
+        var carrying = Self.inside
+        let window = try #require(carrying.window)
+        _ = carrying.togglePick(window)
+        var footers = [windows(), JumpFooter(scope: .shortcuts)]
+        footers.append(JumpFooter(scope: .view))
+        footers.append(JumpFooter(scope: .view, naming: true))
+        for state in [Self.outside, Self.inside, carrying] {
+            footers.append(desktops(state))
+        }
+        for footer in footers {
+            for held in JumpFooter.heldStates {
+                let shown = footer.holding(held)
+                #expect(
+                    shown.hints.last == shown.sideHint(held),
+                    "\(footer.scope) \(held)"
+                )
+            }
+        }
+    }
+
+    @Test("a line fits on its widest held state on every side")
+    func fitIsStable() throws {
+        let chrome = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Jump/JumpPanelChrome.swift"
+                )
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(chrome.contains("reversed(),id:\\.self){stable($0)}"))
+        #expect(
+            chrome.contains(
+                "ForEach(Self.heldStates,id:\\.rawValue){heldin"
+                    + "letfooter=holding(held)"
+                    + "footer.row(Array(footer.hints.prefix(shown))).hidden()}"
+            )
+        )
     }
 
     @Test("the Windows line sheds Next app, then ⇥, then Apps")

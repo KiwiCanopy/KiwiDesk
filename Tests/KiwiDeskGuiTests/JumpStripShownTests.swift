@@ -186,14 +186,14 @@ struct JumpStripShownTests {
         JumpFooter(
             scope: .windows,
             stripSteps: steps,
-            lastAppChord: chord
+            lastAppCombo: chord.flatMap(KeyCombo.parse)
         ).hints
     }
 
     @Test("Windows lists ← → Apps and the opener's chord, ⇥ last")
     func footerHints() {
         LocalizationManager.shared.select("en")
-        let full = footer(steps: true, chord: "⌥⇥")
+        let full = footer(steps: true, chord: "option+tab")
         let tail = ["← → Apps", "⌥⇥ Next app", "⇥ Shortcuts"]
         #expect(Array(full.suffix(3)) == tail)
         let bare = footer(steps: false, chord: nil)
@@ -204,7 +204,7 @@ struct JumpStripShownTests {
         let lit = JumpFooter(
             scope: .windows,
             stripSteps: true,
-            lastAppChord: "⌥⇥"
+            lastAppCombo: KeyCombo.parse("option+tab")
         ).lit
         #expect(lit == [0, 6])
     }
@@ -216,7 +216,7 @@ struct JumpStripShownTests {
             let hints = JumpFooter(
                 scope: scope,
                 stripSteps: true,
-                lastAppChord: "⌥⇥"
+                lastAppCombo: KeyCombo.parse("option+tab")
             ).hints
             #expect(!hints.contains { $0.contains("Next app") })
             #expect(!hints.contains { $0.contains("Apps") })
@@ -249,10 +249,10 @@ struct JumpStripShownTests {
                     + ".async{self?.refit(animated:true)}}"
             )
         )
-        #expect(controller.contains("model.lastAppChord=lastAppChord()"))
+        #expect(controller.contains("model.lastAppCombo=lastAppCombo()"))
         #expect(
             try squash("JumpPanelController+Shortcuts.swift")
-                .contains("model.lastAppChord=lastAppChord()")
+                .contains("model.lastAppCombo=lastAppCombo()")
         )
         let view = try squash("JumpPanelView.swift")
         #expect(view.contains("ifmodel.list.stripShown{JumpStripView("))
@@ -271,7 +271,7 @@ struct JumpStripShownTests {
         #expect(list.contains("rows:model.list.drawnRows"))
         #expect(!view.contains("rows:model.list.results.count"))
         let footer = try squash("JumpPanelView+Footer.swift")
-        #expect(footer.contains("lastAppChord:model.lastAppChord"))
+        #expect(footer.contains("lastAppCombo:model.lastAppCombo"))
     }
 
     /// The selected tile is the ring alone; only the pointer's

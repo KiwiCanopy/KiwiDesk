@@ -16807,36 +16807,37 @@ alone left ⌘↓ Open Space secondary while ⌘ was held, and ⇥ — on
 Shortcuts the only press that does anything — never in ink. The
 lit hints are the pick, as above; every hint whose written chord
 is the held modifiers and would act; and the side switch whenever
-Tab under the held keys steps a side, with or without a selection.
-Bare navigation — ← →, ↑↓, Esc — never lights, or at rest the
-whole line would be ink and ink would say nothing; a dead chord
-lights nothing, as ⌥ outside a Space, where ⌥↩ has no window to
-swap. Under ⇧ the side switch reads "⇧⇥ <previous side>", since
-⇧⇥ steps back and plain ⇥ is no longer the press; under ⌥ or ⌘
-Tab is swallowed, so it keeps its words and goes secondary. On
-Windows ⇧⌥ turns Next app into "⌥⇧⇥ Previous app", the opener's
-back chord (#3135). The side switch is the last hint on every
-side, the carrying layer included, so the eye finds it at one end;
-on Windows it stands after Next app, and the line still sheds Next
-app first, then the side switch, then Apps — where a hint stands
-and when it goes are two orders.
+Tab under the held keys steps a side, with or without a
+selection. Bare navigation — ← →, ↑↓, Esc — never lights, or at
+rest the whole line would be ink and ink would say nothing; a
+dead chord lights nothing, as ⌥ on Desktops outside a Space,
+where ⌥↩ has no window to swap. Under ⇧ the side switch reads "⇧⇥
+<previous side>", since ⇧⇥ steps back and plain ⇥ is no longer
+the press; under ⌥ or ⌘ Tab steps no side, so the switch keeps
+its words and goes secondary. On Windows ⇧⌥ turns Next app into
+"⌥⇧⇥ Previous app", the opener's back chord (#3135). The side
+switch is the last hint on every side, the carrying layer
+included, so the eye finds it at one end; on Windows it stands
+after Next app, and the line still sheds Next app first, then the
+side switch, then Apps, then the rest from the end — where a hint
+stands and when it goes are two orders.
 :::
 
 **Short of room, a modifier hint becomes its key before any hint
-goes (#3249).** Where a language's Windows line does not fit, Swap
-here, then the digits, then Move here draw as a bare keycap — ⌥,
-⌘, ⇧ — so the user still learns the modifier does something there,
-and holding it words that hint again; only past all three do hints
-shed from the end, Next app first (#3159). The keycaps are chosen
+goes (#3249).** Where a language's Windows line does not fit,
+Swap here, then the digits, then Move here draw as a bare keycap
+— ⌥, ⌘, ⇧ — so the user still learns the modifier does something
+there, and holding it words that hint again; only past all three
+do hints shed, Next app first (#3159). The keycaps are chosen
 once per language, on the widest of every chord of the three
 modifiers, so a press re-words the line and never changes which
-hints are keys, and the hint a held chord lights is always worded,
-so the lit hint is never a bare key. ↩ Jump never collapses: a line
-of symbols alone tells a new user nothing, which is why keycaps at
-rest everywhere was refused (ui-designer, 2026-11-12).
-`JumpFooterKeycapTests` ▸ `windowsKeycapsArePinned` pins each
-language's keycaps, so a catalog edit moving a language is a
-ruling.
+hints are keys, and the hint a held chord lights is always
+worded, so the lit hint is never a bare key. ↩ Jump never
+collapses: a line of symbols alone tells a new user nothing,
+which is why keycaps at rest everywhere was refused (ui-designer,
+2026-11-12). `JumpFooterKeycapTests` ▸ `windowsKeycapsArePinned`
+pins each language's keycaps, so a catalog edit moving a language
+is a ruling.
 
 **⌥ is Swap here, and ⇧ never means "there" (#2885, owner ruling
 2026-11-01).** ⌥↩ and ⇧⌥↩ both bring the selected window into your
