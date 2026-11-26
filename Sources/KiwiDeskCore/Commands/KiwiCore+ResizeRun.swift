@@ -49,12 +49,7 @@ extension KiwiCore {
     ) -> Bool {
         // A weight already at its limit moves nothing, and a silent
         // press never ends a hold.
-        let spent =
-            members.count > 1
-            && StackLayout.weightSpent(
-                space.stackWeights[focused] ?? 1,
-                by: delta
-            )
+        let spent = members.count > 1 && outcome.spent
         let at = members.firstIndex(of: focused) ?? 0
         if delta < 0, outcome.hitOwnMinimum {
             refuseShrinkAtMinimum(focused, axis: axis)
