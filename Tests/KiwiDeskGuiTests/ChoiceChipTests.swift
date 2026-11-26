@@ -40,7 +40,7 @@ struct ChoiceChipTests {
             "Settings/Sections/ShortcutLayerChip.swift": true,
             "Settings/Sections/LayerStripEditor.swift": false,
             "Settings/Components/Keybindings/KeyboardChrome.swift": true,
-            "Settings/Components/SpaceOverrides/SpacesPanelPreview.swift":
+            "Settings/Components/SpaceOverrides/SpacePreviewChipRow.swift":
                 true,
             // Its `+` is glyph-only; its lens chips are edged.
             "Settings/Components/KiwiVision/KiwiVisionLensStrip.swift":

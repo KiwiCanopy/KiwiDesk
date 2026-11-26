@@ -13,6 +13,24 @@ struct StripFollow<ID: Hashable>: Equatable {
     let index: Int
 }
 
+extension StripFollow where ID == String {
+    /// A name-keyed strip's follow: the focused item while it is
+    /// listed in `names`, else `fallback`; nil when neither is.
+    static func named(
+        focused: String?,
+        else fallback: String?,
+        in names: [String]
+    ) -> Self? {
+        let item =
+            focused.flatMap { names.contains($0) ? $0 : nil }
+            ?? fallback
+        guard let item else { return nil }
+        return names.firstIndex(of: item).map {
+            Self(id: item, index: $0)
+        }
+    }
+}
+
 /// A strip's items along its run, answering Core's overflow
 /// arithmetic (`ShelfOverflow`) for the fade and the focus follow.
 struct StripRun {
@@ -25,6 +43,23 @@ struct StripRun {
     let depth: CGFloat
     /// Room inside the scroller past each end item.
     var endRoom: CGFloat = 0
+
+    /// The run of items named `names` whose drawn sizes the strip
+    /// measured into `sizes`: lengths bare, depth the tallest shown
+    /// item's height. An item not yet measured takes no room.
+    static func measured(
+        _ names: [String],
+        sizes: [String: CGSize],
+        gap: CGFloat,
+        endRoom: CGFloat
+    ) -> StripRun {
+        StripRun(
+            lengths: names.map { sizes[$0]?.width ?? 0 },
+            gap: gap,
+            depth: names.compactMap { sizes[$0]?.height }.max() ?? 0,
+            endRoom: endRoom
+        )
+    }
 
     /// Each item's run, the end room riding on the end items.
     private var runLengths: [CGFloat] {

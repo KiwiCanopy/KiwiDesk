@@ -65,10 +65,10 @@ struct LayerStripEditor: View {
     /// name sets each chip's width.
     private func strip(_ names: [String]) -> some View {
         SidewaysStrip(
-            run: StripRun(
-                lengths: names.map { chipSizes[$0]?.width ?? 0 },
+            run: .measured(
+                names,
+                sizes: chipSizes,
                 gap: Self.gap,
-                depth: chipSizes.values.map(\.height).max() ?? 0,
                 endRoom: Self.ringRoom
             ),
             followed: followed(in: names)
@@ -78,12 +78,7 @@ struct LayerStripEditor: View {
     }
 
     private func followed(in names: [String]) -> StripFollow<String>? {
-        let item =
-            focusedChip.flatMap { names.contains($0) ? $0 : nil }
-            ?? selected
-        return names.firstIndex(of: item).map {
-            StripFollow(id: item, index: $0)
-        }
+        .named(focused: focusedChip, else: selected, in: names)
     }
 
     private func chipLine(_ names: [String]) -> some View {
