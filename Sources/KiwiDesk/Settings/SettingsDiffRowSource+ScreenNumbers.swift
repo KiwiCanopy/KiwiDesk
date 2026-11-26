@@ -48,6 +48,6 @@ extension SettingsDiffRowSource {
                 )
             }
         }
-        return (named + left).joined(separator: ", ")
+        return (named + left).joined(separator: " · ")
     }
 }

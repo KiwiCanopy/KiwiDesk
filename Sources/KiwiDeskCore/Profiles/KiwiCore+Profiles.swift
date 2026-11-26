@@ -159,7 +159,7 @@ extension KiwiCore {
         return Profile(
             name: name,
             monitorSets: [set],
-            spaceMonitorMap: set.order.storing(
+            spaceMonitorMap: (sessionScreenOrder ?? set.order).storing(
                 runtime: capturedPins(alsoOf: extra),
                 over: [:]
             ),

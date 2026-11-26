@@ -2946,7 +2946,7 @@
   "spaces.overrides.custom": "%1$d angepasst",
   "spaces.overrides.customize": "Anpassen…",
   "spaces.pin_badge.help": "Für dieses Profil an %1$@ gepinnt.",
-  "spaces.pin_badge.help_numbered": "An Bildschirm %1$d gepinnt – hier ist das %2$@.",
+  "spaces.pin_badge.help_numbered": "An Bildschirm %1$d gepinnt, hier %2$@.",
   "spaces.pin_offline_badge": "Bildschirm-Pin offline",
   "spaces.pin_offline_badge.help": "An einen Bildschirm gepinnt, der nicht angeschlossen ist, daher öffnet sich dieser Space vorübergehend auf dem Hauptbildschirm.",
   "spaces.pin_offline_badge.help_fallback": "An den Bildschirm %1$@ gepinnt, der nicht angeschlossen ist.\nBis er wieder angeschlossen ist, öffnet sich der Space auf %2$@.",

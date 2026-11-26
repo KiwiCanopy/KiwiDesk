@@ -191,6 +191,16 @@ struct ScreensGateWiringTests {
                 // needle two entries down, and the same fix.
                 "split.overflow>0",
                 "overflowChip(assignments,split.overflow)",
+                // The number badge leads the first pane (#3647).
+                "ifleads{ScreenNumberBadge(model:model,display:display)",
+            ],
+            "Components/Screens/ScreenAreaMenu.swift": [
+                // The badge's items on the keyboard and VoiceOver
+                // route (#3647).
+                "ScreenNumberItems(model:model,display:display)"
+            ],
+            "Sections/SpacePinChip.swift": [
+                "BadgeChip(label:model.offlinePinLabel(space))"
             ],
             "Components/Screens/ScreenCard.swift": [
                 // The main display's glow (#758). Decoration —
@@ -214,6 +224,8 @@ struct ScreensGateWiringTests {
                 "Image(systemName:\"xmark.circle.fill\")",
             ],
             "Sections/ScreensSection+Details.swift": [
+                // A pin waiting on a number no screen holds (#3647).
+                "ifletnumber=orphan.number{",
                 // The orphan row's spoken label: its value is a
                 // bare fingerprint hash, which VoiceOver steps
                 // through with no context unless the row says
@@ -224,7 +236,7 @@ struct ScreensGateWiringTests {
                 // carries one of those already, so the bare
                 // modifier name could never fail (code review
                 // round 2, 2026-08-04).
-                "\"monitors.orphan_pin.row_axlabel\""
+                "\"monitors.orphan_pin.row_axlabel\"",
             ],
         ]
         for (name, needles) in draws {

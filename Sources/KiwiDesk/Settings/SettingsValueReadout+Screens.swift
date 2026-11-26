@@ -6,15 +6,19 @@ extension SettingsValueReadout {
     static func screensRows(
         _ key: ScreensKey,
         old: GuiConfig,
-        new: GuiConfig
+        new: GuiConfig,
+        order: ScreenOrder?
     ) -> [SettingsDiffRow] {
         let census = SettingKey.screens(key)
         switch key {
         case .spacePins:
+            let words = { (slot: ScreenSlotKey) in
+                screenWords(slot, order, new.settings.displayAreas)
+            }
             return screensPinRows(
                 census,
-                old: old.spacePins,
-                new: new.spacePins
+                old: old.spacePins.mapValues(words),
+                new: new.spacePins.mapValues(words)
             )
         case .mainSpaces:
             return screensMainRows(
@@ -39,8 +43,8 @@ extension SettingsValueReadout {
     /// as "Screen N" (#3647), an area pin as "Screen N – Area k".
     private static func screensPinRows(
         _ census: SettingKey,
-        old: [SpaceID: ScreenSlotKey],
-        new: [SpaceID: ScreenSlotKey]
+        old: [SpaceID: String],
+        new: [SpaceID: String]
     ) -> [SettingsDiffRow] {
         let base = L("diff.label.space_pin", "Screen pin")
         let touched = Set(old.keys).union(new.keys)
@@ -51,22 +55,33 @@ extension SettingsValueReadout {
                 census,
                 instance: space.raw,
                 label: instanceLabel(base, space.raw),
-                old: old[space].map(screenWords) ?? unset,
-                new: new[space].map(screenWords) ?? unset
+                old: old[space] ?? unset,
+                new: new[space] ?? unset
             )
         }
     }
 
-    /// A stored pin's words: the number its screen holds, and an
-    /// area's place in the order its ids were given.
-    private static func screenWords(_ slot: ScreenSlotKey) -> String {
+    /// A stored pin's words: "Screen N", and an area pin "Screen N –
+    /// Left", its area worded on the screen holding N in `order`.
+    private static func screenWords(
+        _ slot: ScreenSlotKey,
+        _ order: ScreenOrder?,
+        _ splits: [String: ScreenSplit]
+    ) -> String {
         let screen = L("monitor_card.number_badge", "Screen %1$d", slot.number)
         guard slot.areaID > 0 else { return screen }
-        return L(
-            "monitors.split.name",
-            "%1$@ – %2$@",
-            screen,
-            ScreenAreaWords.position(.numbered(slot.areaID + 1))
+        guard let key = order?.runtimeKey(of: slot) else {
+            return L(
+                "monitors.split.name",
+                "%1$@ – %2$@",
+                screen,
+                ScreenAreaWords.position(.numbered(slot.areaID + 1))
+            )
+        }
+        return SettingsModel.perScreenName(
+            screen: screen,
+            key: key.description,
+            splits: splits
         )
     }
 

@@ -24173,11 +24173,20 @@ The consequences:
 - **The user renumbers on the Screens page.** Each card's badge
   always reads "Screen N", never a bare numeral, since Spaces
   default to numeric names and a "1" over a "1" chip reads as one
-  thing. Its pop-up offers each number, then **Don't Number This
+  thing. Its pull-down offers each number, then **Don't Number This
   Screen**; picking a number another screen holds swaps the two,
   and the card's menu carries the same items for the keyboard and
   VoiceOver. A screen with no number reads "Gets a new Space" and
-  gets one, as the #1175 heal seeds one. Dragging a card to swap is
+  gets one, as the #1175 heal seeds one. A renumber is a draft until
+  Save, and stands for the session, for its profile on the setup it
+  was made on, until a Save stores it. A screen left unnumbered is
+  the session's alone: no stored setup holds a gap, so a Save writes
+  nothing for it and nothing for the heal's pin, and the gap ends at
+  the next explicit load or pick, a composed apply, the reset or a
+  relaunch. Storing it would need a gap in `MonitorSet.monitors`, a
+  format crossing. A stored profile's draft offers renumbering only,
+  and a screen with a twin cannot be left unnumbered, since the two
+  share one fingerprint. Dragging a card to swap is
   later: cards are already drop targets for Space chips.
 - **A split is stored as shares of the screen**, per-mille, and
   resolved to points on whichever screen holds the number. A

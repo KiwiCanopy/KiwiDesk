@@ -131,7 +131,7 @@ struct SessionScreenOrderTests {
         try core.persistProfile(named: "Work", modes: nil)
         work = try core.profiles.read(name: "Work")
         #expect(work.monitorSets.map(\.monitors) == [reversed.fingerprints])
-        #expect(core.profiles.sessionScreenOrder == holed)
+        #expect(core.profiles.sessionScreenOrder?.order == holed)
     }
 
     @Test("an explicit load ends it; a monitor change does not")
@@ -140,8 +140,74 @@ struct SessionScreenOrderTests {
         try loadWork(core)
         core.setSessionScreenOrder(reversed)
         core.handle(.displaysChanged([left, right]))
-        #expect(core.profiles.sessionScreenOrder == reversed)
+        #expect(core.profiles.sessionScreenOrder?.order == reversed)
         try core.loadProfile(named: "Work")
+        #expect(core.profiles.sessionScreenOrder == nil)
+    }
+
+    @Test("another profile on the same screens never reads it")
+    func ownedByItsProfile() throws {
+        let core = makeCore()
+        try loadWork(core)
+        core.setSessionScreenOrder(reversed)
+        let home = Profile(
+            name: "Home",
+            monitorSets: [MonitorSet(monitors: ["A:100x100", "B:100x100"])],
+            spaceMonitorMap: ["2": ScreenSlotKey(number: 2)!],
+            spaces: ["1", "2"],
+            spaceModes: ["1": .bsp, "2": .bsp],
+            settings: TilingSettings()
+        )
+        try core.profiles.write(home)
+        core.apply(profile: home, cause: .event)
+        #expect(core.profiles.currentName == "Home")
+        #expect(core.liveScreenOrder.fingerprints.first == "A:100x100")
+        #expect(core.spacePins["2"] == "B:100x100")
+    }
+
+    @Test("an unnumbered screen answers to no number")
+    func holeNamesNothing() throws {
+        let core = makeCore()
+        try loadWork(core)
+        core.setSessionScreenOrder(
+            try #require(
+                ScreenOrder(["A:100x100", "B:100x100"])
+                    .unnumbering("B:100x100")
+            )
+        )
+        #expect(core.screen(numbered: 1)?.id == left.id)
+        #expect(core.screen(numbered: 2) == nil)
+        #expect(core.screenNumber(of: right.id) == nil)
+    }
+
+    @Test("a new profile stores no pin to an unnumbered screen")
+    func newProfileDropsTheHolePin() throws {
+        let core = makeCore()
+        try loadWork(core)
+        core.setSessionScreenOrder(
+            try #require(
+                ScreenOrder(["A:100x100", "B:100x100"])
+                    .unnumbering("B:100x100")
+            )
+        )
+        core.spacePins = ["2": "B:100x100"]
+        try core.persistProfile(named: "Fresh", modes: nil)
+        let fresh = try core.profiles.read(name: "Fresh")
+        #expect(fresh.spaceMonitorMap.isEmpty)
+        #expect(
+            fresh.monitorSets.map(\.monitors) == [["A:100x100", "B:100x100"]]
+        )
+    }
+
+    @Test("a pick of the connected set and the reset end it")
+    func pickAndResetClear() throws {
+        let core = makeCore()
+        try loadWork(core)
+        core.setSessionScreenOrder(reversed)
+        try core.claimMonitorSet(["A:100x100", "B:100x100"], for: "Work")
+        #expect(core.profiles.sessionScreenOrder == nil)
+        core.setSessionScreenOrder(reversed)
+        _ = core.resetAllSettings(trash: { _ in })
         #expect(core.profiles.sessionScreenOrder == nil)
     }
 }

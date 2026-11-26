@@ -158,6 +158,8 @@ extension SettingsModel {
                 NewerFormatText.detail(error)
             )
             core.onLog("profile save failed: \(error)")
+            // Nothing stored the renumber, so the session drops it.
+            if screenNumbering.draft != nil { core.setSessionScreenOrder(nil) }
             saved = false
         }
         // Profile files first: the gui.json write below reloads

@@ -1823,7 +1823,7 @@
   "monitor_card.number.ax": "Номер экрана",
   "monitor_card.number.none": "Не нумеровать этот экран",
   "monitor_card.number.unnumbered": "Получает новое пространство",
-  "monitor_card.number.use": "Использовать как экран %1$d",
+  "monitor_card.number.use": "Использовать как Экран %1$d",
   "monitor_card.number_badge": "Экран %1$d",
   "monitor_card.split.nested.ax": "Участков: %1$d",
   "monitor_card.split.side_by_side.ax": "Участков: %1$d, рядом друг с другом",

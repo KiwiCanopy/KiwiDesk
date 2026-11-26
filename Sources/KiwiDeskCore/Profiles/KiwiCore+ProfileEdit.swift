@@ -36,7 +36,9 @@ extension KiwiCore {
         // A renumber of the connected setup it holds (#3647 ▸ lane 2);
         // a hole is the session's and never stored.
         if let screenOrder, screenOrder.unnumbered.isEmpty,
-            existing.set(matching: liveFingerprints) != nil
+            existing.set(matching: liveFingerprints) != nil,
+            MonitorSet(monitors: screenOrder.fingerprints)
+                .matches(liveFingerprints)
         {
             existing.upsert(
                 MonitorSet(monitors: screenOrder.fingerprints),

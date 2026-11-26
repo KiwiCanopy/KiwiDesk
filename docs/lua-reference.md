@@ -743,8 +743,9 @@ screen's fingerprint (as printed by `list_monitors`) or name.
 A number names **Screen N**, as `list_monitors` reports it in
 `screen`: the live profile's numbering for the connected screens,
 else left to right, ties top to bottom. A renumber saved in
-Settings ▸ Screens counts at once, and a screen left unnumbered
-there holds no number until the next load. A script that must name one
+Settings ▸ Screens counts at once. A screen left unnumbered there
+holds no number while that profile stays live, until a profile is
+loaded by hand or KiwiDesk quits. A script that must name one
 screen whatever the numbering passes its fingerprint. A number a
 held `init.lua` call names before any screen is known —
 `pin_space_to_display`, a split, a bar's per-screen value — is
@@ -9348,8 +9349,8 @@ end)
 :::unreleased
 `desktop_change`'s `screen` is the switched screen's
 [Screen N](#move_space_to_display), and `main` says whether it is the
-main screen; the Lua callback receives the number second and `main`
-third. Test `main`, not the number, for the main screen.
+main screen; the Lua callback receives the number second (`nil` on
+an unnumbered screen) and `main` third. Test `main`, not the number, for the main screen.
 :::
 
 The window lifecycle events fire even when focus does not change
@@ -11009,7 +11010,8 @@ its shown Space lays windows out in.
 
 :::unreleased
 It lists the screens as Screen 1 onwards, each with its number in
-`screen` and `main: true` on the main screen.
+`screen` and `main: true` on the main screen; a screen left
+unnumbered in Settings ▸ Screens comes last, with `screen` `null`.
 :::
 
 It also reports `space_id`, the Space that screen shows (`null`

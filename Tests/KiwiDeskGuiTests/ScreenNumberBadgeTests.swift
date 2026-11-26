@@ -59,8 +59,8 @@ struct ScreenNumberBadgeTests {
         let (_, model) = try makeModel()
         model.useScreenNumber(2, for: a)
         let rows = SettingsDiffRowSource.screenNumberRows(for: model)
-        #expect(rows.count == 1)
         #expect(rows.first?.revert == .screenNumbers)
+        // The pill's count is its list's rows: one for the renumber.
         #expect(model.draftChangeCount == 1)
         try model.revert(#require(rows.first))
         #expect(model.screenNumbering.draft == nil)
@@ -128,5 +128,31 @@ struct ScreenNumberBadgeTests {
         #expect(
             saved.monitorSets.map(\.monitors) == [["B:100x100", "A:100x100"]]
         )
+    }
+
+    @Test("the live Save sets the session order before the pins land")
+    func liveSave() throws {
+        let (core, model) = try makeModel()
+        try core.profiles.write(
+            Profile(
+                name: "Work",
+                monitorSets: [
+                    MonitorSet(monitors: ["A:100x100", "B:100x100"])
+                ],
+                spaceMonitorMap: ["2": ScreenSlotKey(number: 2)!],
+                spaces: ["1", "2"],
+                spaceModes: ["1": .bsp, "2": .bsp],
+                settings: TilingSettings()
+            )
+        )
+        try core.loadProfile(named: "Work")
+        model.reload()
+        model.useScreenNumber(2, for: a)
+        model.updateActiveProfile()
+        let work = try core.profiles.read(name: "Work")
+        #expect(
+            work.monitorSets.map(\.monitors) == [["B:100x100", "A:100x100"]]
+        )
+        #expect(core.spacePins["2"] == "A:100x100")
     }
 }

@@ -1823,7 +1823,7 @@
   "monitor_card.number.ax": "화면 번호",
   "monitor_card.number.none": "이 화면에 번호 매기지 않기",
   "monitor_card.number.unnumbered": "새 공간을 받음",
-  "monitor_card.number.use": "화면 %1$d번으로 사용",
+  "monitor_card.number.use": "화면 %1$d(으)로 사용",
   "monitor_card.number_badge": "화면 %1$d",
   "monitor_card.split.nested.ax": "구역 수: %1$d",
   "monitor_card.split.side_by_side.ax": "구역 수: %1$d, 좌우 배치",

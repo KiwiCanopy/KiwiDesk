@@ -133,3 +133,9 @@ public struct ScreenOrder: Equatable, Sendable {
         )
     }
 }
+
+/// A session renumber with the profile it is for (#3647 ▸ lane 2b).
+struct SessionScreenOrder: Equatable {
+    var profile: String?
+    var order: ScreenOrder
+}

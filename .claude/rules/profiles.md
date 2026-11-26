@@ -2042,6 +2042,19 @@ loaded with it. The obligations:
   `ProfileComposition`, the tour, the starter), and never an array
   index, so a gap in the order stays a gap (#3647,
   `NumberedScreenArgumentTests`).
+- **A session renumber of the connected screens is one override,
+  `KiwiCore+SessionScreenOrder`'s (#3647 ▸ lane 2b)**, read by
+  `screenOrder(for:)` for the live profile and by `liveScreenOrder`,
+  never by `screenOrder(holding:)`, so a stored draft keeps its own
+  order. Clear it only at an explicit load (`.explicit`, ahead of
+  `loadProfile`'s hand-over), a pick of the connected set, a composed
+  apply, the #634 reset and a Save that stored it with no hole
+  (`clearSessionScreenOrder(ifStoredIn:)`); a monitor-change, wake or
+  edit re-apply keeps it. A Save stores it through
+  `upsert(_:reordering:)` on a held profile and through
+  `liveMonitorSet` on a new one, and it is keyed by its profile, so a
+  switch to another profile on the same screens never reads it
+  (`SessionScreenOrderTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and
   `forgetMonitorSet` (#3324) — never `Profile.release` beside it,

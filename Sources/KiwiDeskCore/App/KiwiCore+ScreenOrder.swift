@@ -20,9 +20,7 @@ extension KiwiCore {
     /// set covering them, else left to right. A draft of a stored
     /// profile reads its own, never the live one's.
     public func screenOrder(for profile: Profile?) -> ScreenOrder {
-        if let profile, profile.name == profiles.currentName,
-            let order = sessionScreenOrder
-        {
+        if let profile, let order = sessionScreenOrder(for: profile.name) {
             return order
         }
         return screenOrder(holding: profile?.monitorSets ?? [])
@@ -53,9 +51,9 @@ extension KiwiCore {
     ) -> [(number: Int, display: Display)] {
         var left = displays.sorted(by: ScreenOrder.precedes)
         var result: [(number: Int, display: Display)] = []
-        for (index, fingerprint) in liveScreenOrder.fingerprints
-            .enumerated()
-        {
+        let order = liveScreenOrder
+        for (index, fingerprint) in order.fingerprints.enumerated()
+        where !order.unnumbered.contains(index + 1) {
             guard
                 let at = left.firstIndex(where: {
                     $0.fingerprint == fingerprint

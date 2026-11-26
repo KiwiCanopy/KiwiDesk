@@ -55,7 +55,9 @@ struct ScreensFamilyRows {
     /// (#53).
     func chips(on fingerprint: String) -> [SpaceAssignment] {
         spaces.compactMap { space in
-            guard !mainSpaces.contains(space) else { return nil }
+            // A waiting pin has its own row, never a chip (#3647).
+            guard !mainSpaces.contains(space), waiting[space] == nil
+            else { return nil }
             switch resolutions[space] {
             case .pinned(let pinned) where pinned == fingerprint:
                 return SpaceAssignment(space: space, kind: .pinned)
@@ -119,7 +121,7 @@ struct ScreensFamilyRows {
     /// them.
     var orphans: [OrphanPin] {
         let connected = Set(displays.map(\.fingerprint))
-        return
+        let gone =
             pins
             .filter {
                 !connected.contains(
@@ -128,10 +130,11 @@ struct ScreensFamilyRows {
             }
             .filter { !mainSpaces.contains($0.key) }
             .map { OrphanPin(space: $0.key, fingerprint: $0.value) }
-            + waiting.filter { !mainSpaces.contains($0.key) }.map {
+        let numbered = waiting.filter { !mainSpaces.contains($0.key) }
+            .map {
                 OrphanPin(space: $0.key, fingerprint: "", number: $0.value)
             }
-            .sorted { $0.space.raw < $1.space.raw }
+        return (gone + numbered).sorted { $0.space.raw < $1.space.raw }
     }
 
     /// Deduplicated spaces assigned to screen cards: fingerprint
