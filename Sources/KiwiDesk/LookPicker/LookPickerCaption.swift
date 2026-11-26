@@ -8,15 +8,24 @@ struct LookPickerCaption: View {
     @ObservedObject var model: LookPickerModel
     let geometry: LookPickerGeometry
     @FocusState private var nameFocused: Bool
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 4) {
-            name
-            if let entry = model.selected {
-                Text(LookPickerText.subtitle(entry, worn: worn))
-                    .font(.system(size: 15, weight: .medium))
-                    .opacity(0.75)
-                    .accessibilityHidden(true)
+            // The name block fades out, then the next one in, never
+            // two names at once (ui-designer, 2026-11-26).
+            ZStack {
+                VStack(spacing: 4) {
+                    name
+                    if let entry = model.selected {
+                        Text(LookPickerText.subtitle(entry, worn: worn))
+                            .font(.system(size: 15, weight: .medium))
+                            .opacity(0.75)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .id(model.selection)
+                .transition(nameSwap)
             }
             Text(
                 LookPickerText.hint(
@@ -34,6 +43,17 @@ struct LookPickerCaption: View {
         .shadow(color: SettingsTheme.visionVeil.opacity(0.7), radius: 14, y: 2)
         .frame(width: geometry.screen.width)
         .offset(y: geometry.nameTop)
+    }
+
+    private var nameSwap: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.animation(
+                reduceMotion ? nil : .easeOut(duration: 0.16).delay(0.06)
+            ),
+            removal: .opacity.animation(
+                reduceMotion ? nil : .easeOut(duration: 0.08)
+            )
+        )
     }
 
     private var worn: Bool { model.selection == model.wornIndex }

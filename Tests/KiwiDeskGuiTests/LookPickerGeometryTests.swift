@@ -115,4 +115,25 @@ struct LookPickerGeometryTests {
             )
         }
     }
+
+    @Test("a slot is the card at 0 and a stripe past it, off-screen too")
+    func slots() {
+        let geometry = LookPickerGeometry(
+            screen: CGSize(width: 1512, height: 982),
+            menuBar: 33
+        )
+        #expect(geometry.slot(for: 0) == geometry.card)
+        let right = geometry.stripes(side: 1, available: 40)
+        let left = geometry.stripes(side: -1, available: 40)
+        for (k, rect) in right.enumerated() {
+            #expect(geometry.slot(for: k + 1) == rect)
+        }
+        for (k, rect) in left.enumerated() {
+            #expect(geometry.slot(for: -(k + 1)) == rect)
+        }
+        #expect(geometry.shownStripes(side: 1) == right.count)
+        // One past the last shown lies beyond the screen's edge.
+        let past = geometry.slot(for: right.count + 1)
+        #expect(past.maxX > 1512 - LookPickerGeometry.margin)
+    }
 }

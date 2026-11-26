@@ -12,6 +12,11 @@ struct LookPickerView: View {
     @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency)
     private var reduceTransparency
+    /// The ground the last step left, drawn opaque under the incoming
+    /// one until it is covered, so two grounds never meet half-faded.
+    @State private var groundUnder: Int?
+    @State private var swapProgress: CGFloat = 1
+    @State private var swapSide: CGFloat = 1
 
     var body: some View {
         ZStack {
@@ -32,7 +37,11 @@ struct LookPickerView: View {
                 )
             }
             if reveal.drop != .hidden {
-                LookPickerDrop(stage: reveal.drop, target: dropPoint)
+                LookPickerDrop(
+                    stage: reveal.drop,
+                    faded: reveal.dropIn,
+                    target: dropPoint
+                )
             }
         }
         .frame(width: geometry.screen.width, height: geometry.screen.height)
@@ -49,9 +58,7 @@ struct LookPickerView: View {
     private var picker: some View {
         ZStack(alignment: .topLeading) {
             backdrop
-            stripes(side: -1)
-            stripes(side: 1)
-            card
+            LookPickerRow(model: model, geometry: geometry)
             LookPickerCaption(model: model, geometry: geometry)
         }
         .frame(
@@ -66,11 +73,28 @@ struct LookPickerView: View {
     /// it closes, as Esc does. #3478 lays the look's picture here.
     private var backdrop: some View {
         ZStack {
-            LookGround(
-                settings: selectedSettings,
-                reach: geometry.screen.height * 2,
-                stage: .backdrop
-            )
+            ZStack {
+                if let under = groundUnder, model.cards.indices.contains(under)
+                {
+                    ground(model.cards[under].painted(over: model.settings))
+                }
+                ground(selectedSettings)
+                    .drawingGroup()
+                    .modifier(
+                        LookPickerSwapIn(
+                            progress: swapProgress,
+                            side: swapSide
+                        )
+                    )
+            }
+            .onChange(of: model.selection) { old, new in
+                groundUnder = old
+                swapSide = new > old ? 1 : -1
+                swapProgress = 0
+                withAnimation(reduceMotion ? nil : LookPickerRow.spring) {
+                    swapProgress = 1
+                }
+            }
             RadialGradient(
                 colors: [.clear, SettingsTheme.visionVeil.opacity(0.25)],
                 center: .center,
@@ -84,108 +108,22 @@ struct LookPickerView: View {
         .accessibilityHidden(true)
     }
 
+    private func ground(_ settings: TilingSettings) -> some View {
+        LookGround(
+            settings: settings,
+            reach: geometry.screen.height * 2,
+            stage: .backdrop
+        )
+    }
+
     private var selectedSettings: TilingSettings {
         model.selected?.painted(over: model.settings) ?? model.settings
-    }
-
-    @ViewBuilder
-    private func stripes(side: Int) -> some View {
-        let available =
-            side < 0
-            ? model.selection
-            : model.cards.count - model.selection - 1
-        let rects = geometry.stripes(side: side, available: available)
-        // The far ones first, so each nearer stripe lies on top.
-        ForEach(Array(rects.enumerated()).reversed(), id: \.offset) {
-            item in
-            let k = item.offset
-            let rect = item.element
-            let index = model.selection + side * (k + 1)
-            LookPickerStripe(
-                entry: model.cards[index],
-                settings: model.settings,
-                spaceLabels: model.spaceLabels,
-                geometry: geometry,
-                shade: LookPickerGeometry.stripeShade(k)
-            )
-            .frame(width: rect.width, height: rect.height)
-            .offset(x: rect.minX, y: rect.minY)
-            .onTapGesture { model.select(index) }
-        }
-    }
-
-    private var card: some View {
-        let frame = geometry.frame
-        let shape = RoundedRectangle(
-            cornerRadius: LookPickerGeometry.frameRadius
-        )
-        return ZStack {
-            Color.clear.glassChrome(
-                in: shape,
-                enabled: true,
-                variant: .regular,
-                tint: nil,
-                fallback: AnyShapeStyle(.regularMaterial)
-            )
-            LookCardScene(
-                settings: selectedSettings,
-                spaceLabels: model.spaceLabels,
-                scale: geometry.scale,
-                height: geometry.card.height
-            )
-            .frame(width: geometry.card.width, height: geometry.card.height)
-            .clipShape(
-                RoundedRectangle(cornerRadius: LookPickerGeometry.cardRadius)
-            )
-        }
-        .frame(width: frame.width, height: frame.height)
-        .shadow(
-            color: SettingsTheme.visionVeil.opacity(0.5),
-            radius: 40,
-            y: 30
-        )
-        .offset(x: frame.minX, y: frame.minY)
-        .onTapGesture { model.wearSelected() }
-        .modifier(LookPickerCardSpeech(model: model))
-    }
-}
-
-/// One stripe: the whole look scaled down, darker further out.
-private struct LookPickerStripe: View {
-    let entry: LookPickerEntry
-    let settings: TilingSettings
-    let spaceLabels: [SpaceGlyph]
-    let geometry: LookPickerGeometry
-    let shade: Double
-
-    var body: some View {
-        let card = geometry.card.size
-        let fit = geometry.stripeSize.height / max(card.height, 1)
-        LookCardScene(
-            settings: entry.painted(over: settings),
-            spaceLabels: spaceLabels,
-            scale: geometry.scale,
-            height: card.height
-        )
-        .frame(width: card.width, height: card.height)
-        .scaleEffect(fit)
-        .frame(
-            width: geometry.stripeSize.width,
-            height: geometry.stripeSize.height
-        )
-        .overlay(SettingsTheme.visionVeil.opacity(shade))
-        .clipShape(
-            RoundedRectangle(cornerRadius: LookPickerGeometry.stripeRadius)
-        )
-        .shadow(color: SettingsTheme.visionVeil.opacity(0.55), radius: 9)
-        .contentShape(Rectangle())
-        .accessibilityHidden(true)
     }
 }
 
 /// The card speaks for the picker: the look's name, its line and
 /// its place, adjusted by a swipe, worn by the default action.
-private struct LookPickerCardSpeech: ViewModifier {
+struct LookPickerCardSpeech: ViewModifier {
     @ObservedObject var model: LookPickerModel
 
     func body(content: Content) -> some View {

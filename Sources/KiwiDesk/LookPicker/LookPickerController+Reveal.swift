@@ -41,6 +41,11 @@ extension LookPickerController {
         }
         reveal.drop = .above
         withAnimation(
+            reduceMotion ? nil : .easeOut(duration: LookPickerReveal.dropFade)
+        ) {
+            reveal.dropIn = true
+        }
+        withAnimation(
             reduceMotion ? nil : .easeIn(duration: LookPickerReveal.fall)
         ) {
             reveal.drop = .landed

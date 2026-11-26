@@ -57,6 +57,20 @@ struct LookPickerModelTests {
         #expect(model.selection == 0)
     }
 
+    @Test("only a step past the row's end reads as a wrap")
+    func wrapIsMarked() {
+        let model = model(worn: 0)
+        model.handle(.step(1), repeated: false)
+        #expect(model.selection == 1 && !model.wrapped)
+        model.handle(.step(-1), repeated: false)
+        model.handle(.step(-1), repeated: false)
+        #expect(model.selection == 2 && model.wrapped)
+        model.handle(.step(1), repeated: false)
+        #expect(model.selection == 0 && model.wrapped)
+        model.select(2)
+        #expect(!model.wrapped)
+    }
+
     @Test("↩ wears another look once; on the worn look it closes")
     func enterWearsOrCloses() {
         let model = model(worn: 1)

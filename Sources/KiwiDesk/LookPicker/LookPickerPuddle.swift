@@ -15,6 +15,8 @@ final class LookPickerReveal: ObservableObject {
     }
 
     @Published var drop: DropStage = .hidden
+    /// The drop has faded in, apart from its fall.
+    @Published var dropIn = false
     /// The picker's own blur, in points.
     @Published var blur: CGFloat = 0
     /// The hole's radius, from the drop's point.
@@ -26,6 +28,8 @@ final class LookPickerReveal: ObservableObject {
 
     /// The drop's fall from `dropHeight` above the card.
     static let fall: TimeInterval = 0.22
+    /// The drop's fade-in at the top of its fall.
+    static let dropFade: TimeInterval = 0.06
     /// How long the drop rests squashed before it sinks.
     static let squashHold: TimeInterval = 0.08
     /// The sink and its ripple.
@@ -122,6 +126,7 @@ struct LookPickerWave: View {
 /// lands, then sinks in under a ripple.
 struct LookPickerDrop: View {
     let stage: LookPickerReveal.DropStage
+    let faded: Bool
     /// Where it lands.
     let target: CGPoint
 
@@ -143,7 +148,7 @@ struct LookPickerDrop: View {
                     y: scale.y,
                     anchor: .bottom
                 )
-                .opacity(stage == .above || stage == .sunk ? 0 : 1)
+                .opacity(stage == .sunk || !faded ? 0 : 1)
                 .position(
                     x: target.x,
                     y: stage == .above

@@ -235,6 +235,9 @@ struct SettingsRawColorTests {
             "the preview's fade is a MASK — only its alpha "
             + "reaches the screen, black is 'opaque' and never "
             + "drawn",
+        "LookPickerSwapIn.swift":
+            "the backdrop wipe is a MASK (#3038) — only its alpha "
+            + "reaches the screen, black is 'opaque' and never drawn",
         "CustomGlyph.swift":
             "a template image's ink (#3281) — only its alpha "
             + "reaches the screen, tinted by the view's foreground",
