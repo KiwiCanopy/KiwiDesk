@@ -44,10 +44,13 @@ final class HeldWrites: @unchecked Sendable {
 
     /// Holds every write to `ids` until `deadline`; a window held
     /// already takes the later of the two.
-    func hold(_ ids: some Sequence<WindowID>, until deadline: DispatchTime) {
+    func hold(
+        _ ids: some Sequence<WindowID>,
+        until deadline: DispatchTime,
+        now: DispatchTime = .now()
+    ) {
         lock.lock()
         defer { lock.unlock() }
-        let now = DispatchTime.now()
         deadlines = deadlines.filter {
             now < $0.value || staged[$0.key] != nil
         }
@@ -152,13 +155,13 @@ extension FrameApplier {
         _ ids: some Sequence<WindowID>,
         until deadline: DispatchTime
     ) {
-        held.hold(ids, until: deadline)
+        held.hold(ids, until: deadline, now: heldNow())
     }
 
     /// Ends every hold — the plate slide's play was dropped — and
     /// sends what they kept, a take-out's early with them.
     func releaseAllHolds() {
-        for id in held.releaseAll() { releaseHeld(id, at: .now()) }
+        for id in held.releaseAll() { releaseHeld(id, at: heldNow()) }
     }
 
     /// Stages `frame` for a held window; true when it was held, so
@@ -175,7 +178,8 @@ extension FrameApplier {
             frame,
             setSize: setSize,
             band: band,
-            lead: lead
+            lead: lead,
+            now: heldNow()
         ) {
         case .pass: return false
         case .merged: return true
@@ -201,6 +205,7 @@ extension FrameApplier {
         let holds = enhancedUI
         let recent = recentStamp
         let move = ownWindowMove
+        let now = heldNow
         let reschedule: @Sendable (DispatchTime) -> Void = {
             [weak self] later in
             DispatchQueue.main.async {
@@ -215,8 +220,8 @@ extension FrameApplier {
         // meanwhile, which then toggles nothing.
         let atRest = own ? false : enhancedUIAtRest(pid)
         let generation = holds.generation(pid)
-        queue(for: pid).asyncAfter(deadline: deadline) {
-            switch held.release(id) {
+        scheduleHeldLanding(queue(for: pid), deadline) {
+            switch held.release(id, now: now()) {
             case .write(let entry):
                 if own {
                     MainActor.assumeIsolated {
