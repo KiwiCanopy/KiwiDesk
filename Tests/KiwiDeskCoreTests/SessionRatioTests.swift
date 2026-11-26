@@ -255,7 +255,7 @@ struct SessionRatioTests {
     @Test("SessionRatios carries exactly the mirrored fields")
     func fieldCountPinsTheMirrors() {
         let mirror = Mirror(reflecting: SessionRatios())
-        #expect(mirror.children.count == 6)
+        #expect(mirror.children.count == 7)
     }
 
     @Test("Scrolling slot resize stays per-space too")
@@ -284,7 +284,7 @@ struct SessionRatioTests {
             return
         }
         core.applyResizeAdjustment(
-            .bspRatioH(0.1),
+            .masterRatio(0.1),
             for: nil,
             in: space,
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
@@ -292,7 +292,7 @@ struct SessionRatioTests {
         )
         let session =
             core.sessionRatios(of: SpaceID("1"))
-        #expect(session.splitRatioH != nil)
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
+        #expect(session.masterRatio != nil)
+        #expect(core.tiler.settings.stack.masterRatio == 0.6)
     }
 }

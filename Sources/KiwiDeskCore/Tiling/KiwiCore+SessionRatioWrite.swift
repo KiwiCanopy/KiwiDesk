@@ -115,6 +115,20 @@ extension KiwiCore {
         withSessionRatios(of: space) { $0.splitRatioV = value }
     }
 
+    /// One BSP split's ratio, under the window that owns it (#3672).
+    func writeBspSplit(
+        _ value: Double,
+        owner: WindowID,
+        sideBySide: Bool,
+        for space: SpaceID
+    ) {
+        withSessionRatios(of: space) {
+            var splits = $0.bspSplits ?? BspSplitRatios()
+            splits.set(value, of: owner, sideBySide: sideBySide)
+            $0.bspSplits = splits.isEmpty ? nil : splits
+        }
+    }
+
     func writeMasterRatio(_ value: Double, for space: SpaceID) {
         withSessionRatios(of: space) { $0.masterRatio = value }
     }

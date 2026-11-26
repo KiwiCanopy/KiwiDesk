@@ -1,34 +1,15 @@
 import CoreGraphics
 
-/// The geometry of a BSP space's FIRST split on one axis: which
-/// side of it a slot sits on, and which slots take part in it at
-/// all. Shared by every resize path — the keyboard `resize`
-/// verb, the shared capped writer and the mouse drag translator
-/// — which is why it is not inside any one of them (#122/#1259).
+/// Which slots of a BSP space take part in the first split on an
+/// axis, read off the frames a layout already produced: the BSP
+/// chain's across-axis check reads it (#1259, #2542). A resize's
+/// split is `BspLayout.splitOwner`'s (#3672).
 ///
-/// It reads slots rather than a tree because there is no tree to
-/// read: BSP is a dwindle over the flat array with two shared
-/// ratio scalars (AGENTS.md §5), so a split's shape exists only
-/// in the frames it produced.
-///
-/// It lives in `Tiling/` beside `MouseResize` and `Navigation`
-/// rather than in `Layouts/`, because it is resize
-/// CLASSIFICATION over frames a layout already produced, not a
-/// layout algorithm — and it reads the one pile detector, which
-/// `Layouts/` may not (its rule is pure functions over the flat
-/// array).
+/// It lives in `Tiling/` rather than in `Layouts/` because it is
+/// resize CLASSIFICATION over frames, not a layout algorithm — and
+/// it reads the one pile detector, which `Layouts/` may not (its
+/// rule is pure functions over the flat array).
 public enum BspSplit {
-    /// Direction (+1 / -1) to move BSP ratio to grow target slot (#122).
-    public static func side(
-        slot: CGRect,
-        bounds: CGRect,
-        horizontal: Bool
-    ) -> CGFloat {
-        horizontal
-            ? (slot.midX <= bounds.midX ? 1 : -1)
-            : (slot.midY <= bounds.midY ? 1 : -1)
-    }
-
     /// How far a slot's extent may fall short of the tiled
     /// extent and still count as spanning it: the layout's own
     /// arithmetic, so sub-point rounding is the only gap to

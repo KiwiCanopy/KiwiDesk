@@ -160,8 +160,10 @@ struct FullscreenResizeTiledTests {
     /// window. Both axes, since each has its own ratio.
     @Test("bsp writes no split ratio for a full-screen focus")
     func bspRefusesBothAxes() {
-        expectRefused(mode: "bsp", axis: "x", count: 2)
-        expectRefused(mode: "bsp", axis: "y", count: 2)
+        // w2 owns the stacked split and sits in w3's side-by-side
+        // one, so each axis has a split to write (#3672).
+        expectRefused(mode: "bsp", axis: "x", count: 3, focus: WindowID(2))
+        expectRefused(mode: "bsp", axis: "y", count: 3, focus: WindowID(2))
     }
 
     /// The split axis (x, for the default right-hand stack zone)

@@ -39,12 +39,12 @@ extension KiwiCore {
                 \.bsp.splitRatioH,
                 \.bsp.override,
                 \.splitRatioH
-            ) { $0.splitRatioH = nil },
+            ) { $0.clearBspAxis(sideBySide: true) },
             SizingShadow(
                 \.bsp.splitRatioV,
                 \.bsp.override,
                 \.splitRatioV
-            ) { $0.splitRatioV = nil },
+            ) { $0.clearBspAxis(sideBySide: false) },
             SizingShadow(
                 \.stack.masterRatio,
                 \.stack.override,

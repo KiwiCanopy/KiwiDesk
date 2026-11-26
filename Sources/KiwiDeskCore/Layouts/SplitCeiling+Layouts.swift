@@ -145,7 +145,12 @@ extension SplitCeiling {
         var region = context.usable
         for (depth, side) in across.enumerated() {
             guard
-                let parts = BspLayout.divide(region, sideBySide: side, context)
+                let parts = BspLayout.divide(
+                    region,
+                    sideBySide: side,
+                    owner: windows[depth],
+                    context
+                )
             else { return nil }
             let spans = [span(parts.first, side), span(parts.rest, side)]
             let shared = share(

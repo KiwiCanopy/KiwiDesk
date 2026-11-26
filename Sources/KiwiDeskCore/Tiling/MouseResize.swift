@@ -10,8 +10,11 @@ public enum MouseResizeMode: String, Sendable, Codable, CaseIterable {
 
 /// Layout parameter adjustment derived from mouse resize (#56, #128).
 public enum ResizeAdjustment: Equatable, Sendable {
-    case bspRatioH(CGFloat)
-    case bspRatioV(CGFloat)
+    /// A BSP window's growth in points across its width or height,
+    /// and whether its leading edge is the one dragged: the split
+    /// behind that edge moves (#3672).
+    case bspSplitH(CGFloat, leading: Bool)
+    case bspSplitV(CGFloat, leading: Bool)
     case masterRatio(CGFloat)
     case scrollSlot(CGFloat)
     /// The dragged window's share of its stack zone along the
@@ -181,20 +184,12 @@ public enum MouseResize {
         switch mode {
         case .bsp:
             if abs(dw) >= abs(dh), abs(dw) > threshold {
-                let side = BspSplit.side(
-                    slot: slot,
-                    bounds: bounds,
-                    horizontal: true
-                )
-                return .bspRatioH(side * dw / bounds.width)
+                let side = movedSide(from: slot, to: frame, vertical: false)
+                return .bspSplitH(dw, leading: side == .start)
             }
             if abs(dh) > threshold {
-                let side = BspSplit.side(
-                    slot: slot,
-                    bounds: bounds,
-                    horizontal: false
-                )
-                return .bspRatioV(side * dh / bounds.height)
+                let side = movedSide(from: slot, to: frame, vertical: true)
+                return .bspSplitV(dh, leading: side == .start)
             }
             return nil
         case .stack:

@@ -3,10 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The two ratio refusals' own derivations (#3643): a limit reached
-/// takes its glyph and bump from the press's sign, as `ownMinimum`
-/// and `ownMaximum` do, and a ratio that moves the window the other
-/// way bumps nowhere, since no wall was reached.
+/// The ratio limit's own derivations (#3643): a limit reached takes
+/// its glyph and bump from the press's sign, as `ownMinimum` and
+/// `ownMaximum` do.
 @Suite("Resize ratio refusal rendering (#3643)")
 @MainActor
 struct ResizeRatioRefusalRenderingTests {
@@ -33,21 +32,6 @@ struct ResizeRatioRefusalRenderingTests {
         }
     }
 
-    @Test("A ratio that moves the window the other way never bumps")
-    func otherWayHasNoWall() {
-        for grows in [true, false] {
-            let refusal = ResizeRefusal.ratioMovesOtherWay(
-                window,
-                axis: "x",
-                grows: grows
-            )
-            #expect(refusal.bumpDirection == nil)
-            #expect(refusal.pillSymbol == "nosign")
-            #expect(refusal.window == window)
-            #expect(refusal.axis == "x")
-        }
-    }
-
     @Test("Each ratio refusal draws its ruled sentence")
     func sentencesAreTheRuling() {
         // English asserted, so the locale is pinned first (#740).
@@ -60,14 +44,6 @@ struct ResizeRatioRefusalRenderingTests {
             (
                 .ratioLimit(window, axis: "x", grows: false),
                 "Smallest share reached"
-            ),
-            (
-                .ratioMovesOtherWay(window, axis: "x", grows: true),
-                "This window grows the other way"
-            ),
-            (
-                .ratioMovesOtherWay(window, axis: "x", grows: false),
-                "This window shrinks the other way"
             ),
         ]
         for (refusal, text) in cases {

@@ -48,7 +48,7 @@ extension ResizeRefusal {
                 : "arrow.down.right.and.arrow.up.left"
         case .noAxisHere, .layoutHasNoResize, .nothingToDivide,
             .gridNoOtherTrack, .windowIsFullscreen,
-            .fullscreenCannotMove, .moveNeedsFloat, .ratioMovesOtherWay:
+            .fullscreenCannotMove, .moveNeedsFloat:
             "nosign"
         case .moveAtBoundary(_, let direction):
             switch direction {
@@ -98,16 +98,6 @@ extension ResizeRefusal {
             grows
                 ? L("resize.share_max_reached", "Largest share reached")
                 : L("resize.share_min_reached", "Smallest share reached")
-        case .ratioMovesOtherWay(_, _, let grows):
-            grows
-                ? L(
-                    "resize.grows_other_way",
-                    "This window grows the other way"
-                )
-                : L(
-                    "resize.shrinks_other_way",
-                    "This window shrinks the other way"
-                )
         case .noAxisHere(_, let axis):
             axis == "y"
                 ? L(

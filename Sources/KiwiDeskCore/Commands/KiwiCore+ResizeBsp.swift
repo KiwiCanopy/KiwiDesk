@@ -3,15 +3,12 @@ import Foundation
 
 /// The BSP half of the `resize` command, split out of
 /// `KiwiCore+Resize` for file size (like `+ResizeFloating` and
-/// `+ResizeStack`): the per-axis ratio write and the
-/// focused-window sign rule.
+/// `+ResizeStack`).
 extension KiwiCore {
-    /// Per-axis BSP resize (#56): "x" moves the side-by-side
-    /// splits, "y" the stacked splits — independent knobs. The
-    /// delta's sign follows the FOCUSED window (#122): a slot
-    /// in the second (right/bottom) region grows when the
-    /// shared ratio DROPS, so +delta always grows the focused
-    /// region — mouse-path parity (`MouseResize.translate`).
+    /// Per-axis BSP resize (#56): "x" moves a side-by-side split,
+    /// "y" a stacked one — the split `BspLayout.splitOwner` names
+    /// for the focused window (#3672), so +delta grows the focused
+    /// window by `delta` points.
     func resizeBsp(
         axis: String,
         delta: Double,
@@ -30,80 +27,48 @@ extension KiwiCore {
         {
             return response
         }
-        let bsp = tiler.settings.resolvedBsp(
-            for: space,
-            session: sessionRatios(of: space.id)
-        )
-        let signed =
-            bspFocusSign(axis: axis, space: space)
-            * delta
-        // Cap the write at the layout region's effective range
-        // (#383): past it the layout clamps anyway and the stored
-        // value would only ratchet invisibly, exactly like the
-        // stack path (#44). Span is the region before outer gaps
-        // (#537) — still a superset of the gap-adjusted range the
-        // layout divides, so the cap never blocks reaching the
-        // visible bound, but no longer a superset by the Space
-        // Bar's whole strip, which let the ratchet back in.
-        // Two-sided since #933: each side of the first split
-        // carries its own windows' effective minimums, and a
-        // truncated write cues the refusal.
-        let base =
-            axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
-        // A press that would move the focused window against the
-        // press, or not at all, refuses instead (#2969).
-        if let focused = space.focused,
-            !bspPressMoves(
-                focused,
+        if let focused = space.focused {
+            if let press = bspSplit(
+                of: focused,
                 axis: axis,
-                delta: delta,
-                to: base + signed / span,
+                edge: .either,
                 space: space
-            )
-        {
-            return .ok()
+            ), press.split.available > 0 {
+                let proposed =
+                    press.drawnRatio
+                    + press.split.sign * delta / press.split.available
+                // A press that would not move the focused window the
+                // way asked refuses instead (#2969).
+                if bspPressMoves(
+                    focused,
+                    press,
+                    axis: axis,
+                    delta: delta,
+                    to: proposed
+                ) {
+                    writeCappedBspSplit(
+                        press,
+                        proposed: proposed,
+                        axis: axis,
+                        space: space,
+                        focused: focused
+                    )
+                }
+                return .ok()
+            }
+            if state.effectiveTiledMembers(of: space).contains(focused) {
+                refuseBspNoSplit(
+                    focused,
+                    axis: axis,
+                    grows: delta > 0,
+                    space: space
+                )
+                return .ok()
+            }
         }
-        writeCappedBspRatio(
-            proposed: base + signed / span,
-            axis: axis,
-            span: span,
-            space: space,
-            focused: space.focused
-        )
+        // No tiled focus: the shared ratio every split without its
+        // own takes, capped at the layout region (#383).
+        writeSharedBspRatio(delta: delta, axis: axis, span: span, space: space)
         return .ok()
-    }
-
-    /// Which way the shared BSP ratio must move so "grow"
-    /// grows the FOCUSED window — the mouse path's side rule,
-    /// via the shared authority (`BspSplit.side`).
-    /// Unknown focus (none, or floating — no slot) keeps +1,
-    /// the first-region direction (the pre-#122 behavior).
-    /// Assumes `space` IS the active space: the slot lookup
-    /// resolves the active space's frames only, so any other
-    /// space silently gets the +1 fallback.
-    private func bspFocusSign(
-        axis: String,
-        space: Space
-    ) -> Double {
-        guard let focused = space.focused,
-            let slot = tiler.calculatedFrames(
-                state: state
-            )[focused],
-            let screen = TilingEngine.screen(
-                for: space.id,
-                in: state
-            )
-        else { return 1 }
-        // The layout region, not the raw frame (#537): the slot
-        // being classified was placed inside that region, so the
-        // midpoint it is compared against has to be the region's
-        // — a Space Bar on a leading edge shifts it.
-        return Double(
-            BspSplit.side(
-                slot: slot,
-                bounds: tiler.layoutBounds(on: screen, for: space),
-                horizontal: axis == "x"
-            )
-        )
     }
 }

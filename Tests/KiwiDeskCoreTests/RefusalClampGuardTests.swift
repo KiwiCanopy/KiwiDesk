@@ -79,16 +79,24 @@ struct RefusalClampGuardTests {
         refuse(core, WindowID(2), asked: 400, answered: 700)
         core.retile()
         let live = try #require(core.state.workspaces[space])
-        core.writeCappedBspRatio(
+        let press = try #require(
+            core.bspSplit(
+                of: WindowID(1),
+                axis: "x",
+                edge: .trailing,
+                space: live
+            )
+        )
+        core.writeCappedBspSplit(
+            press,
             proposed: 0.9,
             axis: "x",
-            span: core.layoutSpan(of: live, horizontal: true),
             space: live,
             focused: WindowID(1)
         )
-        // Within the writer's raw-span slack of 700, never at the
-        // 300 setting.
-        #expect(try #require(width(core, WindowID(2))) >= 650)
+        core.retile()
+        // At the refusal's 700, never at the 300 setting.
+        #expect(try #require(width(core, WindowID(2))) >= 699)
     }
 
     @Test("The master side of the split heal counts a refusal")

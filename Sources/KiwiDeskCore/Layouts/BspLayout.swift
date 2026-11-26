@@ -1,11 +1,11 @@
 import CoreGraphics
 
 /// Binary space partitioning layout over flat window array
-/// (dwindle). Two per-space ratio scalars, not per-node ratios —
-/// those need stable split identity, i.e. a tree, which the flat
-/// array forbids (#56). Where a split no longer fits two windows
-/// at `min_window_size`, the trailing chain scrolls instead
-/// (`BspLayout+Run`, #2542).
+/// (dwindle). Split k divides `windows[k]` from the rest, so the
+/// window at depth k owns it and keys its ratio (`BspSplitRatios`,
+/// #3672); a split with no entry takes the Space's shared ratio.
+/// Where a split no longer fits two windows at `min_window_size`,
+/// the trailing chain scrolls instead (`BspLayout+Run`, #2542).
 public struct BspLayout: LayoutSystem {
     public init() {}
 
@@ -38,13 +38,15 @@ public struct BspLayout: LayoutSystem {
         }
     }
 
-    /// `region` divided at the shared ratio, clamped into the
-    /// region's own range (#383) so neither side falls under
-    /// `min_window_size` and the rest under `restFloor`; nil
-    /// where the region cannot hold two windows at the minimum.
+    /// `region` divided at `owner`'s split ratio (#3672), else the
+    /// shared one, clamped into the region's own range (#383) so
+    /// neither side falls under `min_window_size` and the rest under
+    /// `restFloor`; nil where the region cannot hold two windows at
+    /// the minimum.
     static func divide(
         _ region: CGRect,
         sideBySide: Bool,
+        owner: WindowID? = nil,
         restFloor: CGFloat = 0,
         _ context: LayoutContext
     ) -> (first: CGRect, rest: CGRect)? {
@@ -65,7 +67,10 @@ public struct BspLayout: LayoutSystem {
             )
         else { return nil }
         let stored =
-            sideBySide ? context.bsp.splitRatioH : context.bsp.splitRatioV
+            owner.flatMap {
+                context.bspSplits.ratio(of: $0, sideBySide: sideBySide)
+            }
+            ?? (sideBySide ? context.bsp.splitRatioH : context.bsp.splitRatioV)
         let ratio = CGFloat(
             min(max(stored, range.lowerBound), range.upperBound)
         )
