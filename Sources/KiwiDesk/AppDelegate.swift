@@ -54,6 +54,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// (#326, #2246) and the view picker, retained so it
     /// survives close and reopen.
     var jumpPanel: JumpPanelController?
+    /// The look picker (#3038).
+    var lookPicker: LookPickerController?
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -124,6 +126,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         core.uiBridge.onKiwihubShowLastApp = { [weak jumpPanel] in
             jumpPanel?.toggleLastApp()
+        }
+        // ⌃⌥⇧L opens or closes the look picker (#3038).
+        let lookPicker = LookPickerController(core: core)
+        self.lookPicker = lookPicker
+        core.uiBridge.onLookShowPicker = { [weak lookPicker] in
+            lookPicker?.toggle()
         }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in

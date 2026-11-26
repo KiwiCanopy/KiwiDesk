@@ -96,6 +96,13 @@ struct ShortcutsPanelNounTests {
             opener: "keybinding.show_desktop_overview",
             translated: true
         ),
+        // The look picker, KiwiDesk's own panel beside KiwiHub
+        // (#3038).
+        Pair(
+            panelName: "look_picker.panel.ax_label",
+            opener: "keybinding.show_look_picker",
+            translated: true
+        ),
         // The quick menu's row opens the same side (#3545).
         Pair(
             panelName: "desktop_overview.panel.ax_label",

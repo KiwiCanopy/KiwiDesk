@@ -56,7 +56,7 @@ struct SettingsThemeWiringTests {
         "lightAccent": "SchematicPalette.swift",
         "keyGlyph": "KeyboardBoard.swift",
         "visionVeil": "KiwiVisionScene.swift",
-        "lookGround": "LookPlate.swift",
+        "lookGround": "LookGround.swift",
         "lookWindow": "LookPlate+Desk.swift",
         "lookWindowLine": "LookPlate+Desk.swift",
         "keyFree": "KeyboardBoard.swift",

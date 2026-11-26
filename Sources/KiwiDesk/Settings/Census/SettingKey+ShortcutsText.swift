@@ -86,6 +86,8 @@ extension ShortcutsKey {
             return .text("keybinding.show_shortcuts")
         case .openSettings:
             return .text("keybinding.open_settings")
+        case .lookPicker:
+            return .text("keybinding.show_look_picker")
         case .`import`:
             return .text("shortcuts.import", help: "shortcuts.import.help")
         case .restoreDefaults:

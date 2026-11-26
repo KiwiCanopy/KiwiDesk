@@ -132,6 +132,11 @@ struct ShortcutsControls: Sendable {
         "keybinding.open_settings",
         "Open Settings"
     )
+    /// The look picker's row (#3038), beside Open Settings.
+    let lookPickerBinding = SettingsControl(
+        "keybinding.show_look_picker",
+        "Show look picker"
+    )
     /// The directional Maximize rows (#3062), anchors for the
     /// Layout Defaults captions' links.
     let maximizeHeightBinding = SettingsControl(

@@ -626,6 +626,12 @@ kiwidesk get_settings /settings/layout/stack/stack_position 3
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look
 without writing it.
 
+:::unreleased
+`look.show_picker` opens the look picker on the focused screen, or
+closes it. See
+[look.show_picker](lua-reference.md#lookshow_picker).
+:::
+
 `shortcut.list`, `shortcut.set <chord> <command> [argument…]` and
 `shortcut.remove <chord>` read and write the saved shortcuts; a
 write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).

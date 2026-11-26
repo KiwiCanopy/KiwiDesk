@@ -72,6 +72,10 @@ struct SettingsRawColorTests {
         "ColorField+Commit.swift":
             "same RGBA tuple accessors in the commit's hex "
             + "normalisation",
+        "LookQuickName.swift":
+            "RGBA accessors reading a hue for the quick name's "
+            + "fruit, and the Orange fruit's case (#3038) — names, "
+            + "no Color drawn",
     ]
 
     @Test("no fixed system hue is drawn in the Settings tree")
