@@ -2,8 +2,7 @@ import SwiftUI
 
 /// The incoming backdrop wiped in from the side the next look comes
 /// from, its soft edge 30 % of the screen wide (owner, prototype
-/// 2026-11-26). #3478's picture takes the same wipe, decoded once at
-/// screen size, never redrawn full size per frame.
+/// 2026-11-26).
 struct LookPickerSwapIn: ViewModifier, Animatable {
     var progress: CGFloat
     /// +1 for a step rightward, -1 leftward.

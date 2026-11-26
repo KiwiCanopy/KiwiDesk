@@ -151,7 +151,7 @@ struct LookPickerDrop: View {
                 .opacity(stage == .sunk || !faded ? 0 : 1)
                 .position(
                     x: target.x,
-                    y: stage == .above
+                    y: stage == .above || stage == .hidden
                         ? target.y - LookPickerReveal.dropHeight : target.y
                 )
         }

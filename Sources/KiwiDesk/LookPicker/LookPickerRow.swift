@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The looks as one carousel (owner, prototype 2026-11-26): one view
-/// per look, keyed by the look, placed at `LookPickerGeometry.slot`,
+/// per card index, placed at `LookPickerGeometry.slot`,
 /// so a step grows the next stripe into the card and shrinks the card
 /// into a stripe on one spring. The frosted frame is the seat and
 /// never moves; a step that wraps lays the row out at once and fades
@@ -138,5 +138,27 @@ private struct LookPickerRowItem: View {
         )
         .position(x: rect.midX, y: rect.midY)
         .accessibilityHidden(true)
+    }
+}
+
+/// The card speaks for the picker: the look's name, its line and
+/// its place, adjusted by a swipe, worn by the default action.
+private struct LookPickerCardSpeech: ViewModifier {
+    @ObservedObject var model: LookPickerModel
+
+    func body(content: Content) -> some View {
+        content
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(model.selected.map(LookPickerText.name) ?? "")
+            .accessibilityValue(model.spokenSelection ?? "")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment: model.handle(.step(1), repeated: false)
+                case .decrement: model.handle(.step(-1), repeated: false)
+                @unknown default: break
+                }
+            }
+            .accessibilityAction { model.wearSelected() }
     }
 }

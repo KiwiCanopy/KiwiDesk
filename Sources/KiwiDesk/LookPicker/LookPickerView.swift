@@ -12,11 +12,6 @@ struct LookPickerView: View {
     @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency)
     private var reduceTransparency
-    /// The ground the last step left, drawn opaque under the incoming
-    /// one until it is covered, so two grounds never meet half-faded.
-    @State private var groundUnder: Int?
-    @State private var swapProgress: CGFloat = 1
-    @State private var swapSide: CGFloat = 1
 
     var body: some View {
         ZStack {
@@ -36,13 +31,13 @@ struct LookPickerView: View {
                     rimOnly: reduceTransparency
                 )
             }
-            if reveal.drop != .hidden {
-                LookPickerDrop(
-                    stage: reveal.drop,
-                    faded: reveal.dropIn,
-                    target: dropPoint
-                )
-            }
+            // Mounted from the start, so its fall from `.hidden` (drawn
+            // as `.above`) animates rather than appearing landed.
+            LookPickerDrop(
+                stage: reveal.drop,
+                faded: reveal.dropIn,
+                target: dropPoint
+            )
         }
         .frame(width: geometry.screen.width, height: geometry.screen.height)
         .opacity(reveal.opacity)
@@ -57,7 +52,7 @@ struct LookPickerView: View {
 
     private var picker: some View {
         ZStack(alignment: .topLeading) {
-            backdrop
+            LookPickerBackdrop(model: model, geometry: geometry)
             LookPickerRow(model: model, geometry: geometry)
             LookPickerCaption(model: model, geometry: geometry)
         }
@@ -66,79 +61,5 @@ struct LookPickerView: View {
             height: geometry.screen.height,
             alignment: .topLeading
         )
-    }
-
-    /// The look's own colour ground at the backdrop's strength with a
-    /// soft vignette (owner, prototype 2026-11-26); a click on
-    /// it closes, as Esc does. #3478 lays the look's picture here.
-    private var backdrop: some View {
-        ZStack {
-            ZStack {
-                if let under = groundUnder, model.cards.indices.contains(under)
-                {
-                    ground(model.cards[under].painted(over: model.settings))
-                }
-                ground(selectedSettings)
-                    .drawingGroup()
-                    .modifier(
-                        LookPickerSwapIn(
-                            progress: swapProgress,
-                            side: swapSide
-                        )
-                    )
-            }
-            .onChange(of: model.selection) { old, new in
-                groundUnder = old
-                swapSide = new > old ? 1 : -1
-                swapProgress = 0
-                withAnimation(reduceMotion ? nil : LookPickerRow.spring) {
-                    swapProgress = 1
-                }
-            }
-            RadialGradient(
-                colors: [.clear, SettingsTheme.visionVeil.opacity(0.25)],
-                center: .center,
-                startRadius: geometry.screen.width * 0.2,
-                endRadius: geometry.screen.width * 0.6
-            )
-        }
-        .frame(width: geometry.screen.width, height: geometry.screen.height)
-        .contentShape(Rectangle())
-        .onTapGesture { model.handle(.escape, repeated: false) }
-        .accessibilityHidden(true)
-    }
-
-    private func ground(_ settings: TilingSettings) -> some View {
-        LookGround(
-            settings: settings,
-            reach: geometry.screen.height * 2,
-            stage: .backdrop
-        )
-    }
-
-    private var selectedSettings: TilingSettings {
-        model.selected?.painted(over: model.settings) ?? model.settings
-    }
-}
-
-/// The card speaks for the picker: the look's name, its line and
-/// its place, adjusted by a swipe, worn by the default action.
-struct LookPickerCardSpeech: ViewModifier {
-    @ObservedObject var model: LookPickerModel
-
-    func body(content: Content) -> some View {
-        content
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(model.selected.map(LookPickerText.name) ?? "")
-            .accessibilityValue(model.spokenSelection ?? "")
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAdjustableAction { direction in
-                switch direction {
-                case .increment: model.handle(.step(1), repeated: false)
-                case .decrement: model.handle(.step(-1), repeated: false)
-                @unknown default: break
-                }
-            }
-            .accessibilityAction { model.wearSelected() }
     }
 }

@@ -32,6 +32,8 @@ final class LookPickerModel: ObservableObject {
     /// The last move wrapped past the row's end, which the row fades
     /// in rather than flies across (ui-designer, 2026-11-26).
     @Published private(set) var wrapped = false
+    /// The side the last move went: +1 rightward, -1 leftward.
+    @Published private(set) var stepSide = 1
     /// The card the desk wears now, if it is one of the cards.
     @Published private(set) var wornIndex: Int?
     /// The rename field's text while a quick-saved name is open.
@@ -88,6 +90,7 @@ final class LookPickerModel: ObservableObject {
             )
             select(
                 next,
+                side: delta.signum(),
                 wrapping: delta > 0 ? next < selection : next > selection
             )
         case .wear:
@@ -103,12 +106,13 @@ final class LookPickerModel: ObservableObject {
     }
 
     /// A stripe's click: selects that card, wears nothing.
-    func select(_ index: Int, wrapping: Bool = false) {
+    func select(_ index: Int, side: Int? = nil, wrapping: Bool = false) {
         guard cards.indices.contains(index), !isNaming,
             phase == .browsing
         else { return }
         let moved = index != selection
         wrapped = wrapping
+        stepSide = side ?? (index < selection ? -1 : 1)
         selection = index
         if moved, let spoken = spokenSelection { onAnnounce(spoken) }
     }

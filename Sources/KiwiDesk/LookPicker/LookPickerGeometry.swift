@@ -51,11 +51,11 @@ struct LookPickerGeometry: Equatable {
     /// +1 rightward, at most `available` of them, each overlapping
     /// the next by a quarter, the first tucked under the card, and
     /// the last one the screen cuts.
-    func stripes(side: Int, available: Int) -> [CGRect] {
+    func stripes(side: Int, available: Int = .max) -> [CGRect] {
         let step = stripeSize.width * (1 - Self.stripeOverlap)
         var rects: [CGRect] = []
-        for k in 0..<max(available, 0) {
-            let rect = stripe(side: side, k)
+        while rects.count < max(available, 0) {
+            let rect = stripe(side: side, rects.count)
             rects.append(rect)
             let next = rect.minX + CGFloat(side) * step
             let beyond =
@@ -67,8 +67,7 @@ struct LookPickerGeometry: Equatable {
         return rects
     }
 
-    /// Stripe `k` steps out on `side`, wherever it falls, on screen
-    /// or past its edge.
+    /// Stripe `k` steps out on `side`, as the row lays it.
     func stripe(side: Int, _ k: Int) -> CGRect {
         let size = stripeSize
         let offset = CGFloat(k) * size.width * (1 - Self.stripeOverlap)
@@ -85,16 +84,23 @@ struct LookPickerGeometry: Equatable {
     }
 
     /// Where the look `d` places from the selection draws during the
-    /// carousel (owner, prototype 2026-11-26): the card at 0, else a
-    /// stripe, one past the last the screen shows so a look slides
-    /// in and out through the edge.
+    /// carousel (owner, prototype 2026-11-26): the card at 0, a shown
+    /// stripe, or just past the screen's edge, where a look waits to
+    /// slide in and leaves to.
     func slot(for d: Int) -> CGRect {
-        d == 0 ? card : stripe(side: d.signum(), abs(d) - 1)
+        if d == 0 { return card }
+        let side = d.signum()
+        let k = abs(d) - 1
+        let shown = stripes(side: side).count
+        guard k >= shown else { return stripe(side: side, k) }
+        var rect = stripe(side: side, 0)
+        rect.origin.x = side > 0 ? screen.width : -rect.width
+        return rect
     }
 
     /// How many stripes one side shows with every look available.
     func shownStripes(side: Int) -> Int {
-        stripes(side: side, available: Self.stripeCeiling).count
+        stripes(side: side).count
     }
 
     /// The black a stripe `k` steps out wears, darker further out.
@@ -124,6 +130,4 @@ struct LookPickerGeometry: Equatable {
     /// How much of the nearest stripe hides under the card.
     static let tuck: CGFloat = 0.35
     static let margin: CGFloat = 24
-    /// More stripes than any screen shows.
-    static let stripeCeiling = 64
 }

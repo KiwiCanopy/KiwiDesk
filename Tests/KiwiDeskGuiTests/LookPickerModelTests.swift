@@ -60,15 +60,23 @@ struct LookPickerModelTests {
     @Test("only a step past the row's end reads as a wrap")
     func wrapIsMarked() {
         let model = model(worn: 0)
+        // A held key stopped at the row's start moves and wraps nothing.
+        model.handle(.step(-1), repeated: true)
+        #expect(model.selection == 0 && !model.wrapped)
         model.handle(.step(1), repeated: false)
         #expect(model.selection == 1 && !model.wrapped)
         model.handle(.step(-1), repeated: false)
         model.handle(.step(-1), repeated: false)
         #expect(model.selection == 2 && model.wrapped)
+        #expect(model.stepSide == -1)
         model.handle(.step(1), repeated: false)
         #expect(model.selection == 0 && model.wrapped)
+        // A wrap rightward still steps rightward.
+        #expect(model.stepSide == 1)
         model.select(2)
-        #expect(!model.wrapped)
+        #expect(!model.wrapped && model.stepSide == 1)
+        model.select(1)
+        #expect(model.stepSide == -1)
     }
 
     @Test("↩ wears another look once; on the worn look it closes")

@@ -132,8 +132,8 @@ struct LookPickerGeometryTests {
             #expect(geometry.slot(for: -(k + 1)) == rect)
         }
         #expect(geometry.shownStripes(side: 1) == right.count)
-        // One past the last shown lies beyond the screen's edge.
-        let past = geometry.slot(for: right.count + 1)
-        #expect(past.maxX > 1512 - LookPickerGeometry.margin)
+        // One past the last shown waits wholly off screen.
+        #expect(geometry.slot(for: right.count + 1).minX >= 1512)
+        #expect(geometry.slot(for: -(left.count + 1)).maxX <= 0)
     }
 }
