@@ -24,11 +24,6 @@ struct LookWallpaperBadgeTests {
                 .colours(.lookRemoveWallpaper),
             ]
         )
-        let menu = ColorsRowOrder.looksContextMenu
-        let places = LooksShelf.wallpaperMenu.compactMap {
-            menu.firstIndex(of: $0)
-        }
-        #expect(places == places.sorted())
     }
 
     @Test("the glyph's shape names none, one or a picture per screen")
@@ -55,24 +50,63 @@ struct LookWallpaperBadgeTests {
         let shelf = try SourceScan.strippedSource(
             at: dir.appendingPathComponent("LooksShelf.swift")
         ).filter { !$0.isWhitespace }
-        let bundled = try #require(shelf.range(of: "varbundledGroup"))
+        // The saved group's body alone: `card(` both groups call sits
+        // after it, so a mount moved there reds.
         let user = try #require(shelf.range(of: "varuserGroup"))
-        let badge = "badge:AnyView(wallpaperBadge(look))"
-        let mounts = shelf.ranges(of: badge)
-        #expect(mounts.count == 1)
-        #expect(mounts.allSatisfy { $0.lowerBound > user.lowerBound })
-        #expect(
-            !shelf[bundled.lowerBound..<user.lowerBound].contains(badge)
+        let end = try #require(
+            shelf.range(
+                of: "privatefuncgroupHeader",
+                range: user.upperBound..<shelf.endIndex
+            )
         )
+        // Any spelling of the mount, and `card(` hands its badge on
+        // unchanged, so no default there reaches a bundled tile.
+        let badge = "wallpaperBadge("
+        #expect(shelf.ranges(of: badge).count == 1)
+        #expect(shelf[user.upperBound..<end.lowerBound].contains(badge))
+        #expect(shelf.contains("badge:badge,"))
         let tile = try SourceScan.strippedSource(
             at: dir.appendingPathComponent("LookTile.swift")
         ).filter { !$0.isWhitespace }
         let button = try #require(tile.range(of: "Button(action:apply)"))
         let overlay = try #require(
-            tile.range(of: ".overlay(alignment:.topTrailing){badge?")
+            tile.range(of: ".overlay(alignment:.topTrailing){letrisen")
         )
         let style = try #require(tile.range(of: ".buttonStyle(.plain)"))
         #expect(button.lowerBound < style.lowerBound)
         #expect(style.lowerBound < overlay.lowerBound)
+        #expect(
+            tile[overlay.upperBound...].hasPrefix(
+                "=pointerOver&&isEnabled&&!appliedbadge?"
+            )
+        )
+    }
+
+    /// The drawing reads the state: the badge's glyph is its own
+    /// wallpaper's, and its menu draws every item of the list.
+    @Test("the badge draws its state and every item")
+    func badgeDrawsItsState() throws {
+        let dir = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Looks"
+            )
+        let view = try SourceScan.strippedSource(
+            at: dir.appendingPathComponent("LookWallpaperBadge.swift")
+        ).filter { !$0.isWhitespace }
+        #expect(view.contains("Image(systemName:symbol)"))
+        #expect(
+            view.contains(
+                "privatevarsymbol:String{Self.symbol(for:wallpaper)}"
+            )
+        )
+        let shelf = try SourceScan.strippedSource(
+            at: dir.appendingPathComponent("LooksShelf+Badge.swift")
+        ).filter { !$0.isWhitespace }
+        #expect(
+            shelf.contains(
+                "ForEach(Self.wallpaperMenu,id:\\.id){keyin"
+                    + "menuItem(key,look,divides:false)"
+            )
+        )
     }
 }

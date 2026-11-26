@@ -1719,7 +1719,7 @@
   "looks.wallpaper.diff.none": "无",
   "looks.wallpaper.diff.set": "由造型设置",
   "looks.wallpaper.drop": "拖放以设为墙纸",
-  "looks.wallpaper.hint": "将图片拖放到造型上即可为其设定墙纸。",
+  "looks.wallpaper.hint": "将图片拖放到造型上即可将其设为墙纸。",
   "looks.wallpaper.large.body": "KiwiDesk 会在其配置文件夹中保留一份拷贝，该文件夹可能会同步到你的其他电脑，或位于点文件仓库中。",
   "looks.wallpaper.large.cancel": "取消",
   "looks.wallpaper.large.copy": "仍然拷贝",

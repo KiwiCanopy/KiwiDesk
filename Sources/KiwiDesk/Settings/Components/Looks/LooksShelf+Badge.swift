@@ -7,7 +7,9 @@ import SwiftUI
 /// (#845).
 extension LooksShelf {
     func wallpaperBadge(_ look: ShelfLook) -> some View {
-        LookWallpaperBadge(wallpaper: look.admitted.wallpaper) {
+        // The raw value, as Remove's grey reads it: a name this build
+        // cannot use still holds a picture Remove can clear.
+        LookWallpaperBadge(wallpaper: look.wallpaper) {
             ForEach(Self.wallpaperMenu, id: \.id) { key in
                 menuItem(key, look, divides: false)
             }

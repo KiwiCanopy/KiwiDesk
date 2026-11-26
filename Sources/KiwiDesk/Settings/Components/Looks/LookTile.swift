@@ -27,6 +27,11 @@ struct LookTile: View {
     var dropping = false
     let apply: () -> Void
     @ObservedObject var pictures = LookTilePictures.shared
+    /// The pointer over the tile or its badge, so moving onto the
+    /// badge keeps the tile risen and the badge rides with it.
+    @State private var pointerOver = false
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
 
     var body: some View {
         let match = look.match(model.config.settings)
@@ -42,7 +47,8 @@ struct LookTile: View {
                 // Simple's line draws the name alone (#2737 ruling
                 // 3), so it reserves no caption room.
                 captionLines: captionLines
-                    ?? (caption == nil ? 0 : Self.captionRoom)
+                    ?? (caption == nil ? 0 : Self.captionRoom),
+                pointerOver: badge == nil ? nil : pointerOver
             ) {
                 ZStack {
                     LookPlate(
@@ -56,13 +62,22 @@ struct LookTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onHover { hover?($0) }
         .accessibilityAddTraits(applied ? [.isSelected] : [])
         .accessibilityHint(help ?? "")
         .accessibilityValue(wallpaperSpoken)
         .help(other ? restoreColorsHelp : (help ?? ""))
         .overlay(alignment: .topTrailing) {
+            let risen = pointerOver && isEnabled && !applied
             badge?.padding(Self.badgeInset)
+                .offset(y: risen ? -SettingsTheme.hoverRise : 0)
+                .animation(
+                    reduceMotion ? nil : HoverRiseTiming.animation,
+                    value: risen
+                )
+        }
+        .onHover {
+            pointerOver = $0
+            hover?($0)
         }
     }
 

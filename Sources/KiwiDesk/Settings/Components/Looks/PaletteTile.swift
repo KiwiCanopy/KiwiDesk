@@ -18,6 +18,9 @@ struct PaletteTile<Plate: View>: View {
     /// False keeps the hover edge and drops the rise: the setup tour
     /// sits on `page` in scrollers with no room for one (#3042).
     var rises = true
+    /// The pointer as a host reads it over the tile and whatever it
+    /// lays on top; nil reads the tile's own hover.
+    var pointerOver: Bool?
     @ViewBuilder var plate: () -> Plate
     @State private var hovered = false
     @Environment(\.isEnabled) private var isEnabled
@@ -69,7 +72,9 @@ struct PaletteTile<Plate: View>: View {
 
     /// The applied tile, whose click changes nothing, stays flat
     /// (owner, 2026-10-17).
-    private var risen: Bool { hovered && isEnabled && !isApplied }
+    private var risen: Bool {
+        (pointerOver ?? hovered) && isEnabled && !isApplied
+    }
 
     /// Leading checkmark indicator for active palette
     /// (`ColorField`, `FitGapsAction`, `LoginItemCard`).
