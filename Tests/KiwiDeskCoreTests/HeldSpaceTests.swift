@@ -242,7 +242,7 @@ struct HeldSpaceTests {
         core.spacePins[SpaceID(5)] = dell.fingerprint
         let kept = core.buildProfile(name: "kept", modes: nil)
         #expect(
-            kept.monitorSets.first?.spaceMonitorMap[SpaceID(5)] == nil
+            kept.spaceMonitorMap[SpaceID(5)] == nil
         )
     }
 

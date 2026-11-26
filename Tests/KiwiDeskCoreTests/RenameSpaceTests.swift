@@ -14,7 +14,7 @@ struct RenameSpaceTests {
         config.spaces = [SpaceID("2"), SpaceID("mail")]
         config.spaceModes = [SpaceID("2"): .stack]
         config.appRules = ["Spotify": SpaceID("2")]
-        config.spacePins = [SpaceID("2"): "LG:2560x1440"]
+        config.spacePins = [SpaceID("2"): ScreenSlotKey(number: 2)!]
         config.mainSpaces = [SpaceID("mail")]
         config.settings.gapsOverride[SpaceID("2")] = .uniform(12)
         config.settings.placementOverride[SpaceID("2")] = .last
@@ -61,7 +61,7 @@ struct RenameSpaceTests {
         #expect(config.appRules["Spotify"] == SpaceID("main"))
         #expect(
             config.spacePins[SpaceID("main")]
-                == "LG:2560x1440"
+                == ScreenSlotKey(number: 2)
         )
         #expect(config.spacePins[SpaceID("2")] == nil)
         let lua = config.layers[0].bindings.map(\.lua)

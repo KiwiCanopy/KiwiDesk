@@ -124,16 +124,6 @@ extension KiwiCore {
         mainSpaces = Set(placement.mains)
     }
 
-    /// The connected monitors as a stored set, carrying the
-    /// live space pins (pins to disconnected monitors drop) — a
-    /// temporary Space's only where `extra` names it (#1790).
-    func liveMonitorSet(alsoOf extra: Set<SpaceID>) -> MonitorSet {
-        MonitorSet(
-            monitors: liveFingerprints,
-            spaceMonitorMap: capturedPins(alsoOf: extra)
-        )
-    }
-
     /// Snapshot of the current configuration as a new profile
     /// carrying only the live monitor set. The live space order
     /// from `allSpaces` is captured as the profile's stored
@@ -160,9 +150,16 @@ extension KiwiCore {
             ?? Dictionary(
                 uniqueKeysWithValues: captured.map { ($0.id, $0.mode) }
             )
+        // A set another profile holds keeps its stored order when
+        // this one takes it (#3647, owner 2026-11-26).
+        let set = heldLiveSet ?? liveMonitorSet
         return Profile(
             name: name,
-            monitorSets: [liveMonitorSet(alsoOf: extra)],
+            monitorSets: [set],
+            spaceMonitorMap: set.order.storing(
+                runtime: capturedPins(alsoOf: extra),
+                over: [:]
+            ),
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
             // Carry the starter-setup identity when the live
             // layout IS that setup (#485): the transient Starter
@@ -212,9 +209,8 @@ extension KiwiCore {
             if modes == nil { adoptedWholeLive(name) }
             return released
         }
-        let live = liveMonitorSet(
-            alsoOf: modes.map { Set($0.keys) } ?? Set(liveTemporarySpaces)
-        )
+        let extra = modes.map { Set($0.keys) } ?? Set(liveTemporarySpaces)
+        let live = liveMonitorSet
         guard existing.monitorCount == live.monitors.count else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: existing.monitorCount,
@@ -224,10 +220,16 @@ extension KiwiCore {
         // A set ANOTHER profile owns stays with it: the live profile
         // is on those screens through a binding or a set moved away
         // by hand, and a save takes nothing (owner, 2026-09-23).
+        // Its pins are numbered in the order of the set it holds, or
+        // of the one it takes now (#3647).
         if existing.set(matching: live.monitors) != nil
             || !isOwnedElsewhere(live.monitors, than: name)
         {
             existing.upsert(live)
+            existing.storePins(
+                capturedPins(alsoOf: extra),
+                through: screenOrder(for: existing)
+            )
         }
         let fresh = buildProfile(name: name, modes: modes)
         existing.spaces = fresh.spaces

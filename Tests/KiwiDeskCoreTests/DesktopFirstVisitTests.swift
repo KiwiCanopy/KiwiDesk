@@ -112,9 +112,7 @@ struct DesktopFirstVisitTests {
                 name: "P",
                 monitorSets: [
                     MonitorSet(
-                        monitors: ["Screen:100x100"],
-                        spaceMonitorMap: [:]
-                    )
+                        monitors: ["Screen:100x100"])
                 ],
                 spaces: [SpaceID(1)],
                 spaceModes: [SpaceID(1): .bsp],
@@ -150,9 +148,7 @@ struct DesktopFirstVisitTests {
             name: "P",
             monitorSets: [
                 MonitorSet(
-                    monitors: ["Screen:100x100"],
-                    spaceMonitorMap: [:]
-                )
+                    monitors: ["Screen:100x100"])
             ],
             spaces: [SpaceID(1)],
             spaceModes: [SpaceID(1): .bsp],
@@ -203,9 +199,7 @@ struct DesktopFirstVisitTests {
                     name: "P",
                     monitorSets: [
                         MonitorSet(
-                            monitors: ["Screen:100x100"],
-                            spaceMonitorMap: [:]
-                        )
+                            monitors: ["Screen:100x100"])
                     ],
                     spaces: [SpaceID(1)],
                     spaceModes: [SpaceID(1): .bsp],

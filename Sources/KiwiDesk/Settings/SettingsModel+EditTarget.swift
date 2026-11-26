@@ -61,6 +61,12 @@ extension SettingsModel {
             stored = storedState(name)
             if stored == nil { target = .live }
         }
+        // A stored draft is numbered in its own profile's order. A
+        // set moved off the target without a reload leaves the Save's
+        // match guard to drop its pins, never to misnumber them.
+        storedMonitorSets = editingProfile.map {
+            (try? core.profiles.read(name: $0))?.monitorSets ?? []
+        }
         ruleReachStored = core.ruleReachSnapshot()
         reachPage =
             ruleReachStored == nil

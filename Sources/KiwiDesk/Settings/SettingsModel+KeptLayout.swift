@@ -39,7 +39,7 @@ extension SettingsModel {
             return
         }
         let live = core.capturedSpaces.map(\.id)
-        let pins = core.capturedSpacePins
+        let pins = core.capturedSpacePins(over: cleanConfig.spacePins)
         if config.spaces == cleanConfig.spaces { config.spaces = live }
         if config.spacePins == cleanConfig.spacePins {
             config.spacePins = pins

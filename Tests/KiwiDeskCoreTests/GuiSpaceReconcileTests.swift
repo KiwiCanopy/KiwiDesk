@@ -146,7 +146,7 @@ struct GuiSpaceReconcileTests {
         let profile = Profile(
             name: "edit",
             monitorSets: [
-                MonitorSet(monitors: ["mon-a"], spaceMonitorMap: [:])
+                MonitorSet(monitors: ["mon-a"])
             ],
             spaces: start.spaces,
             spaceModes: [
@@ -187,9 +187,7 @@ struct GuiSpaceReconcileTests {
                 name: "solo",
                 monitorSets: [
                     MonitorSet(
-                        monitors: ["m"],
-                        spaceMonitorMap: [:]
-                    )
+                        monitors: ["m"])
                 ],
                 spaces: [SpaceID("A")],
                 spaceModes: [SpaceID("A"): .bsp],
@@ -207,7 +205,7 @@ struct GuiSpaceReconcileTests {
     func deletionIsPerProfile() throws {
         let core = makeCore()
         let mon = [
-            MonitorSet(monitors: ["m"], spaceMonitorMap: [:])
+            MonitorSet(monitors: ["m"])
         ]
         try core.profiles.write(
             Profile(

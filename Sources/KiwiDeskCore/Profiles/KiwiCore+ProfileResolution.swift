@@ -134,7 +134,7 @@ extension KiwiCore {
         let fits = fitting != nil
         spacePins = keepingPins(
             of: temporaries.subtracting(declared),
-            over: fitting?.spaceMonitorMap ?? [:]
+            over: profile.runtimePins(on: live) ?? [:]
         )
         mainSpaces = Set(profile.mainSpaces)
         // Adopt the profile's explicit rehome target (#68);

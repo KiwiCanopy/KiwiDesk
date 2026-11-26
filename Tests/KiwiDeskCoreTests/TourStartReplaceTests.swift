@@ -183,7 +183,7 @@ struct TourStartReplaceTests {
             core.spaceSet(for: StandardProfiles.focus2)
         )
         #expect(
-            replaced.monitorSets.first?.spaceMonitorMap == planned.pins
+            replaced.spaceMonitorMap == planned.pins
         )
         #expect(!planned.pins.isEmpty)
         #expect(core.restoreSpaces(baseline))

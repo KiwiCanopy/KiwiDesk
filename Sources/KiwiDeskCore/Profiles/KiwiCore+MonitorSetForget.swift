@@ -131,7 +131,7 @@ extension KiwiCore {
             .flatMap { profile in
                 profile.monitorSets.map { set in
                     KnownMonitorSet(
-                        monitors: set.monitors,
+                        monitors: set.sortedKey,
                         profile: profile.name,
                         isConnected: isConnectedMonitorSet(set.monitors),
                         isProfilesLast: profile.monitorSets.count == 1
@@ -151,7 +151,7 @@ extension KiwiCore {
     /// hand-edited duplicate `settleSharedSets` has not settled.
     @discardableResult
     public func forgetMonitorSet(_ monitors: [String]) throws -> [String] {
-        let wanted = MonitorSet(monitors: monitors).monitors
+        let wanted = MonitorSet(monitors: monitors).sortedKey
         guard !isConnectedMonitorSet(wanted) else {
             throw MonitorSetForgetError.connected
         }

@@ -126,7 +126,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 53 = the `gesture` map is one map per layer, today's the
     /// default layer's (#3535), in a bundle's `config` and its
     /// `[Profile]` alike.
-    public static let currentFormat = 53
+    /// 54 = a profile's Screen pins are its own, keyed by screen
+    /// number (#3647), in a bundle's `[Profile]`.
+    public static let currentFormat = 54
 
     public let format: Int
 

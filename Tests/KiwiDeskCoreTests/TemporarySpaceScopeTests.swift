@@ -47,10 +47,10 @@ struct TemporarySpaceScopeTests {
         let stored = try core.profiles.read(name: "desk")
         #expect(stored.spaces == (1...4).map { SpaceID($0) } + [SpaceID(7)])
         #expect(stored.spaceModes[SpaceID(7)] == .monocle)
-        let set = try #require(
-            stored.set(matching: core.liveFingerprints)
+        let pins = try #require(
+            stored.runtimePins(on: core.liveFingerprints)
         )
-        #expect(set.spaceMonitorMap[SpaceID(7)] == desk.dell.fingerprint)
+        #expect(pins[SpaceID(7)] == desk.dell.fingerprint)
         let declared = core.profiles.active?.declaredSpaces
         #expect(declared?.contains(SpaceID(7)) == true)
     }
@@ -152,7 +152,7 @@ struct TemporarySpaceScopeTests {
         let added = AddedSpace(
             after: SpaceID(1),
             mode: .monocle,
-            pin: "DELL:1920x1080",
+            pin: ScreenSlotKey(number: 1),
             icon: "star"
         )
         var profile = desk.profile(
@@ -180,7 +180,7 @@ struct TemporarySpaceScopeTests {
         #expect(profile.spaces == [SpaceID(1), SpaceID(7)])
         #expect(profile.spaceModes[SpaceID(7)] == draft.spaceModes[SpaceID(7)])
         #expect(
-            profile.monitorSets.first?.spaceMonitorMap[SpaceID(7)]
+            profile.spaceMonitorMap[SpaceID(7)]
                 == draft.spacePins[SpaceID(7)]
         )
         #expect(
@@ -193,9 +193,7 @@ struct TemporarySpaceScopeTests {
         #expect(profile.mainSpaces.isEmpty)
         #expect(profile.fallbackSpace == nil)
         #expect(
-            profile.monitorSets.allSatisfy {
-                $0.spaceMonitorMap[SpaceID(2)] == nil
-            }
+            profile.spaceMonitorMap[SpaceID(2)] == nil
         )
         #expect(draft.spacePins[SpaceID(2)] == nil)
         #expect(profile.settings.spaceIcons[SpaceID(2)] == nil)

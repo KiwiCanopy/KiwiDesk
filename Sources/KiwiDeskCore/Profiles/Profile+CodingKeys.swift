@@ -8,6 +8,7 @@ extension Profile {
         case name
         case monitorSets = "monitor_sets"
         case dormantMonitorCount = "monitor_count"
+        case spaceMonitorMap = "space_monitor_map"
         case mainSpaces = "main_spaces"
         case isDefault = "default"
         case isStarterSetup = "starter_setup"

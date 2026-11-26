@@ -19,13 +19,13 @@ extension SettingsModel {
             resolved[space] = reading(
                 SpacePlacement.resolve(
                     space: space,
-                    pins: config.spacePins,
+                    pins: resolvedPins,
                     mainSpaces: config.mainSpaces,
                     displays: displays,
                     mainID: mainID,
                     assignment: assignment
                 ),
-                pin: config.spacePins[space]
+                pin: pin(of: space)
             )
         }
         return resolved
@@ -51,7 +51,7 @@ extension SettingsModel {
             spaces: config.spaces,
             mainSpaces: config.mainSpaces,
             resolutions: resolutions(),
-            pins: config.spacePins,
+            pins: resolvedPins,
             displays: displays,
             splits: config.settings.displayAreas
         )

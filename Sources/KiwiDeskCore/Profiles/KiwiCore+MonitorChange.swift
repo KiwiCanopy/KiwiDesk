@@ -79,8 +79,7 @@ extension KiwiCore {
                 profiles.markClean()
                 spacePins = keepingPins(
                     of: Set(liveTemporarySpaces),
-                    over: profile.set(matching: fingerprints)?
-                        .spaceMonitorMap ?? [:]
+                    over: profile.runtimePins(on: fingerprints) ?? [:]
                 )
                 returnHeldSpacesWithoutApply(to: profile)
             }

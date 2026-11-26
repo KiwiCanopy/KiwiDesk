@@ -35,14 +35,13 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-pinned space, showing the stored
-    /// `name:WxH` fingerprint verbatim: no fingerprint→name
-    /// helper exists, and a parser here would be a second copy
-    /// of the fingerprint grammar.
+    /// One row per re-pinned space, showing the stored screen
+    /// number (`ScreenSlotKey`, #3647) verbatim until the "Screen N"
+    /// words ship with the Screens badge.
     private static func screensPinRows(
         _ census: SettingKey,
-        old: [SpaceID: String],
-        new: [SpaceID: String]
+        old: [SpaceID: ScreenSlotKey],
+        new: [SpaceID: ScreenSlotKey]
     ) -> [SettingsDiffRow] {
         let base = L("diff.label.space_pin", "Screen pin")
         let touched = Set(old.keys).union(new.keys)
@@ -53,8 +52,8 @@ extension SettingsValueReadout {
                 census,
                 instance: space.raw,
                 label: instanceLabel(base, space.raw),
-                old: old[space] ?? unset,
-                new: new[space] ?? unset
+                old: old[space]?.description ?? unset,
+                new: new[space]?.description ?? unset
             )
         }
     }

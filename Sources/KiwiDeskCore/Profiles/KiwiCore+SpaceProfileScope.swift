@@ -52,7 +52,9 @@ extension KiwiCore {
         let added = AddedSpace(
             after: after,
             mode: space.mode,
-            pin: spacePins[id],
+            pin: spacePins[id].flatMap {
+                liveScreenOrder.slot(of: ScreenAreaKey(parsing: $0))
+            },
             icon: tiler.settings.spaceIcons[id]
         )
         guard writeThroughLiveProfile(.addSpace(id, added)) else {

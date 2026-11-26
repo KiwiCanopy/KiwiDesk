@@ -14,12 +14,11 @@ private func makeProfile(
 ) -> Profile {
     Profile(
         name: name,
-        monitorSets: [
-            MonitorSet(
-                monitors: monitors,
-                spaceMonitorMap: pins
-            )
-        ],
+        monitorSets: [MonitorSet(monitors: monitors)],
+        spaceMonitorMap: ScreenOrder(monitors).storing(
+            runtime: pins,
+            over: [:]
+        ),
         mainSpaces: mains,
         isDefault: isDefault,
         spaceModes: modes,
@@ -32,24 +31,21 @@ private func makeProfile(
 
 @Suite("Profile data model")
 struct ProfileModelTests {
-    @Test("Monitor sets store canonically sorted")
-    func sortedMonitors() {
+    @Test("A monitor set keeps its order and matches in any order")
+    func setIsAnOrder() {
         let set = MonitorSet(monitors: ["B:2x2", "A:1x1"])
-        #expect(set.monitors == ["A:1x1", "B:2x2"])
+        #expect(set.monitors == ["B:2x2", "A:1x1"])
+        #expect(set.matches(["A:1x1", "B:2x2"]))
+        #expect(!set.matches(["A:1x1", "A:1x1"]))
     }
 
-    @Test("Pins to monitors outside the set are dropped")
+    @Test("A stored pin drops a screen the order does not hold")
     func orphanPinsDropped() {
-        let set = MonitorSet(
-            monitors: ["A:1x1"],
-            spaceMonitorMap: [
-                SpaceID(1): "A:1x1",
-                SpaceID(2): "GONE:9x9",
-            ]
+        let stored = ScreenOrder(["A:1x1"]).storing(
+            runtime: [SpaceID(1): "A:1x1", SpaceID(2): "GONE:9x9"],
+            over: [:]
         )
-        #expect(
-            set.spaceMonitorMap == [SpaceID(1): "A:1x1"]
-        )
+        #expect(stored == [SpaceID(1): ScreenSlotKey(number: 1)!])
     }
 
     @Test("Mismatched set lengths drop; first is canonical")
@@ -171,29 +167,25 @@ struct ProfileModelTests {
         #expect(json.contains("\"space_modes\":{\"1\""))
     }
 
-    @Test("Upsert replaces the same set, refuses new lengths")
+    @Test("Upsert keeps the same set's order, refuses new lengths")
     func upsert() {
         var profile = makeProfile(
             name: "p",
-            monitors: ["A:1x1"]
+            monitors: ["A:1x1", "C:3x3"]
         )
-        let replaced = MonitorSet(
-            monitors: ["A:1x1"],
-            spaceMonitorMap: [SpaceID(1): "A:1x1"]
+        let sameSet = profile.upsert(
+            MonitorSet(monitors: ["C:3x3", "A:1x1"])
         )
-        let sameSet = profile.upsert(replaced)
         #expect(sameSet)
         #expect(profile.monitorSets.count == 1)
-        #expect(
-            profile.monitorSets[0].spaceMonitorMap.count == 1
-        )
+        #expect(profile.monitorSets[0].monitors == ["A:1x1", "C:3x3"])
         let newSet = profile.upsert(
-            MonitorSet(monitors: ["B:2x2"])
+            MonitorSet(monitors: ["B:2x2", "D:4x4"])
         )
         #expect(newSet)
         #expect(profile.monitorSets.count == 2)
         let wrongLength = profile.upsert(
-            MonitorSet(monitors: ["C:3x3", "D:4x4"])
+            MonitorSet(monitors: ["C:3x3"])
         )
         #expect(!wrongLength)
     }

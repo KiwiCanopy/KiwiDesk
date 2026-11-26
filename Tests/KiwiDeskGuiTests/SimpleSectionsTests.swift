@@ -1,4 +1,5 @@
 import Combine
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -21,10 +22,22 @@ struct SimpleSectionsTests {
     @Test("each placement clears the other one")
     func placementRoundTrips() {
         let model = onSimple()
+        let screen = Display(
+            id: DisplayID(31),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        for display in model.core.state.workspaces.allDisplays {
+            model.core.state.workspaces.removeDisplay(display.id)
+        }
+        model.core.state.workspaces.upsertDisplay(screen)
         let space = SpaceID("1")
-        model.place(space, .screen("fp-a"))
-        #expect(model.config.spacePins[space] == "fp-a")
-        #expect(model.screenChoice(of: space) == .screen("fp-a"))
+        model.place(space, .screen(screen.fingerprint))
+        // The draft stores the number the screen holds (#3647).
+        #expect(model.config.spacePins[space] == ScreenSlotKey(number: 1))
+        #expect(
+            model.screenChoice(of: space) == .screen(screen.fingerprint)
+        )
         model.place(space, .followsMain)
         #expect(model.config.spacePins[space] == nil)
         #expect(model.config.mainSpaces.contains(space))

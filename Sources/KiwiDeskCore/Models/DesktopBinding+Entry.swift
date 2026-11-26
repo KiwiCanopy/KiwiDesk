@@ -58,7 +58,7 @@ extension DesktopBinding {
         /// is all screen setups.
         static func canonical(_ setup: [String]?) -> [String]? {
             guard let setup, !setup.isEmpty else { return nil }
-            return MonitorSet(monitors: setup).monitors
+            return MonitorSet(monitors: setup).sortedKey
         }
 
         /// A pending entry is stored as before ids: a bare name

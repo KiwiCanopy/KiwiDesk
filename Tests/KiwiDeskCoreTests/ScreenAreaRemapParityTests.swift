@@ -18,14 +18,14 @@ import Testing
 // keys, a map keyed by a typed `ScreenAreaKey`, and an optional
 // map left nil, which reflects no children (`populated()` sets
 // `look` and `appWide` so theirs are seen). Such a store owes a
-// behavioural test of its own. A profile's other monitor sets
-// (`Profile.monitorSets[].spaceMonitorMap`) are outside the draft
-// a merge edits: a pin there naming the vanished area falls back
-// to area 0 through the one resolver (ruling 22).
+// behavioural test of its own. The draft's Screen pins are such a
+// store since #3647 — keyed by screen NUMBER, typed `ScreenSlotKey`
+// — and `mergeTakesTheDoor` and `applyCopiesEveryMap` hold them.
 
 private let screen = "Wide:3440x1440"
 private let vanished = ScreenAreaKey(fingerprint: screen, areaID: 2)
 private let survivor = ScreenAreaKey(fingerprint: screen, areaID: 1)
+private let order = ScreenOrder([screen])
 
 /// Reflected paths of String-typed maps that hold no area key, and
 /// why. Keyed by the whole path, so exempting one map never exempts
@@ -46,7 +46,7 @@ private let notAreaKeyed: [String: String] = [
 private func populated() -> GuiConfig {
     var config = GuiConfig()
     let key = vanished.description
-    config.spacePins[SpaceID("1")] = key
+    config.spacePins[SpaceID("1")] = ScreenSlotKey(number: 1, areaID: 2)
     let desktop = DesktopKey.identity(DesktopIdentity(raw: "probe"))
     config.desktopAreaSpaces[desktop] = [key: SpaceID("1")]
     config.settings.spaceBarStyle.edgeOverride[key] = .bottom
@@ -115,7 +115,8 @@ struct ScreenAreaRemapParityTests {
     func applyRewritesEveryMap() {
         var config = populated()
         config.apply(
-            ScreenAreaRemap(vanished: vanished, survivor: survivor)
+            ScreenAreaRemap(vanished: vanished, survivor: survivor),
+            order: order
         )
         let maps = stringMaps(config).filter {
             notAreaKeyed[$0.label] == nil
@@ -133,7 +134,8 @@ struct ScreenAreaRemapParityTests {
         config.settings.appBarStyle.edgeOverride[survivor.description] =
             .top
         config.apply(
-            ScreenAreaRemap(vanished: vanished, survivor: survivor)
+            ScreenAreaRemap(vanished: vanished, survivor: survivor),
+            order: order
         )
         #expect(
             config.settings.appBarStyle.edgeOverride
@@ -149,21 +151,23 @@ struct ScreenAreaRemapParityTests {
             whole.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
         )
         config.settings.displayAreas[screen] = three
-        let merged = config.mergeAreas(2, 1, on: screen)
+        let merged = config.mergeAreas(2, 1, on: screen, order: order)
         let remap = try #require(merged)
         #expect(remap.vanished == vanished)
         #expect(remap.survivor == survivor)
-        #expect(config.spacePins[SpaceID("1")] == survivor.description)
+        #expect(
+            config.spacePins[SpaceID("1")]
+                == ScreenSlotKey(number: 1, areaID: 1)
+        )
         #expect(config.settings.displayAreas[screen]?.areas.count == 2)
-        let refused = config.mergeAreas(0, 9, on: screen)
+        let refused = config.mergeAreas(0, 9, on: screen, order: order)
         #expect(refused == nil)
     }
 }
 
 /// Reflected area-keyed maps a split does not copy, and why.
 private let notCopied: [String: String] = [
-    "spacePins": "a pin stays on the half that keeps the id",
-    "desktopAreaSpaces": "a new area starts empty (ruling 23)",
+    "desktopAreaSpaces": "a new area starts empty (ruling 23)"
 ]
 
 // Forget-proof guard for a split's copy (#3517): `apply(_ copy:)`
@@ -186,7 +190,11 @@ struct ScreenAreaSplitCopyParityTests {
             #expect(map.text.contains("\"\(vanished)\""), "\(map.label)")
             #expect(map.text.contains("\"\(minted)\""), "\(map.label)")
         }
-        #expect(config.spacePins[SpaceID("1")] == vanished.description)
+        // A pin stays on the half that keeps the id.
+        #expect(
+            config.spacePins[SpaceID("1")]
+                == ScreenSlotKey(number: 1, areaID: 2)
+        )
         let labels = Set(stringMaps(config).map(\.label))
         for label in notCopied.keys {
             #expect(labels.contains(label), "\(label) is gone")

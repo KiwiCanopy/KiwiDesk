@@ -9,7 +9,7 @@ extension SettingsModel {
     func spacePlacement(of space: SpaceID) -> SpacePlacement.Resolution? {
         SpacePlacement.resolve(
             space: space,
-            pins: config.spacePins,
+            pins: resolvedPins,
             mainSpaces: config.mainSpaces,
             displays: displays,
             mainID: PositionalDisplays.liveMainID,
@@ -21,7 +21,7 @@ extension SettingsModel {
     /// every pin chip takes.
     func spacePinBadge(_ space: SpaceID) -> SpacePinBadge {
         SpacePinBadge.resolve(
-            pin: config.spacePins[space],
+            pin: pin(of: space),
             connectedFingerprints: Set(displays.map(\.fingerprint)),
             name: screenName
         )
