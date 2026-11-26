@@ -224,4 +224,31 @@ struct SessionScreenOrderTests {
         core.apply(profile: work, cause: .event)
         #expect(core.liveScreenOrder.fingerprints.first == "A:100x100")
     }
+
+    @Test("a rename keeps it with its profile; a delete drops it")
+    func renameAndDelete() throws {
+        let core = makeCore()
+        try loadWork(core)
+        let holed = try #require(reversed.unnumbering("A:100x100"))
+        core.setSessionScreenOrder(holed)
+        try core.profiles.rename(from: "Work", to: "Desk")
+        #expect(core.profiles.sessionScreenOrder?.profile == "Desk")
+        #expect(core.liveScreenOrder == holed)
+        try core.profiles.delete(name: "Desk")
+        #expect(core.profiles.sessionScreenOrder == nil)
+    }
+
+    @Test("a Save under another name hands it over")
+    func saveUnderAnotherName() throws {
+        let core = makeCore()
+        try loadWork(core)
+        try core.persistProfile(named: "Other", modes: nil)
+        try core.loadProfile(named: "Work")
+        let holed = try #require(reversed.unnumbering("A:100x100"))
+        core.setSessionScreenOrder(holed)
+        try core.persistProfile(named: "Other", modes: nil)
+        #expect(core.profiles.currentName == "Other")
+        #expect(core.profiles.sessionScreenOrder?.profile == "Other")
+        #expect(core.liveScreenOrder == holed)
+    }
 }

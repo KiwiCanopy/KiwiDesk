@@ -53,7 +53,7 @@ extension KiwiCore {
         var result: [(number: Int, display: Display)] = []
         let order = liveScreenOrder
         for (index, fingerprint) in order.fingerprints.enumerated()
-        where !order.unnumbered.contains(index + 1) {
+        where order.holds(ScreenSlotKey(number: index + 1)!) {
             guard
                 let at = left.firstIndex(where: {
                     $0.fingerprint == fingerprint

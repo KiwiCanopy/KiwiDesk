@@ -2053,8 +2053,10 @@ loaded with it. The obligations:
   edit re-apply keeps it. A Save stores it through
   `upsert(_:reordering:)` on a held profile and through
   `liveMonitorSet` on a new one, and it is keyed by its profile, so a
-  switch to another profile on the same screens never reads it
-  (`SessionScreenOrderTests`).
+  switch to another profile on the same screens never reads it. A
+  Save hands it to the profile it adopts (`settleSessionScreenOrder`),
+  a rename carries it with its owner and a delete of its owner
+  drops it (`SessionScreenOrderTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and
   `forgetMonitorSet` (#3324) — never `Profile.release` beside it,

@@ -132,6 +132,7 @@ extension SettingsModel {
         )
         // A renumber stands before the draft's pins are projected
         // (#3647 ▸ lane 2).
+        let priorOrder = core.sessionScreenOrder
         if let order = screenNumbering.draft {
             core.setSessionScreenOrder(order)
         }
@@ -158,8 +159,10 @@ extension SettingsModel {
                 NewerFormatText.detail(error)
             )
             core.onLog("profile save failed: \(error)")
-            // Nothing stored the renumber, so the session drops it.
-            if screenNumbering.draft != nil { core.setSessionScreenOrder(nil) }
+            // Nothing stored the renumber: the session keeps its own.
+            if screenNumbering.draft != nil {
+                core.setSessionScreenOrder(priorOrder)
+            }
             saved = false
         }
         // Profile files first: the gui.json write below reloads

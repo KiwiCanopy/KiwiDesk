@@ -3,8 +3,8 @@ import Foundation
 /// The session's renumber of the connected setup (#3647 ▸ lane 2b):
 /// a Settings Save sets it before the pins are projected, and it
 /// stands only for the profile it was made for, on the setup it was
-/// made on. One store, one setter, one clear; profiles.md names who
-/// clears.
+/// made on. One store and one setter, on ProfileManager; profiles.md
+/// names who carries it and who clears it.
 extension KiwiCore {
     /// The override `profile` reads on the connected screens; nil for
     /// another profile or another setup.
@@ -18,7 +18,7 @@ extension KiwiCore {
     }
 
     /// The live profile's override, nil where it has none.
-    var sessionScreenOrder: ScreenOrder? {
+    public var sessionScreenOrder: ScreenOrder? {
         sessionScreenOrder(for: profiles.currentName)
     }
 
@@ -43,5 +43,18 @@ extension KiwiCore {
             profile.monitorSets.contains(where: { $0.order == order })
         else { return }
         clearSessionScreenOrder()
+    }
+
+    /// A Save adopted `profile` with `carried`, the live renumber read
+    /// before it: the renumber follows to it, and ends where the Save
+    /// stored it.
+    func settleSessionScreenOrder(
+        _ carried: ScreenOrder?,
+        savedAs profile: Profile
+    ) {
+        if let carried {
+            profiles.setSessionScreenOrder(carried, for: profile.name)
+        }
+        clearSessionScreenOrder(ifStoredIn: profile)
     }
 }

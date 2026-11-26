@@ -203,16 +203,13 @@ extension KiwiCore {
         named name: String,
         modes: [SpaceID: LayoutMode]?
     ) throws -> [String] {
+        // A renumber goes with the live arrangement it numbers.
+        let carried = sessionScreenOrder
         guard var existing = try? profiles.read(name: name)
         else {
             let built = buildProfile(name: name, modes: modes)
-            // A renumber goes with the live arrangement it numbers.
-            let carried = sessionScreenOrder
             let released = try saveProfile(built)
-            if let carried {
-                profiles.setSessionScreenOrder(carried, for: name)
-            }
-            clearSessionScreenOrder(ifStoredIn: built)
+            settleSessionScreenOrder(carried, savedAs: built)
             recordLookWrite(of: built)
             refreshConfigIssues()
             if modes == nil { adoptedWholeLive(name) }
@@ -234,10 +231,10 @@ extension KiwiCore {
         if existing.set(matching: live.monitors) != nil
             || !isOwnedElsewhere(live.monitors, than: name)
         {
-            existing.upsert(live, reordering: sessionScreenOrder != nil)
+            existing.upsert(live, reordering: carried != nil)
             existing.storePins(
                 capturedPins(alsoOf: extra),
-                through: screenOrder(for: existing)
+                through: carried ?? screenOrder(for: existing)
             )
         }
         let fresh = buildProfile(name: name, modes: modes)
@@ -248,7 +245,7 @@ extension KiwiCore {
         existing.settings = fresh.settings
         existing.savedAt = .now
         let released = try saveProfile(existing)
-        clearSessionScreenOrder(ifStoredIn: existing)
+        settleSessionScreenOrder(carried, savedAs: existing)
         recordLookWrite(of: existing)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
