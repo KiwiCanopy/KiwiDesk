@@ -22,7 +22,10 @@ final class LookTilePictures: ObservableObject {
     /// first ask starts it.
     func image(named name: String, in library: WallpaperLibrary) -> CGImage? {
         if let image = decoded[name] { return image }
-        guard asked.insert(name).inserted else { return nil }
+        // A picture not here yet (sync) is asked again on a later draw.
+        guard library.has(name), asked.insert(name).inserted else {
+            return nil
+        }
         let url = library.url(of: name)
         let pixels = Self.maxPixels
         Task.detached(priority: .utility) { [weak self] in

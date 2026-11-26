@@ -69,3 +69,35 @@ struct LookWallpaperTravelTests {
         #expect(core.wallpaperLibrary.has(name))
     }
 }
+
+/// An imported look's picture is renamed to the hash of the bytes
+/// that arrived, so a hand-edited file cannot name a picture it does
+/// not carry (#3478).
+@Suite("Look wallpaper import")
+@MainActor
+struct LookWallpaperImportTests {
+    @Test("an import re-hashes the picture it carries")
+    func importRehashes() throws {
+        let core = makeTestCore()
+        let bytes = WallpaperLibraryTests.png()
+        let name = WallpaperLibrary.name(of: bytes, extension: "png")
+        let wrong = String(repeating: "d", count: 64) + ".png"
+        let file = LookExport(
+            look: ShelfLook(
+                name: "Dusk",
+                style: [:],
+                colors: [:],
+                wallpaper: .all(wrong)
+            ),
+            wallpapers: [wrong: bytes]
+        )
+        let url =
+            testTemporaryDirectory
+            .appendingPathComponent(UUID().uuidString + ".json")
+        try JSONEncoder().encode(file).write(to: url)
+        let imported = try core.importLook(from: url, fallbackName: "X")
+        #expect(imported.wallpaper == .all(name))
+        #expect(core.wallpaperLibrary.has(name))
+        #expect(!core.wallpaperLibrary.has(wrong))
+    }
+}

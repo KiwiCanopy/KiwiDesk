@@ -1,21 +1,35 @@
 import Foundation
 
 /// The library's cleanup (#3478 ▸ Cleanup): a picture goes to the
-/// Trash once no look home names it. The homes are `looks.json`,
-/// the shared look in `gui.json`, every profile's worn
-/// `look_wallpaper` and the live settings — one walk, never a copy.
+/// Trash once no look home names it. The stored homes are read by the
+/// one `wallpaperNames(looks:config:profiles:)` walk, which a backup
+/// reads too; cleanup adds the live settings and the shared look.
 extension KiwiCore {
-    /// Every library picture a look home names.
-    func namedWallpapers() -> Set<String> {
-        var names: Set<String> = []
-        let looks = (try? lookLibrary.libraryLooks()) ?? []
-        for look in looks { names.formUnion(look.wallpaper?.names ?? []) }
-        if let shared = sharedLook {
-            names.formUnion(shared.wallpaper?.names ?? [])
-        }
-        for profile in profiles.allProfiles() {
+    /// Every library picture a stored look home names: the look
+    /// library, `gui.json`'s shared look and settings, each profile.
+    static func wallpaperNames(
+        looks: [ShelfLook],
+        config: GuiConfig?,
+        profiles: [Profile]
+    ) -> Set<String> {
+        var names = Set(looks.flatMap { $0.wallpaper?.names ?? [] })
+        names.formUnion(config?.look?.wallpaper?.names ?? [])
+        names.formUnion(config?.settings.lookWallpaper?.names ?? [])
+        for profile in profiles {
             names.formUnion(profile.settings.lookWallpaper?.names ?? [])
         }
+        return names
+    }
+
+    /// Every library picture a look home names, the live one included.
+    /// Reads the files, so it stays off the switch path.
+    func namedWallpapers() -> Set<String> {
+        var names = Self.wallpaperNames(
+            looks: (try? lookLibrary.libraryLooks()) ?? [],
+            config: guiConfigStore.load(),
+            profiles: profiles.allProfiles()
+        )
+        names.formUnion(sharedLook?.wallpaper?.names ?? [])
         names.formUnion(tiler.settings.lookWallpaper?.names ?? [])
         return names
     }

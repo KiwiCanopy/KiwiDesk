@@ -62,8 +62,9 @@ extension KiwiCore {
             else { continue }
             wanted.append((display.id, number, name))
         }
-        // Keep what a screen still shows and what a look still
-        // names, or a Desktop not shown now loses the file under it.
+        // Keep what a screen still shows and every copy the library
+        // still holds, so a Desktop not shown now keeps the file under
+        // it; a stat per copy, never a read of the look homes.
         let shown = Set(
             state.workspaces.allDisplays.compactMap {
                 desk.current($0.id).flatMap(wallpaperCopies.libraryName)
@@ -71,7 +72,7 @@ extension KiwiCore {
         )
         let names = Set(wanted.map(\.2).filter(library.has))
         let here = wallpaperCopies.keep(
-            names.union(shown).union(namedWallpapers()),
+            names.union(shown),
             from: library
         )
         var outcomes: [Int: WallpaperSetOutcome] = [:]

@@ -81,12 +81,11 @@ extension KiwiCore {
             ConfigArtifact.looks.travelsInABackup
             ? try looks.libraryLooks() : nil
         // Only the pictures a carried look home names (#3478).
-        var named = Set((library ?? []).flatMap { $0.wallpaper?.names ?? [] })
-        named.formUnion(config?.look?.wallpaper?.names ?? [])
-        named.formUnion(config?.settings.lookWallpaper?.names ?? [])
-        for profile in stored {
-            named.formUnion(profile.settings.lookWallpaper?.names ?? [])
-        }
+        let named = wallpaperNames(
+            looks: library ?? [],
+            config: config,
+            profiles: stored
+        )
         return SetupBundle(
             writtenBy: KiwiDeskVersion.semantic,
             config: config,

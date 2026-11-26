@@ -12198,8 +12198,9 @@ never overwritten by a look without one. The picture is copied, never
 referenced: a stored path breaks on a move, differs per Mac and would
 prompt later. The copy lives in the config folder's `wallpapers/`,
 named by its content hash, and the copy macOS wears is kept apart on
-this Mac, last applied only, so a cleanup, a reset or a sync deletion
-never pulls the picture off screen. One picture covers every screen;
+this Mac, so a cleanup, a reset or a sync deletion never pulls the
+picture off screen; a copy goes once the library no longer holds its
+picture, since another Desktop may still wear it. One picture covers every screen;
 a look keeps one per #3647 screen number only where the screens
 showed different pictures. Wearing the look by any route sets it,
 through the one change of the worn settings' `look_wallpaper`, so a

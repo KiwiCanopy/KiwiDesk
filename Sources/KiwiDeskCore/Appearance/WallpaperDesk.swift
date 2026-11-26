@@ -79,7 +79,9 @@ struct WallpaperMachineCopies {
     }
 
     /// Copies each of `names` in from `library`, then drops every
-    /// other copy: last applied only. Answers the names now here.
+    /// other copy the library no longer holds, so a picture is pulled
+    /// off a Desktop only once no look keeps it. Answers the names
+    /// now here.
     @discardableResult
     func keep(
         _ names: Set<String>,
@@ -106,7 +108,8 @@ struct WallpaperMachineCopies {
         let present =
             (try? files.contentsOfDirectory(atPath: directory.path))
             ?? []
-        for stale in present where !names.contains(stale) {
+        for stale in present
+        where !names.contains(stale) && !library.has(stale) {
             try? files.removeItem(at: url(of: stale))
         }
         return here
