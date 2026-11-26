@@ -169,12 +169,11 @@ struct SessionScreenOrderTests {
     func holeNamesNothing() throws {
         let core = makeCore()
         try loadWork(core)
-        core.setSessionScreenOrder(
-            try #require(
-                ScreenOrder(["A:100x100", "B:100x100"])
-                    .unnumbering("B:100x100")
-            )
+        let holed = try #require(
+            ScreenOrder(["A:100x100", "B:100x100"])
+                .unnumbering("B:100x100")
         )
+        core.setSessionScreenOrder(holed)
         #expect(core.screen(numbered: 1)?.id == left.id)
         #expect(core.screen(numbered: 2) == nil)
         #expect(core.screenNumber(of: right.id) == nil)
@@ -184,12 +183,11 @@ struct SessionScreenOrderTests {
     func newProfileDropsTheHolePin() throws {
         let core = makeCore()
         try loadWork(core)
-        core.setSessionScreenOrder(
-            try #require(
-                ScreenOrder(["A:100x100", "B:100x100"])
-                    .unnumbering("B:100x100")
-            )
+        let holed = try #require(
+            ScreenOrder(["A:100x100", "B:100x100"])
+                .unnumbering("B:100x100")
         )
+        core.setSessionScreenOrder(holed)
         core.spacePins = ["2": "B:100x100"]
         try core.persistProfile(named: "Fresh", modes: nil)
         let fresh = try core.profiles.read(name: "Fresh")
