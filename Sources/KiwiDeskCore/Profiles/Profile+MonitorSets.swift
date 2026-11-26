@@ -28,7 +28,7 @@ extension Profile {
     /// `fingerprints`, through the matching set's order; nil where
     /// no set matches (#3647).
     public func runtimePins(on fingerprints: [String]) -> [SpaceID: String]? {
-        set(matching: fingerprints).map { $0.order.runtime(spaceMonitorMap) }
+        monitorSets.order(matching: fingerprints)?.runtime(spaceMonitorMap)
     }
 }
 

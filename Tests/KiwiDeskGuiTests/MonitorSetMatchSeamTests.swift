@@ -8,9 +8,12 @@ import Testing
 /// `sortedKey`, homed in `MonitorSet.swift`; this scan reds a raw
 /// compare anywhere else in either source tree. It sees `.monitors`
 /// beside `==` or `!=` on one line, after stripping comments and
-/// whitespace, and spares a member read off it (`monitors.count`):
-/// a compare spread over lines, through another name or a member
-/// such as `monitors.first` is review's.
+/// whitespace, sparing a member read off it (`monitors.count`); and
+/// the pre-#3647 idiom `monitors.sorted()` and a `Set` built from
+/// `map(\.monitors)`, both `sortedKey`'s. A compare spread over
+/// lines, through another name, through `contains`, a Dictionary
+/// keyed by the order, or a synthesized `==` of a whole `MonitorSet`
+/// or `Profile` is review's.
 @Suite("Monitor set matching has one home (#3647)")
 struct MonitorSetMatchSeamTests {
     @Test("no raw monitors compare outside MonitorSet")
@@ -24,7 +27,8 @@ struct MonitorSetMatchSeamTests {
         }
         #expect(files.count > 100, "the scan found the trees")
         let compare = try NSRegularExpression(
-            pattern: #"\.monitors(==|!=)|(==|!=)[\w.?]*\.monitors(?![\w.])"#
+            pattern: #"\.monitors(==|!=)|(==|!=)[\w.?]*\.monitors(?![\w.])|"#
+                + #"\.monitors\.sorted\(\)|Set\([\w.$]*map\(\\\.monitors\)"#
         )
         var found: [String] = []
         for file in files where file.lastPathComponent != "MonitorSet.swift" {

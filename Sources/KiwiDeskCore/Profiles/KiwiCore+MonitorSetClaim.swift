@@ -150,7 +150,9 @@ extension KiwiCore {
         else { return [] }
         let own = Set(profile.monitorSets.map(\.sortedKey))
         return monitorSets(count: profile.monitorCount)
-            .filter { !own.contains($0.monitors.sorted()) }
+            .filter {
+                !own.contains(MonitorSet(monitors: $0.monitors).sortedKey)
+            }
     }
 
     /// Every set a profile saved for `count` screens holds, plus

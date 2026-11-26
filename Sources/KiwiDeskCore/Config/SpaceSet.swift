@@ -29,25 +29,31 @@ public struct SpaceSet: Sendable, Equatable {
 }
 
 extension Profile {
-    /// This profile's arrangement where a set covers `monitors`,
-    /// its pins all of them, so a Revert restores them all; no pins
-    /// where no set covers the screens.
-    func spaceSet(monitors: [String]) -> SpaceSet {
+    /// This profile's arrangement with all its pins, which belong to
+    /// its numbers whatever screens are connected, so a Revert
+    /// restores them all.
+    func spaceSet() -> SpaceSet {
         SpaceSet(
             spaces: orderedSpaces,
             spaceModes: spaceModes,
             mainSpaces: mainSpaces,
-            pins: set(matching: monitors) == nil ? [:] : spaceMonitorMap,
+            pins: spaceMonitorMap,
             fallbackSpace: fallbackSpace
         )
     }
 
-    /// Replaces the arrangement, its pins included.
+    /// Replaces the arrangement, its pins included; a stored number
+    /// past the screen count stays for a Space `set` keeps and does
+    /// not pin (#3647 ▸ no-fit ruling).
     mutating func replaceSpaces(with set: SpaceSet) {
+        let waiting = spaceMonitorMap.filter {
+            $0.value.number > monitorCount && set.pins[$0.key] == nil
+                && set.spaces.contains($0.key)
+        }
         spaces = set.spaces
         spaceModes = set.spaceModes
         mainSpaces = set.mainSpaces
         fallbackSpace = set.fallbackSpace
-        spaceMonitorMap = set.pins
+        takePins(set.pins.merging(waiting) { own, _ in own })
     }
 }

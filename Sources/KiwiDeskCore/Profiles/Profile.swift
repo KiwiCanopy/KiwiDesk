@@ -16,8 +16,9 @@ public struct Profile: Codable, Sendable, Equatable {
     private(set) var dormantMonitorCount: Int?
     /// Screen pin per Space, by the number its screen holds in
     /// whichever setup is connected (#3647, sparse); the runtime
-    /// reads it through `ScreenOrder`.
-    public var spaceMonitorMap: [SpaceID: ScreenSlotKey]
+    /// reads it through `ScreenOrder`. Written only through the doors
+    /// below, which each name the order the numbers are in.
+    public private(set) var spaceMonitorMap: [SpaceID: ScreenSlotKey]
     /// Spaces assigned to Main role on current main display.
     public var mainSpaces: [SpaceID]
     /// Default profile for this screen count.
@@ -304,6 +305,28 @@ public struct Profile: Codable, Sendable, Equatable {
         }
         dormantMonitorCount = nil
         return true
+    }
+
+    /// Numbers the runtime's `pins` through `order` — the set this
+    /// profile holds for the screens, else the live order a new set
+    /// stores — keeping a stored number past it (#3647).
+    mutating func storePins(
+        _ pins: [SpaceID: String],
+        through order: ScreenOrder
+    ) {
+        spaceMonitorMap = order.storing(runtime: pins, over: spaceMonitorMap)
+    }
+
+    /// Takes pins already numbered in this profile's own order: a
+    /// draft seeded from it, a Revert of its own.
+    public mutating func takePins(_ stored: [SpaceID: ScreenSlotKey]) {
+        spaceMonitorMap = stored
+    }
+
+    /// Pins `space` to `slot`, a number in this profile's own order,
+    /// or unpins it.
+    mutating func pin(_ space: SpaceID, to slot: ScreenSlotKey?) {
+        spaceMonitorMap[space] = slot
     }
 
     /// Removes the set covering `monitors`, keeping the count so a

@@ -33,7 +33,7 @@ extension KiwiCore {
         else { return nil }
         return TourSpacesBaseline(
             profile: name,
-            spaces: profile.spaceSet(monitors: liveFingerprints)
+            spaces: profile.spaceSet()
         )
     }
 

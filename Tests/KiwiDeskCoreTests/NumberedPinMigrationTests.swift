@@ -122,12 +122,17 @@ struct NumberedPinMigrationTests {
         #expect(read.spaceMonitorMap == ["1": ScreenSlotKey(number: 1)!])
     }
 
+    /// The gate is the format, since the moved key keeps its name: a
+    /// set-level map in a file at the new format is not crossed.
     @Test("a current file stays as it is")
     func currentFileStays() throws {
-        var current = profile
-        current.spaceMonitorMap = numbered
-        let data = try JSONEncoder().encode(current)
-        #expect(ConfigMigration.migratingPinsOntoNumbers(data) == nil)
+        var root = try encoded(profile)
+        oldShape(&root, format: 43, maps: oldMaps)
+        let current = try data(root)
+        #expect(ConfigMigration.migratingPinsOntoNumbers(current) == nil)
+        oldShape(&root, format: 42, maps: oldMaps)
+        let old = try data(root)
+        #expect(ConfigMigration.migratingPinsOntoNumbers(old) != nil)
     }
 
     @Test("a stored pin that is no number refuses the file")

@@ -46,7 +46,7 @@ extension KiwiCore {
         {
             return .untouched(layout)
         }
-        let live = profile.spaceSet(monitors: liveFingerprints)
+        let live = profile.spaceSet()
         if profile.isStarterSetup,
             let starter = offered.first(where: { $0.starterTitle != nil }),
             let planned = spaceSet(for: starter),

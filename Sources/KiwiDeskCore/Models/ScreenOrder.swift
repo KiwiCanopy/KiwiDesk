@@ -61,7 +61,8 @@ public struct ScreenOrder: Equatable, Sendable {
 
     /// Runtime pins as stored. A pin to a screen outside the order
     /// is dropped; a Space it does not pin keeps a stored number past
-    /// the order, a pin waiting on a screen not connected.
+    /// the order — a screen left unnumbered, or a hand edit (#3647 ▸
+    /// no-fit ruling).
     public func storing(
         runtime: [SpaceID: String],
         over stored: [SpaceID: ScreenSlotKey]

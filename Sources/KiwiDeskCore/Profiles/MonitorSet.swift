@@ -33,3 +33,11 @@ public struct MonitorSet: Codable, Sendable, Equatable {
     /// The order this setup numbers its screens by.
     public var order: ScreenOrder { ScreenOrder(monitors) }
 }
+
+extension Array where Element == MonitorSet {
+    /// The order of the set covering `fingerprints`: the one
+    /// spelling of "which stored set numbers these screens".
+    public func order(matching fingerprints: [String]) -> ScreenOrder? {
+        first { $0.matches(fingerprints) }?.order
+    }
+}

@@ -128,3 +128,47 @@ struct NumberedPinsSharedTests {
         #expect(saved.spaceMonitorMap == ["1": ScreenSlotKey(number: 2)!])
     }
 }
+
+/// A create on screens another profile holds claims that set, and the
+/// set keeps the order its holder stored (#3647, owner 2026-11-26).
+@Suite("A create keeps the held set's order (#3647)", .serialized)
+@MainActor
+struct NumberedPinsCreateTests {
+    @Test("a new profile numbers through the held set's order")
+    func createTakesTheHeldOrder() throws {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent("kiwi-3647c-\(UUID().uuidString)")
+        )
+        for (index, name) in ["A", "B"].enumerated() {
+            core.state.workspaces.upsertDisplay(
+                Display(
+                    id: DisplayID(UInt32(index + 1)),
+                    name: name,
+                    frame: CGRect(
+                        x: CGFloat(index) * 100,
+                        y: 0,
+                        width: 100,
+                        height: 100
+                    )
+                )
+            )
+        }
+        let held = ["B:100x100", "A:100x100"]
+        try core.profiles.write(
+            Profile(
+                name: "Old",
+                monitorSets: [MonitorSet(monitors: held)],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        core.state.workspaces.ensureSpace("1")
+        core.spacePins = ["1": "B:100x100"]
+        try core.persistProfile(named: "New", modes: nil)
+        let saved = try core.profiles.read(name: "New")
+        #expect(saved.monitorSets.map(\.monitors) == [held])
+        #expect(saved.spaceMonitorMap == ["1": ScreenSlotKey(number: 1)!])
+    }
+}

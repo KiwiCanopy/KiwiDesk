@@ -2001,9 +2001,11 @@ loaded with it. The obligations:
   arrangement (through `saveProfile`'s tail), an explicit load
   (`loadProfile`) and the Profiles page's pick (`claimMonitorSet`)
   hand the set over and strip it from same-count siblings, the
-  load and the pick through the one `handOver`, which keeps the
-  previous owner's screen order and carries no pins, a profile's
-  pins being its own and numbered (#3647); each strip goes through
+  load and the pick through the one `handOver`, which hands over
+  the order the set's holder stored and none of its pins, as a
+  create does (#3647, `MonitorSetHandOverTests` ▸
+  `pickCarriesNoPins`, `NumberedPinsCreateTests` ▸
+  `createTakesTheHeldOrder`); each strip goes through
   `ProfileManager.claim`. Boot, monitor-change matching and a
   Desktop binding's load never claim, because a claim there
   rewrites files the user did not touch — so a new caller of a
@@ -2013,6 +2015,21 @@ loaded with it. The obligations:
   format crossing and after a restore, which keeps each set with
   the profile `match` already loads for it
   (`MonitorSetSettleTests`); it never runs per boot.
+- **Compare a monitor set through `MonitorSet.matches` or
+  `sortedKey`, never `monitors ==`**: a set is an order since
+  #3647, so a raw compare misses the same screens in another order
+  (`MonitorSetMatchSeamTests`, whose header states what it cannot
+  see).
+- **Cross between a profile's number-keyed pins and the runtime's
+  fingerprint-keyed `spacePins` only through the order of the set
+  that profile holds for the connected screens** —
+  `KiwiCore.screenOrder(for:)`, `liveScreenOrder` for the live one,
+  `Profile.runtimePins(on:)` — never an order of a reader's own,
+  and write `Profile.spaceMonitorMap` only through its doors,
+  `storePins`, `takePins` and `pin`, each naming the order it
+  numbers in. A Settings draft of a stored profile is numbered in
+  that profile's order, never the live one's
+  (`NumberedPinsSharedTests`, `StoredDraftScreenOrderTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and
   `forgetMonitorSet` (#3324) — never `Profile.release` beside it,

@@ -117,14 +117,14 @@ extension Profile {
             spaceModes[id] = added.mode
             settings.spaceIcons[id] = added.icon
             if let pin = added.pin, set(matching: monitors) != nil {
-                spaceMonitorMap[id] = pin
+                self.pin(id, to: pin)
             }
         case .removeSpace(let id):
             spaces.removeAll { $0 == id }
             spaceModes[id] = nil
             mainSpaces.removeAll { $0 == id }
             if fallbackSpace == id { fallbackSpace = nil }
-            spaceMonitorMap[id] = nil
+            self.pin(id, to: nil)
             settings.removeSpace(id)
         case .kept(let leaves):
             settings = leaves.applied(to: settings)

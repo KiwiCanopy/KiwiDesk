@@ -35,10 +35,9 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-pinned space, showing the stored
-    /// `name:WxH` fingerprint verbatim: no fingerprint→name
-    /// helper exists, and a parser here would be a second copy
-    /// of the fingerprint grammar.
+    /// One row per re-pinned space, showing the stored screen
+    /// number (`ScreenSlotKey`, #3647) verbatim until the "Screen N"
+    /// words ship with the Screens badge.
     private static func screensPinRows(
         _ census: SettingKey,
         old: [SpaceID: ScreenSlotKey],

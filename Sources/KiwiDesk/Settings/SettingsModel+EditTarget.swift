@@ -61,6 +61,10 @@ extension SettingsModel {
             stored = storedState(name)
             if stored == nil { target = .live }
         }
+        // A stored draft is numbered in its own profile's order.
+        storedScreenOrder = editingProfile.map {
+            core.screenOrder(for: try? core.profiles.read(name: $0))
+        }
         ruleReachStored = core.ruleReachSnapshot()
         reachPage =
             ruleReachStored == nil

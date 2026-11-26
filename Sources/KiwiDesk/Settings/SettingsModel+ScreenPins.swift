@@ -5,8 +5,11 @@ import KiwiDeskCore
 /// profile does; every Settings reader and writer of a pin goes
 /// through these and `place`, so no view spells the crossing.
 extension SettingsModel {
-    /// Which connected screen holds which number — Core's one order.
-    var screenOrder: ScreenOrder { core.liveScreenOrder }
+    /// Which connected screen holds which number for the draft's
+    /// target: a stored profile's own order, else the live one.
+    var screenOrder: ScreenOrder {
+        storedScreenOrder ?? core.liveScreenOrder
+    }
 
     /// Every draft pin as the runtime keys it: a screen fingerprint,
     /// or an area key.

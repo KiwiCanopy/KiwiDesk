@@ -150,10 +150,16 @@ extension KiwiCore {
             ?? Dictionary(
                 uniqueKeysWithValues: captured.map { ($0.id, $0.mode) }
             )
+        // A set another profile holds keeps its stored order when
+        // this one takes it (#3647, owner 2026-11-26).
+        let set = heldLiveSet ?? liveMonitorSet
         return Profile(
             name: name,
-            monitorSets: [liveMonitorSet],
-            spaceMonitorMap: storedPins(alsoOf: extra),
+            monitorSets: [set],
+            spaceMonitorMap: set.order.storing(
+                runtime: capturedPins(alsoOf: extra),
+                over: [:]
+            ),
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
             // Carry the starter-setup identity when the live
             // layout IS that setup (#485): the transient Starter
@@ -220,12 +226,9 @@ extension KiwiCore {
             || !isOwnedElsewhere(live.monitors, than: name)
         {
             existing.upsert(live)
-            let order =
-                existing.set(matching: live.monitors)?.order
-                ?? liveScreenOrder
-            existing.spaceMonitorMap = order.storing(
-                runtime: capturedPins(alsoOf: extra),
-                over: existing.spaceMonitorMap
+            existing.storePins(
+                capturedPins(alsoOf: extra),
+                through: screenOrder(for: existing)
             )
         }
         let fresh = buildProfile(name: name, modes: modes)
