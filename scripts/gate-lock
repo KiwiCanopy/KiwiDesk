@@ -43,6 +43,13 @@ fi
 export KIWIDESK_GATE_PRUNE
 KIWIDESK_GATE_PRUNE="$(cd "$(dirname "$0")" && pwd)/prune-builds"
 export KIWIDESK_GATE_PRUNE_BELOW_GB="${KIWIDESK_GATE_PRUNE_BELOW_GB:-40}"
+# Every run: the build tools' old, empty TemporaryDirectory.*
+# folders in the gated command's own $TMPDIR (the script's
+# default), where they land and where its tests list. Not the
+# lock's dir: a remapped $TMPDIR fills elsewhere. Same || true,
+# its own deadline.
+export KIWIDESK_GATE_PRUNE_TMP
+KIWIDESK_GATE_PRUNE_TMP="$(dirname "$KIWIDESK_GATE_PRUNE")/prune-tmpdir"
 
 export KIWIDESK_GATE_LOCK_HELD=1
 export KIWIDESK_GATE_HOLDER="$PWD pid $$ since $(date +%T)"
@@ -51,6 +58,8 @@ export KIWIDESK_GATE_HOLDER="$PWD pid $$ since $(date +%T)"
      "$KIWIDESK_GATE_PRUNE" --apply --timeout 180 \
          --if-below-gb "$KIWIDESK_GATE_PRUNE_BELOW_GB" \
          < /dev/null > /dev/null || true
+     "$KIWIDESK_GATE_PRUNE_TMP" --apply --timeout 60 \
+         < /dev/null > /dev/null 2>&1 || true
      exec /usr/bin/nice -n 10 "$@"' "$HOLDER" "$@"
 STATUS=$?
 if [ "$STATUS" -eq 75 ]; then
