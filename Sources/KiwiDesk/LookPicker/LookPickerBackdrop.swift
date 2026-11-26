@@ -56,7 +56,9 @@ struct LookPickerBackdrop: View {
 }
 
 /// One look's backdrop: its colour ground at the backdrop's strength
-/// under a soft vignette (owner, prototype 2026-11-26).
+/// under a soft vignette (owner, prototype 2026-11-26). A look's
+/// picture, drawn here, is decoded once at the screen's pixel size,
+/// never full size per frame (#3038 ▸ Ruling 2026-11-26).
 struct LookPickerBackdropLayer: View {
     let entry: LookPickerEntry?
     let settings: TilingSettings

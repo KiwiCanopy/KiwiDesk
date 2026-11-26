@@ -53,8 +53,10 @@ struct LookPickerGeometry: Equatable {
     /// the last one the screen cuts.
     func stripes(side: Int, available: Int = .max) -> [CGRect] {
         let step = stripeSize.width * (1 - Self.stripeOverlap)
+        // The screen bounds the count too, so no geometry spins.
+        let fits = Int(screen.width / max(step, 1)) + 2
         var rects: [CGRect] = []
-        while rects.count < max(available, 0) {
+        while rects.count < min(max(available, 0), fits) {
             let rect = stripe(side: side, rects.count)
             rects.append(rect)
             let next = rect.minX + CGFloat(side) * step
