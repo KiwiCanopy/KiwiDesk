@@ -12,6 +12,21 @@ extension KiwiCore {
     /// w=, h=, id=, name=}, …})` takes the rects whole. The sizes or
     /// rects must tile the screen exactly.
     func setDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
+        let response = storeDisplayAreas(args)
+        if response.isSuccess { retile() }
+        return response
+    }
+
+    /// `set_display_areas`' write, without the retile: a screen
+    /// named by number or name while none is known waits for the
+    /// first report, whose drain replays this body (#3640).
+    func storeDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
+        if holdsScreenArg(args.first) {
+            holdSettingsCall(split: true) { [unowned self] in
+                self.storeDisplayAreas(args)
+            }
+            return .ok()
+        }
         guard let screen = splitScreen(args.first) else {
             return .fail("unknown screen: \(args.first?.stringValue ?? "")")
         }
@@ -36,14 +51,22 @@ extension KiwiCore {
             screen.fingerprint,
             tiler.settings.displayAreas[screen.fingerprint]
         )
-        retile()
         return .ok()
     }
 
     /// `set_display_area_name(area, name)` names the area its key
     /// names (as `list_monitors` prints it); an empty name clears
-    /// it back to the positional default.
+    /// it back to the positional default. Behind a split a load
+    /// holds for the first screen report, it waits too (#3640).
     func setDisplayAreaName(_ args: [JSONValue]) -> CommandResponse {
+        if luaAreaSplits.isRecording,
+            heldScreenCalls.contains(where: \.isSplit)
+        {
+            holdSettingsCall(split: false) { [unowned self] in
+                self.setDisplayAreaName(args)
+            }
+            return .ok()
+        }
         guard let raw = args.first?.stringValue,
             let name = args.dropFirst().first?.stringValue
         else { return .fail("expected an area and a name") }

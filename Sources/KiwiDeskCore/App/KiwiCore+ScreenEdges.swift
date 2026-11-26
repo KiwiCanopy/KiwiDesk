@@ -241,11 +241,13 @@ extension KiwiCore {
     /// screen names through the one `areaKeys(named:)` (#3517
     /// rulings 7, 16, 22), the edge checked first so a bad edge
     /// answers as one. Other fields, and a call with no screen,
-    /// pass through once.
+    /// pass through once. A screen named by number or name while
+    /// none is known holds the call for `replay` (#3640).
     func screenResolvedEdgeArgs(
         field: String,
         screenField: String,
-        _ args: [JSONValue]
+        _ args: [JSONValue],
+        replay: @escaping @MainActor () -> CommandResponse
     ) -> Result<[[JSONValue]], AppBarSettingError> {
         guard field == screenField, args.count > 1 else {
             return .success([args])
@@ -255,6 +257,10 @@ extension KiwiCore {
             AppBarEdge.self
         ) {
             return .failure(error)
+        }
+        if holdsScreenArg(args[1]) {
+            holdSettingsCall(split: false, replay: replay)
+            return .success([])
         }
         guard let keys = areaKeys(named: args[1]) else {
             return .failure(

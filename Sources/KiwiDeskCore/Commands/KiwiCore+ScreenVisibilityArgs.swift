@@ -7,16 +7,21 @@ import Foundation
 extension KiwiCore {
     /// `args` once per key the verb's screen names: `set_edge`'s
     /// through `screenResolvedEdgeArgs`, `set_visibility`'s here.
-    /// A call with no screen is itself, once.
+    /// A call with no screen is itself, once. A screen named by
+    /// number or name while none is known holds the call, which
+    /// `replay` makes again at the first report, and answers no
+    /// calls now (#3640).
     func screenResolvedBarArgs(
         field: String,
-        _ args: [JSONValue]
+        _ args: [JSONValue],
+        replay: @escaping @MainActor () -> CommandResponse
     ) -> Result<[[JSONValue]], AppBarSettingError> {
         guard field == "visibility" else {
             return screenResolvedEdgeArgs(
                 field: field,
                 screenField: "edge",
-                args
+                args,
+                replay: replay
             )
         }
         guard args.count > 1 else { return .success([args]) }
@@ -25,6 +30,10 @@ extension KiwiCore {
             ShelfVisibility.self
         ) {
             return .failure(error)
+        }
+        if holdsScreenArg(args[1]) {
+            holdSettingsCall(split: false, replay: replay)
+            return .success([])
         }
         guard let keys = areaKeys(named: args[1]) else {
             return .failure(
@@ -51,8 +60,8 @@ extension KiwiCore {
     /// (ruling 22), and as given for a screen not connected. Last,
     /// an area's own name, refused where two share it.
     func areaKeys(named arg: JSONValue) -> [String]? {
-        let displays = connectedDisplays()
         let ws = state.workspaces
+        let displays = ws.allDisplays
         let screenKeys = { (id: DisplayID) -> [String]? in
             guard
                 let fingerprint = displays.first(where: { $0.id == id })?
