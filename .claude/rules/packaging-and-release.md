@@ -12,6 +12,7 @@ paths:
   - "scripts/pre-commit"
   - "scripts/gate-lock"
   - "scripts/prune-builds"
+  - "scripts/prune-tmpdir"
   - "scripts/resolve-packages"
   - "Package.swift"
   - ".github/workflows/**"
@@ -736,7 +737,8 @@ moved aside does.
 
 ## Pruning build output (#3186)
 
-**A script that deletes build output calls `scripts/prune-builds`;
+**A script that deletes build output in a worktree (`.build`,
+`site/node_modules`, `site/.astro`) calls `scripts/prune-builds`;
 it never re-derives the predicate.** The script's header lists the
 clauses that make a deletion safe — the gate held for the whole
 sweep, no process using the tree, never the caller's tree, idle
@@ -757,6 +759,16 @@ process group before the gated command runs. The nested
 lock through `gate-lock --lock-path`, the lock file's one name.
 `ExecTestsPruneBuilds` holds each clause and the trigger on
 fixture worktrees with a lock of their own.
+
+**The build tools' `TemporaryDirectory.*` leftovers in a temp dir
+go through `scripts/prune-tmpdir`**, whose header is the one home
+of its clauses. Every gate run calls it inside the lock on the
+gated command's `$TMPDIR`, the dir its tests list at start. A
+change to the clauses keeps the age guard, because other sessions
+build beside the gate. The call is `|| true` under the script's
+own `--timeout` alarm, so a failure never fails the gate and a
+stall ends at the alarm (`ExecTestsPruneTmpdir` holds the clauses,
+`ExecTestsPruneTmpdirGate` the call inside the lock and the alarm).
 
 ## Git hooks
 
