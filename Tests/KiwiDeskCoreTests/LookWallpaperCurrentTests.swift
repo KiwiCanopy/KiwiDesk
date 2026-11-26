@@ -15,7 +15,7 @@ struct LookWallpaperCurrentTests {
     /// for its display id.
     private func core(
         screens count: Int,
-        shown: @escaping (DisplayID) -> URL?
+        shown: @escaping @MainActor (DisplayID) -> URL?
     ) -> (KiwiCore, Sets) {
         let core = makeTestCore()
         for index in 0..<count {
@@ -127,7 +127,11 @@ struct LookWallpaperCurrentTests {
     @Test("a follower's copy is stamped with the picture")
     func followerIsStamped() {
         let picture = LookWallpaper.all(LookWallpaperTests.a)
-        let body = LookBody(style: [:], colors: [:], wallpaper: picture)
+        let body = LookBody(
+            style: ["gap.global": .number(4)],
+            colors: [:],
+            wallpaper: picture
+        )
         let worn = body.worn(over: TilingSettings())
         #expect(worn.lookWallpaper == picture)
         #expect(body.isStamped(on: worn))

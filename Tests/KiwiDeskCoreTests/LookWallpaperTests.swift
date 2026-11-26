@@ -50,6 +50,10 @@ struct LookWallpaperTests {
                 + " \"2\": \"../etc.png\", \"3\": \"\(Self.b)\"}"
         )
         #expect(value.admitted == .perScreen([3: Self.b]))
+        #expect(
+            LookWallpaper.perScreen([0: Self.a, 3: Self.b]).admitted
+                == .perScreen([3: Self.b])
+        )
         #expect(LookWallpaper.all("photo.png").admitted == nil)
         #expect(LookWallpaper.perScreen([:]).admitted == nil)
     }

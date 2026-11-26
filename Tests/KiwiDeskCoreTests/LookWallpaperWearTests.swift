@@ -59,6 +59,13 @@ struct LookWallpaperWearTests {
         ShelfLook(name: "Mine", style: [:], colors: [:])
             .pick(into: &settings)
         #expect(settings.lookWallpaper == nil)
+        ShelfLook(
+            name: "Bad",
+            style: [:],
+            colors: [:],
+            wallpaper: .all("photo.png")
+        ).pick(into: &settings)
+        #expect(settings.lookWallpaper == nil)
     }
 
     @Test("a picture never changes whether a look reads applied")
@@ -81,7 +88,8 @@ struct LookWallpaperWearTests {
         ShelfLook(name: "Dusk", style: [:], colors: [:], wallpaper: .all(name))
             .pick(into: &core.tiler.settings)
         #expect(box.sets.map(\.lastPathComponent) == [name])
-        #expect(core.wallpaperCopies.libraryName(of: box.sets[0]) == name)
+        let set = try #require(box.sets.first)
+        #expect(core.wallpaperCopies.libraryName(of: set) == name)
     }
 
     @Test("a picture already shown is not set again")
@@ -107,6 +115,7 @@ struct LookWallpaperWearTests {
         let name = try picture(in: core)
         core.tiler.settings.lookWallpaper = .all(name)
         box.sets = []
+        box.shown = nil
         core.tiler.settings.lookWallpaper = nil
         #expect(box.sets.isEmpty)
     }
