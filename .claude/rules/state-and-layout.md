@@ -1909,7 +1909,13 @@ editing here:
   side classifier counts the chain as one block at its region
   through `BspSplit.sides(…, chain:)`, never its members' slots,
   so no ratio moves for a window no ratio places
-  (`BspRunCommandTests`). A new scrolling layout then needs no
+  (`BspRunCommandTests`). Outside the chain, every BSP ratio door
+  takes its split from the one `BspLayout.splitOwner` and writes
+  it through `writeCappedBspSplit`, keyed by the window that owns
+  it (#3672, `RunPushCommandTests` ▸ `trailingDragMovesOwnSplit`):
+  a door resolving a split of its own, or writing the shared
+  ratio for a tiled focus, moves a split the resize did not name.
+  A new scrolling layout then needs no
   second wiring (`GridRunCommandTests` ▸ `focusStepsIntoTheRun`
   holds Grid's focus step; that no mode list returns is
   review's):
@@ -2442,8 +2448,8 @@ editing here:
   (`ResizeSizeLimitFeedbackTests`,
   `ResizeNeighborLimitTests`). A keyboard BSP press asks
   `bspPressMoves` before the capped writer and writes nothing where
-  the press would move the focused window against itself or not at
-  all; the mouse drop does not ask it (#2969,
+  the press would not move the focused window the way asked; the
+  mouse drop does not ask it (#2969,
   `HeldResizePressTests`). A press that moves nothing names the
   limit that stopped it, a floor (the window's own or a mate's)
   winning over a ratio's or a weight's own limit, and a weight
@@ -2670,18 +2676,14 @@ editing here:
   TILED members, and no live focus is outside them — a
   construction net, since the #670 bullet's `resize` clause
   rules every droppable focus ahead of the writers (#1298,
-  #1301) — while bsp's sides are
-  geometric and a window spanning the whole tiled extent on the
-  axis sits above every split of that orientation, so no ratio
-  move can resize it. That window is dropped from both sides by
-  the one `BspSplit.sides` authority — which also keeps
-  its floor out of the CAP, where it blocked a write no window
-  on the split was constraining — and the binding side is then
-  read off the WRITE's own direction, never the focused
-  window's side, which says nothing when the window is on
-  neither.
-  The empty case is the CUE's alone, and the write is not part
-  of it: a ratio is a stored per-space value whose caps protect
+  #1301) — while bsp's two sides are the split's own (#3672): its
+  owner, and the rest behind it, the binding side read off the
+  WRITE's own direction, and a tiled focus no split bounds on the
+  axis is refused before any write (`refuseBspNoSplit`), so no
+  cap counts a floor the split was not constraining.
+  With no tiled focus the write still lands, on the shared ratio
+  (`writeSharedBspRatio`): a ratio is a stored per-space value
+  whose caps protect
   the REGION rather than the windows currently in it, so an
   empty or unsplit space still records what a later split opens
   at (#383/#44/#458, `SessionRatioTests`, whose cases drive
@@ -2720,12 +2722,6 @@ editing here:
   A new writer of this shape states which kind of partition it
   has; `ResizeRefusalTargetingTests` holds the verdicts, one
   per arm, bsp and stack alike.
-  The classification models the FIRST split of an orientation,
-  which is what the shared scalar makes reachable: a deeper
-  split reusing it is not separately classified, so at depth ≥
-  2 a participant can still be named on the wrong side of it
-  (pre-existing, and the same under-clamp the cap already
-  documents).
 - **A minimum pill says WHOSE floor bound — the configured
   one or the app's — and derives that ONCE** (#1261). The
   remedy differs (a setting can be lowered, an app's own

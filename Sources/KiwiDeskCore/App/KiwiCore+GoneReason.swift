@@ -71,6 +71,7 @@ extension KiwiCore {
             state.focusRecency[id] = nil
             // Closing the window empties its slot (#2446).
             state.emptyPocket(id)
+            forgetBspSplits(of: id)  // its BSP splits (#3672)
         }
         if reason == .vanished,
             case .hosted(let space, _) = presence

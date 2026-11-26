@@ -264,6 +264,7 @@ extension TilingSettings {
         )
         context.parkBounds = parkBounds
         context.runSizes = space.runSizes
+        context.bspSplits = session.bspSplits ?? BspSplitRatios()
         return context
     }
 

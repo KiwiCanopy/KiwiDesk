@@ -170,161 +170,44 @@ extension KiwiCore {
         )
     }
 
-    /// Two-sided capped BSP ratio write plus refusal cues — the
-    /// one authority for the keyboard per-axis resize and the
-    /// mouse `.bspRatioH`/`.bspRatioV` adjustments. Sides of
-    /// the FIRST split resolve geometrically from the slots via
-    /// the shared `BspSplit.sides` authority, which also
-    /// drops the windows the split cannot resize (#1259); each
-    /// side's minimum is the max over its windows' effective
-    /// minimums — a lower bound on what the side truly needs
-    /// (its sub-splits can demand more), so this cap
-    /// under-clamps but never over-clamps, and the per-region
-    /// render clamp stays the net beneath it.
-    ///
-    /// This is the one writer whose focused window may be in
-    /// NEITHER group: a stack zone and a track partition every
-    /// member by membership, so their `focusedIsBinding` is a
-    /// membership read. Here it has to be read off a partition
-    /// the window may sit outside of.
-    ///
-    /// The write lands whatever the window population is — the
-    /// ratio is a stored per-space value the caps protect the
-    /// REGION of, not only the windows currently in it
-    /// (#383/#44/#458, `SessionRatioTests`), so an empty or
-    /// unsplit space still records what a later split opens at.
-    /// Only the CUE reads the population.
-    func writeCappedBspRatio(
-        proposed: Double,
+    /// The shared BSP ratio a press with no tiled focus writes —
+    /// what every split without its own ratio takes (#3672), capped
+    /// at the layout region's range (#383/#44/#458,
+    /// `SessionRatioTests`), so an empty or unsplit space still
+    /// records what a later split opens at.
+    func writeSharedBspRatio(
+        delta: Double,
         axis: String,
         span: Double,
-        space: Space,
-        focused: WindowID?
+        space: Space
     ) {
         let bsp = tiler.settings.resolvedBsp(
             for: space,
             session: sessionRatios(of: space.id)
         )
-        let base =
-            axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
-        let horizontal = axis == "x"
-        let screen = TilingEngine.screen(for: space.id, in: state)
-        let slots = tiler.calculatedFrames(state: state)
-        let tiled = state.effectiveTiledMembers(of: space)
-        // The scrolled chain classifies as one block (#2542).
-        let chain = screen.flatMap { bspChain(of: space, on: $0)?.zone }
-        // No display to classify against: the caps still hold on
-        // the global floor, and nothing here can name a window.
-        let sides = screen.map { screen in
-            BspSplit.sides(
-                of: tiled,
-                slots: slots,
-                bounds: tiler.layoutBounds(on: screen, for: space),
-                horizontal: horizontal,
-                chain: chain
-            )
-        }
-        let lowMin = plannedMinSize(
-            of: sides?.first ?? [],
-            axis: axis,
-            in: space
-        )
-        let highMin = plannedMinSize(
-            of: sides?.second ?? [],
-            axis: axis,
-            in: space
-        )
-        let outcome = SplitDomain.cappedRatioWrite(
-            proposed,
+        let base = axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
+        let value = SplitDomain.cappedRatioWrite(
+            base + delta / span,
             base: base,
             available: span,
-            minLow: lowMin.size,
-            minHigh: highMin.size
+            minSize: Double(minWindowSize(in: space).on(axis: axis))
         )
-        writeBspRatio(outcome.value, axis: axis, space: space)
-        guard let focused, let sides, let screen,
-            tiled.contains(focused)
-        else { return }
-        if sides.first.isEmpty, sides.second.isEmpty {
-            // Nothing on this axis answers to the ratio. That is
-            // a fact about the ARRANGEMENT rather than a limit
-            // reached, so it is said on the first press like the
-            // stack path's own no-parameter axis, not once the
-            // clamp happens to bite — and only where the OTHER
-            // axis DOES divide, which is what the sentence
-            // claims. A space too small to split at all — one
-            // window, an overflow pile — divides neither, and
-            // naming an axis there would be the same wrong
-            // sentence #1259 removed; #1258 owns the silence
-            // that leaves.
-            let across = BspSplit.sides(
-                of: tiled,
-                slots: slots,
-                bounds: tiler.layoutBounds(on: screen, for: space),
-                horizontal: !horizontal,
-                chain: chain
-            )
-            if !across.first.isEmpty || !across.second.isEmpty {
-                refuseAxisAbsent(focused, axis: axis)
-            } else {
-                // Neither axis divides: one window, or a pile.
-                // #1259 left this wordless deliberately; #1258
-                // is the string that fills it.
-                // Reached only when the ACROSS axis is empty
-                // too, so there is no other axis to send the
-                // user to.
-                refuseNothingToDivide(
-                    focused,
-                    otherAxisDivides: false
-                )
-            }
-            return
-        }
-        guard outcome.clamped else { return }
-        // A ratio that moved DOWN ran into the low side's
-        // minimum and one that moved UP into the high side's —
-        // read off the write's own direction, since the focused
-        // window's side says nothing when it sits on neither. A
-        // clamped outcome is never a standing-still write, so
-        // the comparison always decides.
-        let bindingFirst = proposed < base
-        let binding = bindingFirst ? lowMin : highMin
-        let bindingSide =
-            bindingFirst ? sides.first : sides.second
-        reportResizeRefusal(
-            focused: focused,
-            bindingCarrier: binding.carrier,
-            fallbackAnchor: bindingSide.first(where: {
-                $0 != focused
-            }),
-            focusedIsBinding: bindingSide.contains(focused),
-            axis: axis
-        )
-    }
-
-    /// The store's own 0.1...0.9 bound on a BSP ratio.
-    static func storedBspRatio(_ value: Double) -> Double {
-        min(max(value, 0.1), 0.9)
-    }
-
-    /// Whether a press from `base` to `proposed` leaves the stored
-    /// ratio where it is: at its bound, up to a hold's float drift.
-    static func bspRatioSpent(_ base: Double, to proposed: Double) -> Bool {
-        abs(storedBspRatio(proposed) - storedBspRatio(base)) < 1e-9
-    }
-
-    /// The per-axis store write both paths above share, with the
-    /// store's own bound applied once.
-    private func writeBspRatio(
-        _ value: Double,
-        axis: String,
-        space: Space
-    ) {
         let stored = Self.storedBspRatio(value)
         if axis == "x" {
             writeSplitRatioH(stored, for: space.id)
         } else {
             writeSplitRatioV(stored, for: space.id)
         }
+    }
+
+    /// The store's own 0.1...0.9 bound on a BSP ratio.
+    nonisolated static func storedBspRatio(_ value: Double) -> Double {
+        min(max(value, 0.1), 0.9)
+    }
+
+    /// Whether a press from `base` to `proposed` leaves the stored
+    /// ratio where it is: at its bound, up to a hold's float drift.
+    static func bspRatioSpent(_ base: Double, to proposed: Double) -> Bool {
+        abs(storedBspRatio(proposed) - storedBspRatio(base)) < 1e-6
     }
 }

@@ -60,17 +60,36 @@ struct RevertSettingsApplyTests {
         ratios.slotSize = .auto
         ratios.gridColumnWeights = [1]
         ratios.gridRowWeights = [1]
+        var splits = BspSplitRatios()
+        splits.set(0.1, of: WindowID(1), sideBySide: true)
+        splits.set(0.1, of: WindowID(1), sideBySide: false)
+        ratios.bspSplits = splits
         return ratios
     }
 
-    /// The labels of `ratios`' fields that hold a value.
+    /// The labels of `ratios`' fields that hold a value, the BSP
+    /// splits one per axis (#3672).
     private func setLabels(_ ratios: SessionRatios) -> Set<String> {
-        Set(
+        var labels = Set(
             Mirror(reflecting: ratios).children.compactMap { child in
                 "\(child.value)" == "nil" ? nil : child.label
             }
         )
+        labels.remove("bspSplits")
+        if ratios.bspSplits?.horizontal.isEmpty == false {
+            labels.insert("bspSplits.h")
+        }
+        if ratios.bspSplits?.vertical.isEmpty == false {
+            labels.insert("bspSplits.v")
+        }
+        return labels
     }
+
+    /// The splits an axis's shared ratio clears with it (#3672).
+    private let axisSplits = [
+        "splitRatioH": "bspSplits.h",
+        "splitRatioV": "bspSplits.v",
+    ]
 
     /// The shadow table mirrors `SessionRatios`: each entry clears
     /// one field, no two the same, and together every field — a
@@ -80,13 +99,17 @@ struct RevertSettingsApplyTests {
     func everyFieldHasAnEntry() {
         let all = setLabels(fullRatios())
         let fields = Mirror(reflecting: SessionRatios()).children.count
-        #expect(all.count == fields)
+        #expect(all.count == fields + 1)
         var cleared: [String] = []
         for shadow in KiwiCore.sizingShadows {
             var ratios = fullRatios()
             shadow.clear(&ratios)
             let gone = all.subtracting(setLabels(ratios))
-            #expect(gone.count == 1)
+            let shared = gone.subtracting(axisSplits.values)
+            #expect(shared.count == 1)
+            #expect(
+                gone == shared.union(shared.compactMap { axisSplits[$0] })
+            )
             cleared += gone
         }
         #expect(cleared.count == Set(cleared).count)
@@ -106,7 +129,7 @@ struct RevertSettingsApplyTests {
             "gridRowWeights": { $0.grid.rowWeights = [2, 1] },
         ]
         let all = setLabels(fullRatios())
-        #expect(Set(writes.keys) == all)
+        #expect(Set(writes.keys) == all.subtracting(axisSplits.values))
         let old = TilingSettings()
         for (label, write) in writes {
             var new = old
@@ -118,7 +141,10 @@ struct RevertSettingsApplyTests {
             guard let shadow = moved.first else { continue }
             var ratios = fullRatios()
             shadow.clear(&ratios)
-            #expect(all.subtracting(setLabels(ratios)) == [label])
+            #expect(
+                all.subtracting(setLabels(ratios))
+                    == Set([label] + [axisSplits[label]].compactMap { $0 })
+            )
         }
     }
 }

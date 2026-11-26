@@ -118,18 +118,6 @@ extension KiwiCore {
         cueResizeRefusal(.ratioLimit(window, axis: axis, grows: grows))
     }
 
-    /// A press the shared BSP ratio answers by moving the window
-    /// against itself (#3643), named by the press's sign.
-    func refuseRatioMovesOtherWay(
-        _ window: WindowID,
-        axis: String,
-        grows: Bool
-    ) {
-        cueResizeRefusal(
-            .ratioMovesOtherWay(window, axis: axis, grows: grows)
-        )
-    }
-
     /// A press on a float whose size macOS says cannot be set (#2994):
     /// the app's own limit either way, on macOS's statement rather
     /// than a learned floor or ceiling. The one verdict no derivation

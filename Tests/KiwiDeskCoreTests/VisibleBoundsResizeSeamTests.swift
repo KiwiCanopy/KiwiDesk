@@ -61,11 +61,15 @@ struct VisibleBoundsResizeSeamTests {
         return core
     }
 
+    /// The one split's ratio: w1's own (#3672), else the shared.
     private func ratioH(_ core: KiwiCore) -> Double {
-        core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!,
-            session: core.sessionRatios(of: SpaceID("1"))
-        ).splitRatioH
+        core.sessionRatios(of: SpaceID("1")).bspSplits?.horizontal[
+            WindowID(1)
+        ]
+            ?? core.tiler.settings.resolvedBsp(
+                for: core.state.workspaces[SpaceID("1")]!,
+                session: core.sessionRatios(of: SpaceID("1"))
+            ).splitRatioH
     }
 
     @Test("The keyboard span is the injected width")
@@ -85,22 +89,10 @@ struct VisibleBoundsResizeSeamTests {
 
     @Test("The BSP resize sign reads the injected bounds")
     func bspFocusSignFollowsInjectedBounds() {
-        // `bspFocusSign` classifies the focused slot as the first
-        // or second region via `BspSplit.side`, which is
-        // `slot.midX <= bounds.midX ? 1 : -1`. Growing the right
-        // window must lower the shared ratio (#122).
-        //
-        // The rect sits at a NEGATIVE origin on purpose. A revert
-        // to the host's screen leaves the slot where the injected
-        // rect put it and only changes the `bounds` it is compared
-        // against — so with a rect at x: 0 the classification
-        // survives on any host narrower than ~1500pt, including
-        // the ~1066pt runner of #523: the guard would have been
-        // green on CI and red only on a wide dev Mac, reproducing
-        // the very anti-pattern it exists to catch (review). Here
-        // the right slot's midX is −4250 against the injected
-        // −4500 (second region), while EVERY real display has
-        // midX ≥ 0 (first region), so a revert goes red anywhere.
+        // The right window sits in the rest of w1's split, so its
+        // grow lowers that split's ratio (#3672), by delta over the
+        // split's span: the injected width at a NEGATIVE origin,
+        // which no real display shares.
         guard NSScreen.main != nil else { return }
         let core = makeCore(
             bounds: CGRect(

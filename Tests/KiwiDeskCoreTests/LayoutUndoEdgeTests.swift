@@ -90,8 +90,9 @@ struct LayoutUndoEdgeTests {
         #expect(order(core) == start)
     }
 
+    /// w1's split ratio as the session holds it (#3672).
     private func ratio(_ core: KiwiCore) -> Double? {
-        core.sessionRatios(of: one).splitRatioH
+        core.sessionRatios(of: one).bspSplits?.horizontal[WindowID(1)]
     }
 
     @Test("a held key's press and its glide are one step")

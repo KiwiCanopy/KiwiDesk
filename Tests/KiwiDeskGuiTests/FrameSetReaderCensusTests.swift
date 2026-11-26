@@ -106,12 +106,6 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+ResizeScrollSlot.swift": (
             .slots, "the press measures the drawn slot"
         ),
-        "KiwiCore+RatioWriters.swift": (
-            .slots, "`BspSplit.sides` classifies the first split"
-        ),
-        "KiwiCore+ResizeBsp.swift": (
-            .slots, "the focus sign reads the slot's side"
-        ),
         "KiwiCore+ResizeBspChain.swift": (
             .slots, "a drag's side and the other axis read the slots"
         ),
@@ -151,12 +145,8 @@ struct FrameSetReaderCensusTests {
             "a whole-zone pile's cascade; a run takes its own restore",
         "KiwiCore+ScrollingRestore.swift": "Scrolling draws no run",
         "KiwiCore+ResizeScrollSlot.swift": "Scrolling draws no run",
-        "KiwiCore+RatioWriters.swift":
-            "a scrolled chain classifies by its region (#2542)",
         "KiwiCore+ResizeBspChain.swift":
             "a scrolled chain classifies by its region (#2542)",
-        "KiwiCore+ResizeBsp.swift":
-            "the focused window's own side, which a run always shows",
     ]
 
     @Test("Every slots reader says whether a run can mislead it")

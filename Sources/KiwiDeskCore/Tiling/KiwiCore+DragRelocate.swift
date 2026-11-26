@@ -139,6 +139,8 @@ extension KiwiCore {
         // one choke point also keeps track cap / spill placement out
         // of two hand-maintained copies.
         insertDropped(id, onto: target, into: destID)
+        // Its BSP splits stay with the Space it left (#3672).
+        forgetBspSplits(of: id)
         state.workspaces.focus(id, in: destID)
         // The pointer ended on the destination display; make it the
         // focused one so "current space" follows the window there —

@@ -3,14 +3,14 @@ import CoreGraphics
 import Foundation
 
 /// The retile-time heal of the split stores (#934/#1430) — the
-/// Track floor heal's shape (#1355) one store over: the two bsp
-/// split ratios and the stack master ratio are moved so a side
-/// draws its members' LEARNED floor. Called from `KiwiCore.retile`
+/// Track floor heal's shape (#1355) one store over: each bsp
+/// split's ratio (#3672) and the stack master ratio are moved so a
+/// side draws its members' LEARNED floor. Called from `KiwiCore.retile`
 /// beside `healTrackSessionWeights`, inside the same forced-pass
 /// scope, so it covers a window ARRIVING into a slot under its
 /// floor and a resize that walked the split past the floor before
-/// corroboration alike. The ruling — shared ratios may move for
-/// a learned floor — is in `docs/design-decisions.md`.
+/// corroboration alike. The ruling — a split may move for a
+/// learned floor — is in `docs/design-decisions.md`.
 ///
 /// Reads the LOCAL members (#944's traveler ruling), the render's
 /// own `layoutInput`, and writes through the capped writers with
@@ -74,53 +74,15 @@ extension KiwiCore {
             !healStandsDown(for: tiled)
         else { return }
         let bounds = tiler.layoutBounds(on: screen, for: space)
-        let slots = LayoutEngine.calculate(
-            mode: input.space.mode,
-            windows: input.tiled,
-            context: context
-        )
         var cues: Set<SplitFloorCue> = []
         switch space.mode {
         case .bsp:
-            // The scrolled chain classifies as one block (#2542).
-            let chain = bspChain(input)?.zone
-            for axis in ["x", "y"] {
-                let horizontal = axis == "x"
-                let sides = BspSplit.sides(
-                    of: tiled,
-                    slots: slots,
-                    bounds: bounds,
-                    horizontal: horizontal,
-                    chain: chain
-                )
-                healSplit(
-                    axis: axis,
-                    low: sides.first,
-                    high: sides.second,
-                    space: space,
-                    shown: shown,
-                    bounds: bounds,
-                    context: context,
-                    cues: &cues,
-                    current: {
-                        let bsp = self.tiler.settings.resolvedBsp(
-                            for: $0,
-                            session: self.sessionRatios(of: $0.id)
-                        )
-                        return horizontal
-                            ? bsp.splitRatioH : bsp.splitRatioV
-                    },
-                    write: { ratio, span in
-                        self.writeCappedBspRatio(
-                            proposed: ratio,
-                            axis: axis,
-                            span: span,
-                            space: space,
-                            focused: nil
-                        )
-                    }
-                )
-            }
+            healBspSplits(
+                of: space,
+                shown: shown,
+                screen: screen,
+                cues: &cues
+            )
         case .stack:
             let stack = tiler.settings.resolvedStack(
                 for: space,
@@ -134,13 +96,24 @@ extension KiwiCore {
             guard let stackZone else { break }
             let axis =
                 stack.stackPosition.splitsHorizontally ? "x" : "y"
+            let gap =
+                axis == "x"
+                ? context.gaps.inner.horizontal
+                : context.gaps.inner.vertical
+            let available = Double(
+                (axis == "x" ? context.usable.width : context.usable.height)
+                    - gap
+            )
             healSplit(
                 axis: axis,
                 low: Array(master),
                 high: Array(stackZone),
+                lowMin: plannedMinSize(of: master, axis: axis, in: space),
+                highMin: plannedMinSize(of: stackZone, axis: axis, in: space),
+                available: available,
                 space: space,
                 shown: shown,
-                bounds: bounds,
+                span: Double(axis == "x" ? bounds.width : bounds.height),
                 context: context,
                 cues: &cues,
                 current: {
@@ -173,34 +146,22 @@ extension KiwiCore {
     /// `write` is the capped writer, handed the raw region span
     /// every press hands it while the math divides the span the
     /// layout divides.
-    private func healSplit(
+    func healSplit(
         axis: String,
         low: [WindowID],
         high: [WindowID],
+        lowMin: (size: Double, carrier: WindowID?),
+        highMin: (size: Double, carrier: WindowID?),
+        available: Double,
         space: Space,
         shown: Bool,
-        bounds: CGRect,
+        span: Double,
         context: LayoutContext,
         cues: inout Set<SplitFloorCue>,
         current: (Space) -> Double,
         write: (Double, Double) -> Void
     ) {
         guard !low.isEmpty, !high.isEmpty else { return }
-        let lowMin = plannedMinSize(of: low, axis: axis, in: space)
-        let highMin = plannedMinSize(
-            of: high,
-            axis: axis,
-            in: space
-        )
-        let horizontal = axis == "x"
-        let gap =
-            horizontal
-            ? context.gaps.inner.horizontal
-            : context.gaps.inner.vertical
-        let available = Double(
-            (horizontal ? context.usable.width : context.usable.height)
-                - gap
-        )
         let before = current(space)
         let verdict = SplitDomain.healedRatio(
             current: before,
@@ -217,7 +178,7 @@ extension KiwiCore {
         case nil:
             return
         case .healed(let ratio):
-            write(ratio, Double(horizontal ? bounds.width : bounds.height))
+            write(ratio, span)
             let after = (state.workspaces[space.id]).map(current) ?? before
             // A store clamp or the writer's cap can land short of
             // the proposal: said once, when the store moved.

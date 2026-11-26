@@ -87,10 +87,9 @@ extension KiwiCore {
             masterCount: stack.masterCount
         ).master.contains(id)
         // The layout region, not the raw frame (#537): `translate`
-        // divides the drag delta by this span and classifies the
-        // slot against its midpoint, and both belong to the region
-        // the layout filled — the keyboard path's own span now
-        // resolves the same way.
+        // divides a ratio's drag delta by this span, the region the
+        // layout filled — the keyboard path's own span resolves the
+        // same way.
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let adjustment = MouseResize.translate(
             mode: space.mode,
@@ -109,8 +108,8 @@ extension KiwiCore {
         // the points the drag measured (#2542).
         let along: (axis: String, points: CGFloat)? =
             switch adjustment {
-            case .bspRatioH: ("x", frame.width - slot.width)
-            case .bspRatioV: ("y", frame.height - slot.height)
+            case .bspSplitH(let points, _): ("x", points)
+            case .bspSplitV(let points, _): ("y", points)
             default: nil
             }
         if along.flatMap({
@@ -202,34 +201,26 @@ extension KiwiCore {
         // writers the keyboard `resize` verb calls (#933) —
         // per-side effective minimums, and the refusal cues
         // when the drag ran into one.
-        case .bspRatioH(let delta):
-            let base =
-                tiler.settings.resolvedBsp(
-                    for: space,
-                    session: sessionRatios(of: space.id)
+        case .bspSplitH(let points, let leading):
+            if let window {
+                resizeBspSplit(
+                    window,
+                    axis: "x",
+                    points: Double(points),
+                    edge: leading ? .leading : .trailing,
+                    space: space
                 )
-                .splitRatioH
-            writeCappedBspRatio(
-                proposed: base + Double(delta),
-                axis: "x",
-                span: Double(bounds.width),
-                space: space,
-                focused: window
-            )
-        case .bspRatioV(let delta):
-            let base =
-                tiler.settings.resolvedBsp(
-                    for: space,
-                    session: sessionRatios(of: space.id)
+            }
+        case .bspSplitV(let points, let leading):
+            if let window {
+                resizeBspSplit(
+                    window,
+                    axis: "y",
+                    points: Double(points),
+                    edge: leading ? .leading : .trailing,
+                    space: space
                 )
-                .splitRatioV
-            writeCappedBspRatio(
-                proposed: base + Double(delta),
-                axis: "y",
-                span: Double(bounds.height),
-                space: space,
-                focused: window
-            )
+            }
         case .masterRatio(let delta):
             let stack = tiler.settings.resolvedStack(
                 for: space,

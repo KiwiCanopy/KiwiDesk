@@ -123,6 +123,8 @@ public struct LayoutContext: Sendable {
     public var probesBeyondBounds = false
 
     public var bsp: BspParams
+    /// BSP's per-split ratios (#3672), over `bsp`'s shared ones.
+    public var bspSplits = BspSplitRatios()
     public var stack: StackParams
     public var scrolling: ScrollingParams
     public var grid: GridParams

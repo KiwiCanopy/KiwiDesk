@@ -20,9 +20,11 @@ extension BspLayout {
     struct Plan {
         var fixed: [WindowID: CGRect]
         var zone: RunZone?
-        /// Each split made, side by side when true, in depth order
-        /// — every split while no chain scrolls (#3217).
+        /// Each split made ahead of any chain, side by side when
+        /// true, in depth order (#3217, #3672).
         var splits: [Bool] = []
+        /// Each depth's region before its split, in depth order.
+        var regions: [CGRect] = []
     }
 
     static func plan(
@@ -42,7 +44,12 @@ extension BspLayout {
             }
             let across = sideBySide(region, depth: depth, context)
             guard
-                let parts = divide(region, sideBySide: across, context)
+                let parts = divide(
+                    region,
+                    sideBySide: across,
+                    owner: window,
+                    context
+                )
             else {
                 return chain(
                     windows,
@@ -57,7 +64,12 @@ extension BspLayout {
             fixed[window] = parts.first
             region = parts.rest
         }
-        return Plan(fixed: fixed, zone: nil, splits: splits)
+        return Plan(
+            fixed: fixed,
+            zone: nil,
+            splits: splits,
+            regions: regions
+        )
     }
 
     /// The run over the trailing chain once the split at
@@ -89,6 +101,7 @@ extension BspLayout {
             if let parts = divide(
                 regions[start - 1],
                 sideBySide: splits[start - 1],
+                owner: windows[start - 1],
                 restFloor: thickness,
                 context
             ) {
@@ -102,7 +115,9 @@ extension BspLayout {
                 members: members,
                 region: region,
                 vertical: vertical
-            )
+            ),
+            splits: Array(splits[..<start]),
+            regions: Array(regions[..<start])
         )
     }
 }

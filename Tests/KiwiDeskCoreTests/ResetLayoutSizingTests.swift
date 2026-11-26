@@ -119,10 +119,11 @@ struct ResetLayoutSizingTests {
     func clearsSizesKeepsOverrides() throws {
         let core = makeCore()
         seed(core)
-        // An interactive resize lands in Space 1's session layer.
+        // An interactive resize lands in Space 1's session layer: the
+        // focused window's own split (#3672).
         core.execute("resize", args: [.string("x"), .number(200)])
         #expect(
-            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).bspSplits != nil
         )
         #expect(
             core.execute("reset_layout_sizing", args: [.string("all")])

@@ -1898,6 +1898,12 @@ bsp.set_strategy("longest_side")
 BSP split. `resize("x", …)` nudges this value; the stacked splits
 keep their own ratio (#56).
 
+:::unreleased
+`resize("x", …)` moves one split instead and stores that split's
+own ratio for the session (#3672); setting this value clears those
+and applies to every side-by-side split again.
+:::
+
 **Example:**
 
 ```lua
@@ -1911,6 +1917,11 @@ bsp.set_ratio_h(0.5)
 **Does:** sets the first window's share of every **stacked**
 (top/bottom) BSP split. `resize("y", …)` nudges this value,
 independently of the side-by-side ratio (#56).
+
+:::unreleased
+`resize("y", …)` moves one split instead, as `bsp.set_ratio_h`
+says, and setting this value clears the stacked splits' own ratios.
+:::
 
 **Example:**
 
@@ -8840,6 +8851,16 @@ What the `delta` adjusts depends on the layout:
   at the bound that keeps both regions at their effective
   minimums (per side, #933) within the area the layout fills
   (#383) — the screen minus any Space Bar strip.
+
+  :::unreleased
+  Each split keeps its own ratio (#3672): a press moves the
+  focused window's own split where it runs along the axis, else
+  the nearest split above it on the axis, so a positive delta
+  grows the focused window by `delta` points and leaves every
+  other split where it is. A mouse drag moves the split behind
+  the edge it moved. A window no split bounds on the axis refuses
+  the press.
+  :::
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;

@@ -10,7 +10,13 @@ extension SpaceArrangement {
         guard windows.contains(window) else { return self }
         var space = scratch(focused: nil)
         space.remove(window)
-        return SpaceArrangement(space, sessionSizes: sessionSizes)
+        // Its BSP splits end with it, as the live store's do (#3672).
+        var sizes = sessionSizes
+        sizes.ratios.bspSplits?.forget(window)
+        if sizes.ratios.bspSplits?.isEmpty == true {
+            sizes.ratios.bspSplits = nil
+        }
+        return SpaceArrangement(space, sessionSizes: sizes)
     }
 
     /// This arrangement with `window` placed by `placement` beside

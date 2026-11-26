@@ -55,7 +55,8 @@ struct SplitFloorHealNeedleTests {
     @Test("The heal writes only through the capped writers")
     func healWritesThroughTheCappedWriters() throws {
         let source = try healSource()
-        #expect(source.contains("writeCappedBspRatio("))
+        #expect(source.contains("writeCappedBspSplit("))
+        #expect(!source.contains("writeBspSplit("))
         #expect(source.contains("writeCappedMasterRatio("))
         #expect(!source.contains("writeSplitRatioH("))
         #expect(!source.contains("writeSplitRatioV("))
@@ -190,10 +191,17 @@ struct SplitFloorHealNeedleTests {
     private func healSource(
         _ path: StaticString = #filePath
     ) throws -> String {
-        let url = SourceScan.repoRoot(from: "\(path)")
+        // The BSP half heals each split in a file of its own (#3672).
+        let dir = SourceScan.repoRoot(from: "\(path)")
             .appendingPathComponent("Sources/KiwiDeskCore/Commands")
-            .appendingPathComponent("KiwiCore+SplitFloorHeal.swift")
-        return try SourceScan.strippedSource(at: url)
+        return try [
+            "KiwiCore+SplitFloorHeal.swift",
+            "KiwiCore+SplitFloorHealBsp.swift",
+        ].map {
+            try SourceScan.strippedSource(
+                at: dir.appendingPathComponent($0)
+            )
+        }.joined(separator: "\n")
     }
 
     private func coreWideCount(

@@ -101,78 +101,34 @@ struct ResizeRefusalTargetingTests {
         }
     }
 
-    @Test("A full-span window is not blamed for its neighbours")
-    func fullSpanFocusBlamesTheStuckNeighbour() throws {
+    @Test("A full-span window moves no split and names the other axis")
+    func fullSpanFocusMovesNoSplit() throws {
         // Wide display: the first split is side-by-side, so w1
-        // holds the whole height and w2/w3 share the vertical
-        // split on the other side. A height shrink from w1 moves
-        // THAT split — w1's own height never changes — so when
-        // it clamps, the window that cannot move is w2.
+        // holds the whole height and w2/w3 share the stacked split
+        // on the other side. No split bounds w1's height (#3672),
+        // so its height press moves nothing — not the neighbours'
+        // split — and says the other axis divides it.
         let core = makeCore()
         _ = makeBspSpace(core, count: 3)
-        let frames = core.tiler.calculatedFrames(state: core.state)
-        let first = try #require(frames[WindowID(1)])
-        let second = try #require(frames[WindowID(2)])
+        let before = core.tiler.calculatedFrames(state: core.state)
+        let first = try #require(before[WindowID(1)])
+        let second = try #require(before[WindowID(2)])
         #expect(first.height > second.height)
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
-        core.execute("resize", args: [.string("y"), .number(-200)])
+        for step in [-200.0, 200.0] {
+            core.execute("resize", args: [.string("y"), .number(step)])
+        }
         #expect(
             refusals == [
-                .neighborMinimum(
-                    anchor: WindowID(2),
-                    focused: WindowID(1),
-                    axis: "y",
-                    appBound: false,
-                    anchorApp: "App2"
-                )
+                .nothingToDivide(WindowID(1), otherAxisDivides: true),
+                .nothingToDivide(WindowID(1), otherAxisDivides: true),
             ]
         )
-    }
-
-    @Test("A full-span window carries no side's learned floor")
-    func fullSpanWindowIsNoBindingCarrier() throws {
-        // w1's learned 450 pt floor is real, and irrelevant to
-        // the vertical split: nothing that ratio does can change
-        // w1's height. Counting it made w1 the binding carrier
-        // of its side — the pill on the trier — AND blocked the
-        // write outright at a floor no window on that split has.
-        // The floor is deliberately FEASIBLE against the span
-        // (450 + w3's 300 fits): an infeasible pair makes the
-        // cap give up unclamped, which moves the split and cues
-        // nothing, so it would leave the second assertion below
-        // watching a case the fix cannot change (guard-prover,
-        // 2026-09-05).
-        let core = makeCore()
-        _ = makeBspSpace(core, count: 3)
-        seedMinHeight(core, window: WindowID(1), min: 450)
-        // The premise, pinned: without a landed bound this case
-        // degenerates into the one above and would pass for the
-        // wrong reason.
-        let seeded = core.tiler.sizeBound(for: WindowID(1))
-        #expect(seeded?.minHeight == 450)
-        var refusals: [ResizeRefusal] = []
-        core.borders.onResizeRefusal = { refusals.append($0) }
-        core.execute("resize", args: [.string("y"), .number(-200)])
-        #expect(
-            refusals == [
-                .neighborMinimum(
-                    anchor: WindowID(2),
-                    focused: WindowID(1),
-                    axis: "y",
-                    appBound: false,
-                    anchorApp: "App2"
-                )
-            ]
-        )
-        // And the neighbours' split MOVED: counting w1's floor
-        // on this axis did not only misname the refusal, it
-        // capped the write where w1's own height would have had
-        // to shrink, so the press moved nothing at all.
-        let frames = core.tiler.calculatedFrames(state: core.state)
-        let second = try #require(frames[WindowID(2)])
-        let third = try #require(frames[WindowID(3)])
-        #expect(second.height < third.height)
+        core.retile()
+        #expect(core.tiler.calculatedFrames(state: core.state) == before)
+        let id = core.state.workspaces.space(of: WindowID(1))!
+        #expect(core.sessionRatios(of: id) == SessionRatios())
     }
 
     @Test("With no split on the axis the refusal says so")

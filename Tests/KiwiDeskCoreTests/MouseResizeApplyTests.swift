@@ -8,7 +8,8 @@ import Testing
 /// (`KiwiCore.applyResizeAdjustment`), testable without a
 /// screen: a swapped case label in that switch would cross
 /// the axes while `MouseResizeTests` (the translate half)
-/// stayed green (#56 review).
+/// stayed green (#56 review). BSP's split cases need a laid-out
+/// window, so `BspSplitDragTests` holds them (#3672).
 @Suite("Mouse resize application (#56)", .serialized)
 @MainActor
 struct MouseResizeApplyTests {
@@ -37,82 +38,6 @@ struct MouseResizeApplyTests {
             args: [.string("1"), .string(mode)]
         )
         return core.state.workspaces[SpaceID("1")]!
-    }
-
-    /// Session-resolved params of space "1" (#458): mouse
-    /// drops on a no-override space land in the session layer.
-    private func resolvedBsp(_ core: KiwiCore) -> BspParams {
-        core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!,
-            session: core.sessionRatios(of: SpaceID("1"))
-        )
-    }
-
-    @Test("bspRatioH writes only the H ratio")
-    func hAppliesToH() {
-        let core = makeCore()
-        let space = space(core, mode: "bsp")
-        core.applyResizeAdjustment(
-            .bspRatioH(0.1),
-            for: nil,
-            in: space,
-            bounds: bounds,
-            moved: { _ in .both }
-        )
-        let bsp = resolvedBsp(core)
-        #expect(abs(bsp.splitRatioH - 0.6) < 1e-9)
-        #expect(bsp.splitRatioV == 0.5)
-        // The stored global is untouched (#458).
-        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
-    }
-
-    @Test("bspRatioV writes only the V ratio")
-    func vAppliesToV() {
-        let core = makeCore()
-        let space = space(core, mode: "bsp")
-        core.applyResizeAdjustment(
-            .bspRatioV(0.1),
-            for: nil,
-            in: space,
-            bounds: bounds,
-            moved: { _ in .both }
-        )
-        let bsp = resolvedBsp(core)
-        #expect(abs(bsp.splitRatioV - 0.6) < 1e-9)
-        #expect(bsp.splitRatioH == 0.5)
-    }
-
-    @Test("bspRatioH drag caps at the effective range (#383)")
-    func bspRatioHDragCapped() {
-        let core = makeCore()
-        let space = space(core, mode: "bsp")
-        // bounds 1000 wide, min 300 → effective [0.3, 0.7]: an
-        // oversized drag stops at the visible cliff instead of
-        // ratcheting the stored ratio to the 0.9 clamp and
-        // collapsing the neighbor into the overlap pile.
-        core.applyResizeAdjustment(
-            .bspRatioH(0.5),
-            for: nil,
-            in: space,
-            bounds: bounds,
-            moved: { _ in .both }
-        )
-        #expect(abs(resolvedBsp(core).splitRatioH - 0.7) < 1e-9)
-    }
-
-    @Test("bspRatioV drag caps at the effective range (#383)")
-    func bspRatioVDragCapped() {
-        let core = makeCore()
-        let space = space(core, mode: "bsp")
-        // bounds 800 tall, min 300 → effective [0.375, 0.625].
-        core.applyResizeAdjustment(
-            .bspRatioV(0.5),
-            for: nil,
-            in: space,
-            bounds: bounds,
-            moved: { _ in .both }
-        )
-        #expect(abs(resolvedBsp(core).splitRatioV - 0.625) < 1e-9)
     }
 
     @Test("masterRatio applies onto the resolved base")

@@ -21,6 +21,9 @@ public struct SessionRatios: Sendable, Equatable {
     public var gridColumnWeights: [Double]?
     /// Grid row weights (#763), the whole list.
     public var gridRowWeights: [Double]?
+    /// BSP's per-split ratios by owning window (#3672); they
+    /// outrank `splitRatioH` / `splitRatioV` for their split.
+    public var bspSplits: BspSplitRatios?
 
     public init() {}
 }
@@ -54,6 +57,7 @@ extension SessionRatios: Codable {
         case slotAuto = "slot_auto"
         case gridColumnWeights = "grid_column_weights"
         case gridRowWeights = "grid_row_weights"
+        case bspSplits = "bsp_splits"
     }
 
     public init(from decoder: Decoder) throws {
@@ -94,6 +98,10 @@ extension SessionRatios: Codable {
             [Double].self,
             forKey: .gridRowWeights
         )
+        bspSplits = try c.decodeIfPresent(
+            BspSplitRatios.self,
+            forKey: .bspSplits
+        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -119,5 +127,6 @@ extension SessionRatios: Codable {
             gridRowWeights,
             forKey: .gridRowWeights
         )
+        try c.encodeIfPresent(bspSplits, forKey: .bspSplits)
     }
 }
