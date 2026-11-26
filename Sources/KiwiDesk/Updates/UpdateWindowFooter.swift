@@ -37,8 +37,7 @@ struct UpdateWindowFooter: View {
                 )
             )
             .font(.system(size: 11))
-            // The header's on-glass secondary ink (#3111).
-            .foregroundStyle(SettingsTheme.ink2)
+            .foregroundStyle(.secondary)
         case .downloading(let received, let expected):
             progress(
                 fraction: expected.map {
@@ -53,7 +52,7 @@ struct UpdateWindowFooter: View {
         case .failed(let failure):
             Label {
                 Text(Self.failureText(failure))
-                    .foregroundStyle(SettingsTheme.ink2)
+                    .foregroundStyle(.secondary)
             } icon: {
                 Image(systemName: "exclamationmark.triangle")
                     .foregroundStyle(SettingsTheme.warningInk)
@@ -75,7 +74,7 @@ struct UpdateWindowFooter: View {
             .accessibilityLabel(text)
             Text(text)
                 .font(.system(size: 12))
-                .foregroundStyle(SettingsTheme.ink2)
+                .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
         }
     }

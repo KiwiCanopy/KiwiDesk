@@ -2071,6 +2071,15 @@ Obligations:
   panel, never restated here. Moving either is a device sitting,
   not a tidy-up; `GlassChromeSeamTests` holds that both
   parameters reach the branch.
+- **Text drawn straight on an untinted window ground takes
+  `.primary` / `.secondary`, never an ink by name; text on a card
+  over it keeps its concrete ink** (#3650). Regular glass adapts
+  to the backdrop, not the appearance, so a fixed light ink sinks
+  on glass gone dark. Such a ground is `glassWindowGround`, which
+  decides glass once for the ground and the inks and hands the
+  fallback the concrete inks the contrast suite measures on it;
+  the update window's ground is the instance
+  (`UpdateGlassTextTests`, `GlassWindowGroundInksTests`).
 - **A tinted panel's text takes the hierarchical styles `panelGlassChrome`
   sets, never an ink by name.** While the panel wears the Fill, on
   glass or over its material (`PanelGlass.shelf`), it sets

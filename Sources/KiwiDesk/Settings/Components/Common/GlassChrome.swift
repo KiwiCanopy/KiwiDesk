@@ -89,6 +89,65 @@ private struct GlassChrome<S: Shape>: ViewModifier {
     }
 }
 
+extension View {
+    /// A window's ground: `glassChrome` in a rectangle behind the
+    /// content, up behind the title bar. Text on it takes `.primary`
+    /// / `.secondary`: the system's adaptive styles on glass, and
+    /// `primary` / `secondary` where the fallback draws (#3650).
+    func glassWindowGround(
+        enabled: Bool,
+        variant: GlassChromeVariant,
+        fallback: AnyShapeStyle,
+        primary: Color,
+        secondary: Color
+    ) -> some View {
+        modifier(
+            GlassWindowGround(
+                enabled: enabled,
+                variant: variant,
+                fallback: fallback,
+                primary: primary,
+                secondary: secondary
+            )
+        )
+    }
+}
+
+/// Decides glass once and hands that one answer to the ground and
+/// the inks, so the two never disagree. One branch, so a flip of
+/// Reduce transparency keeps the window's state.
+private struct GlassWindowGround: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
+
+    let enabled: Bool
+    let variant: GlassChromeVariant
+    let fallback: AnyShapeStyle
+    let primary: Color
+    let secondary: Color
+
+    func body(content: Content) -> some View {
+        let glass =
+            enabled && !reduceTransparency && GlassChromeVariant.drawable
+        content
+            .foregroundStyle(
+                glass ? AnyShapeStyle(.primary) : AnyShapeStyle(primary),
+                glass ? AnyShapeStyle(.secondary) : AnyShapeStyle(secondary)
+            )
+            .background {
+                Color.clear
+                    .glassChrome(
+                        in: Rectangle(),
+                        enabled: glass,
+                        variant: variant,
+                        tint: nil,
+                        fallback: fallback
+                    )
+                    .ignoresSafeArea()
+            }
+    }
+}
+
 /// The glass finish, a legibility decision per surface (gui.md):
 /// `.regular` under dense text, `.clear` where nothing is read or
 /// a Fill carries the text (#2569).
