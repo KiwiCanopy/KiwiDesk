@@ -16,7 +16,7 @@ struct StripFollow<ID: Hashable>: Equatable {
 extension StripFollow where ID == String {
     /// A name-keyed strip's follow: the focused item while it is
     /// listed in `names`, else `fallback`; nil when neither is.
-    nonisolated static func named(
+    static func named(
         focused: String?,
         else fallback: String?,
         in names: [String]

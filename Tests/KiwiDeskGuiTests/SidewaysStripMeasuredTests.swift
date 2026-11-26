@@ -48,6 +48,28 @@ struct SidewaysStripMeasuredTests {
         ),
     ]
 
+    /// Every strip that measures its items is listed above, so a new
+    /// one is held to `measuredWiring` rather than skipping it. Reads
+    /// a file holding both `SidewaysStrip(` and a size measurement; a
+    /// strip that measures its items in another file is not seen.
+    @Test("every measured strip is listed")
+    func everyMeasuredStripIsListed() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        var found: Set<String> = []
+        for url in try SourceScan.swiftSources(under: root) {
+            let source = try SourceScan.strippedSource(at: url)
+                .split(whereSeparator: \.isWhitespace).joined()
+            guard source.contains("SidewaysStrip("),
+                source.contains(".onGeometryChange(for:CGSize.self)")
+            else { continue }
+            found.insert(
+                String(url.path.dropFirst(root.path.count + 1))
+            )
+        }
+        #expect(found == Set(Self.strips.map(\.path)))
+    }
+
     /// Each measured strip writes each chip's size under its key,
     /// reads its run through `measured`, and follows by name through
     /// `StripFollow.named`, its chips scroll-addressable and
