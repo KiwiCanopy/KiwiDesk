@@ -220,14 +220,9 @@ extension KiwiCore {
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.
         }
-        let live = liveFingerprints
-        if profile.set(matching: live) != nil {
-            profile.upsert(
-                MonitorSet(
-                    monitors: live,
-                    spaceMonitorMap: config.spacePins
-                )
-            )
+        // The draft numbered its pins in this set's order (#3647).
+        if profile.set(matching: liveFingerprints) != nil {
+            profile.spaceMonitorMap = config.spacePins
         }
         profile.savedAt = .now
     }

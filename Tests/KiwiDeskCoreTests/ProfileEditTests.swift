@@ -97,7 +97,7 @@ struct ProfileEditTests {
         connect(core, [display(1, "A")])
 
         var cfg = try core.loadGuiConfig(editing: "multi")
-        cfg.spacePins[SpaceID(1)] = "A:100x100"
+        cfg.spacePins[SpaceID(1)] = ScreenSlotKey(number: 1)
         try core.overwriteProfile(
             named: "multi",
             with: cfg,
@@ -106,8 +106,9 @@ struct ProfileEditTests {
 
         let read = try core.profiles.read(name: "multi")
         #expect(read.monitorSets.count == 2)
-        let setA = read.set(matching: ["A:100x100"])
-        #expect(setA?.spaceMonitorMap[SpaceID(1)] == "A:100x100")
+        #expect(
+            read.runtimePins(on: ["A:100x100"])?[SpaceID(1)] == "A:100x100"
+        )
     }
 
     @Test("overwriteProfile injects no set for absent monitors")
@@ -230,7 +231,7 @@ struct ProfileEditTests {
         // No matching set → no pins come back for editing.
         #expect(cfg.spacePins.isEmpty)
         // Even a stray pin is dropped: {A} untouched, no {B} set.
-        cfg.spacePins[SpaceID(1)] = "B:100x100"
+        cfg.spacePins[SpaceID(1)] = ScreenSlotKey(number: 1)
         try core.overwriteProfile(
             named: "deskA",
             with: cfg,
@@ -240,10 +241,7 @@ struct ProfileEditTests {
         let after = try core.profiles.read(name: "deskA")
         #expect(after.monitorSets.count == 1)
         #expect(after.set(matching: ["B:100x100"]) == nil)
-        #expect(
-            after.set(matching: ["A:100x100"])?
-                .spaceMonitorMap[SpaceID(1)] == nil
-        )
+        #expect(after.spaceMonitorMap[SpaceID(1)] == nil)
     }
 
     @Test("reapplyIfInEffect hot-reloads the active profile")

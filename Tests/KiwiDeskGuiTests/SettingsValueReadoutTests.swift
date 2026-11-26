@@ -223,7 +223,7 @@ struct SettingsValueReadoutTests {
         var pinBase = clean
         pinBase.spaces = [SpaceID("a")]
         edited = pinBase
-        edited.spacePins[SpaceID("a")] = "fp"
+        edited.spacePins[SpaceID("a")] = ScreenSlotKey(number: 1)
         expectRows(.screens(.spacePins), pinBase, edited)
 
         // Rename pairs positionally (same count, in-place map

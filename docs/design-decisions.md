@@ -23982,7 +23982,9 @@ consequences:
 *Amended (#3647): a set changing hands carries no pins.* Pins
 belong to a profile's screen numbers (▸ *A profile numbers its
 screens per screen count*), so the claimant's own numbers apply to
-the set it takes, and the profile it leaves keeps its pins.
+the set it takes, and the profile it leaves keeps its pins. The set
+keeps the order its previous holder stored (owner, 2026-11-26):
+that order is the numbering the user last saw for those screens.
 :::
 
 *Forgetting a setup is its own act (#3324, owner, 2026-11-14,

@@ -9998,6 +9998,16 @@ stripped, grouped by namespace — `set_gap_override` becomes
 }
 ```
 
+:::unreleased
+`space_monitor_map` sits at the profile's top level, beside
+`monitor_sets`, and pins each Space to a screen NUMBER: `"2": "2"`
+pins Space 2 to Screen 2, `"3": "1#2"` to area 2 of Screen 1. A
+monitor set lists its screens in the order that numbers them, so
+Screen 1 is the first fingerprint in `monitors`, and every set the
+profile holds shares the one map. A file written by an older
+release crosses on its first read.
+:::
+
 `lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
 the profile. It maps a lens name, in lower case, to `false`:
 `"lens_reach": { "writing": false }`. A lens the key does not name

@@ -58,8 +58,13 @@ extension SettingsModel {
         on display: Display
     ) -> Int? {
         let fingerprint = display.fingerprint
-        let survivor = config.mergeAreas(id, other, on: fingerprint)?
-            .survivor.areaID
+        let survivor = config.mergeAreas(
+            id,
+            other,
+            on: fingerprint,
+            order: screenOrder
+        )?
+        .survivor.areaID
         // Merged back to whole where the saved setup had no split:
         // nothing to keep, so the Save books no row for a no-op.
         if config.settings.displayAreas[fingerprint]?.isWhole == true,

@@ -33,7 +33,8 @@ extension GuiConfig {
     public mutating func mergeAreas(
         _ a: Int,
         _ b: Int,
-        on fingerprint: String
+        on fingerprint: String,
+        order: ScreenOrder
     ) -> ScreenAreaRemap? {
         guard
             let merged = settings.displayAreas[fingerprint]?
@@ -50,7 +51,7 @@ extension GuiConfig {
                 areaID: merged.survivor
             )
         )
-        apply(remap)
+        apply(remap, order: order)
         return remap
     }
 
@@ -58,9 +59,21 @@ extension GuiConfig {
     /// pins, the areas' Desktop memory and the per-screen maps in
     /// the settings (`ScreenAreaRemapParityTests` finds them by
     /// reflection).
-    public mutating func apply(_ remap: ScreenAreaRemap) {
-        for (space, pin) in spacePins {
-            spacePins[space] = remap.rewrite(pin)
+    /// A pin names its screen by number, so `order` says which
+    /// numbers the remapped screen holds (#3647).
+    public mutating func apply(
+        _ remap: ScreenAreaRemap,
+        order: ScreenOrder
+    ) {
+        let numbers = Set(order.numbers(of: remap.vanished.fingerprint))
+        for (space, pin) in spacePins
+        where numbers.contains(pin.number)
+            && pin.areaID == remap.vanished.areaID
+        {
+            spacePins[space] = ScreenSlotKey(
+                number: pin.number,
+                areaID: remap.survivor.areaID
+            )
         }
         for (desktop, var shown) in desktopAreaSpaces {
             remap.move(in: &shown)

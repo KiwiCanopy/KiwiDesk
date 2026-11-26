@@ -24,7 +24,7 @@ extension SettingsModel {
                 name: profile.name,
                 profileID: profile.id,
                 count: profile.monitorCount,
-                sets: profile.monitorSets.map(\.monitors),
+                sets: profile.monitorSets.map(\.sortedKey),
                 isDormant: profile.isDormant,
                 isUsableDefault: profile.isUsableDefault,
                 isDefault: profile.isDefault,

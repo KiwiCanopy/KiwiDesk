@@ -20,16 +20,16 @@ extension KiwiCore {
         state.workspaces.allDisplays.map(\.fingerprint)
     }
 
-    /// The live Space→monitor pins, read-only — what a pick onto
-    /// the loaded profile leaves live, for the draft to follow.
-    public var livePins: [SpaceID: String] { spacePins }
+    /// The live Screen pins, numbered as the draft stores them —
+    /// what a pick onto the loaded profile leaves live, for the
+    /// draft to follow (#3647).
+    public var livePins: [SpaceID: ScreenSlotKey] { storedPins() }
 
     /// Whether `monitors` is the connected set — the one answer
     /// the Profiles page and the pick both take (#1530).
     public func isConnectedMonitorSet(_ monitors: [String]) -> Bool {
         !monitors.isEmpty
-            && MonitorSet(monitors: monitors).monitors
-                == MonitorSet(monitors: liveFingerprints).monitors
+            && MonitorSet(monitors: monitors).matches(liveFingerprints)
     }
 
     /// Whether a profile other than `name` holds `monitors` — a
@@ -54,25 +54,20 @@ extension KiwiCore {
 
     /// Hands `monitors` to `profile` — the load's and the pick's
     /// one hand-over. A set the profile does not hold yet arrives
-    /// with its current owner's pins for the Spaces `profile`
-    /// declares, so a round trip keeps those both declare.
+    /// in the order its current owner stored, else in the live
+    /// order, and carries no pins: the profile's own numbered pins
+    /// reach it (#3647).
     private func handOver(
         _ monitors: [String],
         to profile: inout Profile
     ) throws -> [String] {
         if profile.set(matching: monitors) == nil {
-            let declared = profile.declaredSpaces
-            let pins =
-                profiles.allProfiles()
-                .first { $0.set(matching: monitors) != nil }?
-                .set(matching: monitors)?.spaceMonitorMap ?? [:]
+            let held = profiles.allProfiles().lazy
+                .compactMap { $0.set(matching: monitors) }.first
             profile.upsert(
-                MonitorSet(
-                    monitors: monitors,
-                    spaceMonitorMap: pins.filter {
-                        declared.contains($0.key)
-                    }
-                )
+                held
+                    ?? (isConnectedMonitorSet(monitors)
+                        ? liveMonitorSet : MonitorSet(monitors: monitors))
             )
             try profiles.write(profile)
         }
@@ -132,8 +127,7 @@ extension KiwiCore {
             if current == name {
                 spacePins = keepingPins(
                     of: Set(liveTemporarySpaces),
-                    over: profile.set(matching: monitors)?
-                        .spaceMonitorMap ?? [:]
+                    over: profile.runtimePins(on: monitors) ?? [:]
                 )
                 resolveSpaceDisplays()
                 retile()
@@ -154,9 +148,9 @@ extension KiwiCore {
     ) -> [ClaimableMonitorSet] {
         guard let profile = try? profiles.read(name: name)
         else { return [] }
-        let own = Set(profile.monitorSets.map(\.monitors))
+        let own = Set(profile.monitorSets.map(\.sortedKey))
         return monitorSets(count: profile.monitorCount)
-            .filter { !own.contains($0.monitors) }
+            .filter { !own.contains($0.monitors.sorted()) }
     }
 
     /// Every set a profile saved for `count` screens holds, plus
@@ -168,8 +162,8 @@ extension KiwiCore {
         let peers = profiles.allProfiles().filter {
             $0.monitorCount == count
         }
-        var sets = Set(peers.flatMap { $0.monitorSets.map(\.monitors) })
-        let live = MonitorSet(monitors: liveFingerprints).monitors
+        var sets = Set(peers.flatMap { $0.monitorSets.map(\.sortedKey) })
+        let live = MonitorSet(monitors: liveFingerprints).sortedKey
         if !live.isEmpty, live.count == count { sets.insert(live) }
         return
             sets

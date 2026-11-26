@@ -246,7 +246,7 @@ struct HomeCardContentTests {
             HomeCardContent.subtitle(for: .screens, model: model)
                 == single
         )
-        model.config.spacePins = ["2": "B:100x100"]
+        model.config.spacePins = ["2": ScreenSlotKey(number: 2)!]
         #expect(
             HomeCardContent.subtitle(for: .screens, model: model)
                 != single

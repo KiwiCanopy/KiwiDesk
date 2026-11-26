@@ -41,8 +41,8 @@ extension SettingsValueReadout {
     /// of the fingerprint grammar.
     private static func screensPinRows(
         _ census: SettingKey,
-        old: [SpaceID: String],
-        new: [SpaceID: String]
+        old: [SpaceID: ScreenSlotKey],
+        new: [SpaceID: ScreenSlotKey]
     ) -> [SettingsDiffRow] {
         let base = L("diff.label.space_pin", "Screen pin")
         let touched = Set(old.keys).union(new.keys)
@@ -53,8 +53,8 @@ extension SettingsValueReadout {
                 census,
                 instance: space.raw,
                 label: instanceLabel(base, space.raw),
-                old: old[space] ?? unset,
-                new: new[space] ?? unset
+                old: old[space]?.description ?? unset,
+                new: new[space]?.description ?? unset
             )
         }
     }

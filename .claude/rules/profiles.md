@@ -2001,8 +2001,9 @@ loaded with it. The obligations:
   arrangement (through `saveProfile`'s tail), an explicit load
   (`loadProfile`) and the Profiles page's pick (`claimMonitorSet`)
   hand the set over and strip it from same-count siblings, the
-  load and the pick through the one `handOver`, which carries the
-  previous owner's pins; each strip goes through
+  load and the pick through the one `handOver`, which keeps the
+  previous owner's screen order and carries no pins, a profile's
+  pins being its own and numbered (#3647); each strip goes through
   `ProfileManager.claim`. Boot, monitor-change matching and a
   Desktop binding's load never claim, because a claim there
   rewrites files the user did not touch — so a new caller of a

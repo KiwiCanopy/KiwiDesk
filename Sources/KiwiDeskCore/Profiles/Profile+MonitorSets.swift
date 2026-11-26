@@ -21,8 +21,14 @@ extension Profile {
     public func set(
         matching fingerprints: [String]
     ) -> MonitorSet? {
-        let wanted = fingerprints.sorted()
-        return monitorSets.first { $0.monitors == wanted }
+        monitorSets.first { $0.matches(fingerprints) }
+    }
+
+    /// The pins as the runtime keys them on the connected
+    /// `fingerprints`, through the matching set's order; nil where
+    /// no set matches (#3647).
+    public func runtimePins(on fingerprints: [String]) -> [SpaceID: String]? {
+        set(matching: fingerprints).map { $0.order.runtime(spaceMonitorMap) }
     }
 }
 

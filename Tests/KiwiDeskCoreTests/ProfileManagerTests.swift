@@ -25,12 +25,11 @@ private func makeProfile(
 ) -> Profile {
     Profile(
         name: name,
-        monitorSets: [
-            MonitorSet(
-                monitors: monitors,
-                spaceMonitorMap: pins
-            )
-        ],
+        monitorSets: [MonitorSet(monitors: monitors)],
+        spaceMonitorMap: ScreenOrder(monitors).storing(
+            runtime: pins,
+            over: [:]
+        ),
         mainSpaces: mains,
         isDefault: isDefault,
         spaceModes: modes,

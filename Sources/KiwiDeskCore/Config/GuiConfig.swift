@@ -18,8 +18,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// `app:title` -> space assignment (`titled_app_rules`, #3341):
     /// keyed in the float grammar, a title fragment's case kept.
     public var titledAppRules: [String: SpaceID] = [:]
-    /// Space -> monitor fingerprint pin (profile-scoped).
-    public var spacePins: [SpaceID: String] = [:]
+    /// Space -> Screen pin by number, as the profile stores it
+    /// (profile-scoped, #3647); `KiwiCore.liveScreenOrder` reads it
+    /// onto the screens.
+    public var spacePins: [SpaceID: ScreenSlotKey] = [:]
     /// Spaces following the main display (profile-scoped).
     public var mainSpaces: Set<SpaceID> = []
     /// Explicit fallback space when a profile switch drops spaces (#68).

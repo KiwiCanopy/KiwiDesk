@@ -38,7 +38,7 @@ struct SettingsDraftDiffTests {
         config.spaces = ["work"]
         config.spaceModes = ["work": .grid]
         config.appRules = ["Safari": "web"]
-        config.spacePins = ["work": "fp"]
+        config.spacePins = ["work": ScreenSlotKey(number: 1)!]
         config.mainSpaces = ["work"]
         config.fallbackSpace = "work"
         config.floatRules = ["Info"]

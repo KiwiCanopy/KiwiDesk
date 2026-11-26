@@ -226,7 +226,7 @@ struct SpaceAssignmentChip: View {
 
     private var currentKey: String? {
         kind == .main
-            ? nil : model.config.spacePins[space].map(model.resolvedPin)
+            ? nil : model.pin(of: space).map(model.resolvedPin)
     }
 
     private func clear() {

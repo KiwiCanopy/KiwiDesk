@@ -7,9 +7,7 @@ extension Profile {
         var all = Set(spaces)
         all.formUnion(spaceModes.keys)
         all.formUnion(mainSpaces)
-        for set in monitorSets {
-            all.formUnion(set.spaceMonitorMap.keys)
-        }
+        all.formUnion(spaceMonitorMap.keys)
         return all
     }
 

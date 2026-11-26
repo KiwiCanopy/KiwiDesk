@@ -14,6 +14,10 @@ public struct Profile: Codable, Sendable, Equatable {
     /// The screen count of a DORMANT profile — one whose last set
     /// another profile claimed (#1530). Nil while it holds a set.
     private(set) var dormantMonitorCount: Int?
+    /// Screen pin per Space, by the number its screen holds in
+    /// whichever setup is connected (#3647, sparse); the runtime
+    /// reads it through `ScreenOrder`.
+    public var spaceMonitorMap: [SpaceID: ScreenSlotKey]
     /// Spaces assigned to Main role on current main display.
     public var mainSpaces: [SpaceID]
     /// Default profile for this screen count.
@@ -76,6 +80,7 @@ public struct Profile: Codable, Sendable, Equatable {
         name: String,
         monitorSets: [MonitorSet],
         monitorCount: Int? = nil,
+        spaceMonitorMap: [SpaceID: ScreenSlotKey] = [:],
         mainSpaces: [SpaceID] = [],
         isDefault: Bool = false,
         isStarterSetup: Bool = false,
@@ -105,6 +110,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.monitorSets = Self.sanitized(monitorSets)
         self.dormantMonitorCount =
             self.monitorSets.isEmpty ? monitorCount : nil
+        self.spaceMonitorMap = spaceMonitorMap
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
         self.isDefault = isDefault
         self.isStarterSetup = isStarterSetup
@@ -175,6 +181,11 @@ public struct Profile: Codable, Sendable, Equatable {
                     "profile has no valid monitor set"
             )
         }
+        spaceMonitorMap =
+            try container.decodeIfPresent(
+                [SpaceID: ScreenSlotKey].self,
+                forKey: .spaceMonitorMap
+            ) ?? [:]
         mainSpaces =
             (try container.decodeIfPresent(
                 [SpaceID].self,
@@ -276,10 +287,10 @@ public struct Profile: Codable, Sendable, Equatable {
         )
     }
 
-    /// Adds or replaces the set covering the same monitors.
-    /// Rejects (returns false) a set of a different length —
-    /// a profile covers exactly one screen count, a dormant one
-    /// included.
+    /// Adds the set, or keeps the one covering the same screens
+    /// with its stored order (#3647). Rejects (returns false) a set
+    /// of a different length — a profile covers exactly one screen
+    /// count, a dormant one included.
     @discardableResult
     public mutating func upsert(
         _ set: MonitorSet
@@ -288,11 +299,7 @@ public struct Profile: Codable, Sendable, Equatable {
             monitorCount == 0
                 || set.monitors.count == monitorCount
         else { return false }
-        if let index = monitorSets.firstIndex(where: {
-            $0.monitors == set.monitors
-        }) {
-            monitorSets[index] = set
-        } else {
+        if !monitorSets.contains(where: { $0.matches(set) }) {
             monitorSets.append(set)
         }
         dormantMonitorCount = nil
@@ -304,10 +311,9 @@ public struct Profile: Codable, Sendable, Equatable {
     /// set covers them.
     @discardableResult
     mutating func release(_ monitors: [String]) -> Bool {
-        let wanted = monitors.sorted()
         guard
             let index = monitorSets.firstIndex(where: {
-                $0.monitors == wanted
+                $0.matches(monitors)
             })
         else { return false }
         let count = monitorCount

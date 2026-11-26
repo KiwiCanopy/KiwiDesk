@@ -21,7 +21,7 @@ extension KiwiCore {
             spaces: composed.spaces,
             spaceModes: composed.spaceModes,
             mainSpaces: placement.mains,
-            pins: placement.pins
+            pins: liveScreenOrder.storing(runtime: placement.pins, over: [:])
         )
     }
 

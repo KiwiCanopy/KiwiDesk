@@ -3,26 +3,30 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A Screen pin may name an area (#3517): a monitor set keeps a pin
-/// whose key's screen is in the set, so a Settings Save, which
-/// writes the draft's pins into the set, keeps an area pin, and a
-/// stored one survives the decode.
-@Suite("Monitor set area pins")
+/// A Screen pin may name an area (#3517): a numbered pin keeps its
+/// area through the stored key and through the screen order, and a
+/// pin to an area of a screen the order does not hold drops (#3647).
+@Suite("Numbered area pins")
 struct MonitorSetAreaPinTests {
     private let screen = "Wide:3440x1440"
 
-    @Test func areaPinOfAScreenInTheSetIsKept() throws {
+    @Test func areaPinOfAScreenInTheOrderIsKept() throws {
         let area = ScreenAreaKey(fingerprint: screen, areaID: 2)
-        let set = MonitorSet(
-            monitors: [screen],
-            spaceMonitorMap: [
+        let order = ScreenOrder([screen])
+        let stored = order.storing(
+            runtime: [
                 SpaceID("1"): area.description,
                 SpaceID("2"): "Other:1920x1080#1",
-            ]
+            ],
+            over: [:]
         )
-        #expect(set.spaceMonitorMap == [SpaceID("1"): area.description])
-        let data = try JSONEncoder().encode(set)
-        let back = try JSONDecoder().decode(MonitorSet.self, from: data)
-        #expect(back.spaceMonitorMap == set.spaceMonitorMap)
+        #expect(stored == [SpaceID("1"): ScreenSlotKey(number: 1, areaID: 2)!])
+        let data = try JSONEncoder().encode(stored)
+        let back = try JSONDecoder().decode(
+            [SpaceID: ScreenSlotKey].self,
+            from: data
+        )
+        #expect(back == stored)
+        #expect(order.runtime(back) == [SpaceID("1"): area.description])
     }
 }
