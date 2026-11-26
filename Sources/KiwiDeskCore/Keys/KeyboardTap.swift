@@ -93,6 +93,11 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     typealias Report = @Sendable (String) -> Void
 
     let consumers: Set<KeyboardTapConsumer>
+    /// What every event is stamped on: the detector's flags and an
+    /// open sequence's `now` (#3593).
+    let clock: Clock
+    /// Schedules a single tap's lapse (#3593).
+    private let scheduleLapse: Lapse
     private let sideRows = OSAllocatedUnfairLock<[SideTapRow]>(
         initialState: []
     )
@@ -118,22 +123,34 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
     private init(
         consumers: Set<KeyboardTapConsumer>,
         fire: @escaping Fire,
-        report: @escaping Report
+        report: @escaping Report,
+        clock: @escaping Clock,
+        scheduleLapse: @escaping Lapse
     ) {
         self.consumers = consumers
         self.fire = fire
         self.report = report
+        self.clock = clock
+        self.scheduleLapse = scheduleLapse
     }
 
     #if DEBUG
         /// Tests only: a tap that never installs, whose consumers a
-        /// suite drives with fabricated events. Production must not
-        /// read this.
+        /// suite drives with fabricated events on the clock and lapse
+        /// it names. Production must not read this.
         static func unstarted(
             consumers: Set<KeyboardTapConsumer>,
-            fire: @escaping Fire
+            fire: @escaping Fire,
+            clock: @escaping Clock,
+            scheduleLapse: @escaping Lapse
         ) -> KeyboardTap {
-            KeyboardTap(consumers: consumers, fire: fire, report: { _ in })
+            KeyboardTap(
+                consumers: consumers,
+                fire: fire,
+                report: { _ in },
+                clock: clock,
+                scheduleLapse: scheduleLapse
+            )
         }
         /// Tests only: the callback's body, true where it swallowed
         /// the event. Production must not read this.
@@ -152,7 +169,9 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         let tap = KeyboardTap(
             consumers: consumers,
             fire: fire,
-            report: report
+            report: report,
+            clock: liveClock,
+            scheduleLapse: liveLapse
         )
         return tap.start() ? tap : nil
     }
@@ -249,20 +268,14 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
                     swallowed = true
                 }
             case .modifierTaps:
-                if let input = Self.tapInput(type, event) { route(input) }
+                if let input = tapInput(type, event) { route(input) }
             }
         }
         return swallowed ? nil : pass
     }
 
-    /// The tap's own uptime clock, in seconds: `CGEvent.timestamp`'s
-    /// unit differs by architecture (mach ticks on arm64).
-    static func uptime() -> TimeInterval {
-        TimeInterval(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e9
-    }
-
     /// What `.modifierTaps` hears of an event, nil for nothing.
-    private static func tapInput(
+    private func tapInput(
         _ type: CGEventType,
         _ event: CGEvent
     ) -> ModifierTapDetector.Input? {
@@ -273,7 +286,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         case .flagsChanged:
             return .flags(
                 HotkeyModifiers.held(by: event.flags),
-                at: uptime()
+                at: clock()
             )
         default: return nil
         }
@@ -307,9 +320,7 @@ final class KeyboardTap: KeyboardTapHandle, @unchecked Sendable {
         let atTap = tapHold.withLock { $0 }
         ids.filter { lets(id: $0, atTap) }.forEach(fireOrOpen)
         if let pending {
-            DispatchQueue.global(qos: .userInteractive).asyncAfter(
-                deadline: .now() + ModifierTapDetector.gapLimit
-            ) { [weak self] in
+            scheduleLapse(ModifierTapDetector.gapLimit) { [weak self] in
                 guard let self,
                     let id = self.router.withLock({ $0.expire(pending) }),
                     self.lets(id: id, atTap),
