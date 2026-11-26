@@ -119,9 +119,15 @@ struct JumpPanelLiveSettingsTests {
             wiring.numberOfMatches(in: fanOut, range: range) == 1,
             "the fan-out no longer hands the settings to KiwiHub"
         )
+        // The look picker joins the same fan-out (#3038).
+        #expect(
+            fanOut.contains("lookPicker?.settingsChanged(settings)"),
+            "the fan-out no longer hands the settings to the picker"
+        )
         let delegate = try SourceScan.strippedSource(
             at: gui.appendingPathComponent("AppDelegate.swift")
         )
         #expect(delegate.contains("wireSettingsReaders()"))
+        #expect(delegate.contains("self.lookPicker = lookPicker"))
     }
 }

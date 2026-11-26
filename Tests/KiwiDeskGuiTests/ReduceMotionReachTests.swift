@@ -140,6 +140,7 @@ struct ReduceMotionReachTests {
         "ConfigIssuesWindow.swift": (1, "mounts no reader"),
         "CuePlate/CuePlateController.swift": (1, "its model, at show"),
         "Jump/JumpPanelController.swift": (1, "PanelPresence, at show"),
+        "LookPicker/LookPickerController.swift": (1, "its seam, at show"),
         "Settings/SettingsWindowController.swift":
             (1, "SettingsView writes macOS's setting, live"),
         "StandardNotice/StandardFallbackNotice.swift":

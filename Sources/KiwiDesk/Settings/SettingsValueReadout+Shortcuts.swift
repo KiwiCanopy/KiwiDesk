@@ -26,7 +26,7 @@ extension SettingsValueReadout {
             .toggleSpaceBar, .toggleAppBar,
             .toggleSticky, .pocket, .pocketWindow, .pocketList,
             .showShortcuts,
-            .openSettings, .switchToLayer, .openApplications,
+            .openSettings, .lookPicker, .switchToLayer, .openApplications,
             .pocketApps,
             .advanced, .`import`, .restoreDefaults:
             return []

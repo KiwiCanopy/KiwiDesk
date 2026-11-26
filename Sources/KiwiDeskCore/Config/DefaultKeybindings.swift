@@ -84,6 +84,7 @@ public enum DefaultKeybindings {
         rows.append(windowSwitcherLastAppRow())
         rows.append(desktopOverviewRow())
         rows.append(kiwiVisionRow())
+        rows.append(lookPickerRow())
         rows.append(resetSizesRow())
         let undoAt = rows.count
         rows.append(maximizeRow())

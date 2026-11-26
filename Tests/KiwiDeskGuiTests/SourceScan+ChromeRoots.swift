@@ -42,7 +42,8 @@ enum ChromeScanRoots {
     /// defect the tint makes visible.
     ///
     /// Jump joined in the change that created it (#1875): its
-    /// panel draws a selection fill and plain buttons.
+    /// panel draws a selection fill and plain buttons. LookPicker
+    /// joined in the change that created it (#3038).
     static let paths = [
         "Sources/KiwiDesk/Settings",
         "Sources/KiwiDesk/Onboarding",
@@ -51,6 +52,7 @@ enum ChromeScanRoots {
         "Sources/KiwiDesk/BootNotice",
         "Sources/KiwiDesk/CuePlate",
         "Sources/KiwiDesk/Jump",
+        "Sources/KiwiDesk/LookPicker",
         "Sources/KiwiDesk/StandardNotice",
     ]
 

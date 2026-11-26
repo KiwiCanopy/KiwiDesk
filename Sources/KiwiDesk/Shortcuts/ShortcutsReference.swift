@@ -179,9 +179,17 @@ enum ShortcutsReferenceBuilder {
         // KiwiDesk's own app row leads Apps, as the editor's Open
         // applications ▸ KiwiDesk does (#1520, #2246); without it a
         // bound Open Settings fell through to Custom as raw Lua
-        // (#678 item 18).
+        // (#678 item 18). The look picker, KiwiDesk's other own
+        // surface, sits beside it (#3038).
         let apps =
-            rows([KeybindingCatalog.openSettings], band: .apps, regroups: true)
+            rows(
+                [
+                    KeybindingCatalog.openSettings,
+                    KeybindingCatalog.showLookPicker,
+                ],
+                band: .apps,
+                regroups: true
+            )
             + buildApps(layer, consumed: &consumed)
         let filed = file(
             regrouped + buildCustom(layer, consumed: consumed)

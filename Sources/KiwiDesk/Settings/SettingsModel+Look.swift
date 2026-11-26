@@ -47,7 +47,7 @@ extension SettingsModel {
     func renameUserLook(from old: String, to typed: String) {
         let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canRenameUserLook(name, from: old) else { return }
-        try? core.renameLook(from: old, to: name)
+        _ = try? core.renameLook(from: old, to: name)
         refreshLooks()
     }
 

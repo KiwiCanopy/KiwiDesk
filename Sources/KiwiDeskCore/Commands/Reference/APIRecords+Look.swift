@@ -24,5 +24,9 @@ extension APIReference {
             "Deletes a saved look; a bundled look cannot be deleted.",
             .text("name")
         ),
+        "show_picker": APIRecord(
+            "Opens the look picker on the focused screen, or closes it "
+                + "if it is open."
+        ),
     ]
 }

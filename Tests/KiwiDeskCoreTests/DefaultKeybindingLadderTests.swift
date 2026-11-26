@@ -42,6 +42,10 @@ struct DefaultKeybindingLadderTests {
                 "KiwiDesk.redo_layout()",
                 "reverses the undo, as ⌘⇧Z (#3515)"
             ),
+            "kiwihub.show(\"view\")": (
+                "look.show_picker()",
+                "picks the look the view picker's layouts wear (#3038)"
+            ),
         ]
 
     /// Whether `row` is the ruled `⇧` variant of its seeded twin.

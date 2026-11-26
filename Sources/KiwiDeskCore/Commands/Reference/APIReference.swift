@@ -313,7 +313,7 @@ public enum APIReference {
         ],
         "kiwihub": ["show", "show_last_app", "set_key"],
         "look": [
-            "list", "current", "apply", "save", "delete",
+            "list", "current", "apply", "save", "delete", "show_picker",
         ],
         "app_rule": [
             "list", "set_space", "remove_space", "set_float",

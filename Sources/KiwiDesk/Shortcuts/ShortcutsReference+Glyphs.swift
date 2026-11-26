@@ -151,6 +151,9 @@ extension ShortcutsReferenceBuilder {
         // Settings row wears the Settings gear (#2670).
         case KeybindingCatalog.openSettings.lua:
             return "gearshape"
+        // The look picker wears the Looks palette (#3038).
+        case KeybindingCatalog.showLookPicker.lua:
+            return "paintpalette"
         // Back to the screen before (#2512), and a window sent there,
         // staying or following (#3117) — each its own glyph, the
         // next-screen step keeping `display.2` (#3284).

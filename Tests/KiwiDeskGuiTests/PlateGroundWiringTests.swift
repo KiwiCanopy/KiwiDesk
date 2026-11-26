@@ -161,6 +161,8 @@ struct PlateGroundWiringTests {
     func oneResolver() throws {
         let writers: Set<String> = [
             resolver, "LookPlate.swift", "JumpLayoutTile.swift",
+            // The look picker's card is a look's picture (#3038).
+            "LookCardScene.swift",
         ]
         var named: Set<String> = []
         var wrote: Set<String> = []
