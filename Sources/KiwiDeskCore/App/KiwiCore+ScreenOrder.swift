@@ -20,7 +20,9 @@ extension KiwiCore {
         screenOrder(holding: profile?.monitorSets ?? [])
     }
 
-    private func screenOrder(holding sets: [MonitorSet]) -> ScreenOrder {
+    /// The order `sets` number the connected screens in; read on each
+    /// call, so it follows a screen change.
+    public func screenOrder(holding sets: [MonitorSet]) -> ScreenOrder {
         sets.order(matching: liveFingerprints)
             ?? .leftToRight(state.workspaces.allDisplays)
     }

@@ -127,8 +127,8 @@ final class SettingsModel: ObservableObject {
     @Published var target: EditTarget = .live
     /// Whether screen placement canvas is editable for current target (#18).
     @Published var placementEditable = true
-    /// A stored target's screen order, read at `reload` (#3647).
-    var storedScreenOrder: ScreenOrder?
+    /// A stored target's screen setups, read at `reload` (#3647).
+    var storedMonitorSets: [MonitorSet]?
     @Published var profiles: [String] = []
     /// `isGuiManaged`, the sidecar's presence and its latch (#2324),
     /// read once per refresh: the first re-reads init.lua (#1392).

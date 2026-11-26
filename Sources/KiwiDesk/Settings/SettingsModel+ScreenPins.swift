@@ -8,7 +8,8 @@ extension SettingsModel {
     /// Which connected screen holds which number for the draft's
     /// target: a stored profile's own order, else the live one.
     var screenOrder: ScreenOrder {
-        storedScreenOrder ?? core.liveScreenOrder
+        storedMonitorSets.map(core.screenOrder(holding:))
+            ?? core.liveScreenOrder
     }
 
     /// Every draft pin as the runtime keys it: a screen fingerprint,
