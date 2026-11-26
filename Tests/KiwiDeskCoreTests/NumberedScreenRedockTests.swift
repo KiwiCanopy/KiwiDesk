@@ -78,4 +78,17 @@ struct NumberedScreenRedockTests {
         #expect(core.profiles.currentName == "Work")
         #expect(core.spacePins["2"] == "B:100x100")
     }
+
+    /// A write of the live file after its load moves the pins the
+    /// re-dock reads, with no apply between.
+    @Test("a re-dock reads the pins the live file holds now")
+    func redockReadsTheWrittenPins() throws {
+        let core = makeCore()
+        try loadWork(core, isDefault: false)
+        var work = try core.profiles.read(name: "Work")
+        work.pin("2", to: ScreenSlotKey(number: 1)!)
+        try core.profiles.write(work)
+        redock(core)
+        #expect(core.spacePins["2"] == "A:100x100")
+    }
 }
