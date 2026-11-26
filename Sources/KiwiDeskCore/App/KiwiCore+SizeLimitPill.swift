@@ -228,11 +228,10 @@ extension KiwiCore {
         cueResizeRefusal(.moveAtBoundary(window, direction: to))
     }
 
-    /// A shrink hit the window's effective minimum (#933) — on
-    /// the FIRST attempt the clamp truncates, landing ON the
-    /// minimum included, not only once already there. Whose
-    /// floor bound is derived here (#1261); `raisedBy` is the
-    /// floor a clamp adds beside `min_window_size`, if any.
+    /// A shrink hit the window's effective minimum (#933), on the
+    /// first attempt the clamp truncates too. Whose floor bound is
+    /// derived here (#1261); `raisedBy` is the floor a clamp adds
+    /// beside `min_window_size`, if any.
     func refuseShrinkAtMinimum(
         _ window: WindowID,
         axis: String,
@@ -252,14 +251,26 @@ extension KiwiCore {
     }
 
     /// A grow refused at the window's own learned app-enforced
-    /// maximum (#1055) — `refuseShrinkAtMinimum`'s mirror at the
-    /// other end. One pill only: the limit is the resized
-    /// window's own app, so there is no second window to mark —
-    /// and the sentence says so (#1261), needing no
-    /// discriminator since no configured maximum exists.
+    /// maximum (#1055): one pill, since the limit is the window's
+    /// own app and no configured maximum exists (#1261).
     func refuseGrowAtMaximum(_ window: WindowID, axis: String) {
         cueResizeRefusal(
             .ownMaximum(window, axis: axis, atBoundary: false)
+        )
+    }
+
+    /// A press a ratio or weight stops (#3643): at its stored limit,
+    /// or a grow it would shrink (`otherWay`).
+    func refuseRatio(
+        _ window: WindowID,
+        axis: String,
+        grows: Bool,
+        otherWay: Bool = false
+    ) {
+        cueResizeRefusal(
+            otherWay
+                ? .ratioMovesOtherWay(window, axis: axis)
+                : .ratioLimit(window, axis: axis, grows: grows)
         )
     }
 
@@ -286,17 +297,9 @@ extension KiwiCore {
     /// A float grow refused because BOTH edges are against the
     /// region it may occupy — the screen less its bars (#1091) —
     /// or a Grid cell grow where the cell already fills the axis
-    /// (#2707).
-    ///
-    /// Shares `.ownMaximum` rather than taking a case of its
-    /// own, and that is a RULING: every consumer of the reason
-    /// acts on "the resized window hit its own ceiling" and
-    /// would do the same for either wall. Only the WORDS tell a
-    /// learned app maximum from a screen edge apart, which is
-    /// why the distinction rides the case as a flag the renderer
-    /// reads rather than as a second case — observable at the
-    /// seam either way (#1258), where before #1258 it was
-    /// observable at neither.
+    /// (#2707). It shares `.ownMaximum` by ruling: only the words
+    /// tell a learned app maximum from a wall, so the case carries
+    /// the flag the renderer reads (#1258).
     func refuseGrowAtBoundary(_ window: WindowID, axis: String) {
         cueResizeRefusal(
             .ownMaximum(window, axis: axis, atBoundary: true)

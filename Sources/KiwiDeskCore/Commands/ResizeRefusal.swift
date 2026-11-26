@@ -41,6 +41,15 @@ enum ResizeRefusal: Equatable {
     /// cell already filling the axis (#2707), which the wording
     /// tells apart and no consumer acts on.
     case ownMaximum(WindowID, axis: String, atBoundary: Bool)
+    /// A press stopped at the stored limit of the ratio or weight it
+    /// moves (#3643): BSP's 0.1/0.9 bound, or Stack's and Track's
+    /// weight range, while the windows may still be above their
+    /// floors. `grows` is the press's sign, not the ratio's motion.
+    case ratioLimit(WindowID, axis: String, grows: Bool)
+    /// A grow that would shrink the window (#3643): the one shared BSP
+    /// ratio moves it the other way, so the opposite press grows it.
+    /// No wall was reached, so it does not bump.
+    case ratioMovesOtherWay(WindowID, axis: String)
     /// The zone the focused window sits in has no parameter on
     /// the asked axis at all (#1255) — a horizontal master zone
     /// divides widths, so a height press has nothing to move.
@@ -94,6 +103,7 @@ extension ResizeRefusal {
     var window: WindowID {
         switch self {
         case .ownMinimum(let id, _, _), .ownMaximum(let id, _, _),
+            .ratioLimit(let id, _, _), .ratioMovesOtherWay(let id, _),
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
             .gridNoOtherTrack(let id, _), .layoutHasNoResize(let id),
             .windowIsFullscreen(let id),
@@ -112,6 +122,7 @@ extension ResizeRefusal {
     var axis: String? {
         switch self {
         case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _),
+            .ratioLimit(_, let axis, _), .ratioMovesOtherWay(_, let axis),
             .noAxisHere(_, let axis), .gridNoOtherTrack(_, let axis):
             axis
         case .neighborMinimum(_, _, let axis, _, _):
@@ -138,7 +149,8 @@ extension ResizeRefusal {
     /// one level down (review, 2026-09-05).
     var bumpDirection: Direction? {
         switch self {
-        case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _):
+        case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _),
+            .ratioLimit(_, let axis, _):
             axis == "y" ? .down : .right
         case .neighborMinimum(_, _, let axis, _, _):
             axis == "y" ? .down : .right
@@ -146,7 +158,7 @@ extension ResizeRefusal {
             direction
         case .noAxisHere, .nothingToDivide, .gridNoOtherTrack,
             .layoutHasNoResize, .windowIsFullscreen,
-            .fullscreenCannotMove, .moveNeedsFloat:
+            .fullscreenCannotMove, .moveNeedsFloat, .ratioMovesOtherWay:
             nil
         }
     }

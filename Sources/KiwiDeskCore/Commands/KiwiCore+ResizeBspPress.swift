@@ -63,7 +63,13 @@ extension KiwiCore {
         let moved: Bool
         if mates.contains(focused) {
             let change = length(next[focused]) - length(now[focused])
-            moved = change * (delta < 0 ? -1 : 1) > Self.pressMovesTolerance
+            let sensed = change * (delta < 0 ? -1 : 1)
+            moved = sensed > Self.pressMovesTolerance
+            // The shared ratio shrinks this window on a grow.
+            if delta > 0, sensed < -Self.pressMovesTolerance {
+                refuseRatio(focused, axis: axis, grows: true, otherWay: true)
+                return false
+            }
         } else {
             moved = mates.contains {
                 abs(length(next[$0]) - length(now[$0]))
@@ -79,6 +85,9 @@ extension KiwiCore {
             axis: axis,
             delta: delta,
             squeezed: squeezed,
+            atBound: abs(
+                Self.storedBspRatio(proposed) - Self.storedBspRatio(base)
+            ) < 1e-9,
             now
         )
         return false
@@ -89,13 +98,15 @@ extension KiwiCore {
 
     /// The cue for a BSP press that moves nothing it asks for: the
     /// mate on the `squeezed` side nearest `focused` sitting at its
-    /// floor (#1259's blame), where one does, else the window's own
-    /// minimum on a shrink or the boundary on a grow.
+    /// floor (#1259's blame), where one does, else the ratio's stored
+    /// bound where the press is `atBound` (#3643), else the window's
+    /// own minimum on a shrink or the boundary on a grow.
     private func cueBspLimit(
         _ focused: WindowID,
         axis: String,
         delta: Double,
         squeezed: [WindowID],
+        atBound: Bool,
         _ frames: [WindowID: CGRect]
     ) {
         let horizontal = axis == "x"
@@ -118,6 +129,8 @@ extension KiwiCore {
         }
         if let stuck {
             refuseGrowAtNeighborMinimum(focused, anchor: stuck, axis: axis)
+        } else if atBound {
+            refuseRatio(focused, axis: axis, grows: delta > 0)
         } else if delta < 0 {
             refuseShrinkAtMinimum(focused, axis: axis)
         } else {

@@ -56,10 +56,12 @@ extension KiwiCore {
                 by: delta
             )
         let at = members.firstIndex(of: focused) ?? 0
-        if delta < 0, outcome.hitOwnMinimum || spent {
+        if delta < 0, outcome.hitOwnMinimum {
+            refuseShrinkAtMinimum(focused, axis: axis)
+        } else if delta < 0, spent {
             // A limit above the floor is no minimum: a hold just ends.
-            if outcome.hitOwnMinimum || !endGlideStep() {
-                refuseShrinkAtMinimum(focused, axis: axis)
+            if !endGlideStep() {
+                refuseRatio(focused, axis: axis, grows: false)
             }
         } else if delta > 0,
             let blocked = outcome.blockedByOther
@@ -82,11 +84,15 @@ extension KiwiCore {
                 return true
             }
             if endGlideStep() { return false }
-            refuseGrowAtNeighborMinimum(
-                focused,
-                anchor: members[blocked],
-                axis: axis
-            )
+            if outcome.blockedByOther == nil {
+                refuseRatio(focused, axis: axis, grows: true)
+            } else {
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: members[blocked],
+                    axis: axis
+                )
+            }
         }
         return false
     }
@@ -195,6 +201,8 @@ extension KiwiCore {
         switch press.cue {
         case .ownMinimum:
             refuseShrinkAtMinimum(focused, axis: axis)
+        case .weightLimit:
+            refuseRatio(focused, axis: axis, grows: delta > 0)
         case .neighborMinimum(let anchor):
             refuseGrowAtNeighborMinimum(focused, anchor: anchor, axis: axis)
         case .nothingToDivide:
@@ -229,23 +237,15 @@ extension KiwiCore {
     }
 
     /// A weight at its limit moves nothing: a hold just ends there
-    /// and a press cues, mirroring `pushOrCue`'s spent arms (#2709,
-    /// #2969), so a change to one owes the other. `mate` is the
-    /// neighbour a grow names.
+    /// and a press cues the limit (#2709, #2969, #3643), mirroring
+    /// `pushOrCue`'s spent arms, so a change to one owes the other.
     func cueWeightLimit(
         _ window: WindowID,
-        mate: WindowID?,
         delta: Double,
         axis: String
     ) {
         guard !endGlideStep() else { return }
-        if delta < 0 {
-            refuseShrinkAtMinimum(window, axis: axis)
-        } else if let mate, mate != window {
-            refuseGrowAtNeighborMinimum(window, anchor: mate, axis: axis)
-        } else {
-            refuseGrowAtBoundary(window, axis: axis)
-        }
+        refuseRatio(window, axis: axis, grows: delta > 0)
     }
 
     /// Whether a drag shrinking `id` on `vertical`'s axis hands the

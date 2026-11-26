@@ -21,6 +21,8 @@ extension RunZone {
             case ownMinimum
             case neighborMinimum(WindowID)
             case nothingToDivide
+            /// The window's weight is at its stored limit (#3643).
+            case weightLimit
         }
 
         public enum Refusal: Sendable, Equatable {
@@ -92,7 +94,7 @@ extension RunZone {
         // A run that shows everyone holds no length, so a shrink at
         // its limit stops here and says so. A grow there pushes.
         if spent {
-            return Press(cue: .ownMinimum, refusal: .atWeightLimit)
+            return Press(cue: .weightLimit, refusal: .atWeightLimit)
         }
         if let press = weightStep(
             line,

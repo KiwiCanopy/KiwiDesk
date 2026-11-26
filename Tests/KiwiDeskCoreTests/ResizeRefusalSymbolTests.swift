@@ -42,6 +42,8 @@ struct ResizeRefusalSymbolTests {
             // #3007: no move here either.
             .fullscreenCannotMove(window),
             .moveNeedsFloat(window),
+            // #3643: no wall reached, so no arrow either.
+            .ratioMovesOtherWay(window, axis: "x"),
         ] {
             #expect(!refusal.pillSymbol.contains("arrow"))
         }
@@ -59,6 +61,9 @@ struct ResizeRefusalSymbolTests {
                 axis: "y",
                 atBoundary: false
             ),
+            // #3643: a ratio or weight stopped at its stored limit.
+            .ratioLimit(window, axis: "x", grows: true),
+            .ratioLimit(window, axis: "x", grows: false),
             // #2972: a move stopped, each way.
             .moveAtBoundary(window, direction: .left),
             .moveAtBoundary(window, direction: .right),
@@ -162,6 +167,9 @@ struct ResizeRefusalSymbolTests {
             .moveAtBoundary(window, direction: .right),
             .moveAtBoundary(window, direction: .up),
             .moveAtBoundary(window, direction: .down),
+            .ratioLimit(window, axis: "x", grows: true),
+            .ratioLimit(window, axis: "x", grows: false),
+            .ratioMovesOtherWay(window, axis: "x"),
         ] {
             #expect(
                 NSImage(
