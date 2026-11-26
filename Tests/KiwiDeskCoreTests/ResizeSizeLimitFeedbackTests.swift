@@ -211,11 +211,14 @@ struct ResizeSizeLimitFeedbackTests {
             args: [.string("x"), .number(-800)]
         )
         #expect(res.isSuccess)
-        let bsp = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!,
-            session: core.sessionRatios(of: space)
+        // w1's own split (#3672).
+        let ratio = core.storedBspRatio(
+            of: WindowID(1),
+            sideBySide: true,
+            in: core.state.workspaces[space]!
         )
-        #expect(bsp.splitRatioH >= 0.40)
+        #expect(ratio < 0.5)
+        #expect(ratio >= 0.40)
     }
 
     @Test("Floating resize clamps against learned size bound")

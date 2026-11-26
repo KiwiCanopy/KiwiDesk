@@ -520,10 +520,7 @@ bounces and shows a frosted pill:
 :::unreleased
 Where the split or the weight reaches its own limit before any
 window does, the pill says *Largest share reached* or *Smallest
-share reached*. In BSP one split ratio divides every level, so a
-window inside a nested pair can say *This window grows the other
-way* or *This window shrinks the other way*: the opposite press
-does what was asked.
+share reached*.
 :::
 
 Where windows that do not fit wait behind a `+n` overflow mark, a

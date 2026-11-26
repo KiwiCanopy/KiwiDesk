@@ -32,6 +32,7 @@ extension KiwiCore {
             zOrderRaiseEchoes[new] = stamp
         }
         tiler.placements.rekey(old: old, new: new)
+        rekeyBspSplits(old, to: new)  // #3672
         tiler.unsolicitedCorrections.rekey(old, to: new)
         if pendingFocusRaise == old {
             pendingFocusRaise = new

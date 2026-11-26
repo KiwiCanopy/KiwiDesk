@@ -166,71 +166,65 @@ struct MouseResizeTests {
         #expect(adjustment == .stackWeight(100))
     }
 
-    @Test("BSP grows toward the dragged side")
-    func bspSides() {
-        let left = slot(x: 0)
-        #expect(
-            MouseResize.translate(
-                mode: .bsp,
-                isMaster: false,
-                stackSplitHorizontal: true,
-                trackAxisVertical: true,
-                scrollVertical: false,
-                slot: left,
-                frame: grown(left, dw: 100),
-                bounds: bounds
-            ) == .bspRatioH(0.1)
+    /// The edge a frame moved its `dx` / `dy` off, its size grown
+    /// by the same amount.
+    private func pulled(
+        _ rect: CGRect,
+        dx: CGFloat = 0,
+        dy: CGFloat = 0
+    ) -> CGRect {
+        CGRect(
+            x: rect.minX - dx,
+            y: rect.minY - dy,
+            width: rect.width + dx,
+            height: rect.height + dy
         )
-        let right = slot(x: 600)
-        #expect(
-            MouseResize.translate(
-                mode: .bsp,
-                isMaster: false,
-                stackSplitHorizontal: true,
-                trackAxisVertical: true,
-                scrollVertical: false,
-                slot: right,
-                frame: grown(right, dw: 100),
-                bounds: bounds
-            ) == .bspRatioH(-0.1)
+    }
+
+    private func bsp(_ slot: CGRect, _ frame: CGRect) -> ResizeAdjustment? {
+        MouseResize.translate(
+            mode: .bsp,
+            isMaster: false,
+            stackSplitHorizontal: true,
+            trackAxisVertical: true,
+            scrollVertical: false,
+            slot: slot,
+            frame: frame,
+            bounds: bounds
         )
+    }
+
+    @Test("BSP names the growth and the edge dragged (#3672)")
+    func bspEdges() {
+        // Where the slot sits says nothing: the split moved is the
+        // one behind the dragged edge.
+        for x: CGFloat in [0, 600] {
+            let slot = slot(x: x)
+            #expect(
+                bsp(slot, grown(slot, dw: 100))
+                    == .bspSplitH(100, leading: false)
+            )
+            #expect(
+                bsp(slot, pulled(slot, dx: 100))
+                    == .bspSplitH(100, leading: true)
+            )
+            #expect(
+                bsp(slot, pulled(slot, dx: -50))
+                    == .bspSplitH(-50, leading: true)
+            )
+        }
     }
 
     @Test("BSP maps width drags to H and height drags to V")
     func bspAxes() {
-        // A height-dominant drag on a top slot moves the
-        // stacked (V) ratio, not the side-by-side one (#56).
+        // A height-dominant drag moves a stacked split, not a
+        // side-by-side one (#56).
         let top = CGRect(x: 0, y: 25, width: 900, height: 300)
         #expect(
-            MouseResize.translate(
-                mode: .bsp,
-                isMaster: false,
-                stackSplitHorizontal: true,
-                trackAxisVertical: true,
-                scrollVertical: false,
-                slot: top,
-                frame: grown(top, dh: 80),
-                bounds: bounds
-            ) == .bspRatioV(0.1)
-        )
-        // A bottom slot grows by lowering the V ratio.
-        let bottom = CGRect(
-            x: 0,
-            y: 525,
-            width: 900,
-            height: 300
+            bsp(top, grown(top, dh: 80)) == .bspSplitV(80, leading: false)
         )
         #expect(
-            MouseResize.translate(
-                mode: .bsp,
-                isMaster: false,
-                stackSplitHorizontal: true,
-                trackAxisVertical: true,
-                scrollVertical: false,
-                slot: bottom,
-                frame: grown(bottom, dh: 80),
-                bounds: bounds
-            ) == .bspRatioV(-0.1)
+            bsp(top, pulled(top, dy: 80)) == .bspSplitV(80, leading: true)
         )
     }
 

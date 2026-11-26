@@ -4438,6 +4438,28 @@ and monocle stays an explicit no-op (floating was one too until
 back-compat alias for the old `bsp.set_ratio` /
 `layout.bsp.ratio` name (pre-release, single user). (#56)
 
+:::unreleased
+*Amended (#3672, owner ruling): each split keeps its own ratio.*
+The rejection above rested on a split having no identity without
+a tree, and it has one: split k of the dwindle divides `windows[k]`
+from the rest, so the window at depth k owns it and keys its
+ratio (`BspSplitRatios`), on the same flat array. A split with no
+entry takes the Space's shared `ratio_h`/`ratio_v`, which stays
+the configured value an explicit write sets — that write clears
+the axis's per-split entries, as it clears the session shadow.
+The entries are session sizes (`SessionRatios`, #2921): they rekey
+with a native tab, end when their window closes, and ride the
+in-place capture only. What it buys is the principle the owner
+ruled: a press keeps the option to resize. With one shared ratio
+a nested window could be pinned — both presses refused, each
+pointing at the other — and per-split ratios give every inner
+edge its own knob, so no window is left without one. A ratio
+follows its window as a Stack or Track weight does: a swap or an
+insert ahead moves it to the depth the window now holds, and a
+move to another Space ends it, as a close does. A float, a hide or
+a Desktop vanish keeps it for the window's return.
+:::
+
 **Stack resize is focus-aware, and its zone weights are
 ephemeral by design.** Both axes act on the *focused* window:
 the split axis (`x` for a left/right stack zone, `y` for
@@ -4966,6 +4988,21 @@ entry below is the ruling's home. (#122, #124, #129)
 window against the press, or move nothing, refuses with the
 writer's blame instead of writing, so a hold ends; the direction
 stays the midpoint rule above, shared with the mouse.
+
+:::unreleased
+*Amended (#3672): the limitation above is gone, and so is the
+midpoint rule.* Every split keeps its own ratio (the #56 entry's
+amendment), so a resize moves ONE split, named by the one
+resolver every door takes (`BspLayout.splitOwner`): a press moves
+the window's own split where it runs along the axis — its
+trailing edge — else the nearest split above it on the axis, its
+leading edge; a drag moves the split behind the edge it moved.
+The step is in points of the split's own span, so a press grows
+the window by what it asks, and a window no split bounds on the
+axis refuses with what it lacks. The midpoint sign, and the
+"moves the other way" refusal #3643 added for a nested window the
+shared ratio pinned, retire with the case they answered.
+:::
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
@@ -5735,6 +5772,12 @@ flat-array trade's residue and stays in the limitations row.
 (`SplitFloorHealTests`, `SplitOverflowTests`,
 `SplitFloorHealWiringTests`, `SplitFloorCueTests`,
 `SplitFloorHealNeedleTests`)
+
+:::unreleased
+*Amended (#3672):* with a ratio per split, the heal reaches every
+BSP split, each healing its own owner against the least length its
+rest takes, and the shared ratio no longer moves for one window.
+:::
 
 The heal moves the ratio only for a membership a Desktop shows
 (#2907). Through a Desktop switch a Space briefly holds both

@@ -79,11 +79,23 @@ struct SplitFloorHealWiringTests {
         }
     }
 
+    /// `owner`'s split ratio (#3672): its own, else the shared one.
+    private func ratio(
+        _ core: KiwiCore,
+        _ space: SpaceID,
+        of owner: UInt32,
+        sideBySide: Bool
+    ) -> Double {
+        core.storedBspRatio(
+            of: WindowID(owner),
+            sideBySide: sideBySide,
+            in: core.state.workspaces[space]!
+        )
+    }
+
+    /// w1's side-by-side split, the first one.
     private func ratioH(_ core: KiwiCore, _ space: SpaceID) -> Double {
-        core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!,
-            session: core.sessionRatios(of: space)
-        ).splitRatioH
+        ratio(core, space, of: 1, sideBySide: true)
     }
 
     @Test("A bsp retile moves the horizontal ratio to a learned floor")
@@ -137,14 +149,11 @@ struct SplitFloorHealWiringTests {
             - gaps.inner.vertical
         #expect(span == 730)
         core.retile()
-        let bsp = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!,
-            session: core.sessionRatios(of: space)
-        )
-        // The bottom draws 400.25; the horizontal ratio, which
-        // no floor binds, stays.
-        #expect(abs((1 - bsp.splitRatioV) * span - 400.25) < 0.01)
-        #expect(bsp.splitRatioH == 0.5)
+        // The bottom draws 400.25 off w2's stacked split; w1's
+        // side-by-side one, which no floor binds, stays.
+        let stacked = ratio(core, space, of: 2, sideBySide: false)
+        #expect(abs((1 - stacked) * span - 400.25) < 0.01)
+        #expect(ratioH(core, space) == 0.5)
         let frame = try #require(
             core.tiler.calculatedFrames(state: core.state)[w3]
         )

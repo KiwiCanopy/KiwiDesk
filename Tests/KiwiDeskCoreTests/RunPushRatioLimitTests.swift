@@ -22,35 +22,35 @@ extension RunPushCommandTests {
         return seen
     }
 
-    /// The inner window of a nested pair is about r(1 − r) of the
-    /// width, one ratio dividing every level.
+    /// Alternating at 2560 × 1440: w1 splits side by side, w2 stacked,
+    /// and w3 owns the side-by-side split beside w4, so an x press
+    /// moves w3's own split, whatever the shared ratio every other
+    /// split keeps (#3672).
     private func innerWindow(ratio: Double) -> KiwiCore {
         makeSpace("bsp", windows: 4, focus: 3, width: 2560, height: 1440) {
             $0.execute("bsp.set_ratio_h", args: [.number(ratio)])
         }.0
     }
 
-    @Test("BSP: below the peak the inner window grows the other way")
-    func bspInnerWindowMovesTheOtherWay() {
-        #expect(
-            refusals(innerWindow(ratio: 0.4), "x", 5) == [
-                .ratioMovesOtherWay(w(3), axis: "x", grows: true)
-            ]
-        )
-        #expect(
-            refusals(innerWindow(ratio: 0.4), "x", -5) == [
-                .ratioMovesOtherWay(w(3), axis: "x", grows: false)
-            ]
-        )
-    }
-
-    @Test("BSP: at the peak the inner window's grow is the largest share")
-    func bspInnerWindowAtThePeak() {
-        #expect(
-            refusals(innerWindow(ratio: 0.5), "x", 5) == [
-                .ratioLimit(w(3), axis: "x", grows: true)
-            ]
-        )
+    @Test(
+        "BSP: a nested window grows and shrinks the way asked",
+        arguments: [0.4, 0.5]
+    )
+    func bspInnerWindowMovesTheWayAsked(ratio: Double) throws {
+        for step in [5.0, -5.0] {
+            let core = innerWindow(ratio: ratio)
+            let before = try #require(
+                core.tiler.calculatedFrames(state: core.state)[w(3)]
+            )
+            #expect(refusals(core, "x", step).isEmpty)
+            let after = try #require(
+                core.tiler.calculatedFrames(state: core.state)[w(3)]
+            )
+            #expect(
+                abs(after.width - before.width - step) < 1,
+                Comment(rawValue: "ratio \(ratio) step \(step)")
+            )
+        }
     }
 
     @Test("BSP: a ratio at its stored bound says the share is spent")
@@ -74,10 +74,11 @@ extension RunPushCommandTests {
         }
     }
 
-    @Test("BSP: a window spanning the axis names the bound it presses")
+    @Test("BSP: a stacked split at its bound names the bound it presses")
     func bspSpanningWindowAtTheBound() {
-        // w1 spans the height; its y press moves the split of w2 and
-        // w3, which no step moves past the stored bound.
+        // Alternating: w1 splits side by side, w2 owns the stacked
+        // split under it, so w2's y press moves that split, which no
+        // step moves past the stored bound.
         var cued: [ResizeRefusal] = []
         let presses = [(0.9, 5.0), (0.9, -5.0), (0.1, 5.0), (0.1, -5.0)]
         for (ratio, step) in presses {
@@ -85,13 +86,13 @@ extension RunPushCommandTests {
             let (core, _) = makeSpace(
                 "bsp",
                 windows: 3,
-                focus: 1,
+                focus: 2,
                 height: 4000
             ) { $0.execute("bsp.set_ratio_v", args: [.number(ratio)]) }
             for refusal in refusals(core, "y", step) {
                 cued.append(refusal)
                 #expect(
-                    refusal == .ratioLimit(w(1), axis: "y", grows: step > 0),
+                    refusal == .ratioLimit(w(2), axis: "y", grows: step > 0),
                     Comment(rawValue: "ratio \(ratio) step \(step)")
                 )
             }

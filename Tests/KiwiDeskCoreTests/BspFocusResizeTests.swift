@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Focus-aware BSP resize direction (#122): `resize` flips the
-/// delta's sign from the focused window's calculated slot, so
-/// "grow" grows the focused window's region — the keyboard path
-/// finally matches the mouse path's side inference.
+/// Focus-aware BSP resize direction (#122, #3672): `resize` moves
+/// the split the focused window's edge sits on, so "grow" grows the
+/// focused window — its own split's ratio rises, a split it sits
+/// behind falls.
 @Suite("BSP focus-aware resize (#122)", .serialized)
 @MainActor
 struct BspFocusResizeTests {
@@ -84,14 +84,30 @@ struct BspFocusResizeTests {
         )
     }
 
+    /// `owner`'s split ratio on the axis `sideBySide` names: its own
+    /// (#3672), else the shared one.
+    private func split(
+        _ core: KiwiCore,
+        _ owner: UInt32,
+        sideBySide: Bool = true
+    ) -> Double {
+        core.sessionRatios(of: SpaceID("1")).bspSplits?.ratio(
+            of: WindowID(owner),
+            sideBySide: sideBySide
+        )
+            ?? (sideBySide
+                ? resolvedBsp(core).splitRatioH
+                : resolvedBsp(core).splitRatioV)
+    }
+
     @Test("x with the left window focused raises the H ratio")
     func leftFocusGrowsLeft() {
         let core = makeCore()
         bspSpace(core)
         core.state.apply(.windowFocused(WindowID(1)))
-        let before = resolvedBsp(core).splitRatioH
+        let before = split(core, 1)
         core.execute("resize", args: [.string("x"), .number(200)])
-        #expect(resolvedBsp(core).splitRatioH > before)
+        #expect(split(core, 1) > before)
         // The global never moves for a no-override space (#458).
         #expect(core.tiler.settings.bsp.splitRatioH == before)
     }
@@ -101,11 +117,11 @@ struct BspFocusResizeTests {
         let core = makeCore()
         bspSpace(core)
         core.state.apply(.windowFocused(WindowID(2)))
-        let before = resolvedBsp(core).splitRatioH
+        let before = split(core, 1)
         core.execute("resize", args: [.string("x"), .number(200)])
-        // +delta grows the FOCUSED window: the right region
-        // widens, so the shared H ratio drops (#122).
-        #expect(resolvedBsp(core).splitRatioH < before)
+        // +delta grows the FOCUSED window: it sits behind w1's
+        // split, so that split's ratio drops.
+        #expect(split(core, 1) < before)
     }
 
     @Test("y with the top window focused raises the V ratio")
@@ -115,9 +131,9 @@ struct BspFocusResizeTests {
         // [1, 2, 3]: w1 left; the right region stacks w2 over
         // w3 (alternating → vertical at depth 1).
         core.state.apply(.windowFocused(WindowID(2)))
-        let before = resolvedBsp(core).splitRatioV
+        let before = split(core, 2, sideBySide: false)
         core.execute("resize", args: [.string("y"), .number(200)])
-        #expect(resolvedBsp(core).splitRatioV > before)
+        #expect(split(core, 2, sideBySide: false) > before)
     }
 
     @Test("y with the bottom window focused lowers the V ratio")
@@ -125,9 +141,9 @@ struct BspFocusResizeTests {
         let core = makeCore()
         bspSpace(core, count: 3)
         core.state.apply(.windowFocused(WindowID(3)))
-        let before = resolvedBsp(core).splitRatioV
+        let before = split(core, 2, sideBySide: false)
         core.execute("resize", args: [.string("y"), .number(200)])
-        #expect(resolvedBsp(core).splitRatioV < before)
+        #expect(split(core, 2, sideBySide: false) < before)
     }
 
     @Test("a huge x resize caps at the effective range (#383)")
@@ -135,20 +151,18 @@ struct BspFocusResizeTests {
         let core = makeCore()
         bspSpace(core)
         core.state.apply(.windowFocused(WindowID(1)))
-        // The keyboard path passes the display width as the cap
-        // span; an outsized delta must stop at THAT display's
-        // effective bound, not the blind 0.9 store clamp. With the
-        // display pinned (#531) the bound is a literal rather than
-        // a re-derivation of the formula under test: 1600pt wide
-        // against the 300pt default minimum leaves
-        // (1600 − 300) / 1600 = 0.8125, below the 0.9 clamp — so a
-        // removed cap would store 0.9 and fail here. (The mouse
-        // twin is `MouseResizeApplyTests.bspRatioHDragCapped`.)
+        // An outsized delta must stop where w2 keeps its floor, not
+        // at the blind 0.9 store clamp: on 1600pt against the 300pt
+        // default minimum, 0.9 would leave w2 under it. (The mouse
+        // twin is `RunPushCommandTests` ▸ `dragStopsAtTheRestFloor`.)
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         core.execute("resize", args: [.string("x"), .number(9000)])
-        #expect(
-            abs(resolvedBsp(core).splitRatioH - 0.8125) < 1e-9
-        )
+        core.retile()
+        let w2 = core.tiler.calculatedFrames(state: core.state)[
+            WindowID(2)
+        ]
+        #expect(abs((w2?.width ?? 0) - 300) < 1)
+        #expect(split(core, 1) < 0.9)
     }
 
     @Test("x with a floating focused window resizes the float")
@@ -185,7 +199,7 @@ struct BspFocusResizeTests {
         // (the session layer, #764), the authored override keeps
         // its number and the shared global stays put.
         #expect(over?.splitRatioH == 0.5)
-        #expect(resolvedBsp(core).splitRatioH < 0.5)
+        #expect(split(core, 1) < 0.5)
         #expect(
             core.tiler.settings.bsp.splitRatioH == globalBefore
         )

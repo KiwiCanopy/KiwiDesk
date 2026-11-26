@@ -125,7 +125,7 @@ struct HeldResizePressTests {
         return moves
     }
 
-    @Test("BSP: a window on the shared ratio's peak cues, never bounces")
+    @Test("BSP: every window's hold cues at its limit, never bounces")
     func bspBounce() {
         var moves = 0
         for (width, height) in [(1220.0, 820.0), (2560.0, 1440.0)] {
@@ -212,11 +212,11 @@ struct HeldResizePressTests {
         #expect(moves >= 1300, "\(moves) moving presses")
     }
 
-    @Test("BSP: a full-span window's hold ends on the stuck neighbour")
-    func fullSpanHoldBlamesTheNeighbour() throws {
-        // w1 holds the whole height; its height press moves w2/w3's
-        // split until w2 stops at its floor, and every press after
-        // that names w2, never w1 (#1259).
+    @Test("BSP: a full-span window's hold refuses at once")
+    func fullSpanHoldRefusesAtOnce() {
+        // w1 holds the whole height and no split bounds it there
+        // (#3672): every press of the hold names the other axis,
+        // and none moves the neighbours' split.
         let core = makeSpace(
             "bsp",
             windows: 3,
@@ -226,30 +226,27 @@ struct HeldResizePressTests {
         )
         var refusals: [ResizeRefusal] = []
         core.borders.onResizeRefusal = { refusals.append($0) }
-        for _ in 0..<300 {
+        for _ in 0..<30 {
             core.execute("resize", args: [.string("y"), .number(-5)])
         }
-        let last = try #require(refusals.last)
-        #expect(refusals.count > 1)
+        #expect(refusals.count == 30)
         #expect(
-            last
-                == .neighborMinimum(
-                    anchor: WindowID(2),
-                    focused: WindowID(1),
-                    axis: "y",
-                    appBound: false,
-                    anchorApp: "App2"
-                )
+            refusals.allSatisfy {
+                $0 == .nothingToDivide(WindowID(1), otherAxisDivides: true)
+            }
         )
+        let id = core.state.workspaces.space(of: WindowID(1))!
+        #expect(core.sessionRatios(of: id) == SessionRatios())
     }
 
-    /// The refusals a hold ends on where no mate sits at its floor:
-    /// the window itself, the ratio moving it the other way or the
-    /// ratio's stored bound by the press's sign (#2969, #3643).
+    /// The refusals a hold ends on: a nested window grows until a
+    /// neighbour's floor (#3672), and a split at the store's bound
+    /// names that bound by the press's sign (#2969, #3643).
     @Test("BSP: the inner window and the store bound refuse on the window")
     func refusalsNameTheWindow() {
         func lastRefusal(
             width: CGFloat,
+            height: CGFloat,
             windows: UInt32,
             focus: UInt32,
             step: Double
@@ -259,7 +256,7 @@ struct HeldResizePressTests {
                 windows: windows,
                 focus: focus,
                 width: width,
-                height: width == 4000 ? 4000 : 820
+                height: height
             )
             var refusals: [ResizeRefusal] = []
             core.borders.onResizeRefusal = { refusals.append($0) }
@@ -268,20 +265,34 @@ struct HeldResizePressTests {
             }
             return refusals.first
         }
-        // A grow held to the inner window's peak, where the one
-        // shared ratio gives it no larger share either way.
-        #expect(
-            lastRefusal(width: 1220, windows: 4, focus: 3, step: 5)
-                == .ratioLimit(WindowID(3), axis: "x", grows: true)
+        // A grow held on the inner window runs to a neighbour's
+        // floor: its own split moves it, no shared peak. 2560 ×
+        // 1440 keeps w3 and w4 out of a scrolled chain.
+        let inner = lastRefusal(
+            width: 2560,
+            height: 1440,
+            windows: 4,
+            focus: 3,
+            step: 5
         )
-        // The store's bound on a desk where every floor is far off.
-        #expect(
-            lastRefusal(width: 4000, windows: 6, focus: 1, step: 5)
-                == .ratioLimit(WindowID(1), axis: "x", grows: true)
-        )
-        #expect(
-            lastRefusal(width: 4000, windows: 6, focus: 1, step: -5)
-                == .ratioLimit(WindowID(1), axis: "x", grows: false)
-        )
+        if case .neighborMinimum(_, let focused, "x", _, _) = inner {
+            #expect(focused == WindowID(3))
+        } else {
+            Issue.record("inner grow ended on \(String(describing: inner))")
+        }
+        // The store's bound on a desk where every floor is far off:
+        // 12000 wide, so even w1's rest of five windows, whose
+        // side-by-side floors add up (#3672), fits at 0.1.
+        for (step, grows) in [(20.0, true), (-20.0, false)] {
+            #expect(
+                lastRefusal(
+                    width: 12000,
+                    height: 4000,
+                    windows: 6,
+                    focus: 1,
+                    step: step
+                ) == .ratioLimit(WindowID(1), axis: "x", grows: grows)
+            )
+        }
     }
 }

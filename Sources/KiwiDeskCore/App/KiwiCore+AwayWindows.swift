@@ -156,6 +156,7 @@ extension KiwiCore {
         desktopMemory.returnFocus.retire(id)
         followFocus.retire(id)
         jump.retire(id)
+        forgetBspSplits(of: id)  // #3672
     }
 
     /// The app's exit ends its entries (the state fold) and

@@ -26,6 +26,10 @@ struct SessionRatioCarryTests {
         ratios.slotSize = .fraction(0.712345678)
         ratios.gridColumnWeights = [1.25, 0.75, 1]
         ratios.gridRowWeights = [0.6, 1.4]
+        var splits = BspSplitRatios()
+        splits.set(0.3, of: WindowID(7), sideBySide: true)
+        splits.set(0.6, of: WindowID(8), sideBySide: false)
+        ratios.bspSplits = splits
         return ratios
     }
 

@@ -161,10 +161,12 @@ final class HoldGlideFixture {
         let space = core.state.workspaces.space(
             of: WindowID(1)
         )!
-        return core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!,
-            session: core.sessionRatios(of: space)
-        ).splitRatioH
+        // w1's split, the pair's one (#3672).
+        return core.storedBspRatio(
+            of: WindowID(1),
+            sideBySide: true,
+            in: core.state.workspaces[space]!
+        )
     }
 
     var hits: LuaValue? { core.lua?.global("hits") }
