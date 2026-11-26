@@ -70,6 +70,9 @@ struct AreaMenu: ViewModifier {
             }
             .disabled(!model.canEvenOut(holding: area, on: display))
         }
+        // The badge's items: the keyboard and VoiceOver route to them.
+        Divider()
+        ScreenNumberItems(model: model, display: display)
     }
 
     @ViewBuilder private func mergeItems(

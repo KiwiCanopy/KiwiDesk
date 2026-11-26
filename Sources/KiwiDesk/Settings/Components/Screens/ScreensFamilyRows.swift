@@ -14,6 +14,8 @@ enum ScreensRowInstance: Hashable {
 struct OrphanPin: Identifiable, Hashable {
     let space: SpaceID
     let fingerprint: String
+    /// The screen number it waits for, where the pin is one (#3647).
+    var number: Int?
 
     var id: String { space.raw }
 }
@@ -34,6 +36,9 @@ struct ScreensFamilyRows {
     /// The draft's splits by fingerprint (#3517); a screen with
     /// none, or a whole one, is one area 0.
     var splits: [String: ScreenSplit] = [:]
+    /// Stored pins to a number no connected screen holds (#3647):
+    /// they wait, as a pin to a gone screen does.
+    var waiting: [SpaceID: Int] = [:]
 
     /// Connected screens in left-to-right desk reading order.
     var orderedDisplays: [Display] {
@@ -123,6 +128,9 @@ struct ScreensFamilyRows {
             }
             .filter { !mainSpaces.contains($0.key) }
             .map { OrphanPin(space: $0.key, fingerprint: $0.value) }
+            + waiting.filter { !mainSpaces.contains($0.key) }.map {
+                OrphanPin(space: $0.key, fingerprint: "", number: $0.value)
+            }
             .sorted { $0.space.raw < $1.space.raw }
     }
 
@@ -159,7 +167,7 @@ struct ScreensFamilyRows {
             return orphans.map {
                 ScreensRowInstance.orphan($0.space.raw)
             }
-        case .fingerprints, .displayAreas:
+        case .fingerprints, .displayAreas, .screenNumbers:
             return orderedDisplays.map {
                 ScreensRowInstance.display($0.fingerprint)
             }

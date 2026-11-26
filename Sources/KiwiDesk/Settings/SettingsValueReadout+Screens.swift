@@ -29,15 +29,14 @@ extension SettingsValueReadout {
                 new: new.settings.displayAreas
             )
         case .orphanPinClear, .fingerprints,
-            .placementUnavailable:
+            .placementUnavailable, .screenNumbers:
             // no model path — never booked by the diff
             return []
         }
     }
 
-    /// One row per re-pinned space, showing the stored screen
-    /// number (`ScreenSlotKey`, #3647) verbatim until the "Screen N"
-    /// words ship with the Screens badge.
+    /// One row per re-pinned space, naming the stored screen number
+    /// as "Screen N" (#3647), an area pin as "Screen N – Area k".
     private static func screensPinRows(
         _ census: SettingKey,
         old: [SpaceID: ScreenSlotKey],
@@ -52,10 +51,23 @@ extension SettingsValueReadout {
                 census,
                 instance: space.raw,
                 label: instanceLabel(base, space.raw),
-                old: old[space]?.description ?? unset,
-                new: new[space]?.description ?? unset
+                old: old[space].map(screenWords) ?? unset,
+                new: new[space].map(screenWords) ?? unset
             )
         }
+    }
+
+    /// A stored pin's words: the number its screen holds, and an
+    /// area's place in the order its ids were given.
+    private static func screenWords(_ slot: ScreenSlotKey) -> String {
+        let screen = L("monitor_card.number_badge", "Screen %1$d", slot.number)
+        guard slot.areaID > 0 else { return screen }
+        return L(
+            "monitors.split.name",
+            "%1$@ – %2$@",
+            screen,
+            ScreenAreaWords.position(.numbered(slot.areaID + 1))
+        )
     }
 
     /// One row per screen whose split changed (#3517), each side

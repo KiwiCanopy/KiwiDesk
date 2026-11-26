@@ -22,6 +22,9 @@ enum SettingsRowRevert: Hashable {
     case lookChanges
     /// One app's rule and the reach it was given (#1393).
     case ruleReach(app: String)
+    /// The draft's renumber of the connected screens, put back whole
+    /// (#3647).
+    case screenNumbers
     /// A live change put back to its stored value through Core
     /// (#2411), by the row's keep ids.
     case live

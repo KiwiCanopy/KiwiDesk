@@ -17,20 +17,12 @@ struct SpacePinChip: View {
         case .pinned(let displayName):
             if !offlineOnly {
                 BadgeChip(label: displayName)
-                    .help(
-                        L(
-                            "spaces.pin_badge.help",
-                            "Pinned to %1$@ for this profile.",
-                            displayName
-                        )
-                    )
+                    .help(model.pinnedHelp(space, displayName))
             }
         case .offline:
-            BadgeChip(
-                label: L("spaces.pin_offline_badge", "Pin offline")
-            )
-            .help(model.offlinePinSentence(space))
-            .accessibilityHint(model.offlinePinSentence(space))
+            BadgeChip(label: model.offlinePinLabel(space))
+                .help(model.offlinePinSentence(space))
+                .accessibilityHint(model.offlinePinSentence(space))
         }
     }
 }

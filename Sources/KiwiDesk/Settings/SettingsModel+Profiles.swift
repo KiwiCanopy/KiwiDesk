@@ -130,6 +130,11 @@ extension SettingsModel {
         committing.settings.tiling = keepingLiveTilingToggle(
             committing.settings.tiling
         )
+        // A renumber stands before the draft's pins are projected
+        // (#3647 ▸ lane 2).
+        if let order = screenNumbering.draft {
+            core.setSessionScreenOrder(order)
+        }
         core.withUserMotion {
             core.applyProfileScopedState(
                 from: committing,
