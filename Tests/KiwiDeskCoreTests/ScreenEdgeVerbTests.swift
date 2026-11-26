@@ -52,7 +52,9 @@ struct ScreenEdgeVerbTests {
         defer { PositionalDisplays.mainIDOverride = saved }
         let core = makeCore()
         let verb = "space_bar.set_edge"
-        #expect(edge(core, verb, .string("left"), .number(1)).isSuccess)
+        // Screen 2: left to right, the main screen is the right one
+        // (#3647).
+        #expect(edge(core, verb, .string("left"), .number(2)).isSuccess)
         #expect(
             edge(core, verb, .string("right"), .string("Left")).isSuccess
         )

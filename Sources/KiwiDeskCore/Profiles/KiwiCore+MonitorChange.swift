@@ -110,22 +110,16 @@ extension KiwiCore {
             // screens, but goes dirty — the same rule as
             // load_profile onto other hardware.
             guard isGuiManaged else {
-                if let name = profiles.currentName {
+                if let active = profiles.active {
                     profiles.markDirty()
                     // Its pins follow its numbers here too (#3647
-                    // ▸ lane 2); a number past the screens waits.
-                    do {
-                        let profile = try profiles.read(name: name)
-                        spacePins = keepingPins(
-                            of: Set(liveTemporarySpaces),
-                            over: runtimePins(of: profile)
-                        )
-                    } catch {
-                        onLog(
-                            "monitor change: pins of '\(name)' kept, "
-                                + "profile unreadable: \(error)"
-                        )
-                    }
+                    // ▸ lane 2), read from adoption state; a number
+                    // past the screens waits.
+                    spacePins = keepingPins(
+                        of: Set(liveTemporarySpaces),
+                        over: screenOrder(holding: active.monitorSets)
+                            .runtime(active.spacePins)
+                    )
                 }
                 // NOT redundant with the deferred resolve:
                 // this branch retiles and emits below, and two
