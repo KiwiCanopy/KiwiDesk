@@ -12192,8 +12192,11 @@ Setting a wallpaper is not reading one, so it takes no prompt. The
 one file read is **Use Current Wallpaper**, a deliberate click that
 accepts macOS's one-time folder prompt; every other check reads only
 the URL macOS reports. A picture joins a look only through Choose
-Wallpaper…, Use Current Wallpaper or a file dropped on the tile, and
-Save never captures one, so a wallpaper changed in System Settings is
+Wallpaper…, Use Current Wallpaper or a file dropped on the tile. A
+saved tile draws a badge at rest that opens those items, since a row
+menu and a drop are invisible until known (owner, 2026-11-26); a
+bundled tile draws none, as it can never take one. Save never
+captures one, so a wallpaper changed in System Settings is
 never overwritten by a look without one. The picture is copied, never
 referenced: a stored path breaks on a move, differs per Mac and would
 prompt later. The copy lives in the config folder's `wallpapers/`,

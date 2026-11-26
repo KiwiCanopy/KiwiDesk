@@ -18,6 +18,8 @@ struct LooksShelf: View {
     /// Why the last save or import wrote nothing, until the next
     /// one succeeds.
     @State var failure: String?
+    /// The saved look a picture file is dragged over (#3478).
+    @State var dropTarget: String?
 
     private let columns = [
         GridItem(.adaptive(minimum: 132), spacing: 12, alignment: .top)
@@ -92,7 +94,9 @@ struct LooksShelf: View {
                     card(
                         look,
                         caption: look.author.map(LookTile.byline),
-                        captionLines: userCaptionLines
+                        captionLines: userCaptionLines,
+                        badge: AnyView(wallpaperBadge(look)),
+                        dropping: dropTarget == look.name
                     )
                     .focused($returningTile, equals: look.name)
                     .rowActions { userMenu(look) }
@@ -100,10 +104,13 @@ struct LooksShelf: View {
                         guard let url = urls.first else { return false }
                         attachWallpaper(at: url, to: look)
                         return true
+                    } isTargeted: { over in
+                        dropTargeted(over, look)
                     }
                 }
                 addTile
             }
+            wallpaperHint
             if let failure {
                 Text(failure)
                     .font(.caption)
@@ -138,13 +145,17 @@ struct LooksShelf: View {
     private func card(
         _ look: ShelfLook,
         caption: String?,
-        captionLines: Int? = nil
+        captionLines: Int? = nil,
+        badge: AnyView? = nil,
+        dropping: Bool = false
     ) -> some View {
         LookTile(
             model: model,
             look: look,
             caption: caption,
-            captionLines: captionLines
+            captionLines: captionLines,
+            badge: badge,
+            dropping: dropping
         ) {
             apply(look)
         }
@@ -175,7 +186,11 @@ struct LooksShelf: View {
     }
 
     @ViewBuilder
-    private func menuItem(_ key: SettingKey, _ look: ShelfLook) -> some View {
+    func menuItem(
+        _ key: SettingKey,
+        _ look: ShelfLook,
+        divides: Bool = true
+    ) -> some View {
         switch key {
         case .colours(.lookRename):
             Button(L("looks.rename", "Rename…")) {
@@ -187,7 +202,7 @@ struct LooksShelf: View {
         case .colours(.lookExport):
             Button(L("looks.export", "Export…")) { exportLook(look) }
         case .colours(.lookChooseWallpaper):
-            Divider()
+            if divides { Divider() }
             Button(L("looks.wallpaper.choose", "Choose Wallpaper…")) {
                 chooseWallpaper(for: look)
             }
@@ -198,11 +213,10 @@ struct LooksShelf: View {
                 useCurrentWallpaper(for: look)
             }
         case .colours(.lookRemoveWallpaper):
-            if look.wallpaper != nil {
-                Button(L("looks.wallpaper.remove", "Remove Wallpaper")) {
-                    removeWallpaper(from: look)
-                }
+            Button(L("looks.wallpaper.remove", "Remove Wallpaper")) {
+                removeWallpaper(from: look)
             }
+            .disabled(look.wallpaper == nil)
         case .colours(.lookDelete):
             Divider()
             Button(L("looks.delete", "Delete"), role: .destructive) {

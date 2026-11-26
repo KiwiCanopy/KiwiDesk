@@ -28,7 +28,7 @@ struct PaletteTile<Plate: View>: View {
     }
 
     /// Derived inset maintaining concentric corner radii.
-    private static var inset: CGFloat {
+    static var inset: CGFloat {
         SettingsTheme.disclosureRadius
             - PaletteSceneThumbnail.plateRadius
     }

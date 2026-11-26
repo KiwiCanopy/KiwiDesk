@@ -19,6 +19,12 @@ struct LookTile: View {
     /// Told when the pointer enters and leaves, for a surface that
     /// previews the look under it (Simple, #2737 ruling 9).
     var hover: ((Bool) -> Void)?
+    /// A saved look's wallpaper badge, over the plate's corner and
+    /// outside the tile's button, whose label takes no clicks for a
+    /// menu inside it (#3478).
+    var badge: AnyView?
+    /// A picture file is dragged over this tile (#3478).
+    var dropping = false
     let apply: () -> Void
     @ObservedObject var pictures = LookTilePictures.shared
 
@@ -38,11 +44,14 @@ struct LookTile: View {
                 captionLines: captionLines
                     ?? (caption == nil ? 0 : Self.captionRoom)
             ) {
-                LookPlate(
-                    settings: preview,
-                    spaceLabels: spaceLabels,
-                    picture: picture
-                )
+                ZStack {
+                    LookPlate(
+                        settings: preview,
+                        spaceLabels: spaceLabels,
+                        picture: picture
+                    )
+                    if dropping { LookWallpaperDropCue() }
+                }
             }
             .contentShape(Rectangle())
         }
@@ -52,6 +61,14 @@ struct LookTile: View {
         .accessibilityHint(help ?? "")
         .accessibilityValue(wallpaperSpoken)
         .help(other ? restoreColorsHelp : (help ?? ""))
+        .overlay(alignment: .topTrailing) {
+            badge?.padding(Self.badgeInset)
+        }
+    }
+
+    /// The plate's inset in its tile, plus the badge's own.
+    private static var badgeInset: CGFloat {
+        PaletteTile<EmptyView>.inset + LookWallpaperBadge<EmptyView>.inset
     }
 
     /// The lines a captioned tile reserves: a description or a

@@ -178,6 +178,11 @@ extension SettingsButtonStyleConventionTests {
             ),
             // A Space card's layout menu draws its picture face
             // whole through the button menu style (#2777).
+            "LookWallpaperBadge.swift": (
+                1, ".buttonStyle(.plain)",
+                "The wallpaper badge's Menu taking plain style, so "
+                    + "its face is the drawn chip (#3478)"
+            ),
             "SpaceModeMenu.swift": (
                 1, ".buttonStyle(.plain)",
                 "The layout Menu taking plain style, so its face "
