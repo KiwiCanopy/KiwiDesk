@@ -27,11 +27,22 @@ extension KiwiCore {
     public func overwriteProfile(
         named name: String,
         with config: GuiConfig,
-        writingRules: Bool
+        writingRules: Bool,
+        screenOrder: ScreenOrder? = nil
     ) throws {
         var existing = try profiles.read(name: name)
         let stored = existing
         applyProfileEdits(from: config, onto: &existing)
+        // A renumber of the connected setup it holds (#3647 ▸ lane 2);
+        // a hole is the session's and never stored.
+        if let screenOrder, screenOrder.unnumbered.isEmpty,
+            existing.set(matching: liveFingerprints) != nil
+        {
+            existing.upsert(
+                MonitorSet(monitors: screenOrder.fingerprints),
+                reordering: true
+            )
+        }
         if !writingRules {
             existing.appRules = stored.appRules
             existing.titledAppRules = stored.titledAppRules

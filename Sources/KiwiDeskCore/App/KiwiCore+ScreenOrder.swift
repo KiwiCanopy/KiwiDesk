@@ -11,14 +11,21 @@ extension KiwiCore {
     /// left to right, ties top to bottom. Read from adoption state,
     /// never the file (#1245).
     public var liveScreenOrder: ScreenOrder {
-        screenOrder(holding: profiles.active?.monitorSets ?? [])
+        sessionScreenOrder
+            ?? screenOrder(holding: profiles.active?.monitorSets ?? [])
     }
 
     /// The order `profile`'s pins are numbered in on the connected
-    /// screens: its set covering them, else left to right. A draft of
-    /// a stored profile reads its own, never the live one's.
+    /// screens: the session's renumber for the live profile, else its
+    /// set covering them, else left to right. A draft of a stored
+    /// profile reads its own, never the live one's.
     public func screenOrder(for profile: Profile?) -> ScreenOrder {
-        screenOrder(holding: profile?.monitorSets ?? [])
+        if let profile, profile.name == profiles.currentName,
+            let order = sessionScreenOrder
+        {
+            return order
+        }
+        return screenOrder(holding: profile?.monitorSets ?? [])
     }
 
     /// The order `sets` number the connected screens in; read on each

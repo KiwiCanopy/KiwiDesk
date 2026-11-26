@@ -62,6 +62,9 @@ public final class ProfileManager {
     /// The resolving Standard as one value, `currentStandard`'s
     /// source (#1509).
     private(set) var standard: ActiveStandard?
+    /// The live profile's session renumber (#3647 ▸ lane 2), read
+    /// and written through `KiwiCore+SessionScreenOrder` alone.
+    var sessionScreenOrder: ScreenOrder?
     /// True when live state diverged from saved profile.
     public private(set) var isDirty = false
 

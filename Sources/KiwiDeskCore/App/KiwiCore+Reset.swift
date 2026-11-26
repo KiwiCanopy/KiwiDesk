@@ -109,6 +109,7 @@ extension KiwiCore {
         mainSpaces = []
         healedSpaces = [:]
         forgetHeldSpaces()
+        clearSessionScreenOrder()
         tiler.settings = TilingSettings()
         resetAppWide()
         resetSharedLook()

@@ -81,6 +81,8 @@ extension KiwiCore {
     /// (#36). Returns the profiles that lost the set.
     @discardableResult
     public func loadProfile(named name: String) throws -> [String] {
+        // Ahead of the hand-over, which stores the live order.
+        clearSessionScreenOrder()
         var profile = try profiles.read(name: name)
         let live = liveFingerprints
         var released: [String] = []
@@ -119,6 +121,7 @@ extension KiwiCore {
                 live: monitors.count
             )
         }
+        if isConnectedMonitorSet(monitors) { clearSessionScreenOrder() }
         let released = try handOver(monitors, to: &profile)
         if isConnectedMonitorSet(monitors),
             let current = profiles.currentName

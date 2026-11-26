@@ -152,7 +152,10 @@ extension KiwiCore {
             )
         // A set another profile holds keeps its stored order when
         // this one takes it (#3647, owner 2026-11-26).
-        let set = heldLiveSet ?? liveMonitorSet
+        // A renumber stands for the live order the pins took (#3647).
+        let set =
+            sessionScreenOrder == nil
+            ? heldLiveSet ?? liveMonitorSet : liveMonitorSet
         return Profile(
             name: name,
             monitorSets: [set],
@@ -204,6 +207,7 @@ extension KiwiCore {
         else {
             let built = buildProfile(name: name, modes: modes)
             let released = try saveProfile(built)
+            clearSessionScreenOrder(ifStoredIn: built)
             recordLookWrite(of: built)
             refreshConfigIssues()
             if modes == nil { adoptedWholeLive(name) }
@@ -225,7 +229,7 @@ extension KiwiCore {
         if existing.set(matching: live.monitors) != nil
             || !isOwnedElsewhere(live.monitors, than: name)
         {
-            existing.upsert(live)
+            existing.upsert(live, reordering: sessionScreenOrder != nil)
             existing.storePins(
                 capturedPins(alsoOf: extra),
                 through: screenOrder(for: existing)
@@ -239,6 +243,7 @@ extension KiwiCore {
         existing.settings = fresh.settings
         existing.savedAt = .now
         let released = try saveProfile(existing)
+        clearSessionScreenOrder(ifStoredIn: existing)
         recordLookWrite(of: existing)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).

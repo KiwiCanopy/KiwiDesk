@@ -289,18 +289,20 @@ public struct Profile: Codable, Sendable, Equatable {
     }
 
     /// Adds the set, or keeps the one covering the same screens
-    /// with its stored order (#3647). Rejects (returns false) a set
-    /// of a different length — a profile covers exactly one screen
-    /// count, a dormant one included.
+    /// with its stored order (#3647) — `reordering`, a renumber's
+    /// write, stores `set`'s order instead. Rejects (returns false) a
+    /// set of a different length — a profile covers exactly one
+    /// screen count, a dormant one included.
     @discardableResult
     public mutating func upsert(
-        _ set: MonitorSet
+        _ set: MonitorSet,
+        reordering: Bool = false
     ) -> Bool {
-        guard
-            monitorCount == 0
-                || set.monitors.count == monitorCount
+        guard monitorCount == 0 || set.monitors.count == monitorCount
         else { return false }
-        if !monitorSets.contains(where: { $0.matches(set) }) {
+        if let at = monitorSets.firstIndex(where: { $0.matches(set) }) {
+            if reordering { monitorSets[at] = set }
+        } else {
             monitorSets.append(set)
         }
         dormantMonitorCount = nil
