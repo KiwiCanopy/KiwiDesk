@@ -80,8 +80,10 @@ struct ScreenNumberBadgeTests {
         #expect(model.screenNumber(of: b) == nil)
         #expect(ScreenNumberBadge.face(nil) == "Gets a new Space")
         #expect(!model.takesPins("B:100x100"))
+        // A refused drop leaves the Space's own pin where it was.
+        model.place("1", .screen("A:100x100"))
         model.place("1", .screen("B:100x100"))
-        #expect(model.config.spacePins["1"] == nil)
+        #expect(model.config.spacePins["1"] == ScreenSlotKey(number: 1))
         #expect(model.waitingPins == ["2": 2])
         #expect(model.spacePinBadge("2") == .offline)
         #expect(model.offlinePinLabel("2") == "Screen 2 offline")
