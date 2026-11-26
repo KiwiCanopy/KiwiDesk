@@ -74,6 +74,7 @@ extension ShelfArrangement {
         placed.place(
             within: free,
             whole: whole,
+            leadsEnd: pocket.leadsEnd,
             needs: (spaceNeed, appNeed),
             alignment: shelf.alignment
         )
@@ -95,6 +96,7 @@ extension ShelfArrangement {
     private mutating func place(
         within free: ClosedRange<CGFloat>,
         whole: CGFloat,
+        leadsEnd: Bool,
         needs: (space: CGFloat?, app: CGFloat?),
         alignment: KiwiShelf.Alignment
     ) {
@@ -104,7 +106,8 @@ extension ShelfArrangement {
                 lone,
                 need: need,
                 within: free,
-                whole: whole
+                whole: whole,
+                leadsEnd: leadsEnd
             )
             if space != nil { space = slot } else { app = slot }
             return
@@ -129,7 +132,8 @@ extension ShelfArrangement {
         _ slot: Slot,
         need: CGFloat,
         within free: ClosedRange<CGFloat>,
-        whole: CGFloat
+        whole: CGFloat,
+        leadsEnd: Bool
     ) -> Slot {
         let room = free.upperBound - free.lowerBound
         guard slot.alignment == .center else {
@@ -146,7 +150,6 @@ extension ShelfArrangement {
                 alignment: .center
             )
         }
-        let leadsEnd = free.lowerBound == 0
         return Slot(
             offset: free.lowerBound,
             length: room,

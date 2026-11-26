@@ -166,21 +166,17 @@ struct PocketArrangementTests {
         #expect(space.alignment == alignment)
     }
 
-    @Test("a centred lone bar's slot moves with no need")
-    func centredSlotIsFixed() throws {
-        let short = arrange(
-            space: 120,
-            app: nil,
-            pocket: .init(need: 43.19, leadsEnd: false)
-        )
-        let long = arrange(
-            space: 860,
-            app: nil,
-            pocket: .init(need: 43.19, leadsEnd: false)
-        )
-        #expect(short.space == long.space)
-        let slot = try #require(long.space)
-        #expect(slot.length >= 860)
+    @Test(
+        "a centred lone bar's slot moves with no need",
+        arguments: [(120, 860), (920, 950)] as [(CGFloat, CGFloat)]
+    )
+    func centredSlotIsFixed(short: CGFloat, long: CGFloat) throws {
+        let pocket = ShelfArrangement.PocketAsk(need: 43.19, leadsEnd: false)
+        let first = arrange(space: short, app: nil, pocket: pocket)
+        let second = arrange(space: long, app: nil, pocket: pocket)
+        #expect(first.space == second.space)
+        let slot = try #require(second.space)
+        #expect(slot.length >= long)
     }
 
     @Test("a run too long to centre stops at the pocket's slot")
