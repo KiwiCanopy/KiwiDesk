@@ -80,6 +80,10 @@ struct SettingsSearchCatalogSynonymTests {
                 "files-and-reset",
                 "the drawer's retired title, now a root's (#2737)"
             ),
+            SettingsCatalog.screens.orphanPins.id: (
+                "waiting-pins",
+                "the card's retired title, \"disconnected\" (#3688)"
+            ),
         ]
     }
 

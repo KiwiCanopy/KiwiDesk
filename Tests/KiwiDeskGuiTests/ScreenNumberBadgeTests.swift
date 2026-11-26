@@ -86,7 +86,37 @@ struct ScreenNumberBadgeTests {
         #expect(model.config.spacePins["1"] == ScreenSlotKey(number: 1))
         #expect(model.waitingPins == ["2": 2])
         #expect(model.spacePinBadge("2") == .offline)
-        #expect(model.offlinePinLabel("2") == "Screen 2 offline")
+        #expect(model.offlinePinLabel("2") == "No Screen 2")
+    }
+
+    @Test("a pin to an unnumbered screen says so, never offline (#3688)")
+    func unnumberedPinCopy() throws {
+        LocalizationManager.shared.select("en")
+        let (_, model) = try makeModel()
+        model.config.spaces = ["1", "2", "3"]
+        model.config.spacePins["3"] = ScreenSlotKey(number: 3)!
+        model.leaveUnnumbered(b)
+        #expect(model.unnumberedScreen(at: 2) == b)
+        #expect(model.unnumberedScreen(at: 3) == nil)
+        #expect(model.unnumberedWaits == [2: model.screenLabel(b)])
+        let help = model.offlinePinSentence("2")
+        #expect(help.contains("isn't numbered this session"))
+        #expect(help.contains(model.screenLabel(b)))
+        #expect(!help.contains("connected"))
+        // A number no connected screen holds keeps the offline copy.
+        #expect(model.offlinePinLabel("3") == "Screen 3 offline")
+        #expect(model.offlinePinSentence("3").contains("isn't connected"))
+        let orphans = model.screenRows.orphans
+        let two = try #require(orphans.first { $0.space == "2" })
+        let three = try #require(orphans.first { $0.space == "3" })
+        #expect(two.unnumberedScreen == model.screenLabel(b))
+        #expect(three.unnumberedScreen == nil)
+        let sentence = ScreensSection.orphanSentence(two)
+        #expect(sentence.contains("isn't numbered this session"))
+        #expect(!sentence.contains("connected"))
+        #expect(
+            ScreensSection.orphanSentence(three).contains("isn't connected")
+        )
     }
 
     @Test("a stored target cannot leave a screen unnumbered")
