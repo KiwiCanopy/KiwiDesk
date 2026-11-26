@@ -91,8 +91,8 @@ struct HeldResizePressTests {
             let frame = frames[window]
             return (axis == "x" ? frame?.width : frame?.height) ?? 0
         }
-        // Each press's after-frames are the next press's before-frames,
-        // and `resize` retiles itself, so a press lays out once (#3654).
+        // Each press's after-frames are the next press's
+        // before-frames: one frame read per press (#3654).
         var frames = core.tiler.calculatedFrames(state: core.state)
         // A window spanning the axis is on no split of it: its press
         // sizes its mates (#1259), so a neighbour must move instead.
