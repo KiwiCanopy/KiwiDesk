@@ -199,7 +199,7 @@ struct EdgeBandWriteTests {
         case .instant:
             applier.applyInstant(id, frame, setSize: true)
         case .held:
-            applier.holdWrites([id], until: .now() + 0.05)
+            applier.holdWrites([id], for: 0.05)
             applier.applyInstant(id, frame, setSize: true)
         }
         // A generous guard, never a tight deadline (#344).
@@ -253,7 +253,7 @@ struct EdgeBandWriteTests {
         let app = RefusingApp(start, screenBottom: screen.maxY)
         let applier = makeApplier(app)
         let id = WindowID(1)
-        applier.holdWrites([id], until: .now() + 0.05)
+        applier.holdWrites([id], for: 0.05)
         applier.applyInstant(id, slot, setSize: false)
         applier.applyInstant(id, slot, setSize: true)
         // A generous guard, never a tight deadline (#344).
@@ -312,10 +312,11 @@ struct EdgeBandWriteTests {
         let held = HeldWrites()
         let id = WindowID(1)
         let taller = slot.insetBy(dx: 0, dy: -1)
-        held.hold([id], until: .now() + 60)
-        _ = held.stage(id, slot, setSize: true, band: band)
-        _ = held.stage(id, taller, setSize: true)
-        guard case .write(let entry) = held.release(id, now: .now() + 120)
+        let now = DispatchTime.now()
+        held.hold([id], until: now + 60, now: now)
+        _ = held.stage(id, slot, setSize: true, band: band, now: now)
+        _ = held.stage(id, taller, setSize: true, now: now)
+        guard case .write(let entry) = held.release(id, now: now + 120)
         else {
             Issue.record("the staged write was not released")
             return

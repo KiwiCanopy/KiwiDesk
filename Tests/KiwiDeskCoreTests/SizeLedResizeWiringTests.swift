@@ -144,7 +144,7 @@ struct SizeLedResizeWiringTests {
         let app = answering(core, .fixed)
         let applier = core.tiler.applier
         let id = WindowID(1)
-        applier.holdWrites([id], until: .now() + 0.05)
+        applier.holdWrites([id], for: 0.05)
         applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.applyInstant(
             id,
@@ -192,7 +192,7 @@ struct SizeLedResizeWiringTests {
         let applier = core.tiler.applier
         let id = WindowID(1)
         let asked = CGRect(x: 75, y: 100, width: 550, height: 400)
-        applier.holdWrites([id], until: .now() + 0.05)
+        applier.holdWrites([id], for: 0.05)
         applier.applyInstant(id, start, setSize: true)
         applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.applyInstant(id, asked, setSize: true)

@@ -27,7 +27,7 @@ struct HeldWritesTests {
     @Test("a held window stages, then folds later writes into it")
     func heldStagesAndMerges() {
         let held = HeldWrites()
-        held.hold([w], until: later(0.4))
+        held.hold([w], until: later(0.4), now: t0)
         #expect(
             held.stage(w, a, setSize: true, now: t0) == .staged(later(0.4))
         )
@@ -46,10 +46,10 @@ struct HeldWritesTests {
     @Test("a burst holding the window again takes the later landing")
     func reholdTakesTheLater() {
         let held = HeldWrites()
-        held.hold([w], until: later(0.4))
+        held.hold([w], until: later(0.4), now: t0)
         _ = held.stage(w, a, setSize: false, now: t0)
-        held.hold([w], until: later(0.7))
-        held.hold([w], until: later(0.5))
+        held.hold([w], until: later(0.7), now: t0)
+        held.hold([w], until: later(0.5), now: t0)
         #expect(held.release(w, now: later(0.4)) == .later(later(0.7)))
         #expect(held.isHeld(w, now: later(0.6)))
         #expect(!held.isHeld(w, now: later(0.7)))
@@ -58,7 +58,7 @@ struct HeldWritesTests {
     @Test("a hold past its deadline stages nothing")
     func expiredHoldPasses() {
         let held = HeldWrites()
-        held.hold([w], until: later(0.4))
+        held.hold([w], until: later(0.4), now: t0)
         #expect(held.stage(w, a, setSize: false, now: later(0.4)) == .pass)
     }
 }

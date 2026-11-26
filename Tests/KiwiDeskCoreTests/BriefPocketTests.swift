@@ -133,7 +133,7 @@ struct BriefPocketTests {
         #expect(core.execute("pocket").isSuccess)
         #expect(core.state.pocketedWindows.isEmpty)
         #expect(core.briefPocket.isPlaying)
-        #expect(core.tiler.applier.held.isHeld(one))
+        #expect(core.tiler.applier.held.isHeld(one, now: .now()))
         // The restore's one write is staged, not sent ahead of it.
         #expect(core.tiler.applier.held.isStaged(one))
         // Its ring waits with it, and lets go at the landing.
@@ -161,7 +161,7 @@ struct BriefPocketTests {
             #expect(next.map { raised(core, $0) } == true)
             #expect(core.execute("pocket").isSuccess)
             #expect(!core.briefPocket.isPlaying)
-            #expect(!core.tiler.applier.held.isHeld(one))
+            #expect(!core.tiler.applier.held.isHeld(one, now: .now()))
             #expect(raised(core, one))
         }
     }

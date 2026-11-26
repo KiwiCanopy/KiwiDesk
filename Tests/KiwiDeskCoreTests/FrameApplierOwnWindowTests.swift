@@ -80,7 +80,7 @@ struct FrameApplierOwnWindowTests {
     func heldOwnWindowMovesAtTheLanding() async throws {
         let moves = Moves()
         let applier = makeApplier(pid: getpid(), moves)
-        applier.holdWrites([w], until: .now() + 0.05)
+        applier.holdWrites([w], for: 0.05)
         applier.applyInstant(w, frame, setSize: true)
         #expect(moves.all.isEmpty)
         // A generous guard, never a tight deadline (#344).

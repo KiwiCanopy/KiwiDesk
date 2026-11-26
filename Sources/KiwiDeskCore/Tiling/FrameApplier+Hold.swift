@@ -44,10 +44,13 @@ final class HeldWrites: @unchecked Sendable {
 
     /// Holds every write to `ids` until `deadline`; a window held
     /// already takes the later of the two.
-    func hold(_ ids: some Sequence<WindowID>, until deadline: DispatchTime) {
+    func hold(
+        _ ids: some Sequence<WindowID>,
+        until deadline: DispatchTime,
+        now: DispatchTime
+    ) {
         lock.lock()
         defer { lock.unlock() }
-        let now = DispatchTime.now()
         deadlines = deadlines.filter {
             now < $0.value || staged[$0.key] != nil
         }
@@ -64,7 +67,7 @@ final class HeldWrites: @unchecked Sendable {
     }
 
     /// Whether `id` is held at `now`.
-    func isHeld(_ id: WindowID, now: DispatchTime = .now()) -> Bool {
+    func isHeld(_ id: WindowID, now: DispatchTime) -> Bool {
         lock.lock()
         defer { lock.unlock() }
         return deadlines[id].map { now < $0 } ?? false
@@ -76,7 +79,7 @@ final class HeldWrites: @unchecked Sendable {
         setSize: Bool,
         band: EdgeBand? = nil,
         lead: SizeLedWrite.Lead? = nil,
-        now: DispatchTime = .now()
+        now: DispatchTime
     ) -> Staging {
         lock.lock()
         defer { lock.unlock() }
@@ -133,7 +136,7 @@ final class HeldWrites: @unchecked Sendable {
 
     /// The staged write a release at `now` sends, or the later
     /// deadline it must wait for instead.
-    func release(_ id: WindowID, now: DispatchTime = .now()) -> Release {
+    func release(_ id: WindowID, now: DispatchTime) -> Release {
         lock.lock()
         defer { lock.unlock() }
         if let deadline = deadlines[id], now < deadline {
@@ -145,20 +148,18 @@ final class HeldWrites: @unchecked Sendable {
 }
 
 extension FrameApplier {
-    /// Holds every write to `ids` until `deadline`: the plate
-    /// slide's incoming windows (#1956), a take-out's window until
-    /// the brief pocket's plate lands (#2680).
-    func holdWrites(
-        _ ids: some Sequence<WindowID>,
-        until deadline: DispatchTime
-    ) {
-        held.hold(ids, until: deadline)
+    /// Holds every write to `ids` for `wait` seconds on `heldNow`:
+    /// the plate slide's incoming windows (#1956), a take-out's
+    /// window until the brief pocket's plate lands (#2680).
+    func holdWrites(_ ids: some Sequence<WindowID>, for wait: TimeInterval) {
+        let now = heldNow()
+        held.hold(ids, until: now + max(wait, 0), now: now)
     }
 
     /// Ends every hold — the plate slide's play was dropped — and
     /// sends what they kept, a take-out's early with them.
     func releaseAllHolds() {
-        for id in held.releaseAll() { releaseHeld(id, at: .now()) }
+        for id in held.releaseAll() { releaseHeld(id, at: heldNow()) }
     }
 
     /// Stages `frame` for a held window; true when it was held, so
@@ -175,7 +176,8 @@ extension FrameApplier {
             frame,
             setSize: setSize,
             band: band,
-            lead: lead
+            lead: lead,
+            now: heldNow()
         ) {
         case .pass: return false
         case .merged: return true
@@ -201,6 +203,7 @@ extension FrameApplier {
         let holds = enhancedUI
         let recent = recentStamp
         let move = ownWindowMove
+        let now = heldNow
         let reschedule: @Sendable (DispatchTime) -> Void = {
             [weak self] later in
             DispatchQueue.main.async {
@@ -215,8 +218,9 @@ extension FrameApplier {
         // meanwhile, which then toggles nothing.
         let atRest = own ? false : enhancedUIAtRest(pid)
         let generation = holds.generation(pid)
-        queue(for: pid).asyncAfter(deadline: deadline) {
-            switch held.release(id) {
+        let delay = Self.seconds(from: heldNow(), to: deadline)
+        scheduleHeldLanding(queue(for: pid), delay) {
+            switch held.release(id, now: now()) {
             case .write(let entry):
                 if own {
                     MainActor.assumeIsolated {
@@ -242,6 +246,15 @@ extension FrameApplier {
                 break
             }
         }
+    }
+
+    nonisolated private static func seconds(
+        from now: DispatchTime,
+        to deadline: DispatchTime
+    ) -> TimeInterval {
+        guard deadline > now else { return 0 }
+        let nanos = deadline.uptimeNanoseconds - now.uptimeNanoseconds
+        return TimeInterval(nanos) / 1e9
     }
 
     nonisolated private static func write(

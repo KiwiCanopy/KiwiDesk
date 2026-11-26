@@ -193,7 +193,7 @@ extension KiwiCore {
             )
         }
         if let lands, let at = play?.flightEnd {
-            tiler.applier.holdWrites([id], until: .now() + at)
+            tiler.applier.holdWrites([id], for: at)
             holdRingThroughLanding(id, target: lands, lands: at)
         }
         refreshStickyReach()
