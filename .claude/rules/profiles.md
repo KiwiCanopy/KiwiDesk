@@ -2034,6 +2034,14 @@ loaded with it. The obligations:
   `screenOrder(holding:)` over that profile's sets, never the live
   one's
   (`NumberedPinsSharedTests`, `StoredDraftScreenOrderTests`).
+- **Read a screen number a user types or reads — a screen
+  argument, `N#id`, `list_monitors`, `desktop_change` — through
+  `KiwiCore.numberedScreens` or its `screen(numbered:)` /
+  `screenNumber(of:)`, never `PositionalDisplays`**, which only
+  assigns layouts and finds main (the heal leads, `numberedPlan`,
+  `ProfileComposition`, the tour, the starter), and never an array
+  index, so a gap in the order stays a gap (#3647,
+  `NumberedScreenArgumentTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and
   `forgetMonitorSet` (#3324) — never `Profile.release` beside it,

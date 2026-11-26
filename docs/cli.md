@@ -713,8 +713,8 @@ every lens with why it cannot turn on.
 | | `focus_desktop` | Desktop number, counted across every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)) |
 | | `move_to_desktop` | Desktop number, [space id] — moves the window there; you stay. `space id` names the Space it lands in |
 | | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
-| | `move_space_to_display` | space id, display index or name |
-| | `pin_space_to_display` | space id, display index or name |
+| | `move_space_to_display` | space id, screen number, fingerprint or name ([which number](lua-reference.md#move_space_to_display)) |
+| | `pin_space_to_display` | space id, screen number, fingerprint or name ([which number](lua-reference.md#move_space_to_display)) |
 | | `create_space` | space id, [mode] — see [`create_space`](lua-reference.md#create_space) |
 | | `delete_space` | space id — see [Deleting a Space](#deleting-a-space) |
 | Window | `make_floating` | — |
@@ -773,7 +773,7 @@ every lens with why it cannot turn on.
 | | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
 | | `bind_profile_to_desktop` | Desktop number, profile, screen fingerprints… (optional; scopes the binding to that setup) (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
-| | `list_monitors` | — (returns each screen's `id`, `name`, `frame`, `layout_frame`, `fingerprint` and `space_id`, the Space it shows) |
+| | `list_monitors` | — (returns each screen's `id`, `name`, `frame`, `layout_frame`, `fingerprint` and `space_id`, the Space it shows; the full field list is [list_windows](lua-reference.md#list_windows)'s) |
 | | `list_windows` | [space] |
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000) |
@@ -1043,6 +1043,11 @@ sits in, and `list_monitors`' entries `areas`, one per area with its
 key, name, rect and `space_id`. See
 [set_display_areas](lua-reference.md#set_display_areas) and
 [get_state](lua-reference.md#get_state).
+
+:::unreleased
+An area is also named `"N#id"`, Screen N's area `id`, as
+`areas[].numbered_key` prints it.
+:::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
@@ -1443,23 +1448,20 @@ Bulk reassignments (profile load, session restore) stay silent:
 screen — a swipe, Mission Control, or a `focus_desktop` /
 `move_to_desktop_and_follow` command; its data carries the 1-based
 Desktop number now current on the screen that switched, counted
-across every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)), that
-screen's positional number (`monitor`: 1 is the main screen,
-secondaries follow left to right — the same 1-based positional
-numbering a screen argument takes), and the active profile:
+across every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)), the
+screen that switched, and the active profile.
 
 :::unreleased
-`monitor` is the screen's Screen N, the number a screen argument
-takes, and `main` says whether that screen is the main one:
-`{"desktop": 2, "monitor": 1, "main": true, …}`. A script that read
-`monitor: 1` as the main screen reads `main` instead.
-:::
+The screen is `screen`, its Screen N, the number a screen argument
+takes, and `main` says whether it is the main screen. Test `main`,
+not `screen`, for the main screen:
 
 ```json
 {"event": "desktop_change",
- "data": {"desktop": 2, "monitor": 1,
+ "data": {"desktop": 2, "screen": 1, "main": true,
           "profile": "Creator Studio"}}
 ```
+:::
 
 `desktop_change` fires once KiwiDesk has read the arriving
 Desktop's windows, after that switch's `vanished` and `returned`
@@ -1470,13 +1472,13 @@ Switches in quick succession deliver their events in order, after
 the last one's windows are read.
 
 With "Displays have separate Spaces" on, each screen switches
-Desktops on its own, so watch `monitor` to tell them apart:
-only a switch on the main screen (`monitor: 1`) selects a
+Desktops on its own, so watch `screen` to tell them apart:
+only a switch on the main screen (`main: true`) selects a
 profile. A secondary screen's swipe reports its Desktop and
 moves that screen onto the Space its arriving Desktop should
 show — which emits `space_change` too when that screen is the
 one holding the active Space. With the
-option off, or with a single screen, `monitor` is always 1.
+option off, or with a single screen, `main` is always `true`.
 
 `layer_change` fires when the active keyboard layer changes —
 a `switch_layer` call, a config reload returning you to

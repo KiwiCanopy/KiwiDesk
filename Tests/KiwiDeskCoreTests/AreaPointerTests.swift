@@ -136,7 +136,12 @@ struct AreaPointerTests {
         )
         #expect(areaOf["1"] == .string(keys[0]))
         #expect(areaOf["2"] == .string(keys[1]))
-        guard case .array(let areas) = core.areasJSON(of: wide) else {
+        guard
+            case .array(let areas) = core.areasJSON(
+                of: wide,
+                screen: core.screenNumber(of: wide.id)
+            )
+        else {
             Issue.record("no areas")
             return
         }

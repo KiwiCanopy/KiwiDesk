@@ -26,7 +26,7 @@ struct ReplyKeyVocabularyTests {
 
     /// Keys a rename retired; respelling one undoes #2963.
     private static let retired = [
-        "floats", "layout_mode", "tiles", "ignores",
+        "floats", "layout_mode", "tiles", "ignores", "monitor",
     ]
 
     /// Every Core file: a reply built in a new directory is read

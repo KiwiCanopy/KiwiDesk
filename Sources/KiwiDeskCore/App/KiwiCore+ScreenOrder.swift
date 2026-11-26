@@ -36,21 +36,40 @@ extension KiwiCore {
         screenOrder(for: profile).runtime(profile.spaceMonitorMap)
     }
 
-    /// `displays` in Screen N order: what a number in Lua or the CLI,
-    /// `list_monitors` and `desktop_change` name (#3647). Twins take
-    /// their numbers left to right.
-    func numbered(_ displays: [Display]) -> [Display] {
-        var left = displays.sorted { $0.frame.minX < $1.frame.minX }
-        var result: [Display] = []
-        for fingerprint in liveScreenOrder.fingerprints {
+    /// `displays` that hold a number, in Screen N order, each with
+    /// it: what a number in Lua or the CLI, `list_monitors` and
+    /// `desktop_change` name (#3647). The number is the screen's
+    /// place in `liveScreenOrder`, so a gap stays a gap; twins take
+    /// theirs left to right, ties top to bottom.
+    func numberedScreens(
+        _ displays: [Display]
+    ) -> [(number: Int, display: Display)] {
+        var left = displays.sorted(by: ScreenOrder.precedes)
+        var result: [(number: Int, display: Display)] = []
+        for (index, fingerprint) in liveScreenOrder.fingerprints
+            .enumerated()
+        {
             guard
-                let index = left.firstIndex(where: {
+                let at = left.firstIndex(where: {
                     $0.fingerprint == fingerprint
                 })
             else { continue }
-            result.append(left.remove(at: index))
+            result.append((index + 1, left.remove(at: at)))
         }
         return result
+    }
+
+    /// The connected screen numbered `number`, nil where none is.
+    func screen(numbered number: Int) -> Display? {
+        numberedScreens(state.workspaces.allDisplays)
+            .first { $0.number == number }?.display
+    }
+
+    /// The number of the connected screen `id`, nil where it holds
+    /// none.
+    func screenNumber(of id: DisplayID) -> Int? {
+        numberedScreens(state.workspaces.allDisplays)
+            .first { $0.display.id == id }?.number
     }
 
     /// The live pins a write records, numbered on the live screens;

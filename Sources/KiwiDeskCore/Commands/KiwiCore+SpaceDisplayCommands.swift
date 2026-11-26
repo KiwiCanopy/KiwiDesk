@@ -6,8 +6,7 @@ import Foundation
 /// verbs) for the file ceiling.
 extension KiwiCore {
     /// Resolves a display argument to a live `DisplayID`:
-    /// - a **number** is a 1-based positional index — main is 1,
-    ///   secondaries follow left-to-right (`PositionalDisplays`);
+    /// - a **number** is Screen N (`numberedScreens`, #3647);
     /// - a **string** matches a connected monitor by `fingerprint`
     ///   (as printed by `list_monitors`), else by `name`.
     /// Nil when nothing matches (or no displays are connected).
@@ -22,12 +21,9 @@ extension KiwiCore {
     ) -> DisplayID? {
         guard !displays.isEmpty else { return nil }
         // Index first: a number is Screen N, never a name (#3647).
-        if let index = arg?.intValue {
-            let ordered = numbered(displays)
-            guard index >= 1, index <= ordered.count else {
-                return nil
-            }
-            return ordered[index - 1].id
+        if let number = arg?.intValue {
+            return numberedScreens(displays)
+                .first { $0.number == number }?.display.id
         }
         guard let name = arg?.stringValue else { return nil }
         if let match = displays.first(where: {

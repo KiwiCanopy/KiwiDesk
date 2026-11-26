@@ -106,12 +106,20 @@ extension KiwiCore {
             // profile the Lua base survives reloads untouched (#36
             // promise), and Spaces resolve by pin, Main role, then
             // the numbered plan (#3294). A still-active profile
-            // keeps its tiling and its still-valid pins, but goes
-            // dirty — the same rule as load_profile onto other
-            // hardware.
+            // keeps its tiling and its pins, numbered on these
+            // screens, but goes dirty — the same rule as
+            // load_profile onto other hardware.
             guard isGuiManaged else {
-                if profiles.currentName != nil {
+                if let name = profiles.currentName {
                     profiles.markDirty()
+                    // Its pins follow its numbers here too (#3647
+                    // ▸ lane 2); a number past the screens waits.
+                    if let profile = try? profiles.read(name: name) {
+                        spacePins = keepingPins(
+                            of: Set(liveTemporarySpaces),
+                            over: runtimePins(of: profile)
+                        )
+                    }
                 }
                 // NOT redundant with the deferred resolve:
                 // this branch retiles and emits below, and two

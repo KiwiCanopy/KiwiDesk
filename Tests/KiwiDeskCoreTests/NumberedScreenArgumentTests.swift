@@ -104,6 +104,74 @@ struct NumberedScreenArgumentTests {
         #expect(core.numberedArea("1") == nil)
     }
 
+    /// Two screens wide enough to split, numbered right to left,
+    /// with Screen 1 (the right one, "R") split in two.
+    private func splitScreenOne(_ core: KiwiCore) throws -> Display {
+        let left = Display(
+            id: DisplayID(7),
+            name: "L",
+            frame: CGRect(x: 0, y: 0, width: 400, height: 200)
+        )
+        let right = Display(
+            id: DisplayID(8),
+            name: "R",
+            frame: CGRect(x: 400, y: 0, width: 400, height: 200)
+        )
+        connect(core, [left, right])
+        try core.profiles.write(
+            Profile(
+                name: "Wide",
+                monitorSets: [
+                    MonitorSet(monitors: [right.fingerprint, left.fingerprint])
+                ],
+                spaces: ["1"],
+                spaceModes: ["1": .bsp],
+                settings: TilingSettings()
+            )
+        )
+        try core.loadProfile(named: "Wide")
+        let reply = core.execute(
+            "set_display_areas",
+            args: [
+                .number(1), .string("side_by_side"),
+                .number(200), .number(200),
+            ]
+        )
+        #expect(reply.isSuccess)
+        return right
+    }
+
+    @Test("a verb takes N#id, and list_monitors prints it")
+    func numberedAreaThroughTheVerbs() throws {
+        let core = makeCore()
+        let right = try splitScreenOne(core)
+        let stored = core.tiler.settings.displayAreas
+        #expect(stored.keys.sorted() == [right.fingerprint])
+        let named = core.execute(
+            "set_display_area_name",
+            args: [.string("1#1"), .string("Code")]
+        )
+        #expect(named.isSuccess)
+        let areas = core.tiler.settings.displayAreas[right.fingerprint]?
+            .areas
+        #expect(areas?.first { $0.id == 1 }?.name == "Code")
+        let placed = core.resolveAreaArg(.string("1#1"))
+        #expect(placed?.display == right.id)
+        #expect(placed?.area == 1)
+        guard case .array(let monitors)? = core.listMonitors().data,
+            case .object(let first)? = monitors.first,
+            case .array(let split)? = first["areas"]
+        else {
+            Issue.record("no areas on Screen 1")
+            return
+        }
+        let keys = split.compactMap { entry -> JSONValue? in
+            if case .object(let area) = entry { return area["numbered_key"] }
+            return nil
+        }
+        #expect(keys == [.string("1"), .string("1#1")])
+    }
+
     @Test("an area may not be named like a numbered key")
     func numberedNameRefused() {
         let problem = ScreenArea.nameProblem(

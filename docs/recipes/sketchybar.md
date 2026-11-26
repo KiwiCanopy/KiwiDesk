@@ -62,7 +62,7 @@ any of them to keep sketchybar in sync:
 | `layout_change` | `space_id`, `mode` | Layout mode changes on a space |
 | `focus_change` | `window_id`, `app`, `bundle_id` | Focused window changes |
 | `monitor_change` | `monitor_count` | Screens connect or disconnect |
-| `desktop_change` | `desktop`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
+| `desktop_change` | `desktop`, `screen`, `main` | A macOS Desktop switches on some screen (`screen` is its number; `main` says whether it is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears ([reasons](../lua-reference.md#events)) |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`); `desktop` names the Desktop holding a `vanished` window, else `nil` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
@@ -111,8 +111,9 @@ end)
 -- "Displays have separate Spaces" on, secondary screens report
 -- their own switches too — filter on the main screen so the
 -- indicator tracks the Desktop that selects profiles:
-KiwiDesk.on("desktop_change", function(desktop, monitor)
-    if monitor ~= 1 then return end
+KiwiDesk.on("desktop_change", function(desktop, screen, main)
+    -- `main` is nil on releases before it; there 1 is the main screen.
+    if main == false or (main == nil and screen ~= 1) then return end
     KiwiDesk.exec(
         "sketchybar --trigger kiwi_desktop DESKTOP="
         .. desktop)

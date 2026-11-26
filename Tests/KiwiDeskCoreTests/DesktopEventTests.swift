@@ -56,7 +56,7 @@ struct DesktopEventTests {
         )
     }
 
-    @Test("A secondary switch names its monitor and Desktop")
+    @Test("A secondary switch names its screen and Desktop")
     func secondaryDimension() {
         defer { resetAuthorityOverrides() }
         let (core, events) = makeEventCore()
@@ -66,12 +66,12 @@ struct DesktopEventTests {
         )
         emit(core)
         let payload = data(in: events())
-        #expect(payload?["monitor"] == .number(2))
+        #expect(payload?["screen"] == .number(2))
         #expect(payload?["main"] == .bool(false))
         #expect(payload?["desktop"] == .number(4))
     }
 
-    @Test("A main switch is monitor 1")
+    @Test("A main switch is Screen 1 here")
     func mainDimension() {
         defer { resetAuthorityOverrides() }
         let (core, events) = makeEventCore()
@@ -81,7 +81,7 @@ struct DesktopEventTests {
         )
         emit(core)
         let payload = data(in: events())
-        #expect(payload?["monitor"] == .number(1))
+        #expect(payload?["screen"] == .number(1))
         #expect(payload?["main"] == .bool(true))
         #expect(payload?["desktop"] == .number(2))
     }
@@ -96,8 +96,60 @@ struct DesktopEventTests {
         )
         emit(core)
         let payload = data(in: events())
-        #expect(payload?["monitor"] == .number(1))
+        #expect(payload?["screen"] == .number(1))
         #expect(payload?["desktop"] == .number(1))
+    }
+
+    /// Under a profile numbering B first, the main screen A is
+    /// Screen 2, so `screen` and `main` answer apart (#3647).
+    private func numberRightToLeft(_ core: KiwiCore) throws {
+        try core.profiles.write(
+            Profile(
+                name: "Desk",
+                monitorSets: [
+                    MonitorSet(monitors: ["B:100x100", "A:100x100"])
+                ],
+                spaces: ["1"],
+                spaceModes: ["1": .bsp],
+                settings: TilingSettings()
+            )
+        )
+        try core.loadProfile(named: "Desk")
+    }
+
+    @Test("screen is Screen N, apart from main")
+    func screenIsTheNumber() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, events) = makeEventCore()
+        try numberRightToLeft(core)
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 21
+        )
+        emit(core)
+        #expect(data(in: events())?["screen"] == .number(1))
+        #expect(data(in: events())?["main"] == .bool(false))
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 11,
+            secondaryCurrent: 21
+        )
+        emit(core)
+        #expect(data(in: events())?["screen"] == .number(2))
+        #expect(data(in: events())?["main"] == .bool(true))
+    }
+
+    @Test("a switch no display names reports the main screen's number")
+    func noDisplayNamesMain() throws {
+        defer { resetAuthorityOverrides() }
+        let (core, events) = makeEventCore()
+        try numberRightToLeft(core)
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
+        emit(core)
+        #expect(data(in: events())?["screen"] == .number(2))
+        #expect(data(in: events())?["main"] == .bool(true))
     }
 
     /// A display arriving on a fullscreen space emits NOTHING —
