@@ -139,7 +139,13 @@ struct FrameApplierHeldTests {
         for _ in 0..<500 where landings.owed.isEmpty {
             await Task.yield()
         }
-        try #require(landings.owed.map(\.0) == [later])
+        // A delay round-trips through seconds, so allow 1 µs.
+        let owed = try #require(landings.owed.first?.0)
+        try #require(landings.owed.count == 1)
+        let off =
+            Int64(bitPattern: later.uptimeNanoseconds)
+            - Int64(bitPattern: owed.uptimeNanoseconds)
+        try #require(abs(off) < 1_000)
         landings.land(at: later)
         #expect(counts.withLock { $0.positions } == 1)
         #expect(landings.owed.isEmpty)
