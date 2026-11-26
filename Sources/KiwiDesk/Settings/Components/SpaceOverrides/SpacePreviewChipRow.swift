@@ -22,10 +22,10 @@ struct SpacePreviewChipRow: View {
     var body: some View {
         let names = spaces.map(\.raw)
         SidewaysStrip(
-            run: StripRun(
-                lengths: names.map { chipSizes[$0]?.width ?? 0 },
+            run: .measured(
+                names,
+                sizes: chipSizes,
                 gap: Self.gap,
-                depth: chipSizes.values.map(\.height).max() ?? 0,
                 endRoom: Self.ringRoom
             ),
             followed: followed(in: names)
@@ -40,9 +40,17 @@ struct SpacePreviewChipRow: View {
     }
 
     private func followed(in names: [String]) -> StripFollow<String>? {
-        let item =
-            focusedChip.flatMap { names.contains($0) ? $0 : nil }
-            ?? shown?.raw
+        Self.followed(focused: focusedChip, shown: shown?.raw, in: names)
+    }
+
+    /// The chip the strip brings into view: the focused one while it
+    /// is listed, else the shown Space's.
+    nonisolated static func followed(
+        focused: String?,
+        shown: String?,
+        in names: [String]
+    ) -> StripFollow<String>? {
+        let item = focused.flatMap { names.contains($0) ? $0 : nil } ?? shown
         guard let item else { return nil }
         return names.firstIndex(of: item).map {
             StripFollow(id: item, index: $0)

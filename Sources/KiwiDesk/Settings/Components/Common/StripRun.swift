@@ -26,6 +26,23 @@ struct StripRun {
     /// Room inside the scroller past each end item.
     var endRoom: CGFloat = 0
 
+    /// The run of items named `names` whose drawn sizes the strip
+    /// measured into `sizes`: lengths bare, depth the tallest shown
+    /// item's height. An item not yet measured takes no room.
+    static func measured(
+        _ names: [String],
+        sizes: [String: CGSize],
+        gap: CGFloat,
+        endRoom: CGFloat
+    ) -> StripRun {
+        StripRun(
+            lengths: names.map { sizes[$0]?.width ?? 0 },
+            gap: gap,
+            depth: names.compactMap { sizes[$0]?.height }.max() ?? 0,
+            endRoom: endRoom
+        )
+    }
+
     /// Each item's run, the end room riding on the end items.
     private var runLengths: [CGFloat] {
         lengths.indices.map { index in

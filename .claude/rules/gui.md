@@ -2493,12 +2493,12 @@ a follow of its own (#2987, `SidewaysStripTests`, whose `allowed` map
 is the one copy of who may hold a sideways scroll view). A bare
 `scrollTo` stops the item at the viewport's edge, which is where the
 fade draws. The container owns the scroll, so a tick never
-re-evaluates the host. The Spaces preview chips are the held-out
-strip: scroller only, no fade and no follow, until their varying
-widths are measured (#2990). A strip whose items vary in width builds
-its run from the sizes they report through `onGeometryChange`, a
-followed run's lengths bare and its depth their drawn height —
-`LayerStripEditor`'s chips are the worked case (#3263). The
+re-evaluates the host. A strip whose items vary in width builds
+its run from the sizes they report through `onGeometryChange`, through
+the one `StripRun.measured`, which takes a followed run's lengths bare
+and its depth their drawn height — `LayerStripEditor`'s chips and the
+Spaces preview's `SpacePreviewChipRow` are the worked cases (#3263,
+#2990). The
 first-launch tour's rows are outside this paragraph: scroller only
 as well, centring the applied tile themselves.
 
