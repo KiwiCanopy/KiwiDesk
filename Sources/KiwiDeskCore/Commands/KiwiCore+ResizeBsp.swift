@@ -34,6 +34,8 @@ extension KiwiCore {
                 edge: .either,
                 space: space
             ), press.split.available > 0 {
+                // `divide` guards the range, so a resolved split
+                // always divides something; zero is a construction net.
                 let proposed =
                     press.drawnRatio
                     + press.split.sign * delta / press.split.available
@@ -60,7 +62,8 @@ extension KiwiCore {
                 refuseBspNoSplit(
                     focused,
                     axis: axis,
-                    grows: delta > 0,
+                    delta: delta,
+                    span: span,
                     space: space
                 )
                 return .ok()

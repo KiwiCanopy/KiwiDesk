@@ -3,14 +3,14 @@ import CoreGraphics
 import Foundation
 
 /// The retile-time heal of the split stores (#934/#1430) — the
-/// Track floor heal's shape (#1355) one store over: the two bsp
-/// split ratios and the stack master ratio are moved so a side
-/// draws its members' LEARNED floor. Called from `KiwiCore.retile`
+/// Track floor heal's shape (#1355) one store over: each bsp
+/// split's ratio (#3672) and the stack master ratio are moved so a
+/// side draws its members' LEARNED floor. Called from `KiwiCore.retile`
 /// beside `healTrackSessionWeights`, inside the same forced-pass
 /// scope, so it covers a window ARRIVING into a slot under its
 /// floor and a resize that walked the split past the floor before
-/// corroboration alike. The ruling — shared ratios may move for
-/// a learned floor — is in `docs/design-decisions.md`.
+/// corroboration alike. The ruling — a split may move for a
+/// learned floor — is in `docs/design-decisions.md`.
 ///
 /// Reads the LOCAL members (#944's traveler ruling), the render's
 /// own `layoutInput`, and writes through the capped writers with
@@ -74,26 +74,15 @@ extension KiwiCore {
             !healStandsDown(for: tiled)
         else { return }
         let bounds = tiler.layoutBounds(on: screen, for: space)
-        let slots = LayoutEngine.calculate(
-            mode: input.space.mode,
-            windows: input.tiled,
-            context: context
-        )
         var cues: Set<SplitFloorCue> = []
         switch space.mode {
         case .bsp:
-            // Each split heals its own ratio (#3672); a scrolled
-            // chain's members are the run's, never a split's (#2542).
-            for split in BspLayout.splits(of: input.tiled, in: context) {
-                healBspSplit(
-                    split,
-                    space: space,
-                    shown: shown,
-                    input: input,
-                    slots: slots,
-                    cues: &cues
-                )
-            }
+            healBspSplits(
+                of: space,
+                shown: shown,
+                screen: screen,
+                cues: &cues
+            )
         case .stack:
             let stack = tiler.settings.resolvedStack(
                 for: space,

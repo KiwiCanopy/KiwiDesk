@@ -79,11 +79,13 @@ struct HealStandDownTests {
         #expect(core.tiler.sizeBound(for: window)?.minWidth == 700)
     }
 
+    /// w1's split, the first (#3672).
     private func ratio(_ core: KiwiCore, _ space: SpaceID) -> Double {
-        core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!,
-            session: core.sessionRatios(of: space)
-        ).splitRatioH
+        core.storedBspRatio(
+            of: WindowID(1),
+            sideBySide: true,
+            in: core.state.workspaces[space]!
+        )
     }
 
     /// The bsp ratio one retile leaves, with `offShown` the windows

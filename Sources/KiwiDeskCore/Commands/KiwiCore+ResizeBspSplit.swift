@@ -39,6 +39,7 @@ extension KiwiCore {
         )
         return BspSplitPress(
             split: split,
+            mode: input.space.mode,
             tiled: input.tiled,
             context: input.context,
             slots: slots
@@ -113,6 +114,9 @@ extension KiwiCore {
                 space: space
             ), press.split.available > 0
         else { return }
+        let before = press.slots[window].map {
+            Double(axis == "x" ? $0.width : $0.height)
+        }
         writeCappedBspSplit(
             press,
             proposed: press.drawnRatio
@@ -121,16 +125,37 @@ extension KiwiCore {
             space: space,
             focused: window
         )
+        // A leading edge moved the split before the window; where the
+        // window's own split runs along the axis too, it re-divides
+        // the grown rest, so that split is set to keep the trailing
+        // edge where the drag left it.
+        guard edge == .leading, let before,
+            let own = bspSplit(
+                of: window,
+                axis: axis,
+                edge: .trailing,
+                space: space
+            ), own.split.available > 0
+        else { return }
+        writeCappedBspSplit(
+            own,
+            proposed: (before + points) / own.split.available,
+            axis: axis,
+            space: space,
+            focused: window
+        )
     }
 
     /// The cue for a press on a tiled window no split bounds on
-    /// `axis`: a lone window divides nothing, a layout with no split
-    /// on the axis has none here, and a window spanning the axis has
-    /// no room to grow and no split to shrink against.
+    /// `axis`: a lone window divides nothing (the shared ratio still
+    /// records the press, #383), a layout with no split on the axis
+    /// divides only the other one, and a window spanning the axis has
+    /// nothing to divide on it while the other axis does.
     func refuseBspNoSplit(
         _ window: WindowID,
         axis: String,
-        grows: Bool,
+        delta: Double,
+        span: Double,
         space: Space
     ) {
         guard let screen = TilingEngine.screen(for: space.id, in: state)
@@ -146,9 +171,15 @@ extension KiwiCore {
             in: input.context
         )
         if !divides.any {
+            writeSharedBspRatio(
+                delta: delta,
+                axis: axis,
+                span: span,
+                space: space
+            )
             refuseNothingToDivide(window, otherAxisDivides: false)
-        } else if grows, divides.axis {
-            refuseGrowAtBoundary(window, axis: axis)
+        } else if divides.axis {
+            refuseNothingToDivide(window, otherAxisDivides: true)
         } else {
             refuseAxisAbsent(window, axis: axis)
         }
@@ -158,6 +189,8 @@ extension KiwiCore {
 /// A resolved BSP split and the layout it was read from (#3672).
 struct BspSplitPress {
     let split: BspLayout.SplitOwner
+    /// The mode the slots were laid out in.
+    let mode: LayoutMode
     let tiled: [WindowID]
     let context: LayoutContext
     let slots: [WindowID: CGRect]
@@ -166,13 +199,10 @@ struct BspSplitPress {
     /// it divides, which a stored ratio outside the region's range
     /// is not (#1057's drawn-span base).
     var drawnRatio: Double {
-        let stored =
-            context.bspSplits.ratio(
-                of: split.owner,
-                sideBySide: split.sideBySide
-            )
-            ?? (split.sideBySide
-                ? context.bsp.splitRatioH : context.bsp.splitRatioV)
+        let stored = context.bspRatio(
+            of: split.owner,
+            sideBySide: split.sideBySide
+        )
         guard split.available > 0, let slot = slots[split.owner]
         else { return stored }
         let length = Double(split.sideBySide ? slot.width : slot.height)
@@ -188,7 +218,7 @@ struct BspSplitPress {
             sideBySide: split.sideBySide
         )
         return LayoutEngine.calculate(
-            mode: .bsp,
+            mode: mode,
             windows: tiled,
             context: context
         )

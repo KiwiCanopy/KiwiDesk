@@ -87,10 +87,9 @@ extension KiwiCore {
             masterCount: stack.masterCount
         ).master.contains(id)
         // The layout region, not the raw frame (#537): `translate`
-        // divides the drag delta by this span and classifies the
-        // slot against its midpoint, and both belong to the region
-        // the layout filled — the keyboard path's own span now
-        // resolves the same way.
+        // divides a ratio's drag delta by this span, the region the
+        // layout filled — the keyboard path's own span resolves the
+        // same way.
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let adjustment = MouseResize.translate(
             mode: space.mode,

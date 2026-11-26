@@ -41,8 +41,9 @@ extension KiwiCore {
         flushHeldArrivals(ofExitedApp: pid)  // #2630
         retireAwayDebts(ofExitedApp: pid)
         BarIconCache.forget(pid: pid)
-        for _ in state.windows.windows(pid: pid) {
+        for window in state.windows.windows(pid: pid) {
             crash.noteDeparture(closed: true)
+            forgetBspSplits(of: window.id)  // an exit is a close (#3672)
         }
     }
 }

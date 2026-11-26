@@ -229,7 +229,8 @@ struct FullscreenResizeTiledTests {
         let untouched = Stores(core)
         core.handleDragEnd(focused, start: slot, frame: frame)
         let written = Stores(core)
-        #expect(written.ratios.splitRatioH != nil)
+        // w1's own split (#3672).
+        #expect(written.ratios.bspSplits?.horizontal.isEmpty == false)
         #expect(written != untouched)
 
         core.state.apply(

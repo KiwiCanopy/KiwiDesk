@@ -72,11 +72,15 @@ struct LayoutBoundsResizeSeamTests {
         return core
     }
 
+    /// The one split's ratio: w1's own (#3672), else the shared.
     private func ratioH(_ core: KiwiCore) -> Double {
-        core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!,
-            session: core.sessionRatios(of: SpaceID("1"))
-        ).splitRatioH
+        core.sessionRatios(of: SpaceID("1")).bspSplits?.horizontal[
+            WindowID(1)
+        ]
+            ?? core.tiler.settings.resolvedBsp(
+                for: core.state.workspaces[SpaceID("1")]!,
+                session: core.sessionRatios(of: SpaceID("1"))
+            ).splitRatioH
     }
 
     @Test("The keyboard span excludes the Space Bar's strip")
@@ -94,18 +98,13 @@ struct LayoutBoundsResizeSeamTests {
         #expect(abs((ratioH(core) - before) - 0.1) < 1e-9)
     }
 
-    @Test("The BSP sign classifies against the region's midpoint")
+    @Test("The BSP split's step divides by the region")
     func bspSignUsesRegionMidpoint() {
-        // The one case where the strip changes the *direction*,
-        // not only the magnitude. Bar on the RIGHT, so the region
-        // is 0…1600 (midX 800) inside a 0…2000 display (midX
-        // 1000). At ratio 0.2 the right window's slot spans
-        // 320…1600 — midX 960, which is past the region's
-        // midpoint (second region, sign −1) but short of the
-        // display's (first region, sign +1). Growing the right
-        // window must LOWER the shared ratio (#122), so a raw-span
-        // read is wrong twice over: 0.2 − 40/1600 = 0.175 against
-        // 0.2 + 40/2000 = 0.22.
+        // Bar on the RIGHT, so the region is 0…1600 inside a
+        // 0…2000 display. The right window sits behind w1's split
+        // (#3672), so its grow lowers that ratio by 40 over the
+        // region's 1600, never the display's 2000: 0.175, not
+        // 0.18.
         guard NSScreen.main != nil else { return }
         let core = makeCore(
             bounds: CGRect(x: 0, y: 0, width: 2000, height: 1000),

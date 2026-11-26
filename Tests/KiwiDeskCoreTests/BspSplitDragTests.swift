@@ -35,14 +35,36 @@ extension RunPushCommandTests {
         core.sessionRatios(of: id).bspSplits ?? BspSplitRatios()
     }
 
+    /// A drop of `window` with `edit` applied to its slot, through
+    /// the drop entry point, so `MouseResize.translate` names the
+    /// edge.
+    private func drag(
+        _ core: KiwiCore,
+        _ id: SpaceID,
+        _ window: WindowID,
+        _ edit: (inout CGRect) -> Void
+    ) throws {
+        let slot = try #require(frames(core)[window])
+        var frame = slot
+        edit(&frame)
+        core.handleResizeEnd(
+            window,
+            slot: slot,
+            frame: frame,
+            in: core.state.workspaces[id]!
+        )
+        core.retile(animated: false)
+    }
+
     @Test("BSP: a trailing-edge drag moves the window's own split")
     func trailingDragMovesOwnSplit() throws {
         let (core, id) = makeSpace("bsp", windows: 2, focus: 1)
         let before = try #require(frames(core)[w(1)])
-        drop(core, id, w(1), .bspSplitH(100, leading: false))
+        try drag(core, id, w(1)) { $0.size.width += 100 }
         let after = try #require(frames(core)[w(1)])
         #expect(abs(after.width - before.width - 100) < 1)
-        #expect(splits(core, id).horizontal.keys.sorted() == [w(1)])
+        #expect(abs(after.minX - before.minX) < 1)
+        #expect(Set(splits(core, id).horizontal.keys) == [w(1)])
         #expect(splits(core, id).vertical.isEmpty)
         #expect(core.sessionRatios(of: id).splitRatioH == nil)
     }
@@ -51,11 +73,35 @@ extension RunPushCommandTests {
     func leadingDragMovesTheSplitBefore() throws {
         let (core, id) = makeSpace("bsp", windows: 2, focus: 2)
         let before = try #require(frames(core)[w(2)])
-        drop(core, id, w(2), .bspSplitH(100, leading: true))
+        try drag(core, id, w(2)) {
+            $0.origin.x -= 100
+            $0.size.width += 100
+        }
         let after = try #require(frames(core)[w(2)])
         #expect(abs(after.width - before.width - 100) < 1)
         #expect(abs(after.maxX - before.maxX) < 1)
-        #expect(splits(core, id).horizontal.keys.sorted() == [w(1)])
+        #expect(Set(splits(core, id).horizontal.keys) == [w(1)])
+    }
+
+    @Test("BSP: a leading drag keeps the trailing edge of a split owner")
+    func leadingDragKeepsTheTrailingEdge() throws {
+        // 2560 × 1440 alternating: w3 sits behind w1's side-by-side
+        // split and owns the side-by-side one beside w4.
+        let (core, id) = makeSpace(
+            "bsp",
+            windows: 4,
+            focus: 3,
+            width: 2560,
+            height: 1440
+        )
+        let before = try #require(frames(core)[w(3)])
+        try drag(core, id, w(3)) {
+            $0.origin.x -= 100
+            $0.size.width += 100
+        }
+        let after = try #require(frames(core)[w(3)])
+        #expect(abs(after.width - before.width - 100) < 1)
+        #expect(abs(after.maxX - before.maxX) < 1)
     }
 
     @Test("BSP: an outer edge no split bounds writes nothing")
@@ -73,7 +119,7 @@ extension RunPushCommandTests {
         drop(core, id, w(2), .bspSplitV(60, leading: false))
         let after = try #require(frames(core)[w(2)])
         #expect(abs(after.height - before.height - 60) < 1)
-        #expect(splits(core, id).vertical.keys.sorted() == [w(2)])
+        #expect(Set(splits(core, id).vertical.keys) == [w(2)])
         #expect(splits(core, id).horizontal.isEmpty)
     }
 
@@ -87,7 +133,8 @@ extension RunPushCommandTests {
 
     @Test("BSP: a press on one split leaves every other split's ratio")
     func pressKeepsOtherSplits() throws {
-        // w1 | (w2 | (w3 over w4)) at 2560 × 1440.
+        // Alternating at 2560 × 1440: w1 | (w2 over (w3 | w4)), so
+        // w3's x press moves its own split.
         let (core, id) = makeSpace(
             "bsp",
             windows: 4,
@@ -99,7 +146,7 @@ extension RunPushCommandTests {
         core.state.workspaces.focus(w(3), in: id)
         press(core, "x", 40)
         let stored = splits(core, id)
-        #expect(stored.horizontal.keys.sorted() == [w(1), w(2)])
+        #expect(Set(stored.horizontal.keys) == [w(1), w(3)])
         // w1's split held through w3's press.
         let w1 = try #require(frames(core)[w(1)])
         let half = (2560.0 - 20 - 10) / 2
@@ -118,12 +165,31 @@ extension RunPushCommandTests {
         #expect(!splits(core, id).vertical.isEmpty)
     }
 
-    @Test("BSP: a re-key carries the splits and a close ends them")
-    func rekeyAndCloseReachTheSplits() {
+    @Test("BSP: a Space's ratio override clears that axis's splits")
+    func overrideClearsSplits() {
+        let (core, id) = makeSpace("bsp", windows: 3, focus: 1)
+        press(core, "x", 50)
+        core.state.workspaces.focus(w(2), in: id)
+        press(core, "y", 50)
+        core.execute(
+            "bsp.set_ratio_h_override",
+            args: [.string(id.raw), .number(0.5)]
+        )
+        #expect(splits(core, id).horizontal.isEmpty)
+        #expect(!splits(core, id).vertical.isEmpty)
+        core.execute(
+            "bsp.set_ratio_v_override",
+            args: [.string(id.raw), .number(0.5)]
+        )
+        #expect(core.sessionRatios(of: id).bspSplits == nil)
+    }
+
+    @Test("BSP: the re-key and end doors move and drop the splits")
+    func rekeyAndForgetDoors() {
         let (core, id) = makeSpace("bsp", windows: 2, focus: 1)
         press(core, "x", 50)
         core.rekeyBspSplits(w(1), to: w(9))
-        #expect(splits(core, id).horizontal.keys.sorted() == [w(9)])
+        #expect(Set(splits(core, id).horizontal.keys) == [w(9)])
         core.forgetBspSplits(of: w(9))
         #expect(core.sessionRatios(of: id).bspSplits == nil)
     }

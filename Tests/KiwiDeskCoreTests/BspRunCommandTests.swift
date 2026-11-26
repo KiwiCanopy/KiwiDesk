@@ -142,6 +142,8 @@ struct BspRunCommandTests {
             ).splitRatioV
                 == ratio
         )
+        // Nor a split's own ratio (#3672).
+        #expect(core.sessionRatios(of: space.id).bspSplits == nil)
     }
 
     @Test("The split floor heal reads no parked window")
@@ -163,6 +165,8 @@ struct BspRunCommandTests {
             ).splitRatioV
                 == 0.5
         )
+        // Nor a split's own ratio (#3672).
+        #expect(core.sessionRatios(of: space.id).bspSplits == nil)
     }
 
     @Test("A press along a chain that fits moves its weights")
@@ -192,6 +196,8 @@ struct BspRunCommandTests {
             ).splitRatioV
                 == ratio
         )
+        // Nor a split's own ratio (#3672).
+        #expect(core.sessionRatios(of: space.id).bspSplits == nil)
     }
 
     @Test("A drag along the chain moves its weights, not a ratio")
@@ -221,6 +227,8 @@ struct BspRunCommandTests {
             ).splitRatioV
                 == ratio
         )
+        // Nor a split's own ratio (#3672).
+        #expect(core.sessionRatios(of: space.id).bspSplits == nil)
     }
 
     @Test("A press along a run that shows every window moves weights")
@@ -256,6 +264,8 @@ struct BspRunCommandTests {
             ).splitRatioV
                 == ratio
         )
+        // Nor a split's own ratio (#3672).
+        #expect(core.sessionRatios(of: space.id).bspSplits == nil)
     }
 
     @Test("Across the chain the heal counts its hidden members")
@@ -270,12 +280,13 @@ struct BspRunCommandTests {
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(!run.shown.contains(w4))
         let space = try #require(core.state.workspaces[id])
+        // w1's split beside the chain (#3672).
         #expect(
-            core.tiler.settings.resolvedBsp(
-                for: space,
-                session: core.sessionRatios(of: space.id)
-            ).splitRatioH
-                < 0.5
+            core.storedBspRatio(
+                of: WindowID(1),
+                sideBySide: true,
+                in: space
+            ) < 0.5
         )
     }
 }

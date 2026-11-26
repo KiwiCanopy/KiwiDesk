@@ -66,11 +66,7 @@ public struct BspLayout: LayoutSystem {
                 minHigh: Double(restMin)
             )
         else { return nil }
-        let stored =
-            owner.flatMap {
-                context.bspSplits.ratio(of: $0, sideBySide: sideBySide)
-            }
-            ?? (sideBySide ? context.bsp.splitRatioH : context.bsp.splitRatioV)
+        let stored = context.bspRatio(of: owner, sideBySide: sideBySide)
         let ratio = CGFloat(
             min(max(stored, range.lowerBound), range.upperBound)
         )

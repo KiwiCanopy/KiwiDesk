@@ -29,7 +29,7 @@ public enum ResizeAdjustment: Equatable, Sendable {
     case gridRow(CGFloat, leading: Bool)
 }
 
-/// Translates mouse resizes into layout adjustments (#56, #122, #128).
+/// Translates mouse resizes into layout adjustments (#56, #128, #3672).
 public enum MouseResize {
     /// The edge a drag moved along one axis, the one that moved
     /// more — the side a resize along a run pushes or pulls on

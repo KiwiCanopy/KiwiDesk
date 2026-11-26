@@ -87,12 +87,10 @@ public enum BspSplit {
             guard !piled.contains(id) else { continue }
             let own = horizontal ? slot.width : slot.height
             guard own < whole - spanTolerance else { continue }
-            let side = side(
-                slot: slot,
-                bounds: bounds,
-                horizontal: horizontal
-            )
-            if side > 0 {
+            let leads =
+                horizontal
+                ? slot.midX <= bounds.midX : slot.midY <= bounds.midY
+            if leads {
                 first.append(id)
             } else {
                 second.append(id)

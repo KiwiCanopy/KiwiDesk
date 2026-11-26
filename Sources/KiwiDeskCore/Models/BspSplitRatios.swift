@@ -89,6 +89,16 @@ extension BspSplitRatios: Codable {
     }
 }
 
+extension LayoutContext {
+    /// The ratio `owner`'s split takes along the axis `sideBySide`
+    /// names: its own (#3672), else the shared one. The one spelling
+    /// the layout, a press and the heal all read.
+    public func bspRatio(of owner: WindowID?, sideBySide: Bool) -> Double {
+        owner.flatMap { bspSplits.ratio(of: $0, sideBySide: sideBySide) }
+            ?? (sideBySide ? bsp.splitRatioH : bsp.splitRatioV)
+    }
+}
+
 extension SessionRatios {
     /// Drops one axis's shared BSP ratio and every split's ratio on
     /// it: an explicit `ratio_h`/`ratio_v` write reaches every split.

@@ -22,9 +22,10 @@ extension RunPushCommandTests {
         return seen
     }
 
-    /// w3 sits in the rest of w2's side-by-side split, its own split
-    /// stacked: an x press moves w2's split, whatever the shared
-    /// ratio every other split keeps (#3672).
+    /// Alternating at 2560 × 1440: w1 splits side by side, w2 stacked,
+    /// and w3 owns the side-by-side split beside w4, so an x press
+    /// moves w3's own split, whatever the shared ratio every other
+    /// split keeps (#3672).
     private func innerWindow(ratio: Double) -> KiwiCore {
         makeSpace("bsp", windows: 4, focus: 3, width: 2560, height: 1440) {
             $0.execute("bsp.set_ratio_h", args: [.number(ratio)])
@@ -73,10 +74,11 @@ extension RunPushCommandTests {
         }
     }
 
-    @Test("BSP: a window spanning the axis names the bound it presses")
+    @Test("BSP: a stacked split at its bound names the bound it presses")
     func bspSpanningWindowAtTheBound() {
-        // w1's own split is stacked: its y press moves that split,
-        // which no step moves past the stored bound.
+        // Alternating: w1 splits side by side, w2 owns the stacked
+        // split under it, so w2's y press moves that split, which no
+        // step moves past the stored bound.
         var cued: [ResizeRefusal] = []
         let presses = [(0.9, 5.0), (0.9, -5.0), (0.1, 5.0), (0.1, -5.0)]
         for (ratio, step) in presses {
@@ -84,13 +86,13 @@ extension RunPushCommandTests {
             let (core, _) = makeSpace(
                 "bsp",
                 windows: 3,
-                focus: 1,
+                focus: 2,
                 height: 4000
             ) { $0.execute("bsp.set_ratio_v", args: [.number(ratio)]) }
             for refusal in refusals(core, "y", step) {
                 cued.append(refusal)
                 #expect(
-                    refusal == .ratioLimit(w(1), axis: "y", grows: step > 0),
+                    refusal == .ratioLimit(w(2), axis: "y", grows: step > 0),
                     Comment(rawValue: "ratio \(ratio) step \(step)")
                 )
             }

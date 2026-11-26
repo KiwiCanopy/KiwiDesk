@@ -4453,7 +4453,11 @@ in-place capture only. What it buys is the principle the owner
 ruled: a press keeps the option to resize. With one shared ratio
 a nested window could be pinned — both presses refused, each
 pointing at the other — and per-split ratios give every inner
-edge its own knob, so no window is left without one.
+edge its own knob, so no window is left without one. A ratio
+follows its window as a Stack or Track weight does: a swap or an
+insert ahead moves it to the depth the window now holds, and a
+move to another Space ends it, as a close does. A float, a hide or
+a Desktop vanish keeps it for the window's return.
 :::
 
 **Stack resize is focus-aware, and its zone weights are
