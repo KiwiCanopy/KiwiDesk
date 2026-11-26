@@ -17,7 +17,8 @@ enum SettingsValueReadout {
         for key: SettingKey,
         old: GuiConfig,
         new: GuiConfig,
-        screenOrder: ScreenOrder? = nil
+        screenOrder: ScreenOrder? = nil,
+        baseScreenOrder: ScreenOrder? = nil
     ) -> [SettingsDiffRow] {
         switch key {
         case .appBar(let k):
@@ -52,7 +53,12 @@ enum SettingsValueReadout {
             // draft leaf, so nothing to narrate.
             return []
         case .screens(let k):
-            return screensRows(k, old: old, new: new, order: screenOrder)
+            return screensRows(
+                k,
+                old: old,
+                new: new,
+                orders: (baseScreenOrder ?? screenOrder, screenOrder)
+            )
         case .profiles(let k):
             return profilesRows(k, old: old, new: new)
         case .shortcuts(let k):

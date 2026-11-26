@@ -168,6 +168,7 @@ public final class ProfileManager {
             at: url(for: validated(name))
         )
         updateIndex(stampBefore: stamp) { $0.remove(file: name) }
+        if sessionScreenOrder?.profile == name { sessionScreenOrder = nil }
         if currentName == name {
             active = nil
             isDirty = true

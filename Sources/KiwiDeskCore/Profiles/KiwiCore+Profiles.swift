@@ -206,7 +206,12 @@ extension KiwiCore {
         guard var existing = try? profiles.read(name: name)
         else {
             let built = buildProfile(name: name, modes: modes)
+            // A renumber goes with the live arrangement it numbers.
+            let carried = sessionScreenOrder
             let released = try saveProfile(built)
+            if let carried {
+                profiles.setSessionScreenOrder(carried, for: name)
+            }
             clearSessionScreenOrder(ifStoredIn: built)
             recordLookWrite(of: built)
             refreshConfigIssues()

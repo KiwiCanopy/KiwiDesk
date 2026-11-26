@@ -210,4 +210,18 @@ struct SessionScreenOrderTests {
         _ = core.resetAllSettings(trash: { _ in })
         #expect(core.profiles.sessionScreenOrder == nil)
     }
+
+    @Test("a renumber saved as new leaves the old profile its order")
+    func saveAsNewTakesTheOrder() throws {
+        let core = makeCore()
+        try loadWork(core)
+        core.setSessionScreenOrder(reversed)
+        try core.persistProfile(named: "Copy", modes: nil)
+        let copy = try core.profiles.read(name: "Copy")
+        #expect(copy.monitorSets.map(\.monitors) == [reversed.fingerprints])
+        #expect(core.profiles.sessionScreenOrder == nil)
+        let work = try core.profiles.read(name: "Work")
+        core.apply(profile: work, cause: .event)
+        #expect(core.liveScreenOrder.fingerprints.first == "A:100x100")
+    }
 }

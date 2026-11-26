@@ -207,7 +207,8 @@ enum SettingsDiffRowSource {
                 for: key,
                 old: model.cleanConfig,
                 new: model.config,
-                screenOrder: model.screenOrder
+                screenOrder: model.screenOrder,
+                baseScreenOrder: model.baseScreenOrder
             ).map {
                 var row = $0
                 row.revert =

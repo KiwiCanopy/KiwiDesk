@@ -181,8 +181,7 @@ struct ScreenAreaEditTests {
             let rows = SettingsValueReadout.screensRows(
                 .displayAreas,
                 old: old,
-                new: new,
-                order: nil
+                new: new
             )
             #expect(rows.count == 1)
             let text = String(describing: rows)

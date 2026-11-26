@@ -7,18 +7,20 @@ extension SettingsValueReadout {
         _ key: ScreensKey,
         old: GuiConfig,
         new: GuiConfig,
-        order: ScreenOrder?
+        orders: (old: ScreenOrder?, new: ScreenOrder?) = (nil, nil)
     ) -> [SettingsDiffRow] {
         let census = SettingKey.screens(key)
         switch key {
         case .spacePins:
-            let words = { (slot: ScreenSlotKey) in
-                screenWords(slot, order, new.settings.displayAreas)
-            }
+            // Each side worded in its own order and splits.
             return screensPinRows(
                 census,
-                old: old.spacePins.mapValues(words),
-                new: new.spacePins.mapValues(words)
+                old: old.spacePins.mapValues {
+                    screenWords($0, orders.old, old.settings.displayAreas)
+                },
+                new: new.spacePins.mapValues {
+                    screenWords($0, orders.new, new.settings.displayAreas)
+                }
             )
         case .mainSpaces:
             return screensMainRows(
