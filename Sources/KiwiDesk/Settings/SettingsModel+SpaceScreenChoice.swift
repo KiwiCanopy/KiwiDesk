@@ -17,7 +17,7 @@ enum SpaceScreenChoice: Hashable, Sendable {
 extension SettingsModel {
     /// The draft's placement of `space`.
     func screenChoice(of space: SpaceID) -> SpaceScreenChoice {
-        if let pin = config.spacePins[space], !pin.isEmpty {
+        if let pin = pin(of: space), !pin.isEmpty {
             return .screen(resolvedPin(pin))
         }
         return config.mainSpaces.contains(space)
@@ -34,7 +34,11 @@ extension SettingsModel {
             config.mainSpaces.insert(space)
             config.spacePins[space] = nil
         case .screen(let fingerprint):
-            config.spacePins[space] = fingerprint
+            // Stored by the number its screen holds (#3647); a
+            // screen not connected holds none, so pins nothing.
+            config.spacePins[space] = screenOrder.slot(
+                of: ScreenAreaKey(parsing: fingerprint)
+            )
             config.mainSpaces.remove(space)
         }
     }

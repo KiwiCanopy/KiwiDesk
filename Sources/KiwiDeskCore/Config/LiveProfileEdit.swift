@@ -71,14 +71,14 @@ public struct AddedSpace: Sendable, Equatable {
     /// first.
     public let after: SpaceID?
     public let mode: LayoutMode
-    /// The screen fingerprint it is pinned to, if any.
-    public let pin: String?
+    /// The screen number it is pinned to, if any (#3647).
+    public let pin: ScreenSlotKey?
     public let icon: String?
 
     public init(
         after: SpaceID?,
         mode: LayoutMode,
-        pin: String?,
+        pin: ScreenSlotKey?,
         icon: String?
     ) {
         self.after = after
@@ -103,8 +103,8 @@ extension Array where Element == SpaceID {
 }
 
 extension Profile {
-    /// Applies `edit` to this profile's file shape; a pin lands in
-    /// the set covering `monitors`, if the profile has one.
+    /// Applies `edit` to this profile's file shape; a pin lands
+    /// only where a set covers `monitors`, whose order numbered it.
     public mutating func apply(
         _ edit: LiveProfileEdit,
         monitors: [String]
@@ -116,32 +116,26 @@ extension Profile {
             spaces = orderedSpaces.inserting(id, after: added.after)
             spaceModes[id] = added.mode
             settings.spaceIcons[id] = added.icon
-            if let pin = added.pin, let set = set(matching: monitors) {
-                upsert(set.pinning(id, to: pin))
+            if let pin = added.pin, set(matching: monitors) != nil {
+                self.pin(id, to: pin)
             }
         case .removeSpace(let id):
             spaces.removeAll { $0 == id }
             spaceModes[id] = nil
             mainSpaces.removeAll { $0 == id }
             if fallbackSpace == id { fallbackSpace = nil }
-            for set in monitorSets { upsert(set.pinning(id, to: nil)) }
+            self.pin(id, to: nil)
             settings.removeSpace(id)
         case .kept(let leaves):
             settings = leaves.applied(to: settings)
             spaceModes.merge(leaves.spaceModes) { $1 }
         case .replaceSpaces(let set):
-            replaceSpaces(with: set, monitors: monitors)
+            replaceSpaces(
+                with: set,
+                order: monitorSets.order(matching: monitors)
+                    ?? ScreenOrder(monitors)
+            )
         }
-    }
-}
-
-extension MonitorSet {
-    /// This set with `id` pinned to `screen`, or unpinned; the
-    /// init keeps only pins to its own monitors.
-    fileprivate func pinning(_ id: SpaceID, to screen: String?) -> MonitorSet {
-        var map = spaceMonitorMap
-        map[id] = screen
-        return MonitorSet(monitors: monitors, spaceMonitorMap: map)
     }
 }
 

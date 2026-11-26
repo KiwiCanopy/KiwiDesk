@@ -137,7 +137,7 @@ struct ScreenSetupModelTests {
         model.cleanConfig.spacePins = [:]
         core.spacePins = [:]
         model.claimScreenSetup(pair, for: "Work")
-        #expect(core.livePins == ["2": "B:100x100"])
+        #expect(core.livePins == ["2": ScreenSlotKey(number: 2)!])
         #expect(model.config.spacePins == core.livePins)
         #expect(model.cleanConfig.spacePins == core.livePins)
     }
@@ -159,7 +159,7 @@ struct ScreenSetupModelTests {
         model.refreshProfiles()
         let pair = ["A:100x100", "B:100x100"]
         model.claimScreenSetup(pair, for: "Home")
-        let edited: [SpaceID: String] = ["1": "A:100x100"]
+        let edited: [SpaceID: ScreenSlotKey] = ["1": ScreenSlotKey(number: 1)!]
         model.config.spacePins = edited
         model.cleanConfig.spacePins = [:]
         model.claimScreenSetup(pair, for: "Work")

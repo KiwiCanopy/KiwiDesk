@@ -322,15 +322,9 @@ struct SpacePlacementTests {
             Profile(
                 name: "pinned",
                 monitorSets: [
-                    MonitorSet(
-                        monitors: [
-                            "A:100x100", "B:100x100",
-                        ],
-                        spaceMonitorMap: [
-                            SpaceID(1): "B:100x100"
-                        ]
-                    )
+                    MonitorSet(monitors: ["A:100x100", "B:100x100"])
                 ],
+                spaceMonitorMap: [SpaceID(1): ScreenSlotKey(number: 2)!],
                 mainSpaces: [SpaceID(2)],
                 spaceModes: ["1": .stack, "2": .bsp],
                 settings: TilingSettings()

@@ -21,7 +21,7 @@ struct GuiConfigSpaceParityTests {
         var config = GuiConfig()
         config.spaces = [probe]
         config.spaceModes[probe] = .grid
-        config.spacePins[probe] = "fp"
+        config.spacePins[probe] = ScreenSlotKey(number: 1)
         config.mainSpaces = [probe]
         config.fallbackSpace = probe
         return config

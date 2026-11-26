@@ -9807,8 +9807,16 @@ restart of the Mac ends every hold
 ### Profile Screen Setups
 
 A profile covers concrete **screen setups** of one screen count — each a list
-of screen fingerprints plus the space→screen pins valid for that
-arrangement. Updating a profile while a new combination is connected
+of screen fingerprints.
+
+:::unreleased
+Each setup lists its screens in the order that numbers them, and
+the profile's Screen pins name a screen by that number, so every
+setup the profile holds shares one set of pins ([Profile JSON
+Format](#profile-json-format)).
+:::
+
+Updating a profile while a new combination is connected
 teaches it that combination. When screens change, KiwiDesk resolves
 in this order:
 
@@ -9833,7 +9841,7 @@ in this order:
 Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.
 
-Every space always resolves to a screen: an explicit fingerprint pin
+Every space always resolves to a screen: an explicit Screen pin
 wins, then the **Main** role (the space follows whatever screen is
 currently main — dock and undock without stale fingerprints), then
 the built-in positional default.
@@ -9853,8 +9861,15 @@ A screen setup belongs to one profile. `save_profile` (unless
 another profile owns the set), `load_profile` of a profile saved
 for as many screens, and creating a profile hand the connected set
 to that profile and remove it from every other
-profile with that count; the set keeps the pins its previous owner
-held for the Spaces the new owner declares. When that took the set
+profile with that count.
+
+:::unreleased
+A set a profile takes keeps the order its previous owner stored and
+carries none of that owner's pins; the profile that takes it applies
+its own.
+:::
+
+When that took the set
 from another profile, the command returns the names and why:
 `{"taken_from": ["Work"], "reason": "…"}`; otherwise it returns
 nothing. The first start after updating, and restoring a
@@ -9889,7 +9904,7 @@ set becomes the default unless the count already has another.
   by the screens' names, as Settings ▸ Profiles ▸ **Known screen
   setups** lists them.
 - `forget_monitor_set` removes that exact combination from the
-  profile holding it, with its pins; every other setup, including
+  profile holding it; every other setup, including
   ones sharing a screen, stays. A binding kept in `bindings.json`
   loses its entry for that setup, and one left with no entry goes;
   a `bind_profile_to_desktop` call in `init.lua` stays as written.
@@ -9905,6 +9920,11 @@ set becomes the default unless the count already has another.
 (`space_bar.visibility_override`, each layout's
 `app_bar.visibility_override`)
 for the screens whose edges it drops.
+
+:::unreleased
+`forget_monitor_set` leaves the profile's Screen pins as they are:
+they belong to its screen numbers, which its other setups share.
+:::
 
 **Example:**
 
@@ -9928,13 +9948,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "name": "Desk One",
   "default": true,            // this count's fallback profile
   "monitor_sets": [
-    {
-      "monitors": ["Built-in Retina Display:1728x1117"],
-      "space_monitor_map": {  // explicit pins only (sparse)
-        "2": "Built-in Retina Display:1728x1117"
-      }
-    }
+    { "monitors": ["Built-in Retina Display:1728x1117"] }
   ],
+  "space_monitor_map": { "2": "1" },  // Space → screen number (sparse)
   "main_spaces": ["1"],       // follow the main screen
   "fallback_space": "1",      // rehome target
   "saved_at": "2026-07-04T12:00:00Z",
@@ -9997,6 +10013,19 @@ stripped, grouped by namespace — `set_gap_override` becomes
   ]
 }
 ```
+
+:::unreleased
+`space_monitor_map` sits at the profile's top level, beside
+`monitor_sets`, and pins each Space to a screen NUMBER: `"2": "2"`
+pins Space 2 to Screen 2, `"3": "1#2"` to area 2 of Screen 1. A
+monitor set lists its screens in the order that numbers them, so
+Screen 1 is the first fingerprint in `monitors`, and every set the
+profile holds shares the one map. Reorder `monitors` to renumber
+the screens. A file written by an older release crosses on its
+first read, numbering each screen by its place in the set's
+`monitors`; where two sets pinned one Space differently, the first
+set in `monitor_sets` keeps its pin.
+:::
 
 `lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
 the profile. It maps a lens name, in lower case, to `false`:

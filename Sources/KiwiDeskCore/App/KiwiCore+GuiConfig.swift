@@ -228,7 +228,7 @@ extension KiwiCore {
         }
         spacePins = keepingPins(
             of: temporaries.subtracting(inList.union(extra)),
-            over: config.spacePins
+            over: runtimePins(config.spacePins)
         )
         mainSpaces = config.mainSpaces
         // A fallback pointing outside the edited space list is

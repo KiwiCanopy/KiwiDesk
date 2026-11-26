@@ -18,7 +18,7 @@ extension ProfileManager {
         var lines: [String] = []
         for holder in allProfiles() {
             for set in holder.monitorSets
-            where settled.insert(set.monitors).inserted {
+            where settled.insert(set.sortedKey).inserted {
                 let count = set.monitors.count
                 let fallback = defaultProfile(count: count)?.name
                 let released = try claim(set.monitors, for: holder.name)

@@ -1,6 +1,6 @@
 {
   "default" : true,
-  "format" : 42,
+  "format" : 43,
   "id" : "test-desk-2",
   "main_spaces" : [
 
@@ -10,10 +10,7 @@
       "monitors" : [
         "Fixture A:2560x1440",
         "Fixture B:2560x1440"
-      ],
-      "space_monitor_map" : {
-
-      }
+      ]
     }
   ],
   "name" : "Test Dual",
@@ -303,6 +300,9 @@
     "4" : "monocle",
     "5" : "grid",
     "6" : "floating"
+  },
+  "space_monitor_map" : {
+
   },
   "spaces" : [
     "1",

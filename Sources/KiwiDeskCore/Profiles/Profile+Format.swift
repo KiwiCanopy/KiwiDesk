@@ -56,10 +56,12 @@ extension Profile {
     /// handle take that palette's handle colour (#3409,
     /// `migratingHandleStamp`), 42 the `gesture` map is one map
     /// per layer, today's the default layer's (#3535,
-    /// `migratingGesturesOntoLayers`).
+    /// `migratingGesturesOntoLayers`), 43 its Screen pins are its
+    /// own, keyed by screen number, and a monitor set is an order
+    /// (#3647, `migratingPinsOntoNumbers`).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 42
+    public static let currentFormat = 43
 }

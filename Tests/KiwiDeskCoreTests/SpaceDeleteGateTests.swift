@@ -36,7 +36,7 @@ struct SpaceDeleteGateTests {
     @Test("A monitor pin trips the gate")
     func pin() {
         var c = config()
-        c.spacePins[space] = "MONITOR-A"
+        c.spacePins[space] = ScreenSlotKey(number: 1)
         #expect(c.carriesOverrides(space))
     }
 
@@ -65,7 +65,7 @@ struct SpaceDeleteGateTests {
     func scopedToSpace() {
         var c = config()
         c.spaces = [space, SpaceID("2")]
-        c.spacePins[space] = "MONITOR-A"
+        c.spacePins[space] = ScreenSlotKey(number: 1)
         #expect(c.carriesOverrides(SpaceID("2")) == false)
     }
 }

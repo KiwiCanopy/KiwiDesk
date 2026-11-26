@@ -38,8 +38,8 @@ private func connect(_ core: KiwiCore, _ names: [String]) {
 }
 
 /// What travels with a monitor set when it changes hands (#1530):
-/// the pins, the live profile's #36 fit, and the default flag's
-/// writers.
+/// its order but no pins, which are each profile's own (#3647), the
+/// live profile's #36 fit, and the default flag's writers.
 @Suite("A monitor set changing hands (#1530)", .serialized)
 @MainActor
 struct MonitorSetHandOverTests {
@@ -54,23 +54,22 @@ struct MonitorSetHandOverTests {
         try core.persistProfile(named: "Work", modes: nil)
     }
 
-    @Test("A load that takes a set brings its owner's pins")
-    func loadCarriesPins() throws {
+    @Test("A load that takes a set back keeps its own pins")
+    func loadKeepsItsPins() throws {
         let core = makeCore()
         try pinnedWork(core)
         try core.persistProfile(named: "Home", modes: nil)
-        // Home holds the pair now, with the pins it saved; a load
-        // of Work takes it back and must not arrive unpinned.
+        // Home holds the pair now; a load of Work takes it back and
+        // arrives with its own pins.
         try core.loadProfile(named: "Work")
         let work = try core.profiles.read(name: "Work")
         #expect(
-            work.set(matching: pair)?.spaceMonitorMap
-                == ["2": "B:100x100"]
+            work.runtimePins(on: pair)?["2"] == "B:100x100"
         )
     }
 
-    @Test("A pick carries only the pins of Spaces it declares")
-    func pickFiltersPins() throws {
+    @Test("A pick carries no pins from the set's owner")
+    func pickCarriesNoPins() throws {
         let core = makeCore()
         try pinnedWork(core)
         try core.profiles.write(
@@ -85,11 +84,12 @@ struct MonitorSetHandOverTests {
         )
         try core.claimMonitorSet(pair, for: "Solo")
         let solo = try core.profiles.read(name: "Solo")
-        #expect(solo.set(matching: pair)?.spaceMonitorMap == [:])
+        #expect(solo.set(matching: pair) != nil)
+        #expect(solo.spaceMonitorMap.isEmpty)
         try core.claimMonitorSet(pair, for: "Work")
         #expect(
             try core.profiles.read(name: "Work")
-                .set(matching: pair)?.spaceMonitorMap == [:]
+                .runtimePins(on: pair)?["2"] == "B:100x100"
         )
     }
 

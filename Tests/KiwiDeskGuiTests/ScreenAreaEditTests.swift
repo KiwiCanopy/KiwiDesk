@@ -61,7 +61,7 @@ struct ScreenAreaEditTests {
         #expect(model.mergeNeighbours(of: 1, on: screen) == [0])
         let kept = model.mergeArea(1, with: 0, on: screen)
         #expect(kept == 0)
-        #expect(model.config.spacePins[space] == screen.fingerprint)
+        #expect(model.pin(of: space) == screen.fingerprint)
         #expect(model.areaSplit(of: screen) == nil)
     }
 

@@ -18,9 +18,9 @@ extension KiwiCore {
         config.settings = resolvedSettings(of: profile)
         config.spaceModes = profile.spaceModes
         config.mainSpaces = Set(profile.mainSpaces)
-        let live = liveFingerprints
         config.spacePins =
-            profile.set(matching: live)?.spaceMonitorMap ?? [:]
+            profile.set(matching: liveFingerprints) == nil
+            ? [:] : profile.spaceMonitorMap
         // The space set is the profile's own — NOT unioned with
         // the live sidecar's spaces, or editing a profile for
         // other hardware would graft this machine's spaces into
@@ -111,7 +111,7 @@ extension KiwiCore {
         // only in `gui.json` is seeded into live at boot
         // (`seedGuiSpaces`, #77), so it is present here too.
         config.spaces = SpaceID.deduplicated(live)
-        config.spacePins = capturedPins(alsoOf: [])
+        config.spacePins = storedPins(over: config.spacePins)
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
     }
@@ -198,7 +198,7 @@ extension KiwiCore {
         config.settings = tiler.settings
         config.appRules = globalRuleBase.appRules
         config.titledAppRules = globalRuleBase.titledAppRules
-        config.spacePins = capturedPins(alsoOf: [])
+        config.spacePins = storedPins(over: config.spacePins)
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
         config.layers = recoverKeybindings()

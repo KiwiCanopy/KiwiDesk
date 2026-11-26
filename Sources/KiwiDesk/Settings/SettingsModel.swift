@@ -106,8 +106,7 @@ final class SettingsModel: ObservableObject {
     // `recomputeDirty()` and `draftDiff` live in `+Dirty` (§2.1).
     var draftMemo = DraftDiffMemo()
 
-    /// `UserDefaults` seam for non-config preferences; tests inject a scratch
-    /// domain.
+    /// `UserDefaults` seam for non-config preferences; tests inject one.
     let preferences: UserDefaults
 
     /// Active saved profile, or nil for a transient state.
@@ -118,8 +117,8 @@ final class SettingsModel: ObservableObject {
     @Published var activeStandardTitle: StarterTitle?
     /// True when live state diverged from saved profile.
     @Published var profileDirty = false
-    /// Core's unsaved live settings, and whether they draw a row
-    /// (#2262); written by `refreshUnsavedLive` alone.
+    /// Core's unsaved live settings and their row (#2262); written
+    /// by `refreshUnsavedLive` alone.
     @Published var unsavedLive: UnsavedLiveSettings?
     @Published var liveUnsaved = false
     /// Live leaves the last Keep could not write, by keep id (#2368).
@@ -128,14 +127,15 @@ final class SettingsModel: ObservableObject {
     @Published var target: EditTarget = .live
     /// Whether screen placement canvas is editable for current target (#18).
     @Published var placementEditable = true
+    /// A stored target's screen setups, read at `reload` (#3647).
+    var storedMonitorSets: [MonitorSet]?
     @Published var profiles: [String] = []
     /// `isGuiManaged`, the sidecar's presence and its latch (#2324),
     /// read once per refresh: the first re-reads init.lua (#1392).
     @Published var guiManaged = true
     @Published var sidecarExists = true
     @Published var writeLatch: NewerFormatOnDisk?
-    /// Rich rows for saved profiles: screen setups, screen count, matches
-    /// (#36).
+    /// Saved profiles' rows: setups, screen count, matches (#36).
     @Published var profileSummaries: [ProfileSummary] = []
     /// Every stored screen setup, Core's order (#3324).
     @Published var knownSetups: [KnownMonitorSet] = []

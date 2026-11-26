@@ -32,9 +32,11 @@ struct HeldSpaceDesk {
         for space in spaces { modes[space] = .bsp }
         return Profile(
             name: name,
-            monitorSets: [
-                MonitorSet(monitors: screens, spaceMonitorMap: pins)
-            ],
+            monitorSets: [MonitorSet(monitors: screens)],
+            spaceMonitorMap: ScreenOrder(screens).storing(
+                runtime: pins,
+                over: [:]
+            ),
             spaces: spaces,
             spaceModes: modes,
             settings: TilingSettings()

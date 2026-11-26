@@ -66,6 +66,7 @@ public enum ConfigMigration {
         migratingStepDistanceOut,
         migratingHandleStamp,
         migratingGesturesOntoLayers,
+        migratingPinsOntoNumbers,
     ]
 
     /// Runs after `steps`, and is skipped by

@@ -94,9 +94,13 @@ struct SimplePreviewTests {
         #expect(main.contains("the main screen"))
     }
 
-    @Test("an offline pin names the screen it waits for and its fallback")
-    func offlineSentence() {
-        LocalizationManager.shared.select("en")
+    /// A pin is stored by screen number (#3647), so a screen not
+    /// connected holds no number and a pin cannot wait on it; a
+    /// stored number past the connected screens is kept for the
+    /// Save and reads unpinned. The words for such a pin are the
+    /// owner's to rule (#3647 ▸ Lane 1 design rulings, 5).
+    @Test("a pin past the connected screens is kept and reads unpinned")
+    func pinPastTheScreens() {
         let model = model(["a"])
         let core = model.core
         for display in core.state.workspaces.allDisplays {
@@ -110,12 +114,10 @@ struct SimplePreviewTests {
             )
         )
         let space = SpaceID("a")
-        model.config.spacePins[space] = "Dell:200x100"
-        let sentence = model.offlinePinSentence(space)
-        #expect(sentence.contains("Dell"))
-        #expect(sentence.contains("Built-in"))
-        // Its one screen is the main one, and the sentence says so.
-        #expect(sentence.contains("the main screen"))
+        model.config.spacePins[space] = ScreenSlotKey(number: 2)
+        #expect(model.pin(of: space) == nil)
+        #expect(model.screenChoice(of: space) == .auto)
+        #expect(model.config.spacePins[space] == ScreenSlotKey(number: 2))
     }
 
     /// A card drawing the stored settings would ignore a hovered

@@ -108,9 +108,13 @@ extension KiwiCore {
         }
     }
 
-    /// `capturedPins(alsoOf: [])`, for the GUI's draft baseline.
-    public var capturedSpacePins: [SpaceID: String] {
-        capturedPins(alsoOf: [])
+    /// The live pins numbered as a write stores them, for the GUI's
+    /// draft baseline; a number `stored` holds past the live screens
+    /// stays (#3647).
+    public func capturedSpacePins(
+        over stored: [SpaceID: ScreenSlotKey]
+    ) -> [SpaceID: ScreenSlotKey] {
+        storedPins(over: stored)
     }
 
     /// Whether a switch holds `id` though its screen stayed
