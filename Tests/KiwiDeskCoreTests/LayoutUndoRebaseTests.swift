@@ -95,10 +95,51 @@ struct LayoutUndoRebaseTests {
     func unrecordedChangeStillClears() {
         let core = makeCore()
         swap(core)
+        // 2 3 1, unrecorded; the rebased swap would read 1 2 → 2 1,
+        // which the live 2 1 matches, so only the gate refuses.
         core.state.workspaces.withSpace(one) {
-            $0.move(WindowID(3), to: 0)
+            $0.move(WindowID(1), to: 2)
         }
-        core.handle(.windowDestroyed(WindowID(2), wasMinimized: false))
+        #expect(order(core) == [2, 3, 1])
+        core.handle(.windowDestroyed(WindowID(3), wasMinimized: false))
+        #expect(order(core) == [2, 1])
         #expect(!core.execute("undo_layout").isSuccess)
+    }
+    @Test("a track head's close hands its break on and keeps history")
+    func trackHeadCloseKeepsHistory() {
+        let core = makeCore()
+        core.execute("set_mode", args: [.string("1"), .string("track")])
+        core.layoutHistory.history = LayoutUndoStacks()
+        core.state.workspaces.focus(WindowID(2), in: one)
+        #expect(core.execute("swap", args: [.string("right")]).isSuccess)
+        let swapped = order(core)
+        #expect(swapped != [1, 2, 3])
+        let head = core.state.workspaces[one]?.trackBreaks
+        #expect(head?.contains(WindowID(1)) == true)
+        core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(order(core) == [2, 3])
+    }
+
+    @Test("an app's exit closes each of its windows in the history")
+    func appExitKeepsHistory() {
+        let core = makeCore()
+        for id: UInt32 in [5, 6] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(id: WindowID(id), pid: 2, appName: "B")
+                )
+            )
+        }
+        core.state.workspaces.withSpace(one) {
+            $0.move(WindowID(5), to: 3)
+            $0.move(WindowID(6), to: 4)
+        }
+        core.state.workspaces.focus(WindowID(1), in: one)
+        #expect(core.execute("swap", args: [.string("right")]).isSuccess)
+        core.handle(.appTerminated(pid: 2))
+        #expect(order(core) == [2, 1, 3])
+        #expect(core.execute("undo_layout").isSuccess)
+        #expect(order(core) == [1, 2, 3])
     }
 }

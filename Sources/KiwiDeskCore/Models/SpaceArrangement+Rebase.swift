@@ -15,7 +15,8 @@ extension SpaceArrangement {
 
     /// This arrangement with `window` placed by `placement` beside
     /// `anchor` — at the end when `anchor` is not a member — and
-    /// carrying the per-window sizing `live` gave it.
+    /// carrying the per-window sizing `live` gave it: a mirror of
+    /// the window-keyed fields `SpaceArrangementParityTests` holds.
     func inserting(
         _ window: WindowID,
         placement: SpawnPlacement,
@@ -39,18 +40,16 @@ extension SpaceArrangement {
         return out
     }
 
+    /// A Space holding this arrangement, through `restore`, the
+    /// parity-tested inverse of `init`.
     private func scratch(focused: WindowID?) -> Space {
         var space = Space(
             id: SpaceID("undo"),
             mode: mode,
             windows: windows,
-            focused: focused,
-            stackWeights: stackWeights,
-            trackBreaks: trackBreaks,
-            handedBreaks: handedBreaks,
-            trackWeights: trackWeights
+            focused: focused
         )
-        space.runSizes = runSizes
+        space.restore(self)
         return space
     }
 }

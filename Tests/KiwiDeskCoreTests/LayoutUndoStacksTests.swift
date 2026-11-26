@@ -191,10 +191,14 @@ struct LayoutUndoStacksTests {
         #expect(stacks.sits(one, at: arrangement([2, 1])))
         #expect(!stacks.sits(one, at: arrangement([1, 2])))
         guard case .ready(let step) = stacks.candidate(.undo, of: one)
-        else { return }
+        else {
+            Issue.record("no step")
+            return
+        }
         stacks.take(step, from: .undo)
         // The redo's before is where an undo left the Space.
         #expect(stacks.sits(one, at: arrangement([1, 2])))
+        #expect(!stacks.sits(one, at: arrangement([2, 1])))
     }
     private func placed(
         _ ids: [UInt32],

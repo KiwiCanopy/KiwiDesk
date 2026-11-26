@@ -4377,13 +4377,15 @@ or closing is the one membership change that rebases instead
 removes a closed window from every stored step, dropping a step
 left changing nothing, and inserts a window `new_window_placement`
 placed into every step of its Space through the same
-`Space.insert`, beside its anchor or at the end where the step
-lacks it; the steps keep their label and coalescing group. It is
+`Space.insert`, beside its anchor or at the start or end, and at
+the end where the step lacks the anchor; the steps keep their
+label and coalescing group. It is
 eager, at the fold, because only there is the anchor known and the
 arrival's side effects — a track break handed on — told apart from
 a change no act saw, which still clears. A return by rank, a track
-spawn, a hide, a minimize and a move between Spaces no act made
-still clear, each awaiting a ruling of its own. A new user act that should be undoable opens a bracket. Undo refuses rather than
+spawn, a hide, a minimize, a move between Spaces no act made and
+an open or close while an act is still open (a drag, a held key's
+glide) still clear, each awaiting a ruling of its own. A new user act that should be undoable opens a bracket. Undo refuses rather than
 skipping past the change, because reverting under a state the
 step never saw would write an arrangement nobody had. The history
 is per Space because `⌃⌥Z` should take back what is in front of

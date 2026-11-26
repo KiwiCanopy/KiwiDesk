@@ -42,6 +42,13 @@ extension KiwiCore {
         let now = Self.members(after)
         let closed = Set(was.keys).subtracting(now.keys)
         let opened = Set(now.keys).subtracting(was.keys)
+        // A window the handler re-filed beside it (a launch's
+        // riders) is a move no step records.
+        guard
+            was.allSatisfy({
+                closed.contains($0.key) || now[$0.key] == $0.value
+            })
+        else { return }
         // A window gone by a hide or minimize comes back by rank.
         let isClose: Bool
         if case .appTerminated = fold.event {
@@ -78,15 +85,18 @@ extension KiwiCore {
         )
         var history = layoutHistory.history
         // A Space whose history no longer sits at the pre-fold
-        // arrangement already reads as unrecorded.
+        // arrangement already reads as unrecorded; one such Space
+        // leaves every Space to its lazy clear, a linked step
+        // spanning both.
         guard
             changed.allSatisfy({ space in
                 fold.before[space].map { history.sits(space, at: $0) }
                     ?? false
             })
         else { return }
-        // The change's own side effects — a track break handed on —
-        // become the stored after, so the next undo still acts.
+        // What the handler wrote beside the membership — the event
+        // retile's heals of weights and session sizes — becomes the
+        // stored after, so the next undo still acts.
         history.rebase { space, side in
             if changed.contains(space), side == fold.before[space],
                 let live = after[space]

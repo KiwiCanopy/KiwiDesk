@@ -1209,8 +1209,9 @@ and a step that only moved it is gone. A new window keeps it too,
 joining each earlier step where its placement put it, beside the
 same window or at the start or end, and at the end of a step that
 lacks that window. A window that comes back from a hide, a
-minimize or another Desktop, or opens into a Track space, still
-clears the history.
+minimize or another Desktop, a window Track's new-window rule
+places, or a window opening or closing while a drag or a held key
+is still going, still clears the history.
 :::
 
 A failed or empty undo from a key plays the refusal
