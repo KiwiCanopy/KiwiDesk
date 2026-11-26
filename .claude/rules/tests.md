@@ -387,9 +387,10 @@ bite large test PRs:
   (`DeferredTasks`' burst cap) owes its test a seam, or every real
   wait one-directional: a parked wait seam, and real sleeps only
   as floors a slow runner widens (`DeferredTasksTests`, #3567).
-  The keyboard tap takes its clock and its lapse at construction,
-  and a suite building one names both, stepping them by hand
-  where a verdict waits on a lapse (#3593, `KiwiHubHeldTapTests`).
+  Keep the keyboard tap's clock and lapse construction parameters
+  with no default, and step both by hand in a suite whose verdict
+  waits on a lapse, never sleeping past the gap (#3593,
+  `KiwiHubHeldTapTests` ▸ `heldLapse`).
   `makeTestCore` freezes the applier's, the ledger's and the
   core's wall clock (a stamp read in the same test cannot age),
   and `EchoClockSeamTests` holds the host uptime to those seams'

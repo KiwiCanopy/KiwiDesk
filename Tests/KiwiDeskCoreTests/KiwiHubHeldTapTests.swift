@@ -138,7 +138,7 @@ struct KiwiHubHeldTapTests {
     }
 
     /// A right ⌘ single that waits on its double: it fires only at
-    /// the gap's lapse, on the tap's own queue.
+    /// the gap's lapse, which the rig's clock steps to.
     private func lapseRig() throws -> (KeyboardTap, Fired, TapClock) {
         let fired = Fired()
         let clock = TapClock()
