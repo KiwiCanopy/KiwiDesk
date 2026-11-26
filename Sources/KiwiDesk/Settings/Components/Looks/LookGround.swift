@@ -9,17 +9,27 @@ struct LookGround: View {
     let settings: TilingSettings
     /// How far down the focus haze reaches.
     let reach: CGFloat
+    var stage: Stage = .plate
+
+    /// Where the ground draws: a tile or card, or the look picker's
+    /// full-screen backdrop, which takes no veil and a stronger haze
+    /// (owner, prototype 2026-11-26).
+    enum Stage {
+        case plate, backdrop
+    }
 
     var body: some View {
         ZStack {
             SettingsTheme.lookGround
             Color(kiwiHex: settings.kiwishelf.fillColor)
                 .opacity(Self.share(settings))
-            SettingsTheme.lookGround.opacity(0.15)
+            if stage == .plate {
+                SettingsTheme.lookGround.opacity(0.15)
+            }
             RadialGradient(
                 colors: [
                     Color(kiwiHex: settings.borderStyle.focusedColor)
-                        .opacity(0.3),
+                        .opacity(stage == .plate ? 0.3 : Self.backdropHaze),
                     .clear,
                 ],
                 center: .top,
@@ -37,6 +47,9 @@ struct LookGround: View {
         let luminance = ColorVision.luminance(settings.kiwishelf.fillColor)
         return (luminance ?? 0) > lightGround ? lightTint : 1
     }
+
+    /// The backdrop's haze, the focus colour's share at the top.
+    static let backdropHaze = 0.9
 
     /// The WCAG luminance above which a shelf colour is light.
     static let lightGround = 0.5

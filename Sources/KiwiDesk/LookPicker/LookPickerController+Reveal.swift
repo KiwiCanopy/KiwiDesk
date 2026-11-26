@@ -4,8 +4,9 @@ import SwiftUI
 
 /// The wear and the puddle reveal (#3038 ▸ Ruling 2026-11-23, steps
 /// 1–4): Core wears the look under the opaque overlay, the reveal
-/// waits for the desk at most `readyCap`, then the drop, the blur and
-/// the wave; Reduce Motion takes the cross-fade instead.
+/// waits for the desk at most `readyCap`, then the drop lands and
+/// sinks, and only then the blur and the wave (amended 2026-11-26);
+/// Reduce Motion takes the cross-fade instead.
 extension LookPickerController {
     /// ↩ on a look not worn: Core wears it with the windows placed at
     /// once, then the reveal waits for the desk — at most
@@ -38,21 +39,33 @@ extension LookPickerController {
             after(LookPickerReveal.crossFade, finish)
             return
         }
-        reveal.dropShown = true
+        reveal.drop = .above
         withAnimation(
             reduceMotion ? nil : .easeIn(duration: LookPickerReveal.fall)
         ) {
-            reveal.dropLanded = true
+            reveal.drop = .landed
         }
-        let reach = Self.reach(of: geometry)
         after(LookPickerReveal.fall) { [weak self] in
             guard self?.opening == current else { return }
             withAnimation(
                 reduceMotion
-                    ? nil : .easeOut(duration: LookPickerReveal.splash)
+                    ? nil : .spring(response: 0.12, dampingFraction: 0.55)
             ) {
-                reveal.dropSplashed = true
+                reveal.drop = .squashed
             }
+        }
+        let sinkAt = LookPickerReveal.fall + LookPickerReveal.squashHold
+        after(sinkAt) { [weak self] in
+            guard self?.opening == current else { return }
+            withAnimation(
+                reduceMotion ? nil : .easeOut(duration: LookPickerReveal.sink)
+            ) {
+                reveal.drop = .sunk
+            }
+        }
+        let reach = Self.reach(of: geometry)
+        after(sinkAt + LookPickerReveal.waveLead) { [weak self] in
+            guard self?.opening == current else { return }
             withAnimation(
                 reduceMotion
                     ? nil : .easeOut(duration: LookPickerReveal.blurIn)

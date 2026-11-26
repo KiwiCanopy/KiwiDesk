@@ -31,12 +31,8 @@ struct LookPickerView: View {
                     rimOnly: reduceTransparency
                 )
             }
-            if reveal.dropShown {
-                LookPickerDrop(
-                    landed: reveal.dropLanded,
-                    splashed: reveal.dropSplashed,
-                    target: dropPoint
-                )
+            if reveal.drop != .hidden {
+                LookPickerDrop(stage: reveal.drop, target: dropPoint)
             }
         }
         .frame(width: geometry.screen.width, height: geometry.screen.height)
@@ -65,16 +61,18 @@ struct LookPickerView: View {
         )
     }
 
-    /// The look's own colour ground with a soft vignette; a click on
+    /// The look's own colour ground at the backdrop's strength with a
+    /// soft vignette (owner, prototype 2026-11-26); a click on
     /// it closes, as Esc does. #3478 lays the look's picture here.
     private var backdrop: some View {
         ZStack {
             LookGround(
                 settings: selectedSettings,
-                reach: geometry.screen.height * 0.9
+                reach: geometry.screen.height * 2,
+                stage: .backdrop
             )
             RadialGradient(
-                colors: [.clear, SettingsTheme.visionVeil.opacity(0.45)],
+                colors: [.clear, SettingsTheme.visionVeil.opacity(0.25)],
                 center: .center,
                 startRadius: geometry.screen.width * 0.2,
                 endRadius: geometry.screen.width * 0.6
