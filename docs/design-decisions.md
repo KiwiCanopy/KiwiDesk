@@ -23938,13 +23938,6 @@ consequences:
   declares, so a round trip keeps the pins of Spaces both
   declare; picked onto the loaded profile, the pins take effect at
   once.
-  :::unreleased
-  *Amended (#3647):* pins now belong to a count's numbers, so a
-  set changing hands brings no pins and takes the claimant's
-  numbers, and a round trip no longer keeps them; which order the
-  set brings is open (▸ *A profile numbers its screens per screen
-  count*).
-  :::
 - **A profile that loses its last set goes *dormant* rather than
   being deleted.** It keeps its screen count (the file carries
   `monitor_count`), is never picked by the exact-match or
@@ -23969,6 +23962,13 @@ consequences:
 - **`save_profile` and `load_profile` name what they took, and
   why.** A scripted save that changes another file must not do it
   silently.
+
+:::unreleased
+*Amended (#3647): a set changing hands carries no pins.* Pins
+belong to a profile's screen numbers (▸ *A profile numbers its
+screens per screen count*), so the claimant's own numbers apply to
+the set it takes, and the profile it leaves keeps its pins.
+:::
 
 *Forgetting a setup is its own act (#3324, owner, 2026-11-14,
 amending the above).* The setup chips on a profile row stay
@@ -24008,8 +24008,10 @@ page.
 
 :::unreleased
 *Amended (#3647):* a forget drops only the setup's order. The pins
-belong to the count's numbers, so they stay, on a profile left
-dormant too.
+and the bars' and pocket's per-screen values belong to the
+profile's screen numbers, so they stay, on a profile left dormant
+too, and the clearing of per-screen bar edges above ends with the
+fingerprint-keyed maps.
 :::
 
 *The card's order (#3374, owner, 2026-11-17, amending the above).*
@@ -24061,9 +24063,10 @@ The consequences:
   write of a fingerprint-keyed runtime map reaches storage through
   that function alone, `storeSplit` and the Lua split record
   included. `set_display_areas` and the per-screen setters keep
-  taking a fingerprint, which now names the number that screen
-  holds. #3640's boot hold stands as fixed: a held call replays
-  through these verbs, so it reaches the same door.
+  their arguments, and a fingerprint now names the number that
+  screen holds. #3640's held calls replay through those verbs'
+  bodies (`storeDisplayAreas`, the bars' commands), so they reach
+  the same door.
 - **A Save writes the connected setup's order and the
   number-keyed values**, nothing keyed by a fingerprint.
 - **A setup is an order, matched as a set.** Which profile a set
@@ -24093,8 +24096,7 @@ The consequences:
   split).
 - **Twin screens share one split.** Two screens with one
   fingerprint can hold two numbers, but the runtime keys an area
-  by fingerprint, so both draw the lower number's split
-  (`docs/accepted-limitations.md`).
+  by fingerprint, so both draw the lower number's split.
 - **The crossing is one `ConfigMigration` step**, run through
   `MigrationBackup.migrateInPlace` like every step. Slot k is the
   stored `monitors[k]`; where two setups of one count pin
@@ -24104,18 +24106,7 @@ The consequences:
   `space_monitor_map` crosses with the rest.
 - **Copy says which form of a screen's name it means.** Known
   screen setups keeps naming screens by name, since every setup
-  there has its own Screen 1; `.claude/rules/config-vocabulary.md`'s
-  **area** and **screen** entries say so.
-
-Open, for the owner:
-- When a claim hands a set to another profile (#1530), whether the
-  set brings the order its previous holder stored or takes the
-  left-to-right suggestion.
-- When no full numbering fits every screen, which screen goes
-  without a number.
-- Whether the #1175 heal's pin on a screen with no number is
-  session-only, so a Save writes nothing for that screen, or is
-  stored.
+  there has its own Screen 1.
 :::
 
 **[Principle]**
@@ -24637,8 +24628,10 @@ duplicate reads as a bug in the drawing rather than a limit of the
 identity.
 
 :::unreleased
-*Amended (#3647):* twins may hold two numbers, but they still
-share one split, the lower number's.
+*Amended (#3647):* a pin now follows a screen number rather than
+`name:WxH`, so twins may hold two numbers; which twin holds which
+is arbitrary within their one identity (▸ *A profile numbers its
+screens per screen count*).
 :::
 
 **Chips: pinned, follows-main, automatic.** Semantic micro-icons
