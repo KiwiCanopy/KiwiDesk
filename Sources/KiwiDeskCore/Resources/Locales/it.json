@@ -904,6 +904,7 @@
   "jump.footer.jump": "%1$@ Vai",
   "jump.footer.move_here": "%1$@ Sposta qui",
   "jump.footer.next_app": "%1$@ App successiva",
+  "jump.footer.previous_app": "%1$@ App precedente",
   "jump.footer.quick": "%1$@ Salto rapido",
   "jump.footer.quick_move_here": "%1$@ Sposta qui subito",
   "jump.footer.quick_swap_here": "%1$@ Scambia qui subito",

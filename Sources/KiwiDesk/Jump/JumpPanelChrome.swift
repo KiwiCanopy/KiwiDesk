@@ -5,10 +5,10 @@ import SwiftUI
 /// VoiceOver, whose row actions say the same (#1875 ▸ footer).
 /// Short of room, it sheds hints from the end, the Windows side
 /// first collapsing its modifier hints to keycaps (#3249); a hint
-/// keeps its index, so the lit one stays lit while it is shown.
+/// keeps its index, so a lit one stays lit while it is shown.
 struct JumpFooter: View {
     let scope: JumpScope
-    /// The modifiers held now, which decide the one lit hint.
+    /// The modifiers held now, which decide the lit hints.
     var modifiers: NSEvent.ModifierFlags = []
     /// Whether a row or tile is selected; with none, nothing lights.
     var hasSelection = true
@@ -31,9 +31,10 @@ struct JumpFooter: View {
     /// Whether the Windows strip has more than one app to step
     /// through (#3159).
     var stripSteps = false
-    /// The last-app opener's live chord; nil where it is unbound,
-    /// which leaves its hint out (#3159).
-    var lastAppChord: String?
+    /// The last-app opener as bound; nil where it is unbound, which
+    /// leaves its hint out (#3159). Its ⇧ form steps the strip back
+    /// (#3135).
+    var lastAppCombo: KeyCombo?
 
     @Environment(\.kiwiDeskReduceMotion) var reduceMotion
 
@@ -55,7 +56,7 @@ struct JumpFooter: View {
         return ViewThatFits(in: .horizontal) {
             // A side's leading hints never shed (#1229 ▸ Footer).
             ForEach((keeps...hints.count).reversed(), id: \.self) {
-                row(Array(hints.prefix($0)))
+                stable($0)
             }
             // Past every candidate the line truncates rather than
             // spill onto the side's controls.
@@ -66,6 +67,27 @@ struct JumpFooter: View {
         .lineLimit(1)
     }
 
+    /// The first `shown` hints as wide as under any held chord, so
+    /// a press re-words the line and never sheds the hint it lights
+    /// (#3667, as #3249 fits the Windows line).
+    private func stable(_ shown: Int) -> some View {
+        ZStack {
+            ForEach(Self.heldStates, id: \.rawValue) { held in
+                let footer = holding(held)
+                footer.row(Array(footer.hints.prefix(shown))).hidden()
+            }
+            row(Array(hints.prefix(shown)))
+        }
+        .fixedSize(horizontal: true, vertical: false)
+    }
+
+    /// This footer under `held`.
+    func holding(_ held: NSEvent.ModifierFlags) -> JumpFooter {
+        var footer = self
+        footer.modifiers = held
+        return footer
+    }
+
     /// One candidate line of `shown`; a line that is not `fixed`
     /// truncates to the room it is given.
     func row(_ shown: [String], fixed: Bool = true) -> some View {
@@ -74,7 +96,7 @@ struct JumpFooter: View {
                 if index > 0 { Text(verbatim: "·") }
                 Text(hint)
                     .foregroundStyle(
-                        index == leading
+                        lit.contains(index)
                             ? AnyShapeStyle(.primary)
                             : AnyShapeStyle(.secondary)
                     )
@@ -99,18 +121,56 @@ struct JumpFooter: View {
 }
 
 extension JumpFooter {
-    /// The one hint in full ink: the pick that acts on the
-    /// selection with the modifiers held now, read off `JumpKey`
-    /// itself — ↩ where it picks, else the ⌘ digits. Navigation and
-    /// bridges never light; the Shortcuts side picks nothing (#2246).
-    /// The index is into `hints`, whose order it follows: Jump,
-    /// Move here, Swap here, the digits on Windows (#3249); Apply,
-    /// the digits on View.
-    var leading: Int? {
-        guard hasSelection, scope != .shortcuts else { return nil }
-        if scope == .desktops { return desktopsLeading }
-        if scope == .windows { return windowsLeading }
-        let held = modifiers.intersection([.shift, .option, .command])
+    /// The hints in full ink, as indices into `hints` (#2246, as
+    /// amended by #3667): every press that acts now, read off
+    /// `JumpKey` — the pick and the chords the held keys complete,
+    /// which need a selection, and the side switch, last, wherever
+    /// Tab steps a side. Bare navigation never lights.
+    var lit: Set<Int> {
+        var lit: Set<Int> = []
+        if hasSelection {
+            switch scope {
+            case .desktops: lit = desktopsLit
+            case .windows: lit = Set([windowsLeading].compactMap { $0 })
+            case .view: lit = Set([viewPick].compactMap { $0 })
+            case .shortcuts: break
+            }
+        }
+        if scope == .windows { lit.formUnion(windowsOpenerLit) }
+        let count = hints.count
+        if count > 0, tabSteps(modifiers) { lit.insert(count - 1) }
+        return lit
+    }
+
+    /// The held keys a hint reads: ⌃ is left out, since the chord
+    /// that opened the panel may still be held when it draws.
+    static func held(
+        _ modifiers: NSEvent.ModifierFlags
+    ) -> NSEvent.ModifierFlags {
+        modifiers.intersection([.shift, .option, .command])
+    }
+
+    /// What Tab does under `held`: step a side, forward or back,
+    /// or nothing (nil), as the panel itself reads it.
+    func tabStep(_ held: NSEvent.ModifierFlags) -> Bool? {
+        let key = JumpKey.of(
+            keyCode: JumpKey.tab,
+            modifiers: Self.held(held),
+            scope: scope,
+            naming: naming
+        )
+        if case .stepScope(let forward) = key { return forward }
+        return nil
+    }
+
+    /// Whether Tab under `held` steps a side.
+    func tabSteps(_ held: NSEvent.ModifierFlags) -> Bool {
+        tabStep(held) != nil
+    }
+
+    /// The View side's pick: ↩ Apply, else its ⌘ digits.
+    private var viewPick: Int? {
+        let held = Self.held(modifiers)
         let one = UInt16(JumpKey.digitRows[0])
         if case .quick(_, let moveHere) = JumpKey.of(
             keyCode: one,
@@ -132,18 +192,20 @@ extension JumpFooter {
         }
     }
 
-    /// ⇥ and the side it steps to.
-    var sideHint: String {
-        L(
+    /// The side switch worded for `held`: ⇥ and the next side, or
+    /// ⇧⇥ and the previous one where ⇧ makes Tab step back.
+    func sideHint(_ held: NSEvent.ModifierFlags) -> String {
+        let back = tabStep(held) == false
+        return L(
             "jump.footer.scope",
             "%1$@ %2$@",
-            "⇥",
-            scope.stepped(forward: true).title
+            back ? "⇧⇥" : "⇥",
+            scope.stepped(forward: !back).title
         )
     }
 
     var hints: [String] {
-        let other = sideHint
+        let other = sideHint(modifiers)
         switch scope {
         case .desktops:
             return desktopsHints

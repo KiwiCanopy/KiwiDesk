@@ -86,7 +86,7 @@ struct JumpStaleModifierTests {
         #expect(model.pickModifiers([.option]).isEmpty)
     }
 
-    @Test("the lit hint is Jump while the opener's ⌥ is held")
+    @Test("Jump lights while the opener's ⌥ is held")
     func footerLightsJump() {
         let model = model()
         model.latchOpener([.option])
@@ -94,14 +94,14 @@ struct JumpStaleModifierTests {
             scope: .windows,
             modifiers: model.heldModifiers
         )
-        #expect(stale.leading == 0)
+        #expect(stale.lit == [0, 4])
         model.noteModifiers([])
         model.noteModifiers([.option])
         let fresh = JumpFooter(
             scope: .windows,
             modifiers: model.heldModifiers
         )
-        #expect(fresh.leading == 2)
+        #expect(fresh.lit == [2])
     }
 
     @Test("↩ and a digit under a stale ⌥ jump; a fresh ⌥ swaps")

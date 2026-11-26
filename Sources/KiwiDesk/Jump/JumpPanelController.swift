@@ -111,7 +111,7 @@ final class JumpPanelController: NSObject {
         // The chord that opened the panel is still held (#3168).
         model.latchOpener(NSEvent.modifierFlags)
         model.chords = liveChords()
-        model.lastAppChord = lastAppChord()
+        model.lastAppCombo = lastAppCombo()
         model.settings = core.tiler.settings
         let panel = self.panel ?? makePanel()
         self.panel = panel

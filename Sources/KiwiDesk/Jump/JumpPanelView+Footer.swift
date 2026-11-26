@@ -20,7 +20,7 @@ extension JumpPanelView {
                     DesktopsFooterState($0, refusal: model.desktopsRefusal)
                 },
                 stripSteps: model.list.snapshot.apps.count > 1,
-                lastAppChord: model.lastAppChord
+                lastAppCombo: model.lastAppCombo
             ),
             // Desktops draws its tray, no button (#1229).
             carriesControls: model.scope != .windows

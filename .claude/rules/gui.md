@@ -2484,6 +2484,21 @@ step under the opener's ⌥ as ↑ ↓ do (`JumpStaleModifierTests` ▸ `arrowsU
 opener door or a new pick reader joins
 `JumpStaleModifierTests` ▸ `wiring`.
 
+## A KiwiHub footer hint lights from the key map (#3667)
+
+**A footer hint lights where `JumpKey` reads the held keys as the
+press its own written chord names, and that press acts** — a
+Desktops hint through its `DesktopsHint` chord, a Windows pick
+through `JumpPick`, the opener through `JumpKey.isOpener` and
+`isBack` — never a modifier test beside them; a bare key lights
+only as ↩'s pick. **The side switch is the last hint on every
+side**, lit wherever `JumpKey` reads Tab as a side step, so a
+hint added after it takes its light. A line fits on its widest
+held state, and the Windows line sheds by `JumpFooterSlot.Role`,
+never by position (`JumpFooterLitTests`). The argument is
+`docs/design-decisions.md` ▸ *The footer lights one hint*, as
+amended by #3667.
+
 ## A sideways strip fades, follows and keeps its scroller (#2901)
 
 **A Settings strip that scrolls sideways is a `SidewaysStrip` handed

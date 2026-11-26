@@ -14,22 +14,22 @@ struct JumpSwapFooterTests {
     private func lit(
         _ modifiers: NSEvent.ModifierFlags,
         swaps: Bool = true
-    ) -> Int? {
+    ) -> Set<Int> {
         JumpFooter(
             scope: .windows,
             modifiers: modifiers,
             selectionSwaps: swaps
-        ).leading
+        ).lit
     }
 
     @Test("⌥ and ⇧⌥ light the Swap here hint")
     func footerLightsSwap() {
-        #expect(lit(.option) == 2)
-        #expect(lit([.shift, .option]) == 2)
-        #expect(lit(.option, swaps: false) == nil)
-        #expect(lit([.option, .command]) == 3)
-        // Without ⌥ the refusal is not asked.
-        #expect(lit(.shift, swaps: false) == 1)
+        #expect(lit(.option) == [2])
+        #expect(lit([.shift, .option]) == [2])
+        #expect(lit(.option, swaps: false) == [])
+        #expect(lit([.option, .command]) == [3])
+        // Without ⌥ the refusal is not asked; ⇧⇥ lights beside it.
+        #expect(lit(.shift, swaps: false) == [1, 4])
     }
 
     @Test("Move here and Swap here both show; ⌥ rewords the digits")

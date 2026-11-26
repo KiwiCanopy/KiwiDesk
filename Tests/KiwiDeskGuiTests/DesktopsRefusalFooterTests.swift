@@ -128,12 +128,13 @@ struct DesktopsRefusalFooterTests {
             modifiers: .command,
             desktops: DesktopsFooterState(state)
         )
-        #expect(footer.leading == nil)
+        // ⌘↑ Back still lights; Pick up does not.
+        #expect(footer.lit == [3])
         let open = DesktopsStateTests.state(DesktopsStateTests.overview())
         var inside = open
         _ = inside.press(.openSpace, repeated: false)
         footer.desktops = DesktopsFooterState(inside)
-        #expect(footer.leading == 2)
+        #expect(footer.lit == [2, 3])
     }
 
     @Test("after a drop the target line is selected")
