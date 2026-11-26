@@ -106,7 +106,9 @@ struct ExecTestsPruneTmpdir {
         )
         try folder("TemporaryDirectory.subfolder")
         try files.createDirectory(
-            at: desk.url("TemporaryDirectory.subfolder/inputs-1"),
+            at: desk.url(
+                "TemporaryDirectory.subfolder/inputs-1.LinkFileList"
+            ),
             withIntermediateDirectories: false
         )
         try folder("TemporaryDirectory.linkedKeep")
@@ -122,9 +124,16 @@ struct ExecTestsPruneTmpdir {
             desk.url("TemporaryDirectory.freshFile/.keep-directory").path,
             to: Date()
         )
+        // An old, empty folder: only the link keeps it.
+        let linked = desk.root.appendingPathComponent("outside/empty")
+        try files.createDirectory(
+            at: linked,
+            withIntermediateDirectories: false
+        )
+        try age(linked.path)
         try files.createSymbolicLink(
             at: desk.url("TemporaryDirectory.link"),
-            withDestinationURL: desk.root.appendingPathComponent("outside")
+            withDestinationURL: linked
         )
         files.createFile(
             atPath: desk.url("TemporaryDirectory.plainFile").path,
@@ -149,12 +158,14 @@ struct ExecTestsPruneTmpdir {
         for (name, goes) in Self.cases {
             #expect(desk.exists(name) != goes, "\(name)")
         }
-        #expect(
-            FileManager.default.fileExists(
-                atPath: desk.root.appendingPathComponent("outside/keep")
-                    .path
+        for outside in ["outside/keep", "outside/empty"] {
+            #expect(
+                FileManager.default.fileExists(
+                    atPath: desk.root.appendingPathComponent(outside).path
+                ),
+                "\(outside)"
             )
-        )
+        }
     }
 
     @Test("a dry run removes nothing")
