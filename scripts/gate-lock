@@ -43,10 +43,13 @@ fi
 export KIWIDESK_GATE_PRUNE
 KIWIDESK_GATE_PRUNE="$(cd "$(dirname "$0")" && pwd)/prune-builds"
 export KIWIDESK_GATE_PRUNE_BELOW_GB="${KIWIDESK_GATE_PRUNE_BELOW_GB:-40}"
-# Every run: the build tools' empty TemporaryDirectory.* leftovers
-# in the lock's own dir, which slow every test process's temp-dir
-# listing. Same || true, its own deadline.
-export KIWIDESK_GATE_PRUNE_TMP KIWIDESK_GATE_PRUNE_TMP_DIR="$DIR"
+# Every run: the build tools' old, empty TemporaryDirectory.*
+# folders in the gated command's own temp dir, where they land and
+# where its tests list. Not the lock's dir: a remapped $TMPDIR
+# fills elsewhere. KIWIDESK_GATE_TMP_DIR points the tests at one
+# of their own. Same || true, its own deadline.
+export KIWIDESK_GATE_PRUNE_TMP KIWIDESK_GATE_PRUNE_TMP_DIR
+KIWIDESK_GATE_PRUNE_TMP_DIR="${KIWIDESK_GATE_TMP_DIR:-${TMPDIR:-$DIR}}"
 KIWIDESK_GATE_PRUNE_TMP="$(dirname "$KIWIDESK_GATE_PRUNE")/prune-tmpdir"
 
 export KIWIDESK_GATE_LOCK_HELD=1

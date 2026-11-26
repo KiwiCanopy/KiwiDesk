@@ -18,16 +18,20 @@ A folder goes only when every clause holds:
      session is running at the same moment.
 
 Nothing else in the temp dir is read past its name. Removal
-unlinks the vetted files and then calls rmdir, so a file that
-appears after the check keeps the folder. The default temp dir is
-`getconf DARWIN_USER_TEMP_DIR`, as in `scripts/gate-lock`.
---timeout S stops the sweep after S seconds, keeping what it has
-removed. `scripts/gate-lock` runs this inside its lock on its own
-lock dir, and a failure never fails the gate. Exit 64: usage.
+unlinks the vetted files through the folder's own descriptor and
+then calls rmdir, so a file that appears after the check keeps
+the folder. The default temp dir is `getconf
+DARWIN_USER_TEMP_DIR`. --timeout S ends the process after S
+seconds (SIGALRM), keeping what it has removed.
+
+`scripts/gate-lock` runs this inside its lock on the gated
+command's temp dir, and a failure never fails the gate. Exit 1:
+the temp dir cannot be read; 64: usage.
 """
 
 import os
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -53,12 +57,13 @@ def user_temp_dir() -> str:
     return out or "/tmp/"
 
 
-def leftovers(folder: str, cutoff: float) -> "list[str] | None":
-    """The folder's files when clauses 2 and 3 hold, else None."""
-    if os.lstat(folder).st_mtime >= cutoff:
+def leftovers(fd: int, cutoff: float) -> "list[str] | None":
+    """The open folder's file names when clauses 2 and 3 hold,
+    else None."""
+    if os.fstat(fd).st_mtime >= cutoff:
         return None
-    files = []
-    with os.scandir(folder) as entries:
+    names = []
+    with os.scandir(fd) as entries:
         for entry in entries:
             if not entry.is_file(follow_symlinks=False):
                 return None
@@ -66,8 +71,43 @@ def leftovers(folder: str, cutoff: float) -> "list[str] | None":
                 return None
             if entry.stat(follow_symlinks=False).st_mtime >= cutoff:
                 return None
-            files.append(entry.path)
-    return files
+            names.append(entry.name)
+    return names
+
+
+def sweep(root: str, cutoff: float, apply: bool) -> int:
+    """Removes (or counts) every qualifying folder under `root`.
+    Each folder is opened without following a link and emptied
+    through that descriptor, so a folder swapped for a symlink
+    after the check is never followed."""
+    removed = 0
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        with os.scandir(root) as entries:
+            for entry in entries:
+                if not entry.name.startswith(PREFIX):
+                    continue
+                try:
+                    fd = os.open(entry.name, flags, dir_fd=root_fd)
+                except OSError:
+                    continue
+                try:
+                    names = leftovers(fd, cutoff)
+                    if names is None:
+                        continue
+                    if apply:
+                        for name in names:
+                            os.unlink(name, dir_fd=fd)
+                        os.rmdir(entry.name, dir_fd=root_fd)
+                    removed += 1
+                except OSError:
+                    continue
+                finally:
+                    os.close(fd)
+    finally:
+        os.close(root_fd)
+    return removed
 
 
 def main(argv: "list[str]") -> int:
@@ -90,32 +130,18 @@ def main(argv: "list[str]") -> int:
             print(USAGE, file=sys.stderr)
             return 64
     root = root or user_temp_dir()
-    cutoff = time.time() - age * 60
-    deadline = None if timeout is None else time.monotonic() + timeout
-    removed = 0
-    with os.scandir(root) as entries:
-        for entry in entries:
-            if not entry.name.startswith(PREFIX):
-                continue
-            if deadline is not None and time.monotonic() > deadline:
-                break
-            try:
-                if not entry.is_dir(follow_symlinks=False):
-                    continue
-                files = leftovers(entry.path, cutoff)
-                if files is None:
-                    continue
-                if apply:
-                    for path in files:
-                        os.unlink(path)
-                    os.rmdir(entry.path)
-                removed += 1
-            except OSError:
-                continue
+    if timeout is not None:
+        # A hard deadline: SIGALRM's default action ends the
+        # process, even one stalled inside a call.
+        signal.alarm(max(1, int(timeout)))
+    try:
+        removed = sweep(root, time.time() - age * 60, apply)
+    except OSError as error:
+        print(f"prune-tmpdir: {error}", file=sys.stderr)
+        return 1
     verb = "removed" if apply else "would remove"
     print(f"prune-tmpdir: {verb} {removed} {PREFIX}* folder(s) in {root}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

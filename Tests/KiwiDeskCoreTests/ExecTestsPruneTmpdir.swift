@@ -30,7 +30,10 @@ struct ExecTestsPruneTmpdir {
             testTemporaryDirectory
             .appendingPathComponent("prune-tmp-\(UUID().uuidString)")
             .resolvingSymlinksInPath()
-        var temp: URL { root.appendingPathComponent("gate") }
+        var temp: URL { root.appendingPathComponent("temp") }
+        var lock: URL {
+            root.appendingPathComponent("gate/kiwidesk-gate.lock")
+        }
 
         func url(_ name: String) -> URL {
             temp.appendingPathComponent(name)
@@ -54,15 +57,15 @@ struct ExecTestsPruneTmpdir {
             env["KIWIDESK_GATE_LOCK_HELD"] = nil
             env["KIWIDESK_GATE_WAIT"] = nil
             env["KIWIDESK_GATE_PRUNE_BELOW_GB"] = "0"
-            env["KIWIDESK_GATE_DIR"] = temp.path
+            env["KIWIDESK_GATE_DIR"] =
+                lock.deletingLastPathComponent().path
+            env["KIWIDESK_GATE_TMP_DIR"] = temp.path
             return env
         }
 
         func prune(_ extra: [String] = ["--apply"]) throws -> ScriptRun {
-            try spawn(
-                "/usr/bin/python3",
-                [script("prune-tmpdir"), "--dir", temp.path] + extra
-            )
+            // By its shebang, as gate-lock runs it.
+            try spawn(script("prune-tmpdir"), ["--dir", temp.path] + extra)
         }
     }
 
@@ -73,10 +76,12 @@ struct ExecTestsPruneTmpdir {
             at: desk.root.appendingPathComponent("outside"),
             withIntermediateDirectories: true
         )
-        try files.createDirectory(
-            at: desk.temp,
-            withIntermediateDirectories: true
-        )
+        for dir in [desk.temp, desk.lock.deletingLastPathComponent()] {
+            try files.createDirectory(
+                at: dir,
+                withIntermediateDirectories: true
+            )
+        }
         func folder(_ name: String, _ children: [String] = []) throws {
             let dir = desk.url(name)
             try files.createDirectory(
@@ -86,7 +91,6 @@ struct ExecTestsPruneTmpdir {
             for child in children {
                 let path = dir.appendingPathComponent(child).path
                 files.createFile(atPath: path, contents: Data("x".utf8))
-                try age(path)
             }
         }
         func age(_ path: String, to date: Date = Self.old) throws {
@@ -120,10 +124,6 @@ struct ExecTestsPruneTmpdir {
         )
         try folder("TemporaryDirectory.fresh")
         try folder("TemporaryDirectory.freshFile", [".keep-directory"])
-        try age(
-            desk.url("TemporaryDirectory.freshFile/.keep-directory").path,
-            to: Date()
-        )
         // An old, empty folder: only the link keeps it.
         let linked = desk.root.appendingPathComponent("outside/empty")
         try files.createDirectory(
@@ -141,10 +141,29 @@ struct ExecTestsPruneTmpdir {
         )
         try folder("NotTemporaryDirectory.empty")
         try folder("kiwi-run-1-abc")
-        // Last: writing a folder's children moves its mtime.
-        for (name, _) in Self.cases where name != "TemporaryDirectory.fresh" {
-            try? age(desk.url(name).path)
-        }
+        // Last, and the links themselves too (`-h`): writing a
+        // folder's children moves its mtime, and FileManager dates
+        // a link's target. Then the two fresh items alone.
+        let format = DateFormatter()
+        format.dateFormat = "yyyyMMddHHmm"
+        let stamp = format.string(from: Self.old)
+        let aged = try spawn(
+            "/usr/bin/find",
+            [
+                desk.temp.path, "-mindepth", "1",
+                "-exec", "touch", "-h", "-t", stamp, "{}", "+",
+            ]
+        )
+        #expect(aged.status == 0, "\(aged.stderr)")
+        let fresh = try spawn(
+            "/usr/bin/touch",
+            [
+                desk.url("TemporaryDirectory.fresh").path,
+                desk.url("TemporaryDirectory.freshFile/.keep-directory")
+                    .path,
+            ]
+        )
+        #expect(fresh.status == 0, "\(fresh.stderr)")
         return desk
     }
 
@@ -196,16 +215,57 @@ struct ExecTestsPruneTmpdir {
     func gateLockPrunes() throws {
         let desk = try makeDesk()
         defer { desk.remove() }
-        let run = try spawn(
-            "/bin/bash",
-            [desk.script("gate-lock"), "echo", "gated"],
-            environment: desk.environment,
-            currentDirectory: desk.root
-        )
+        let run = try gateLock(desk)
         #expect(run.status == 0, "\(run.stderr)")
         #expect(run.stdout == "gated\n", "\(run.stdout)")
         #expect(!desk.exists("TemporaryDirectory.empty"))
         #expect(!desk.exists("TemporaryDirectory.leftovers"))
         #expect(desk.exists("TemporaryDirectory.otherFile"))
+    }
+
+    /// A prune moved ahead of gate-lock's own lockf would run while
+    /// another gate step holds the slot.
+    @Test("gate-lock never prunes before it holds the gate")
+    func gateLockPrunesOnlyInsideTheLock() throws {
+        let desk = try makeDesk()
+        defer { desk.remove() }
+        let holder = Process()
+        holder.executableURL = URL(fileURLWithPath: "/usr/bin/lockf")
+        holder.arguments = ["-k", desk.lock.path, "/bin/cat"]
+        let input = Pipe()
+        holder.standardInput = input
+        try holder.run()
+        defer {
+            try? input.fileHandleForWriting.close()
+            holder.waitUntilExit()
+        }
+        let deadline = Date().addingTimeInterval(10)
+        var held = false
+        while !held, Date() < deadline {
+            let probe = try spawn(
+                "/usr/bin/lockf",
+                ["-k", "-t", "0", desk.lock.path, "/usr/bin/true"]
+            )
+            held = probe.status == 75
+            if !held { Thread.sleep(forTimeInterval: 0.05) }
+        }
+        #expect(held, "the holder never took the fixture gate")
+        let run = try gateLock(desk, wait: "1")
+        #expect(run.status == 75, "\(run.stdout)\(run.stderr)")
+        #expect(desk.exists("TemporaryDirectory.empty"))
+    }
+
+    private func gateLock(
+        _ desk: Desk,
+        wait: String? = nil
+    ) throws -> ScriptRun {
+        var env = desk.environment
+        env["KIWIDESK_GATE_WAIT"] = wait
+        return try spawn(
+            "/bin/bash",
+            [desk.script("gate-lock"), "echo", "gated"],
+            environment: env,
+            currentDirectory: desk.root
+        )
     }
 }
