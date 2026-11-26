@@ -36,10 +36,15 @@ struct TestScratchCensusTests {
         Needle(text: "itemReplacement" + "Directory", allowed: []),
         Needle(text: "mkd" + "temp", allowed: []),
         Needle(text: "mks" + "temp", allowed: []),
-        // The spawn primitives point children at the run's root.
+        // The spawn primitives point children at the run's root;
+        // the temp-dir prune's gate cases re-point or unset it to
+        // run the script's own default, inside that root.
         Needle(
             text: "TMP" + "DIR",
-            allowed: ["ScriptFixture.swift", "GuiScriptFixture.swift"]
+            allowed: [
+                "ScriptFixture.swift", "GuiScriptFixture.swift",
+                "ExecTestsPruneTmpdirGate.swift",
+            ]
         ),
         Needle(text: "\"/" + "tmp", allowed: Self.literalTmp),
         // A minted script name, beside other files.

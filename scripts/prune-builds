@@ -8,7 +8,8 @@
 # site/node_modules and site/.astro, and only in a tree passing
 # every clause below; DerivedData is reported, never touched. Never
 # removes a worktree or a branch. Anything else that deletes build
-# output calls this script (packaging-and-release.md).
+# output in a worktree calls this script; the build tools' temp-dir
+# leftovers are scripts/prune-tmpdir's (packaging-and-release.md).
 #
 #   1. The gate is free: --apply takes gate-lock's lock with
 #      `lockf -t 0` and holds it for the whole sweep, or runs
