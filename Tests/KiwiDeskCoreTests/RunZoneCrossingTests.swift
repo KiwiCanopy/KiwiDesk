@@ -188,6 +188,12 @@ struct RunZoneCrossingTests {
         #expect(press.cue == limit.cue)
         #expect(press.refusal == limit.refusal)
         #expect(press.sizes.keys == limit.sizes.keys)
+        // The two weights draw window 4 about 1 pt apart.
+        for (member, share) in limit.sizes {
+            let near = press.sizes[member] ?? nil
+            #expect((near == nil) == (share == nil))
+            #expect(abs((near ?? 0) - (share ?? 0)) < 0.005)
+        }
         let after = applying(press, of: id, to: zone, in: near)
         #expect(
             press.cue != nil
