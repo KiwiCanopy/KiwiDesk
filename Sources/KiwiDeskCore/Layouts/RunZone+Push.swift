@@ -94,7 +94,7 @@ extension RunZone {
         // A run that shows everyone holds no length, so a shrink at
         // its limit stops here and says so. A grow there pushes.
         if spent {
-            return Press(cue: .weightLimit, refusal: .atWeightLimit)
+            return Press(cue: limitCue(line, index), refusal: .atWeightLimit)
         }
         if let press = weightStep(
             line,

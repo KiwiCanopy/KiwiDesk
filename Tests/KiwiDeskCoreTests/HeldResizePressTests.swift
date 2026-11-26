@@ -268,10 +268,11 @@ struct HeldResizePressTests {
             }
             return refusals.first
         }
-        // A grow that would shrink the inner window of a nested pair.
+        // A grow held to the inner window's peak, where the one
+        // shared ratio gives it no larger share either way.
         #expect(
             lastRefusal(width: 1220, windows: 4, focus: 3, step: 5)
-                == .ratioMovesOtherWay(WindowID(3), axis: "x")
+                == .ratioLimit(WindowID(3), axis: "x", grows: true)
         )
         // The store's bound on a desk where every floor is far off.
         #expect(

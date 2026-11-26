@@ -96,7 +96,7 @@ struct HoldGlideEligibilitySeamTests {
         // — the wiring suite drives today's three cues but
         // cannot see a fourth that never joins. Derived, not
         // listed (#1056 guard-prover finding): every `refuse*`
-        // function in the pill file routes through the funnel,
+        // function in the builders file routes through the funnel,
         // the funnel notes a press's refusal (the retile door,
         // #934, is the one that stands the note down), and the
         // funnel is the ONE production caller of
@@ -107,7 +107,7 @@ struct HoldGlideEligibilitySeamTests {
                     "Sources/KiwiDeskCore/App"
                 )
                 .appendingPathComponent(
-                    "KiwiCore+SizeLimitPill.swift"
+                    "KiwiCore+ResizeRefusals.swift"
                 )
         )
         // Per FUNCTION, not a balance identity: a count that
@@ -122,7 +122,7 @@ struct HoldGlideEligibilitySeamTests {
         for name in cueNames {
             let body = try SourceScan.functionBody(
                 of: name,
-                in: "KiwiCore+SizeLimitPill.swift",
+                in: "KiwiCore+ResizeRefusals.swift",
                 under: "App"
             )
             #expect(

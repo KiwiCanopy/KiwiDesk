@@ -76,7 +76,7 @@ struct SplitFloorHealNeedleTests {
     func retileCueSkipsThePressChannels() throws {
         let door = try SourceScan.functionBody(
             of: "refuseFloorUnfitAtRetile",
-            in: "KiwiCore+SizeLimitPill.swift",
+            in: "KiwiCore+ResizeRefusals.swift",
             under: "App"
         )
         #expect(door.contains("cueResizeRefusal("))

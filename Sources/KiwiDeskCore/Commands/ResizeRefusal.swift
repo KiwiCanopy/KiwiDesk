@@ -41,15 +41,17 @@ enum ResizeRefusal: Equatable {
     /// cell already filling the axis (#2707), which the wording
     /// tells apart and no consumer acts on.
     case ownMaximum(WindowID, axis: String, atBoundary: Bool)
-    /// A press stopped at the stored limit of the ratio or weight it
-    /// moves (#3643): BSP's 0.1/0.9 bound, or Stack's and Track's
-    /// weight range, while the windows may still be above their
-    /// floors. `grows` is the press's sign, not the ratio's motion.
+    /// A press stopped at the largest or smallest share the ratio or
+    /// weight it moves can give (#3643): BSP's 0.1/0.9 bound or the
+    /// peak one shared ratio gives a nested window, or Stack's and
+    /// Track's weight range, with the windows above their floors.
+    /// `grows` is the press's sign, not the ratio's motion.
     case ratioLimit(WindowID, axis: String, grows: Bool)
-    /// A grow that would shrink the window (#3643): the one shared BSP
-    /// ratio moves it the other way, so the opposite press grows it.
-    /// No wall was reached, so it does not bump.
-    case ratioMovesOtherWay(WindowID, axis: String)
+    /// A press the one shared BSP ratio answers by moving the window
+    /// against itself, while the opposite press moves it the way
+    /// asked (#3643). `grows` is the press's sign. No wall was
+    /// reached, so it does not bump.
+    case ratioMovesOtherWay(WindowID, axis: String, grows: Bool)
     /// The zone the focused window sits in has no parameter on
     /// the asked axis at all (#1255) — a horizontal master zone
     /// divides widths, so a height press has nothing to move.
@@ -103,7 +105,7 @@ extension ResizeRefusal {
     var window: WindowID {
         switch self {
         case .ownMinimum(let id, _, _), .ownMaximum(let id, _, _),
-            .ratioLimit(let id, _, _), .ratioMovesOtherWay(let id, _),
+            .ratioLimit(let id, _, _), .ratioMovesOtherWay(let id, _, _),
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
             .gridNoOtherTrack(let id, _), .layoutHasNoResize(let id),
             .windowIsFullscreen(let id),
@@ -122,7 +124,7 @@ extension ResizeRefusal {
     var axis: String? {
         switch self {
         case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _),
-            .ratioLimit(_, let axis, _), .ratioMovesOtherWay(_, let axis),
+            .ratioLimit(_, let axis, _), .ratioMovesOtherWay(_, let axis, _),
             .noAxisHere(_, let axis), .gridNoOtherTrack(_, let axis):
             axis
         case .neighborMinimum(_, _, let axis, _, _):

@@ -2232,6 +2232,7 @@
   "resize.nothing_to_divide": "Esta zona não tem nada a dividir",
   "resize.share_max_reached": "Proporção máxima atingida",
   "resize.share_min_reached": "Proporção mínima atingida",
+  "resize.shrinks_other_way": "Esta janela diminui no outro sentido",
   "resize.window_fullscreen": "Janelas em tela cheia não podem ser redimensionadas",
   "restore_reach.changed_in": "Com alterações em %1$@.",
   "restore_reach.changed_in_count": "Perfis com alterações: %1$d",

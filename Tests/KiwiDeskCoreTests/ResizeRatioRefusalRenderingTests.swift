@@ -6,7 +6,7 @@ import Testing
 /// The two ratio refusals' own derivations (#3643): a limit reached
 /// takes its glyph and bump from the press's sign, as `ownMinimum`
 /// and `ownMaximum` do, and a ratio that moves the window the other
-/// way on a grow bumps nowhere, since no wall was reached.
+/// way bumps nowhere, since no wall was reached.
 @Suite("Resize ratio refusal rendering (#3643)")
 @MainActor
 struct ResizeRatioRefusalRenderingTests {
@@ -35,11 +35,17 @@ struct ResizeRatioRefusalRenderingTests {
 
     @Test("A ratio that moves the window the other way never bumps")
     func otherWayHasNoWall() {
-        let refusal = ResizeRefusal.ratioMovesOtherWay(window, axis: "x")
-        #expect(refusal.bumpDirection == nil)
-        #expect(refusal.pillSymbol == "nosign")
-        #expect(refusal.window == window)
-        #expect(refusal.axis == "x")
+        for grows in [true, false] {
+            let refusal = ResizeRefusal.ratioMovesOtherWay(
+                window,
+                axis: "x",
+                grows: grows
+            )
+            #expect(refusal.bumpDirection == nil)
+            #expect(refusal.pillSymbol == "nosign")
+            #expect(refusal.window == window)
+            #expect(refusal.axis == "x")
+        }
     }
 
     @Test("Each ratio refusal draws its ruled sentence")
@@ -56,8 +62,12 @@ struct ResizeRatioRefusalRenderingTests {
                 "Smallest share reached"
             ),
             (
-                .ratioMovesOtherWay(window, axis: "x"),
+                .ratioMovesOtherWay(window, axis: "x", grows: true),
                 "This window grows the other way"
+            ),
+            (
+                .ratioMovesOtherWay(window, axis: "x", grows: false),
+                "This window shrinks the other way"
             ),
         ]
         for (refusal, text) in cases {

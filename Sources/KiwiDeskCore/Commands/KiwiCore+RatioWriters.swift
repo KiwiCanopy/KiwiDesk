@@ -307,6 +307,12 @@ extension KiwiCore {
         min(max(value, 0.1), 0.9)
     }
 
+    /// Whether a press from `base` to `proposed` leaves the stored
+    /// ratio where it is: at its bound, up to a hold's float drift.
+    static func bspRatioSpent(_ base: Double, to proposed: Double) -> Bool {
+        abs(storedBspRatio(proposed) - storedBspRatio(base)) < 1e-9
+    }
+
     /// The per-axis store write both paths above share, with the
     /// store's own bound applied once.
     private func writeBspRatio(

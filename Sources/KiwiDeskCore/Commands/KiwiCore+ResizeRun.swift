@@ -59,10 +59,7 @@ extension KiwiCore {
         if delta < 0, outcome.hitOwnMinimum {
             refuseShrinkAtMinimum(focused, axis: axis)
         } else if delta < 0, spent {
-            // A limit above the floor is no minimum: a hold just ends.
-            if !endGlideStep() {
-                refuseRatio(focused, axis: axis, grows: false)
-            }
+            cueWeightLimit(focused, delta: delta, axis: axis)
         } else if delta > 0,
             let blocked = outcome.blockedByOther
                 ?? (spent ? StackLayout.nearestMate(of: at) : nil)
@@ -83,10 +80,9 @@ extension KiwiCore {
                 store(press, of: focused, in: found.zone, space: space)
                 return true
             }
-            if endGlideStep() { return false }
             if outcome.blockedByOther == nil {
-                refuseRatio(focused, axis: axis, grows: true)
-            } else {
+                cueWeightLimit(focused, delta: delta, axis: axis)
+            } else if !endGlideStep() {
                 refuseGrowAtNeighborMinimum(
                     focused,
                     anchor: members[blocked],
@@ -202,7 +198,7 @@ extension KiwiCore {
         case .ownMinimum:
             refuseShrinkAtMinimum(focused, axis: axis)
         case .weightLimit:
-            refuseRatio(focused, axis: axis, grows: delta > 0)
+            cueWeightLimit(focused, delta: delta, axis: axis)
         case .neighborMinimum(let anchor):
             refuseGrowAtNeighborMinimum(focused, anchor: anchor, axis: axis)
         case .nothingToDivide:
@@ -236,16 +232,16 @@ extension KiwiCore {
         return true
     }
 
-    /// A weight at its limit moves nothing: a hold just ends there
-    /// and a press cues the limit (#2709, #2969, #3643), mirroring
-    /// `pushOrCue`'s spent arms, so a change to one owes the other.
+    /// A weight at its limit above the floor moves nothing: a hold
+    /// just ends there and a press cues the limit (#2709, #2969,
+    /// #3643). Every weight writer's limit arm takes this one door.
     func cueWeightLimit(
         _ window: WindowID,
         delta: Double,
         axis: String
     ) {
         guard !endGlideStep() else { return }
-        refuseRatio(window, axis: axis, grows: delta > 0)
+        refuseRatioLimit(window, axis: axis, grows: delta > 0)
     }
 
     /// Whether a drag shrinking `id` on `vertical`'s axis hands the

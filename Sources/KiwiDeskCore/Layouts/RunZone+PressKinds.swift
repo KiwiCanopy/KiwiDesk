@@ -174,6 +174,13 @@ extension RunZone {
         return press
     }
 
+    /// The cue for a weight at its limit: the window's own floor where
+    /// it draws at it, since a floor wins over the limit (#3643).
+    func limitCue(_ line: Line, _ index: Int) -> Press.Cue {
+        line.drawn[index] <= line.bare[index] + Self.unchangedTolerance
+            ? .ownMinimum : .weightLimit
+    }
+
     /// The run's weight step (#2235): it divides the span the shown
     /// windows' floors leave, among the windows that take a share,
     /// with no minimum of its own, since the layout keeps the floors.

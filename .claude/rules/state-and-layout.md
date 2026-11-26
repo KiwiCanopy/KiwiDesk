@@ -2444,7 +2444,11 @@ editing here:
   `bspPressMoves` before the capped writer and writes nothing where
   the press would move the focused window against itself or not at
   all; the mouse drop does not ask it (#2969,
-  `HeldResizePressTests`). Along a run's scroll direction a
+  `HeldResizePressTests`). A press that moves nothing names the
+  limit that stopped it, a floor (the window's own or a mate's)
+  winning over a ratio's or a weight's own limit, and a weight
+  writer's limit arm takes the one `cueWeightLimit` (#3643,
+  `RunPushCommandTests` ▸ `stackFloorWinsOverTheLimit`). Along a run's scroll direction a
   grow pushes instead (#2709): what a press inside a zone laid by
   floor and weight writes is the one pure `RunZone.press`, which
   `resizeInRun` stores whole and a whole-zone weight step a

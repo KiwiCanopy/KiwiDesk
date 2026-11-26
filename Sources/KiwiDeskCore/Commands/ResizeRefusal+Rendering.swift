@@ -98,8 +98,16 @@ extension ResizeRefusal {
             grows
                 ? L("resize.share_max_reached", "Largest share reached")
                 : L("resize.share_min_reached", "Smallest share reached")
-        case .ratioMovesOtherWay:
-            L("resize.grows_other_way", "This window grows the other way")
+        case .ratioMovesOtherWay(_, _, let grows):
+            grows
+                ? L(
+                    "resize.grows_other_way",
+                    "This window grows the other way"
+                )
+                : L(
+                    "resize.shrinks_other_way",
+                    "This window shrinks the other way"
+                )
         case .noAxisHere(_, let axis):
             axis == "y"
                 ? L(

@@ -2232,6 +2232,7 @@
   "resize.nothing_to_divide": "Questa zona non ha nulla da dividere",
   "resize.share_max_reached": "Quota massima raggiunta",
   "resize.share_min_reached": "Quota minima raggiunta",
+  "resize.shrinks_other_way": "Questa finestra si riduce nell'altra direzione",
   "resize.window_fullscreen": "Le finestre a tutto schermo non possono essere ridimensionate",
   "restore_reach.changed_in": "Modifiche in %1$@.",
   "restore_reach.changed_in_count": "Profili con modifiche: %1$d",

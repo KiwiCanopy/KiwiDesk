@@ -2232,6 +2232,7 @@
   "resize.nothing_to_divide": "Dieser Bereich hat nichts aufzuteilen",
   "resize.share_max_reached": "Größter Anteil erreicht",
   "resize.share_min_reached": "Kleinster Anteil erreicht",
+  "resize.shrinks_other_way": "Dieses Fenster schrumpft in die andere Richtung",
   "resize.window_fullscreen": "Vollbildfenster können nicht in der Größe geändert werden",
   "restore_reach.changed_in": "Geändert in %1$@.",
   "restore_reach.changed_in_count": "Geändert in Profilen: %1$d",

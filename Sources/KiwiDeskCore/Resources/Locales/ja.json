@@ -2232,6 +2232,7 @@
   "resize.nothing_to_divide": "この領域には分けるものがありません",
   "resize.share_max_reached": "最大の割合に達しました",
   "resize.share_min_reached": "最小の割合に達しました",
+  "resize.shrinks_other_way": "このウインドウは逆方向で小さくなります",
   "resize.window_fullscreen": "フルスクリーンのウインドウはサイズ変更できません",
   "restore_reach.changed_in": "%1$@で変更されています。",
   "restore_reach.changed_in_count": "変更されたプロファイル: %1$d",

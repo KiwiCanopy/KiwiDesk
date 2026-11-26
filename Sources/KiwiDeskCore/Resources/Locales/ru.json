@@ -2232,6 +2232,7 @@
   "resize.nothing_to_divide": "В этой зоне нечего делить",
   "resize.share_max_reached": "Достигнута максимальная доля",
   "resize.share_min_reached": "Достигнута минимальная доля",
+  "resize.shrinks_other_way": "Это окно уменьшается в другую сторону",
   "resize.window_fullscreen": "Размер полноэкранных окон изменить нельзя",
   "restore_reach.changed_in": "Где изменено: %1$@.",
   "restore_reach.changed_in_count": "Изменено в профилях: %1$d",

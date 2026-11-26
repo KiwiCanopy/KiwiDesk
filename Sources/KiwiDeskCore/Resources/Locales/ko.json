@@ -2232,6 +2232,7 @@
   "resize.nothing_to_divide": "이 영역에는 나눌 것이 없습니다",
   "resize.share_max_reached": "최대 비율에 도달했습니다",
   "resize.share_min_reached": "최소 비율에 도달했습니다",
+  "resize.shrinks_other_way": "이 윈도우는 반대 방향으로 작아집니다",
   "resize.window_fullscreen": "전체 화면 윈도우는 크기를 조절할 수 없습니다",
   "restore_reach.changed_in": "%1$@에서 변경되었습니다.",
   "restore_reach.changed_in_count": "변경된 프로필: %1$d",
