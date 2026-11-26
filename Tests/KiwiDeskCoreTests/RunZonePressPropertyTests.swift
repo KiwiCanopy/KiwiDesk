@@ -102,7 +102,7 @@ struct RunZonePressPropertyTests {
 
     @Test("Every press keeps the run whole and its step honest")
     func pressesKeepTheInvariants() throws {
-        for seed in 1...300 {
+        for seed in 1...700 {
             var random = Seeded(state: UInt64(seed))
             var (zone, context, _) = start(&random)
             context = persisted(zone, context)
