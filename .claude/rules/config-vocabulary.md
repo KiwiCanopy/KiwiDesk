@@ -385,7 +385,8 @@ synonym:
   Middle / Right and Top / Bottom, a nested area by one key per
   two-word name, "Area 1" onwards where `ScreenSplit.positions`
   numbers them — or by the name a user gave it, and a Space's place
-  reads "Screen 1 – Left". Never *segment* (the Space Bar's
+  reads "Screen 1 – Left", the screen named by its **Screen N**
+  (below) wherever the copy means the number the pin stores. Never *segment* (the Space Bar's
   front-app segment and segmented pickers spend it), *part*,
   *region*, *zone*, *display* or *monitor*, and never a bare
   *screen*, which keeps meaning the physical one. Author no other
@@ -424,6 +425,15 @@ synonym:
   the one copy of how that is decided). The argument, and the
   counts it was decided on, are `docs/design-decisions.md` ▸
   Vocabulary: a screen is a screen.
+- **Screen N** — the number a profile gives a screen (#3647):
+  copy names it "Screen 2", through the `monitor_card.number_badge`
+  frame, and never a bare numeral, which reads as a count — save in
+  the save pill's "Screen numbers" row, whose label names the noun
+  for every entry ("1 LG UltraWide, 2 Studio Display"). A sentence
+  naming a pinned number says "Screen N"; one naming the physical
+  screen says its name. Where every setup has its own Screen 1 —
+  Known screen setups — copy names screens by name alone. A screen
+  holding no number is *not numbered*, never *off* or *disabled*.
 - **duration** vs **speed** vs **rate** vs **delay** — name the
   quantity you STORE. A time a thing takes is a **duration**
   (`animations.set_duration`,

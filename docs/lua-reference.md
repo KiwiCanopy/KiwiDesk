@@ -742,7 +742,9 @@ screen's fingerprint (as printed by `list_monitors`) or name.
 :::unreleased
 A number names **Screen N**, as `list_monitors` reports it in
 `screen`: the live profile's numbering for the connected screens,
-else left to right, ties top to bottom. A script that must name one
+else left to right, ties top to bottom. A renumber saved in
+Settings ▸ Screens counts at once, and a screen left unnumbered
+there holds no number until the next load. A script that must name one
 screen whatever the numbering passes its fingerprint. A number a
 held `init.lua` call names before any screen is known —
 `pin_space_to_display`, a split, a bar's per-screen value — is

@@ -58,6 +58,7 @@
 (readonly) mac_checklist.switch_on_activate
 (readonly) monitors.fingerprints
 (state) monitors.placementUnavailable
+(state) monitors.screen_numbers
 AutoStartManager (no stored pref)
 UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance

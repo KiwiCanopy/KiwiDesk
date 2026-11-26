@@ -51,6 +51,8 @@ struct AnnouncedValueTests {
         "SpaceModeMenu.swift": 2,
         // #2737: a Space's Screen menu, named for its row.
         "SpaceScreenMenu.swift": 1,
+        // #3647: a screen card's number pull-down, its face spoken.
+        "ScreenNumberBadge.swift": 1,
         // #1790: a temporary or held Space's greyed mode readout.
         "LiveOnlySpaceRow.swift": 1,
         "DesktopsGroup+Row.swift": 1,

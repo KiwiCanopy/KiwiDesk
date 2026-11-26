@@ -18,6 +18,7 @@ struct ScreenNumberBadge: View {
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
+        .menuTriggerHover()
         .fixedSize()
         .accessibilityLabel(L("monitor_card.number.ax", "Screen number"))
         .accessibilityValue(face)

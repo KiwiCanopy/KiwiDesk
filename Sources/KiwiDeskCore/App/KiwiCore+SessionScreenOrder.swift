@@ -31,9 +31,7 @@ extension KiwiCore {
     /// a hole is never stored, so it outlives the Save.
     func clearSessionScreenOrder(ifStoredIn profile: Profile) {
         guard let order = sessionScreenOrder, order.unnumbered.isEmpty,
-            profile.monitorSets.contains(where: {
-                $0.monitors == order.fingerprints
-            })
+            profile.monitorSets.contains(where: { $0.order == order })
         else { return }
         clearSessionScreenOrder()
     }
