@@ -38,7 +38,7 @@ struct UpdateGlassTextTests {
     /// Files whose text a control draws on a bezel of its own, in
     /// the ink its seal sets. A menu picker's seal is a fixed ink
     /// and its bezel adapts with the glass: weak in light over a
-    /// dark backdrop, a defect apart from #3650's text.
+    /// dark backdrop, a defect of its own (#3666).
     private static let exempt: [String: String] = [
         "UpdateNotesTabStrip.swift": "segments; menu under its seal",
         "WhatsNewReleasePicker.swift": "menu picker under its seal",
