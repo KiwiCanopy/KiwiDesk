@@ -186,22 +186,18 @@ struct ScreenEdgeVerbTests {
         #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
     }
 
-    /// Before the first display is published — `init.lua` at
-    /// boot — a screen named by number waits for the first report
-    /// of a screen and lands there (#3640); a fingerprint needs no
-    /// screen and lands at once.
+    /// Before the first display is published, outside a config
+    /// load, a screen number names nothing and refuses, while a
+    /// fingerprint needs no screen and lands at once; `init.lua`'s
+    /// own calls wait for a screen (#3640, `BootDisplayAreaTests`).
     @Test("A screen is named before any display is published")
     func namesAScreenAtBoot() {
         let core = makeTestCore()
         #expect(core.state.workspaces.allDisplays.isEmpty)
-        let main = PositionalDisplays.mainIDOverride
-        defer { PositionalDisplays.mainIDOverride = main }
-        PositionalDisplays.mainIDOverride = { Self.right.id }
         #expect(
-            edge(core, "space_bar.set_edge", .string("left"), .number(1))
+            !edge(core, "space_bar.set_edge", .string("left"), .number(1))
                 .isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.isEmpty)
         #expect(
             edge(
                 core,
@@ -213,11 +209,6 @@ struct ScreenEdgeVerbTests {
         #expect(
             core.tiler.settings.appBarStyle.edgeOverride
                 == [Self.left.fingerprint: .left]
-        )
-        core.handle(.displaysChanged([Self.left, Self.right]))
-        #expect(
-            core.tiler.settings.spaceBarStyle.edge(on: Self.right.fingerprint)
-                == .left
         )
         #expect(core.heldScreenCalls.isEmpty)
     }

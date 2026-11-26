@@ -61,7 +61,9 @@ struct LuaAreaSplits {
         from old: ScreenSplit,
         to stored: ScreenSplit
     ) {
-        if declared?.contains(fingerprint) == true {
+        if declared?.contains(fingerprint) == true
+            || awaiting?.contains(fingerprint) == true
+        {
             written[fingerprint] = stored
         } else if lastLoad[fingerprint] == old {
             lastLoad[fingerprint] = stored

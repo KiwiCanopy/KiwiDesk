@@ -10,12 +10,12 @@ extension KiwiCore {
     /// replaced is dropped, as the replace would have overwritten
     /// it live (#3640).
     func settleLuaAreaSplits(kept: Bool) {
-        if !kept { heldScreenCalls.removeAll(where: \.isLoadSettings) }
+        if !kept { heldScreenCalls.removeAll(where: \.isSettings) }
         makeWhole(
             luaAreaSplits.endLoad(
                 stored: tiler.settings.displayAreas,
                 kept: kept,
-                holding: heldScreenCalls.contains(where: \.isLoadSplit)
+                holding: heldScreenCalls.contains(where: \.isSplit)
             )
         )
     }

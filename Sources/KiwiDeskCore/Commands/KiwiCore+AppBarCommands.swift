@@ -27,7 +27,7 @@ extension KiwiCore {
         switch screenResolvedBarArgs(
             field: field,
             args,
-            replay: {
+            replay: { [unowned self] in
                 self.barCommand(command, args)
             }
         ) {
@@ -70,7 +70,7 @@ extension KiwiCore {
         switch screenResolvedBarArgs(
             field: field,
             args,
-            replay: {
+            replay: { [unowned self] in
                 self.spaceBarCommand(command, args)
             }
         ) {
@@ -113,7 +113,7 @@ extension KiwiCore {
             field: field,
             screenField: "pocket_edge",
             args,
-            replay: { self.kiwishelfCommand(command, args) }
+            replay: { [unowned self] in self.kiwishelfCommand(command, args) }
         ) {
         case .success(let resolved): calls = resolved
         case .failure(let error): return .fail(error.message)
@@ -159,7 +159,7 @@ extension KiwiCore {
         switch screenResolvedBarArgs(
             field: field,
             args,
-            replay: {
+            replay: { [unowned self] in
                 self.applyBarOverride(field: field, args, into: mode)
             }
         ) {

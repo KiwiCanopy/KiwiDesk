@@ -6,14 +6,11 @@ import Foundation
 enum HeldScreenCall {
     /// `pin_space_to_display`'s Space and raw screen argument.
     case pin(SpaceID, JSONValue)
-    /// A settings write by screen number or name: a split or a bar's
-    /// per-screen value. `duringLoad` marks one a config load made,
-    /// and `split` one that writes `display_areas`.
-    case settings(
-        duringLoad: Bool,
-        split: Bool,
-        replay: @MainActor () -> CommandResponse
-    )
+    /// A config load's settings write that waits on a screen: a split
+    /// or a bar's per-screen value by number or name, or an area's
+    /// name behind a held split. `split` marks one that writes
+    /// `display_areas`.
+    case settings(split: Bool, replay: @MainActor () -> CommandResponse)
 
     /// The Space a held pin names, nil for any other call.
     var pinnedSpace: SpaceID? {
@@ -21,28 +18,30 @@ enum HeldScreenCall {
         return nil
     }
 
-    /// Whether this is a settings write a config load made.
-    var isLoadSettings: Bool {
-        if case .settings(true, _, _) = self { return true }
+    /// Whether this is a settings write.
+    var isSettings: Bool {
+        if case .settings = self { return true }
         return false
     }
 
-    /// Whether this is a split a config load made.
-    var isLoadSplit: Bool {
-        if case .settings(true, true, _) = self { return true }
+    /// Whether this is a write of `display_areas`.
+    var isSplit: Bool {
+        if case .settings(true, _) = self { return true }
         return false
     }
 }
 
 extension KiwiCore {
     /// Whether a settings write naming `arg` as its screen waits for
-    /// the first screen report: no screen is known, and the argument
-    /// is a number or a name, which only a known screen resolves. A
-    /// fingerprint or area key resolves without one and never waits.
+    /// the first screen report: a config load runs with no screen
+    /// known, and the argument is a number or a name, which only a
+    /// known screen resolves. A fingerprint or area key resolves
+    /// without one and never waits; a call outside a load answers
+    /// as it always did.
     func holdsScreenArg(_ arg: JSONValue?) -> Bool {
-        guard state.workspaces.allDisplays.isEmpty, let arg else {
-            return false
-        }
+        guard luaAreaSplits.isRecording,
+            state.workspaces.allDisplays.isEmpty, let arg
+        else { return false }
         if arg.intValue != nil { return true }
         guard let raw = arg.stringValue else { return false }
         return !Self.isFingerprint(ScreenAreaKey(parsing: raw).fingerprint)
@@ -55,13 +54,7 @@ extension KiwiCore {
         split: Bool,
         replay: @escaping @MainActor () -> CommandResponse
     ) {
-        heldScreenCalls.append(
-            .settings(
-                duringLoad: luaAreaSplits.isRecording,
-                split: split,
-                replay: replay
-            )
-        )
+        heldScreenCalls.append(.settings(split: split, replay: replay))
     }
 
     /// Replays every held call in the order it was made, at the first
@@ -84,8 +77,8 @@ extension KiwiCore {
                 if let reason {
                     onLog("pin_space_to_display(\(space.raw)): \(reason)")
                 }
-            case .settings(let duringLoad, _, let replay):
-                luaAreaSplits.replaying = duringLoad
+            case .settings(_, let replay):
+                luaAreaSplits.replaying = true
                 let reason = replay().error
                 luaAreaSplits.replaying = false
                 if let reason { onLog("held screen call: \(reason)") }

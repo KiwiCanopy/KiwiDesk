@@ -22,7 +22,9 @@ extension KiwiCore {
     /// first report, whose drain replays this body (#3640).
     func storeDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
         if holdsScreenArg(args.first) {
-            holdSettingsCall(split: true) { self.storeDisplayAreas(args) }
+            holdSettingsCall(split: true) { [unowned self] in
+                self.storeDisplayAreas(args)
+            }
             return .ok()
         }
         guard let screen = splitScreen(args.first) else {
@@ -54,8 +56,17 @@ extension KiwiCore {
 
     /// `set_display_area_name(area, name)` names the area its key
     /// names (as `list_monitors` prints it); an empty name clears
-    /// it back to the positional default.
+    /// it back to the positional default. Behind a split a load
+    /// holds for the first screen report, it waits too (#3640).
     func setDisplayAreaName(_ args: [JSONValue]) -> CommandResponse {
+        if luaAreaSplits.isRecording,
+            heldScreenCalls.contains(where: \.isSplit)
+        {
+            holdSettingsCall(split: false) { [unowned self] in
+                self.setDisplayAreaName(args)
+            }
+            return .ok()
+        }
         guard let raw = args.first?.stringValue,
             let name = args.dropFirst().first?.stringValue
         else { return .fail("expected an area and a name") }

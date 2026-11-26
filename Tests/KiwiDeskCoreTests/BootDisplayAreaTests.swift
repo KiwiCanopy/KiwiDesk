@@ -77,7 +77,8 @@ struct BootDisplayAreaTests {
         #expect(areas(core) == 2)
         #expect(core.heldScreenCalls.isEmpty)
         // The held split is Lua's: a reload that drops it undoes it.
-        try load(core, "-- no areas")
+        // The reload keeps a setting so `init.lua` still owns them.
+        try load(core, #"space_bar.set_visibility("auto")"#)
         #expect(areas(core) == 1)
     }
 
@@ -105,6 +106,34 @@ struct BootDisplayAreaTests {
         #expect(core.spacePins["Calls"] == Self.rightArea)
     }
 
+    @Test("an area named behind a held split keeps its name")
+    func nameFollowsItsHeldSplit() throws {
+        let core = try makeCore()
+        let lua = """
+            KiwiDesk.set_display_area_name("\(Self.rightArea)", "Right")
+            KiwiDesk.pin_space_to_display("Calls", "Right")
+            """
+        try load(core, Self.split + "\n" + lua)
+        dock(core)
+        let split = core.tiler.settings.displayAreas[Self.builtIn.fingerprint]
+        #expect(split?.areas.first { $0.id == 1 }?.name == "Right")
+        #expect(core.spacePins["Calls"] == Self.rightArea)
+    }
+
+    @Test("a call outside a config load answers as it always did")
+    func callOutsideALoadIsNotHeld() throws {
+        let core = try makeCore()
+        let reply = core.execute(
+            "set_display_areas",
+            args: [
+                .string(Self.builtIn.name), .string("side_by_side"),
+                .number(756), .number(756),
+            ]
+        )
+        #expect(!reply.isSuccess)
+        #expect(core.heldScreenCalls.isEmpty)
+    }
+
     @Test("a bar value by name writes every area of a held split")
     func barCallFansOutOverTheSplit() throws {
         let core = try makeCore()
@@ -122,12 +151,28 @@ struct BootDisplayAreaTests {
         )
     }
 
+    @Test("a bar edge by number lands on that screen at the report")
+    func edgeByNumberApplies() throws {
+        try externalMain {
+            let core = try makeCore()
+            try load(core, #"space_bar.set_edge("left", 2)"#)
+            #expect(core.tiler.settings.spaceBarStyle.edgeOverride.isEmpty)
+            dock(core)
+            #expect(
+                core.tiler.settings.spaceBarStyle.edge(
+                    on: Self.builtIn.fingerprint
+                ) == .left
+            )
+        }
+    }
+
     @Test("a report of no screen keeps what is held")
     func emptyReportKeepsTheList() throws {
         let core = try makeCore()
         try load(core, Self.split)
         core.handle(.displaysChanged([]))
-        #expect(!core.heldScreenCalls.isEmpty)
+        let held = core.heldScreenCalls.filter(\.isSplit)
+        #expect(!held.isEmpty)
         dock(core)
         #expect(areas(core) == 2)
     }
@@ -139,7 +184,7 @@ struct BootDisplayAreaTests {
         _ = try core.saveProfile(profile)
         core.apply(profile: profile, cause: .explicit)
         try load(core, Self.split)
-        let held = core.heldScreenCalls.filter(\.isLoadSettings)
+        let held = core.heldScreenCalls.filter(\.isSettings)
         #expect(held.isEmpty)
         dock(core)
         #expect(areas(core) == 1)
