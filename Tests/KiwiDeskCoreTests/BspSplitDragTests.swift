@@ -102,6 +102,16 @@ extension RunPushCommandTests {
         let after = try #require(frames(core)[w(3)])
         #expect(abs(after.width - before.width - 100) < 1)
         #expect(abs(after.maxX - before.maxX) < 1)
+        // A drag past w1's floor: the leading split stops there, and
+        // w3 grows by what it moved, its trailing edge still held.
+        try drag(core, id, w(3)) {
+            $0.origin.x -= 3000
+            $0.size.width += 3000
+        }
+        let capped = try #require(frames(core)[w(3)])
+        let w1 = try #require(frames(core)[w(1)])
+        #expect(abs(w1.width - 300) < 1)
+        #expect(abs(capped.maxX - before.maxX) < 1)
     }
 
     @Test("BSP: an outer edge no split bounds writes nothing")

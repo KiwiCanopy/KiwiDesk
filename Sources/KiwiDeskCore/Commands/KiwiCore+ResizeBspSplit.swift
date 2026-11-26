@@ -114,9 +114,7 @@ extension KiwiCore {
                 space: space
             ), press.split.available > 0
         else { return }
-        let before = press.slots[window].map {
-            Double(axis == "x" ? $0.width : $0.height)
-        }
+        let before = press.slots[window]
         writeCappedBspSplit(
             press,
             proposed: press.drawnRatio
@@ -128,18 +126,26 @@ extension KiwiCore {
         // A leading edge moved the split before the window; where the
         // window's own split runs along the axis too, it re-divides
         // the grown rest, so that split is set to keep the trailing
-        // edge where the drag left it.
+        // edge where it was: the window grows by what the leading
+        // edge actually moved, a cap included.
         guard edge == .leading, let before,
             let own = bspSplit(
                 of: window,
                 axis: axis,
                 edge: .trailing,
                 space: space
-            ), own.split.available > 0
+            ), own.split.available > 0,
+            let now = own.slots[window]
         else { return }
+        let horizontal = axis == "x"
+        let moved = Double(
+            horizontal ? before.minX - now.minX : before.minY - now.minY
+        )
+        guard abs(moved) > 0.5 else { return }
+        let length = Double(horizontal ? before.width : before.height)
         writeCappedBspSplit(
             own,
-            proposed: (before + points) / own.split.available,
+            proposed: (length + moved) / own.split.available,
             axis: axis,
             space: space,
             focused: window

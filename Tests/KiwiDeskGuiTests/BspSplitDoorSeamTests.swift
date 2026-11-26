@@ -101,7 +101,23 @@ struct BspSplitDoorSeamTests {
             try body(
                 "Commands/KiwiCore+SpaceCommands.swift",
                 after: "func settleFiling("
-            ).contains("if from != target { forgetBspSplits(of: window) }")
+            ).contains(
+                "if let from, from != target { forgetBspSplits(of: window) }"
+            )
+        )
+        #expect(
+            try body(
+                "Tiling/KiwiCore+DragRelocate.swift",
+                after: "func commitCrossDisplayDrop("
+            ).contains("forgetBspSplits(of: id)")
+        )
+        // The undo rebase forgets with the live store, or an undo
+        // after the owner closes reads the Space as changed (#3601).
+        #expect(
+            try body(
+                "Models/SpaceArrangement+Rebase.swift",
+                after: "func removing("
+            ).contains("sizes.ratios.bspSplits?.forget(window)")
         )
     }
 }

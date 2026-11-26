@@ -144,8 +144,9 @@ extension KiwiCore {
         // A target named by an undeclared id takes its screen now:
         // the re-anchor and a follow's Space cue read it (#1994).
         placeUnplacedSpaces()
-        // Its BSP splits stay with the Space it left (#3672).
-        if from != target { forgetBspSplits(of: window) }
+        // Its BSP splits stay with the Space it left (#3672); a
+        // window from no Space (out of the Pocket) keeps its own.
+        if let from, from != target { forgetBspSplits(of: window) }
         if from != target,
             !placeEnteringFloat(window, wasFloat: wasFloat)
         {
