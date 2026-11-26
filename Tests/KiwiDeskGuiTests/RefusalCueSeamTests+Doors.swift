@@ -221,4 +221,34 @@ extension RefusalCueSeamTests {
             "found: \(callers)"
         )
     }
+
+    /// A weight writer reaches the ratio limit through the one
+    /// `cueWeightLimit`, which ends a hold first (#3643); the BSP
+    /// verdict is the other reader.
+    @Test("the ratio limit is cued from its two doors")
+    func ratioLimitHasTwoDoors() throws {
+        let core = Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        var bodies = 0
+        for name in ["cueWeightLimit", "cueBspLimit"] {
+            let body = Self.stripped(
+                try SourceScan.functionBody(
+                    of: name,
+                    in: name == "cueWeightLimit"
+                        ? "KiwiCore+ResizeRun.swift"
+                        : "KiwiCore+ResizeBspPress.swift",
+                    under: "Commands"
+                )
+            )
+            bodies += body.occurrences(of: "refuseRatioLimit(")
+        }
+        var calls = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            let text = try Self.file(file)
+            calls +=
+                text.occurrences(of: "refuseRatioLimit(")
+                - text.occurrences(of: "funcrefuseRatioLimit(")
+        }
+        #expect(bodies == 2)
+        #expect(calls == bodies)
+    }
 }

@@ -67,11 +67,12 @@ extension KiwiCore {
             moved = change * (delta < 0 ? -1 : 1) > Self.pressMovesTolerance
             // The opposite press would do what was asked (#3643): the
             // shared ratio moves this window against the press.
-            let opposite = frames(at: base - (proposed - base))
-            let back = length(opposite[focused]) - length(now[focused])
-            if !moved,
-                back * (delta < 0 ? 1 : -1) < -Self.pressMovesTolerance
-            {
+            let back: CGFloat =
+                moved
+                ? 0
+                : length(frames(at: base - (proposed - base))[focused])
+                    - length(now[focused])
+            if back * (delta < 0 ? 1 : -1) < -Self.pressMovesTolerance {
                 refuseRatioMovesOtherWay(
                     focused,
                     axis: axis,
