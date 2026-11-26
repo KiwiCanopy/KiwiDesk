@@ -289,6 +289,11 @@ struct KiwiDeskKeyRows: View {
                 .searchAnchored(
                     SettingsCatalog.shortcuts.openSettingsBinding
                 )
+        case .shortcuts(.lookPicker):
+            VStack(alignment: .leading, spacing: 8) { family() }
+                .searchAnchored(
+                    SettingsCatalog.shortcuts.lookPickerBinding
+                )
         default:
             let _ = assertionFailure(
                 "unanchored KiwiDesk keys row: \(key.id)"

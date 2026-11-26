@@ -14,6 +14,7 @@ extension AppDelegate {
     /// assignment of the hook.
     func settingsReadersChanged(_ settings: TilingSettings) {
         jumpPanel?.settingsChanged(settings)
+        lookPicker?.settingsChanged(settings)
         dashboardIfCreated?.liveSettingsChanged()
     }
 }

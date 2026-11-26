@@ -96,6 +96,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocketApps = "(rows) shortcuts.pocket_apps"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
+    /// The look picker (#3038).
+    case lookPicker = "keybinding.show_look_picker"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
     case openApplications = "(rows) shortcuts.open_applications"
     case advanced = "(rows) shortcuts.advanced"
@@ -201,7 +203,7 @@ extension ShortcutsKey {
             return .row(.shortcuts, .openApplications, .atRest)
         // KiwiDesk's own chord, a built-in, under Show & hide's
         // "KiwiDesk" subheading (#1520, #3184).
-        case .openSettings:
+        case .openSettings, .lookPicker:
             return .row(.shortcuts, .showHide, .atRest)
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)

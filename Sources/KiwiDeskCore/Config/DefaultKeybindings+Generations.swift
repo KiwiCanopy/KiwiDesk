@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 15
+    public static let newestGeneration = 16
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -49,6 +49,8 @@ extension DefaultKeybindings {
         case 14: [windowSwitcherLastAppRow()]
         // Undo and redo the arrangement (#3515).
         case 15: layoutUndoRows(key: undoKey)
+        // The look picker on ⌃⌥⇧L (#3038).
+        case 16: [lookPickerRow()]
         default: []
         }
     }

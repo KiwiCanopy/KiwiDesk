@@ -138,6 +138,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.showShortcuts]
         case .openSettings:
             return [KeybindingCatalog.openSettings]
+        case .lookPicker:
+            return [KeybindingCatalog.showLookPicker]
         case .switchToLayer:
             return
                 layerNames

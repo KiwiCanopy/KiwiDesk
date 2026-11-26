@@ -49,6 +49,8 @@ struct WindowSwitcherLastAppSeedTests {
                 == [row]
                 + DefaultKeybindings.rows(ofGeneration: 15)
                 .map(ShortcutBase.hyper.rebased)
+                + DefaultKeybindings.rows(ofGeneration: 16)
+                .map(ShortcutBase.hyper.rebased)
         )
     }
 
@@ -73,6 +75,7 @@ struct WindowSwitcherLastAppSeedTests {
                     above: 13,
                     base: .standard
                 ) == DefaultKeybindings.rows(ofGeneration: 15)
+                    + DefaultKeybindings.rows(ofGeneration: 16)
             )
         }
     }

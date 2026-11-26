@@ -43,12 +43,14 @@ extension KiwiCore {
 
     /// Renames a saved look; a name `lookNameVerdict` refuses
     /// throws `LibraryNameRefusal`, and the store refuses an
-    /// unreadable library (#2860).
-    public func renameLook(from old: String, to new: String) throws {
+    /// unreadable library (#2860). Answers the name it stored.
+    @discardableResult
+    public func renameLook(from old: String, to new: String) throws -> String {
         let name = try admittedName(new) {
             lookNameVerdict($0, renaming: old)
         }
         try lookLibrary.rename(from: old, to: name)
+        return name
     }
 
     /// Deletes a saved look (#2860).

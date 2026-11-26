@@ -591,6 +591,13 @@ synonym:
   Layout line alone, and *layout picker*. The word binds copy
   naming that side; it does not reach a sentence about a window
   or a screen.
+- **look picker** — the full-screen panel ⌃⌥⇧L opens (Lua
+  `look.show_picker()`, #3038), by its VoiceOver name and in its
+  Shortcuts row, "Show look picker", the two held to one noun by
+  `ShortcutsPanelNounTests`. It is KiwiDesk's own panel
+  and no KiwiHub side, so copy naming it never says *KiwiHub* or
+  *side*; never a *theme picker*, since a look is never a
+  *theme*.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename

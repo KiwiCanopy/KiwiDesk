@@ -207,7 +207,8 @@ enum ShortcutsRowOrder {
 
     /// Show & hide ▸ KiwiDesk, below KiwiVision (#1520, #3184).
     static let showHideKiwiDesk: [SettingKey] = [
-        .shortcuts(.openSettings)
+        .shortcuts(.openSettings),
+        .shortcuts(.lookPicker),
     ]
 
     /// Layers group order behind disclosure.

@@ -46,6 +46,7 @@ struct APIKindCensusTests {
             + "press writes it (#764)",
         "kiwihub.show": "opens a panel",
         "kiwihub.show_last_app": "opens a panel",
+        "look.show_picker": "opens a panel",
         "restore_setup": "replaces the setup from a backup, as "
             + "load_profile replaces the arrangement (architect, #2610)",
     ]

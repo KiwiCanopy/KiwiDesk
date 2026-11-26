@@ -103,6 +103,15 @@ struct ReduceMotionHomeTests {
                     + "presence.reduceMotion)"
             ),
             (
+                "LookPicker", "LookPickerController.swift", .file,
+                "varreduceMotion:()->Bool={ReduceMotion.isOn}"
+            ),
+            (
+                "LookPicker", "LookPickerController.swift",
+                .function("show"),
+                ".environment(\\.kiwiDeskReduceMotion,reduceMotionNow)"
+            ),
+            (
                 "", "PanelEntrance.swift", .function("fadeOut"),
                 "letdelay=reduceMotion?0:Self.leaveDuration"
             ),
