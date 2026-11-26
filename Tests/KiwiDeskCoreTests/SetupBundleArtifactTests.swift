@@ -82,15 +82,17 @@ struct SetupBundleArtifactTests {
             )
         )
 
+        let picture = try core.wallpaperLibrary.add(
+            WallpaperLibraryTests.png()
+        )
         try core.lookLibrary.save(
             ShelfLook(
                 name: "Mine",
                 style: ["kiwishelf.thickness": .number(30)],
-                colors: [:]
+                colors: [:],
+                wallpaper: .all(picture)
             )
         )
-
-        _ = try core.wallpaperLibrary.add(WallpaperLibraryTests.png())
 
         let bundle = try core.exportSetup()
         // Assert the loop has something to walk: every artifact

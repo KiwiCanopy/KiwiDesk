@@ -51,8 +51,10 @@ extension KiwiCore {
         _ look: ShelfLook,
         ready: @escaping @MainActor () -> Void
     ) {
+        let before = tiler.settings.lookWallpaper
         let pick: SettingsEdit = { look.pick(into: &$0) }
         writeTourEditThrough(live: pick, stored: pick, animated: false)
+        reassertWallpaper(ifUnchangedFrom: before)
         awaitWallpaperShown(ready: ready)
     }
 

@@ -29,27 +29,39 @@ extension KiwiCore {
     }
 
     /// The launch and post-sync sweep: trashes every library file no
-    /// look names that is older than `grace`, which covers a picture
-    /// synced in ahead of the `looks.json` naming it.
+    /// look names that arrived more than `grace` ago, which covers a
+    /// picture synced in ahead of the `looks.json` naming it.
     func sweepWallpapers(grace: TimeInterval = 7 * 24 * 3600) {
         let library = wallpaperLibrary
         let named = namedWallpapers()
         let now = wallClock()
         let stale = library.names().filter { name in
             guard !named.contains(name) else { return false }
-            let attributes = try? FileManager.default.attributesOfItem(
-                atPath: library.url(of: name).path
-            )
-            let date = attributes?[.modificationDate] as? Date ?? now
-            return now.timeIntervalSince(date) > grace
+            let arrived = Self.arrival(of: library.url(of: name)) ?? now
+            return now.timeIntervalSince(arrived) > grace
         }
         trashWallpapers(Set(stale))
+    }
+
+    /// When a file reached this folder: the later of its content and
+    /// its attribute change, since a copy keeps the content date of
+    /// the Mac it came from.
+    static func arrival(of url: URL) -> Date? {
+        let values = try? url.resourceValues(forKeys: [
+            .contentModificationDateKey, .attributeModificationDateKey,
+        ])
+        return [
+            values?.contentModificationDate,
+            values?.attributeModificationDate,
+        ].compactMap { $0 }.max()
     }
 
     /// Writes a bundle's pictures, each re-hashed on the way in, so
     /// a name never disagrees with its bytes. A bundle from before
     /// pictures travelled carries none and leaves the library alone.
-    func writeIncomingWallpapers(_ bundle: SetupBundle) {
+    func writeIncomingWallpapers(
+        _ bundle: SetupBundle
+    ) throws(SetupBundleError) {
         let library = wallpaperLibrary
         for (name, data) in bundle.wallpapers ?? [:] {
             do {
@@ -57,6 +69,8 @@ extension KiwiCore {
                 if stored != name {
                     onLog("restore: picture \(name) re-hashed to \(stored)")
                 }
+            } catch .couldNotWrite {
+                throw .couldNotWrite(name: WallpaperLibrary.folderName)
             } catch {
                 onLog("restore: picture \(name) not written: \(error)")
             }
@@ -67,7 +81,7 @@ extension KiwiCore {
         let library = wallpaperLibrary
         for name in names where library.has(name) {
             do {
-                try desktopMemory.trashWallpaper(library.url(of: name))
+                try lookWallpaperSeams.trash(library.url(of: name))
             } catch {
                 onLog("wallpaper: \(name) not trashed: \(error)")
             }

@@ -22,7 +22,7 @@ struct LookWallpaperWearTests {
             )
         )
         let box = Box()
-        core.desktopMemory.wallpaper = WallpaperDesk(
+        core.lookWallpaperSeams.desk = WallpaperDesk(
             current: { _ in box.shown },
             set: { url, _ in
                 box.sets.append(url)
@@ -30,7 +30,7 @@ struct LookWallpaperWearTests {
                 return true
             }
         )
-        core.desktopMemory.wallpaperArmed = armed
+        core.lookWallpaperSeams.armed = armed
         return (core, box)
     }
 

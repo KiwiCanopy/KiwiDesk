@@ -64,8 +64,8 @@ func pinDesktopReads(_ core: KiwiCore) {
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
     // A look's picture set (#3478) is a write macOS keeps.
-    core.desktopMemory.wallpaper = .refused
-    core.desktopMemory.trashWallpaper = {
+    core.lookWallpaperSeams.desk = .refused
+    core.lookWallpaperSeams.trash = {
         try FileManager.default.removeItem(at: $0)
     }
     // The host's keyboard layout picks the undo seed's key (#3599):

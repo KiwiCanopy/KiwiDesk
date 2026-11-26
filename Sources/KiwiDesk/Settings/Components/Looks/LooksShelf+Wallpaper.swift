@@ -21,12 +21,21 @@ extension LooksShelf {
     }
 
     /// Copies the picture at `url` onto `look`, asking first when it
-    /// is large; a drop on a tile takes this door too.
+    /// is large; a drop on a tile takes this door too. The file is
+    /// read off the main actor, since it may be tens of megabytes.
     func attachWallpaper(at url: URL, to look: ShelfLook) {
-        guard var data = try? Data(contentsOf: url) else {
-            failure = unreadableWallpaper
-            return
+        Task { @MainActor in
+            let read = Task.detached { try? Data(contentsOf: url) }
+            guard let data = await read.value else {
+                failure = unreadableWallpaper
+                return
+            }
+            attachWallpaper(data, to: look)
         }
+    }
+
+    private func attachWallpaper(_ read: Data, to look: ShelfLook) {
+        var data = read
         if data.count > WallpaperLibrary.largeBytes {
             switch askLargeWallpaper(data) {
             case .copy: break
@@ -68,7 +77,10 @@ extension LooksShelf {
             try core.setLookWallpaper(nil, of: look.name)
             failure = nil
         } catch {
-            failure = unreadableWallpaper
+            failure = L(
+                "looks.wallpaper.remove_failed",
+                "KiwiDesk couldn't remove the wallpaper from this look."
+            )
         }
         reload()
     }

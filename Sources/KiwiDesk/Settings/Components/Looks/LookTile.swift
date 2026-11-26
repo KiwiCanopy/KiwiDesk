@@ -20,6 +20,7 @@ struct LookTile: View {
     /// previews the look under it (Simple, #2737 ruling 9).
     var hover: ((Bool) -> Void)?
     let apply: () -> Void
+    @ObservedObject var pictures = LookTilePictures.shared
 
     var body: some View {
         let match = look.match(model.config.settings)
@@ -65,13 +66,13 @@ struct LookTile: View {
     /// Whether the look carries a picture (#3478): "With wallpaper",
     /// or a count where it keeps one per screen.
     private var wallpaperSpoken: String {
-        switch look.wallpaper?.count ?? 0 {
+        switch look.admitted.wallpaper?.count ?? 0 {
         case 0: return ""
         case 1: return L("looks.wallpaper.spoken_one", "With wallpaper")
         case let n:
             return L(
                 "looks.wallpaper.spoken_many",
-                "With wallpapers for %1$d screens",
+                "Wallpapers for screens: %1$d",
                 n
             )
         }
@@ -95,10 +96,7 @@ struct LookTile: View {
     /// Screen 1's picture, or the one picture (#3478).
     private var picture: CGImage? {
         look.admitted.wallpaper?.name(forScreen: 1).flatMap {
-            LookTilePictures.image(
-                named: $0,
-                in: model.core.wallpaperLibrary
-            )
+            pictures.image(named: $0, in: model.core.wallpaperLibrary)
         }
     }
 

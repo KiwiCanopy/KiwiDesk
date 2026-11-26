@@ -79,7 +79,7 @@ extension KiwiCore {
         let config = signposter.beginInterval("loadConfig")
         loadConfig()
         // A launch is no wear: a look's picture is set from here on.
-        desktopMemory.wallpaperArmed = true
+        lookWallpaperSeams.armed = true
         sweepWallpapers()
         signposter.endInterval("loadConfig", config)
         boot.configDone = ContinuousClock.now

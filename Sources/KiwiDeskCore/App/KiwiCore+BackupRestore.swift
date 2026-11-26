@@ -337,7 +337,7 @@ extension KiwiCore {
                 )
             }
         }
-        writeIncomingWallpapers(bundle)
+        try writeIncomingWallpapers(bundle)
         return RestoreOutcome(
             skippedProfiles: skipped,
             refusedPalettes: refused,

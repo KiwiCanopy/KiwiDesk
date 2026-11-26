@@ -112,3 +112,18 @@ struct WallpaperMachineCopies {
         return here
     }
 }
+
+/// A look's picture's machine touches (#3478), in one home: the
+/// wallpaper reads and sets, whether a set is armed yet, and the
+/// Trash. Both `makeTestCore` twins pin `desk` to `refused` and
+/// `trash` to a plain delete, since a set outlives this process and
+/// a suite must never fill the developer's Trash.
+@MainActor
+final class LookWallpaperSeams {
+    var desk = WallpaperDesk.live
+    /// False until boot's config load ran: a launch is no wear.
+    var armed = false
+    var trash: (URL) throws -> Void = {
+        try FileManager.default.trashItem(at: $0, resultingItemURL: nil)
+    }
+}

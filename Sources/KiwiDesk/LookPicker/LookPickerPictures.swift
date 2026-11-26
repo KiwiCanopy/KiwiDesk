@@ -56,30 +56,15 @@ final class LookPickerPictures: ObservableObject {
         let pixels = maxPixels
         for name in names {
             let url = library.url(of: name)
-            Task.detached(priority: .userInitiated) {
-                guard let image = Self.decode(url, maxPixels: pixels) else {
-                    return
-                }
-                await MainActor.run { [weak self] in
-                    self?.decoded[name] = image
-                }
+            Task.detached(priority: .userInitiated) { [weak self] in
+                guard
+                    let image = WallpaperShrink.thumbnail(
+                        at: url,
+                        maxPixels: pixels
+                    )
+                else { return }
+                await MainActor.run { self?.decoded[name] = image }
             }
         }
-    }
-
-    nonisolated static func decode(_ url: URL, maxPixels: Int) -> CGImage? {
-        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil)
-        else { return nil }
-        let options: [CFString: Any] = [
-            kCGImageSourceCreateThumbnailFromImageAlways: true,
-            kCGImageSourceThumbnailMaxPixelSize: max(1, maxPixels),
-            kCGImageSourceCreateThumbnailWithTransform: true,
-            kCGImageSourceShouldCacheImmediately: true,
-        ]
-        return CGImageSourceCreateThumbnailAtIndex(
-            source,
-            0,
-            options as CFDictionary
-        )
     }
 }

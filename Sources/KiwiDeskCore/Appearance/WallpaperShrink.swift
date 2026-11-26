@@ -53,4 +53,23 @@ public enum WallpaperShrink {
         else { return false }
         return CGImageSourceGetCount(source) > 1
     }
+
+    /// The picture at `url` decoded at most `maxPixels` on its long
+    /// side, for a surface that draws it small or at screen size and
+    /// never decodes the full picture per frame (#3038, #3478).
+    public static func thumbnail(at url: URL, maxPixels: Int) -> CGImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil)
+        else { return nil }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(1, maxPixels),
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+        ]
+        return CGImageSourceCreateThumbnailAtIndex(
+            source,
+            0,
+            options as CFDictionary
+        )
+    }
 }

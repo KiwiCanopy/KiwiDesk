@@ -72,22 +72,35 @@ extension KiwiCore {
         // exported, stops being discarded and stops being written,
         // which is what "does not travel" has to mean to be worth
         // recording (`architect-reviewer`, 2026-08-17).
-        SetupBundle(
+        let config =
+            ConfigArtifact.guiConfig.travelsInABackup ? gui.load() : nil
+        let stored =
+            ConfigArtifact.profiles.travelsInABackup
+            ? profiles.allProfiles() : []
+        let library =
+            ConfigArtifact.looks.travelsInABackup
+            ? try looks.libraryLooks() : nil
+        // Only the pictures a carried look home names (#3478).
+        var named = Set((library ?? []).flatMap { $0.wallpaper?.names ?? [] })
+        named.formUnion(config?.look?.wallpaper?.names ?? [])
+        named.formUnion(config?.settings.lookWallpaper?.names ?? [])
+        for profile in stored {
+            named.formUnion(profile.settings.lookWallpaper?.names ?? [])
+        }
+        return SetupBundle(
             writtenBy: KiwiDeskVersion.semantic,
-            config: ConfigArtifact.guiConfig.travelsInABackup
-                ? gui.load() : nil,
-            profiles: ConfigArtifact.profiles.travelsInABackup
-                ? profiles.allProfiles() : [],
+            config: config,
+            profiles: stored,
             palettes: ConfigArtifact.palettes.travelsInABackup
                 ? try palettes.libraryPalettes() : [],
-            looks: ConfigArtifact.looks.travelsInABackup
-                ? try looks.libraryLooks() : nil,
+            looks: library,
             profileBindings: bindings
                 && ConfigArtifact.desktopBindings.travelsInABackup
                 ? gui.load()?.profileBindings : nil,
             initLua: initLua,
             wallpapers: ConfigArtifact.wallpapers.travelsInABackup
-                ? wallpapers.contents() : nil
+                ? wallpapers.contents().filter { named.contains($0.key) }
+                : nil
         )
     }
 

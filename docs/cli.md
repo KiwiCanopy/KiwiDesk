@@ -288,8 +288,8 @@ says so (`newer_format`) instead of reporting a plain failed write.
 `looks` takes an `action` — each `look.*` verb that can be undone —
 and that verb's arguments by name; `look.delete` goes through
 `run_destructive`. The AI page's **Make a new look** prompt offers to
-match your wallpaper from a screenshot you give the AI app: KiwiDesk
-never reads the wallpaper itself.
+match your wallpaper from a screenshot you give the AI app, rather
+than KiwiDesk reading the wallpaper.
 
 `app_rules` takes the same shape over the `app_rule.*` verbs. An app
 is named by the `bundle_id` `get_state` lists for its windows.

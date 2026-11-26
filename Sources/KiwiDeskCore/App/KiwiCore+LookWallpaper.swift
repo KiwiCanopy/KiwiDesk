@@ -1,9 +1,9 @@
 import AppKit
 import Foundation
 
-/// What a set of a look's picture did on one screen (#3478): Core
-/// names it, the GUI narrates it.
-public enum WallpaperSetOutcome: Equatable, Sendable {
+/// What a set of a look's picture did on one screen (#3478), for the
+/// log and the suites.
+enum WallpaperSetOutcome: Equatable, Sendable {
     /// macOS took the set.
     case set
     /// The screen already shows this picture, so nothing was sent.
@@ -36,7 +36,7 @@ extension KiwiCore {
     /// Bootstrap-time: the one wiring of the trigger.
     func wireLookWallpaper() {
         tiler.onLookWallpaper = { [weak self] wallpaper in
-            guard let self, self.desktopMemory.wallpaperArmed,
+            guard let self, self.lookWallpaperSeams.armed,
                 let wallpaper
             else { return }
             self.setWallpaper(wallpaper)
@@ -53,24 +53,27 @@ extension KiwiCore {
     ) -> [Int: WallpaperSetOutcome] {
         let library = wallpaperLibrary
         let order = liveScreenOrder
-        let desk = desktopMemory.wallpaper
+        let desk = lookWallpaperSeams.desk
         var wanted: [(DisplayID, Int, String)] = []
         for display in state.workspaces.allDisplays {
             guard
-                let number = order.numbers(of: display.fingerprint).first,
+                let number = order.number(of: display.fingerprint),
                 let name = wallpaper.name(forScreen: number)
             else { continue }
             wanted.append((display.id, number, name))
         }
-        // Keep what a skipped screen still shows, or its Desktop
-        // loses the file under it.
+        // Keep what a screen still shows and what a look still
+        // names, or a Desktop not shown now loses the file under it.
         let shown = Set(
             state.workspaces.allDisplays.compactMap {
                 desk.current($0.id).flatMap(wallpaperCopies.libraryName)
             }
         )
         let names = Set(wanted.map(\.2).filter(library.has))
-        let here = wallpaperCopies.keep(names.union(shown), from: library)
+        let here = wallpaperCopies.keep(
+            names.union(shown).union(namedWallpapers()),
+            from: library
+        )
         var outcomes: [Int: WallpaperSetOutcome] = [:]
         for (display, number, name) in wanted {
             outcomes[number] = setWallpaper(
@@ -88,7 +91,7 @@ extension KiwiCore {
         on display: DisplayID,
         available: Bool
     ) -> WallpaperSetOutcome {
-        let desk = desktopMemory.wallpaper
+        let desk = lookWallpaperSeams.desk
         guard available else { return .notInLibrary }
         guard screenShowsUserSpace(on: display) else {
             return .fullScreenSpace
@@ -102,12 +105,23 @@ extension KiwiCore {
             ? .set : .refused
     }
 
+    /// An explicit wear of a look whose picture the settings already
+    /// carried — a re-pick after a change in System Settings — sets
+    /// it again, since the trigger fires on a change alone.
+    func reassertWallpaper(ifUnchangedFrom before: LookWallpaper?) {
+        guard lookWallpaperSeams.armed,
+            let wallpaper = tiler.settings.lookWallpaper,
+            wallpaper == before
+        else { return }
+        setWallpaper(wallpaper)
+    }
+
     /// Calls `ready` once every screen that should wear the live
     /// look's picture reports it, polling the URL read-back (235–480
     /// ms in the L4 spike); at once where there is none to wait for.
     /// The caller caps the wait.
     func awaitWallpaperShown(ready: @escaping @MainActor () -> Void) {
-        guard desktopMemory.wallpaperArmed,
+        guard lookWallpaperSeams.armed,
             let wallpaper = tiler.settings.lookWallpaper,
             wallpaperShown(wallpaper) == false
         else { return ready() }
@@ -133,10 +147,10 @@ extension KiwiCore {
     /// `wallpaper`, read from the URLs alone.
     func wallpaperShown(_ wallpaper: LookWallpaper) -> Bool {
         let order = liveScreenOrder
-        let desk = desktopMemory.wallpaper
+        let desk = lookWallpaperSeams.desk
         return state.workspaces.allDisplays.allSatisfy { display in
             guard screenShowsUserSpace(on: display.id),
-                let number = order.numbers(of: display.fingerprint).first,
+                let number = order.number(of: display.fingerprint),
                 let name = wallpaper.name(forScreen: number),
                 wallpaperLibrary.has(name)
             else { return true }
@@ -153,6 +167,6 @@ extension KiwiCore {
                 $0.id == id
             })
         else { return 1 }
-        return liveScreenOrder.numbers(of: display.fingerprint).first ?? 1
+        return liveScreenOrder.number(of: display.fingerprint) ?? 1
     }
 }

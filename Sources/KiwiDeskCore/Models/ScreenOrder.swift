@@ -54,6 +54,12 @@ public struct ScreenOrder: Equatable, Sendable {
         slot.number <= fingerprints.count
     }
 
+    /// The number `fingerprint` answers to: the lower one for twins,
+    /// which the runtime cannot tell apart; nil past the order.
+    public func number(of fingerprint: String) -> Int? {
+        numbers(of: fingerprint).first
+    }
+
     /// Every number `fingerprint` holds (two for twins).
     public func numbers(of fingerprint: String) -> [Int] {
         fingerprints.indices

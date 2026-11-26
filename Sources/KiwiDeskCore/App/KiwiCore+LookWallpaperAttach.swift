@@ -69,13 +69,13 @@ extension KiwiCore {
         for name: String
     ) async -> [Int: CurrentWallpaperOutcome] {
         let order = liveScreenOrder
-        let desk = desktopMemory.wallpaper
+        let desk = lookWallpaperSeams.desk
         let held = userLooks.first { $0.name == name }?.wallpaper
         var picks: [Int: String] = [:]
         var outcomes: [Int: CurrentWallpaperOutcome] = [:]
         var reads: [(Int, URL)] = []
         for display in state.workspaces.allDisplays {
-            guard let number = order.numbers(of: display.fingerprint).first
+            guard let number = order.number(of: display.fingerprint)
             else { continue }
             guard screenShowsUserSpace(on: display.id) else {
                 outcomes[number] = .fullScreenSpace
