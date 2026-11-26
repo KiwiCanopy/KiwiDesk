@@ -41,7 +41,7 @@ struct ActiveProfile {
     /// Its number-keyed Screen pins — what a monitor change
     /// re-numbers on the new screens without a read (#3647). Like
     /// the monitor sets it follows every write of the file.
-    let spacePins: [SpaceID: ScreenSlotKey]
+    let screenPins: [SpaceID: ScreenSlotKey]
 
     init(_ profile: Profile) {
         name = profile.name
@@ -51,7 +51,7 @@ struct ActiveProfile {
         isStarterSetup = profile.isStarterSetup
         monitorSets = profile.monitorSets
         lensesLeftOut = Self.leftOut(profile)
-        spacePins = profile.spaceMonitorMap
+        screenPins = profile.spaceMonitorMap
     }
 
     private init(
@@ -62,7 +62,7 @@ struct ActiveProfile {
         isStarterSetup: Bool,
         monitorSets: [MonitorSet],
         lensesLeftOut: Set<String>,
-        spacePins: [SpaceID: ScreenSlotKey]
+        screenPins: [SpaceID: ScreenSlotKey]
     ) {
         self.name = name
         self.id = id
@@ -71,7 +71,7 @@ struct ActiveProfile {
         self.isStarterSetup = isStarterSetup
         self.monitorSets = monitorSets
         self.lensesLeftOut = lensesLeftOut
-        self.spacePins = spacePins
+        self.screenPins = screenPins
     }
 
     private static func leftOut(_ profile: Profile) -> Set<String> {
@@ -91,7 +91,7 @@ struct ActiveProfile {
             isStarterSetup: isStarterSetup,
             monitorSets: monitorSets,
             lensesLeftOut: lensesLeftOut,
-            spacePins: spacePins
+            screenPins: screenPins
         )
     }
 
@@ -108,7 +108,7 @@ struct ActiveProfile {
             isStarterSetup: isStarterSetup,
             monitorSets: profile.monitorSets,
             lensesLeftOut: Self.leftOut(profile),
-            spacePins: profile.spaceMonitorMap
+            screenPins: profile.spaceMonitorMap
         )
     }
 }

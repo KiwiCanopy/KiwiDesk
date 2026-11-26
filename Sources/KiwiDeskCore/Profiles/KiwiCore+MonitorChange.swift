@@ -118,7 +118,7 @@ extension KiwiCore {
                     spacePins = keepingPins(
                         of: Set(liveTemporarySpaces),
                         over: screenOrder(holding: active.monitorSets)
-                            .runtime(active.spacePins)
+                            .runtime(active.screenPins)
                     )
                 }
                 // NOT redundant with the deferred resolve:
