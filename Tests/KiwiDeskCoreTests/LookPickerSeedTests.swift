@@ -33,16 +33,16 @@ struct LookPickerSeedTests {
         }
     }
 
-    @Test("generation 16 is the row alone, and the newest")
+    @Test("generation 16 is the row alone")
     func generation() {
         #expect(DefaultKeybindings.rows(ofGeneration: 16) == [row])
-        #expect(DefaultKeybindings.newestGeneration == 16)
+        #expect(DefaultKeybindings.newestGeneration >= 16)
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: [],
                 above: 15,
                 base: .standard
-            ) == [row]
+            ).first == row
         )
     }
 

@@ -71,6 +71,12 @@ enum LookPickerText {
             ? L("look_picker.current_name", "Current") : entry.look.name
     }
 
+    /// The rename field's VoiceOver name, the Looks shelf's own
+    /// rename prompt.
+    static var nameField: String {
+        L("looks.name_placeholder", "Look name")
+    }
+
     static func savedAs(_ name: String) -> String {
         L("look_picker.saved_as", "Saved as %1$@", name)
     }
@@ -83,8 +89,9 @@ enum LookPickerText {
     static var terminalTitle: String {
         L("look_picker.demo.terminal", "zsh — ~/KiwiDesk")
     }
+    /// The Settings window's own name, never a copy of it.
     static var settingsTitle: String {
-        L("look_picker.demo.settings", "KiwiDesk Settings")
+        L("home.title_ax", "KiwiDesk Settings")
     }
     static var noteTitle: String {
         L("look_picker.demo.note", "Kiwi Cake")

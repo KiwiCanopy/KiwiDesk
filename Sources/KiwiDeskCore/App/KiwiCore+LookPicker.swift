@@ -13,9 +13,7 @@ extension KiwiCore {
     /// The screen the picker covers: the one showing the focused
     /// Space, else none, and the GUI takes the pointer's.
     public func lookPickerScreen() -> NSScreen? {
-        state.workspaces.activeSpace
-            .flatMap { state.workspaces.display(of: $0) }
-            .flatMap(screen(for:))
+        focusedScreen.flatMap(screen(for:))
     }
 
     /// The first bundled or saved look the live settings wear
@@ -31,14 +29,14 @@ extension KiwiCore {
         }
     }
 
-    /// The worn look under `name` when no library look matches it
-    /// — the picker's "Current" card; nil while the library cannot
-    /// be read, so a saved look never shows as unsaved.
-    public func unsavedWornLook(named name: String) -> ShelfLook? {
+    /// The worn look when no library look matches it — the picker's
+    /// "Current" card, which the GUI names; nil while the library
+    /// cannot be read, so a saved look never shows as unsaved.
+    public func unsavedWornLook() -> ShelfLook? {
         guard (try? lookLibrary.libraryLooks()) != nil,
             wornLibraryLook == nil
         else { return nil }
-        return ShelfLook.current(named: name, in: tiler.settings)
+        return ShelfLook.current(named: "", in: tiler.settings)
     }
 
     /// Wears `look` for good: picked live, windows placed at once
@@ -66,5 +64,18 @@ extension KiwiCore {
         )
         onLookLibraryChanged()
         return look
+    }
+
+    /// Renames a saved look from the picker and tells the library's
+    /// readers, answering the name it stored; throws as
+    /// `renameLook` refuses.
+    @discardableResult
+    public func renamePickedLook(
+        from old: String,
+        to new: String
+    ) throws -> String {
+        let stored = try renameLook(from: old, to: new)
+        onLookLibraryChanged()
+        return stored
     }
 }

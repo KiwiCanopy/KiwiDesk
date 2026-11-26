@@ -62,6 +62,8 @@ struct PanelHandBackTests {
         let core = makeTestCore()
         let jump = JumpPanelController(core: core).makePanel()
         #expect(jump.styleMask.contains(.nonactivatingPanel))
+        let picker = LookPickerController(core: core).makePanel()
+        #expect(picker.styleMask.contains(.nonactivatingPanel))
     }
 
     /// Core tells KiwiHub from a grown peek by this stamp, letting
@@ -80,7 +82,8 @@ struct PanelHandBackTests {
     func chordsReachTheMainMenu() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         for path in [
-            "Sources/KiwiDesk/Jump/JumpPanel.swift"
+            "Sources/KiwiDesk/Jump/JumpPanel.swift",
+            "Sources/KiwiDesk/LookPicker/LookPickerPanel.swift",
         ] {
             let source = SourceScan.stripComments(
                 try String(
@@ -107,7 +110,8 @@ struct PanelHandBackTests {
     func panelsPresentThroughTheDoor() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         for path in [
-            "Sources/KiwiDesk/Jump/JumpPanelController.swift"
+            "Sources/KiwiDesk/Jump/JumpPanelController.swift",
+            "Sources/KiwiDesk/LookPicker/LookPickerController.swift",
         ] {
             let raw = try String(
                 contentsOf: root.appendingPathComponent(path),

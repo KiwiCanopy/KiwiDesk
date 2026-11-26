@@ -71,6 +71,8 @@ final class LookPickerModel: ObservableObject {
     /// `repeated` is the key held down: a step wraps on a fresh
     /// press only (#2897).
     func handle(_ key: LookPickerKey, repeated: Bool) {
+        // Esc always closes, a wear waiting on the desk included.
+        if phase == .wearing, key == .escape { return onClose() }
         guard phase == .browsing else { return }
         switch key {
         case .step(let delta):

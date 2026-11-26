@@ -65,15 +65,18 @@ final class LookPickerPanel: NSPanel {
 
     override func sendEvent(_ event: NSEvent) {
         switch event.type {
-        case .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            if revealing() {
-                onInterrupt()
-                return
-            }
-            if event.type == .keyDown, let key = key(for: event) {
+        case .keyDown:
+            if revealing() { return onInterrupt() }
+            if let key = key(for: event) {
                 onKey(key, event.isARepeat)
                 return
             }
+        // A click ends the reveal at its release, which the close
+        // holds for (#3209); the press itself lands on nothing.
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            if revealing() { return }
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            if revealing() { return onInterrupt() }
         default:
             break
         }

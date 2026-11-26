@@ -15,14 +15,14 @@ final class LookPickerController: NSObject {
     private(set) var model: LookPickerModel?
     private(set) var reveal = LookPickerReveal()
     /// This opening; a timer an earlier opening set finds another.
-    private var opening = 0
-    private var revealing = false
+    var opening = 0
+    var revealing = false
     /// Seam for KiwiDesk's Reduce Motion (#3252), read once per
     /// opening and handed to the view.
     var reduceMotion: () -> Bool = { ReduceMotion.isOn }
-    private var reduceMotionNow = false
+    var reduceMotionNow = false
     /// Where this opening draws, which the wave starts from.
-    private var geometry = LookPickerGeometry(screen: .zero, menuBar: 0)
+    var geometry = LookPickerGeometry(screen: .zero, menuBar: 0)
     /// Seam deferring work by a delay on the main queue.
     var after: (TimeInterval, @escaping @MainActor () -> Void) -> Void = {
         delay,
@@ -94,19 +94,35 @@ final class LookPickerController: NSObject {
         model?.settings = settings
     }
 
-    /// Closes at once, the puddle included; nothing is undone.
+    /// Closes at once, the puddle included; nothing is undone. A
+    /// click that closed it holds the panel up unseen for the rest
+    /// of the double-click interval, so a second press lands on it
+    /// (#3209).
     func close() {
+        let hold = PanelPresence.clickHoldNow(on: panel)
         opening += 1
         revealing = false
-        panel?.orderOut(nil)
-        panel?.contentView = nil
         model = nil
+        guard let panel else { return }
+        guard hold > 0 else { return Self.orderOut(panel) }
+        panel.alphaValue = PanelPresence.holdAlpha
+        let current = opening
+        after(hold) { [weak self, weak panel] in
+            guard self?.opening == current, let panel else { return }
+            Self.orderOut(panel)
+        }
+    }
+
+    private static func orderOut(_ panel: NSPanel) {
+        panel.orderOut(nil)
+        panel.contentView = nil
+        panel.alphaValue = 1
     }
 
     // MARK: - Cards
 
     private func makeModel() -> LookPickerModel {
-        let current = core.unsavedWornLook(named: "")
+        let current = core.unsavedWornLook()
         let entries = LookPickerEntry.cards(
             current: current,
             bundled: core.bundledLooks,
@@ -143,13 +159,7 @@ final class LookPickerController: NSObject {
         model.onWear = { [weak self] in self?.wear($0) }
         model.onQuickSave = { [weak self] in self?.quickSave() }
         model.onRename = { [weak self] from, to in
-            guard let self else { return nil }
-            do {
-                try core.renameLook(from: from, to: to)
-                return LibraryNameVerdict.normalized(to)
-            } catch {
-                return nil
-            }
+            try? self?.core.renamePickedLook(from: from, to: to)
         }
     }
 
@@ -159,97 +169,9 @@ final class LookPickerController: NSObject {
         return try? core.saveWornLook(base: name)
     }
 
-    // MARK: - Wear and reveal
-
-    /// ↩ on a look not worn: Core wears it with the windows placed at
-    /// once, then the reveal waits for the desk — at most
-    /// `readyCap` — whichever comes first.
-    private func wear(_ entry: LookPickerEntry) {
-        let current = opening
-        let latch = ResumeLatch()
-        let resume: @MainActor () -> Void = { [weak self] in
-            guard !latch.fired, let self, opening == current else { return }
-            latch.fired = true
-            startReveal()
-        }
-        announce(LookPickerText.wearing(entry.look.name))
-        core.wearPickedLook(entry.look, ready: resume)
-        after(Self.readyCap, resume)
-    }
-
-    private func startReveal() {
-        guard panel != nil else { return }
-        revealing = true
-        let reveal = self.reveal
-        let current = opening
-        let reduceMotion = reduceMotionNow
-        let finish: @MainActor () -> Void = { [weak self] in
-            guard let self, opening == current else { return }
-            close()
-        }
-        if reduceMotion {
-            withAnimation(Self.crossFade(reduceMotion: reduceMotion)) {
-                reveal.opacity = 0
-            }
-            after(LookPickerReveal.crossFade, finish)
-            return
-        }
-        reveal.dropShown = true
-        withAnimation(
-            reduceMotion ? nil : .easeIn(duration: LookPickerReveal.fall)
-        ) {
-            reveal.dropLanded = true
-        }
-        let reach = Self.reach(of: geometry)
-        after(LookPickerReveal.fall) { [weak self] in
-            guard self?.opening == current else { return }
-            withAnimation(
-                reduceMotion
-                    ? nil : .easeOut(duration: LookPickerReveal.splash)
-            ) {
-                reveal.dropSplashed = true
-            }
-            withAnimation(
-                reduceMotion
-                    ? nil : .easeOut(duration: LookPickerReveal.blurIn)
-            ) {
-                reveal.blur = LookPickerReveal.blurRadius
-            }
-            reveal.waveShown = true
-            withAnimation(
-                reduceMotion ? nil : .easeOut(duration: LookPickerReveal.wave)
-            ) {
-                reveal.holeRadius = reach
-            }
-            self?.after(LookPickerReveal.wave, finish)
-        }
-    }
-
-    /// Reduce Motion's 0.2 s cross-fade, a fade and no travel; it
-    /// plays only for a Reduce Motion user, whom the puddle skips.
-    static func crossFade(reduceMotion: Bool) -> Animation? {
-        reduceMotion ? .easeInOut(duration: LookPickerReveal.crossFade) : nil
-    }
-
-    /// How far the wave travels: past the corner farthest from the
-    /// card's centre, its band included.
-    static func reach(of geometry: LookPickerGeometry) -> CGFloat {
-        let size = geometry.screen
-        let centre = CGPoint(x: geometry.card.midX, y: geometry.card.midY)
-        let corners = [
-            CGPoint.zero, CGPoint(x: size.width, y: 0),
-            CGPoint(x: 0, y: size.height),
-            CGPoint(x: size.width, y: size.height),
-        ]
-        let far =
-            corners.map { hypot($0.x - centre.x, $0.y - centre.y) }
-            .max() ?? 0
-        return far + LookPickerReveal.band
-    }
-
     // MARK: - Panel
 
-    private func makePanel() -> LookPickerPanel {
+    func makePanel() -> LookPickerPanel {
         let panel = LookPickerPanel(
             contentRect: .zero,
             styleMask: [
@@ -278,7 +200,7 @@ final class LookPickerController: NSObject {
         return panel
     }
 
-    private func announce(_ text: String) {
+    func announce(_ text: String) {
         guard let panel else { return }
         NSAccessibility.post(
             element: panel,
@@ -296,10 +218,4 @@ extension LookPickerController: NSWindowDelegate {
     func windowDidResignKey(_ notification: Notification) {
         close()
     }
-}
-
-/// Resumes the reveal once: Core's `ready` or the cap, first wins.
-@MainActor
-private final class ResumeLatch {
-    var fired = false
 }

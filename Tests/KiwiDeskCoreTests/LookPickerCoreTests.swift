@@ -32,7 +32,7 @@ struct LookPickerCoreTests {
         let stored = try core.profiles.read(name: "Mine").settings
         #expect(look.match(stored) == .applied)
         #expect(core.wornLibraryLook?.name == look.name)
-        #expect(core.unsavedWornLook(named: "x") == nil)
+        #expect(core.unsavedWornLook() == nil)
     }
 
     @Test("a tweak to the worn look is the Current card")
@@ -41,9 +41,24 @@ struct LookPickerCoreTests {
         core.wearPickedLook(try other(core)) {}
         core.tiler.settings.borderStyle.focusedColor = "#123456"
         #expect(core.wornLibraryLook == nil)
-        let current = try #require(core.unsavedWornLook(named: "Now"))
-        #expect(current.name == "Now")
+        let current = try #require(core.unsavedWornLook())
         #expect(current.match(core.tiler.settings) == .applied)
+    }
+
+    /// An unreadable library could hold the worn look, so no card
+    /// calls it unsaved and ⌘S has nothing to save over it.
+    @Test("an unreadable library offers no Current card")
+    func unreadableLibrary() throws {
+        let core = makeCore()
+        core.tiler.settings.borderStyle.focusedColor = "#123456"
+        let url = core.lookLibrary.url
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data(#"{"format": 99, "looks": []}"#.utf8).write(to: url)
+        #expect(core.wornLibraryLook == nil)
+        #expect(core.unsavedWornLook() == nil)
     }
 
     @Test("⌘S saves the worn look under a free name")
@@ -57,8 +72,30 @@ struct LookPickerCoreTests {
         let second = try core.saveWornLook(base: "Kiwi · Nov 24")
         #expect(second.name == "Kiwi · Nov 24 2")
         #expect(changed == 2)
-        #expect(core.unsavedWornLook(named: "Now") == nil)
+        #expect(core.unsavedWornLook() == nil)
         #expect(core.wornLibraryLook != nil)
+    }
+
+    @Test("a picker rename answers the stored name and tells readers")
+    func renameTellsReaders() throws {
+        let core = makeCore()
+        core.tiler.settings.borderStyle.focusedColor = "#123456"
+        let saved = try core.saveWornLook(base: "Kiwi")
+        var changed = 0
+        core.onLookLibraryChanged = { changed += 1 }
+        let stored = try core.renamePickedLook(
+            from: saved.name,
+            to: "  Night "
+        )
+        #expect(stored == "Night")
+        #expect(changed == 1)
+        #expect(core.userLooks.map(\.name).contains("Night"))
+        #expect(throws: (any Error).self) {
+            try core.renamePickedLook(
+                from: "Night",
+                to: LookCatalog.defaultName
+            )
+        }
     }
 
     @Test("look.show_picker raises the GUI hook and moves nothing")

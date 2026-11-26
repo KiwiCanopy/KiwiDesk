@@ -16,6 +16,7 @@ struct LookPickerCaption: View {
                 Text(LookPickerText.subtitle(entry, worn: worn))
                     .font(.system(size: 15, weight: .medium))
                     .opacity(0.75)
+                    .accessibilityHidden(true)
             }
             Text(
                 LookPickerText.hint(
@@ -27,12 +28,12 @@ struct LookPickerCaption: View {
             .font(.system(size: 15, weight: .medium))
             .opacity(0.8)
             .padding(.top, 6)
+            .accessibilityHidden(true)
         }
         .foregroundStyle(SettingsTheme.plateInk)
         .shadow(color: SettingsTheme.visionVeil.opacity(0.7), radius: 14, y: 2)
         .frame(width: geometry.screen.width)
         .offset(y: geometry.nameTop)
-        .accessibilityHidden(true)
     }
 
     private var worn: Bool { model.selection == model.wornIndex }
@@ -53,11 +54,14 @@ struct LookPickerCaption: View {
             .frame(maxWidth: geometry.card.width)
             .focused($nameFocused)
             .onAppear { nameFocused = true }
-            .accessibilityLabel(LookPickerText.panelName)
+            // The card speaks for the look; the field, open after
+            // ⌘S, names what it edits.
+            .accessibilityLabel(LookPickerText.nameField)
         } else {
             Text(model.selected.map(LookPickerText.name) ?? "")
                 .font(.system(size: geometry.nameSize, weight: .bold))
                 .lineLimit(1)
+                .accessibilityHidden(true)
         }
     }
 }

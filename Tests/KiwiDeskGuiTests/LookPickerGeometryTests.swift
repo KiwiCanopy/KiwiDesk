@@ -33,7 +33,7 @@ struct LookPickerGeometryTests {
     }
 
     @Test("stripes overlap a quarter and stop inside the screen")
-    func stripes() {
+    func stripes() throws {
         let geometry = LookPickerGeometry(
             screen: CGSize(width: 1512, height: 982),
             menuBar: 33
@@ -46,6 +46,11 @@ struct LookPickerGeometryTests {
         #expect(abs(step - geometry.stripeSize.width * 0.75) < 0.01)
         #expect(right[0].minX < geometry.card.maxX, "tucked under the card")
         #expect(abs(right[0].height - geometry.card.height * 0.88) < 0.01)
+        #expect(right.count < 40)
+        let last = try #require(right.last)
+        #expect(last.minX < 1512 - LookPickerGeometry.margin)
+        let first = try #require(left.last)
+        #expect(first.maxX > LookPickerGeometry.margin)
         #expect(geometry.stripes(side: 1, available: 2).count == 2)
         #expect(geometry.stripes(side: 1, available: 0).isEmpty)
         #expect(
@@ -90,5 +95,18 @@ struct LookPickerGeometryTests {
         #expect(LookFruit.of(hex: "#F2F2F2") == .coconut)
         #expect(LookFruit.of(hex: "#1C1C1E") == .blackberry)
         #expect(LookFruit.of(hex: "nonsense") == .kiwi)
+        // One hue inside each band, as ruled by ui-designer.
+        let ruled: [(Double, LookFruit)] = [
+            (5, .cherry), (26, .orange), (45, .mango), (61, .lemon),
+            (110, .kiwi), (210, .blueberry), (272, .grape),
+            (305, .plum), (332, .raspberry), (352, .cherry),
+        ]
+        for (hue, fruit) in ruled {
+            #expect(
+                LookFruit.of(hue: hue, saturation: 0.8, luminance: 0.3)
+                    == fruit,
+                "hue \(hue)"
+            )
+        }
     }
 }

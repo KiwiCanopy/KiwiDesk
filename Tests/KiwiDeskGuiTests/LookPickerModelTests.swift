@@ -74,6 +74,19 @@ struct LookPickerModelTests {
         #expect(model.phase == .wearing)
     }
 
+    @Test("Esc closes while a wear waits on the desk")
+    func escapeDuringWear() {
+        let model = model(worn: 1)
+        var closed = 0
+        model.onClose = { closed += 1 }
+        model.handle(.step(1), repeated: false)
+        model.handle(.wear, repeated: false)
+        #expect(model.phase == .wearing)
+        model.handle(.step(1), repeated: false)
+        model.handle(.escape, repeated: false)
+        #expect(closed == 1)
+    }
+
     @Test("Esc closes and wears nothing")
     func escapeCloses() {
         let model = model()
