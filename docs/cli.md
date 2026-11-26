@@ -914,12 +914,10 @@ alone. `scroll_gesture.set_pan`, `scroll_gesture.set_space_step`,
 `trackpad_gesture.bind` are retired and fail naming
 `gesture.bind`.
 
-:::unreleased
 A last argument names the keybinding layer the binding is on,
 `default` when it is left out:
 `gesture.bind <input> <keys> <action> [layer]` and
 `gesture.unbind <input> <keys> [layer]`.
-:::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`

@@ -2,6 +2,35 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "5.2.0",
+      "tag": "v5.2.0",
+      "date": "2026-11-26",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v5.2.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v5.2.0/KiwiDesk-5.2.0.dmg",
+      "summary": "KiwiDesk 5.2.0 lets each layer bind its own gestures, as it already binds its own keys. Keyboard resizing goes the way you press, pinned Spaces start on their screen, and a few Settings and KiwiHub details are tidied up. When you connect a screen count you have no profile for, KiwiDesk now tells you what it set up.",
+      "heads": "If your init.lua runs your setup, your Spaces now take the order init.lua first names them in, so they may line up differently. Reorder them in init.lua to change it.",
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**Each layer now has its own gestures.** Pick a layer above the Shortcuts tabs and its Mouse & Trackpad gestures apply only while that layer is active. A layer that binds no gestures leaves the mouse and trackpad to macOS. Your current gestures move to the default layer when you update.",
+            "**Connecting a screen count you have no saved profile for now shows a short notice** that KiwiDesk set up Spaces for it, and how to keep your changes. It shows once per screen count."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**Keyboard resizing goes the way you press**, and a held key stops where the window can go no further.",
+            "**Spaces your init.lua pins to a screen start on that screen.**",
+            "**Small polish** in Settings ▸ Shortcuts ▸ Personal, Settings ▸ KiwiVision and KiwiHub's Desktop search."
+          ],
+          "type": "fixed"
+        }
+      ]
+    },
+    {
       "version": "5.1.0",
       "tag": "v5.1.0",
       "date": "2026-11-25",

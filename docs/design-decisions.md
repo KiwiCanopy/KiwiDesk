@@ -4947,12 +4947,10 @@ the *effective* float since
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184), whose
 entry below is the ruling's home. (#122, #124, #129)
 
-:::unreleased
 **Amended (#2969):** a keyboard press that would move the focused
 window against the press, or move nothing, refuses with the
 writer's blame instead of writing, so a hold ends; the direction
 stays the midpoint rule above, shared with the mouse.
-:::
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
@@ -12787,11 +12785,9 @@ is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs
 nothing at rest, and a drawer around it is chrome.
 
-:::unreleased
 *Amended (#3535):* Modifier keys is Built-in's one collapsible
 card; the layer pick is a strip above the Shortcuts switcher
 (*One page, three parts*).
-:::
 
 Per-Space Customize… is the one offer that left the menu (#2674,
 owner ruling 2026-10-27, amending this entry): every Space row
@@ -14814,11 +14810,9 @@ profiles get the same affordance: a pencil beside the
 profile name renames immediately — file, adopted name, and
 Desktop bindings follow, like Delete and make default.
 
-:::unreleased
 *Amended (#3535):* once a layer exists the strip is page-wide,
 above the Shortcuts switcher, and the switch rows are Personal ▸
 Layers' card; until then the card holds the strip.
-:::
 
 **Shortcut layers are the layering mechanism**: a layer switch
 gives a whole second set of single-key bindings, ergonomically
@@ -17792,7 +17786,6 @@ Home, the other two add a navigator.
   hidden — would stand, which is why it is a condition of the
   ruling rather than a nicety.
 
-:::unreleased
 *Amended (#3535, owner 2026-11-20 and 2026-11-25):* **a layer
 binds gestures as it binds keys**, so Mouse & Trackpad is the
 picked layer's part too, and "a layer does not act on a gesture"
@@ -17824,7 +17817,6 @@ Natural scrolling, which belong to no layer, say so once a layer
 exists. This retires "Layers stays a shut card on Built-in" and
 "Layers draws on Built-in and Personal" above, and moves the rule
 below to sit under Modifier keys, above the first part after it.
-:::
 
 **Its entries are grouped by where the hand is** — on your
 windows, anywhere holding a modifier, on the KiwiShelf — never by

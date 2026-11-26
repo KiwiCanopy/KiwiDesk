@@ -1820,14 +1820,12 @@ renamed in place from the Settings app's **Spaces** section; the
 rename is persisted and follows the id everywhere it is used —
 its layout mode, app rules, screen pins, and any keybindings.
 
-:::unreleased
 When `init.lua`
 [owns the config](#what-coexists-with-the-settings-app-and-what-doesnt),
 the order in which its run first refers to each Space through a
 KiwiDesk call is the Space order, on every load. Spaces it never
 refers to follow in their own order, and an active profile's
 order still wins.
-:::
 
 ### How inactive spaces hide their windows
 
@@ -5665,7 +5663,6 @@ Each row's **Applies to** picks the profiles it reaches, as a
 written to the base or a profile's own bindings
 ([Gesture storage](#gesture-storage)).
 
-:::unreleased
 Gesture bindings belong to a keybinding layer, as keys do, and
 only the active layer's fire. A gesture the active layer does not
 bind does nothing: switching to a layer that binds no gestures
@@ -5673,7 +5670,6 @@ turns every gesture off while it is active, the defaults included,
 which belong to `default` ([Gestures](user-guide.md#gestures)).
 Only a layer `KiwiDesk.define_layer` or the Settings app defines
 can be switched to.
-:::
 
 ### Gesture inputs
 
@@ -6007,7 +6003,6 @@ family whole. A
 binding [`gesture.bind`](#gesturebind) would refuse is kept and
 does nothing.
 
-:::unreleased
 The `gesture` object holds one such map per keybinding layer,
 keyed by the layer's name, in `gui.json` and in a profile file
 alike. The `default` layer's map lies over the defaults; every
@@ -6022,7 +6017,6 @@ that map under `default` on its next load.
   "Coding": { "swipe3:control+option": { "family": "space" } }
 }
 ```
-:::
 
 A file a release before this one wrote is moved on its next load:
 `trackpad_gesture`'s slots, `modifier_drag`'s `move` and `resize`
@@ -6098,7 +6092,6 @@ gesture.bind("wheel", "control+option+command", {
 })
 ```
 
-:::unreleased
 A fourth argument names the keybinding layer the binding is on,
 `default` when it is left out; an empty name fails. A binding on a
 layer fires only while that layer is active
@@ -6108,7 +6101,6 @@ layer fires only while that layer is active
 ```lua
 gesture.bind("swipe3", "control+option", "space", "Coding")
 ```
-:::
 
 ### gesture.unbind
 
@@ -6125,10 +6117,8 @@ gesture.unbind("tap3", "")
 gesture.unbind("drag", "control+option")
 ```
 
-:::unreleased
 A third argument names the layer, as for
 [`gesture.bind`](#gesturebind).
-:::
 
 ### scroll_gesture.set_pan
 
@@ -8337,7 +8327,6 @@ names. **←** **→** stay on the Desktop and land on the Space beside
 the one you left. A click on a row's name goes to the Desktop as a
 title click does.
 
-:::unreleased
 While anything is typed, the arrows land only on what matches, and
 when the selected Space stops matching the selection moves to the
 first match; typing never switches, **Return** does. While nothing
@@ -8346,7 +8335,6 @@ or **⌃**, do nothing, and a click still acts. While windows ride
 along, the arrows reach every Space again and no Space dims; typing
 while they ride along searches again until the next pick-up, and
 **Escape** clears that typing before it puts the windows back.
-:::
 
 **Tab** reaches it from View, and **⇧Tab** from Windows.
 
@@ -10677,7 +10665,6 @@ is not split. Each area shows its own Space, so several Spaces with
 one `display` can be `shown` at once; the one with a given `area`
 is that area's `areas[].space_id` in `list_monitors`.
 
-:::unreleased
 `display` is the `list_monitors` id, macOS's own number for the
 screen, not the [screen position](#move_space_to_display) a screen
 verb reads from a number; the two often look alike, so a `display`
@@ -10703,7 +10690,6 @@ identical screens that macOS leaves unnumbered share one
 fingerprint, and so share every setting stored by it
 ([twin screens](accepted-limitations.md),
 [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734)).
-:::
 
 A Stack space object also has `stack_position`: the side its stack
 zone draws on the Desktop its screen shows now, a
@@ -10882,12 +10868,10 @@ window on a Space no screen shows, or parked out of sight, has
 `frame` `null`, and `visibility` too where no screen shows it; a
 full-screen window has no `visibility`.
 
-:::unreleased
 `display` is the `list_monitors` id, not the
 [screen position](#move_space_to_display) a screen verb reads from
 a number. To hand a window's screen to one, pass the `fingerprint`
 of its Space from [`get_state`](#get_state).
-:::
 
 `list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
 `height`) in the same coordinates, and `layout_frame`, the area
