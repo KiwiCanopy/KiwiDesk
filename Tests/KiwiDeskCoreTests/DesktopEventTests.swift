@@ -138,8 +138,8 @@ struct DesktopEventTests {
         #expect(data(in: events())?["main"] == .bool(true))
     }
 
-    @Test("a switch no display names reports the main screen's number")
-    func noDisplayNamesMain() throws {
+    @Test("a repeat names the main screen's number, not 1")
+    func repeatNamesMain() throws {
         defer { resetAuthorityOverrides() }
         let (core, events) = makeEventCore()
         try numberRightToLeft(core)

@@ -114,10 +114,16 @@ extension KiwiCore {
                     profiles.markDirty()
                     // Its pins follow its numbers here too (#3647
                     // ▸ lane 2); a number past the screens waits.
-                    if let profile = try? profiles.read(name: name) {
+                    do {
+                        let profile = try profiles.read(name: name)
                         spacePins = keepingPins(
                             of: Set(liveTemporarySpaces),
                             over: runtimePins(of: profile)
+                        )
+                    } catch {
+                        onLog(
+                            "monitor change: pins of '\(name)' kept, "
+                                + "profile unreadable: \(error)"
                         )
                     }
                 }
