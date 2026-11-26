@@ -66,6 +66,7 @@ struct LookPickerGeometryTests {
     }
 
     @Test("the panel reads arrows, ↩, Esc and ⌘S; naming hands arrows on")
+    @MainActor
     func keys() {
         func key(
             _ code: UInt16,
