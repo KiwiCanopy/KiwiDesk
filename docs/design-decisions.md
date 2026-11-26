@@ -4380,9 +4380,11 @@ placed into every step of its Space through the same
 `Space.insert`, beside its anchor or at the start or end, and at
 the end where the step lacks the anchor; the steps keep their
 label and coalescing group. It is
-eager, at the fold, because only there is the anchor known and the
-arrival's side effects — a track break handed on — told apart from
-a change no act saw, which still clears. A return by rank, a track
+eager, at the fold, because only there is the anchor known; the
+fold checks that history still sits where the event found the
+Space, so a change no act saw still clears, and so does anything
+the handler writes beyond the window list, such as a launch's
+riders re-filed. A return by rank, a track
 spawn, a hide, a minimize, a move between Spaces no act made and
 an open or close while an act is still open (a drag, a held key's
 glide) still clear, each awaiting a ruling of its own. A new user act that should be undoable opens a bracket. Undo refuses rather than

@@ -119,6 +119,10 @@ struct LayoutUndoRebaseTests {
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         #expect(core.execute("undo_layout").isSuccess)
         #expect(order(core) == [2, 3])
+        // The stored before handed the head's break on, as live did.
+        let breaks = core.state.workspaces[one]?.trackBreaks ?? []
+        #expect(breaks.contains(WindowID(2)))
+        #expect(!breaks.contains(WindowID(1)))
     }
 
     @Test("an app's exit closes each of its windows in the history")

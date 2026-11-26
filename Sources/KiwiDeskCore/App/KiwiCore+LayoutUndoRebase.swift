@@ -28,9 +28,10 @@ extension KiwiCore {
         return LayoutUndoFold(event: event, before: layoutArrangements())
     }
 
-    /// Rebases the history over what the fold and its handler
-    /// changed, read after the handler's last write so a window it
-    /// re-filed reads as moved, not opened.
+    /// Rebases the history over the windows the fold and its
+    /// handler opened or closed. Anything else the handler wrote —
+    /// a heal, a rider re-filed — leaves the stored after behind,
+    /// so the next undo clears as before.
     func rebaseLayoutUndo(
         _ fold: LayoutUndoFold?,
         effects: AppliedEffects,
@@ -42,13 +43,6 @@ extension KiwiCore {
         let now = Self.members(after)
         let closed = Set(was.keys).subtracting(now.keys)
         let opened = Set(now.keys).subtracting(was.keys)
-        // A window the handler re-filed beside it (a launch's
-        // riders) is a move no step records.
-        guard
-            was.allSatisfy({
-                closed.contains($0.key) || now[$0.key] == $0.value
-            })
-        else { return }
         // A window gone by a hide or minimize comes back by rank.
         let isClose: Bool
         if case .appTerminated = fold.event {
@@ -94,17 +88,7 @@ extension KiwiCore {
                     ?? false
             })
         else { return }
-        // What the handler wrote beside the membership — the event
-        // retile's heals of weights and session sizes — becomes the
-        // stored after, so the next undo still acts.
-        history.rebase { space, side in
-            if changed.contains(space), side == fold.before[space],
-                let live = after[space]
-            {
-                return live
-            }
-            return rebase(space, side)
-        }
+        history.rebase(rebase)
         layoutHistory.history = history
     }
 
