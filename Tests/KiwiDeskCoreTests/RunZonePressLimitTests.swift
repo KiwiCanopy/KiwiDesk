@@ -194,6 +194,10 @@ struct RunZonePressLimitTests {
             )
             #expect(press.cue == cue, Comment(rawValue: "\(width)"))
             #expect(press.refusal == .atWeightLimit)
+            // A grow names the share even at the floor: the floor
+            // that stops a grow is a mate's.
+            let grow = two.limitPress(two.line(in: spent), 0, by: 5)
+            #expect(grow.cue == .weightLimit)
         }
     }
 }

@@ -228,8 +228,9 @@ extension RefusalCueSeamTests {
     @Test("the ratio limit is cued from its two doors")
     func ratioLimitHasTwoDoors() throws {
         let core = Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        let doors = ["cueWeightLimit", "cueBspLimit"]
         var bodies = 0
-        for name in ["cueWeightLimit", "cueBspLimit"] {
+        for name in doors {
             let body = Self.stripped(
                 try SourceScan.functionBody(
                     of: name,
@@ -248,7 +249,7 @@ extension RefusalCueSeamTests {
                 text.occurrences(of: "refuseRatioLimit(")
                 - text.occurrences(of: "funcrefuseRatioLimit(")
         }
-        #expect(bodies == 2)
+        #expect(bodies == doors.count)
         #expect(calls == bodies)
     }
 }
