@@ -35,8 +35,8 @@ struct LookWallpaperBadge<Items: View>: View {
     }
 
     /// The badge as drawn: an opaque chip on the card's ground with
-    /// its edge and a soft shadow, so it reads on any plate or
-    /// picture; the pointer lifts its fill (owner, 2026-11-26).
+    /// its edge, so it reads on any plate or picture; the pointer
+    /// lifts its fill (owner, 2026-11-26).
     static func face(symbol: String, hovered: Bool) -> some View {
         Image(systemName: symbol)
             .font(.system(size: 12, weight: .semibold))
@@ -48,15 +48,7 @@ struct LookWallpaperBadge<Items: View>: View {
             )
             .background(SettingsTheme.card, in: Circle())
             .overlay(
-                Circle().strokeBorder(
-                    hovered ? SettingsTheme.hoverEdge : SettingsTheme.hairline,
-                    lineWidth: 1
-                )
-            )
-            .shadow(
-                color: SettingsTheme.hoverRiseShadow,
-                radius: 2,
-                y: 1
+                Circle().strokeBorder(SettingsTheme.hairline, lineWidth: 1)
             )
             .contentShape(Circle())
     }
