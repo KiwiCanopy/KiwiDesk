@@ -137,6 +137,52 @@ struct PocketArrangementTests {
         #expect(abs(middle - 500) < 0.001)
     }
 
+    @Test(
+        "a lone bar at an end keeps all the room beside the pocket",
+        arguments: [
+            (KiwiShelf.Alignment.start, true),
+            (.start, false),
+            (.end, true),
+            (.end, false),
+        ]
+    )
+    func endAlignedLoneBarKeepsTheRoom(
+        alignment: KiwiShelf.Alignment,
+        leadsEnd: Bool
+    ) throws {
+        var aligned = shelf
+        aligned.alignment = alignment
+        let placed = ShelfArrangement.arrange(
+            length: 1000,
+            spaceNeed: 200,
+            appNeed: nil,
+            spaceFloor: 40,
+            shelf: aligned,
+            pocket: .init(need: 50, leadsEnd: leadsEnd)
+        )
+        let space = try #require(placed.space)
+        #expect(space.offset == (leadsEnd ? 0 : 50))
+        #expect(space.length == 950)
+        #expect(space.alignment == alignment)
+    }
+
+    @Test("a centred lone bar's slot moves with no need")
+    func centredSlotIsFixed() throws {
+        let short = arrange(
+            space: 120,
+            app: nil,
+            pocket: .init(need: 43.19, leadsEnd: false)
+        )
+        let long = arrange(
+            space: 860,
+            app: nil,
+            pocket: .init(need: 43.19, leadsEnd: false)
+        )
+        #expect(short.space == long.space)
+        let slot = try #require(long.space)
+        #expect(slot.length >= 860)
+    }
+
     @Test("a run too long to centre stops at the pocket's slot")
     func crowdedRunStopsAtThePocket() throws {
         let placed = arrange(

@@ -88,46 +88,70 @@ extension ShelfArrangement {
     /// Moves the bars, laid out in a room `free.length` long from
     /// zero, into `free`: their run takes its `alignment` against
     /// the `whole` edge and is clamped into `free` (#3685). A lone
-    /// bar keeps all of `free` under `start` and `end`; a centred
-    /// one takes the widest stretch of `free` centred on its run.
+    /// bar keeps all of `free` under `start` and `end`. A centred
+    /// one takes the stretch of `free` mirrored about the edge's
+    /// middle, a slot no need moves; a run longer than that takes
+    /// all of `free`, held against the pocket.
     private mutating func place(
         within free: ClosedRange<CGFloat>,
         whole: CGFloat,
         needs: (space: CGFloat?, app: CGFloat?),
         alignment: KiwiShelf.Alignment
     ) {
-        let room = free.upperBound - free.lowerBound
+        if let lone = space ?? app, (space == nil) != (app == nil) {
+            let need = (space != nil ? needs.space : needs.app) ?? 0
+            let slot = Self.loneSlot(
+                lone,
+                need: need,
+                within: free,
+                whole: whole
+            )
+            if space != nil { space = slot } else { app = slot }
+            return
+        }
         let slots = [space, app].compactMap { $0 }
         guard let first = slots.map(\.offset).min() else { return }
         let end = slots.map { $0.offset + $0.length }.max() ?? first
-        let run: CGFloat
-        if slots.count == 1 {
-            let need = needs.space ?? needs.app ?? 0
-            run = min(need, room)
-        } else {
-            run = end - first
-        }
+        let run = end - first
         let lead = min(
-            max(
-                Self.lead(run, in: whole, alignment),
-                free.lowerBound
-            ),
+            max(Self.lead(run, in: whole, alignment), free.lowerBound),
             free.upperBound - run
         )
-        guard slots.count == 1, alignment == .center else {
-            let shift = slots.count == 1 ? free.lowerBound : lead - first
-            space?.offset += shift
-            app?.offset += shift
-            return
+        space?.offset += lead - first
+        app?.offset += lead - first
+    }
+
+    /// A lone bar's slot within `free` (#3685): `slot`, laid out
+    /// from zero, moved into `free`, or under `center` the stretch
+    /// of `free` mirrored about the middle of `whole` while the
+    /// run fits it.
+    private static func loneSlot(
+        _ slot: Slot,
+        need: CGFloat,
+        within free: ClosedRange<CGFloat>,
+        whole: CGFloat
+    ) -> Slot {
+        let room = free.upperBound - free.lowerBound
+        guard slot.alignment == .center else {
+            var moved = slot
+            moved.offset += free.lowerBound
+            return moved
         }
-        let middle = lead + run / 2
-        let half = min(middle - free.lowerBound, free.upperBound - middle)
-        let slot = Slot(
-            offset: middle - half,
-            length: 2 * half,
-            alignment: .center
+        let lower = max(free.lowerBound, whole - free.upperBound)
+        let upper = min(free.upperBound, whole - free.lowerBound)
+        if need <= upper - lower {
+            return Slot(
+                offset: lower,
+                length: upper - lower,
+                alignment: .center
+            )
+        }
+        let leadsEnd = free.lowerBound == 0
+        return Slot(
+            offset: free.lowerBound,
+            length: room,
+            alignment: leadsEnd ? .end : .start
         )
-        if space != nil { space = slot } else { app = slot }
     }
 
     /// The arrangement with only `bars`' slots kept (#3359): each
