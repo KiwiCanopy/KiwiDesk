@@ -152,11 +152,14 @@ extension KiwiCore {
             )
         // A set another profile holds keeps its stored order when
         // this one takes it (#3647, owner 2026-11-26).
-        let set = heldLiveSet ?? liveMonitorSet
+        // A renumber stands for the live order the pins took (#3647).
+        let set =
+            sessionScreenOrder == nil
+            ? heldLiveSet ?? liveMonitorSet : liveMonitorSet
         return Profile(
             name: name,
             monitorSets: [set],
-            spaceMonitorMap: set.order.storing(
+            spaceMonitorMap: (sessionScreenOrder ?? set.order).storing(
                 runtime: capturedPins(alsoOf: extra),
                 over: [:]
             ),
@@ -200,10 +203,13 @@ extension KiwiCore {
         named name: String,
         modes: [SpaceID: LayoutMode]?
     ) throws -> [String] {
+        // A renumber goes with the live arrangement it numbers.
+        let carried = sessionScreenOrder
         guard var existing = try? profiles.read(name: name)
         else {
             let built = buildProfile(name: name, modes: modes)
             let released = try saveProfile(built)
+            settleSessionScreenOrder(carried, savedAs: built)
             recordLookWrite(of: built)
             refreshConfigIssues()
             if modes == nil { adoptedWholeLive(name) }
@@ -225,10 +231,10 @@ extension KiwiCore {
         if existing.set(matching: live.monitors) != nil
             || !isOwnedElsewhere(live.monitors, than: name)
         {
-            existing.upsert(live)
+            existing.upsert(live, reordering: carried != nil)
             existing.storePins(
                 capturedPins(alsoOf: extra),
-                through: screenOrder(for: existing)
+                through: carried ?? screenOrder(for: existing)
             )
         }
         let fresh = buildProfile(name: name, modes: modes)
@@ -239,6 +245,7 @@ extension KiwiCore {
         existing.settings = fresh.settings
         existing.savedAt = .now
         let released = try saveProfile(existing)
+        settleSessionScreenOrder(carried, savedAs: existing)
         recordLookWrite(of: existing)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).

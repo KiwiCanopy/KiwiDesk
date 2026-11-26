@@ -29,8 +29,9 @@ struct ScreensCensusRenderTests {
     }
 
     /// A picture with every kind of chip in it: one pinned, one
-    /// automatic, one following main, and one pinned to hardware
-    /// that is away.
+    /// automatic, one following main, one pinned to hardware that
+    /// is away, and one pinned to a screen number no screen holds,
+    /// which the runtime places automatically (#3647).
     private var expander: ScreensFamilyRows {
         let left = display(1, "Left")
         let right = display(2, "Right", x: 1500)
@@ -38,6 +39,7 @@ struct ScreensCensusRenderTests {
             spaces: [
                 SpaceID("code"), SpaceID("web"),
                 SpaceID("chat"), SpaceID("media"),
+                SpaceID("mail"),
             ],
             mainSpaces: [SpaceID("chat")],
             resolutions: [
@@ -45,12 +47,14 @@ struct ScreensCensusRenderTests {
                 SpaceID("web"): .auto(right.fingerprint),
                 SpaceID("chat"): .main,
                 SpaceID("media"): .pinned("Away:1000x1000"),
+                SpaceID("mail"): .auto(left.fingerprint),
             ],
             pins: [
                 SpaceID("code"): left.fingerprint,
                 SpaceID("media"): "Away:1000x1000",
             ],
-            displays: [left, right]
+            displays: [left, right],
+            waiting: [SpaceID("mail"): 3]
         )
     }
 
@@ -198,7 +202,7 @@ struct ScreensCensusRenderTests {
         )
         #expect(
             expander.rows(for: .screens(.orphanPinClear))
-                == [.orphan("media")]
+                == [.orphan("mail"), .orphan("media")]
         )
         #expect(
             expander.rows(for: .screens(.fingerprints))

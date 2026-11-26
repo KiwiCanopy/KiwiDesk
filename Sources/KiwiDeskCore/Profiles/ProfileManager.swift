@@ -62,6 +62,12 @@ public final class ProfileManager {
     /// The resolving Standard as one value, `currentStandard`'s
     /// source (#1509).
     private(set) var standard: ActiveStandard?
+    /// A session renumber and its profile (#3647; nil: none live),
+    /// read through `KiwiCore+SessionScreenOrder`.
+    private(set) var sessionScreenOrder: SessionScreenOrder?
+    func setSessionScreenOrder(_ order: ScreenOrder?, for name: String?) {
+        sessionScreenOrder = order.map { .init(profile: name, order: $0) }
+    }
     /// True when live state diverged from saved profile.
     public private(set) var isDirty = false
 
@@ -162,6 +168,7 @@ public final class ProfileManager {
             at: url(for: validated(name))
         )
         updateIndex(stampBefore: stamp) { $0.remove(file: name) }
+        if sessionScreenOrder?.profile == name { sessionScreenOrder = nil }
         if currentName == name {
             active = nil
             isDirty = true
@@ -206,6 +213,9 @@ public final class ProfileManager {
         updateIndex(stampBefore: stamp) { $0.remove(file: old) }
         profile.name = new
         try write(profile)
+        if sessionScreenOrder?.profile == old {
+            sessionScreenOrder?.profile = new
+        }
         if currentName == old {
             active = active?.renamed(to: new)
             savedModesRecord = (new, profile.spaceModes)

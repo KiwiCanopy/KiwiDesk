@@ -20,7 +20,8 @@ extension SettingsModel {
     /// A Space's Screen pin as its chip draws it: the one reading
     /// every pin chip takes.
     func spacePinBadge(_ space: SpaceID) -> SpacePinBadge {
-        SpacePinBadge.resolve(
+        if waitingPins[space] != nil { return .offline }
+        return SpacePinBadge.resolve(
             pin: pin(of: space),
             connectedFingerprints: Set(displays.map(\.fingerprint)),
             name: screenName
@@ -31,6 +32,17 @@ extension SettingsModel {
     /// for and the one the Space opens on meanwhile — the runtime's
     /// own fallback. The chip's hover reads this one.
     func offlinePinSentence(_ space: SpaceID) -> String {
+        if let number = waitingPins[space],
+            let fallback = spacePlacement(of: space)?.display
+        {
+            return L(
+                "spaces.pin_offline_badge.help_numbered",
+                "Pinned to Screen %1$d, which isn't connected. Opens "
+                    + "on %2$@ until it's back.",
+                number,
+                screenLabel(fallback)
+            )
+        }
         guard
             case .pinnedAbsent(let pin, let fallback) =
                 spacePlacement(of: space)
@@ -71,6 +83,38 @@ extension SettingsModel {
                 + "the main screen, until it's back.",
             waiting,
             fallback.name
+        )
+    }
+
+    /// The offline chip's label: "Screen N offline" for a pin to a
+    /// number no connected screen holds (#3647).
+    func offlinePinLabel(_ space: SpaceID) -> String {
+        guard let number = waitingPins[space] else {
+            return L("spaces.pin_offline_badge", "Pin offline")
+        }
+        return L(
+            "spaces.pin_offline_badge.numbered",
+            "Screen %1$d offline",
+            number
+        )
+    }
+
+    /// The pinned chip's hover: the number and the screen holding it
+    /// here, where the pin is a number this order holds (#3647).
+    func pinnedHelp(_ space: SpaceID, _ displayName: String) -> String {
+        guard let slot = config.spacePins[space], screenOrder.holds(slot)
+        else {
+            return L(
+                "spaces.pin_badge.help",
+                "Pinned to %1$@ for this profile.",
+                displayName
+            )
+        }
+        return L(
+            "spaces.pin_badge.help_numbered",
+            "Pinned to Screen %1$d, which is %2$@ here.",
+            slot.number,
+            displayName
         )
     }
 }

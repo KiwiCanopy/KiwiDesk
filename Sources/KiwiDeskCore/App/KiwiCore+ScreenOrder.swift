@@ -11,14 +11,19 @@ extension KiwiCore {
     /// left to right, ties top to bottom. Read from adoption state,
     /// never the file (#1245).
     public var liveScreenOrder: ScreenOrder {
-        screenOrder(holding: profiles.active?.monitorSets ?? [])
+        sessionScreenOrder
+            ?? screenOrder(holding: profiles.active?.monitorSets ?? [])
     }
 
     /// The order `profile`'s pins are numbered in on the connected
-    /// screens: its set covering them, else left to right. A draft of
-    /// a stored profile reads its own, never the live one's.
+    /// screens: the session's renumber for the live profile, else its
+    /// set covering them, else left to right. A draft of a stored
+    /// profile reads its own, never the live one's.
     public func screenOrder(for profile: Profile?) -> ScreenOrder {
-        screenOrder(holding: profile?.monitorSets ?? [])
+        if let profile, let order = sessionScreenOrder(for: profile.name) {
+            return order
+        }
+        return screenOrder(holding: profile?.monitorSets ?? [])
     }
 
     /// The order `sets` number the connected screens in; read on each
@@ -46,9 +51,9 @@ extension KiwiCore {
     ) -> [(number: Int, display: Display)] {
         var left = displays.sorted(by: ScreenOrder.precedes)
         var result: [(number: Int, display: Display)] = []
-        for (index, fingerprint) in liveScreenOrder.fingerprints
-            .enumerated()
-        {
+        let order = liveScreenOrder
+        for (index, fingerprint) in order.fingerprints.enumerated()
+        where order.holds(ScreenSlotKey(number: index + 1)!) {
             guard
                 let at = left.firstIndex(where: {
                     $0.fingerprint == fingerprint

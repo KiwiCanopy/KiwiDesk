@@ -14,6 +14,8 @@ enum ScreensRowInstance: Hashable {
 struct OrphanPin: Identifiable, Hashable {
     let space: SpaceID
     let fingerprint: String
+    /// The screen number it waits for, where the pin is one (#3647).
+    var number: Int?
 
     var id: String { space.raw }
 }
@@ -34,6 +36,9 @@ struct ScreensFamilyRows {
     /// The draft's splits by fingerprint (#3517); a screen with
     /// none, or a whole one, is one area 0.
     var splits: [String: ScreenSplit] = [:]
+    /// Stored pins to a number no connected screen holds (#3647):
+    /// they wait, as a pin to a gone screen does.
+    var waiting: [SpaceID: Int] = [:]
 
     /// Connected screens in left-to-right desk reading order.
     var orderedDisplays: [Display] {
@@ -50,7 +55,9 @@ struct ScreensFamilyRows {
     /// (#53).
     func chips(on fingerprint: String) -> [SpaceAssignment] {
         spaces.compactMap { space in
-            guard !mainSpaces.contains(space) else { return nil }
+            // A waiting pin has its own row, never a chip (#3647).
+            guard !mainSpaces.contains(space), waiting[space] == nil
+            else { return nil }
             switch resolutions[space] {
             case .pinned(let pinned) where pinned == fingerprint:
                 return SpaceAssignment(space: space, kind: .pinned)
@@ -114,7 +121,7 @@ struct ScreensFamilyRows {
     /// them.
     var orphans: [OrphanPin] {
         let connected = Set(displays.map(\.fingerprint))
-        return
+        let gone =
             pins
             .filter {
                 !connected.contains(
@@ -123,7 +130,11 @@ struct ScreensFamilyRows {
             }
             .filter { !mainSpaces.contains($0.key) }
             .map { OrphanPin(space: $0.key, fingerprint: $0.value) }
-            .sorted { $0.space.raw < $1.space.raw }
+        let numbered = waiting.filter { !mainSpaces.contains($0.key) }
+            .map {
+                OrphanPin(space: $0.key, fingerprint: "", number: $0.value)
+            }
+        return (gone + numbered).sorted { $0.space.raw < $1.space.raw }
     }
 
     /// Deduplicated spaces assigned to screen cards: fingerprint
@@ -159,7 +170,7 @@ struct ScreensFamilyRows {
             return orphans.map {
                 ScreensRowInstance.orphan($0.space.raw)
             }
-        case .fingerprints, .displayAreas:
+        case .fingerprints, .displayAreas, .screenNumbers:
             return orderedDisplays.map {
                 ScreensRowInstance.display($0.fingerprint)
             }

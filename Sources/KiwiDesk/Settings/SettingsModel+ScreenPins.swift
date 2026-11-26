@@ -6,10 +6,10 @@ import KiwiDeskCore
 /// through these and `place`, so no view spells the crossing.
 extension SettingsModel {
     /// Which connected screen holds which number for the draft's
-    /// target: a stored profile's own order, else the live one.
+    /// target: the draft's renumber, else a stored profile's own
+    /// order, else the live one.
     var screenOrder: ScreenOrder {
-        storedMonitorSets.map(core.screenOrder(holding:))
-            ?? core.liveScreenOrder
+        screenNumbering.draft ?? baseScreenOrder
     }
 
     /// Every draft pin as the runtime keys it: a screen fingerprint,

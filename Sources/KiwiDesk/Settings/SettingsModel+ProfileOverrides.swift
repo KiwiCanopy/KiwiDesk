@@ -57,7 +57,8 @@ extension SettingsModel {
             try core.overwriteProfile(
                 named: name,
                 with: config,
-                writingRules: ruleReachStored == nil
+                writingRules: ruleReachStored == nil,
+                screenOrder: screenNumbering.draft
             )
         } catch {
             profileWarning = L(

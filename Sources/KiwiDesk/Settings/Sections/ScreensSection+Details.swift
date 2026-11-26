@@ -30,24 +30,27 @@ extension ScreensSection {
         // (docs review 2026-08-04).
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(orphanSentence(orphan.space))
+                Text(orphanSentence(orphan))
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(orphan.fingerprint)
-                    .font(
-                        .system(.caption, design: .monospaced)
-                    )
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
+                if orphan.number == nil {
+                    Text(orphan.fingerprint)
+                        .font(
+                            .system(.caption, design: .monospaced)
+                        )
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel(
-                L(
-                    "monitors.orphan_pin.row_axlabel",
-                    "%1$@, waiting for screen %2$@",
-                    orphanSentence(orphan.space),
-                    orphan.fingerprint
-                )
+                orphan.number == nil
+                    ? L(
+                        "monitors.orphan_pin.row_axlabel",
+                        "%1$@, waiting for screen %2$@",
+                        orphanSentence(orphan),
+                        orphan.fingerprint
+                    ) : orphanSentence(orphan)
             )
             Spacer()
             Button(backToAutomatic) {
@@ -63,8 +66,18 @@ extension ScreensSection {
     /// positional default's assignment (docs review 2026-08-04).
     /// "Space %1$@" keeps the noun — a bare numeral opening a
     /// sentence is not writable in ja/ko.
-    private func orphanSentence(_ space: SpaceID) -> String {
-        L(
+    private func orphanSentence(_ orphan: OrphanPin) -> String {
+        if let number = orphan.number {
+            return L(
+                "monitors.orphan_pin.sentence_numbered",
+                "Space %1$@ is pinned to Screen %2$d, which isn't "
+                    + "connected, so it opens elsewhere for now.",
+                orphan.space.raw,
+                number
+            )
+        }
+        let space = orphan.space
+        return L(
             "monitors.orphan_pin.sentence",
             "Space %1$@ is pinned to a screen that isn't "
                 + "attached, so it opens elsewhere for now.",

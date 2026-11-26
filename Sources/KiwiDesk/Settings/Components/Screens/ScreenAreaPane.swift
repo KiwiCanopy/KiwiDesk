@@ -130,6 +130,21 @@ struct ScreenAreaPane: View {
     /// truncates first (ruling 27).
     private var header: some View {
         HStack(spacing: 0) {
+            if leads {
+                ScreenNumberBadge(model: model, display: display)
+                    .font(.caption)
+                    .padding(.trailing, 4)
+                    .layoutPriority(3)
+            }
+            headerText
+        }
+        .frame(height: ScreenCardChips.headerHeight)
+    }
+
+    /// The name and the Main chip, which VoiceOver reads from the
+    /// pane's own label; the badge is its own element.
+    private var headerText: some View {
+        HStack(spacing: 0) {
             let screen = model.screenLabel(display)
             let label = area.flatMap { model.areaLabel($0, on: display) }
             if leads, let label {
@@ -164,7 +179,6 @@ struct ScreenAreaPane: View {
         }
         .font(.caption)
         .bold()
-        .frame(height: ScreenCardChips.headerHeight)
         .accessibilityHidden(true)
     }
 
@@ -291,6 +305,7 @@ struct ScreenAreaPane: View {
 
     /// Pins dropped Spaces to this pane's key (#36, #3517).
     private func pin(_ items: [DraggableSpace]) -> Bool {
+        guard model.takesPins(key) else { return false }
         var assigned = false
         for item in items {
             let space = SpaceID(item.raw)

@@ -206,7 +206,9 @@ enum SettingsDiffRowSource {
             rows += SettingsValueReadout.rows(
                 for: key,
                 old: model.cleanConfig,
-                new: model.config
+                new: model.config,
+                screenOrder: model.screenOrder,
+                baseScreenOrder: model.baseScreenOrder
             ).map {
                 var row = $0
                 row.revert =
@@ -243,6 +245,7 @@ enum SettingsDiffRowSource {
         // (#1197) — ONE list, so the footer's N is still the
         // count of the list it opens.
         rows += driftRows(for: model)
+        rows += screenNumberRows(for: model)
         rows += liveRows(for: model, leaving: diff.changedSettings)
         return lookFolded(rows, for: model)
     }

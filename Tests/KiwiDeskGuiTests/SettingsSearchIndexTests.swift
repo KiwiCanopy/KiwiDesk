@@ -192,7 +192,7 @@ struct SettingsSearchIndexTests {
                 // 33: #2493's three wrap rows, #2976's Maximize; 32
                 // since #3238 sent Scroll duration to Lua.
                 .layoutDefaults: 32,
-                .screens: 3,
+                .screens: 4,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are
                 // `.atRest` in the census, as they render, so

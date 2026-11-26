@@ -9,13 +9,14 @@ extension SettingsModel {
         // A checklist change may reach only OTHER profiles, which
         // the config comparison cannot see (#1393).
         let reachRows = reachDiffRows().count + lookReachDiffRows().count
+        let numbers = screenNumbersEdited ? 1 : 0
         isDirty =
             config != cleanConfig
             || luaSource != cleanLuaSource
-            || reachRows > 0
+            || reachRows + numbers > 0
         draftChangeCount =
             isDirty
-            ? draftDiff.total + reachRows
+            ? draftDiff.total + reachRows + numbers
             : 0
     }
 

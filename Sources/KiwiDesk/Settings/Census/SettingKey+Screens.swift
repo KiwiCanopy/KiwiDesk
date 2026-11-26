@@ -8,12 +8,14 @@ enum ScreensKey: String, CaseIterable, Hashable {
     case orphanPinClear = "(action) monitors.orphan_pin.clear"
     case fingerprints = "(readonly) monitors.fingerprints"
     case placementUnavailable = "(state) monitors.placementUnavailable"
+    /// The draft's renumber of the connected screens (#3647).
+    case screenNumbers = "(state) monitors.screen_numbers"
 }
 
 extension ScreensKey {
     var placement: SettingPlacement {
         switch self {
-        case .spacePins, .mainSpaces, .displayAreas:
+        case .spacePins, .mainSpaces, .displayAreas, .screenNumbers:
             // Ungated: picture availability is governed by the banner gate
             // (#678).
             return .row(.screens, .spacePlacement, .atRest)
@@ -48,6 +50,8 @@ extension ScreensKey {
             return .text("monitors.areas.label")
         case .mainSpaces:
             return .text("monitor_card.follows_main")
+        case .screenNumbers:
+            return .text("monitor_card.number.ax")
         case .orphanPinClear:
             return .text("monitors.clear_pin.label")
         case .fingerprints:

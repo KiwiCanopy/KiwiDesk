@@ -6,15 +6,21 @@ extension SettingsValueReadout {
     static func screensRows(
         _ key: ScreensKey,
         old: GuiConfig,
-        new: GuiConfig
+        new: GuiConfig,
+        orders: (old: ScreenOrder?, new: ScreenOrder?) = (nil, nil)
     ) -> [SettingsDiffRow] {
         let census = SettingKey.screens(key)
         switch key {
         case .spacePins:
+            // Each side worded in its own order and splits.
             return screensPinRows(
                 census,
-                old: old.spacePins,
-                new: new.spacePins
+                old: old.spacePins.mapValues {
+                    screenWords($0, orders.old, old.settings.displayAreas)
+                },
+                new: new.spacePins.mapValues {
+                    screenWords($0, orders.new, new.settings.displayAreas)
+                }
             )
         case .mainSpaces:
             return screensMainRows(
@@ -29,19 +35,18 @@ extension SettingsValueReadout {
                 new: new.settings.displayAreas
             )
         case .orphanPinClear, .fingerprints,
-            .placementUnavailable:
+            .placementUnavailable, .screenNumbers:
             // no model path — never booked by the diff
             return []
         }
     }
 
-    /// One row per re-pinned space, showing the stored screen
-    /// number (`ScreenSlotKey`, #3647) verbatim until the "Screen N"
-    /// words ship with the Screens badge.
+    /// One row per re-pinned space, naming the stored screen number
+    /// as "Screen N" (#3647), an area pin as "Screen N – Area k".
     private static func screensPinRows(
         _ census: SettingKey,
-        old: [SpaceID: ScreenSlotKey],
-        new: [SpaceID: ScreenSlotKey]
+        old: [SpaceID: String],
+        new: [SpaceID: String]
     ) -> [SettingsDiffRow] {
         let base = L("diff.label.space_pin", "Screen pin")
         let touched = Set(old.keys).union(new.keys)
@@ -52,10 +57,34 @@ extension SettingsValueReadout {
                 census,
                 instance: space.raw,
                 label: instanceLabel(base, space.raw),
-                old: old[space]?.description ?? unset,
-                new: new[space]?.description ?? unset
+                old: old[space] ?? unset,
+                new: new[space] ?? unset
             )
         }
+    }
+
+    /// A stored pin's words: "Screen N", and an area pin "Screen N –
+    /// Left", its area worded on the screen holding N in `order`.
+    private static func screenWords(
+        _ slot: ScreenSlotKey,
+        _ order: ScreenOrder?,
+        _ splits: [String: ScreenSplit]
+    ) -> String {
+        let screen = L("monitor_card.number_badge", "Screen %1$d", slot.number)
+        guard slot.areaID > 0 else { return screen }
+        guard let key = order?.runtimeKey(of: slot) else {
+            return L(
+                "monitors.split.name",
+                "%1$@ – %2$@",
+                screen,
+                ScreenAreaWords.position(.numbered(slot.areaID + 1))
+            )
+        }
+        return SettingsModel.perScreenName(
+            screen: screen,
+            key: key.description,
+            splits: splits
+        )
     }
 
     /// One row per screen whose split changed (#3517), each side

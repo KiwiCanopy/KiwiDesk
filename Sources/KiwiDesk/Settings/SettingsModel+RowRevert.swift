@@ -9,7 +9,7 @@ extension SettingsModel {
         switch row.revert {
         case .census: SettingsRevertRegister.writers[row.key] != nil
         case .lua, .look, .lookChanges, .ruleReach, .binding,
-            .layerMembers, .lensFields, .lensReach:
+            .layerMembers, .lensFields, .lensReach, .screenNumbers:
             true
         case .layer(let stored, let page):
             !layerRevertBlocked(stored: stored, page: page)
@@ -41,6 +41,8 @@ extension SettingsModel {
             )
         case .lua:
             luaSource = cleanLuaSource
+        case .screenNumbers:
+            revertScreenNumbers()
         case .look(let profile):
             if let stored = lookReachStored[profile] {
                 setLookFollows(profile, stored)

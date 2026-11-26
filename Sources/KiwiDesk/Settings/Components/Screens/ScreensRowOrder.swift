@@ -5,6 +5,7 @@ enum ScreensRowOrder {
     static let spacePlacement: [SettingKey] = [
         .screens(.placementUnavailable),
         .screens(.spacePins),
+        .screens(.screenNumbers),
         .screens(.mainSpaces),
         .screens(.displayAreas),
     ]

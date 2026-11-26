@@ -20,6 +20,7 @@ extension KiwiCore {
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
         defer { desktopMemory.installing = nil }
+        if cause == .explicit { clearSessionScreenOrder() }
         adoptAppWide(from: profile)
         adoptSharedLook(from: profile)
         let pruneStaleSpaces = cause.prunesStale
@@ -186,6 +187,7 @@ extension KiwiCore {
         composed: ProfileComposition.Composed,
         forceRetile: Bool
     ) {
+        clearSessionScreenOrder()
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
