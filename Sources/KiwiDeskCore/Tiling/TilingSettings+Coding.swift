@@ -36,6 +36,7 @@ extension TilingSettings: Codable {
         case resize
         case space
         case lookOrigin = "look_origin"
+        case lookWallpaper = "look_wallpaper"
         case displayAreas = "display_areas"
     }
 
@@ -178,6 +179,10 @@ extension TilingSettings: Codable {
         lookOrigin = try container.decodeIfPresent(
             ShelfLook.self,
             forKey: .lookOrigin
+        )
+        lookWallpaper = try container.decodeIfPresent(
+            LookWallpaper.self,
+            forKey: .lookWallpaper
         )
         displayAreas =
             try container.decodeIfPresent(

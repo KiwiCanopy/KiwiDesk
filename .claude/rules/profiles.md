@@ -1251,7 +1251,15 @@ A look has a fourth home since #1740: the origin a pick records,
 a whole `ShelfLook` in the settings (`TilingSettings.lookOrigin`,
 `look_origin`) and in the shared look (`LookBody.origin`), so a
 breaking `ShelfLook` change reaches profiles and `gui.json` too,
-and an older build's save drops it, the same accepted trade. A
+and an older build's save drops it, the same accepted trade. The
+worn look's picture rides beside it, never in it (#3478):
+`TilingSettings.lookWallpaper` (`look_wallpaper`) and
+`LookBody.wallpaper`, never a `LookKeys` path, so it never changes
+whether a look reads applied (`LookWallpaperWearTests` ▸
+`appliedIgnoresIt`). A new place that names a picture in the config
+folder's `wallpapers/` joins the one `namedWallpapers()` walk, or
+cleanup trashes a picture something still wears; nothing scans for
+a home left out, so that is review's. A
 user's pick goes through `ShelfLook.pick`, never `apply` beside
 it, or the credit Share and Save read goes stale
 (`LookOriginTests`, `LookOriginSaveTests`); a new pick door is

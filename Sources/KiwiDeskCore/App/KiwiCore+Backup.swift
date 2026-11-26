@@ -48,6 +48,7 @@ extension KiwiCore {
             profiles: profiles,
             palettes: paletteLibrary,
             looks: lookLibrary,
+            wallpapers: wallpaperLibrary,
             bindings: true,
             initLua: initLua
         )
@@ -61,6 +62,7 @@ extension KiwiCore {
         profiles: ProfileManager,
         palettes: PaletteStore,
         looks: LookStore,
+        wallpapers: WallpaperLibrary,
         bindings: Bool,
         initLua: String? = nil
     ) throws -> SetupBundle {
@@ -70,20 +72,34 @@ extension KiwiCore {
         // exported, stops being discarded and stops being written,
         // which is what "does not travel" has to mean to be worth
         // recording (`architect-reviewer`, 2026-08-17).
-        SetupBundle(
+        let config =
+            ConfigArtifact.guiConfig.travelsInABackup ? gui.load() : nil
+        let stored =
+            ConfigArtifact.profiles.travelsInABackup
+            ? profiles.allProfiles() : []
+        let library =
+            ConfigArtifact.looks.travelsInABackup
+            ? try looks.libraryLooks() : nil
+        // Only the pictures a carried look home names (#3478).
+        let named = wallpaperNames(
+            looks: library ?? [],
+            config: config,
+            profiles: stored
+        )
+        return SetupBundle(
             writtenBy: KiwiDeskVersion.semantic,
-            config: ConfigArtifact.guiConfig.travelsInABackup
-                ? gui.load() : nil,
-            profiles: ConfigArtifact.profiles.travelsInABackup
-                ? profiles.allProfiles() : [],
+            config: config,
+            profiles: stored,
             palettes: ConfigArtifact.palettes.travelsInABackup
                 ? try palettes.libraryPalettes() : [],
-            looks: ConfigArtifact.looks.travelsInABackup
-                ? try looks.libraryLooks() : nil,
+            looks: library,
             profileBindings: bindings
                 && ConfigArtifact.desktopBindings.travelsInABackup
                 ? gui.load()?.profileBindings : nil,
-            initLua: initLua
+            initLua: initLua,
+            wallpapers: ConfigArtifact.wallpapers.travelsInABackup
+                ? wallpapers.contents().filter { named.contains($0.key) }
+                : nil
         )
     }
 
@@ -250,7 +266,8 @@ extension KiwiCore {
             let palettes = try? encoder.encode(bundle.palettes),
             let looks = try? encoder.encode(bundle.looks),
             let bindings = try? encoder.encode(bundle.profileBindings),
-            let initLua = try? encoder.encode(bundle.initLua)
+            let initLua = try? encoder.encode(bundle.initLua),
+            let wallpapers = try? encoder.encode(bundle.wallpapers)
         else { return nil }
 
         // The header's own braces come off; its two lines lead.
@@ -266,6 +283,7 @@ extension KiwiCore {
             ("looks", looks),
             ("profileBindings", bindings),
             ("initLua", initLua),
+            ("wallpapers", wallpapers),
         ]
         .map { name, data in
             "  \"\(name)\" : \(reindented(data))"

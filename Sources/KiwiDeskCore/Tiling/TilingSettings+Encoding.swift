@@ -48,6 +48,10 @@ extension TilingSettings {
         try container.encode(mouseResize, forKey: .mouseResize)
         try container.encode(mouse, forKey: .mouse)
         try container.encodeIfPresent(lookOrigin, forKey: .lookOrigin)
+        try container.encodeIfPresent(
+            lookWallpaper,
+            forKey: .lookWallpaper
+        )
         if !displayAreas.isEmpty {
             try container.encode(displayAreas, forKey: .displayAreas)
         }

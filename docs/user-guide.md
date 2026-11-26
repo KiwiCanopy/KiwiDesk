@@ -180,6 +180,12 @@ could share a look gives every profile its own, then the first
 saved profile loaded lends the shared look to those wearing the
 same one.
 
+:::unreleased
+A look's wallpaper travels with it in a backup and through a synced
+folder, and an older KiwiDesk refuses such a backup rather than
+restoring the looks without their pictures.
+:::
+
 The alert sound and the windows per pile on quit travel in a
 backup. An older backup keeps them in its profiles instead, and
 restoring it takes them from the profile that becomes active.

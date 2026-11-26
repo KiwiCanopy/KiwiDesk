@@ -73,13 +73,17 @@ public struct LookExport: Codable, Sendable, Equatable {
     public var author: String?
     public var basedOn: LookCredit?
     public var look: ShelfLook
+    /// The pictures the look names, by library name, where the
+    /// export included them (#3478); an import re-hashes each.
+    public var wallpapers: [String: Data]?
 
     /// Splits the credit `look` carries out beside its body.
-    public init(look: ShelfLook) {
+    public init(look: ShelfLook, wallpapers: [String: Data]? = nil) {
         format = LookDocument.currentFormat
         author = look.author
         basedOn = look.basedOn
         self.look = look.uncredited
+        self.wallpapers = wallpapers
     }
 
     /// The look with its credit put back on it. A gallery id inside
@@ -97,6 +101,7 @@ public struct LookExport: Codable, Sendable, Equatable {
         case author
         case basedOn = "based_on"
         case look
+        case wallpapers
     }
 
     public init(from decoder: Decoder) throws {
@@ -109,5 +114,9 @@ public struct LookExport: Codable, Sendable, Equatable {
             forKey: .basedOn
         )
         look = try container.decode(ShelfLook.self, forKey: .look)
+        wallpapers = try container.decodeIfPresent(
+            [String: Data].self,
+            forKey: .wallpapers
+        )
     }
 }

@@ -236,6 +236,7 @@ extension KiwiCore {
             }
         }
         wireScreenAreas()  // #3517
+        wireLookWallpaper()  // #3478
         // The drawn stack side reads the one flip door (#2771).
         tiler.stackFlip = { [weak self] space in
             self?.stackFlip(of: space)

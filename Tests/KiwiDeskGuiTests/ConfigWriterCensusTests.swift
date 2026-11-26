@@ -91,6 +91,11 @@ struct ConfigWriterCensusTests {
             "the sync folder's stamp, which names the Mac and carries "
                 + "no setup (SyncFolderCopyTests)"
         ),
+        "WallpaperLibrary.swift": (
+            1,
+            "a look picture under its content hash, a name no format "
+                + "or newer build can contradict (WallpaperLibraryTests)"
+        ),
         "SyncLedger.swift": (
             1,
             "this Mac's sync agreement, in the machine folder, no "

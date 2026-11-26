@@ -64,7 +64,7 @@ final class LookPickerController: NSObject {
         opening += 1
         revealing = false
         reduceMotionNow = reduceMotion()
-        let model = makeModel()
+        let model = makeModel(on: screen)
         let reveal = LookPickerReveal()
         self.model = model
         self.reveal = reveal
@@ -128,7 +128,7 @@ final class LookPickerController: NSObject {
 
     // MARK: - Cards
 
-    private func makeModel() -> LookPickerModel {
+    private func makeModel(on screen: NSScreen) -> LookPickerModel {
         let current = core.unsavedWornLook()
         let entries = LookPickerEntry.cards(
             current: current,
@@ -142,7 +142,17 @@ final class LookPickerController: NSObject {
             cards: entries,
             worn: worn,
             settings: core.tiler.settings,
-            spaceLabels: BarsPanelPreview.spaceLabels(of: core.loadGuiConfig())
+            spaceLabels: BarsPanelPreview.spaceLabels(
+                of: core.loadGuiConfig()
+            ),
+            pictures: LookPickerPictures(
+                library: core.wallpaperLibrary,
+                maxPixels: Int(
+                    max(screen.frame.width, screen.frame.height)
+                        * screen.backingScaleFactor
+                ),
+                screen: core.screenNumber(of: screen)
+            )
         )
         wire(model)
         return model

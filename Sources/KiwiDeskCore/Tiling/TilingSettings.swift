@@ -92,6 +92,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// after a pick of the user's own or a bundled look. Written by
     /// a pick (`ShelfLook.pick`) alone.
     public var lookOrigin: ShelfLook?
+    /// The picture the worn look sets (#3478), written by a pick and
+    /// a wear beside `lookOrigin`; never a `LookKeys` path, so it
+    /// never changes whether a look reads applied.
+    public var lookWallpaper: LookWallpaper?
     /// Each split physical screen's areas (#3517), keyed by its
     /// `Display.fingerprint`; a screen absent here is whole.
     public var displayAreas: [String: ScreenSplit] = [:]

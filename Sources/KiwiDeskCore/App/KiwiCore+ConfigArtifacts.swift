@@ -19,6 +19,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     case palettes
     /// The saved look library (#1684).
     case looks
+    /// The pictures looks carry (#3478, `WallpaperLibrary`).
+    case wallpapers
     /// The copies a migration keeps of the files it rewrote
     /// (#1880, `MigrationBackup`).
     case migrationBackups
@@ -51,7 +53,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     /// `SetupBundleArtifactTests` holds the two together.
     public var travelsInABackup: Bool {
         switch self {
-        case .guiConfig, .profiles, .palettes, .looks: return true
+        case .guiConfig, .profiles, .palettes, .looks, .wallpapers:
+            return true
         case .desktopBindings: return true
         case .migrationBackups, .machineConfig, .syncStamp, .syncLedger:
             return false
@@ -69,7 +72,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     /// file never travels (`SetupBundleArtifactTests`).
     public var livesOnThisMac: Bool {
         switch self {
-        case .guiConfig, .profiles, .palettes, .looks, .syncStamp:
+        case .guiConfig, .profiles, .palettes, .looks, .wallpapers,
+            .syncStamp:
             return false
         case .migrationBackups, .machineConfig, .desktopBindings,
             .syncLedger:
@@ -82,7 +86,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
     /// omission (`SetupBundleArtifactTests`).
     public var leftBehindBecause: String? {
         switch self {
-        case .guiConfig, .profiles, .palettes, .looks, .desktopBindings:
+        case .guiConfig, .profiles, .palettes, .looks, .wallpapers,
+            .desktopBindings:
             return nil
         case .migrationBackups:
             return "a copy of this Mac's files at an older format, "
@@ -102,7 +107,8 @@ public enum ConfigArtifact: CaseIterable, Sendable {
 }
 
 extension ConfigArtifact {
-    /// The file's name, nil for a folder (`profiles`, the backups);
+    /// The file's name, nil for a folder (`profiles`, the pictures,
+    /// the backups);
     /// `NewerFormatLatchTests` holds it to `KiwiCore.url(of:)`.
     public var fileName: String? {
         switch self {
@@ -113,7 +119,7 @@ extension ConfigArtifact {
         case .desktopBindings: return DesktopBindingsFile.fileName
         case .syncStamp: return "sync.json"
         case .syncLedger: return SyncLedger.fileName
-        case .profiles, .migrationBackups: return nil
+        case .profiles, .wallpapers, .migrationBackups: return nil
         }
     }
 }
@@ -131,6 +137,7 @@ extension KiwiCore {
         case .profiles: return profiles.directory
         case .palettes: return paletteLibrary.url
         case .looks: return lookLibrary.url
+        case .wallpapers: return wallpaperLibrary.directory
         case .migrationBackups: return migrationBackups
         case .machineConfig: return guiConfigStore.machine.url
         case .desktopBindings: return guiConfigStore.bindingsFile.url

@@ -67,9 +67,9 @@ extension SettingsButtonStyleConventionTests {
                     + "seam feeds (#845)"
             ),
             "LooksShelf.swift": (
-                3, "menuItem",
+                6, "menuItem",
                 "Returned to the row-menu builder the rowActions "
-                    + "seam feeds (#845, #1684)"
+                    + "seam feeds (#845, #1684, #3478)"
             ),
             "SimpleLookCard.swift": (
                 2, "rowActions",
@@ -175,6 +175,11 @@ extension SettingsButtonStyleConventionTests {
                 "The chord popover's container style for the "
                     + "seam-fed menu buttons, which live in the "
                     + "call sites' builder files (#845)"
+            ),
+            "LookWallpaperBadge.swift": (
+                1, ".buttonStyle(.plain)",
+                "The wallpaper badge's Menu taking plain style, so "
+                    + "its face is the drawn chip (#3478)"
             ),
             // A Space card's layout menu draws its picture face
             // whole through the button menu style (#2777).

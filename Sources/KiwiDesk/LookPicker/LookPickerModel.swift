@@ -42,6 +42,8 @@ final class LookPickerModel: ObservableObject {
     /// The live settings each card paints its look over.
     @Published var settings: TilingSettings
     let spaceLabels: [SpaceGlyph]
+    /// Each card's picture, decoded once (#3478).
+    let pictures: LookPickerPictures
 
     var onWear: (LookPickerEntry) -> Void = { _ in }
     var onClose: () -> Void = {}
@@ -58,13 +60,16 @@ final class LookPickerModel: ObservableObject {
         cards: [LookPickerEntry],
         worn: Int?,
         settings: TilingSettings,
-        spaceLabels: [SpaceGlyph]
+        spaceLabels: [SpaceGlyph],
+        pictures: LookPickerPictures = .none
     ) {
         self.cards = cards
         self.wornIndex = worn
         self.selection = worn ?? 0
         self.settings = settings
         self.spaceLabels = spaceLabels
+        self.pictures = pictures
+        pictures.prepare(cards, over: settings)
     }
 
     var selected: LookPickerEntry? {

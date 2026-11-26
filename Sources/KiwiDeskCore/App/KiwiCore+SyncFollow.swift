@@ -230,6 +230,7 @@ extension KiwiCore {
         onLog("sync: \(change.paths.count) file(s) came in")
         loadConfig()
         sync.onSyncedIn(change)
+        sweepWallpapers()
     }
 
     /// Records the folder's files as what both sides agree on, once

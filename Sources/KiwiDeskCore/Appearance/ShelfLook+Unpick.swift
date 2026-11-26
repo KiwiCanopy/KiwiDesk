@@ -17,8 +17,8 @@ extension ShelfLook {
     }
 
     /// The writes a pick makes beyond its keys — every glass leaf,
-    /// the per-layout indicators, the origin — put back from
-    /// `before`: the one list every unpaint reads.
+    /// the per-layout indicators, the origin and the picture — put
+    /// back from `before`: the one list every unpaint reads.
     static func restorePickReach(
         of settings: inout TilingSettings,
         from before: TilingSettings
@@ -30,5 +30,6 @@ extension ShelfLook {
             settings[keyPath: leaf] = before[keyPath: leaf]
         }
         settings.lookOrigin = before.lookOrigin
+        settings.lookWallpaper = before.lookWallpaper
     }
 }

@@ -109,12 +109,14 @@ enum SyncScan {
     /// `SF_DATALESS`, which Swift does not import.
     private static let datalessFlag: UInt32 = 0x4000_0000
 
-    /// The synced paths under `root`: the setup's files, and each
-    /// profile file in its folder.
+    /// The synced paths under `root`: the setup's files, each
+    /// profile file in its folder, and each look picture (#3478).
     static func syncedPaths(in root: URL) -> [String] {
         let profiles = SyncFolder.name(of: .profiles)
+        let pictures = SyncFolder.name(of: .wallpapers)
         var paths: [String] = []
-        for name in SyncFolder.setupNames where name != profiles {
+        for name in SyncFolder.setupNames
+        where name != profiles && name != pictures {
             if isFile(root.appendingPathComponent(name)) {
                 paths.append(name)
             }
@@ -125,6 +127,12 @@ enum SyncScan {
             && !isProfileConflictCopy(file, in: folder)
         {
             paths.append(profiles + "/" + file)
+        }
+        // A picture's name is its hash, so a conflict copy never
+        // carries a library name and is left out by it.
+        for file in names(in: root.appendingPathComponent(pictures))
+        where LookWallpaper.isLibraryName(file) {
+            paths.append(pictures + "/" + file)
         }
         return paths.sorted()
     }

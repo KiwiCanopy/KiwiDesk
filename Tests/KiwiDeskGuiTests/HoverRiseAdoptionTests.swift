@@ -120,7 +120,7 @@ struct HoverRiseAdoptionTests {
         )
         #expect(
             try squashed("Components/Looks/PaletteTile.swift").contains(
-                "varrisen:Bool{hovered&&isEnabled&&!isApplied}"
+                "varrisen:Bool{(pointerOver??hovered)&&isEnabled&&!isApplied}"
             )
         )
         let screen = try squashed("Components/Screens/ScreenCard.swift")

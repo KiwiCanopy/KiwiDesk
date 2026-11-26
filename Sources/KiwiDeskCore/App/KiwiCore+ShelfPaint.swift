@@ -46,7 +46,9 @@ extension KiwiCore {
         // and is a pick, so it records or clears the origin (#1740).
         if let look {
             look.stylingOnly.apply(to: &painted)
-            painted.lookOrigin = look.recordsOrigin ? look.admitted : nil
+            painted.lookOrigin =
+                look.recordsOrigin ? look.admitted.withoutWallpaper : nil
+            painted.lookWallpaper = look.admitted.wallpaper
         }
         palette?.apply(to: &painted)
         return painted

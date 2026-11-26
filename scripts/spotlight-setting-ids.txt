@@ -20,13 +20,16 @@
 (action) general.advanced.reset_all
 (action) look.applies_to
 (action) look.browse
+(action) look.choose_wallpaper
 (action) look.delete
 (action) look.export
 (action) look.import
 (action) look.keep_previous_colors
+(action) look.remove_wallpaper
 (action) look.rename
 (action) look.save
 (action) look.share
+(action) look.use_current_wallpaper
 (action) monitors.orphan_pin.clear
 (action) palette.delete
 (action) palette.export
