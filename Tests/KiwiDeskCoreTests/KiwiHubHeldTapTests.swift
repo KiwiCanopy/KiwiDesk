@@ -18,6 +18,50 @@ struct KiwiHubHeldTapTests {
         func append(_ id: UInt32) { lock.withLock { stored.append(id) } }
     }
 
+    /// The tap's clock and the lapses it scheduled, stepped by hand
+    /// (#3593), so no verdict reads how fast the runner is.
+    private final class TapClock: @unchecked Sendable {
+        private let lock = NSLock()
+        private var time: TimeInterval = 100
+        private var owed: [(TimeInterval, @Sendable () -> Void)] = []
+
+        var now: TimeInterval { lock.withLock { time } }
+
+        func schedule(
+            _ delay: TimeInterval,
+            _ work: @escaping @Sendable () -> Void
+        ) {
+            lock.withLock { owed.append((time + delay, work)) }
+        }
+
+        /// Moves the clock on and runs every lapse due by then.
+        func advance(by seconds: TimeInterval) {
+            let due = lock.withLock {
+                time += seconds
+                let due = owed.filter { $0.0 <= time }
+                owed.removeAll { $0.0 <= time }
+                return due.sorted { $0.0 < $1.0 }
+            }
+            for (_, work) in due { work() }
+        }
+    }
+
+    private func unstarted(
+        _ consumers: Set<KeyboardTapConsumer>,
+        _ clock: TapClock,
+        fire: @escaping KeyboardTap.Fire
+    ) -> KeyboardTap {
+        KeyboardTap.unstarted(
+            consumers: consumers,
+            fire: fire,
+            clock: { clock.now },
+            scheduleLapse: { clock.schedule($0, $1) }
+        )
+    }
+
+    /// Just past a single tap's lapse.
+    private static let pastTheGap = ModifierTapDetector.gapLimit + 0.01
+
     private func flags(_ raw: UInt64) throws -> CGEvent {
         let event = try #require(CGEvent(source: nil))
         event.type = .flagsChanged
@@ -34,10 +78,9 @@ struct KiwiHubHeldTapTests {
 
     private func doubleTapRig() throws -> (KeyboardTap, Fired) {
         let fired = Fired()
-        let tap = KeyboardTap.unstarted(
-            consumers: [.modifierTaps],
-            fire: { fired.append($0) }
-        )
+        let tap = unstarted([.modifierTaps], TapClock()) {
+            fired.append($0)
+        }
         let combo = try #require(KeyCombo.parse("cmd+cmd"))
         tap.setRows(
             KeyboardTapRows(taps: [ModifierTapRow(combo: combo, id: 1)])
@@ -61,10 +104,9 @@ struct KiwiHubHeldTapTests {
     @Test("a held tap leader opens no sequence")
     func heldLeader() throws {
         let fired = Fired()
-        let tap = KeyboardTap.unstarted(
-            consumers: [.modifierTaps, .sequences],
-            fire: { fired.append($0) }
-        )
+        let tap = unstarted([.modifierTaps, .sequences], TapClock()) {
+            fired.append($0)
+        }
         let leader = try #require(KeyCombo.parse("rcmd"))
         tap.setRows(
             KeyboardTapRows(
@@ -97,12 +139,10 @@ struct KiwiHubHeldTapTests {
 
     /// A right ⌘ single that waits on its double: it fires only at
     /// the gap's lapse, on the tap's own queue.
-    private func lapseRig() throws -> (KeyboardTap, Fired) {
+    private func lapseRig() throws -> (KeyboardTap, Fired, TapClock) {
         let fired = Fired()
-        let tap = KeyboardTap.unstarted(
-            consumers: [.modifierTaps],
-            fire: { fired.append($0) }
-        )
+        let clock = TapClock()
+        let tap = unstarted([.modifierTaps], clock) { fired.append($0) }
         let single = try #require(KeyCombo.parse("rcmd"))
         let double = try #require(KeyCombo.parse("rcmd+rcmd"))
         tap.setRows(
@@ -111,37 +151,28 @@ struct KiwiHubHeldTapTests {
                 ModifierTapRow(combo: double, id: 2),
             ])
         )
-        return (tap, fired)
-    }
-
-    /// Polls past the gap against a wall-clock deadline: the lapse
-    /// runs on a timer this suite holds no handle to.
-    private func settle(_ fired: Fired, until done: () -> Bool) async {
-        let deadline = Date().addingTimeInterval(5)
-        while !done(), Date() < deadline {
-            try? await Task.sleep(nanoseconds: 20_000_000)
-        }
+        return (tap, fired, clock)
     }
 
     @Test("a single held at its tap or at its lapse fires nothing")
-    func heldLapse() async throws {
-        let (control, controlFired) = try lapseRig()
+    func heldLapse() throws {
+        let (control, controlFired, controlClock) = try lapseRig()
         try tap(control, device: 0x10)
-        await settle(controlFired) { !controlFired.ids.isEmpty }
+        #expect(controlFired.ids.isEmpty, "a single waits on its double")
+        controlClock.advance(by: Self.pastTheGap)
         #expect(controlFired.ids == [1])
 
-        let (atTap, atTapFired) = try lapseRig()
+        let (atTap, atTapFired, atTapClock) = try lapseRig()
         atTap.holdTaps(.all)
         try tap(atTap, device: 0x10)
         atTap.holdTaps(.none)
-        let (atLapse, atLapseFired) = try lapseRig()
+        atTapClock.advance(by: Self.pastTheGap)
+        #expect(atTapFired.ids.isEmpty)
+
+        let (atLapse, atLapseFired, atLapseClock) = try lapseRig()
         try tap(atLapse, device: 0x10)
         atLapse.holdTaps(.all)
-        let past = Date().addingTimeInterval(
-            ModifierTapDetector.gapLimit * 3
-        )
-        await settle(atTapFired) { Date() >= past }
-        #expect(atTapFired.ids.isEmpty)
+        atLapseClock.advance(by: Self.pastTheGap)
         #expect(atLapseFired.ids.isEmpty)
     }
 

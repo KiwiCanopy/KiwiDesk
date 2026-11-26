@@ -17,7 +17,9 @@ struct KeySequenceTapThreadTests {
         let fired = Fired()
         let tap = KeyboardTap.unstarted(
             consumers: [.sequences],
-            fire: { fired.ids.append($0) }
+            fire: { fired.ids.append($0) },
+            clock: { 100 },
+            scheduleLapse: { _, _ in }
         )
         let combo = try #require(KeyCombo.parse(leader))
         tap.setRows(
