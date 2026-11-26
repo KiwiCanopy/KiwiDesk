@@ -23,9 +23,13 @@ extension SettingsModel {
         if let pin = pin(of: space), !pin.isEmpty {
             return .screen(resolvedPin(pin))
         }
-        if let slot = config.spacePins[space] { return .waiting(slot) }
-        return config.mainSpaces.contains(space)
-            ? .followsMain : .auto
+        if config.mainSpaces.contains(space) { return .followsMain }
+        // A number no connected screen holds waits (#3689), read by
+        // the predicate the chip reads (`waitingPins`).
+        if let slot = config.spacePins[space], !screenOrder.holds(slot) {
+            return .waiting(slot)
+        }
+        return .auto
     }
 
     /// Places `space`, clearing the other placement it held.
@@ -69,11 +73,7 @@ extension SpaceScreenChoice {
             model.pinWords(key)
                 ?? model.screenName(ScreenAreaKey(parsing: key).fingerprint)
         case .waiting(let slot):
-            L(
-                "spaces.pin_offline_badge.numbered",
-                "Screen %1$d offline",
-                slot.number
-            )
+            model.offlinePinLabel(number: slot.number)
         }
     }
 

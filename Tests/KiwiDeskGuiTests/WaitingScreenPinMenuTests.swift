@@ -78,15 +78,25 @@ struct WaitingScreenPinMenuTests {
         #expect(model.config.spacePins["mail"] == slot)
     }
 
+    @Test("Follows main outranks a waiting pin, as the runtime does")
+    func followsMainOutranks() {
+        let model = makeModel()
+        model.config.mainSpaces = ["mail"]
+        #expect(model.screenChoice(of: "mail") == .followsMain)
+    }
+
     @Test("a screen left unnumbered makes its pins wait the same way")
     func unnumberedScreenWaits() throws {
+        LocalizationManager.shared.select("en")
         let model = makeModel()
         model.config.spacePins = ["mail": ScreenSlotKey(number: 2)!]
         model.cleanConfig = model.config
         model.leaveUnnumbered(b)
         let slot = try #require(ScreenSlotKey(number: 2))
-        #expect(model.screenChoice(of: "mail") == .waiting(slot))
-        model.place("mail", model.screenChoice(of: "mail"))
+        let choice = model.screenChoice(of: "mail")
+        #expect(choice == .waiting(slot))
+        #expect(choice.title(in: model) == model.offlinePinLabel("mail"))
+        model.place("mail", choice)
         #expect(model.config.spacePins["mail"] == slot)
     }
 }
