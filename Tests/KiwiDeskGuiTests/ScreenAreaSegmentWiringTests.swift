@@ -23,10 +23,12 @@ struct ScreenAreaSegmentWiringTests {
         // ⌥ picks a segment only on a joined line, from Core.
         #expect(
             divider.contains(
-                "guard NSEvent.modifierFlags.contains(.option), joined"
+                "guard NSEvent.modifierFlags.contains(.option), joined "
+                    + "else {"
             )
         )
         #expect(divider.contains("split.isJoined(cut)"))
+        #expect(divider.contains("? drag?.segment : startedSegment()"))
         #expect(
             divider.contains(
                 "split.segment(of: cut, at: pointer ?? cut.start)"
@@ -45,6 +47,8 @@ struct ScreenAreaSegmentWiringTests {
         // The card draws the piece in flight and the line's rest.
         let card = try source("ScreenCard.swift")
         #expect(card.contains("let shown = mine?.segment ?? cut"))
+        #expect(card.contains("CGFloat(shown.start) * across"))
+        #expect(card.contains("CGFloat(shown.end - shown.start) * across"))
         #expect(card.contains("AreaSegmentRest(stored: stored"))
     }
 }

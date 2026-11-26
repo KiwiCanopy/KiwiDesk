@@ -113,7 +113,10 @@ struct ScreenSplitSegmentTests {
         #expect(middle.leading == [2] && middle.trailing == [3])
         let moved = rows.movingSegment(middle, to: 800, floor: 100)
         #expect(moved.position == 800)
-        #expect(try cuts(moved.split).count == 5)
+        let upright = try cuts(moved.split).filter {
+            $0.axis == .sideBySide
+        }
+        #expect(Set(upright.map(\.position)) == [1000, 800])
     }
 
     /// The line's left box is not cut where its right one is: a
