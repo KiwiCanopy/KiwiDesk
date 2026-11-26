@@ -767,8 +767,8 @@ gated command's `$TMPDIR`, the dir its tests list at start. A
 change to the clauses keeps the age guard, because other sessions
 build beside the gate. The call is `|| true` under the script's
 own `--timeout` alarm, so a failure never fails the gate and a
-stall ends at the alarm (`ExecTestsPruneTmpdir`, which holds the
-clauses and the call inside the lock).
+stall ends at the alarm (`ExecTestsPruneTmpdir` holds the clauses,
+`ExecTestsPruneTmpdirGate` the call inside the lock and the alarm).
 
 ## Git hooks
 
