@@ -223,8 +223,8 @@ extension RunZone {
     /// presses, nearest the length asked; nil where none does. A step
     /// that flips the split between whole and floor-and-share redraws
     /// every share, which can move the window the other way (#2967),
-    /// and a step clamped at the weight's limit can move it less than
-    /// the screen shows (#3634). A whole-zone writer's floors keep its
+    /// and a step clamped at the weight's limit can move it by less
+    /// than the screen shows (#3634). A whole-zone writer's floors keep its
     /// own step from crossing (state-and-layout.md).
     private func checkedWeight(
         _ stepped: Double,

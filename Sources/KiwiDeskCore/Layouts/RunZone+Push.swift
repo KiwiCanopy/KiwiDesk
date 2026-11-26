@@ -103,6 +103,9 @@ extension RunZone {
         ) {
             return press
         }
+        // A run that hides a window steps a length where its weight's
+        // clamped step shows nothing, as at the limit (#3634).
+        if run.hides { return lengths(step, of: id, on: line, context) }
         // No weight moves the window the press's way (#2967): a grow
         // pushes, as at its weight's limit, and a shrink stops there.
         guard delta > 0 else {

@@ -8,7 +8,8 @@ import Testing
 /// and floor-and-share (#2967), on zones the seeded property suite
 /// reaches only by luck: where the weight nearest the length asked
 /// moves the window the other way, and where no weight moves it the
-/// way asked. Pure.
+/// way asked; and a step a hiding run clamps at the weight's limit
+/// (#3634). Pure.
 @Suite("Run zone weight step across the whole split (#2967)")
 struct RunZoneCrossingTests {
     /// A horizontal zone `span` wide, one window per floor, with
@@ -145,5 +146,53 @@ struct RunZoneCrossingTests {
         #expect(press.visible == 0..<1)
         let after = applying(press, of: id, to: zone, in: context)
         #expect(width(id, zone, after) > drawn + 1)
+    }
+
+    /// Seed 674's state at its step 30 (#3634): window 2 holds a
+    /// length, the run shows windows 2 to 4, and window 4 sits near
+    /// its floor at `weight`.
+    private func clampedRun(
+        weight: Double
+    ) -> (RunZone, LayoutContext) {
+        var (zone, context) = zone(
+            span: 1600,
+            floors: [250, 200, 200, 300, 300],
+            weights: [10, 1, 10, weight, 1]
+        )
+        context.runSizes = [
+            WindowID(2): RunSize(share: 0.6102, zone: zone.ordinal),
+            WindowID(5): RunSize(share: 0.4783, zone: zone.ordinal),
+        ]
+        context.runHeads = [WindowID(2)]
+        context.runTails = [WindowID(4)]
+        context.focused = WindowID(4)
+        return (zone, context)
+    }
+
+    @Test("A clamped shrink answers as the weight's limit (#3634)")
+    func clampedStepIsTheLimit() throws {
+        let id = WindowID(4)
+        let (zone, near) = clampedRun(weight: 0.10031)
+        let floor = StackLayout.weightRange.lowerBound
+        let (_, spent) = clampedRun(weight: floor)
+        try #require(zone.run(in: near)?.visible == 1..<4)
+        let drawn = width(id, zone, near)
+        try #require(drawn > 300 && drawn < 302)
+        let press = try #require(
+            zone.press(id, by: -90, toward: .both, in: near)
+        )
+        let limit = try #require(
+            zone.press(id, by: -90, toward: .both, in: spent)
+        )
+        #expect(press.weight == limit.weight)
+        #expect(press.cue == limit.cue)
+        #expect(press.refusal == limit.refusal)
+        #expect(press.sizes.keys == limit.sizes.keys)
+        let after = applying(press, of: id, to: zone, in: near)
+        #expect(
+            press.cue != nil
+                || abs(width(id, zone, after) - drawn) > 0.5
+                || zone.run(in: after)?.visible != 1..<4
+        )
     }
 }
