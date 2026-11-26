@@ -11,8 +11,9 @@ import Testing
 /// apart; the guard is a scan of the Updates files that draw text
 /// or name an ink, each of which is ruled into one list below.
 ///
-/// Out of reach: the links on the Next card take `linkHover()`'s
-/// `.secondary` / `.primary`, set outside these files.
+/// Ruled per file, so a file holding both kinds is ruled by its
+/// card text: `UpdateNotesScroll.swift`'s links sit on the glass,
+/// and a fixed ink added to them would pass both scans.
 /// Off the main actor: one read of the Updates folder.
 @Suite("Update window text on glass and on cards (#3650)")
 struct UpdateGlassTextTests {
@@ -34,10 +35,13 @@ struct UpdateGlassTextTests {
         "UpdateNotesScroll.swift",
     ]
 
-    /// Files that draw text through a control styling its own.
+    /// Files whose text a control draws on a bezel of its own, in
+    /// the ink its seal sets. A menu picker's seal is a fixed ink
+    /// and its bezel adapts with the glass: weak in light over a
+    /// dark backdrop, a defect apart from #3650's text.
     private static let exempt: [String: String] = [
-        "UpdateNotesTabStrip.swift": "a segmented track with its fill",
-        "WhatsNewReleasePicker.swift": "a menu picker under its seal",
+        "UpdateNotesTabStrip.swift": "segments; menu under its seal",
+        "WhatsNewReleasePicker.swift": "menu picker under its seal",
     ]
 
     private static var updates: URL {
@@ -128,6 +132,30 @@ struct UpdateGlassTextTests {
         )
         #expect(arguments.contains("primary:SettingsTheme.ink,"))
         #expect(arguments.contains("secondary:SettingsTheme.ink2"))
+    }
+
+    /// A card's ground is fixed, so the card itself resolves
+    /// `.primary` / `.secondary` to concrete inks: a link's
+    /// `linkHover()` styles, and any text that drops its own ink.
+    @Test(
+        "a card resolves the hierarchical styles to its inks",
+        arguments: ["func updateNotesCard", "struct UpdateHighlightsPanel"]
+    )
+    func cardResolvesTheInks(declaration: String) throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.updates.appendingPathComponent("UpdateNotesGroups.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(after: declaration, in: source),
+            "\(declaration) is gone"
+        )
+        let squashed = body.split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            squashed.contains(
+                ".foregroundStyle(SettingsTheme.ink,SettingsTheme.ink2)"
+            ),
+            "\(declaration) no longer hands its text the inks"
+        )
     }
 
     /// A hierarchical style on a card would follow the glass while
