@@ -212,14 +212,21 @@ struct RunZonePressLimitTests {
             region: region,
             vertical: false
         )
+        let floor = StackLayout.weightRange.lowerBound
         var near = context(focus: 1)
-        near.stackWeights[ids[0]] = StackLayout.weightRange.lowerBound + 0.0003
+        near.stackWeights[ids[0]] = floor + 0.0003
+        var spent = context(focus: 1)
+        spent.stackWeights[ids[0]] = floor
         let run = try #require(two.run(in: near))
         #expect(!run.hides)
         let press = try #require(
             two.press(ids[0], by: -5, toward: .end, in: near)
         )
+        let limit = try #require(
+            two.press(ids[0], by: -5, toward: .end, in: spent)
+        )
         #expect(press.cue == .weightLimit)
-        #expect(press.refusal == .atWeightLimit)
+        #expect(press.cue == limit.cue)
+        #expect(press.refusal == limit.refusal)
     }
 }

@@ -2467,8 +2467,9 @@ editing here:
   that verdict from `WeightStepOutcome.spent` and never the bare
   `StackLayout.weightSpent(_:by:)`: the outcome judges by the span's
   share, a run press by the render's redraw, and each caller takes
-  one (#3661, `RunPushCommandTests` ▸ `trackNearTheLimitCues`). A
-  whole-zone
+  one (#3661, `RunPushCommandTests` ▸ `trackNearTheLimitCues`); a
+  new writer calling the bare compare is review's, since nothing
+  scans for it. A whole-zone
   writer clamps its step at floors no lower than the ones `fitsWhole` plans —
   `KiwiCore.plannedMinSize`, the clamp twin of
   `LayoutContext.plannedFloor` — so a floor input joins both, or a
