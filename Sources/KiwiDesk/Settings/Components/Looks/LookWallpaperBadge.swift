@@ -14,27 +14,14 @@ struct LookWallpaperBadge<Items: View>: View {
 
     /// The badge's side, in points; it sits this far inside the
     /// plate's corner too.
-    static var size: CGFloat { 20 }
+    static var size: CGFloat { 22 }
     static var inset: CGFloat { 4 }
 
     var body: some View {
         Menu {
             items()
         } label: {
-            Image(systemName: symbol)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(
-                    wallpaper == nil ? SettingsTheme.ink2 : SettingsTheme.ink
-                )
-                .frame(width: Self.size, height: Self.size)
-                .background(
-                    hovered ? SettingsTheme.chipHover : SettingsTheme.chipRest,
-                    in: Circle()
-                )
-                // A picture under the badge can be any colour; the
-                // material keeps the chip legible over it.
-                .background(.ultraThinMaterial, in: Circle())
-                .contentShape(Circle())
+            Self.face(symbol: symbol, hovered: hovered)
         }
         .menuStyle(.button)
         .buttonStyle(.plain)
@@ -45,6 +32,33 @@ struct LookWallpaperBadge<Items: View>: View {
         .help(help)
         .focusable(false)
         .accessibilityHidden(true)
+    }
+
+    /// The badge as drawn: an opaque chip on the card's ground with
+    /// its edge and a soft shadow, so it reads on any plate or
+    /// picture; the pointer lifts its fill (owner, 2026-11-26).
+    static func face(symbol: String, hovered: Bool) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(SettingsTheme.ink)
+            .frame(width: size, height: size)
+            .background(
+                hovered ? SettingsTheme.chipHover : .clear,
+                in: Circle()
+            )
+            .background(SettingsTheme.card, in: Circle())
+            .overlay(
+                Circle().strokeBorder(
+                    hovered ? SettingsTheme.hoverEdge : SettingsTheme.hairline,
+                    lineWidth: 1
+                )
+            )
+            .shadow(
+                color: SettingsTheme.hoverRiseShadow,
+                radius: 2,
+                y: 1
+            )
+            .contentShape(Circle())
     }
 
     /// The shape carries the state, never the colour.
