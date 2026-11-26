@@ -37,10 +37,12 @@ extension KiwiCore {
 
     /// Each screen with its frame and the area its shown Space lays
     /// windows out in, in the AX coordinates `list_windows`
-    /// reports (#2492).
+    /// reports (#2492), listed as Screen 1 onwards (#3647).
     func listMonitors() -> CommandResponse {
         let primary = GeometryUtils.primaryHeight
-        let monitors = state.workspaces.allDisplays.map { display in
+        let mainID = PositionalDisplays.liveMainID
+        let ordered = numbered(state.workspaces.allDisplays)
+        let monitors = ordered.enumerated().map { index, display in
             let frame = GeometryUtils.flip(
                 display.frame,
                 primaryHeight: primary
@@ -60,10 +62,12 @@ extension KiwiCore {
                 "frame": Self.json(rect: frame),
                 "layout_frame": laid.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
+                "screen": .number(Double(index + 1)),
+                "main": .bool(display.id == mainID),
                 // The Space its first area shows, `get_state`'s
                 // `shown` Space there (#3549, #3517).
                 "space_id": shown.map { .string($0.id.raw) } ?? .null,
-                "areas": areasJSON(of: display),
+                "areas": areasJSON(of: display, screen: index + 1),
             ])
         }
         return .ok(.array(monitors))

@@ -126,7 +126,7 @@ extension KiwiCore {
             if current == name {
                 spacePins = keepingPins(
                     of: Set(liveTemporarySpaces),
-                    over: profile.runtimePins(on: monitors) ?? [:]
+                    over: runtimePins(of: profile)
                 )
                 resolveSpaceDisplays()
                 retile()

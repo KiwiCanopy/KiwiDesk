@@ -21,12 +21,9 @@ extension KiwiCore {
         among displays: [Display]
     ) -> DisplayID? {
         guard !displays.isEmpty else { return nil }
-        // Index first: a numeric arg is positional, never a name.
+        // Index first: a number is Screen N, never a name (#3647).
         if let index = arg?.intValue {
-            let ordered = PositionalDisplays.ordered(
-                displays,
-                mainID: PositionalDisplays.liveMainID
-            )
+            let ordered = numbered(displays)
             guard index >= 1, index <= ordered.count else {
                 return nil
             }

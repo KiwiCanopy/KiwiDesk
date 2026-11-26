@@ -67,6 +67,7 @@ struct DesktopEventTests {
         emit(core)
         let payload = data(in: events())
         #expect(payload?["monitor"] == .number(2))
+        #expect(payload?["main"] == .bool(false))
         #expect(payload?["desktop"] == .number(4))
     }
 
@@ -81,6 +82,7 @@ struct DesktopEventTests {
         emit(core)
         let payload = data(in: events())
         #expect(payload?["monitor"] == .number(1))
+        #expect(payload?["main"] == .bool(true))
         #expect(payload?["desktop"] == .number(2))
     }
 

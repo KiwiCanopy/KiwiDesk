@@ -65,17 +65,16 @@ extension KiwiCore {
             ?? (switched == nil ? snapshot.authority : nil)
         guard let number else { return }
         let monitor =
-            switched.flatMap {
-                monitorNumber(
-                    forUUID: $0,
-                    mainUUID: snapshot.mainUUID
-                )
-            } ?? 1
+            switched.flatMap { monitorNumber(forUUID: $0) } ?? 1
+        // `monitor` is Screen N, so whether it is the main screen is
+        // its own field (#3647, owner 2026-11-26).
+        let isMain = switched == nil || switched == snapshot.mainUUID
         bus.emit(
             .desktopChange,
             data: .object([
                 "desktop": .number(Double(number)),
                 "monitor": .number(Double(monitor)),
+                "main": .bool(isMain),
                 "profile": profiles.currentName.map {
                     .string($0)
                 } ?? .null,
@@ -83,33 +82,17 @@ extension KiwiCore {
             luaArgs: [
                 .number(Double(number)),
                 .number(Double(monitor)),
+                .bool(isMain),
             ]
         )
     }
 
-    /// Positional number of the display with this SkyLight
-    /// UUID: 1 is the main display, secondaries follow
-    /// left-to-right (`PositionalDisplays.ordered`). Nil when
-    /// no connected display carries the UUID (unplugged
+    /// Screen N of the display with this SkyLight UUID (#3647);
+    /// nil when no connected display carries it (unplugged
     /// mid-switch, or shared mode's synthetic identifier).
-    ///
-    /// Main arrives as the SNAPSHOT's `mainUUID` — the same
-    /// value the switch attribution used, not merely the same
-    /// seam re-read (review round 2, 2026-08-18) — so a switch
-    /// cannot be attributed to one display and numbered as
-    /// another.
-    private func monitorNumber(
-        forUUID uuid: String,
-        mainUUID: String?
-    ) -> Int? {
-        let displays = state.workspaces.allDisplays
-        let mainID = display(forUUID: mainUUID)
-        return
-            PositionalDisplays
-            .ordered(displays, mainID: mainID)
-            .firstIndex {
-                desktopMemory.readDisplayUUID($0.id) == uuid
-            }
+    private func monitorNumber(forUUID uuid: String) -> Int? {
+        numbered(state.workspaces.allDisplays)
+            .firstIndex { desktopMemory.readDisplayUUID($0.id) == uuid }
             .map { $0 + 1 }
     }
 }

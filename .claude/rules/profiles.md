@@ -2024,7 +2024,9 @@ loaded with it. The obligations:
   fingerprint-keyed `spacePins` only through the order of the set
   that profile holds for the connected screens** —
   `KiwiCore.screenOrder(for:)`, `liveScreenOrder` for the live one,
-  `Profile.runtimePins(on:)` — never an order of a reader's own,
+  `KiwiCore.runtimePins(of:)`, which numbers a setup the profile
+  does not hold left to right (#3647 ▸ lane 2) — never an order of
+  a reader's own,
   and write `Profile.spaceMonitorMap` only through its doors:
   `storePins`, which numbers through the order it is handed, and
   `takePins` and `pin`, whose caller hands numbers already in this

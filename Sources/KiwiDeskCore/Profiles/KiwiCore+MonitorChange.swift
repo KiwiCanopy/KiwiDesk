@@ -79,7 +79,7 @@ extension KiwiCore {
                 profiles.markClean()
                 spacePins = keepingPins(
                     of: Set(liveTemporarySpaces),
-                    over: profile.runtimePins(on: fingerprints) ?? [:]
+                    over: runtimePins(of: profile)
                 )
                 returnHeldSpacesWithoutApply(to: profile)
             }
@@ -91,6 +91,12 @@ extension KiwiCore {
                         + "'\(profile.name)' (dirty)"
                 )
             } else {
+                // The same profile on a same-count setup it does not
+                // hold: its numbers land left to right (#3647).
+                spacePins = keepingPins(
+                    of: Set(liveTemporarySpaces),
+                    over: runtimePins(of: profile)
+                )
                 returnHeldSpacesWithoutApply(to: profile)
             }
             profiles.markDirty()

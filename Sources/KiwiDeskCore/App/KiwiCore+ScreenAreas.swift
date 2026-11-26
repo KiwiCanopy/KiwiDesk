@@ -157,11 +157,29 @@ extension KiwiCore {
         }) {
             return ws.placement(keyed: key, on: screen.id)
         }
+        if let (screen, key) = numberedArea(raw) {
+            return ws.placement(keyed: key, on: screen.id)
+        }
         if let screen = resolveDisplayArg(arg) {
             return ws.leadPlacement(of: screen)
         }
         let named = ws.allPlacements.filter { $0.area.name == raw }
         return named.count == 1 ? named[0].id : nil
+    }
+
+    /// `N#id`: Screen N's area `id` (#3647), the screen it names and
+    /// its runtime key; nil for any other string or a number no
+    /// connected screen holds.
+    func numberedArea(_ raw: String) -> (Display, ScreenAreaKey)? {
+        guard let slot = ScreenSlotKey(parsing: raw), slot.areaID > 0
+        else { return nil }
+        let screens = numbered(state.workspaces.allDisplays)
+        guard slot.number <= screens.count else { return nil }
+        let screen = screens[slot.number - 1]
+        return (
+            screen,
+            ScreenAreaKey(fingerprint: screen.fingerprint, areaID: slot.areaID)
+        )
     }
 }
 

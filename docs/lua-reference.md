@@ -740,6 +740,16 @@ with the limits named there.
 `2` the next left-to-right) or a **string** matching a connected
 screen's fingerprint (as printed by `list_monitors`) or name.
 
+:::unreleased
+A number names **Screen N**, the number Settings ▸ Screens shows on
+the screen's badge, not its position: the live profile's numbering
+for the connected screens, else left to right, ties top to bottom.
+A script that must name one screen whatever the numbering passes
+its fingerprint. A number in `init.lua` read before any screen is
+known is numbered at the first screen report; on a different screen
+setup than the last session's, that is left to right.
+:::
+
 **Does:** moves the whole space to that screen **now** and
 shows it there (each screen shows one space at a time). A
 later screen change (dock/undock), profile load, config reload
@@ -818,6 +828,11 @@ Once a screen is split, a screen argument —
 per-screen edge and visibility verbs and a layout's
 `set_app_bar_visibility` — also takes an area key, as
 `list_monitors` prints it in `areas[].key`, or an area's own name.
+
+:::unreleased
+`"N#id"` names Screen N's area `id`, as `list_monitors` prints it in
+`areas[].numbered_key`; an area may not be named that way.
+:::
 A number or a screen's name names its first area; what it names
 for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
 **Per area**. The screen verbs' directions and last screen reach
@@ -9322,6 +9337,12 @@ end)
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 | `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
 
+:::unreleased
+`desktop_change`'s `monitor` is the screen's Screen N, and `main`
+says whether it is the main screen; the Lua callback receives
+`main` as a third argument.
+:::
+
 The window lifecycle events fire even when focus does not change
 (a background window opening or closing). `space` is always the
 space the window lives in — for `window_destroyed`, the one it
@@ -10969,6 +10990,11 @@ of its Space from [`get_state`](#get_state).
 `list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
+
+:::unreleased
+It lists the screens as Screen 1 onwards, each with its number in
+`screen` and `main: true` on the main screen.
+:::
 
 It also reports `space_id`, the Space that screen shows (`null`
 while it shows none) — on a screen that is not split, the Space

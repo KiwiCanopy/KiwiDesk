@@ -1448,6 +1448,13 @@ screen's positional number (`monitor`: 1 is the main screen,
 secondaries follow left to right — the same 1-based positional
 numbering a screen argument takes), and the active profile:
 
+:::unreleased
+`monitor` is the screen's Screen N, the number a screen argument
+takes, and `main` says whether that screen is the main one:
+`{"desktop": 2, "monitor": 1, "main": true, …}`. A script that read
+`monitor: 1` as the main screen reads `main` instead.
+:::
+
 ```json
 {"event": "desktop_change",
  "data": {"desktop": 2, "monitor": 1,

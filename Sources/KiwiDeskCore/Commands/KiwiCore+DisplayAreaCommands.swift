@@ -187,14 +187,23 @@ extension KiwiCore {
     /// `list_monitors`' areas for `display`: each area's key, its
     /// name if any, and its rect in the screen's own points — read
     /// off the placement list, so it shows the split in effect.
-    func areasJSON(of display: Display) -> JSONValue {
+    func areasJSON(of display: Display, screen: Int? = nil) -> JSONValue {
         let areas = state.workspaces.placements(of: display.id)
         guard areas.count > 1 else { return .array([]) }
+        let screen =
+            screen
+            ?? numbered(state.workspaces.allDisplays)
+            .firstIndex { $0.id == display.id }.map { $0 + 1 } ?? 0
         return .array(
             areas.map { placement in
                 let area = placement.area
                 return .object([
                     "key": .string(placement.key.description),
+                    // Screen N's area, as a script names it (#3647).
+                    "numbered_key": ScreenSlotKey(
+                        number: screen,
+                        areaID: area.id
+                    ).map { .string($0.description) } ?? .null,
                     "name": area.name.map(JSONValue.string) ?? .null,
                     "x": .number(Double(area.x)),
                     "y": .number(Double(area.y)),

@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// The crossing between stored, number-keyed Screen pins and the
@@ -25,6 +26,31 @@ extension KiwiCore {
     public func screenOrder(holding sets: [MonitorSet]) -> ScreenOrder {
         sets.order(matching: liveFingerprints)
             ?? .leftToRight(state.workspaces.allDisplays)
+    }
+
+    /// `profile`'s pins as the runtime keys them on the connected
+    /// screens, through its order: a setup it does not hold is
+    /// numbered left to right, so its pins apply there too (#3647
+    /// ▸ lane 2). The one door every apply takes.
+    func runtimePins(of profile: Profile) -> [SpaceID: String] {
+        screenOrder(for: profile).runtime(profile.spaceMonitorMap)
+    }
+
+    /// `displays` in Screen N order: what a number in Lua or the CLI,
+    /// `list_monitors` and `desktop_change` name (#3647). Twins take
+    /// their numbers left to right.
+    func numbered(_ displays: [Display]) -> [Display] {
+        var left = displays.sorted { $0.frame.minX < $1.frame.minX }
+        var result: [Display] = []
+        for fingerprint in liveScreenOrder.fingerprints {
+            guard
+                let index = left.firstIndex(where: {
+                    $0.fingerprint == fingerprint
+                })
+            else { continue }
+            result.append(left.remove(at: index))
+        }
+        return result
     }
 
     /// The live pins a write records, numbered on the live screens;

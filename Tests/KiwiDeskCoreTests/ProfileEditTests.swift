@@ -107,7 +107,7 @@ struct ProfileEditTests {
         let read = try core.profiles.read(name: "multi")
         #expect(read.monitorSets.count == 2)
         #expect(
-            read.runtimePins(on: ["A:100x100"])?[SpaceID(1)] == "A:100x100"
+            core.runtimePins(of: read)[SpaceID(1)] == "A:100x100"
         )
     }
 

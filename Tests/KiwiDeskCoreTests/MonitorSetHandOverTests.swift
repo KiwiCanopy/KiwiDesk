@@ -64,7 +64,7 @@ struct MonitorSetHandOverTests {
         try core.loadProfile(named: "Work")
         let work = try core.profiles.read(name: "Work")
         #expect(
-            work.runtimePins(on: pair)?["2"] == "B:100x100"
+            core.runtimePins(of: work)["2"] == "B:100x100"
         )
     }
 
@@ -87,10 +87,8 @@ struct MonitorSetHandOverTests {
         #expect(solo.set(matching: pair) != nil)
         #expect(solo.spaceMonitorMap.isEmpty)
         try core.claimMonitorSet(pair, for: "Work")
-        #expect(
-            try core.profiles.read(name: "Work")
-                .runtimePins(on: pair)?["2"] == "B:100x100"
-        )
+        let work = try core.profiles.read(name: "Work")
+        #expect(core.runtimePins(of: work)["2"] == "B:100x100")
     }
 
     @Test("Picking the connected set away leaves the live one dirty")
