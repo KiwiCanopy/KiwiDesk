@@ -49,8 +49,13 @@ struct LookPickerGeometryTests {
         #expect(right.count < 40)
         let last = try #require(right.last)
         #expect(last.minX < 1512 - LookPickerGeometry.margin)
+        #expect(
+            last.maxX + step > 1512 - LookPickerGeometry.margin,
+            "the last stripe is the one the screen cuts"
+        )
         let first = try #require(left.last)
         #expect(first.maxX > LookPickerGeometry.margin)
+        #expect(first.minX - step < LookPickerGeometry.margin)
         #expect(geometry.stripes(side: 1, available: 2).count == 2)
         #expect(geometry.stripes(side: 1, available: 0).isEmpty)
         #expect(

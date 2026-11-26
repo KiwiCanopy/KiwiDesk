@@ -12,11 +12,15 @@ import Testing
 @Suite("Look picker panel (#3038)")
 @MainActor
 struct LookPickerPanelTests {
-    private func chord(_ key: String, _ code: UInt16) -> NSEvent {
+    private func chord(
+        _ key: String,
+        _ code: UInt16,
+        flags: NSEvent.ModifierFlags = .command
+    ) -> NSEvent {
         NSEvent.keyEvent(
             with: .keyDown,
             location: .zero,
-            modifierFlags: .command,
+            modifierFlags: flags,
             timestamp: 0,
             windowNumber: 0,
             context: nil,
@@ -76,29 +80,89 @@ struct LookPickerPanelTests {
         #expect(Panel.duringReveal(.rightMouseUp) == .interrupt)
         #expect(Panel.duringReveal(.leftMouseDown) == .swallow)
         #expect(Panel.duringReveal(.otherMouseDown) == .swallow)
+        #expect(Panel.duringReveal(.rightMouseDown) == .swallow)
+        #expect(Panel.duringReveal(.otherMouseUp) == .interrupt)
         #expect(Panel.duringReveal(.mouseMoved) == .pass)
     }
 
-    @Test("a click's close holds the panel unseen, then orders it out")
-    func clickHold() throws {
+    /// A controller whose panel really orders in, its delays held.
+    private func shown() -> (
+        LookPickerController, () -> Void
+    ) {
         let controller = LookPickerController(core: makeTestCore())
         var later: [@MainActor () -> Void] = []
         controller.after = { _, work in later.append(work) }
         controller.reduceMotion = { true }
+        controller.handBack.nextTurn = { $0() }
+        controller.handBack.orderFrontKey = { $0.orderFrontRegardless() }
         controller.show()
+        return (
+            controller,
+            {
+                let due = later
+                later = []
+                due.forEach { $0() }
+            }
+        )
+    }
+
+    @Test("a click's close holds the panel unseen, then orders it out")
+    func clickHold() throws {
+        let (controller, runLater) = shown()
+        defer { controller.close() }
         let panel = try #require(controller.panel)
+        #expect(controller.isOpen)
         controller.clickHold = { _ in 0.3 }
         controller.close()
         #expect(!controller.isOpen, "closed for the shortcut at once")
+        #expect(panel.isVisible, "still up for the release")
         #expect(panel.alphaValue == PanelPresence.holdAlpha)
-        #expect(panel.contentView != nil, "still up for the release")
-        later.forEach { $0() }
+        runLater()
         #expect(!panel.isVisible)
         #expect(panel.alphaValue == 1)
         #expect(panel.contentView == nil)
         controller.clickHold = { _ in 0 }
         controller.show()
         controller.close()
-        #expect(controller.panel?.contentView == nil, "no click, no hold")
+        #expect(!panel.isVisible, "no click, no hold")
+    }
+
+    @Test("a reopen during the hold keeps the panel up")
+    func reopenDuringHold() throws {
+        let (controller, runLater) = shown()
+        defer { controller.close() }
+        let panel = try #require(controller.panel)
+        controller.clickHold = { _ in 0.3 }
+        controller.close()
+        controller.show()
+        runLater()
+        #expect(controller.isOpen)
+        #expect(panel.isVisible)
+        #expect(panel.alphaValue == 1)
+        #expect(panel.contentView != nil)
+    }
+
+    @Test("a key during the reveal reaches the interrupt")
+    func revealWiring() {
+        let panel = LookPickerController(core: makeTestCore())
+            .makePanel()
+        var interrupted = 0
+        var keys = 0
+        panel.revealing = { true }
+        panel.onInterrupt = { interrupted += 1 }
+        panel.onKey = { _, _ in keys += 1 }
+        panel.sendEvent(chord("x", 7, flags: []))
+        #expect(interrupted == 1)
+        #expect(keys == 0)
+    }
+
+    @Test("an outside settings change repaints the cards")
+    func liveSettings() throws {
+        let (controller, _) = shown()
+        defer { controller.close() }
+        var settings = TilingSettings()
+        settings.borderStyle.focusedColor = "#123456"
+        controller.settingsChanged(settings)
+        #expect(controller.model?.settings == settings)
     }
 }

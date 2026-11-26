@@ -34,7 +34,7 @@ extension LookPickerController {
             close()
         }
         if reduceMotion {
-            LookPickerCrossFade.play(reveal)
+            LookPickerCrossFade.play(reveal, reduceMotion: reduceMotion)
             after(LookPickerReveal.crossFade, finish)
             return
         }

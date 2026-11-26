@@ -128,5 +128,6 @@ struct JumpPanelLiveSettingsTests {
             at: gui.appendingPathComponent("AppDelegate.swift")
         )
         #expect(delegate.contains("wireSettingsReaders()"))
+        #expect(delegate.contains("self.lookPicker = lookPicker"))
     }
 }

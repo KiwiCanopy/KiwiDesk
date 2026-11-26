@@ -61,6 +61,20 @@ struct LookPickerCoreTests {
         #expect(core.unsavedWornLook() == nil)
     }
 
+    @Test("an unreadable library names no worn look")
+    func unreadableNamesNone() throws {
+        let core = makeCore()
+        core.wearPickedLook(try other(core)) {}
+        #expect(core.wornLibraryLook != nil)
+        let url = core.lookLibrary.url
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data(#"{"format": 99, "looks": []}"#.utf8).write(to: url)
+        #expect(core.wornLibraryLook == nil)
+    }
+
     @Test("⌘S saves the worn look under a free name")
     func quickSaveTakesAFreeName() throws {
         let core = makeCore()

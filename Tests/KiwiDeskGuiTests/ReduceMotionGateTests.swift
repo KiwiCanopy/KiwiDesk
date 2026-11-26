@@ -53,12 +53,7 @@ struct ReduceMotionGateTests {
     /// indicator; `.claude/rules/gui.md` ▸ the Reduce Motion
     /// gate rules it, and neither of the two the tour draws
     /// needed an entry (#1069).
-    private static let allowed: [String: String] = [
-        // #3038 ▸ Ruling 2026-11-23: under Reduce Motion the look
-        // picker leaves by a 0.2 s cross-fade, a fade with no
-        // travel, played for that user alone.
-        "LookPickerCrossFade.swift": "the ruled Reduce Motion fade"
-    ]
+    private static let allowed: [String: String] = [:]
 
     /// The spellings that START motion. Both are scanned and
     /// each must find at least one site, so a needle that stops

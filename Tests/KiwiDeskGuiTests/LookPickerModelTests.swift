@@ -83,6 +83,13 @@ struct LookPickerModelTests {
         model.handle(.wear, repeated: false)
         #expect(model.phase == .wearing)
         model.handle(.step(1), repeated: false)
+        var saves = 0
+        model.onQuickSave = {
+            saves += 1
+            return nil
+        }
+        model.handle(.save, repeated: false)
+        #expect(saves == 0, "nothing but Esc acts during a wear")
         model.handle(.escape, repeated: false)
         #expect(closed == 1)
     }
