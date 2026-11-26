@@ -139,7 +139,7 @@ final class LookPickerController: NSObject {
             current != nil
             ? 0 : Self.wornIndex(of: core.wornLibraryLook, in: entries)
         let model = LookPickerModel(
-            entries: entries,
+            cards: entries,
             worn: worn,
             settings: core.tiler.settings,
             spaceLabels: BarsPanelPreview.spaceLabels(of: core.loadGuiConfig())

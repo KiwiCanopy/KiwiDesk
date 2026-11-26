@@ -109,6 +109,7 @@ keybinding.pocket_list
 keybinding.pocket_window
 keybinding.redo_layout
 keybinding.reset_sizes
+keybinding.show_look_picker
 keybinding.show_shortcuts
 keybinding.shrink_height
 keybinding.shrink_width

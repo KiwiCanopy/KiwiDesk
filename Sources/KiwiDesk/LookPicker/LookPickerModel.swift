@@ -27,7 +27,7 @@ final class LookPickerModel: ObservableObject {
         case wearing
     }
 
-    @Published private(set) var entries: [LookPickerEntry]
+    @Published private(set) var cards: [LookPickerEntry]
     @Published private(set) var selection: Int
     /// The card the desk wears now, if it is one of the cards.
     @Published private(set) var wornIndex: Int?
@@ -50,12 +50,12 @@ final class LookPickerModel: ObservableObject {
     var onAnnounce: (String) -> Void = { _ in }
 
     init(
-        entries: [LookPickerEntry],
+        cards: [LookPickerEntry],
         worn: Int?,
         settings: TilingSettings,
         spaceLabels: [SpaceGlyph]
     ) {
-        self.entries = entries
+        self.cards = cards
         self.wornIndex = worn
         self.selection = worn ?? 0
         self.settings = settings
@@ -63,7 +63,7 @@ final class LookPickerModel: ObservableObject {
     }
 
     var selected: LookPickerEntry? {
-        entries.indices.contains(selection) ? entries[selection] : nil
+        cards.indices.contains(selection) ? cards[selection] : nil
     }
 
     var isNaming: Bool { nameDraft != nil }
@@ -81,7 +81,7 @@ final class LookPickerModel: ObservableObject {
                 JumpList.stepped(
                     selection,
                     by: delta,
-                    count: entries.count,
+                    count: cards.count,
                     wrap: !repeated
                 )
             )
@@ -99,7 +99,7 @@ final class LookPickerModel: ObservableObject {
 
     /// A stripe's click: selects that card, wears nothing.
     func select(_ index: Int) {
-        guard entries.indices.contains(index), !isNaming,
+        guard cards.indices.contains(index), !isNaming,
             phase == .browsing
         else { return }
         let moved = index != selection
@@ -119,7 +119,7 @@ final class LookPickerModel: ObservableObject {
         guard !isNaming, selected?.kind == .current,
             let saved = onQuickSave()
         else { return onDeadKey() }
-        entries[selection] = LookPickerEntry(look: saved, kind: .saved)
+        cards[selection] = LookPickerEntry(look: saved, kind: .saved)
         nameDraft = saved.name
         onAnnounce(LookPickerText.savedAs(saved.name))
     }
@@ -136,7 +136,7 @@ final class LookPickerModel: ObservableObject {
         }
         var renamed = entry.look
         renamed.name = stored
-        entries[selection] = LookPickerEntry(look: renamed, kind: .saved)
+        cards[selection] = LookPickerEntry(look: renamed, kind: .saved)
         nameDraft = nil
         onAnnounce(LookPickerText.savedAs(stored))
     }
@@ -148,7 +148,7 @@ final class LookPickerModel: ObservableObject {
                 $0,
                 worn: selection == wornIndex,
                 position: selection + 1,
-                count: entries.count
+                count: cards.count
             )
         }
     }

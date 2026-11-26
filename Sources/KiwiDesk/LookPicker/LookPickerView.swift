@@ -95,7 +95,7 @@ struct LookPickerView: View {
         let available =
             side < 0
             ? model.selection
-            : model.entries.count - model.selection - 1
+            : model.cards.count - model.selection - 1
         let rects = geometry.stripes(side: side, available: available)
         // The far ones first, so each nearer stripe lies on top.
         ForEach(Array(rects.enumerated()).reversed(), id: \.offset) {
@@ -104,7 +104,7 @@ struct LookPickerView: View {
             let rect = item.element
             let index = model.selection + side * (k + 1)
             LookPickerStripe(
-                entry: model.entries[index],
+                entry: model.cards[index],
                 settings: model.settings,
                 spaceLabels: model.spaceLabels,
                 geometry: geometry,

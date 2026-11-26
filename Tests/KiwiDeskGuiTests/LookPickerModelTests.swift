@@ -25,7 +25,7 @@ struct LookPickerModelTests {
             saved: [look("Mine")]
         )
         return LookPickerModel(
-            entries: entries,
+            cards: entries,
             worn: current ? 0 : worn,
             settings: TilingSettings(),
             spaceLabels: []
@@ -36,7 +36,7 @@ struct LookPickerModelTests {
     func currentLeads() {
         let model = model(current: true)
         #expect(
-            model.entries.map(\.kind) == [
+            model.cards.map(\.kind) == [
                 .current, .bundled, .bundled, .saved,
             ]
         )
@@ -120,8 +120,8 @@ struct LookPickerModelTests {
         #expect(!model.isNaming)
         model.handle(.step(-1), repeated: false)
         model.handle(.save, repeated: false)
-        #expect(model.entries[0].kind == .saved)
-        #expect(model.entries[0].look.name == "Kiwi · Nov 24")
+        #expect(model.cards[0].kind == .saved)
+        #expect(model.cards[0].look.name == "Kiwi · Nov 24")
         #expect(model.nameDraft == "Kiwi · Nov 24")
     }
 
@@ -144,11 +144,11 @@ struct LookPickerModelTests {
         model.handle(.escape, repeated: false)
         #expect(!model.isNaming)
         #expect(closed == 0, "the first Esc ends the rename only")
-        #expect(model.entries[0].look.name == "Kiwi · Nov 24")
+        #expect(model.cards[0].look.name == "Kiwi · Nov 24")
         model.nameDraft = "Night"
         model.handle(.commitName, repeated: false)
         #expect(renamed == ["Night"])
-        #expect(model.entries[0].look.name == "Night")
+        #expect(model.cards[0].look.name == "Night")
         #expect(!model.isNaming)
     }
 
