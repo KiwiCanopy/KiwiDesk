@@ -12,6 +12,7 @@ paths:
   - "scripts/pre-commit"
   - "scripts/gate-lock"
   - "scripts/prune-builds"
+  - "scripts/prune-tmpdir"
   - "scripts/resolve-packages"
   - "Package.swift"
   - ".github/workflows/**"
@@ -757,6 +758,16 @@ process group before the gated command runs. The nested
 lock through `gate-lock --lock-path`, the lock file's one name.
 `ExecTestsPruneBuilds` holds each clause and the trigger on
 fixture worktrees with a lock of their own.
+
+**Every gate run also runs `scripts/prune-tmpdir` on its lock's
+dir**, which removes only `TemporaryDirectory.*` folders that are
+over an hour old and hold nothing but `.keep-directory` and
+`inputs-<n>.LinkFileList`. Apple's build tools leave one folder
+per build, and every test process lists the temp dir at start.
+The script's header owns the clauses; a change to them keeps the
+age guard, because other sessions build beside the gate. Like the
+build prune, it can neither fail nor hang the gate
+(`ExecTestsPruneTmpdir`).
 
 ## Git hooks
 
