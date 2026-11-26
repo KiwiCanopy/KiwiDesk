@@ -180,7 +180,8 @@ struct LookWallpaperWearTests {
         _ = try core.saveLook(named: "Dusk", from: core.tiler.settings)
         try core.chooseLookWallpaper(WallpaperLibraryTests.png(), for: "Dusk")
         let look = try #require(core.userLooks.first)
-        let url = FileManager.default.temporaryDirectory
+        let url =
+            testTemporaryDirectory
             .appendingPathComponent(UUID().uuidString + ".json")
         try core.exportLook(look, to: url)
         #expect(!core.lookFileCarriesWallpaper(at: url))

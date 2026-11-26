@@ -26,7 +26,8 @@ struct WallpaperLibraryTests {
 
     private func library() -> WallpaperLibrary {
         WallpaperLibrary(
-            configDirectory: FileManager.default.temporaryDirectory
+            configDirectory:
+                testTemporaryDirectory
                 .appendingPathComponent(UUID().uuidString)
         )
     }

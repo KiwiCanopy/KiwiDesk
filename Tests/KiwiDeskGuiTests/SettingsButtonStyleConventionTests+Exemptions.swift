@@ -67,9 +67,9 @@ extension SettingsButtonStyleConventionTests {
                     + "seam feeds (#845)"
             ),
             "LooksShelf.swift": (
-                3, "menuItem",
+                6, "menuItem",
                 "Returned to the row-menu builder the rowActions "
-                    + "seam feeds (#845, #1684)"
+                    + "seam feeds (#845, #1684, #3478)"
             ),
             "SimpleLookCard.swift": (
                 2, "rowActions",
