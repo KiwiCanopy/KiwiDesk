@@ -7365,6 +7365,15 @@ shelf's end on Position's side — the start below 50 %, the end from
 50 % — and never moves, and Position stays one continuous slider
 rather than a second control for a bar's edge.
 
+:::unreleased
+*Amended (#3685, 2026-11-26):* the bars keep their alignment against
+the whole edge, and the pocket's slot only bounds them: a centred
+Space Bar stays centred on the screen beside the pocket, moved inward
+only as far as it must be not to overlap the slot, and shortened only
+once the edge is full. Centring the bars in the room left after the
+pocket put them half its slot off the screen's centre.
+:::
+
 **A shelf section in a panel the shelf owns.** A hugging plate is
 the union of its runs (`ShelfArrangement.plateSpan`), and a panel
 takes every click inside its frame, so a pocket in the shelf's own

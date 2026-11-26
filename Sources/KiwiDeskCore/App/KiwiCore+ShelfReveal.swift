@@ -99,8 +99,8 @@ extension KiwiCore {
                 bar == .space
                     ? placed.arrangement.space : placed.arrangement.app
             }
-            // The bar's run inside its slot, never the whole slot,
-            // which spans the edge for a lone bar (AX).
+            // The bar's run inside its slot, never the slot itself
+            // (AX).
             let run = { (bar: ShelfBar) -> CGRect? in
                 slotOf(bar).map { slot in
                     plan.segment(placed.needs[bar].map(slot.drawing) ?? slot)
