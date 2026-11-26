@@ -20,7 +20,11 @@ public enum SyncFolder {
     static let stampName = name(of: .syncStamp)
 
     static func name(of artifact: ConfigArtifact) -> String {
-        artifact.fileName ?? "profiles"
+        if let file = artifact.fileName { return file }
+        switch artifact {
+        case .wallpapers: return WallpaperLibrary.folderName
+        default: return "profiles"
+        }
     }
 
     /// One side of the comparison, read off its files' dates.

@@ -12,6 +12,8 @@ struct LookPlate: View {
     let spaceLabels: [SpaceGlyph]
     /// Where the picture is shown: a tile, or the gallery's PNG.
     var size = Size.tile
+    /// The look's own wallpaper, drawn as the ground (#3478).
+    var picture: CGImage?
 
     /// The gallery draws on a taller canvas, so its bars take a
     /// desk's share at their font's own size, and alone stands the
@@ -69,8 +71,17 @@ struct LookPlate: View {
 
     /// The look's ground, shared with the look picker's backdrop
     /// (#3038).
-    private var ground: some View {
-        LookGround(settings: settings, reach: size.height * 0.9)
+    @ViewBuilder private var ground: some View {
+        if let picture {
+            Image(decorative: picture, scale: 1)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(height: size.height)
+                .frame(maxWidth: .infinity)
+                .clipped()
+        } else {
+            LookGround(settings: settings, reach: size.height * 0.9)
+        }
     }
 
     /// How much of the shelf colour the ground takes

@@ -128,6 +128,22 @@ final class DesktopMemory {
     var writeStamp: @MainActor (SkyLight.SpaceID, DesktopIdentity) -> Bool =
         KiwiCore.liveStampWrite
 
+    /// The wallpaper reads and sets (#3478), live by default and
+    /// pinned `refused` by both `makeTestCore` twins: a set is a
+    /// write macOS keeps past this process.
+    var wallpaper = WallpaperDesk.live
+
+    /// Whether an installed look's picture is set: false until
+    /// boot's config load ran, since a launch is no wear (#3478).
+    var wallpaperArmed = false
+
+    /// Moves an unnamed library picture to the Trash (#3478); both
+    /// `makeTestCore` twins pin a plain delete, so no suite fills
+    /// the developer's Trash.
+    var trashWallpaper: @MainActor (URL) throws -> Void = {
+        try FileManager.default.trashItem(at: $0, resultingItemURL: nil)
+    }
+
     /// Desktops that did not keep a stamp this process. One
     /// attempt each: a write the WindowServer dropped is not
     /// retried in a loop, and every consumer falls back to the

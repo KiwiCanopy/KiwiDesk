@@ -7,6 +7,7 @@ import SwiftUI
 /// click on it closes, as Esc does.
 struct LookPickerBackdrop: View {
     @ObservedObject var model: LookPickerModel
+    @ObservedObject var pictures: LookPickerPictures
     let geometry: LookPickerGeometry
     @Environment(\.kiwiDeskReduceMotion) private var reduceMotion
     /// The look the last step left, drawn under the incoming one.
@@ -21,12 +22,17 @@ struct LookPickerBackdrop: View {
                 LookPickerBackdropLayer(
                     entry: under,
                     settings: model.settings,
+                    picture: pictures.image(of: under, over: model.settings),
                     geometry: geometry
                 )
             }
             LookPickerBackdropLayer(
                 entry: model.selected,
                 settings: model.settings,
+                picture: pictures.image(
+                    of: model.selected,
+                    over: model.settings
+                ),
                 geometry: geometry
             )
             .drawingGroup()
@@ -55,16 +61,34 @@ struct LookPickerBackdrop: View {
     }
 }
 
-/// One look's backdrop: its colour ground at the backdrop's strength
-/// under a soft vignette (owner, prototype 2026-11-26). A look's
-/// picture, drawn here, is decoded once at the screen's pixel size,
-/// never full size per frame (#3038 ▸ Ruling 2026-11-26).
+/// One look's backdrop: its picture filling the screen where it
+/// carries one (#3478), decoded once at the screen's pixel size and
+/// never full size per frame (#3038 ▸ Ruling 2026-11-26); else its
+/// colour ground at the backdrop's strength under a soft vignette
+/// (owner, prototype 2026-11-26).
 struct LookPickerBackdropLayer: View {
     let entry: LookPickerEntry?
     let settings: TilingSettings
+    /// The card's decoded picture; nil draws the colour ground.
+    var picture: CGImage?
     let geometry: LookPickerGeometry
 
     var body: some View {
+        if let picture {
+            Image(decorative: picture, scale: 1)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(
+                    width: geometry.screen.width,
+                    height: geometry.screen.height
+                )
+                .clipped()
+        } else {
+            colourGround
+        }
+    }
+
+    private var colourGround: some View {
         ZStack {
             LookGround(
                 settings: entry?.painted(over: settings) ?? settings,

@@ -55,7 +55,10 @@ extension KiwiCore {
 
     /// Deletes a saved look (#2860).
     public func deleteLook(_ name: String) throws {
-        try lookLibrary.delete(name)
+        let library = lookLibrary
+        let held = library.userLooks().first { $0.name == name }?.wallpaper
+        try library.delete(name)
+        trashUnnamedWallpapers(held?.names ?? [])
     }
 
     /// Saves `settings`' styling and colours as look `name`, with
@@ -66,30 +69,93 @@ extension KiwiCore {
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
-        let look = ShelfLook.current(
+        var look = ShelfLook.current(
             named: try admittedName(name) { lookNameVerdict($0) },
             in: settings
         )
-        try lookLibrary.save(look)
+        // Save never captures a picture; an overwrite keeps the one
+        // the look holds, which only Remove Wallpaper detaches (#3478).
+        let library = lookLibrary
+        look.wallpaper =
+            library.userLooks().first { $0.name == look.name }?.wallpaper
+        try library.save(look)
         return look
     }
 
     /// Writes `look`, which owns its colours (#1752), as a look
     /// file at `url`.
-    public func exportLook(_ look: ShelfLook, to url: URL) throws {
-        try lookLibrary.export(LookExport(look: look), to: url)
+    public func exportLook(
+        _ look: ShelfLook,
+        to url: URL,
+        includingWallpaper: Bool = false
+    ) throws {
+        var body = look
+        var pictures: [String: Data]?
+        if includingWallpaper, let wallpaper = look.wallpaper {
+            let library = wallpaperLibrary
+            pictures = Dictionary(
+                uniqueKeysWithValues: wallpaper.names.compactMap { name in
+                    library.data(of: name).map { (name, $0) }
+                }
+            )
+        } else {
+            // A picture left behind is not named: the file carries
+            // no reference it cannot keep (#3478 ▸ Export).
+            body.wallpaper = nil
+        }
+        try lookLibrary.export(
+            LookExport(look: body, wallpapers: pictures),
+            to: url
+        )
+    }
+
+    /// Whether the look file at `url` carries pictures, which the
+    /// import offers to bring in (#3478).
+    public func lookFileCarriesWallpaper(at url: URL) -> Bool {
+        guard let data = try? Data(contentsOf: url),
+            let file = try? JSONDecoder().decode(LookPictures.self, from: data)
+        else { return false }
+        return !(file.wallpapers ?? [:]).isEmpty
     }
 
     /// Imports a look file under a free name.
+    /// `withWallpaper` copies the file's pictures in, each
+    /// re-hashed; false brings the look in with none.
     @discardableResult
     public func importLook(
         from url: URL,
-        fallbackName: String
+        fallbackName: String,
+        withWallpaper: Bool = true
     ) throws -> ShelfLook {
-        try addImported(
-            lookLibrary.importLook(from: url),
-            fallbackName: fallbackName
-        )
+        var look = try lookLibrary.importLook(from: url)
+        look.wallpaper =
+            withWallpaper ? importWallpapers(of: look, from: url) : nil
+        return try addImported(look, fallbackName: fallbackName)
+    }
+
+    /// The look's picture reference after copying the file's
+    /// pictures in, renamed to the hash of the bytes that arrived;
+    /// nil where none arrived.
+    private func importWallpapers(
+        of look: ShelfLook,
+        from url: URL
+    ) -> LookWallpaper? {
+        guard let wallpaper = look.wallpaper,
+            let data = try? Data(contentsOf: url),
+            let file = try? JSONDecoder().decode(LookPictures.self, from: data)
+        else { return nil }
+        let library = wallpaperLibrary
+        var renamed: [String: String] = [:]
+        for (name, bytes) in file.wallpapers ?? [:] {
+            if let stored = try? library.add(bytes) { renamed[name] = stored }
+        }
+        switch wallpaper {
+        case .all(let name):
+            return renamed[name].map(LookWallpaper.all)
+        case .perScreen(let map):
+            let kept = map.compactMapValues { renamed[$0] }
+            return kept.isEmpty ? nil : .perScreen(kept)
+        }
     }
 
     /// Adds a look a gallery link downloaded (#1740) under a free
@@ -105,6 +171,8 @@ extension KiwiCore {
         if let held = heldGalleryLook(for: link) { return held }
         var look = try LookStore.importLook(data: data)
         look.galleryID = link.id
+        // The gallery stays link-only (#2838): no picture comes in.
+        look.wallpaper = nil
         return try addImported(look, fallbackName: fallbackName)
     }
 
@@ -160,4 +228,9 @@ extension KiwiCore {
             throw .couldNotWrite(name: lookLibrary.url.lastPathComponent)
         }
     }
+}
+
+/// A look file's pictures alone, read beside its body (#3478).
+private struct LookPictures: Decodable {
+    var wallpapers: [String: Data]?
 }

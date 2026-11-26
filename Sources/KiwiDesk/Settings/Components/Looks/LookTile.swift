@@ -37,7 +37,11 @@ struct LookTile: View {
                 captionLines: captionLines
                     ?? (caption == nil ? 0 : Self.captionRoom)
             ) {
-                LookPlate(settings: preview, spaceLabels: spaceLabels)
+                LookPlate(
+                    settings: preview,
+                    spaceLabels: spaceLabels,
+                    picture: picture
+                )
             }
             .contentShape(Rectangle())
         }
@@ -45,6 +49,7 @@ struct LookTile: View {
         .onHover { hover?($0) }
         .accessibilityAddTraits(applied ? [.isSelected] : [])
         .accessibilityHint(help ?? "")
+        .accessibilityValue(wallpaperSpoken)
         .help(other ? restoreColorsHelp : (help ?? ""))
     }
 
@@ -55,6 +60,21 @@ struct LookTile: View {
     /// An imported look's caption, its author (#1740).
     @MainActor static func byline(_ author: String) -> String {
         L("looks.byline", "by %1$@", author)
+    }
+
+    /// Whether the look carries a picture (#3478): "With wallpaper",
+    /// or a count where it keeps one per screen.
+    private var wallpaperSpoken: String {
+        switch look.wallpaper?.count ?? 0 {
+        case 0: return ""
+        case 1: return L("looks.wallpaper.spoken_one", "With wallpaper")
+        case let n:
+            return L(
+                "looks.wallpaper.spoken_many",
+                "With wallpapers for %1$d screens",
+                n
+            )
+        }
     }
 
     private var otherColorsNote: String {
@@ -70,6 +90,16 @@ struct LookTile: View {
             "looks.restore_colors.help",
             "Click to bring back this look's own colors."
         )
+    }
+
+    /// Screen 1's picture, or the one picture (#3478).
+    private var picture: CGImage? {
+        look.admitted.wallpaper?.name(forScreen: 1).flatMap {
+            LookTilePictures.image(
+                named: $0,
+                in: model.core.wallpaperLibrary
+            )
+        }
     }
 
     private var preview: TilingSettings {

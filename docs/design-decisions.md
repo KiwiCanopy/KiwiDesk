@@ -12185,6 +12185,32 @@ a wallpaper is rarely the submitter's to license, often a personal
 photo, and larger than the repo should carry; the link goes to the
 page it comes from, the way a look's font link does.
 
+:::unreleased
+A saved look may carry a wallpaper that wearing it sets (#3478).
+Setting a wallpaper is not reading one, so it takes no prompt; the
+one read is **Use Current Wallpaper**, a deliberate click that
+accepts macOS's one-time folder prompt, and it reads only the URL
+for a picture KiwiDesk itself set. A picture joins a look only
+through Choose Wallpaper…, Use Current Wallpaper or a file dropped
+on the tile, and Save never captures one, so a wallpaper changed in
+System Settings is never overwritten by a look without one. The
+picture is copied, never referenced, into the config folder's
+`wallpapers/`, named by its content hash; the copy macOS wears lives
+on this Mac (`Application Support/KiwiDesk/wallpaper/`). One picture
+covers every screen; a look keeps one per #3647 screen number only
+where Use Current Wallpaper found the screens different, and screen
+k wears its own entry, else the lowest-numbered one. Wearing it by
+any route sets it — a pick, a profile or Desktop switch, the shared
+look, the look picker — through the one change of the worn
+settings' `look_wallpaper`, never a read on the Desktop-switch path;
+a launch is no wear and sets nothing. It reaches each screen's
+current Desktop only, never a full-screen app's Space, and re-applying
+it on every Desktop visit was refused: it would overwrite a picture
+set by hand for that Desktop and change the picture visibly after
+each arrival. The gallery stays link-only; a look file carries its
+picture only where its export was asked to.
+:::
+
 ### Open at login
 
 **[Principle]**

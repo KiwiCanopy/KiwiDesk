@@ -78,6 +78,9 @@ extension KiwiCore {
         retargetVisionAppearance(nil)
         let config = signposter.beginInterval("loadConfig")
         loadConfig()
+        // A launch is no wear: a look's picture is set from here on.
+        desktopMemory.wallpaperArmed = true
+        sweepWallpapers()
         signposter.endInterval("loadConfig", config)
         boot.configDone = ContinuousClock.now
         sleepWake.start()

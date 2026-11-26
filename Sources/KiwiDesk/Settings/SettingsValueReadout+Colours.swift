@@ -42,6 +42,16 @@ extension SettingsValueReadout {
                     new: lookCredit(new.settings.lookOrigin)
                 )
             ]
+        case .lookWallpaper:
+            // Surfaceless too: the picture the worn look sets (#3478).
+            return [
+                .change(
+                    census,
+                    label: lookWallpaperLabel,
+                    old: wallpaperWords(old.settings.lookWallpaper),
+                    new: wallpaperWords(new.settings.lookWallpaper)
+                )
+            ]
         case .borderSheen:
             return coloursRow(
                 census,
@@ -113,7 +123,8 @@ extension SettingsValueReadout {
             .lookAppliesTo,
             .lookSave, .lookBrowse, .lookImport, .lookShare,
             .lookRename, .lookExport,
-            .lookDelete, .accentPaint, .secondAccentPaint:
+            .lookDelete, .lookChooseWallpaper, .lookUseCurrentWallpaper,
+            .lookRemoveWallpaper, .accentPaint, .secondAccentPaint:
             // Actions and a link: no stored model path, so no
             // value pair to narrate — a group colour's writes are
             // booked to the rows it painted (#1857).
@@ -146,6 +157,18 @@ extension SettingsValueReadout {
 }
 
 extension SettingsValueReadout {
+    /// The worn picture's diff row label (#3478).
+    static var lookWallpaperLabel: String {
+        L("looks.wallpaper.diff", "Wallpaper")
+    }
+
+    /// A worn picture as a diff row reads it: whether one is set.
+    static func wallpaperWords(_ wallpaper: LookWallpaper?) -> String {
+        wallpaper == nil
+            ? L("looks.wallpaper.diff.none", "None")
+            : L("looks.wallpaper.diff.set", "Set by the look")
+    }
+
     /// The origin's diff row label.
     static var lookOriginLabel: String {
         L("looks.origin", "Based on")

@@ -96,6 +96,11 @@ struct LooksShelf: View {
                     )
                     .focused($returningTile, equals: look.name)
                     .rowActions { userMenu(look) }
+                    .dropDestination(for: URL.self) { urls, _ in
+                        guard let url = urls.first else { return false }
+                        attachWallpaper(at: url, to: look)
+                        return true
+                    }
                 }
                 addTile
             }
@@ -181,6 +186,23 @@ struct LooksShelf: View {
             }
         case .colours(.lookExport):
             Button(L("looks.export", "Export…")) { exportLook(look) }
+        case .colours(.lookChooseWallpaper):
+            Divider()
+            Button(L("looks.wallpaper.choose", "Choose Wallpaper…")) {
+                chooseWallpaper(for: look)
+            }
+        case .colours(.lookUseCurrentWallpaper):
+            Button(
+                L("looks.wallpaper.use_current", "Use Current Wallpaper")
+            ) {
+                useCurrentWallpaper(for: look)
+            }
+        case .colours(.lookRemoveWallpaper):
+            if look.wallpaper != nil {
+                Button(L("looks.wallpaper.remove", "Remove Wallpaper")) {
+                    removeWallpaper(from: look)
+                }
+            }
         case .colours(.lookDelete):
             Divider()
             Button(L("looks.delete", "Delete"), role: .destructive) {

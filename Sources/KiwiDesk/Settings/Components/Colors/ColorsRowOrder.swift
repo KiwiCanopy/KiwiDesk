@@ -7,10 +7,14 @@ enum ColorsRowOrder {
         .colours(.lookAppliesTo)
     ]
 
-    /// Context menu for user looks (#1684).
+    /// Context menu for user looks (#1684), the wallpaper items
+    /// between Export and Delete (#3478).
     static let looksContextMenu: [SettingKey] = [
         .colours(.lookRename),
         .colours(.lookExport),
+        .colours(.lookChooseWallpaper),
+        .colours(.lookUseCurrentWallpaper),
+        .colours(.lookRemoveWallpaper),
         .colours(.lookDelete),
     ]
 

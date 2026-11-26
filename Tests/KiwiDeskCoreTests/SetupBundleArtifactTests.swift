@@ -90,6 +90,8 @@ struct SetupBundleArtifactTests {
             )
         )
 
+        _ = try core.wallpaperLibrary.add(WallpaperLibraryTests.png())
+
         let bundle = try core.exportSetup()
         // Assert the loop has something to walk: every artifact
         // travels today, so a `where` that matched nothing would
@@ -108,6 +110,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
+                case .wallpapers: !(bundle.wallpapers ?? [:]).isEmpty
                 case .desktopBindings: bundle.profileBindings != nil
                 case .migrationBackups, .machineConfig, .syncStamp,
                     .syncLedger:

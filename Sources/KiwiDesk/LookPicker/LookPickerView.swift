@@ -52,7 +52,11 @@ struct LookPickerView: View {
 
     private var picker: some View {
         ZStack(alignment: .topLeading) {
-            LookPickerBackdrop(model: model, geometry: geometry)
+            LookPickerBackdrop(
+                model: model,
+                pictures: model.pictures,
+                geometry: geometry
+            )
             LookPickerRow(model: model, geometry: geometry)
             LookPickerCaption(model: model, geometry: geometry)
         }

@@ -63,6 +63,11 @@ func pinDesktopReads(_ core: KiwiCore) {
     // stamping suite takes the live writer back explicitly, with
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
+    // A look's picture set (#3478) is a write macOS keeps.
+    core.desktopMemory.wallpaper = .refused
+    core.desktopMemory.trashWallpaper = {
+        try FileManager.default.removeItem(at: $0)
+    }
     // The host's keyboard layout picks the undo seed's key (#3599):
     // pinned to a US board, so a QWERTZ developer seeds `z` too.
     core.keyCodeTyping = { KeyCombo.keyCodes[$0] }

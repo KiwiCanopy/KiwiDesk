@@ -48,6 +48,7 @@ extension KiwiCore {
             profiles: profiles,
             palettes: paletteLibrary,
             looks: lookLibrary,
+            wallpapers: wallpaperLibrary,
             bindings: true,
             initLua: initLua
         )
@@ -61,6 +62,7 @@ extension KiwiCore {
         profiles: ProfileManager,
         palettes: PaletteStore,
         looks: LookStore,
+        wallpapers: WallpaperLibrary,
         bindings: Bool,
         initLua: String? = nil
     ) throws -> SetupBundle {
@@ -83,7 +85,9 @@ extension KiwiCore {
             profileBindings: bindings
                 && ConfigArtifact.desktopBindings.travelsInABackup
                 ? gui.load()?.profileBindings : nil,
-            initLua: initLua
+            initLua: initLua,
+            wallpapers: ConfigArtifact.wallpapers.travelsInABackup
+                ? wallpapers.contents() : nil
         )
     }
 
@@ -250,7 +254,8 @@ extension KiwiCore {
             let palettes = try? encoder.encode(bundle.palettes),
             let looks = try? encoder.encode(bundle.looks),
             let bindings = try? encoder.encode(bundle.profileBindings),
-            let initLua = try? encoder.encode(bundle.initLua)
+            let initLua = try? encoder.encode(bundle.initLua),
+            let wallpapers = try? encoder.encode(bundle.wallpapers)
         else { return nil }
 
         // The header's own braces come off; its two lines lead.
@@ -266,6 +271,7 @@ extension KiwiCore {
             ("looks", looks),
             ("profileBindings", bindings),
             ("initLua", initLua),
+            ("wallpapers", wallpapers),
         ]
         .map { name, data in
             "  \"\(name)\" : \(reindented(data))"

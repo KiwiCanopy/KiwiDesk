@@ -137,7 +137,7 @@ extension KiwiCore {
             return .fail("a bundled look cannot be deleted")
         }
         do {
-            try library.delete(name)
+            try deleteLook(name)
             onLookLibraryChanged()
             return .ok()
         } catch LookStore.StoreError.notFound {
