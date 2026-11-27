@@ -242,8 +242,12 @@ extension KiwiCore {
             monitorSets.map(\.monitors.count).max() ?? 0,
             order.fingerprints.count
         )
-        let numbers = barNumbers(count: count, order: order)
-            .compactMap { ScreenSlotKey(number: $0)?.description }
+        // Every number, a twin's higher one too: the scope is also
+        // what a forget keeps, and another setup may hold a screen
+        // under that number.
+        let numbers = (0..<count).compactMap {
+            ScreenSlotKey(number: $0 + 1)?.description
+        }
         let areas = shares.flatMap { number, split in
             split.areas.filter { $0.id != 0 }.compactMap { area in
                 Int(number).flatMap {
@@ -257,9 +261,9 @@ extension KiwiCore {
     /// Screens 1 through `count` that keep bar values, in order:
     /// each save a twin's higher number, whose screen reads the lower
     /// number's values (`ScreenOrder.number(of:)`). A session hole
-    /// keeps its number. The one twin rule the edge scope and the
-    /// Settings picker read, each counting its own screens (#3647 ▸
-    /// lane 3c).
+    /// keeps its number. The Settings picker's rows (#3647 ▸ lane
+    /// 3c); never a scope a write or a forget judges, which keeps
+    /// every number.
     public func barNumbers(count: Int, order: ScreenOrder) -> [Int] {
         guard count > 0 else { return [] }
         return (1...count).filter { number in

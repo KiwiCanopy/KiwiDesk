@@ -25,6 +25,12 @@ struct BarSlotDoorTests {
         #expect(order.slot(of: area) == ScreenSlotKey(number: 3, areaID: 2))
         let core = makeTestCore()
         #expect(core.barKey(of: area, order: order) == "3#2")
+        // A runtime pin to the twin is stored under the number it
+        // reads, never dropped.
+        #expect(
+            order.storing(runtime: ["9": twin], over: [:])
+                == ["9": ScreenSlotKey(number: 3)!]
+        )
     }
 
     @Test("a twin's higher number keeps no bar values")
@@ -52,18 +58,19 @@ struct BarSlotDoorTests {
         #expect(core.barNumbers(count: 0, order: ScreenOrder([])) == [])
     }
 
-    @Test("every connected twin agreeing collapses into the bar's edge")
-    func twinsCollapse() {
+    /// The scope a forget keeps holds a twin's higher number: on
+    /// another setup that number is another screen.
+    @Test("a twin's higher number stays in the kept scope")
+    func scopeKeepsTheTwinsNumber() {
         let core = makeTestCore()
         let scope = core.screenEdgeScope(
-            monitorSets: [MonitorSet(monitors: [twin, twin])],
+            monitorSets: [
+                MonitorSet(monitors: [twin, twin]),
+                MonitorSet(monitors: [twin, other]),
+            ],
             shares: [:],
             order: ScreenOrder([twin, twin])
         )
-        #expect(scope.screens == ["1"])
-        var style = SpaceBarStyle()
-        style.setEdge(.left, on: "1", among: scope)
-        #expect(style.edge == .left)
-        #expect(style.edgeOverride.isEmpty)
+        #expect(scope.screens == ["1", "2"])
     }
 }

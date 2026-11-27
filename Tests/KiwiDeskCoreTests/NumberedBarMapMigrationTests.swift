@@ -187,6 +187,44 @@ struct NumberedBarMapMigrationTests {
         )
     }
 
+    /// A backup stands down at its own floor, which sits above the
+    /// profile's: format 56 crosses, 57 does not.
+    @Test("a current backup is never crossed again")
+    func currentBundleStandsDown() throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        var bundle = try #require(
+            JSONSerialization.jsonObject(
+                with: encoder.encode(
+                    SetupBundle(
+                        writtenBy: "test",
+                        config: GuiConfig(),
+                        profiles: [profile],
+                        palettes: []
+                    )
+                )
+            ) as? [String: Any]
+        )
+        var profiles = try #require(bundle["profiles"] as? [[String: Any]])
+        put(
+            &profiles[0],
+            ["space_bar", "edge_override"],
+            ["B:1000x1000": "left"]
+        )
+        bundle["profiles"] = profiles
+        let floor = ConfigMigration.numberedBarMapsBundleFormat
+        bundle["format"] = floor - 1
+        #expect(
+            ConfigMigration.migratingBarMapsOntoNumbers(try data(bundle))
+                != nil
+        )
+        bundle["format"] = floor
+        #expect(
+            ConfigMigration.migratingBarMapsOntoNumbers(try data(bundle))
+                == nil
+        )
+    }
+
     @Test("a fingerprint key refuses a current file")
     func fingerprintKeyRefuses() throws {
         func settings(_ path: [String], key: String) throws -> Data {
