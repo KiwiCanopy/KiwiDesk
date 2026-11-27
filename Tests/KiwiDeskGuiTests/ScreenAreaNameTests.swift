@@ -126,6 +126,8 @@ struct ScreenAreaNameTests {
                 ".frame(height:width>0?height:Self.canvasHeight)"
             )
         )
+        // Hidden until measured: no frame drawn at width 0.
+        #expect(picture.contains(".opacity(width>0?1:0)"))
         #expect(!picture.contains(".vertical"))
     }
 }

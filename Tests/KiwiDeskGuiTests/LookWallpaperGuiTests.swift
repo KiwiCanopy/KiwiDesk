@@ -7,7 +7,7 @@ import Testing
 /// The GUI half of a look's picture (#3478): the look picker draws a
 /// card's picture for its own screen, and Use Current Wallpaper
 /// narrates every screen it skipped, one line each.
-@Suite("Look wallpaper GUI")
+@Suite("Look wallpaper GUI", .serialized)
 @MainActor
 struct LookWallpaperGuiTests {
     static let a = String(repeating: "a", count: 64) + ".png"
@@ -61,6 +61,12 @@ struct LookWallpaperGuiTests {
         let unreadable = LooksShelf.narrate([1: .unreadable], look: "Dusk")
         #expect(missing?.contains("no longer at the place") == true)
         #expect(missing != unreadable)
+        // A catalog reader meets the missing key, not the
+        // unreadable one.
+        LocalizationManager.shared.select("de")
+        defer { LocalizationManager.shared.select("en") }
+        let german = LooksShelf.narrate([1: .missing], look: "Dusk")
+        #expect(german?.contains("liegt nicht mehr dort") == true)
         let gone =
             testTemporaryDirectory
             .appendingPathComponent("gone-\(UUID().uuidString).png")

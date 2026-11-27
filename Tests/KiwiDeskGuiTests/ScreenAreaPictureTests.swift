@@ -40,9 +40,17 @@ struct ScreenAreaPictureTests {
     /// Every pane the card draws holds its name and a chip: the
     /// narrowest area under the band, not the card, is what the
     /// scale floors on (#3697).
-    @MainActor @Test func everyPaneHoldsTheMinimumCard() throws {
+    @MainActor @Test(arguments: [false, true])
+    func everyPaneHoldsTheMinimumCard(stacked: Bool) throws {
         let screen = display(1)
-        let split = try three()
+        // Stacked, a quarter-height pane is the one the height arm
+        // floors on; side by side, the width arm decides.
+        let split =
+            stacked
+            ? try #require(
+                ScreenSplit.whole(width: 3440, height: 1440)
+                    .splitting(0, .stacked)?.splitting(1, .stacked)
+            ) : try three()
         let layout = ScreenArrangement.layout(
             displays: [screen],
             mainID: screen.id,

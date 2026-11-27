@@ -32,8 +32,7 @@ enum ScreenCardChips {
     /// since a chip outranks the name.
     static func namesArea(in size: CGSize) -> Bool {
         size.width - cardPadding * 2 >= areaNameMinWidth
-            && chipArea(in: size, header: areaNameLine).height
-                >= chipHeight
+            && size.height >= splitPaneHeight
     }
     static let trayHeaderHeight: CGFloat = 14
     /// Child spacing for chip stacks pinned in `ScreensGateWiringTests`.

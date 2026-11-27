@@ -40,8 +40,8 @@ struct ScreensPicture: View {
             in: canvas
         )
         // Sideways only, for a desk wider than the page; the page
-        // scrolls up and down. Nothing is laid out before the width
-        // is measured.
+        // scrolls up and down. The content stays hidden until the
+        // width is measured.
         ScrollView(.horizontal) {
             picture(layout)
                 .frame(width: content.width, height: content.height)
