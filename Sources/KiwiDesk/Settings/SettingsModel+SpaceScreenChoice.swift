@@ -12,6 +12,9 @@ enum SpaceScreenChoice: Hashable, Sendable {
     case followsMain
     /// Pinned to a screen by its fingerprint, connected or not.
     case screen(String)
+    /// Pinned to a screen number no connected screen holds: the
+    /// stored pin waits, and re-picking it keeps it (#3689).
+    case waiting(ScreenSlotKey)
 }
 
 extension SettingsModel {
@@ -20,8 +23,13 @@ extension SettingsModel {
         if let pin = pin(of: space), !pin.isEmpty {
             return .screen(resolvedPin(pin))
         }
-        return config.mainSpaces.contains(space)
-            ? .followsMain : .auto
+        if config.mainSpaces.contains(space) { return .followsMain }
+        // A number no connected screen holds waits (#3689), read by
+        // the predicate the chip reads (`waitingPins`).
+        if let slot = config.spacePins[space], !screenOrder.holds(slot) {
+            return .waiting(slot)
+        }
+        return .auto
     }
 
     /// Places `space`, clearing the other placement it held.
@@ -42,6 +50,10 @@ extension SettingsModel {
                 of: ScreenAreaKey(parsing: fingerprint)
             )
             config.mainSpaces.remove(space)
+        case .waiting:
+            // Offered only as the Space's own pin: re-picking it
+            // keeps the stored number (#3689).
+            return
         }
     }
 }
@@ -60,12 +72,14 @@ extension SpaceScreenChoice {
             // "Screen – Left" (#3517 ruling 11).
             model.pinWords(key)
                 ?? model.screenName(ScreenAreaKey(parsing: key).fingerprint)
+        case .waiting(let slot):
+            model.offlinePinLabel(number: slot.number)
         }
     }
 
     /// Automatic, Follows main screen, each connected screen — each
     /// area of a split one (#3517 ruling 11) — and the Space's own
-    /// pin where its screen or area is not there.
+    /// pin where its screen, area or number is not there (#3689).
     @MainActor static func offered(
         for space: SpaceID,
         in model: SettingsModel
