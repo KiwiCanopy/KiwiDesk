@@ -260,16 +260,13 @@ extension KiwiCore {
 
     /// Screens 1 through `count` that keep bar values, in order:
     /// each save a twin's higher number, whose screen reads the lower
-    /// number's values (`ScreenOrder.number(of:)`). A session hole
-    /// keeps its number. The Settings picker's rows (#3647 ▸ lane
-    /// 3c); never a scope a write or a forget judges, which keeps
-    /// every number.
+    /// number's values (`ScreenOrder.number(of:)`). The Settings
+    /// picker's rows (#3647 ▸ lane 3c); never a scope a write or a
+    /// forget judges, which keeps every number.
     public func barNumbers(count: Int, order: ScreenOrder) -> [Int] {
         guard count > 0 else { return [] }
         return (1...count).filter { number in
-            guard number <= order.fingerprints.count,
-                !order.unnumbered.contains(number)
-            else { return true }
+            guard number <= order.fingerprints.count else { return true }
             return order.number(of: order.fingerprints[number - 1]) == number
         }
     }
@@ -311,14 +308,9 @@ extension KiwiCore {
             holdSettingsCall(split: false, replay: replay)
             return .success([])
         }
-        guard let keys = areaKeys(named: args[1]) else {
+        guard let keys = areaKeys(named: args[1]), !keys.isEmpty else {
             return .failure(
                 AppBarSettingError(stringLiteral: Self.unknownScreen)
-            )
-        }
-        guard !keys.isEmpty else {
-            return .failure(
-                AppBarSettingError(stringLiteral: Self.unnumberedScreen)
             )
         }
         return .success(keys.map { Self.args(args, screen: $0) })

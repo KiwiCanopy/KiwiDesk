@@ -1453,7 +1453,7 @@ screen that switched, and the active profile.
 
 :::unreleased
 The screen is `screen`, its Screen N, the number a screen argument
-takes (`null` on a screen left unnumbered), and `main` says whether it is the main screen. Test `main`,
+takes, and `main` says whether it is the main screen. Test `main`,
 not `screen`, for the main screen:
 
 ```json

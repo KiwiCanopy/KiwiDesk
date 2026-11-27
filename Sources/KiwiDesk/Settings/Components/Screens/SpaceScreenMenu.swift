@@ -19,7 +19,6 @@ struct SpaceScreenMenu: View {
             ForEach(offered.filter { !$0.isArea(in: model) }, id: \.self) {
                 choice in
                 Text(choice.title(in: model)).tag(choice)
-                    .disabled(!choice.takesPins(in: model))
             }
             ForEach(firstOfEachScreen, id: \.id) { display in
                 let areas = offered.filter {
@@ -31,7 +30,6 @@ struct SpaceScreenMenu: View {
                         // "Screen – Left", never a bare "Left".
                         ForEach(areas, id: \.self) { choice in
                             Text(choice.title(in: model)).tag(choice)
-                                .disabled(!choice.takesPins(in: model))
                         }
                     }
                 }
@@ -77,12 +75,5 @@ extension SpaceScreenChoice {
                 && (display == nil || $0.id == display?.id)
                 && model.areaLabel(parsed.areaID, on: $0) != nil
         }
-    }
-
-    /// Whether placing a Space here pins it: never on a connected
-    /// screen left unnumbered (#3647).
-    @MainActor func takesPins(in model: SettingsModel) -> Bool {
-        guard case .screen(let key) = self else { return true }
-        return model.takesPins(key)
     }
 }

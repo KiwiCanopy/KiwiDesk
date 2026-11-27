@@ -42,8 +42,6 @@ extension SettingsModel {
             config.mainSpaces.insert(space)
             config.spacePins[space] = nil
         case .screen(let fingerprint):
-            // An unnumbered screen takes no pin: Save would drop it.
-            guard takesPins(fingerprint) else { return }
             // Stored by the number its screen holds (#3647); a
             // screen not connected holds none, so pins nothing.
             config.spacePins[space] = screenOrder.slot(
