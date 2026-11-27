@@ -22,6 +22,10 @@ export default defineConfig({
   // toggle became navigation, and prefetch-on-hover is what keeps
   // it feeling like the instant switch it replaced.
   prefetch: true,
+  // Scope component styles with `:where()`, as Starlight forced
+  // until 0.43 (#3613): global sheets such as landing.css's
+  // `.card p` rely on outranking a component's scoped rules.
+  scopedStyleStrategy: "where",
   // The voices' photos come from Sanity at build time (#2369) and
   // are re-emitted under dist/, so a visitor never asks cdn.sanity.io
   // (`check-site-tokens.py` ▸ `check_no_sanity_in_dist`). The id is
