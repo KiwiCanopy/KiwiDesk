@@ -24218,8 +24218,18 @@ The consequences:
   It is one pure step at the one door a base order is decided at
   (`ScreenOrder.continuing`); the fit ranks against it, a session
   renumber stays on top, and a twin past a setup's copies is a
-  newcomer. A stand-in screen at the same count, replacing one
-  known screen, still numbers left to right until its own ruling.
+  newcomer.
+- **Amended (#3648, owner, 2026-11-27, Sitting A): a stand-in
+  takes the number its absent screen left.** At the profile's own
+  count, a setup sharing some screens with a stored one keeps
+  those screens' numbers, and each new screen takes a free number,
+  left to right. Where several stored setups share screens, the
+  one sharing the most wins, ties to the first stored. Numbering
+  the whole setup left to right gave the cowork monitor standing
+  in for the home one a number a known screen held, and moved that
+  known screen's Spaces. "Known" is still the applied profile's
+  own setups alone: a number means something only inside one
+  profile.
 - **The Main role stays as it is and outranks a Screen pin**, a
   number's pin included.
 - **The user renumbers on the Screens page.** Each card's badge

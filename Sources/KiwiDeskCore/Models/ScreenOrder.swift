@@ -22,37 +22,62 @@ public struct ScreenOrder: Equatable, Sendable {
     }
 
     /// The numbering that keeps a known setup's numbers (#3648 ▸
-    /// known-screens ruling): the first of `sets` whose every screen
-    /// is connected keeps its order, and the other `displays` take
-    /// the next numbers left to right, ties top to bottom. A twin
-    /// past a set's copies is a newcomer. Nil where no set is a
-    /// strict part of `displays`.
+    /// known-screens and Sitting A rulings), read from `sets` alone:
+    /// with more screens than a set, the first set whose every
+    /// screen is connected keeps its order and the other `displays`
+    /// take the next numbers; with as many, the set sharing the most
+    /// connected screens (the first stored on a tie) keeps their
+    /// numbers and each new screen takes a free one. New screens go
+    /// left to right, ties top to bottom, and a twin past a set's
+    /// copies is new. Nil where no set qualifies, or one covers the
+    /// screens (`order(matching:)`'s case).
     public static func continuing(
         _ sets: [MonitorSet],
         displays: [Display]
     ) -> ScreenOrder? {
         let sorted = displays.sorted(by: precedes)
         for set in sets
-        where !set.monitors.isEmpty
-            && set.monitors.count < sorted.count
-        {
-            var rest = sorted
-            let known = set.monitors.allSatisfy { fingerprint in
-                guard
-                    let at = rest.firstIndex(where: {
-                        $0.fingerprint == fingerprint
-                    })
-                else { return false }
-                rest.remove(at: at)
-                return true
-            }
-            if known {
-                return ScreenOrder(
-                    set.monitors + rest.map(\.fingerprint)
-                )
+        where !set.monitors.isEmpty && set.monitors.count < sorted.count {
+            let (known, rest) = knownSlots(set, among: sorted)
+            if known.count == set.monitors.count {
+                return ScreenOrder(set.monitors + rest.map(\.fingerprint))
             }
         }
-        return nil
+        var best: (shared: Int, order: ScreenOrder)?
+        for set in sets where set.monitors.count == sorted.count {
+            let (known, rest) = knownSlots(set, among: sorted)
+            guard !known.isEmpty, known.count < sorted.count,
+                known.count > best?.shared ?? 0
+            else { continue }
+            var newcomers = rest.map(\.fingerprint).makeIterator()
+            let order = set.monitors.indices.map { slot in
+                known.contains(slot)
+                    ? set.monitors[slot]
+                    : newcomers.next() ?? set.monitors[slot]
+            }
+            best = (known.count, ScreenOrder(order))
+        }
+        return best?.order
+    }
+
+    /// The slots of `set` a connected screen holds, each screen
+    /// taken once in stored order, and the screens left over.
+    private static func knownSlots(
+        _ set: MonitorSet,
+        among sorted: [Display]
+    ) -> (slots: Set<Int>, rest: [Display]) {
+        var rest = sorted
+        var slots: Set<Int> = []
+        for (slot, fingerprint) in set.monitors.enumerated() {
+            guard
+                let at = rest.firstIndex(where: {
+                    $0.fingerprint == fingerprint
+                })
+            else { continue }
+            rest.remove(at: at)
+            slots.insert(slot)
+        }
+        return (slots, rest)
     }
 
     /// Whether `a` comes before `b` left to right, ties top to

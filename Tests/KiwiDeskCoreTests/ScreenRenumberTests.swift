@@ -252,6 +252,30 @@ struct SessionScreenOrderTests {
         #expect(core.screenNumber(of: right.id) == 2)
         #expect(core.screenNumber(of: newcomer.id) == 3)
         #expect(core.spacePins["2"] == "B:400x400")
+        // A Save stores the order it was live under.
+        try core.persistProfile(named: "Three", modes: nil)
+        let three = try core.profiles.read(name: "Three")
+        #expect(
+            three.monitorSets.map(\.monitors)
+                == [["A:400x400", "B:400x400", "C:400x400"]]
+        )
+    }
+
+    /// A stand-in at the same count takes the absent screen's number,
+    /// the known screen keeping its own (#3648 ▸ Sitting A ruling).
+    @Test("a stand-in takes the number its absent screen left")
+    func standInKeepsTheKnownNumber() throws {
+        let core = makeCore()
+        try loadWork(core)
+        let standIn = Display(
+            id: DisplayID(3),
+            name: "C",
+            frame: CGRect(x: 800, y: 0, width: 400, height: 400)
+        )
+        core.handle(.displaysChanged([right, standIn]))
+        #expect(core.screenNumber(of: standIn.id) == 1)
+        #expect(core.screenNumber(of: right.id) == 2)
+        #expect(core.spacePins["2"] == "B:400x400")
     }
 
     /// A screen past the profile's numbers takes the next one, its

@@ -741,15 +741,14 @@ screen's fingerprint (as printed by `list_monitors`) or name.
 
 A number names **Screen N**, as `list_monitors` reports it in
 `screen`: the live profile's numbering for the connected screens,
-else left to right, ties top to bottom. A renumber saved in
+with no live profile left to right, ties top to bottom. A renumber saved in
 Settings ▸ Screens counts at once, and every connected screen holds
 a number. A script that must name one screen whatever the numbering
 passes its fingerprint. A number a
 held `init.lua` call names before any screen is known —
 `pin_space_to_display`, a split, a bar's per-screen value — is
 numbered at the first screen report, by the profile live then; on a
-setup that profile does not hold, as
-[Profile Screen Setups](#profile-screen-setups) numbers it.
+setup that profile does not hold, left to right.
 
 **Does:** moves the whole space to that screen **now** and
 shows it there (each screen shows one space at a time). A
@@ -9940,9 +9939,16 @@ the screens left to right, ties top to bottom, and its Screen pins
 apply in that order.
 
 :::unreleased
-A setup that contains every screen of one the profile holds keeps
-those screens' numbers, the first such setup if several, and the
-other screens take the next numbers, left to right.
+A setup it does not hold keeps the numbers of the screens it
+shares with one it does. With more screens than its count — the
+live profile staying on after a screen joins — a setup that
+contains every screen of one the profile holds keeps those
+screens' numbers, the first such setup if several, and the other
+screens take the next numbers. At its count, the stored setup
+sharing the most screens keeps theirs, the first stored on a tie,
+and each new screen takes a number none of them holds. New
+screens go left to right, ties top to bottom; a setup sharing no
+screen is numbered left to right.
 :::
 
 Within the binding rung, a profile bound for exactly the connected

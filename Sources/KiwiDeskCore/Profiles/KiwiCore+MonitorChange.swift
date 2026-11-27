@@ -97,7 +97,7 @@ extension KiwiCore {
                 )
             } else {
                 // The same profile on a same-count setup it does not
-                // hold: its numbers land by its base order (#3648).
+                // hold: numbered by `screenOrder(holding:)` (#3648).
                 spacePins = keepingPins(
                     of: Set(liveTemporarySpaces),
                     over: runtimePins(of: profile)
