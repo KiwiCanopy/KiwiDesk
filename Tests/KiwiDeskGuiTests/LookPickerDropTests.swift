@@ -61,6 +61,21 @@ struct LookPickerDropTests {
         try wear(controller)
         #expect(controller.revealing)
         #expect(view.drop.opacity == 1)
+        // It lands with its middle on the card's centre, the anchor at
+        // its bottom, in the view's unflipped points.
+        let landing = controller.geometry.landing
+        let height = view.bounds.height
+        #expect(
+            view.drop.position
+                == CGPoint(
+                    x: landing.x,
+                    y: height - landing.y - LookPickerDropView.height / 2
+                )
+        )
+        #expect(
+            view.ripple.position
+                == CGPoint(x: landing.x, y: height - landing.y)
+        )
         #expect(view.drop.animation(forKey: "position") != nil)
         #expect(view.drop.animation(forKey: "opacity") != nil)
         let steps = later()
@@ -87,6 +102,21 @@ struct LookPickerDropTests {
         #expect(controller.revealing)
         later().forEach { $0.1() }
         #expect(view.drop.animationKeys() == nil)
+    }
+
+    @Test("a gated step lands at its end with no animation")
+    func gatedStepsLand() {
+        let view = LookPickerDropView(
+            frame: NSRect(x: 0, y: 0, width: 800, height: 600)
+        )
+        view.prepare(landingAt: CGPoint(x: 400, y: 300))
+        view.fall(reduceMotion: true)
+        #expect(view.drop.opacity == 1)
+        view.squash(reduceMotion: true)
+        #expect(view.drop.transform.m11 == 1.3)
+        view.sink(reduceMotion: true)
         #expect(view.drop.opacity == 0)
+        #expect(view.drop.animationKeys() == nil)
+        #expect(view.ripple.animationKeys() == nil)
     }
 }

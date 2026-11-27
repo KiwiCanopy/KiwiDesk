@@ -144,13 +144,12 @@ struct ReduceMotionCensusTests {
         // for the wear's commit; the hook animates nothing.
         "LookPickerController.swift: CATransaction":
             "a commit's completion block starts no motion",
-        // #3700: the drop falls in Core Animation, so a frame needs
-        // no main-thread commit; the controller plays it only past
-        // its Reduce Motion branch, which takes the cross-fade.
+        // #3700: the drop's steps take `reduceMotion` and land at
+        // once under it (`LookPickerDropTests` ▸ `gatedStepsLand`).
         "LookPickerDropView.swift: CABasicAnimation":
-            "played only past the controller's Reduce Motion branch",
+            "gated in its own argument",
         "LookPickerDropView.swift: CASpringAnimation":
-            "played only past the controller's Reduce Motion branch",
+            "gated in its own argument",
         "LookPickerDropView.swift: CATransaction":
             "a suppression: the model value set beside its animation",
     ]

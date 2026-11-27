@@ -20,14 +20,14 @@ struct LookPickerView: View {
                 .blur(radius: reveal.blur)
                 .mask {
                     LookPickerHole(
-                        centre: dropPoint,
+                        centre: geometry.landing,
                         radius: reveal.holeRadius
                     )
                     .fill(style: FillStyle(eoFill: true))
                 }
             if reveal.waveShown {
                 LookPickerWave(
-                    centre: dropPoint,
+                    centre: geometry.landing,
                     radius: reveal.holeRadius,
                     rimOnly: reduceTransparency
                 )
@@ -37,11 +37,6 @@ struct LookPickerView: View {
         .opacity(reveal.opacity)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(LookPickerText.panelName)
-    }
-
-    /// The drop lands on the card's centre, where the wave starts.
-    private var dropPoint: CGPoint {
-        CGPoint(x: geometry.card.midX, y: geometry.card.midY)
     }
 
     private var picker: some View {

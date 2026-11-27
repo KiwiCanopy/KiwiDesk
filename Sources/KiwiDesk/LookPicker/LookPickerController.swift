@@ -14,8 +14,11 @@ final class LookPickerController: NSObject {
     private(set) var panel: LookPickerPanel?
     private(set) var model: LookPickerModel?
     private(set) var reveal = LookPickerReveal()
-    /// This opening's drop, above the picker (#3700).
-    private(set) var dropView: LookPickerDropView?
+    /// This opening's drop, above the picker (#3700); nil once the
+    /// panel lets its content go.
+    var dropView: LookPickerDropView? {
+        (panel?.contentView as? LookPickerContent)?.drop
+    }
     /// This opening; a timer an earlier opening set finds another.
     var opening = 0
     var revealing = false
@@ -97,14 +100,12 @@ final class LookPickerController: NSObject {
         .environment(\.kiwiDeskReduceMotion, reduceMotionNow)
         panel.makeFirstResponder(nil)
         panel.alphaValue = 1
-        let drop = LookPickerDropView(frame: .zero)
-        dropView = drop
         panel.contentView = LookPickerContent(
             picker: NSHostingView(
                 rootView: LocaleScopedRoot { root }
                     .environmentObject(LocalizationManager.shared)
             ),
-            drop: drop
+            drop: LookPickerDropView(frame: .zero)
         )
         panel.setFrame(screen.frame, display: true)
         let current = opening

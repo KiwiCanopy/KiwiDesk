@@ -5,8 +5,9 @@ import SwiftUI
 /// How far the picker's "puddle" exit has come (#3038 ▸ Ruling
 /// 2026-11-23, amended 2026-11-26): a clear drop falls onto the card,
 /// lands, sinks in with a ripple, and only then the picker blurs and
-/// one wave opens a hole to the real desk. The controller moves these
-/// values, each through a gated animation; the views only draw them.
+/// one wave opens a hole to the real desk. It holds the wave's
+/// values, which the controller moves through gated animations, and
+/// the whole sequence's timings; `LookPickerDropView` plays the drop.
 @MainActor
 final class LookPickerReveal: ObservableObject {
     /// The picker's own blur, in points.

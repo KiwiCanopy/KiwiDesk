@@ -5,9 +5,9 @@ import AppKit
 @MainActor
 final class LookPickerContent: NSView {
     let picker: NSView
-    let drop: NSView
+    let drop: LookPickerDropView
 
-    init(picker: NSView, drop: NSView) {
+    init(picker: NSView, drop: LookPickerDropView) {
         self.picker = picker
         self.drop = drop
         super.init(frame: .zero)

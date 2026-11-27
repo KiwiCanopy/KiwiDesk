@@ -52,18 +52,16 @@ extension LookPickerController {
             return
         }
         let drop = dropView
-        drop?.prepare(
-            landingAt: CGPoint(x: geometry.card.midX, y: geometry.card.midY)
-        )
-        drop?.fall()
+        drop?.prepare(landingAt: geometry.landing)
+        drop?.fall(reduceMotion: reduceMotion)
         after(LookPickerReveal.fall) { [weak self] in
             guard self?.opening == current else { return }
-            drop?.squash()
+            drop?.squash(reduceMotion: reduceMotion)
         }
         let sinkAt = LookPickerReveal.fall + LookPickerReveal.squashHold
         after(sinkAt) { [weak self] in
             guard self?.opening == current else { return }
-            drop?.sink()
+            drop?.sink(reduceMotion: reduceMotion)
         }
         let reach = Self.reach(of: geometry)
         after(sinkAt + LookPickerReveal.waveLead) { [weak self] in
@@ -88,7 +86,7 @@ extension LookPickerController {
     /// card's centre, its band included.
     static func reach(of geometry: LookPickerGeometry) -> CGFloat {
         let size = geometry.screen
-        let centre = CGPoint(x: geometry.card.midX, y: geometry.card.midY)
+        let centre = geometry.landing
         let corners = [
             CGPoint.zero, CGPoint(x: size.width, y: 0),
             CGPoint(x: 0, y: size.height),
