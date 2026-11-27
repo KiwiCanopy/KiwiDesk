@@ -82,5 +82,12 @@ struct PocketHandleFlushTests {
         let got = across(tab, edge)
         #expect(abs(got.lowerBound - want.lowerBound) < 0.001)
         #expect(abs(got.upperBound - want.upperBound) < 0.001)
+        // The panel itself starts at the edge too, not a margin in.
+        let side = across(panel, edge)
+        let flush =
+            edge == .top || edge == .left
+            ? abs(side.lowerBound - want.lowerBound)
+            : abs(side.upperBound - want.upperBound)
+        #expect(flush < 0.001)
     }
 }

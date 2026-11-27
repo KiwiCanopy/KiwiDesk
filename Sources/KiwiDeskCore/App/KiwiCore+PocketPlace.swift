@@ -49,7 +49,8 @@ extension KiwiCore {
     /// How far in from its frame's edge side the mark stands: the
     /// outer margin for the whole mark; none inside the strip, whose
     /// frame starts past it, nor for the handle, flush on the edge as
-    /// a bar's handle is (#3361, #3696).
+    /// a bar's handle is (#3361, #3696). A section's panel reads no
+    /// outer, so it takes none.
     static func pocketOuter(
         _ place: PocketPlace,
         shelf: KiwiShelf

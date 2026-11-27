@@ -170,11 +170,12 @@ extension KiwiCore {
         switch pocketPlace(on: display) {
         case .section(let frame), .inside(let frame): return frame
         case .whole:
+            let outer = Self.pocketOuter(.whole(slides: false), shelf: shelf)
             return pocketMarkFrame(on: display).map {
                 PocketPlateView.room(
                     in: $0,
                     edge: shelf.pocketEdge,
-                    outer: shelf.outerMargin
+                    outer: outer
                 )
             }
         case .handle: break
