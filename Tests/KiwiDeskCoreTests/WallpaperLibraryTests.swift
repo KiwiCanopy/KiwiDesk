@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import ImageIO
 import Testing
 
 @testable import KiwiDeskCore
@@ -58,5 +59,41 @@ struct WallpaperLibraryTests {
         #expect(WallpaperLibrary.fileExtension(of: small) == "png")
         let image = try #require(NSBitmapImageRep(data: small))
         #expect(max(image.pixelsWide, image.pixelsHigh) <= 16)
+    }
+
+    /// A 64×64 lossless WebP, checked in as its bytes: ImageIO
+    /// reads WebP but cannot write it (#3699).
+    static let webp = Data(
+        base64Encoded:
+            "UklGRiQAAABXRUJQVlA4TBcAAAAvP8APAAdQ0KJUq/8BICH8f69F9D/1AwA="
+    )!
+
+    @Test("a WebP wallpaper is stored as it is (#3699)")
+    func storesWebP() throws {
+        let library = library()
+        let name = try library.add(Self.webp)
+        #expect(name.hasSuffix(".webp"))
+        #expect(LookWallpaper.isLibraryName(name))
+        #expect(library.data(of: name) == Self.webp)
+        #expect(library.names() == [name])
+    }
+
+    /// Two lists for one fact: a type the library stores under an
+    /// extension a look drops would be stored, then lost.
+    @Test("every stored extension is one a look keeps")
+    func extensionsAgree() {
+        for entry in WallpaperLibrary.pictureTypes {
+            #expect(LookWallpaper.extensions.contains(entry.ext))
+        }
+    }
+
+    @Test("a shrink of a WebP writes HEIC")
+    func webPShrinksToHEIC() throws {
+        let small = try #require(
+            WallpaperShrink.shrunk(Self.webp, maxPixels: 16)
+        )
+        #expect(WallpaperLibrary.fileExtension(of: small) == "heic")
+        let png = "public.png" as CFString
+        #expect(WallpaperShrink.writable(png) == png)
     }
 }

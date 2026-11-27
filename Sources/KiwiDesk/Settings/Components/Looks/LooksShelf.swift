@@ -18,6 +18,8 @@ struct LooksShelf: View {
     /// Why the last save or import wrote nothing, until the next
     /// one succeeds.
     @State var failure: String?
+    /// Why a wallpaper action stored nothing, off its tile (#3699).
+    @State var wallpaperNotice: WallpaperNotice?
     /// The saved look a picture file is dragged over (#3478).
     @State var dropTarget: String?
 
@@ -161,6 +163,15 @@ struct LooksShelf: View {
         }
         .popover(item: renameBinding(look.name)) { request in
             renamePopover(request)
+                .settingsPopoverChrome()
+        }
+        .popover(item: noticeBinding(look.name)) { notice in
+            Text(notice.text)
+                .font(.callout)
+                .foregroundStyle(SettingsTheme.ink)
+                .frame(maxWidth: 280, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(12)
                 .settingsPopoverChrome()
         }
     }

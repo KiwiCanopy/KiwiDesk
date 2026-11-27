@@ -116,6 +116,11 @@ extension KiwiCore {
                 return outcomes.mapValues { _ in .unreadable }
             }
         }
+        for (number, outcome) in outcomes.sorted(by: { $0.key < $1.key }) {
+            onLog(
+                "use current wallpaper: \(name) screen \(number): \(outcome)"
+            )
+        }
         return outcomes
     }
 

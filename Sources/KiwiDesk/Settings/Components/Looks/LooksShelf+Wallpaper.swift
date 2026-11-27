@@ -11,7 +11,7 @@ extension LooksShelf {
     /// The open panel for one picture on every screen.
     func chooseWallpaper(for look: ShelfLook) {
         let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.heic, .jpeg, .png, .tiff]
+        panel.allowedContentTypes = WallpaperLibrary.pictureTypes.map(\.type)
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
         panel.prompt = L("looks.wallpaper.choose_button", "Choose")
@@ -27,7 +27,7 @@ extension LooksShelf {
         Task { @MainActor in
             let read = Task.detached { try? Data(contentsOf: url) }
             guard let data = await read.value else {
-                failure = unreadableWallpaper
+                noteWallpaper(unreadableWallpaper, on: look.name)
                 return
             }
             attachWallpaper(data, to: look)
@@ -41,7 +41,7 @@ extension LooksShelf {
             case .copy: break
             case .shrink:
                 guard let shrunk = shrink(data) else {
-                    failure = unreadableWallpaper
+                    noteWallpaper(unreadableWallpaper, on: look.name)
                     return
                 }
                 data = shrunk
@@ -50,14 +50,17 @@ extension LooksShelf {
         }
         do {
             try core.chooseLookWallpaper(data, for: look.name)
-            failure = nil
+            noteWallpaper(nil, on: look.name)
         } catch WallpaperLibrary.Refusal.notAPicture {
-            failure = L(
-                "looks.wallpaper.not_picture",
-                "That file isn't a picture KiwiDesk can use."
+            noteWallpaper(
+                L(
+                    "looks.wallpaper.not_picture",
+                    "That file isn't a picture KiwiDesk can use."
+                ),
+                on: look.name
             )
         } catch {
-            failure = unreadableWallpaper
+            noteWallpaper(unreadableWallpaper, on: look.name)
         }
         reload()
     }
@@ -67,7 +70,7 @@ extension LooksShelf {
         let name = look.name
         Task { @MainActor in
             let outcomes = await core.useCurrentWallpaper(for: name)
-            failure = Self.narrate(outcomes, look: name)
+            noteWallpaper(Self.narrate(outcomes, look: name), on: name)
             reload()
         }
     }
@@ -75,14 +78,36 @@ extension LooksShelf {
     func removeWallpaper(from look: ShelfLook) {
         do {
             try core.setLookWallpaper(nil, of: look.name)
-            failure = nil
+            noteWallpaper(nil, on: look.name)
         } catch {
-            failure = L(
-                "looks.wallpaper.remove_failed",
-                "KiwiDesk couldn't remove the wallpaper from this look."
+            noteWallpaper(
+                L(
+                    "looks.wallpaper.remove_failed",
+                    "KiwiDesk couldn't remove the wallpaper from this look."
+                ),
+                on: look.name
             )
         }
         reload()
+    }
+
+    /// Why a wallpaper action on `look` stored nothing, shown off
+    /// that look's tile and spoken (#3699); nil clears it.
+    func noteWallpaper(_ text: String?, on look: String) {
+        guard let text else {
+            if wallpaperNotice?.look == look { wallpaperNotice = nil }
+            return
+        }
+        wallpaperNotice = WallpaperNotice(look: look, text: text)
+        AccessibilityNotification.Announcement(text).post()
+    }
+
+    /// The notice popover's binding for `look`'s tile.
+    func noticeBinding(_ look: String) -> Binding<WallpaperNotice?> {
+        Binding(
+            get: { wallpaperNotice?.look == look ? wallpaperNotice : nil },
+            set: { if $0 == nil { wallpaperNotice = nil } }
+        )
     }
 
     /// One line per screen Use Current Wallpaper skipped; nil where
@@ -234,4 +259,12 @@ extension LooksShelf {
             "KiwiDesk couldn't keep that wallpaper."
         )
     }
+}
+
+/// A wallpaper action's refusal, anchored on the tile it was about
+/// (#3699).
+struct WallpaperNotice: Identifiable, Equatable {
+    let id = UUID()
+    let look: String
+    let text: String
 }

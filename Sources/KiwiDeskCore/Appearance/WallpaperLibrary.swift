@@ -98,6 +98,15 @@ public struct WallpaperLibrary: Sendable {
         return "\(hash).\(ext)"
     }
 
+    /// The picture types a look carries, each with its library
+    /// extension: a hand list, each type added once the deployment
+    /// floor reads and sets it (#3699). Every extension here is in
+    /// `LookWallpaper.extensions` (`WallpaperLibraryTests`).
+    public static let pictureTypes: [(type: UTType, ext: String)] = [
+        (.heic, "heic"), (.heif, "heic"), (.jpeg, "jpg"),
+        (.png, "png"), (.tiff, "tiff"), (.webP, "webp"),
+    ]
+
     /// The library extension ImageIO reads `data` as, nil for bytes
     /// that are no picture or of a type looks do not carry.
     public static func fileExtension(of data: Data) -> String? {
@@ -107,12 +116,6 @@ public struct WallpaperLibrary: Sendable {
             let id = CGImageSourceGetType(source) as String?,
             let type = UTType(id)
         else { return nil }
-        if type.conforms(to: .heic) || type.conforms(to: .heif) {
-            return "heic"
-        }
-        if type.conforms(to: .jpeg) { return "jpg" }
-        if type.conforms(to: .png) { return "png" }
-        if type.conforms(to: .tiff) { return "tiff" }
-        return nil
+        return pictureTypes.first { type.conforms(to: $0.type) }?.ext
     }
 }
