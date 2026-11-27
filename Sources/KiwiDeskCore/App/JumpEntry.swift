@@ -112,6 +112,9 @@ public struct JumpSnapshot: Sendable, Equatable {
     /// it is also the one Swap here trades with — which the panel
     /// draws greyed as the current window (#3168); nil otherwise.
     public let yours: JumpEntry?
+    /// Every running regular app with a bundle id, KiwiDesk left
+    /// out (#3704); empty for a fixture that names none.
+    public let running: [JumpRunningApp]
 
     public init(
         entries: [JumpEntry],
@@ -120,8 +123,10 @@ public struct JumpSnapshot: Sendable, Equatable {
         swapsInHere: Bool = false,
         apps: [JumpApp]? = nil,
         lastUsed: JumpEntry.Target? = nil,
-        yours: JumpEntry? = nil
+        yours: JumpEntry? = nil,
+        running: [JumpRunningApp] = []
     ) {
+        self.running = running
         self.entries = entries
         self.here = here
         self.hereIcon = hereIcon

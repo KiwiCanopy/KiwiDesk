@@ -112,6 +112,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Hotkey toggles the window switcher (#1875).
         let jumpPanel = JumpPanelController(core: core)
         self.jumpPanel = jumpPanel
+        // Its Applications section reads a finished scan (#3704).
+        InstalledApps.warm()
         // The Shortcuts side's bridge lands Settings on Shortcuts.
         jumpPanel.onEditShortcuts = { [weak self] in
             self?.openSettingsFromTour(at: .shortcuts)

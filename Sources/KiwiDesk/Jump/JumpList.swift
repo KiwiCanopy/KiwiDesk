@@ -22,12 +22,19 @@ struct JumpList {
     /// alone and the panel never jumps once it showed. A query
     /// alone never shows it (#3704).
     private(set) var stripShown = false
+    /// The apps the Applications section ranks (#3704): installed
+    /// or running, with no row here.
+    let candidates: [JumpAppCandidate]
+    /// The Applications rows under a query on All, after the window
+    /// rows; the selection and the ⌘ digits run on through them.
+    private(set) var appResults: [JumpAppMatch] = []
 
     /// Results that take a ⌘ number.
     static let numbered = 9
 
-    init(snapshot: JumpSnapshot) {
+    init(snapshot: JumpSnapshot, candidates: [JumpAppCandidate] = []) {
         self.snapshot = snapshot
+        self.candidates = candidates
         results = JumpSearch.matches(snapshot.entries, query: "")
         matchedApps = Set(snapshot.apps.map(\.pid))
         selection = results.isEmpty ? nil : 0
@@ -46,17 +53,18 @@ struct JumpList {
             text.isEmpty
             ? Set(snapshot.apps.map(\.pid)) : Set(all.map(\.entry.pid))
         results = all
-        selection = results.isEmpty ? nil : 0
+        appResults = Self.appMatches(candidates, query: text)
+        selection = rowCount == 0 ? nil : 0
     }
 
     /// Moves the selection by `delta` rows, clamped at both ends;
     /// with `wrap`, one row past an end lands on the other (#2897).
     mutating func step(_ delta: Int, wrap: Bool = false) {
-        guard let selection, !results.isEmpty else { return }
+        guard let selection, rowCount > 0 else { return }
         self.selection = Self.stepped(
             selection,
             by: delta,
-            count: results.count,
+            count: rowCount,
             wrap: wrap
         )
     }
@@ -78,20 +86,29 @@ struct JumpList {
 
     /// Selects row `index` where one exists.
     mutating func select(_ index: Int) {
-        guard results.indices.contains(index) else { return }
+        guard index >= 0, index < rowCount else { return }
         selection = index
     }
 
+    /// The selected window row; nil on an app row.
     var selected: JumpSearch.Match? {
-        selection.map { results[$0] }
+        selection.flatMap {
+            results.indices.contains($0) ? results[$0] : nil
+        }
     }
 
-    /// The match a ⌘ digit picks — by result, never by scroll.
+    /// The window match a ⌘ digit picks — by result, never by
+    /// scroll; nil past the windows.
     func quick(_ index: Int) -> JumpSearch.Match? {
         guard index < Self.numbered, index < results.count else {
             return nil
         }
         return results[index]
+    }
+
+    /// Whether a ⌘ digit reaches row `index`, an app row included.
+    func digitReaches(_ index: Int) -> Bool {
+        index < Self.numbered && index < rowCount
     }
 
     /// The ⌘ number row `index` takes, nil from row 10 on. The
@@ -139,16 +156,17 @@ struct JumpList {
         if index == hiddenStart { return .hidden }
         if index == pocketStart { return .pocket }
         if index == otherAppsStart { return .otherApps }
+        if index == appsStart { return .applications }
         return nil
     }
 
     /// How many section headers the list draws.
     var sectionCount: Int {
         [minimizedStart, hiddenStart, pocketStart, otherAppsStart]
-            .compactMap { $0 }.count
+            .compactMap { $0 }.count + (appResults.isEmpty ? 0 : 1)
     }
 
-    enum Section { case minimized, hidden, pocket, otherApps }
+    enum Section { case minimized, hidden, pocket, otherApps, applications }
 
 }
 
@@ -177,7 +195,7 @@ extension JumpList {
 
     /// The list's rows as drawn: the results, and the current
     /// window above them where it shows.
-    var drawnRows: Int { results.count + (yours == nil ? 0 : 1) }
+    var drawnRows: Int { rowCount + (yours == nil ? 0 : 1) }
 
     /// Whether tile `index` holds a match for the query; All always.
     func tileMatches(_ index: Int) -> Bool {
@@ -220,7 +238,9 @@ extension JumpList {
             stripApp.map { app in
                 all.filter { $0.entry.pid == app.pid }
             } ?? all
-        selection = results.isEmpty ? nil : 0
+        appResults =
+            index == 0 ? Self.appMatches(candidates, query: query) : []
+        selection = rowCount == 0 ? nil : 0
         if index != 0 { stripShown = true }
     }
 

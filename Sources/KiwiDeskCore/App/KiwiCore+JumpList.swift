@@ -26,7 +26,12 @@ extension KiwiCore {
             swapsInHere: jumpHereFocus(in: here) != nil,
             apps: jumpApps(for: entries, first: yours),
             lastUsed: jumpLastUsed(in: entries),
-            yours: yours
+            yours: yours,
+            running: jumpRunningApps(
+                listed: Set(
+                    entries.map(\.pid) + [yours?.pid].compactMap { $0 }
+                )
+            )
         )
     }
 

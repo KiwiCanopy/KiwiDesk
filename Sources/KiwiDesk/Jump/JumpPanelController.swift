@@ -103,6 +103,7 @@ final class JumpPanelController: NSObject {
         let width = room.fieldWidth
         let model = JumpModel(
             snapshot: snapshot,
+            candidates: Self.appCandidates(snapshot),
             icons: Self.icons(for: snapshot),
             rowCap: Self.rowCap,
             room: room,
@@ -297,6 +298,7 @@ final class JumpPanelController: NSObject {
         model.moveRefusal = { [weak self] entry in
             self?.core.moveHereRefusal(entry.target, on: self?.hubArea)
         }
+        wireApps(model)
         model.onClose = { [weak self] in
             self?.close()
         }

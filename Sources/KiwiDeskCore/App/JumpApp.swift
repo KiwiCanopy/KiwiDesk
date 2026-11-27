@@ -25,3 +25,20 @@ extension JumpApp {
         }
     }
 }
+
+/// A running regular app by bundle id, for KiwiHub's Applications
+/// section (#3704): Core names which apps run and which of them
+/// hold a row; the GUI ranks them with the installed ones.
+public struct JumpRunningApp: Sendable, Equatable {
+    /// Lowercased, as every app verb takes it.
+    public let bundleID: String
+    public let name: String
+    /// Whether a row of the list, or the current window, is its.
+    public let listed: Bool
+
+    public init(bundleID: String, name: String, listed: Bool) {
+        self.bundleID = bundleID
+        self.name = name
+        self.listed = listed
+    }
+}

@@ -141,6 +141,10 @@ final class JumpModel: ObservableObject {
     /// wires Core's, a test keeps the snapshot's.
     var swapRefusal: (JumpEntry) -> JumpSwapBlock? = { $0.swapBlock }
     var moveRefusal: (JumpEntry) -> JumpMoveBlock? = { $0.moveBlock }
+    /// Core's answer for an Applications row's ↩ (#3704).
+    var openRefusal: (String) -> JumpOpenBlock? = { _ in nil }
+    /// Opens an Applications row's app; the panel closes first.
+    var onOpenApp: (String) -> Void = { _ in }
     /// The row whose refused press swells its reason, for a beat.
     @Published var refusedRow: Int?
     /// The row a refused press showed its reason on, until the
@@ -185,6 +189,7 @@ final class JumpModel: ObservableObject {
 
     init(
         snapshot: JumpSnapshot,
+        candidates: [JumpAppCandidate] = [],
         icons: [pid_t: NSImage],
         rowCap: Int,
         room: JumpPanelRoom = JumpPanelController.room(
@@ -196,7 +201,7 @@ final class JumpModel: ObservableObject {
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
-        list = JumpList(snapshot: snapshot)
+        list = JumpList(snapshot: snapshot, candidates: candidates)
         lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
@@ -273,7 +278,7 @@ final class JumpModel: ObservableObject {
     /// (#2365).
     func clickRow(_ index: Int, pick: JumpPick) {
         guard scope == .windows else { return }
-        guard list.results.indices.contains(index) else { return }
+        guard index >= 0, index < list.rowCount else { return }
         list.select(index)
         self.pick(index, pick)
     }
@@ -322,8 +327,11 @@ final class JumpModel: ObservableObject {
     func move(by delta: Int, wrap: Bool = false) {
         let before = list.selection
         list.step(delta, wrap: wrap)
-        if list.selection != before, let match = list.selected {
+        guard list.selection != before else { return }
+        if let match = list.selected {
             onAnnounce(JumpRowText.spoken(match.entry))
+        } else if let app = list.selectedApp {
+            onAnnounce(JumpAppText.spoken(app.app))
         }
     }
 }

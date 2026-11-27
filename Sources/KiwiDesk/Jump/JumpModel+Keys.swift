@@ -41,11 +41,11 @@ extension JumpModel {
         case .swapHere:
             if let index = list.selection { pick(index, .swapHere) }
         case .quick(let index, let moveHere):
-            if list.quick(index) != nil {
+            if list.digitReaches(index) {
                 pick(index, moveHere ? .moveHere : .jump)
             }
         case .quickSwap(let index):
-            if list.quick(index) != nil { pick(index, .swapHere) }
+            if list.digitReaches(index) { pick(index, .swapHere) }
         case .escape:
             if list.query.isEmpty {
                 onClose()

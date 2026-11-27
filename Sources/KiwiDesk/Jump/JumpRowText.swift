@@ -108,6 +108,7 @@ enum JumpRowText {
         case .hidden: return hidden
         case .pocket: return pocket
         case .otherApps: return otherApps
+        case .applications: return JumpAppText.header
         }
     }
 

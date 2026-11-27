@@ -8308,6 +8308,16 @@ never the text, and narrow the matches to that app.
 [kiwihub.show_last_app](#kiwihubshow_last_app) opens this side with
 the strip on the app of the window you used last.
 
+:::unreleased
+Under a query, below the windows, **Applications** lists up to
+five installed apps with no window in the list whose name matches,
+each marked **Not open** or **Open, no windows**. **Return** (or a
+click) opens the app, or has a running one open a window; the ⌘
+digits count on through these rows, and **⇧Return** and
+**⌥Return** do nothing on them. Where nothing matches, the list
+says **No Results**.
+:::
+
 With nothing typed, the window you are in sits greyed at the top
 of **All** and of its app's tile, marked **Current window**. It is
 never a row you pick: the arrows, the digits and search skip it.

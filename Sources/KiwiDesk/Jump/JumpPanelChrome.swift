@@ -17,6 +17,9 @@ struct JumpFooter: View {
     /// its modifier (#2885).
     var selectionSwaps = true
     var selectionMoves = true
+    /// Whether the selection is an Applications row, whose ↩ opens
+    /// the app: the first hint then reads "↩ Open" (#3704).
+    var selectionOpens = false
     /// How many items the View side's ⌘ digits reach on the
     /// selected line (#2309 ruling 7).
     var quickCount = 9

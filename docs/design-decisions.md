@@ -17395,6 +17395,44 @@ stays on the Windows side rather than moving to a side or panel of
 its own, because it filters the Windows list and ⌥⇥ must land
 beside the list it filters.
 
+**KiwiHub's search reaches apps that are not open (#3704, owner
+ruling 2026-11-27, amending #3168's "reopening such an app stays
+with Open or Focus, ⌘⇥ and the Dock").** [Rationale] A user typing
+an app's name into the switcher wants that app, and an empty list
+for an installed app with no window sends them to a second tool
+for the same intent. So under a query, below the window rows, an
+**Applications** section lists installed apps with no row here,
+ranked by Core's own name matcher (`JumpSearch.nameMatch`, the
+tiers the window rows' app names rank by), a running app first on
+a tie, at most five rows, each labelled "Not open" or "Open, no
+windows". It shows under a query only, never at rest, because the
+calm opening is a list of windows to go back to, and an app the
+user did not name is not one. The ⌘ digits run on through these
+rows, since a digit numbers what is drawn. App rows never become
+strip tiles, so every tile stays a slice of All, and the strip on
+another app's tile lists none, being a filter of that app's
+windows.
+
+↩ on an app row opens it: a launch, or for a running app with no
+window a reopen, which has it open one as a Dock click does
+(#1840), its window followed to its App Rule's Space as any launch
+is (#1599). Core answers at the press (#2885), so an app removed
+since the panel opened refuses in the row, "Not found", and keeps
+the panel open; nothing else is knowable before the app answers.
+Move here and Swap here stay drawn and dimmed for these rows, and
+their chords beep as a chord that picks nothing does (#2931 ▸
+Ruling 4): with no window there is nothing to refuse, so no
+refusal sound and no reason word. Where neither a window nor an
+app matches, the list says "No Results".
+
+The installed-app index is the GUI's (`InstalledApps`), shared with
+Settings' app pickers, because the disk scan builds display names,
+which are narration; Core names only which apps run and which of
+them already hold a row. The scan is slow, so it is warmed at
+launch and KiwiHub reads only a finished one: an opening before the
+scan ends lists no Applications section rather than scanning on the
+hotkey path (#3276).
+
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,
 and an option would put a second meaning on a call every existing

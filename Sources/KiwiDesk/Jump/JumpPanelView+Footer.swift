@@ -6,13 +6,16 @@ import SwiftUI
 extension JumpPanelView {
     var footer: some View {
         let selected = model.list.selected?.entry
+        // An app row has no window to move or swap (#3704).
+        let opens = model.list.selectedApp != nil
         return JumpFooterRow(
             footer: JumpFooter(
                 scope: model.scope,
                 modifiers: model.heldModifiers,
                 hasSelection: model.hasSelection,
-                selectionSwaps: selected?.swapBlock == nil,
-                selectionMoves: selected?.moveBlock == nil,
+                selectionSwaps: !opens && selected?.swapBlock == nil,
+                selectionMoves: !opens && selected?.moveBlock == nil,
+                selectionOpens: opens,
                 quickCount: model.viewQuickCount,
                 turnsOff: model.view?.selectionTurnsOff ?? false,
                 naming: model.isNaming,
