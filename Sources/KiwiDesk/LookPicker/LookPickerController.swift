@@ -34,6 +34,14 @@ final class LookPickerController: NSObject {
         }
     }
 
+    /// Seam running work once the current transaction has
+    /// committed (#3700).
+    var afterCommit: (@escaping @MainActor () -> Void) -> Void = { work in
+        CATransaction.setCompletionBlock {
+            MainActor.assumeIsolated(work)
+        }
+    }
+
     /// Seam for how long a click's close holds the panel (#3209).
     var clickHold: (NSWindow?) -> TimeInterval = {
         PanelPresence.clickHoldNow(on: $0)
@@ -65,6 +73,8 @@ final class LookPickerController: NSObject {
         else { return }
         opening += 1
         revealing = false
+        _ = frameLog?.stop()
+        frameLog = nil
         reduceMotionNow = reduceMotion()
         let model = makeModel(on: screen)
         let reveal = LookPickerReveal()
@@ -101,18 +111,8 @@ final class LookPickerController: NSObject {
     /// save the wear's own write: under the overlay it would re-render
     /// every card as the drop starts to fall (#3700).
     func settingsChanged(_ settings: TilingSettings) {
-        guard Self.repaints(revealing: revealing, phase: model?.phase)
-        else { return }
+        guard model?.phase == .browsing else { return }
         model?.settings = settings
-    }
-
-    /// Whether a settings change repaints the cards: only while the
-    /// picker browses, never during a wear or its reveal.
-    static func repaints(
-        revealing: Bool,
-        phase: LookPickerModel.Phase?
-    ) -> Bool {
-        !revealing && phase != .wearing
     }
 
     /// Closes at once, the puddle included; nothing is undone. A

@@ -11,16 +11,16 @@ import SwiftUI
 extension LookPickerController {
     /// ↩ on a look not worn: Core wears it with the windows placed at
     /// once, then the reveal waits for the desk — at most
-    /// `readyCap` — whichever comes first. The fall starts a turn
-    /// after, so the wear's own commit lands before its first frame
-    /// (#3700).
+    /// `readyCap` — whichever comes first. The fall starts after the
+    /// commit of the transaction the wear's call ran in, not inside
+    /// it (#3700); the frame log measures what that buys.
     func wear(_ entry: LookPickerEntry) {
         let current = opening
         let latch = ResumeLatch()
         let resume: @MainActor () -> Void = { [weak self] in
             guard !latch.fired, let self, opening == current else { return }
             latch.fired = true
-            after(0) { [weak self] in
+            afterCommit { [weak self] in
                 guard let self, opening == current else { return }
                 startReveal()
             }
@@ -28,6 +28,7 @@ extension LookPickerController {
         announce(LookPickerText.wearing(entry.look.name))
         let log = LookPickerFrameLog()
         log.start(on: panel?.screen)
+        _ = frameLog?.stop()
         frameLog = log
         let start = CACurrentMediaTime()
         core.wearPickedLook(entry.look, ready: resume)
