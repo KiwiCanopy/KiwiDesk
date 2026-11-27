@@ -27,6 +27,10 @@ enum SettingsSearchSynonyms {
         if id == SettingsCatalog.general.generalAdvanced.control.id {
             return ["advanced"]
         }
+        // The card's retired title (#3688).
+        if id == SettingsCatalog.screens.orphanPins.id {
+            return ["disconnected"]
+        }
         return []
     }
 

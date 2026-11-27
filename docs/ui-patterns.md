@@ -449,8 +449,8 @@ Two things decide how far the combined element reaches:
 
 - **Does the title name the value at all?** Screens' drawer is
   titled "Screen fingerprints", so its rows speak the screen
-  and the hash. The orphan-pin rows sit under "Pinned to
-  disconnected screens", which never says *fingerprint*, so
+  and the hash. The orphan-pin rows sit under "Pinned Spaces
+  waiting for a screen", which never says *fingerprint*, so
   their label carries both halves — the row's own sentence plus
   the screen it is waiting for.
 - **Does the row hold a control?** Combine the **readout only**,

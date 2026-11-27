@@ -54,7 +54,8 @@ extension SettingsModel {
             pins: resolvedPins,
             displays: displays,
             splits: config.settings.displayAreas,
-            waiting: waitingPins
+            waiting: waitingPins,
+            unnumbered: unnumberedWaits
         )
     }
 

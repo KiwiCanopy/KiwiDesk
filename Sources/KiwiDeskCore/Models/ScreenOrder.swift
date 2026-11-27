@@ -62,6 +62,16 @@ public struct ScreenOrder: Equatable, Sendable {
             && !unnumbered.contains(slot.number)
     }
 
+    /// The screen left unnumbered at `number`'s place, nil where
+    /// `number` is no hole of this order (#3688).
+    public func unnumberedFingerprint(at number: Int) -> String? {
+        guard unnumbered.contains(number),
+            fingerprints.indices
+                .contains(number - 1)
+        else { return nil }
+        return fingerprints[number - 1]
+    }
+
     /// The number `fingerprint` answers to: the lower one for twins,
     /// which the runtime cannot tell apart; nil past the order.
     public func number(of fingerprint: String) -> Int? {

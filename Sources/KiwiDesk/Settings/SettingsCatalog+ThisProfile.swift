@@ -128,7 +128,7 @@ struct ScreensControls: Sendable {
     )
     let orphanPins = SettingsControl(
         "monitors.orphan_pins.title",
-        "Pinned to disconnected screens"
+        "Pinned Spaces waiting for a screen"
     )
     let screenFingerprints = SettingsDrawer(
         "monitors.advanced.title",

@@ -16,6 +16,9 @@ struct OrphanPin: Identifiable, Hashable {
     let fingerprint: String
     /// The screen number it waits for, where the pin is one (#3647).
     var number: Int?
+    /// The connected screen left unnumbered at `number`'s place,
+    /// named for copy; nil where no connected screen holds it.
+    var unnumberedScreen: String?
 
     var id: String { space.raw }
 }
@@ -39,6 +42,9 @@ struct ScreensFamilyRows {
     /// Stored pins to a number no connected screen holds (#3647):
     /// they wait, as a pin to a gone screen does.
     var waiting: [SpaceID: Int] = [:]
+    /// Each waiting number whose screen is connected but left
+    /// unnumbered, with that screen's name (#3688).
+    var unnumbered: [Int: String] = [:]
 
     /// Connected screens in left-to-right desk reading order.
     var orderedDisplays: [Display] {
@@ -132,7 +138,12 @@ struct ScreensFamilyRows {
             .map { OrphanPin(space: $0.key, fingerprint: $0.value) }
         let numbered = waiting.filter { !mainSpaces.contains($0.key) }
             .map {
-                OrphanPin(space: $0.key, fingerprint: "", number: $0.value)
+                OrphanPin(
+                    space: $0.key,
+                    fingerprint: "",
+                    number: $0.value,
+                    unnumberedScreen: unnumbered[$0.value]
+                )
             }
         return (gone + numbered).sorted { $0.space.raw < $1.space.raw }
     }

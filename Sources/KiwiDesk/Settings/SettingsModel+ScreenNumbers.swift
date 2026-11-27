@@ -45,6 +45,26 @@ extension SettingsModel {
             .mapValues(\.number)
     }
 
+    /// The connected screen left unnumbered at `number`'s place, nil
+    /// where no connected screen holds the number at all (#3688).
+    func unnumberedScreen(at number: Int) -> Display? {
+        guard let fingerprint = screenOrder.unnumberedFingerprint(at: number)
+        else { return nil }
+        return displays.first { $0.fingerprint == fingerprint }
+    }
+
+    /// The waiting numbers whose screen is connected but left
+    /// unnumbered, with that screen's label.
+    var unnumberedWaits: [Int: String] {
+        var result: [Int: String] = [:]
+        for number in Set(waitingPins.values) {
+            if let screen = unnumberedScreen(at: number) {
+                result[number] = screenLabel(screen)
+            }
+        }
+        return result
+    }
+
     /// How many numbers the connected setup has.
     var screenNumberCount: Int { screenOrder.fingerprints.count }
 

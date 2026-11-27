@@ -2624,6 +2624,13 @@ and a surface with no model `perScreenName(screen:key:splits:area:)`
 n" of its own (#3612; `PerScreenAreaNameTests` holds the picker, a
 new surface is review's).
 
+**Copy narrating a waiting Screen pin asks
+`SettingsModel.unnumberedScreen(at:)` first** (#3688): a number
+whose connected screen was left unnumbered this session names that
+screen as *not numbered*, and only a number no connected screen
+holds says *isn't connected* or *offline* (`ScreenNumberBadgeTests`
+▸ `unnumberedPinCopy`; a new narrator is review's).
+
 ## SwiftUI traps
 
 - **Every child of a `ViewThatFits` carries an id distinct from its
