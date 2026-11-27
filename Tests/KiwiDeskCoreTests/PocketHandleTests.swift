@@ -92,13 +92,9 @@ struct PocketHandleTests {
         let depth =
             shown.handle?.isHorizontal == false
             ? shown.frame.width : shown.frame.height
-        // It reaches the edge across the outer margin and draws
-        // past it, as the bars' handles sit.
-        #expect(
-            depth
-                == PocketHandleView.restDepth(of: KiwiShelf())
-                + 8
-        )
+        // Flush on the edge, the margin left out, as the bars'
+        // handles sit (#3696).
+        #expect(depth == PocketHandleView.restDepth(of: KiwiShelf()))
     }
 
     @Test("its approach opening raises the pocket, and closing sinks it")
@@ -124,14 +120,15 @@ struct PocketHandleTests {
         core.pocketPlate.dragging = WindowID(7)
         let shown = try #require(spec(core))
         #expect(shown.risen)
-        // Risen, it still stands one outer margin in.
+        // Risen, it rises from the flush tab, the margin left out
+        // (#3696).
         let shelf = core.tiler.settings.kiwishelf
         let depth =
             shown.handle?.isHorizontal == false
             ? shown.frame.width : shown.frame.height
         #expect(
             depth
-                == 8 + PocketHandleView.tabDepth(of: KiwiShelf())
+                == PocketHandleView.tabDepth(of: KiwiShelf())
                 + PocketPlateView.lift
                 + KiwiCore.pocketRiseSide(thickness: shelf.thickness)
         )

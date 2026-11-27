@@ -27,16 +27,14 @@ extension KiwiCore {
         risen: Bool
     ) -> CGRect? {
         let shelf = self.shelf(on: display)
-        // Reaching the edge across the outer margin, as the bars'
-        // hover bands do; the handle draws past it (#2678).
+        // Flush on the edge, as a bar's handle is (#3361, #3696).
         return pocketHandleFrame(
             on: display,
-            depth: shelf.outerMargin
-                + (risen
-                    ? PocketHandleView.tabDepth(of: shelf)
-                        + PocketPlateView.lift
-                        + Self.pocketRiseSide(thickness: shelf.thickness)
-                    : PocketHandleView.restDepth(of: shelf))
+            depth: risen
+                ? PocketHandleView.tabDepth(of: shelf)
+                    + PocketPlateView.lift
+                    + Self.pocketRiseSide(thickness: shelf.thickness)
+                : PocketHandleView.restDepth(of: shelf)
         )
     }
 
@@ -190,7 +188,7 @@ extension KiwiCore {
             in: PocketPlateView.room(
                 in: room,
                 edge: shelf.pocketEdge,
-                outer: shelf.outerMargin
+                outer: Self.pocketOuter(.handle, shelf: shelf)
             ),
             edge: shelf.pocketEdge,
             side: rise,
