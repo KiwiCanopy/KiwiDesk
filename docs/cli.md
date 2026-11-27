@@ -626,11 +626,9 @@ kiwidesk get_settings /settings/layout/stack/stack_position 3
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look
 without writing it.
 
-:::unreleased
 `look.show_picker` opens the look picker on the focused screen, or
 closes it. See
 [look.show_picker](lua-reference.md#lookshow_picker).
-:::
 
 `shortcut.list`, `shortcut.set <chord> <command> [argument…]` and
 `shortcut.remove <chord>` read and write the saved shortcuts; a
@@ -1044,10 +1042,8 @@ key, name, rect and `space_id`. See
 [set_display_areas](lua-reference.md#set_display_areas) and
 [get_state](lua-reference.md#get_state).
 
-:::unreleased
 An area is also named `"N#id"`, Screen N's area `id`, as
 `areas[].numbered_key` prints it.
-:::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
@@ -1451,7 +1447,6 @@ Desktop number now current on the screen that switched, counted
 across every screen ([which count](spaces-and-desktops.md#how-desktops-are-numbered)), the
 screen that switched, and the active profile.
 
-:::unreleased
 The screen is `screen`, its Screen N, the number a screen argument
 takes, and `main` says whether it is the main screen. Test `main`,
 not `screen`, for the main screen:
@@ -1461,7 +1456,6 @@ not `screen`, for the main screen:
  "data": {"desktop": 2, "screen": 1, "main": true,
           "profile": "Creator Studio"}}
 ```
-:::
 
 `desktop_change` fires once KiwiDesk has read the arriving
 Desktop's windows, after that switch's `vanished` and `returned`

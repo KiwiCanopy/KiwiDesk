@@ -112,12 +112,10 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 | In a Stack, Track, Grid or BSP line where windows wait behind a `+n` [overflow mark](lua-reference.md#when-windows-no-longer-fit), a shrink with two or more windows shown gives the room to the shown windows and brings no waiting window back; only a shrink of the one window shown pulls the next one in. | Pulling a window back on every shrink would bring one back whenever something waits, so a shrink would no longer shrink what it was pressed on (owner ruling on [#3672](https://github.com/KiwiCanopy/KiwiDesk/issues/3672)). | A shrink inside a run is the one pure `RunZone.press`, whose pull reads `RunZone.shrinkTaker`: while two or more windows show, the shown mates take the room ([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)). | Bring a waiting window back with a focus step onto it, with `undo_layout` after the grow that pushed it out, or, where one window is shown, by shrinking that window. A command that pulls one waiting window back is [#3673](https://github.com/KiwiCanopy/KiwiDesk/issues/3673). |
 
-:::unreleased
 Each BSP split keeps its own ratio
 ([#3672](https://github.com/KiwiCanopy/KiwiDesk/issues/3672)): the
 inner window of a nested pair grows and shrinks like any other,
 and the split-layout row's heal reaches every split.
-:::
 
 On a [split screen](lua-reference.md#set_display_areas), two
 dividers dragged or split into line become one: once the segments
@@ -128,24 +126,19 @@ line again, merge the areas on one side and split them anew, or set
 the rects from Lua
 ([#3541](https://github.com/KiwiCanopy/KiwiDesk/issues/3541)).
 
-:::unreleased
 To move one part of such a line alone, hold Option while you drag
 it: only the areas beside the part under the pointer move, and that
 drag does not snap. Merging and splitting again stays the way that
 needs no pointer
 ([#3611](https://github.com/KiwiCanopy/KiwiDesk/issues/3611)).
-:::
 
-:::unreleased
 A look sets the wallpaper of each screen's current Desktop. Other
 Desktops keep theirs until the look is applied there, and a screen
 showing a full-screen app keeps its own: the public call reaches one
 screen's current Desktop, and re-applying the picture on every
 Desktop visit would overwrite a picture set by hand for that Desktop
 ([#3478](https://github.com/KiwiCanopy/KiwiDesk/issues/3478)).
-:::
 
-:::unreleased
 Two screens of one model that macOS left unnumbered share a
 fingerprint, so a Screen pin made on either is stored under the
 lower of their two numbers, and a Space pinned to the second twin
@@ -164,9 +157,7 @@ visibilities follow the same rule: both twins read the lower
 number's, and at the upgrade an entry for a screen no setup of the
 profile holds, or for a number an earlier setup already gave one,
 is not carried over.
-:::
 
-:::unreleased
 A screen whose number's split would put an area under the minimum
 window size there draws whole, and Settings ▸ Screens says so under
 its name. Loading a profile numbers its screens in the first order
@@ -177,7 +168,6 @@ later draws a split whole rather than renumbering the screens, and
 the next profile load or screen change numbers them again. With
 more than six screens, no other order is tried
 ([#3647](https://github.com/KiwiCanopy/KiwiDesk/issues/3647)).
-:::
 
 For a screen with **no free bottom corner**, Settings ▸ Screens and
 the Mac Checklist offer to move one or more screens in your macOS

@@ -180,11 +180,9 @@ could share a look gives every profile its own, then the first
 saved profile loaded lends the shared look to those wearing the
 same one.
 
-:::unreleased
 A look's wallpaper travels with it in a backup and through a synced
 folder, and an older KiwiDesk refuses such a backup rather than
 restoring the looks without their pictures.
-:::
 
 The alert sound and the windows per pile on quit travel in a
 backup. An older backup keeps them in its profiles instead, and
@@ -523,11 +521,9 @@ bounces and shows a frosted pill:
 - On a scrolling space, growing stops at a maximum the app
   enforces (System Settings will not grow past its own width).
 
-:::unreleased
 Where the split or the weight reaches its own limit before any
 window does, the pill says *Largest share reached* or *Smallest
 share reached*.
-:::
 
 Where windows that do not fit wait behind a `+n` overflow mark, a
 grow along that line does not stop at the neighbour: the neighbour
@@ -1067,12 +1063,10 @@ While KiwiHub has the keyboard, only a modifier tap set to one of
 its sides works, as that side's shortcut does; while another
 KiwiDesk panel has it, no modifier tap does.
 
-:::unreleased
 `⌃⌥⇧L` opens the **look picker** over the focused screen, and
 closes it again
 ([`look.show_picker`](lua-reference.md#lookshow_picker)), listed
 under Shortcuts ▸ Built-in ▸ Show & hide ▸ KiwiDesk.
-:::
 
 `⌃⌥R` returns the focused space's sizes to what your profile set
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
