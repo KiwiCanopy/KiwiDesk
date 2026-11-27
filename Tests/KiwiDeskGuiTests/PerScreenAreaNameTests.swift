@@ -6,10 +6,11 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A screen or area in the Screen or area picker is named as
-/// Settings ▸ Screens names it (#3612): a connected area by
-/// `areaName(_:on:)` ("Wide – Left"), a disconnected one by its
-/// stored name, else its position in the stored split; a split
-/// screen's areas list in reading order.
+/// Settings ▸ Screens names it (#3612): an area of a number a
+/// connected screen holds by `areaName(_:on:)` ("Wide – Left"), one
+/// no screen holds as "Screen N" with its stored name, else its
+/// position in the stored split (#3647); a split screen's areas list
+/// in reading order.
 @MainActor
 @Suite("Per screen or area row names (#3612)", .serialized)
 struct PerScreenAreaNameTests {
@@ -58,7 +59,7 @@ struct PerScreenAreaNameTests {
             "1": ScreenShares(away, width: 1920, height: 1080)
         ]
         model.config.settings.spaceBarStyle.visibilityOverride = [
-            "\(gone)#1": .hidden
+            "1#1": .hidden
         ]
         return model
     }
@@ -77,18 +78,20 @@ struct PerScreenAreaNameTests {
         defer { LocalizationManager.shared.select(nil) }
         let model = try model(named: nil)
         let rows = names(model)
-        #expect(rows[wide.fingerprint] == "Wide – Left")
-        #expect(rows["\(wide.fingerprint)#1"] == "Wide – Right")
-        #expect(rows["\(wide.fingerprint)#1"] == model.areaName(1, on: wide))
+        #expect(rows["1"] == "Wide – Left")
+        #expect(rows["1#1"] == "Wide – Right")
+        #expect(rows["1#1"] == model.areaName(1, on: wide))
     }
 
     @Test("a disconnected area reads its stored name, else its position")
     func disconnectedAreasFallBack() throws {
         defer { LocalizationManager.shared.select(nil) }
-        let named = names(try model(named: "Notes"))
-        #expect(named["\(gone)#1"] == "Gone – Notes")
-        let positional = names(try model(named: nil))
-        #expect(positional["\(gone)#1"] == "Gone – Right")
+        let named = try model(named: "Notes")
+        named.core.state.workspaces.removeDisplay(wide.id)
+        #expect(names(named)["1#1"] == "Screen 1 – Notes")
+        let positional = try model(named: nil)
+        positional.core.state.workspaces.removeDisplay(wide.id)
+        #expect(names(positional)["1#1"] == "Screen 1 – Right")
     }
 
     @Test("a whole screen reads its own name")
@@ -97,7 +100,7 @@ struct PerScreenAreaNameTests {
         let model = try model(named: nil)
         model.config.settings.displayAreas = [:]
         let rows = names(model)
-        #expect(rows[wide.fingerprint] == model.areaName(nil, on: wide))
+        #expect(rows["1"] == model.areaName(nil, on: wide))
     }
 
     @Test("a split screen's areas list in reading order, not A–Z")
@@ -125,15 +128,15 @@ struct PerScreenAreaNameTests {
         defer { LocalizationManager.shared.select(nil) }
         let model = try model(named: nil)
         model.config.settings.kiwishelf.pocketEdges.edgeOverride = [
-            "Elsewhere:800x600": .left
+            "3": .left
         ]
         let ids = model.screenScopes.map(\.id)
         #expect(ids.count == Set(ids).count)
-        #expect(ids.contains("\(gone)#1"))
-        #expect(ids.contains("Elsewhere:800x600"))
-        #expect(model.hasOwnSettings("\(gone)#1"))
-        #expect(model.hasOwnSettings("Elsewhere:800x600"))
-        #expect(!model.hasOwnSettings(wide.fingerprint))
+        #expect(ids.contains("1#1"))
+        #expect(ids.contains("3"))
+        #expect(model.hasOwnSettings("1#1"))
+        #expect(model.hasOwnSettings("3"))
+        #expect(!model.hasOwnSettings("1"))
     }
 
     @Test("an area no stored split places is numbered")

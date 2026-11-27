@@ -116,9 +116,9 @@ struct SpaceScreenFingerprintTests {
             args: [.string("bottom"), screenArg(space)]
         )
         #expect(set.isSuccess)
+        // Stored under the left screen's number (#3647 ▸ lane 3c).
         #expect(
-            core.tiler.settings.spaceBarStyle.edgeOverride
-                == [Self.left.fingerprint: .bottom]
+            core.tiler.settings.spaceBarStyle.edgeOverride == ["1": .bottom]
         )
     }
 
@@ -155,7 +155,7 @@ struct SpaceScreenFingerprintTests {
             args: [.string("bottom"), screenArg(space)]
         )
         #expect(
-            core.tiler.settings.spaceBarStyle.edgeOverride == [key: .bottom]
+            core.tiler.settings.spaceBarStyle.edgeOverride == ["1#1": .bottom]
         )
     }
 }

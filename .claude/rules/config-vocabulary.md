@@ -50,7 +50,8 @@ vocabulary spans Lua and profile JSON:
   **A `set_X` verb whose optional scope argument (a screen, a
   Space) writes a sparse map stores that map at `X_override`
   beside `X`, keyed by the scope's identifier** — a Space by its
-  id, a screen by its `Display.fingerprint`:
+  id, a screen by its Screen N (`N`, or `N#id` for an area,
+  #3647), never its fingerprint:
   `space_bar.set_edge(edge, screen)` → `space_bar.edge_override`
   beside `space_bar.edge` (#1948), the storage shape
   `gap.override` has beside `gap.global`. For the two bars the

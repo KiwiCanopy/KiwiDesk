@@ -33,27 +33,15 @@ enum HeldScreenCall {
 
 extension KiwiCore {
     /// Whether a settings write naming `arg` as its screen waits for
-    /// the first screen report: a config load runs with no screen
-    /// known, and the argument is a number or a name, which only a
-    /// known screen resolves. A fingerprint or area key resolves
-    /// without one and never waits; a call outside a load answers
-    /// as it always did. For `pin_space_to_display` and the bars'
-    /// maps, whose runtime stores are still keyed by fingerprint
-    /// (#3647 ▸ lane 3c).
-    func holdsScreenArg(_ arg: JSONValue?) -> Bool {
-        guard luaAreaSplits.isRecording,
-            state.workspaces.allDisplays.isEmpty, let arg
-        else { return false }
-        if arg.intValue != nil { return true }
-        guard let raw = arg.stringValue else { return false }
-        return !Self.isFingerprint(ScreenAreaKey(parsing: raw).fingerprint)
-    }
-
-    /// `holdsScreenArg`'s rule for a verb whose map is keyed by
-    /// screen number (#3647 ▸ lane 3): a number or `N#id` is stored
-    /// directly and never waits; a fingerprint or area key waits
-    /// too, since only the order at the first report gives it a
-    /// number.
+    /// the first screen report (#3647 ▸ lane 3): a config load runs
+    /// with no screen known. A number or `N#id` is stored at once
+    /// and never waits; a fingerprint, an area key or a name waits,
+    /// since only the order at the first report gives it a number.
+    /// A call outside a load answers as it always did. Every verb
+    /// whose map is keyed by screen number takes it — the splits and
+    /// the bars' per-screen values; `pin_space_to_display` holds any
+    /// screen while none is known, its runtime pins being keyed by
+    /// fingerprint.
     func holdsNumberedScreenArg(_ arg: JSONValue?) -> Bool {
         guard luaAreaSplits.isRecording,
             state.workspaces.allDisplays.isEmpty, let arg

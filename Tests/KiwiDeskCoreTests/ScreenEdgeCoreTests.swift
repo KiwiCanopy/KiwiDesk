@@ -76,11 +76,11 @@ struct ScreenEdgeCoreTests {
         core.tiler.visibleBounds = { _ in visible }
         core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
-        core.tiler.settings.spaceBarStyle.edgeOverride = ["A:1x1": .left]
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["1": .left]
         let space = Space(id: SpaceID("1"), mode: .bsp)
-        core.tiler.screenFingerprint = { _ in "A:1x1" }
+        core.tiler.screenSlot = { _ in "1" }
         let onA = core.tiler.layoutBounds(on: screen, for: space)
-        core.tiler.screenFingerprint = { _ in "B:1x1" }
+        core.tiler.screenSlot = { _ in "2" }
         let onB = core.tiler.layoutBounds(on: screen, for: space)
         let reserve = core.tiler.settings.kiwishelf.reservation
         #expect(onA.minX == visible.minX + reserve)
@@ -98,13 +98,11 @@ struct ScreenEdgeCoreTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         // Another screen's edge leaves this one on the bar's.
         core.tiler.settings.spaceBarStyle.edgeOverride = [
-            "Other:1x1": .left
+            "2": .left
         ]
         core.updateBars()
         #expect(core.spaceBars.shownStrips.first?.edge == .top)
-        core.tiler.settings.spaceBarStyle.edgeOverride = [
-            display.fingerprint: .left
-        ]
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["1": .left]
         core.updateBars()
         let space = try #require(core.spaceBars.shownStrips.first)
         let app = try #require(core.appBars.shownStrips.first)
@@ -129,11 +127,9 @@ struct ScreenEdgeCoreTests {
         .enabled(if: NSScreen.main != nil)
     )
     func floatRegionPerScreen() throws {
-        let (core, display, _) = try #require(makeCore(mode: .floating))
+        let (core, _, _) = try #require(makeCore(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.tiler.settings.spaceBarStyle.edgeOverride = [
-            display.fingerprint: .left
-        ]
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["1": .left]
         core.updateBars()
         let space = try #require(
             core.state.workspaces.space(of: Self.window)
@@ -144,18 +140,21 @@ struct ScreenEdgeCoreTests {
         #expect(region.minX >= strip.strip.maxX)
     }
 
-    /// The engine reads the screen identity the bars read: the
-    /// published display's fingerprint, wired at bootstrap.
+    /// The engine reads the key the bars read: the published
+    /// display's Screen N, wired at bootstrap (#3647).
     @Test(
-        "The engine's screen identity is the published display's",
+        "The engine's bar key is the published display's number",
         .enabled(if: NSScreen.main != nil)
     )
     func engineIdentityIsTheDisplays() throws {
         let (core, display, screen) = try #require(makeCore(mode: .bsp))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(core.tiler.screenFingerprint(screen) == display.fingerprint)
+        #expect(
+            core.tiler.screenSlot(screen) == core.screenSlot(of: display.id)
+        )
+        #expect(core.tiler.screenSlot(screen) == "1")
         core.state.apply(.displaysChanged([]))
-        #expect(core.tiler.screenFingerprint(screen) == nil)
+        #expect(core.tiler.screenSlot(screen) == nil)
     }
 
     /// A Space switch's plates slide across the Space Bar's edge
@@ -168,9 +167,7 @@ struct ScreenEdgeCoreTests {
         let (core, display, _) = try #require(makeCore(mode: .bsp))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         #expect(core.spaceSlideAxis(on: display.id) == .horizontal)
-        core.tiler.settings.spaceBarStyle.edgeOverride = [
-            display.fingerprint: .left
-        ]
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["1": .left]
         #expect(core.spaceSlideAxis(on: display.id) == .vertical)
     }
 
@@ -193,11 +190,11 @@ struct ScreenEdgeCoreTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
-        // A screen that is not connected moves no strip.
+        // A number no connected screen holds moves no strip.
         #expect(
             core.execute(
                 "space_bar.set_edge",
-                args: [.string("right"), .string("Elsewhere:640x480")]
+                args: [.string("right"), .number(5)]
             ).isSuccess
         )
         #expect(passes(meter) == 0)

@@ -159,7 +159,11 @@ for the number its screen holds in the profile's first setup that
 holds that screen; a split of a screen no setup of the profile
 holds, or one whose number an earlier setup's split already took,
 is not carried over, and that screen is split again in Settings ▸
-Screens.
+Screens. The bars' and the pocket's per-screen edges and
+visibilities follow the same rule: both twins read the lower
+number's, and at the upgrade an entry for a screen no setup of the
+profile holds, or for a number an earlier setup already gave one,
+is not carried over.
 :::
 
 :::unreleased

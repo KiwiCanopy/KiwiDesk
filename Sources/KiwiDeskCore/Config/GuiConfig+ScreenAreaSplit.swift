@@ -4,30 +4,10 @@ import Foundation
 /// area split — its edges and its Show — given to the area the
 /// split mints, so a split moves no bar. A Screen pin is no bar
 /// value: a pinned Space stays on the half that keeps the id. Keyed
-/// by screen number (#3647 ▸ lane 3); the maps still keyed by
-/// fingerprint take `runtime(in:)`.
+/// by screen number (#3647 ▸ lane 3).
 public struct ScreenAreaCopy: Equatable, Sendable {
     public let parent: ScreenSlotKey
     public let minted: ScreenSlotKey
-
-    /// This copy on the screen `order` gives its number, keyed by
-    /// fingerprint; nil where no screen holds it, or for a twin's
-    /// higher number, as `ScreenAreaRemap.runtime(in:)`.
-    public func runtime(in order: ScreenOrder) -> Fingerprinted? {
-        guard let parentKey = order.runtimeKey(of: parent),
-            let minted = order.runtimeKey(of: minted),
-            order.number(of: parentKey.fingerprint) == parent.number
-        else { return nil }
-        let parent = parentKey
-        return Fingerprinted(parent: parent, minted: minted)
-    }
-
-    /// A copy keyed by fingerprint, for the maps lane 3c moves to
-    /// numbers.
-    public struct Fingerprinted: Equatable, Sendable {
-        public let parent: ScreenAreaKey
-        public let minted: ScreenAreaKey
-    }
 }
 
 extension GuiConfig {
@@ -53,41 +33,22 @@ extension GuiConfig {
         else { return nil }
         settings.displayAreas.store(next, on: fingerprint, order: order)
         let copy = ScreenAreaCopy(parent: parent, minted: minted)
-        apply(copy, order: order)
+        apply(copy)
         return copy
     }
 
     /// Gives the minted area each per-area bar value the parent
-    /// holds: in the settings and the shared look
-    /// (`ScreenAreaSplitCopyParityTests` finds them by reflection).
-    public mutating func apply(_ copy: ScreenAreaCopy, order: ScreenOrder) {
-        guard let runtime = copy.runtime(in: order) else { return }
-        settings.apply(runtime)
-        look?.apply(runtime)
-    }
-}
-
-extension LookBody {
-    /// The shared look's half: a per-screen styling value is a JSON
-    /// object keyed by screen, the parent's entry copied as the
-    /// settings' own is.
-    public mutating func apply(_ copy: ScreenAreaCopy.Fingerprinted) {
-        let parent = copy.parent.description
-        let minted = copy.minted.description
-        for (path, value) in style {
-            guard case .object(var entries) = value,
-                let copied = entries[parent]
-            else { continue }
-            entries[minted] = copied
-            style[path] = .object(entries)
-        }
+    /// holds (`ScreenAreaSplitCopyParityTests` finds them by
+    /// reflection).
+    public mutating func apply(_ copy: ScreenAreaCopy) {
+        settings.apply(copy)
     }
 }
 
 extension TilingSettings {
     /// The per-area maps' half of a split's copy: both bars' and the
     /// pocket's edges, and both bars' Show.
-    public mutating func apply(_ copy: ScreenAreaCopy.Fingerprinted) {
+    public mutating func apply(_ copy: ScreenAreaCopy) {
         let parent = copy.parent.description
         let minted = copy.minted.description
         spaceBarStyle.copyScreen(parent, to: minted)

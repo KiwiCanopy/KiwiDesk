@@ -154,7 +154,7 @@ struct MinSizeFitLineTests {
                 )
         )
         for needle in [
-            "tiler.fingerprint(of: screen, in: settings)",
+            "tiler.gatedScreenSlot(of: screen, in: settings)",
             "pocketAtRest: settings.pocketRests",
             "let region = settings.layoutBounds(",
         ] {

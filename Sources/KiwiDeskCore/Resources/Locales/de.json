@@ -1276,7 +1276,6 @@
   "kiwishelf.scope.label": "Bildschirm oder Abschnitt",
   "kiwishelf.scope.own": "%1$@ — eigene Einstellungen",
   "kiwishelf.scope.summary": "Eigene Einstellungen: %1$d",
-  "kiwishelf.scope.twins": "%1$@ × %2$d",
   "kiwishelf.show.app_bar.beside_always": "Bleibt sichtbar: Die Space Bar an ihrer Kante steht auf „%1$@“.",
   "kiwishelf.show.app_bar_in": "In %1$@ anzeigen",
   "kiwishelf.show.differ.help": "Deine Leisten und die Pocket werden gerade unterschiedlich angezeigt; eine Wahl hier stellt sie alle ein.",

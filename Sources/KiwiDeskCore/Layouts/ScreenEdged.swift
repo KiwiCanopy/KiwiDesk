@@ -4,12 +4,13 @@ import Foundation
 /// Bar's and the App Bar's style, and the pocket's edges
 /// (`PocketEdges`, #3376). `edgeOverride` is the sparse
 /// `space_bar.edge_override` / `app_bar.edge_override` /
-/// `kiwishelf.pocket_edge_override` map, keyed by `ScreenAreaKey`
-/// (#3517 rulings 7, 14): an unsplit screen and a split screen's
-/// area 0 by the bare `Display.fingerprint`. Reads are exact: an
-/// entry applies to its own key alone, and a key with no entry uses
-/// the bar's `edge`; a verb naming a physical screen writes each of
-/// its areas (`KiwiCore.areaKeys(named:)`).
+/// `kiwishelf.pocket_edge_override` map, keyed by Screen N — `N`,
+/// or an area's `N#id` (#3517 rulings 7, 14; #3647 ▸ lane 3c). A
+/// reader keys it only through `KiwiCore.screenSlot(of:)` or
+/// `areaKey(of:)`, never a fingerprint. Reads are exact: an entry
+/// applies to its own key alone, and a key with no entry uses the
+/// bar's `edge`; a verb naming a physical screen writes each of its
+/// areas (`KiwiCore.areaKeys(named:)`).
 ///
 /// Write a bar's edge only through the `setEdge` doors below. A
 /// verb's or Settings' write of a screen's edge equal to the
@@ -25,18 +26,17 @@ public protocol ScreenEdged {
     var edgeOverride: [String: AppBarEdge] { get set }
 }
 
-/// The screens and areas a per-screen edge write judges its
-/// collapse over — made only by
-/// `KiwiCore.screenEdgeScope(monitorSets:shares:order:)`, which
-/// adds the connected screens and every area of each, so no write
-/// can judge fewer.
+/// The screen numbers and areas a per-screen edge write judges its
+/// collapse over and a forget keeps — made only by
+/// `KiwiCore.screenEdgeScope(monitorSets:shares:order:)`, so no
+/// write can judge fewer.
 public struct ScreenEdgeScope: Sendable, Equatable {
     let screens: Set<String>
 
-    /// Whether `key` — a fingerprint, or an area's `ScreenAreaKey`
-    /// — names a screen in scope (#3517).
+    /// Whether `key` — `N`, or an area's `N#id` — is in scope
+    /// (#3647 ▸ lane 3c).
     func holds(_ key: String) -> Bool {
-        screens.contains(ScreenAreaKey(parsing: key).fingerprint)
+        screens.contains(key)
     }
 }
 
@@ -79,7 +79,9 @@ extension ScreenEdged {
         let judged = scope.screens.union(edgeOverride.keys)
             .union([screen])
         let drawn = Set(judged.map { self.edge(on: $0) })
-        guard !edgeOverride.isEmpty, drawn.count == 1,
+        // With no screen known there is nothing to collapse over.
+        guard !scope.screens.isEmpty, !edgeOverride.isEmpty,
+            drawn.count == 1,
             let shared = drawn.first
         else { return }
         setEdge(shared)

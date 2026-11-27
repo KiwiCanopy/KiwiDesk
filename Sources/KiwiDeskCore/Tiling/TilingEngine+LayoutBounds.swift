@@ -48,7 +48,7 @@ extension TilingEngine {
     ) -> (key: String?, pocketAtRest: Bool) {
         let area = spaceArea(space)
         return (
-            area?.key ?? fingerprint(of: screen),
+            area.map(\.key) ?? gatedScreenSlot(of: screen),
             settings.pocketRests && (area?.lead ?? true)
         )
     }

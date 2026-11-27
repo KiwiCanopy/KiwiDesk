@@ -48,18 +48,15 @@ struct PocketScreenEdgeTests {
         { $0.tiler.settings.kiwishelf }
     }
 
-    @Test("a screen is named as a bar's is, and stored by fingerprint")
+    @Test("a screen is named as a bar's is, and stored by number")
     func screenArgument() {
         let saved = PositionalDisplays.mainIDOverride
         defer { PositionalDisplays.mainIDOverride = saved }
         let core = makeCore()
         #expect(set(core, .string("left"), .string("Left")).isSuccess)
-        #expect(set(core, .string("top"), .string(Self.away)).isSuccess)
-        #expect(
-            shelf(core).pocketEdgeOverride == [
-                Self.left.fingerprint: .left, Self.away: .top,
-            ]
-        )
+        #expect(!set(core, .string("top"), .string(Self.away)).isSuccess)
+        #expect(set(core, .string("top"), .number(3)).isSuccess)
+        #expect(shelf(core).pocketEdgeOverride == ["1": .left, "3": .top])
         #expect(shelf(core).pocketEdge == .bottom)
         let refused = set(core, .string("left"), .string("Nope"))
         #expect(refused.error == KiwiCore.unknownScreen)
@@ -130,14 +127,10 @@ struct PocketScreenEdgeTests {
     func keepScreensDrops() {
         var settings = TilingSettings()
         settings.kiwishelf.pocketEdgeOverride = [
-            "Kept:100x100": .left, "Gone:100x100": .top,
+            "1": .left, "3": .top,
         ]
-        settings.keepScreenEdges(
-            in: ScreenEdgeScope(screens: ["Kept:100x100"])
-        )
-        #expect(
-            settings.kiwishelf.pocketEdgeOverride == ["Kept:100x100": .left]
-        )
+        settings.keepScreenEdges(in: ScreenEdgeScope(screens: ["1", "2"]))
+        #expect(settings.kiwishelf.pocketEdgeOverride == ["1": .left])
     }
 
     @Test("the map encodes sparse and round-trips")
@@ -148,9 +141,9 @@ struct PocketScreenEdgeTests {
             !String(decoding: empty, as: UTF8.self)
                 .contains("pocket_edge_override")
         )
-        shelf.pocketEdgeOverride = ["LG:3840x2160": .right]
+        shelf.pocketEdgeOverride = ["2": .right]
         let data = try JSONEncoder().encode(shelf)
         let back = try JSONDecoder().decode(KiwiShelf.self, from: data)
-        #expect(back.pocketEdgeOverride == ["LG:3840x2160": .right])
+        #expect(back.pocketEdgeOverride == ["2": .right])
     }
 }

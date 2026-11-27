@@ -60,10 +60,12 @@ extension Profile {
     /// own, keyed by screen number, and a monitor set is an order
     /// (#3647, `migratingPinsOntoNumbers`), 44 its screen splits
     /// are per-mille shares keyed by screen number (#3647,
-    /// `migratingSplitsOntoNumbers`).
+    /// `migratingSplitsOntoNumbers`), 45 the bars' and the pocket's
+    /// per-screen maps are keyed by screen number (#3647,
+    /// `migratingBarMapsOntoNumbers`).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 44
+    public static let currentFormat = 45
 }

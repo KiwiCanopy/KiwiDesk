@@ -45,14 +45,14 @@ public struct ScreenOrder: Equatable, Sendable {
         )
     }
 
-    /// The number a runtime key's screen holds: the lower one for
-    /// twins, which the runtime cannot tell apart. Nil for a screen
-    /// outside the order.
+    /// The number a runtime key's screen holds, through
+    /// `number(of:)`: the lower numbered one for twins, which the
+    /// runtime cannot tell apart. Nil for a screen outside the order
+    /// or holding no number.
     public func slot(of key: ScreenAreaKey) -> ScreenSlotKey? {
-        guard let index = fingerprints.firstIndex(of: key.fingerprint),
-            !unnumbered.contains(index + 1)
-        else { return nil }
-        return ScreenSlotKey(number: index + 1, areaID: key.areaID)
+        number(of: key.fingerprint).flatMap {
+            ScreenSlotKey(number: $0, areaID: key.areaID)
+        }
     }
 
     /// Whether a screen of this order holds `slot`'s number; a

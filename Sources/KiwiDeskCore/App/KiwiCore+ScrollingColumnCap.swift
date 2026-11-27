@@ -23,7 +23,7 @@ extension KiwiCore {
             bounds: settings.layoutBounds(
                 from: tiler.visibleBounds(screen),
                 mode: .scrolling,
-                on: tiler.fingerprint(of: screen, in: settings),
+                on: tiler.gatedScreenSlot(of: screen, in: settings),
                 pocketAtRest: settings.pocketRests
             ),
             space: space

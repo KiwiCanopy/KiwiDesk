@@ -4,13 +4,11 @@ import SwiftUI
 /// One screen in the Screen or area picker (#1948, #3612), or one
 /// area of a split screen (#3517 ruling 30).
 struct ScreenEdgeRow: Identifiable, Equatable {
-    /// The screen's fingerprint (`Name:WxH`), which identical
-    /// models share — so they share one row — or an area's
-    /// `ScreenAreaKey`.
+    /// The screen's number, `N`, or an area's `N#id` (#3647 ▸ lane
+    /// 3c): the key its bar values are stored under.
     let id: String
     let name: String
-    /// How many of the profile's screens carry this fingerprint.
-    let count: Int
+    /// Whether a connected screen holds the number.
     let present: Bool
     /// The screen's half of `name`, which rows sort by.
     let screen: String
@@ -26,7 +24,24 @@ extension SettingsModel {
     /// that screen's edge (`mainDisplay`). The Home cards picture
     /// and name it.
     var homeSettings: TilingSettings {
-        config.settings.onScreen(mainDisplay?.fingerprint)
+        config.settings.onScreen(
+            mainDisplay.flatMap {
+                core.barKey(
+                    of: ScreenAreaKey(fingerprint: $0.fingerprint, areaID: 0),
+                    order: screenOrder
+                )
+            }
+        )
+    }
+
+    /// The screen numbers the picker lists: Core's
+    /// `barNumbers(count:order:)` over the draft profile's own
+    /// screens (#3647 ▸ lane 3c).
+    var draftScreenNumbers: [Int] {
+        core.barNumbers(
+            count: draftMonitorSets.map(\.monitors.count).max() ?? 0,
+            order: screenOrder
+        )
     }
 
     /// The draft profile's screen combinations: the edit target's
@@ -49,68 +64,54 @@ extension SettingsModel {
         _ bar: KeyPath<TilingSettings, Bar>,
         show: ScreenShowBar? = nil
     ) -> Bool {
-        draftMonitorSets.contains { set in
-            Set(set.monitors).reduce(0) { $0 + areaKeys(of: $1).count } > 1
-        }
+        draftScreenNumbers.flatMap { areaKeys(ofNumber: $0) }
+            .count > 1
             || config.settings[keyPath: bar].screensDiffer
             || show.map { !screenShowKeys($0).isEmpty } == true
     }
 
-    /// The keys a screen's rows take: its areas' on a split screen
-    /// in the draft, in reading order (#3517), else its fingerprint.
-    func areaKeys(of fingerprint: String) -> [String] {
-        ScreenSplit.areaKeys(
-            of: fingerprint,
-            in: draftSplits
-        )
+    /// The keys Screen `number`'s rows take: `N`, then each area's
+    /// `N#id` in reading order where its stored split has areas.
+    func areaKeys(ofNumber number: Int) -> [String] {
+        guard let shares = config.settings.displayAreas[number: number],
+            !shares.isWhole
+        else { return ["\(number)"] }
+        return ScreenArea.readingOrder(shares.areas).compactMap {
+            ScreenSlotKey(number: number, areaID: $0.id)?.description
+        }
     }
 
-    /// A bar's screen rows: the profile's screens, one per area on a
-    /// split screen, and any screen or area holding a value of its
-    /// own, in `ordered`'s order.
+    /// A bar's screen rows: each of the profile's screen numbers,
+    /// one per area of a split one, and any number or area holding
+    /// a value of its own, in `ordered`'s order.
     func screenEdgeRows<Bar: ScreenEdged>(
         _ bar: KeyPath<TilingSettings, Bar>,
         show: ScreenShowBar? = nil
     ) -> [ScreenEdgeRow] {
-        let connected = Set(displays.map(\.fingerprint))
-        var counts: [String: Int] = [:]
-        for set in draftMonitorSets {
-            for screen in Set(set.monitors) {
-                let n = set.monitors.filter { $0 == screen }.count
-                counts[screen] = max(counts[screen] ?? 0, n)
-            }
-        }
-        // A screen split in the draft takes a row per area, and an
-        // entry for an area it no longer has keeps a row of its own.
-        var keyed: [String: Int] = [:]
-        for (screen, count) in counts {
-            for key in areaKeys(of: screen) { keyed[key] = count }
-        }
-        let shows = show.map { Array(screenShowKeys($0)) } ?? []
-        for key in Array(config.settings[keyPath: bar].edgeOverride.keys)
-            + shows
-        {
-            keyed[key] = max(keyed[key] ?? 0, 1)
-        }
+        var keys = Set(
+            draftScreenNumbers.flatMap { areaKeys(ofNumber: $0) }
+        )
+        keys.formUnion(config.settings[keyPath: bar].edgeOverride.keys)
+        keys.formUnion(show.map { screenShowKeys($0) } ?? [])
         return Self.ordered(
-            keyed.map { key, count in
-                let area = ScreenAreaKey(parsing: key)
-                let fingerprint = area.fingerprint
+            keys.map { key in
+                let slot = ScreenSlotKey(parsing: key)
+                let number = slot.map { "\($0.number)" } ?? key
                 return ScreenEdgeRow(
                     id: key,
                     name: perScreenName(key: key),
-                    count: count,
-                    present: connected.contains(fingerprint),
-                    screen: perScreenName(key: fingerprint),
-                    place: areaKeys(of: fingerprint).firstIndex(of: key)
-                        ?? Int.max
+                    present: slot.map { screenOrder.holds($0) } ?? false,
+                    screen: number,
+                    place: slot.flatMap {
+                        areaKeys(ofNumber: $0.number).firstIndex(of: key)
+                    } ?? Int.max
                 )
             }
         )
     }
 
-    /// Connected screens first, then the rest, screens A–Z by name
-    /// and a split screen's areas in reading order (#3612).
+    /// Connected screens first, then the rest, screens by number
+    /// and a split screen's areas in reading order (#3612, #3647).
     static func ordered(_ rows: [ScreenEdgeRow]) -> [ScreenEdgeRow] {
         rows.sorted { a, b in
             if a.present != b.present { return a.present }

@@ -73,8 +73,9 @@ struct ScreenEdgeRowsFallbackTests {
         _ = core.execute("load_profile", args: [.string("Desk")])
         #expect(core.profiles.currentName == "Desk")
         #expect(model.editingProfile == nil)
+        // The page lists three screens: Screen 3 is the absent one.
         let rows = model.screenEdgeRows(\.spaceBarStyle).map(\.id)
-        #expect(rows.contains(absent), "rows: \(rows)")
+        #expect(rows.contains("3"), "rows: \(rows)")
     }
 
     @Test("with no profile loaded, the connected screens answer")
@@ -82,7 +83,7 @@ struct ScreenEdgeRowsFallbackTests {
         let model = model()
         #expect(model.core.profiles.currentName == nil)
         let rows = Set(model.screenEdgeRows(\.spaceBarStyle).map(\.id))
-        #expect(rows == [main.fingerprint, dell.fingerprint])
+        #expect(rows == ["1", "2"])
         #expect(model.offersScreenEdges(\.spaceBarStyle))
     }
 }

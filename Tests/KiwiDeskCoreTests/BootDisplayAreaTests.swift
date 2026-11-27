@@ -176,24 +176,30 @@ struct BootDisplayAreaTests {
             core.tiler.settings.spaceBarStyle.visibilityOverride.isEmpty
         )
         dock(core)
+        let screen = try #require(core.screenSlot(of: Self.builtIn.id))
         #expect(
             Set(core.tiler.settings.spaceBarStyle.visibilityOverride.keys)
-                == [Self.builtIn.fingerprint, Self.rightArea]
+                == [screen, "\(screen)#1"]
         )
     }
 
+    /// A number is stored at once (#3647 ▸ lane 3c), and the
+    /// screen holding it at the report draws it.
     @Test("a bar edge by number lands on that screen at the report")
     func edgeByNumberApplies() throws {
         try externalMain {
             let core = try makeCore()
             try load(core, #"space_bar.set_edge("left", 2)"#)
-            #expect(core.tiler.settings.spaceBarStyle.edgeOverride.isEmpty)
-            dock(core)
             #expect(
-                core.tiler.settings.spaceBarStyle.edge(
-                    on: Self.builtIn.fingerprint
-                ) == .left
+                core.tiler.settings.spaceBarStyle.edgeOverride == ["2": .left]
             )
+            dock(core)
+            let second = try #require(
+                core.state.workspaces.allDisplays.first {
+                    core.screenSlot(of: $0.id) == "2"
+                }
+            )
+            #expect(core.settings(on: second.id).spaceBarStyle.edge == .left)
         }
     }
 
@@ -241,9 +247,14 @@ struct BootDisplayAreaTests {
         try load(core, Self.split + "\n" + bar)
         dock(core)
         #expect(areas(core) == 2)
+        let right = try #require(
+            core.liveScreenOrder.slot(
+                of: ScreenAreaKey(parsing: Self.rightArea)
+            )
+        )
         #expect(
             core.tiler.settings.spaceBarStyle.visibilityOverride
-                == [Self.rightArea: .hidden]
+                == [right.description: .hidden]
         )
     }
 }

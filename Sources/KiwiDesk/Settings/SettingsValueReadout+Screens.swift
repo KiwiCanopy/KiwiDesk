@@ -66,7 +66,7 @@ extension SettingsValueReadout {
 
     /// A stored pin's words: "Screen N", and an area pin "Screen N –
     /// Left", its area worded on the screen holding N in `order`.
-    private static func screenWords(
+    static func screenWords(
         _ slot: ScreenSlotKey,
         _ order: ScreenOrder?,
         _ shares: [String: ScreenShares]
@@ -74,12 +74,18 @@ extension SettingsValueReadout {
         let screen = L("monitor_card.number_badge", "Screen %1$d", slot.number)
         guard slot.areaID > 0 else { return screen }
         guard let key = order?.runtimeKey(of: slot) else {
-            return L(
-                "monitors.split.name",
-                "%1$@ – %2$@",
-                screen,
-                ScreenAreaWords.position(.numbered(slot.areaID + 1))
-            )
+            // No screen holds N: the area's stored name, else its
+            // place in the stored split, else its number.
+            let whole = ScreenShares.whole
+            let split = shares[String(slot.number)]?
+                .resolved(width: whole, height: whole)
+            let area =
+                split?.areas.first { $0.id == slot.areaID }?.name
+                ?? split?.positions[slot.areaID].map {
+                    ScreenAreaWords.position($0)
+                }
+                ?? ScreenAreaWords.position(.numbered(slot.areaID + 1))
+            return L("monitors.split.name", "%1$@ – %2$@", screen, area)
         }
         return SettingsModel.perScreenName(
             screen: screen,

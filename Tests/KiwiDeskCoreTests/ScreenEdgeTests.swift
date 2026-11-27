@@ -127,15 +127,16 @@ struct ScreenEdgeTests {
         )
         #expect(style.edge == .left)
         #expect(style.edgeOverride.count == 2)
-        // With no other screen known, the one entry decides.
+        // With no screen known there is nothing to collapse over, so
+        // a number stored before any screen keeps its own edge (#3647).
         var lone = SpaceBarStyle()
         lone.setEdge(
             .left,
             on: Self.studio,
             among: ScreenEdgeScope(screens: [])
         )
-        #expect(lone.edge == .left)
-        #expect(lone.edgeOverride.isEmpty)
+        #expect(lone.edge == .top)
+        #expect(lone.edgeOverride == [Self.studio: .left])
         // Disagreeing entries never collapse.
         style.setEdge(
             .bottom,

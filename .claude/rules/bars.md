@@ -202,7 +202,7 @@ twice, was a question the user answered twice. The argument is
   ▸ `scopeHasOneHome`). **A per-area map is read exactly and
   fanned out on write (#3517 rulings 7, 14, 16, 22, 30)** — every
   `edge_override`, `pocket_edge_override` and `visibility_override`:
-  an entry applies to its own key alone, the bare fingerprint being
+  an entry applies to its own key alone, the bare number `N` being
   area 0's and never "the whole screen", and a key with no entry
   takes the bar's own value (each layout's, for the App Bar); give
   no read a fallback chain, no write a sibling pin, and no map a
@@ -211,7 +211,13 @@ twice, was a question the user answered twice. The argument is
   `KiwiCore.areaKeys(named:)`: a physical screen, by number or
   connected name, writes every area it lays out in, and a
   fingerprint, an area key or an area name writes that one key
-  (`AreaEdgeTests`). A merge moves the absorbed area's entries onto
+  (`AreaEdgeTests`). **The maps are keyed by Screen N, `N` and
+  `N#id` (#3647 ▸ lane 3c)**: a reader keys them through the one
+  `KiwiCore.screenSlot(of:)` / `areaKey(of:)`, wired to the
+  engine's `screenSlot` seam, or, in Settings, `barKey(of:order:)`
+  over the draft's order — never a fingerprint, which is the
+  screen's physical identity — and a decoder refuses a key that is
+  no number (`NumberedBarMapMigrationTests`). A merge moves the absorbed area's entries onto
   the survivor through `GuiConfig.apply(_ remap:)`
   (`ScreenAreaRemapParityTests`), and a split copies the parent
   area's entries to the minted key through `GuiConfig.apply(_

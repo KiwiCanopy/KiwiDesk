@@ -1276,7 +1276,6 @@
   "kiwishelf.scope.label": "Screen or area",
   "kiwishelf.scope.own": "%1$@ — own settings",
   "kiwishelf.scope.summary": "Own settings: %1$d",
-  "kiwishelf.scope.twins": "%1$@ × %2$d",
   "kiwishelf.show.app_bar.beside_always": "Stays shown: the Space Bar on its edge is set to %1$@.",
   "kiwishelf.show.app_bar_in": "Show in %1$@",
   "kiwishelf.show.differ.help": "Your bars and the Pocket show differently right now; choosing here sets them all.",

@@ -160,7 +160,7 @@ extension KiwiShelf {
             try c.decodeIfPresent(AppBarEdge.self, forKey: .pocketEdge)
             ?? d.pocketEdge
         pocketEdgeOverride =
-            try c.decodeIfPresent(
+            try c.decodeScreenMap(
                 [String: AppBarEdge].self,
                 forKey: .pocketEdgeOverride
             ) ?? d.pocketEdgeOverride

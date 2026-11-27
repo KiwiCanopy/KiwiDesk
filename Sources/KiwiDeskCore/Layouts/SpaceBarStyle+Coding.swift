@@ -44,7 +44,7 @@ extension SpaceBarStyle {
                 forKey: .visibility
             ) ?? defaults.visibility
         visibilityOverride =
-            try container.decodeIfPresent(
+            try container.decodeScreenMap(
                 [String: ShelfVisibility].self,
                 forKey: .visibilityOverride
             ) ?? defaults.visibilityOverride
@@ -54,7 +54,7 @@ extension SpaceBarStyle {
                 forKey: .edge
             ) ?? defaults.edge
         edgeOverride =
-            try container.decodeIfPresent(
+            try container.decodeScreenMap(
                 [String: AppBarEdge].self,
                 forKey: .edgeOverride
             ) ?? defaults.edgeOverride

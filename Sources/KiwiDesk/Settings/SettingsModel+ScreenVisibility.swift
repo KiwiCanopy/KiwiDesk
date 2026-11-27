@@ -25,8 +25,8 @@ enum BarShowRow {
 }
 
 /// A bar's Show for a picked screen or area (#3517 ruling 30,
-/// #3612, #3618): an area's own visibility, keyed by its
-/// `ScreenAreaKey` — an unsplit screen by its fingerprint.
+/// #3612, #3618): an area's own visibility, keyed by its Screen N,
+/// `N` or `N#id` (#3647 ▸ lane 3c).
 extension SettingsModel {
     /// What `key` shows for `row`: the Space Bar's own value, else
     /// the bar's; a layout's App Bar entry, nil for Inherit, which
@@ -144,28 +144,25 @@ extension SettingsModel {
 
     /// A screen's or area's name in the Screen or area picker
     /// (#3612): as Settings ▸ Screens says it (`areaName(_:on:)`)
-    /// where one connected screen carries it, else through
-    /// `perScreenName(screen:key:splits:area:)`.
+    /// where a connected screen holds its number, else as the diff
+    /// words a Screen N key (`SettingsValueReadout.screenWords`).
     func perScreenName(key: String) -> String {
-        let area = ScreenAreaKey(parsing: key)
+        guard let slot = ScreenSlotKey(parsing: key),
+            let number = ScreenSlotKey(number: slot.number)
+        else { return key }
         let split =
-            areaKeys(of: area.fingerprint).count > 1 || area.areaID != 0
-        let found = displays.filter { $0.fingerprint == area.fingerprint }
-        if found.count == 1, let display = found.first,
-            !split || areaLabel(area.areaID, on: display) != nil
-        {
-            return areaName(split ? area.areaID : nil, on: display)
+            areaKeys(ofNumber: slot.number).count > 1
+            || slot.areaID != 0
+        let display = screenOrder.runtimeKey(of: number).flatMap { held in
+            displays.first { $0.fingerprint == held.fingerprint }
         }
-        // Twins share their fingerprint's split, so either's words.
-        let label =
-            split
-            ? found.first.flatMap { areaLabel(area.areaID, on: $0) } : nil
-        return Self.perScreenName(
-            screen: screenWords { $0.fingerprint == area.fingerprint }
-                ?? Display.fingerprintParts(area.fingerprint).name,
-            key: key,
-            splits: draftSplits,
-            area: label
+        if let display, !split || areaLabel(slot.areaID, on: display) != nil {
+            return areaName(split ? slot.areaID : nil, on: display)
+        }
+        return SettingsValueReadout.screenWords(
+            slot,
+            screenOrder,
+            config.settings.displayAreas
         )
     }
 

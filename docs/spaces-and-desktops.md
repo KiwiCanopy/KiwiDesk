@@ -145,6 +145,36 @@ screen split in three shows three Spaces at once. A Desktop still
 belongs to the whole screen: switching it switches every area of
 that screen together.
 
+:::unreleased
+## How screens are numbered
+
+A profile numbers each screen of a setup it holds: **Screen 1**,
+**Screen 2** and so on. A Screen pin, a split and a bar's
+per-screen edge and Show belong to the number, not to the
+physical screen, so they go to whichever screen holds that
+number.
+
+A setup the profile has not saved is numbered **left to right**
+by each screen's left edge. Two screens whose left edges line up
+exactly take the higher one first. For example:
+
+- a 2×2 grid: top-left 1, bottom-left 2, top-right 3,
+  bottom-right 4;
+- one screen, two stacked in the middle, one more (`-=-`): left
+  1, middle top 2, middle bottom 3, right 4;
+- a cross of five: left 1, top 2, centre 3, bottom 4, right 5.
+
+The numbering is yours to change: pick **Use as Screen N** from a
+screen's Screen N badge on Settings ▸ Screens, and Save stores the
+order with the setup. A saved order is kept whatever the
+arrangement.
+
+When a profile's splits fit the connected screens only under
+another numbering, that numbering is used until the screens or
+the profile change; a Save still stores the order shown on
+Settings ▸ Screens.
+:::
+
 ## Every Desktop keeps its own Space, and its own windows
 
 Every Desktop remembers which Space it was on. Switch away and

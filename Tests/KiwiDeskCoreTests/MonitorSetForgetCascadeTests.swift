@@ -40,41 +40,36 @@ private func fp(_ names: String...) -> [String] {
 
 /// What a forget leaves behind is cleared with it (#3324): the
 /// stored Desktop binding entries scoped to the setup, and the
-/// holder's per-screen bar edges for screens nothing still holds.
+/// holder's per-screen bar edges for areas its splits no longer hold;
+/// a screen number within the profile's count keeps its own (#3647).
 @Suite("A forgotten setup's leftovers go (#3324)", .serialized)
 @MainActor
 struct MonitorSetForgetCascadeTests {
     /// "Desk" on A+B, then on A+C (connected), with a Space Bar
-    /// edge of its own on A and on B.
+    /// edge of its own on Screens 1 and 2 and on an area no split
+    /// holds.
     private func desk(_ core: KiwiCore) throws {
         core.tiler.settings.spaceBarStyle.edgeOverride = [
-            "A:100x100": .left, "B:100x100": .right,
+            "1": .left, "2": .right, "2#3": .bottom,
         ]
-        core.tiler.settings.appBarStyle.edgeOverride = [
-            "B:100x100": .top
-        ]
+        core.tiler.settings.appBarStyle.edgeOverride = ["2": .top]
         connect(core, ["A", "B"])
         try core.persistProfile(named: "Desk", modes: nil)
         connect(core, ["A", "C"])
         try core.persistProfile(named: "Desk", modes: nil)
     }
 
-    @Test("a screen no remaining setup holds loses its bar edge")
+    @Test("an area no split holds loses its bar edge; numbers stay")
     func strayEdgesGo() throws {
         let core = makeCore()
         try desk(core)
         try core.forgetMonitorSet(fp("A", "B"))
         let stored = try core.profiles.read(name: "Desk")
-        #expect(
-            stored.settings.spaceBarStyle.edgeOverride
-                == ["A:100x100": .left]
-        )
-        #expect(stored.settings.appBarStyle.edgeOverride.isEmpty)
+        let kept: [String: AppBarEdge] = ["1": .left, "2": .right]
+        #expect(stored.settings.spaceBarStyle.edgeOverride == kept)
+        #expect(stored.settings.appBarStyle.edgeOverride == ["2": .top])
         // The live copy too, or the next Save writes it back.
-        #expect(
-            core.tiler.settings.spaceBarStyle.edgeOverride
-                == ["A:100x100": .left]
-        )
+        #expect(core.tiler.settings.spaceBarStyle.edgeOverride == kept)
     }
 
     @Test("bindings scoped to the setup go; an all-setups entry stays")

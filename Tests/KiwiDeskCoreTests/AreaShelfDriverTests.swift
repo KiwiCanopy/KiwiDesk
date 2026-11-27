@@ -180,11 +180,9 @@ struct AreaShelfDriverTests {
             makeCore({ $0.splitting(0, .sideBySide) }) {
                 $0.kiwishelf.pocketVisibility = .always
                 $0.kiwishelf.pocketEdges.setEdge(.bottom)
-                // The right area's own edge: read for the screen,
-                // its strip would be the screen's top one.
-                let screen =
-                    NSScreen.screens.first?.kiwiDisplay?.fingerprint ?? ""
-                $0.spaceBarStyle.edgeOverride["\(screen)#1"] = .left
+                // The right area's own edge, Screen 1's area 1: read
+                // for the screen, its strip would be the top one.
+                $0.spaceBarStyle.edgeOverride["1#1"] = .left
             }
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }

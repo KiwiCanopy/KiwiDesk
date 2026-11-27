@@ -78,12 +78,19 @@ extension ConfigMigration {
                 ) as? [String: String]
             else { continue }
             changed = true
-            let order = ScreenOrder(
+            let monitors =
                 sets[index][numberedPinsMonitorsKey] as? [String] ?? []
-            )
             for (space, pin) in pins.sorted(by: { $0.key < $1.key })
             where map[space] == nil {
-                if let slot = order.slot(of: ScreenAreaKey(parsing: pin)) {
+                // As written for format 43: the first place holding
+                // the screen, never a live helper's reading.
+                let key = ScreenAreaKey(parsing: pin)
+                if let index = monitors.firstIndex(of: key.fingerprint),
+                    let slot = ScreenSlotKey(
+                        number: index + 1,
+                        areaID: key.areaID
+                    )
+                {
                     map[space] = slot.description
                 }
             }

@@ -240,7 +240,7 @@ public final class TilingEngine {
     /// from the placement list. An unsplit screen keeps every bound
     /// exactly as it was.
     var spaceArea:
-        @MainActor (SpaceID) -> (rect: CGRect, key: String, lead: Bool)? = {
+        @MainActor (SpaceID) -> (rect: CGRect, key: String?, lead: Bool)? = {
             _ in nil
         }
 
@@ -291,15 +291,12 @@ public final class TilingEngine {
         ScreenList.all.map(KiwiCore.axFrame(of:))
     }
 
-    /// A screen's `Display.fingerprint`, the key of a bar's
-    /// per-screen edge (#1948) — the published display's, which
-    /// `bootstrapCoreServices` wires to `KiwiCore.screenFingerprint
-    /// (of:)` so the engine and the bars read one identity; nil
-    /// for a screen no display answers, which takes the bars' own
-    /// edges.
-    var screenFingerprint: @MainActor (NSScreen) -> String? = { _ in
-        nil
-    }
+    /// The key a screen's bar values resolve under — its Screen N
+    /// (#3647) — which `bootstrapCoreServices` wires to
+    /// `KiwiCore.screenSlot(of:)` so the engine and the bars read
+    /// one key; nil for a screen with no number or no display, which
+    /// takes the bars' own values.
+    var screenSlot: @MainActor (NSScreen) -> String? = { _ in nil }
 
     /// The side a Space draws on the Desktop shown now, where it
     /// was flipped there (#2771); `bootstrapCoreServices` wires it
@@ -314,15 +311,15 @@ public final class TilingEngine {
         SessionRatios()
     }
 
-    /// The fingerprint `screen`'s bar edges resolve under in
-    /// `settings` (the live ones unless a draft is handed in) —
-    /// nil while no bar has a screen of its own, skipping the read.
-    func fingerprint(
+    /// The key `screen`'s bar values resolve under in `settings`
+    /// (the live ones unless a draft is handed in) — nil while no
+    /// bar has a screen of its own, skipping the read.
+    func gatedScreenSlot(
         of screen: NSScreen,
         in settings: TilingSettings? = nil
     ) -> String? {
         (settings ?? self.settings).hasScreenEntries
-            ? screenFingerprint(screen) : nil
+            ? screenSlot(screen) : nil
     }
 
     public init() {

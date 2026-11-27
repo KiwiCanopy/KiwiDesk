@@ -3,7 +3,7 @@ import Foundation
 /// A bar's visibility per area (#3517 ruling 30, #3618): the sparse
 /// `space_bar.visibility_override` and each hosting layout's
 /// `<layout>.app_bar.visibility_override` map, keyed by
-/// `ScreenAreaKey` — an unsplit screen by its bare fingerprint —
+/// Screen N — an area by `N#id`, an unsplit screen by its bare N —
 /// taking the bar's own `always | auto | hidden`. An area with no
 /// entry keeps that bar's stored visibility. It resolves
 /// in the one per-screen step, `TilingSettings.onScreen(_:)`, so an

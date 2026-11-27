@@ -52,8 +52,11 @@ struct AreaEdgeTests {
                 .splits(order: core.liveScreenOrder, floors: .unfloored)
         )
         #expect(keys == [fp, "\(fp)#1", "\(fp)#2"])
+        // Stored by Screen N (#3647 ▸ lane 3c).
         #expect(
-            core.liveScreenEdgeScope.screens.isSuperset(of: Set(keys))
+            core.liveScreenEdgeScope.screens.isSuperset(
+                of: ["1", "1#1", "1#2"]
+            )
         )
     }
 
@@ -61,11 +64,11 @@ struct AreaEdgeTests {
     func lookupIsExact() {
         var style = SpaceBarStyle()
         style.setEdge(.top)
-        style.edgeOverride = [fp: .left]
-        #expect(style.edge(on: fp) == .left)
-        #expect(style.edge(on: "\(fp)#1") == .top)
-        style.edgeOverride["\(fp)#1"] = .bottom
-        #expect(style.edge(on: "\(fp)#1") == .bottom)
+        style.edgeOverride = ["1": .left]
+        #expect(style.edge(on: "1") == .left)
+        #expect(style.edge(on: "1#1") == .top)
+        style.edgeOverride["1#1"] = .bottom
+        #expect(style.edge(on: "1#1") == .bottom)
     }
 
     @Test("setting area 1 leaves areas 0 and 2 where they were")
@@ -73,13 +76,13 @@ struct AreaEdgeTests {
         let core = try core()
         let set = core.execute(
             "space_bar.set_edge",
-            args: [.string("bottom"), .string("\(fp)#1")]
+            args: [.string("bottom"), .string("1#1")]
         )
         #expect(set.isSuccess)
         let style = core.tiler.settings.spaceBarStyle
-        #expect(style.edgeOverride == ["\(fp)#1": .bottom])
-        #expect(style.edge(on: fp) == .top)
-        #expect(style.edge(on: "\(fp)#2") == .top)
+        #expect(style.edgeOverride == ["1#1": .bottom])
+        #expect(style.edge(on: "1") == .top)
+        #expect(style.edge(on: "1#2") == .top)
     }
 
     @Test("a fingerprint writes area 0 alone")
@@ -90,9 +93,9 @@ struct AreaEdgeTests {
             args: [.string("left"), .string(fp)]
         )
         let style = core.tiler.settings.spaceBarStyle
-        #expect(style.edgeOverride == [fp: .left])
-        #expect(style.edge(on: "\(fp)#1") == .top)
-        #expect(style.edge(on: "\(fp)#2") == .top)
+        #expect(style.edgeOverride == ["1": .left])
+        #expect(style.edge(on: "1#1") == .top)
+        #expect(style.edge(on: "1#2") == .top)
     }
 
     @Test("a physical screen, by number or name, writes every area")
@@ -101,7 +104,7 @@ struct AreaEdgeTests {
             let core = try core()
             core.execute(
                 "space_bar.set_edge",
-                args: [.string("bottom"), .string("Other:100x100")]
+                args: [.string("bottom"), .number(2)]
             )
             let set = core.execute(
                 "space_bar.set_edge",
@@ -109,7 +112,7 @@ struct AreaEdgeTests {
             )
             #expect(set.isSuccess, "\(screen)")
             let style = core.tiler.settings.spaceBarStyle
-            for key in [fp, "\(fp)#1", "\(fp)#2"] {
+            for key in ["1", "1#1", "1#2"] {
                 #expect(style.edge(on: key) == .bottom, "\(screen) \(key)")
             }
         }
@@ -118,7 +121,7 @@ struct AreaEdgeTests {
     @Test("entries collapse only once every area agrees")
     func collapseJudgesEveryArea() throws {
         let core = try core()
-        for area in [fp, "\(fp)#1"] {
+        for area in [fp, "1#1"] {
             core.execute(
                 "space_bar.set_edge",
                 args: [.string("bottom"), .string(area)]
@@ -126,10 +129,10 @@ struct AreaEdgeTests {
         }
         var style = core.tiler.settings.spaceBarStyle
         #expect(style.edge == .top)
-        #expect(style.edge(on: "\(fp)#2") == .top)
+        #expect(style.edge(on: "1#2") == .top)
         core.execute(
             "space_bar.set_edge",
-            args: [.string("bottom"), .string("\(fp)#2")]
+            args: [.string("bottom"), .string("1#2")]
         )
         style = core.tiler.settings.spaceBarStyle
         #expect(style.edge == .bottom)

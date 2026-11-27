@@ -13,10 +13,9 @@ import Testing
 // until it is classified.
 //
 // Since #3647 lane 3 an area belongs to a screen NUMBER: the probe
-// is the slot `1#2`, and a map still keyed by fingerprint is
-// populated with `Wide:3440x1440#2` and must be named in
-// `movesInLaneThreeC` — so a fingerprint-keyed map left behind, or
-// a new one, reds until it moves to numbers or argues its place.
+// is the slot `1#2`, and a map holding the fingerprint form
+// `Wide:3440x1440#2` reds, so a fingerprint-keyed map left behind,
+// or a new one, reds until it moves to numbers.
 //
 // Stated limitations: a map whose String sits inside a struct
 // element (`[K: SomeStruct]` holding a key in a field) reads as
@@ -32,10 +31,8 @@ private let screen = "Wide:3440x1440"
 private let vanished = ScreenSlotKey(number: 1, areaID: 2)!
 private let survivor = ScreenSlotKey(number: 1, areaID: 1)!
 private let order = ScreenOrder([screen])
-/// The fingerprint form of `vanished` / `survivor`, as the maps not
-/// yet moved key them.
+/// The fingerprint form of `vanished`, which no map may hold.
 private let oldKey = ScreenAreaKey(fingerprint: screen, areaID: 2)
-private let newKey = ScreenAreaKey(fingerprint: screen, areaID: 1)
 
 /// Reflected paths of String-typed maps that hold no area key, and
 /// why. Keyed by the whole path, so exempting one map never exempts
@@ -47,64 +44,37 @@ private let notAreaKeyed: [String: String] = [
     "settings.displayAreas":
         "keyed by screen number; a merge rewrites its shares",
     "look.colors": "a colour path to its hex",
+    "look.style": "a setting path to its value; a look carries no "
+        + "per-screen path (`LookKeys.leftOut`)",
     "gesture.maps": "keyed by keybinding layer name (#3535)",
 ]
 
-/// The per-screen maps still keyed by fingerprint, which #3647's
-/// lane 3c moves to screen numbers; each entry leaves with its map.
-private let movesInLaneThreeC: [String: String] = [
-    "settings.spaceBarStyle.edgeOverride": "moves in lane 3c",
-    "settings.appBarStyle.edgeOverride": "moves in lane 3c",
-    "settings.kiwishelf.pocketEdgeOverride": "moves in lane 3c",
-    "settings.spaceBarStyle.visibilityOverride": "moves in lane 3c",
-    "settings.monocle.appBar.visibilityOverride": "moves in lane 3c",
-    "settings.scrolling.appBar.visibilityOverride": "moves in lane 3c",
-    "look.style": "moves in lane 3c",
-]
-
-/// A config whose every area-keyed field names `vanished`, by
-/// number or, for the maps lane 3c moves, by fingerprint. This
-/// population list is the one hand-kept list; the scan cross-checks
-/// it against what reflection finds.
+/// A config whose every area-keyed field names `vanished` by
+/// number. This population list is the one hand-kept list; the scan
+/// cross-checks it against what reflection finds.
 private func populated() -> GuiConfig {
     var config = GuiConfig()
     let slot = vanished.description
-    let key = oldKey.description
     config.spacePins[SpaceID("1")] = vanished
     let desktop = DesktopKey.identity(DesktopIdentity(raw: "probe"))
     config.desktopAreaSpaces[desktop] = [slot: SpaceID("1")]
-    config.settings.spaceBarStyle.edgeOverride[key] = .bottom
-    config.settings.appBarStyle.edgeOverride[key] = .left
-    config.settings.kiwishelf.pocketEdgeOverride[key] = .right
-    config.settings.spaceBarStyle.visibilityOverride[key] = .hidden
-    config.settings.monocle.appBar.visibilityOverride[key] = .auto
-    config.settings.scrolling.appBar.visibilityOverride[key] = .hidden
+    config.settings.spaceBarStyle.edgeOverride[slot] = .bottom
+    config.settings.appBarStyle.edgeOverride[slot] = .left
+    config.settings.kiwishelf.pocketEdgeOverride[slot] = .right
+    config.settings.spaceBarStyle.visibilityOverride[slot] = .hidden
+    config.settings.monocle.appBar.visibilityOverride[slot] = .auto
+    config.settings.scrolling.appBar.visibilityOverride[slot] = .hidden
     config.appWide = AppWideSettings()
-    config.look = LookBody(
-        style: ["space_bar.edge_override": .object([key: .string("top")])],
-        colors: [:]
-    )
+    config.look = LookBody(style: [:], colors: [:])
     return config
 }
 
-/// The probe a map at `label` must hold: the fingerprint form for a
-/// map lane 3c moves, else the number.
-private func probe(
-    _ label: String,
-    number: ScreenSlotKey,
-    fingerprint: ScreenAreaKey
-) -> String {
-    movesInLaneThreeC[label] != nil
-        ? fingerprint.description : number.description
-}
-
-/// Whether `map` holds the fingerprint probe without being a map
-/// lane 3c moves: one left behind beside the numbers.
+/// Whether `map` holds the fingerprint probe: a map left keyed by
+/// fingerprint beside the numbers.
 private func leftKeyedByFingerprint(
     _ map: (label: String, text: String)
 ) -> Bool {
-    movesInLaneThreeC[map.label] == nil
-        && map.text.contains("\"\(oldKey)\"")
+    map.text.contains("\"\(oldKey)\"")
 }
 
 /// (path, description) of every map typed with `String` on either
@@ -143,9 +113,8 @@ struct ScreenAreaRemapParityTests {
         let maps = stringMaps(populated())
         #expect(maps.count >= 6, "the scan found the maps")
         for map in maps where notAreaKeyed[map.label] == nil {
-            let key = probe(map.label, number: vanished, fingerprint: oldKey)
             #expect(
-                map.text.contains("\"\(key)\""),
+                map.text.contains("\"\(vanished)\""),
                 "\(map.label) holds no probe: populate or classify it"
             )
             // A map still keyed by fingerprint argues its place.
@@ -155,9 +124,7 @@ struct ScreenAreaRemapParityTests {
             )
         }
         let labels = Set(maps.map(\.label))
-        for label in notAreaKeyed.keys.sorted()
-            + movesInLaneThreeC.keys.sorted()
-        {
+        for label in notAreaKeyed.keys.sorted() {
             #expect(labels.contains(label), "\(label) is gone")
         }
     }
@@ -166,24 +133,21 @@ struct ScreenAreaRemapParityTests {
     func applyRewritesEveryMap() {
         var config = populated()
         config.apply(
-            ScreenAreaRemap(vanished: vanished, survivor: survivor),
-            order: order
+            ScreenAreaRemap(vanished: vanished, survivor: survivor)
         )
         let maps = stringMaps(config).filter {
             notAreaKeyed[$0.label] == nil
         }
         #expect(!maps.isEmpty)
         for map in maps {
-            let old = probe(map.label, number: vanished, fingerprint: oldKey)
-            let new = probe(map.label, number: survivor, fingerprint: newKey)
-            #expect(!map.text.contains("\"\(old)\""), "\(map.label)")
-            #expect(map.text.contains("\"\(new)\""), "\(map.label)")
+            #expect(!map.text.contains("\"\(vanished)\""), "\(map.label)")
+            #expect(map.text.contains("\"\(survivor)\""), "\(map.label)")
         }
     }
 
     /// Twins share one fingerprint, which the runtime keys as the
-    /// lower number's; a merge on the higher number's shares must
-    /// leave the lower one's bar entries alone.
+    /// lower number's; a merge on the higher number's shares remaps
+    /// no runtime key and leaves the lower one's bar entries alone.
     @Test("a twin's higher number remaps no runtime key")
     func twinHigherNumberRemapsNothing() throws {
         let twins = ScreenOrder([screen, "B:1000x1000", screen])
@@ -193,7 +157,7 @@ struct ScreenAreaRemapParityTests {
         #expect(remap.runtime(in: twins) == nil)
         var config = populated()
         let before = config.settings.appBarStyle.edgeOverride
-        config.apply(remap, order: twins)
+        config.apply(remap)
         #expect(config.settings.appBarStyle.edgeOverride == before)
         // The lower number still remaps.
         let low = ScreenAreaRemap(vanished: vanished, survivor: survivor)
@@ -218,15 +182,14 @@ struct ScreenAreaRemapParityTests {
     @Test("a survivor's own edge outranks the vanished one")
     func survivorKeepsItsEdge() {
         var config = populated()
-        config.settings.appBarStyle.edgeOverride[newKey.description] =
+        config.settings.appBarStyle.edgeOverride[survivor.description] =
             .top
         config.apply(
-            ScreenAreaRemap(vanished: vanished, survivor: survivor),
-            order: order
+            ScreenAreaRemap(vanished: vanished, survivor: survivor)
         )
         #expect(
             config.settings.appBarStyle.edgeOverride
-                == [newKey.description: .top]
+                == [survivor.description: .top]
         )
     }
 
@@ -268,24 +231,14 @@ struct ScreenAreaSplitCopyParityTests {
     func applyCopiesEveryMap() {
         var config = populated()
         let minted = ScreenSlotKey(number: 1, areaID: 7)!
-        let mintedKey = ScreenAreaKey(fingerprint: screen, areaID: 7)
-        config.apply(
-            ScreenAreaCopy(parent: vanished, minted: minted),
-            order: order
-        )
+        config.apply(ScreenAreaCopy(parent: vanished, minted: minted))
         let maps = stringMaps(config).filter {
             notAreaKeyed[$0.label] == nil && notCopied[$0.label] == nil
         }
         #expect(maps.count >= 5, "the scan found the maps")
         for map in maps {
-            let parent = probe(
-                map.label,
-                number: vanished,
-                fingerprint: oldKey
-            )
-            let new = probe(map.label, number: minted, fingerprint: mintedKey)
-            #expect(map.text.contains("\"\(parent)\""), "\(map.label)")
-            #expect(map.text.contains("\"\(new)\""), "\(map.label)")
+            #expect(map.text.contains("\"\(vanished)\""), "\(map.label)")
+            #expect(map.text.contains("\"\(minted)\""), "\(map.label)")
         }
         // A pin stays on the half that keeps the id.
         #expect(config.spacePins[SpaceID("1")] == vanished)
@@ -299,9 +252,7 @@ struct ScreenAreaSplitCopyParityTests {
     func splitTakesTheDoor() throws {
         var config = GuiConfig()
         let whole = ScreenSplit.whole(width: 3440, height: 1440)
-        let parent = ScreenAreaKey(fingerprint: screen, areaID: 0)
-        config.settings.appBarStyle.edgeOverride[parent.description] =
-            .left
+        config.settings.appBarStyle.edgeOverride["1"] = .left
         let split = config.splitArea(
             0,
             .sideBySide,
@@ -322,12 +273,8 @@ struct ScreenAreaSplitCopyParityTests {
                 )
         )
         #expect(config.settings.displayAreas[number: 1]?.areas.count == 2)
-        let mintedKey = ScreenAreaKey(
-            fingerprint: screen,
-            areaID: whole.nextID
-        )
         #expect(
-            config.settings.appBarStyle.edgeOverride[mintedKey.description]
+            config.settings.appBarStyle.edgeOverride[minted.description]
                 == .left
         )
     }

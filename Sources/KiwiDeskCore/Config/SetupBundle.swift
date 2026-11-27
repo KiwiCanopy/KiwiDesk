@@ -133,7 +133,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// without them.
     /// 56 = a profile's screen splits are per-mille shares keyed by
     /// screen number (#3647), in a bundle's `[Profile]`.
-    public static let currentFormat = 56
+    /// 57 = a profile's bar and pocket per-screen maps are keyed by
+    /// screen number (#3647), in a bundle's `[Profile]`.
+    public static let currentFormat = 57
 
     public let format: Int
 
