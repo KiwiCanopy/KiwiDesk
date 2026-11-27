@@ -4438,7 +4438,6 @@ and monocle stays an explicit no-op (floating was one too until
 back-compat alias for the old `bsp.set_ratio` /
 `layout.bsp.ratio` name (pre-release, single user). (#56)
 
-:::unreleased
 *Amended (#3672, owner ruling): each split keeps its own ratio.*
 The rejection above rested on a split having no identity without
 a tree, and it has one: split k of the dwindle divides `windows[k]`
@@ -4458,7 +4457,6 @@ follows its window as a Stack or Track weight does: a swap or an
 insert ahead moves it to the depth the window now holds, and a
 move to another Space ends it, as a close does. A float, a hide or
 a Desktop vanish keeps it for the window's return.
-:::
 
 **Stack resize is focus-aware, and its zone weights are
 ephemeral by design.** Both axes act on the *focused* window:
@@ -4989,7 +4987,6 @@ window against the press, or move nothing, refuses with the
 writer's blame instead of writing, so a hold ends; the direction
 stays the midpoint rule above, shared with the mouse.
 
-:::unreleased
 *Amended (#3672): the limitation above is gone, and so is the
 midpoint rule.* Every split keeps its own ratio (the #56 entry's
 amendment), so a resize moves ONE split, named by the one
@@ -5002,7 +4999,6 @@ the window by what it asks, and a window no split bounds on the
 axis refuses with what it lacks. The midpoint sign, and the
 "moves the other way" refusal #3643 added for a nested window the
 shared ratio pinned, retire with the case they answered.
-:::
 
 **Resizing clamps at a window's *effective minimum*, and a
 truncated attempt is cued, never silent (#933).** A window's
@@ -5773,11 +5769,9 @@ flat-array trade's residue and stays in the limitations row.
 `SplitFloorHealWiringTests`, `SplitFloorCueTests`,
 `SplitFloorHealNeedleTests`)
 
-:::unreleased
 *Amended (#3672):* with a ratio per split, the heal reaches every
 BSP split, each healing its own owner against the least length its
 rest takes, and the shared ratio no longer moves for one window.
-:::
 
 The heal moves the ratio only for a membership a Desktop shows
 (#2907). Through a Desktop switch a Space briefly holds both
@@ -7365,14 +7359,12 @@ shelf's end on Position's side — the start below 50 %, the end from
 50 % — and never moves, and Position stays one continuous slider
 rather than a second control for a bar's edge.
 
-:::unreleased
 *Amended (#3685, 2026-11-26):* the bars keep their alignment against
 the whole edge, and the pocket's slot only bounds them: a centred
 Space Bar stays centred on the screen beside the pocket, moved inward
 only as far as it must be not to overlap the slot, and shortened only
 once the edge is full. Centring the bars in the room left after the
 pocket put them half its slot off the screen's centre.
-:::
 
 **A shelf section in a panel the shelf owns.** A hugging plate is
 the union of its runs (`ShelfArrangement.plateSpan`), and a panel
@@ -12195,7 +12187,6 @@ a wallpaper is rarely the submitter's to license, often a personal
 photo, and larger than the repo should carry; the link goes to the
 page it comes from, the way a look's font link does.
 
-:::unreleased
 A saved look may carry a wallpaper that wearing it sets (#3478).
 Setting a wallpaper is not reading one, so it takes no prompt. The
 one file read is **Use Current Wallpaper**, a deliberate click that
@@ -12224,7 +12215,6 @@ since it would overwrite a picture set by hand for that Desktop and
 change the picture visibly after each arrival. The gallery stays
 link-only; a look file carries its picture only where its export was
 asked to.
-:::
 
 ### Open at login
 
@@ -16674,14 +16664,12 @@ The Desktop overview's opener, seeded on ⌃⌥O (#1229, #3167), is a fourth
 and is dropped the same way; the side switch prints it beside the
 Desktops title.
 
-:::unreleased
 *Amended (#3695, owner, 2026-11-27): the suppression is the
 Shortcuts side's alone.* Its home is the side switch, which the key
 sequence hint panel lacks, so a step's end key that opens KiwiHub —
 any side, the last-app opener included — is listed there like any
 other end key; dropped, it would be the one end key a step hides
 (`KeySequenceHintOpenerTests`).
-:::
 
 **The side switch draws titles only (#1229, owner ruling
 2026-11-01, amending #2245).** One line, every side always
@@ -16893,7 +16881,6 @@ would refuse the selection. A hint whose words change under a
 press eases its width and fades its words over 150 ms, none under
 Reduce Motion, the curve a row's ⌘ digit takes (#1875).
 
-:::unreleased
 *Amended (#3667, owner via the ui-designer, 2026-11-26): every
 press live now lights, and ⇥ is one of them.* Lighting the pick
 alone left ⌘↓ Open Space secondary while ⌘ was held, and ⇥ — on
@@ -16914,7 +16901,6 @@ included, so the eye finds it at one end; on Windows it stands
 after Next app, and the line still sheds Next app first, then the
 side switch, then Apps, then the rest from the end — where a hint
 stands and when it goes are two orders.
-:::
 
 **Short of room, a modifier hint becomes its key before any hint
 goes (#3249).** Where a language's Windows line does not fit,
@@ -21558,13 +21544,11 @@ in the one per-screen step, so an area whose bars are Hidden draws
 and reserves nothing. Thickness, margins and the rest stay one
 value, as before.
 
-:::unreleased
 *Amended (#3647): the per-screen and per-area maps are keyed by
 the number.* A screen's or an area's bar edge, Show and pocket edge
 belong to the number its screen holds (▸ *A profile numbers its
 screens per screen count*), so the same values follow the number
 onto another desk.
-:::
 
 The Space Bar keeps one visibility, so an area given the bar's own
 value stores nothing, as a screen given its bar's edge does. The
@@ -24094,14 +24078,12 @@ consequences:
   why.** A scripted save that changes another file must not do it
   silently.
 
-:::unreleased
 *Amended (#3647): a set changing hands carries no pins.* Pins
 belong to a profile's screen numbers (▸ *A profile numbers its
 screens per screen count*), so the claimant's own numbers apply to
 the set it takes, and the profile it leaves keeps its pins. The set
 keeps the order its previous holder stored (owner, 2026-11-26):
 that order is the numbering the user last saw for those screens.
-:::
 
 *Forgetting a setup is its own act (#3324, owner, 2026-11-14,
 amending the above).* The setup chips on a profile row stay
@@ -24139,13 +24121,11 @@ page's chips do, the list form of the locale, rather than the
 "+" the ruling sketched, so one setup never reads two ways on one
 page.
 
-:::unreleased
 *Amended (#3647):* a forget drops only the setup's order. The pins
 and the bars' and pocket's per-screen values belong to the
 profile's screen numbers, so they stay, on a profile left dormant
 too, and the clearing of per-screen bar edges above ends with the
 fingerprint-keyed maps.
-:::
 
 *The card's order (#3374, owner, 2026-11-17, amending the above).*
 The connected setup leads, then the rest by screen count, then by
@@ -24159,7 +24139,6 @@ by holder, as the card first did, scattered setups of one count
 across the list, and a user looks for a setup by its screens, not
 by which profile holds it.
 
-:::unreleased
 **[Principle]**
 
 **A profile numbers its screens per screen count, and a screen
@@ -24302,7 +24281,6 @@ The consequences:
 - **Copy says which form of a screen's name it means.** Known
   screen setups keeps naming screens by name, since every setup
   there has its own Screen 1.
-:::
 
 **[Principle]**
 
@@ -24822,12 +24800,10 @@ list hides that second one; a picture cannot, and an unexplained
 duplicate reads as a bug in the drawing rather than a limit of the
 identity.
 
-:::unreleased
 *Amended (#3647):* a pin now follows a screen number rather than
 `name:WxH`, so twins may hold two numbers; which twin holds which
 is arbitrary within their one identity (▸ *A profile numbers its
 screens per screen count*).
-:::
 
 **Chips: pinned, follows-main, automatic.** Semantic micro-icons
 (pin, arrow) rather than border styles alone (accessibility), and

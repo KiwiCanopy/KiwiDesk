@@ -145,7 +145,6 @@ screen split in three shows three Spaces at once. A Desktop still
 belongs to the whole screen: switching it switches every area of
 that screen together.
 
-:::unreleased
 ## How screens are numbered
 
 A profile numbers each screen of a setup it holds: **Screen 1**,
@@ -173,7 +172,6 @@ When a profile's splits fit the connected screens only under
 another numbering, that numbering is used until the screens or
 the profile change; a Save still stores the order shown on
 Settings ▸ Screens.
-:::
 
 ## Every Desktop keeps its own Space, and its own windows
 

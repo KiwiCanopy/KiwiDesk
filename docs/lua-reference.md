@@ -739,7 +739,6 @@ with the limits named there.
 **number** (see below) or a **string** matching a connected
 screen's fingerprint (as printed by `list_monitors`) or name.
 
-:::unreleased
 A number names **Screen N**, as `list_monitors` reports it in
 `screen`: the live profile's numbering for the connected screens,
 else left to right, ties top to bottom. A renumber saved in
@@ -750,7 +749,6 @@ held `init.lua` call names before any screen is known —
 `pin_space_to_display`, a split, a bar's per-screen value — is
 numbered at the first screen report, by the profile live then; on a
 setup that profile does not hold, left to right.
-:::
 
 **Does:** moves the whole space to that screen **now** and
 shows it there (each screen shows one space at a time). A
@@ -831,12 +829,9 @@ per-screen edge and visibility verbs and a layout's
 `set_app_bar_visibility` — also takes an area key, as
 `list_monitors` prints it in `areas[].key`, or an area's own name.
 
-:::unreleased
 `"N#id"` names Screen N's area `id`, as `list_monitors` prints it in
 `areas[].numbered_key`.
-:::
 
-:::unreleased
 A split belongs to a screen number, not to a screen: it is stored
 under `display_areas` keyed by `"N"`, as shares of the screen, and
 draws on whichever screen holds Screen N, so a renumber moves it and
@@ -847,15 +842,12 @@ known yet is stored at once, its sizes read against their own sum.
 A screen that is not connected names the number the live profile's
 first setup holding it gives it, so its split is the one the
 screen holding that number now draws.
-:::
 
-:::unreleased
 A split whose areas would be narrower or shorter than the minimum
 window size on the screen it names is refused. A screen that
 cannot hold its number's split draws whole; a profile load numbers
 its screens so that every split fits where it can, and a
 fingerprint then names the number that screen holds in that order.
-:::
 
 A number or a screen's name names its first area; what it names
 for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
@@ -882,10 +874,8 @@ onwards once a row or column holds four areas, or an area is split
 three levels deep); an empty name goes back to the position. A name made only of digits, or one another
 area or screen already has, is refused.
 
-:::unreleased
 The area may also be named `"N#id"`. A name shaped like `N#id` is
 refused too.
-:::
 
 **Example:**
 
@@ -1247,7 +1237,6 @@ and size are not part of it. A change it did not record — a
 Desktop switch, a profile load, a config reload — makes the next
 undo fail and clears that space's history.
 
-:::unreleased
 A window closing keeps the history: it leaves every stored step,
 and a step that only moved it is gone. A new window keeps it too,
 joining each earlier step where its placement put it, beside the
@@ -1256,7 +1245,6 @@ lacks that window. A window that comes back from a hide, a
 minimize or another Desktop, a window Track's new-window rule
 places, or a window opening or closing while a drag or a held key
 is still going, still clears the history.
-:::
 
 A failed or empty undo from a key plays the refusal
 sound when [`set_refusal_sound`](#set_refusal_sound) is on; a
@@ -1942,11 +1930,9 @@ bsp.set_strategy("longest_side")
 BSP split. `resize("x", …)` nudges this value; the stacked splits
 keep their own ratio (#56).
 
-:::unreleased
 `resize("x", …)` moves one split instead and stores that split's
 own ratio for the session (#3672); setting this value clears those
 and applies to every side-by-side split again.
-:::
 
 **Example:**
 
@@ -1962,10 +1948,8 @@ bsp.set_ratio_h(0.5)
 (top/bottom) BSP split. `resize("y", …)` nudges this value,
 independently of the side-by-side ratio (#56).
 
-:::unreleased
 `resize("y", …)` moves one split instead, as `bsp.set_ratio_h`
 says, and setting this value clears the stacked splits' own ratios.
-:::
 
 **Example:**
 
@@ -4586,7 +4570,6 @@ edge. Splitting an area in Settings gives the new area the edges
 and visibilities of the area it came from; areas a
 `set_display_areas` list creates start at the bars' own.
 
-:::unreleased
 A screen's own edge and visibility belong to its screen number, not
 to the screen: the bars' and the pocket's `edge_override` and
 `visibility_override` maps are keyed by `"N"`, and an area's by
@@ -4598,7 +4581,6 @@ number the live profile's first setup holding it gives it. Two
 screens of one model read the lower number's values. `forget_monitor_set` keeps
 every number up to the profile's screen count, and drops only an
 area's values the profile's splits no longer hold.
-:::
 
 ```lua
 space_bar.set_edge("top")
@@ -5593,7 +5575,6 @@ look, delete it first.
 
 ### look.show_picker
 
-:::unreleased
 **Expects:** nothing.
 
 **Does:** opens the **look picker** over the focused screen, a
@@ -5620,7 +5601,6 @@ hide ▸ KiwiDesk as **Show look picker**.
 
 Under KiwiDesk's Reduce Motion the picker cross-fades away after a
 wear instead of playing its reveal.
-:::
 
 **Example:**
 
@@ -8910,7 +8890,6 @@ What the `delta` adjusts depends on the layout:
   minimums (per side, #933) within the area the layout fills
   (#383) — the screen minus any Space Bar strip.
 
-  :::unreleased
   Each split keeps its own ratio (#3672): a press moves the
   focused window's own split where it runs along the axis, else
   the nearest split above it on the axis, so a positive delta
@@ -8918,7 +8897,6 @@ What the `delta` adjusts depends on the layout:
   other split where it is. A mouse drag moves the split behind
   the edge it moved. A window no split bounds on the axis refuses
   the press.
-  :::
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
@@ -9380,12 +9358,10 @@ end)
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 | `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
 
-:::unreleased
 `desktop_change`'s `screen` is the switched screen's
 [Screen N](#move_space_to_display), and `main` says whether it is the
 main screen; the Lua callback receives the number second and `main`
 third. Test `main`, not the number, for the main screen.
-:::
 
 The window lifecycle events fire even when focus does not change
 (a background window opening or closing). `space` is always the
@@ -9926,12 +9902,10 @@ restart of the Mac ends every hold
 A profile covers concrete **screen setups** of one screen count — each a list
 of screen fingerprints.
 
-:::unreleased
 Each setup lists its screens in the order that numbers them, and
 the profile's Screen pins name a screen by that number, so every
 setup the profile holds shares one set of pins ([Profile JSON
 Format](#profile-json-format)).
-:::
 
 Updating a profile while a new combination is connected
 teaches it that combination. When screens change, KiwiDesk resolves
@@ -9955,12 +9929,10 @@ in this order:
    your Lua-declared tiling stays authoritative and spaces are only
    placed on screens: by their Screen pins, else by number.
 
-:::unreleased
 On a setup of its count it does not hold — a count default, or the
 live profile staying on after a screen change — a profile numbers
 the screens left to right, ties top to bottom, and its Screen pins
 apply in that order.
-:::
 
 Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.
@@ -9987,11 +9959,9 @@ for as many screens, and creating a profile hand the connected set
 to that profile and remove it from every other
 profile with that count.
 
-:::unreleased
 A set a profile takes keeps the order its previous owner stored and
 carries none of that owner's pins; the profile that takes it applies
 its own.
-:::
 
 When that took the set
 from another profile, the command returns the names and why:
@@ -10045,10 +10015,8 @@ set becomes the default unless the count already has another.
 `app_bar.visibility_override`)
 for the screens whose edges it drops.
 
-:::unreleased
 `forget_monitor_set` leaves the profile's Screen pins as they are:
 they belong to its screen numbers, which its other setups share.
-:::
 
 **Example:**
 
@@ -10138,7 +10106,6 @@ stripped, grouped by namespace — `set_gap_override` becomes
 }
 ```
 
-:::unreleased
 `space_monitor_map` sits at the profile's top level, beside
 `monitor_sets`, and pins each Space to a screen NUMBER: `"2": "2"`
 pins Space 2 to Screen 2, `"3": "1#2"` to area 2 of Screen 1. A
@@ -10149,7 +10116,6 @@ the screens. A file written by an older release crosses on its
 first read, numbering each screen by its place in the set's
 `monitors`; where two sets pinned one Space differently, the first
 set in `monitor_sets` keeps its pin.
-:::
 
 `lens_reach` leaves [KiwiVision lenses](#kiwivisiontoggle) out of
 the profile. It maps a lens name, in lower case, to `false`:
@@ -11042,10 +11008,8 @@ of its Space from [`get_state`](#get_state).
 `height`) in the same coordinates, and `layout_frame`, the area
 its shown Space lays windows out in.
 
-:::unreleased
 It lists the screens as Screen 1 onwards, each with its number in
 `screen` and `main: true` on the main screen.
-:::
 
 It also reports `space_id`, the Space that screen shows (`null`
 while it shows none) — on a screen that is not split, the Space
@@ -11059,10 +11023,8 @@ is always its first area's, `areas[0].space_id`, whichever area
 has the focus, and `layout_frame` is that Space's. On a screen that
 is not split, `areas` is empty.
 
-:::unreleased
 Each area also carries `numbered_key`, `"N#id"`, the key a script
 names it by.
-:::
 
 Each `list_windows` entry also carries `app`, `pid`, `index` (the
 window's place in its Space's row, from 1; `null` for a window no
