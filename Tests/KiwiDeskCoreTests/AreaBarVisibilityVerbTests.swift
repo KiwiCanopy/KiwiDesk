@@ -26,10 +26,8 @@ struct AreaBarVisibilityVerbTests {
         guard split else { return core }
         var settings = core.tiler.settings
         settings.displayAreas.store(
-            try #require(
-                ScreenSplit.whole(width: 3440, height: 1440)
-                    .splitting(0, .sideBySide)
-            ),
+            ScreenSplit.whole(width: 3440, height: 1440)
+                .splitting(0, .sideBySide),
             on: wide.fingerprint,
             order: core.liveScreenOrder
         )
