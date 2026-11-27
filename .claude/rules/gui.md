@@ -2079,7 +2079,15 @@ Obligations:
   decides glass once for the ground and the inks and hands the
   fallback the concrete inks the contrast suite measures on it;
   the update window's ground is the instance
-  (`UpdateGlassTextTests`, `GlassWindowGroundInksTests`).
+  (`UpdateGlassTextTests`, `GlassWindowGroundInksTests`). **A
+  control on that glass stands on the opaque control ground**
+  (#3666): a native `.menu` bezel adapts and its label does not,
+  and a chip's translucent face sinks with the glass, so a pop-up
+  is `UpdatePopUp`, an action button adds `updateActionGround()`
+  and the tab strip's segments sit on `updateControlGround`, whose
+  `card` the contrast suite measures the faces on
+  (`UpdateControlGroundTests`). Updates-only until a second glass
+  surface needs it.
 - **A tinted panel's text takes the hierarchical styles `panelGlassChrome`
   sets, never an ink by name.** While the panel wears the Fill, on
   glass or over its material (`PanelGlass.shelf`), it sets

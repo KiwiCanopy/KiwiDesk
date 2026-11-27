@@ -11,7 +11,8 @@ import Testing
 extension SettingsThemeContrastTests {
     /// A segmented control's unselected label over its track, and
     /// over the hover lift above it, on every ground a picker
-    /// stands on — the update window's tab strip on the page.
+    /// stands on — the update window's tab strip on its control
+    /// ground, `card` (#3666).
     private static let segments: [Pairing] =
         [
             ("card", SettingsTheme.card),

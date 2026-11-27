@@ -2,8 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The pinned tab strip above the notes (#1666 ruling): segments
-/// at their natural width, each "Name · N", and a menu picker on
-/// the same selection when they do not fit — a feed type this
+/// at their natural width, each "Name · N", and the window's pop-up
+/// on the same selection when they do not fit — a feed type this
 /// build does not know carries a title nobody sized.
 struct UpdateNotesTabStrip: View {
     let digest: UpdateNotesDigest?
@@ -21,17 +21,14 @@ struct UpdateNotesTabStrip: View {
                 widest(options)
                 SegmentedPicker(selection: $selection, options: options)
                     .fixedSize()
+                    .updateControlGround(Capsule())
                     .accessibilityLabel(Self.label)
             }
-            Picker(Self.label, selection: $selection) {
-                ForEach(options, id: \.value) { option in
-                    Text(option.title).tag(option.value)
-                }
-            }
-            .pickerStyle(.menu)
-            .labelsHidden()
-            .neutralMenuLabel()
-            .fixedSize()
+            UpdatePopUp(
+                label: Self.label,
+                selection: $selection,
+                options: options
+            )
         }
     }
 

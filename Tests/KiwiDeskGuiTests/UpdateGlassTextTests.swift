@@ -11,6 +11,9 @@ import Testing
 /// apart; the guard is a scan of the Updates files that draw text
 /// or name an ink, each of which is ruled into one list below.
 ///
+/// A control draws its label on a face of its own, so it sits on
+/// the opaque control ground instead (#3666).
+///
 /// Ruled per file, so a file holding both kinds is ruled by its
 /// card text: `UpdateNotesScroll.swift`'s links sit on the glass,
 /// and a fixed ink added to them would pass both scans.
@@ -35,13 +38,13 @@ struct UpdateGlassTextTests {
         "UpdateNotesScroll.swift",
     ]
 
-    /// Files whose text a control draws on a bezel of its own, in
-    /// the ink its seal sets. A menu picker's seal is a fixed ink
-    /// and its bezel adapts with the glass: weak in light over a
-    /// dark backdrop, a defect of its own (#3666).
-    private static let exempt: [String: String] = [
-        "UpdateNotesTabStrip.swift": "segments; menu under its seal",
-        "WhatsNewReleasePicker.swift": "menu picker under its seal",
+    /// Files whose text a control draws on the opaque control
+    /// ground (#3666): its face's fixed ink on `card`, which the
+    /// contrast suite measures.
+    private static let onControlGround: Set<String> = [
+        "UpdateNotesTabStrip.swift",
+        "WhatsNewReleasePicker.swift",
+        "UpdateControlGround.swift",
     ]
 
     private static var updates: URL {
@@ -67,6 +70,9 @@ struct UpdateGlassTextTests {
         /(?:foregroundStyle\(|foregroundColor = )SettingsTheme\.ink\d?\b/
     }
 
+    /// The controls that draw a label of their own.
+    private static let controls = ["SegmentedPicker(", "UpdatePopUp("]
+
     /// Every Updates file that draws text or names an ink is ruled
     /// into exactly one list, so a new one cannot go unseen.
     @Test("every text-drawing Updates file is ruled")
@@ -76,12 +82,14 @@ struct UpdateGlassTextTests {
         var drawing: Set<String> = []
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
-            if text.contains("Text(") || text.contains(Self.fixedInk) {
+            if text.contains("Text(") || text.contains(Self.fixedInk)
+                || Self.controls.contains(where: text.contains)
+            {
                 drawing.insert(file.lastPathComponent)
             }
         }
         let lists = [
-            Set(Self.onGlass.keys), Self.onCards, Set(Self.exempt.keys),
+            Set(Self.onGlass.keys), Self.onCards, Self.onControlGround,
         ]
         let ruled = lists.reduce(Set<String>()) { $0.union($1) }
         let unruled = drawing.subtracting(ruled).sorted()
