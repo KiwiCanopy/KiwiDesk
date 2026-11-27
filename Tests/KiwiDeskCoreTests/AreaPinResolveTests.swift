@@ -22,8 +22,8 @@ struct AreaPinResolveTests {
             ScreenSplit.whole(width: 3440, height: 1440)
                 .splitting(0, .sideBySide)
         )
-        core.state.workspaces.setAreaSplits([wide.fingerprint: split])
         core.state.workspaces.upsertDisplay(wide)
+        core.storeSplit(split, on: wide.fingerprint)
         for id in 1...3 { core.state.workspaces.ensureSpace(SpaceID(id)) }
         return core
     }
@@ -68,6 +68,11 @@ struct AreaPinResolveTests {
             frame: CGRect(x: -1512, y: 0, width: 1512, height: 982)
         )
         core.state.workspaces.upsertDisplay(laptop)
+        // The laptop, to the left, is now Screen 1 (#3647): the
+        // wide screen's split moves with it to Screen 2.
+        let shares = core.tiler.settings.displayAreas
+        let one = try #require(shares["1"])
+        core.tiler.settings.displayAreas = ["2": one]
         core.spacePins[SpaceID(2)] = "\(wide.fingerprint)#1"
         core.resolveSpaceDisplays(mainID: laptop.id)
         #expect(core.state.workspaces.display(of: SpaceID(2)) == wide.id)

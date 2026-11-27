@@ -36,7 +36,7 @@ enum SettingsValueReadout {
         case .general(let k):
             return generalRows(k, old: old, new: new)
         case .kiwishelf(let k):
-            return kiwishelfRows(k, old: old, new: new)
+            return kiwishelfRows(k, old: old, new: new, order: screenOrder)
         case .layout(let k):
             return layoutRows(k, old: old, new: new)
         case .layoutAppBar(let k):

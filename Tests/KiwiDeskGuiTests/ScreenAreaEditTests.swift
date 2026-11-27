@@ -158,7 +158,7 @@ struct ScreenAreaEditTests {
         model.splitArea(0, on: screen, .sideBySide)
         model.mergeArea(1, with: 0, on: screen)
         #expect(
-            model.config.settings.displayAreas[screen.fingerprint] == nil
+            model.config.settings.displayAreas.isEmpty
         )
     }
 
@@ -175,9 +175,17 @@ struct ScreenAreaEditTests {
         let base = GuiConfig()
         for changed in [other, named] {
             var old = base
-            old.settings.displayAreas["W:3440x1440"] = one
+            old.settings.displayAreas[number: 1] = ScreenShares(
+                one,
+                width: 3440,
+                height: 1440
+            )
             var new = base
-            new.settings.displayAreas["W:3440x1440"] = changed
+            new.settings.displayAreas[number: 1] = ScreenShares(
+                changed,
+                width: 3440,
+                height: 1440
+            )
             let rows = SettingsValueReadout.screensRows(
                 .displayAreas,
                 old: old,

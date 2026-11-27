@@ -96,9 +96,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// a wear beside `lookOrigin`; never a `LookKeys` path, so it
     /// never changes whether a look reads applied.
     public var lookWallpaper: LookWallpaper?
-    /// Each split physical screen's areas (#3517), keyed by its
-    /// `Display.fingerprint`; a screen absent here is whole.
-    public var displayAreas: [String: ScreenSplit] = [:]
+    /// Each split screen number's areas as shares (#3517, #3647),
+    /// keyed by the bare number `"N"`; a number absent here is
+    /// whole. Read in points only through `ScreenShares+Order`.
+    public var displayAreas: [String: ScreenShares] = [:]
 
     public init() {}
 }

@@ -8,9 +8,15 @@ import Testing
 // key. An area key is a String, so the scan DISCOVERS every map in
 // a `GuiConfig` whose key or value type is `String` by reflection
 // (depth 5) and requires each one to be either populated with the
-// probe key below — and so rewritten by the merge — or named in
+// probe below — and so rewritten by the merge — or named in
 // `notAreaKeyed` with its reason. A new per-screen map reds here
 // until it is classified.
+//
+// Since #3647 lane 3 an area belongs to a screen NUMBER: the probe
+// is the slot `1#2`, and a map still keyed by fingerprint is
+// populated with `Wide:3440x1440#2` and must be named in
+// `movesInLaneThreeC` — so a fingerprint-keyed map left behind, or
+// a new one, reds until it moves to numbers or argues its place.
 //
 // Stated limitations: a map whose String sits inside a struct
 // element (`[K: SomeStruct]` holding a key in a field) reads as
@@ -23,9 +29,13 @@ import Testing
 // — and `mergeTakesTheDoor` and `applyCopiesEveryMap` hold them.
 
 private let screen = "Wide:3440x1440"
-private let vanished = ScreenAreaKey(fingerprint: screen, areaID: 2)
-private let survivor = ScreenAreaKey(fingerprint: screen, areaID: 1)
+private let vanished = ScreenSlotKey(number: 1, areaID: 2)!
+private let survivor = ScreenSlotKey(number: 1, areaID: 1)!
 private let order = ScreenOrder([screen])
+/// The fingerprint form of `vanished` / `survivor`, as the maps not
+/// yet moved key them.
+private let oldKey = ScreenAreaKey(fingerprint: screen, areaID: 2)
+private let newKey = ScreenAreaKey(fingerprint: screen, areaID: 1)
 
 /// Reflected paths of String-typed maps that hold no area key, and
 /// why. Keyed by the whole path, so exempting one map never exempts
@@ -35,20 +45,34 @@ private let notAreaKeyed: [String: String] = [
     "titledAppRules": "keyed by app and title, valued by Space",
     "settings.spaceIcons": "an SF Symbol name per Space",
     "settings.displayAreas":
-        "keyed by the PHYSICAL screen; a merge rewrites its split",
+        "keyed by screen number; a merge rewrites its shares",
     "look.colors": "a colour path to its hex",
     "gesture.maps": "keyed by keybinding layer name (#3535)",
 ]
 
-/// A config whose every area-keyed field names `vanished`. This
-/// population list is the one hand-kept list; the scan
-/// cross-checks it against what reflection finds.
+/// The per-screen maps still keyed by fingerprint, which #3647's
+/// lane 3c moves to screen numbers; each entry leaves with its map.
+private let movesInLaneThreeC: [String: String] = [
+    "settings.spaceBarStyle.edgeOverride": "moves in lane 3c",
+    "settings.appBarStyle.edgeOverride": "moves in lane 3c",
+    "settings.kiwishelf.pocketEdgeOverride": "moves in lane 3c",
+    "settings.spaceBarStyle.visibilityOverride": "moves in lane 3c",
+    "settings.monocle.appBar.visibilityOverride": "moves in lane 3c",
+    "settings.scrolling.appBar.visibilityOverride": "moves in lane 3c",
+    "look.style": "moves in lane 3c",
+]
+
+/// A config whose every area-keyed field names `vanished`, by
+/// number or, for the maps lane 3c moves, by fingerprint. This
+/// population list is the one hand-kept list; the scan cross-checks
+/// it against what reflection finds.
 private func populated() -> GuiConfig {
     var config = GuiConfig()
-    let key = vanished.description
-    config.spacePins[SpaceID("1")] = ScreenSlotKey(number: 1, areaID: 2)
+    let slot = vanished.description
+    let key = oldKey.description
+    config.spacePins[SpaceID("1")] = vanished
     let desktop = DesktopKey.identity(DesktopIdentity(raw: "probe"))
-    config.desktopAreaSpaces[desktop] = [key: SpaceID("1")]
+    config.desktopAreaSpaces[desktop] = [slot: SpaceID("1")]
     config.settings.spaceBarStyle.edgeOverride[key] = .bottom
     config.settings.appBarStyle.edgeOverride[key] = .left
     config.settings.kiwishelf.pocketEdgeOverride[key] = .right
@@ -61,6 +85,17 @@ private func populated() -> GuiConfig {
         colors: [:]
     )
     return config
+}
+
+/// The probe a map at `label` must hold: the fingerprint form for a
+/// map lane 3c moves, else the number.
+private func probe(
+    _ label: String,
+    number: ScreenSlotKey,
+    fingerprint: ScreenAreaKey
+) -> String {
+    movesInLaneThreeC[label] != nil
+        ? fingerprint.description : number.description
 }
 
 /// (path, description) of every map typed with `String` on either
@@ -98,15 +133,24 @@ struct ScreenAreaRemapParityTests {
     func everyMapIsClassified() {
         let maps = stringMaps(populated())
         #expect(maps.count >= 6, "the scan found the maps")
-        let key = vanished.description
         for map in maps where notAreaKeyed[map.label] == nil {
+            let key = probe(map.label, number: vanished, fingerprint: oldKey)
             #expect(
                 map.text.contains("\"\(key)\""),
                 "\(map.label) holds no probe: populate or classify it"
             )
+            // A map still keyed by fingerprint argues its place.
+            if movesInLaneThreeC[map.label] == nil {
+                #expect(
+                    !map.text.contains("\"\(oldKey)\""),
+                    "\(map.label) is keyed by fingerprint"
+                )
+            }
         }
         let labels = Set(maps.map(\.label))
-        for label in notAreaKeyed.keys {
+        for label in notAreaKeyed.keys.sorted()
+            + movesInLaneThreeC.keys.sorted()
+        {
             #expect(labels.contains(label), "\(label) is gone")
         }
     }
@@ -123,15 +167,17 @@ struct ScreenAreaRemapParityTests {
         }
         #expect(!maps.isEmpty)
         for map in maps {
-            #expect(!map.text.contains("\"\(vanished)\""), "\(map.label)")
-            #expect(map.text.contains("\"\(survivor)\""), "\(map.label)")
+            let old = probe(map.label, number: vanished, fingerprint: oldKey)
+            let new = probe(map.label, number: survivor, fingerprint: newKey)
+            #expect(!map.text.contains("\"\(old)\""), "\(map.label)")
+            #expect(map.text.contains("\"\(new)\""), "\(map.label)")
         }
     }
 
     @Test("a survivor's own edge outranks the vanished one")
     func survivorKeepsItsEdge() {
         var config = populated()
-        config.settings.appBarStyle.edgeOverride[survivor.description] =
+        config.settings.appBarStyle.edgeOverride[newKey.description] =
             .top
         config.apply(
             ScreenAreaRemap(vanished: vanished, survivor: survivor),
@@ -139,7 +185,7 @@ struct ScreenAreaRemapParityTests {
         )
         #expect(
             config.settings.appBarStyle.edgeOverride
-                == [survivor.description: .top]
+                == [newKey.description: .top]
         )
     }
 
@@ -150,7 +196,7 @@ struct ScreenAreaRemapParityTests {
         let three = try #require(
             whole.splitting(0, .sideBySide)?.splitting(1, .sideBySide)
         )
-        config.settings.displayAreas[screen] = three
+        config.settings.displayAreas.store(three, on: screen, order: order)
         let merged = config.mergeAreas(2, 1, on: screen, order: order)
         let remap = try #require(merged)
         #expect(remap.vanished == vanished)
@@ -159,7 +205,7 @@ struct ScreenAreaRemapParityTests {
             config.spacePins[SpaceID("1")]
                 == ScreenSlotKey(number: 1, areaID: 1)
         )
-        #expect(config.settings.displayAreas[screen]?.areas.count == 2)
+        #expect(config.settings.displayAreas[number: 1]?.areas.count == 2)
         let refused = config.mergeAreas(0, 9, on: screen, order: order)
         #expect(refused == nil)
     }
@@ -180,21 +226,28 @@ struct ScreenAreaSplitCopyParityTests {
     @Test("a split's apply copies every per-area bar map")
     func applyCopiesEveryMap() {
         var config = populated()
-        let minted = ScreenAreaKey(fingerprint: screen, areaID: 7)
-        config.apply(ScreenAreaCopy(parent: vanished, minted: minted))
+        let minted = ScreenSlotKey(number: 1, areaID: 7)!
+        let mintedKey = ScreenAreaKey(fingerprint: screen, areaID: 7)
+        config.apply(
+            ScreenAreaCopy(parent: vanished, minted: minted),
+            order: order
+        )
         let maps = stringMaps(config).filter {
             notAreaKeyed[$0.label] == nil && notCopied[$0.label] == nil
         }
         #expect(maps.count >= 5, "the scan found the maps")
         for map in maps {
-            #expect(map.text.contains("\"\(vanished)\""), "\(map.label)")
-            #expect(map.text.contains("\"\(minted)\""), "\(map.label)")
+            let parent = probe(
+                map.label,
+                number: vanished,
+                fingerprint: oldKey
+            )
+            let new = probe(map.label, number: minted, fingerprint: mintedKey)
+            #expect(map.text.contains("\"\(parent)\""), "\(map.label)")
+            #expect(map.text.contains("\"\(new)\""), "\(map.label)")
         }
         // A pin stays on the half that keeps the id.
-        #expect(
-            config.spacePins[SpaceID("1")]
-                == ScreenSlotKey(number: 1, areaID: 2)
-        )
+        #expect(config.spacePins[SpaceID("1")] == vanished)
         let labels = Set(stringMaps(config).map(\.label))
         for label in notCopied.keys {
             #expect(labels.contains(label), "\(label) is gone")
@@ -213,17 +266,27 @@ struct ScreenAreaSplitCopyParityTests {
             .sideBySide,
             floor: 100,
             of: whole,
-            on: screen
+            on: screen,
+            order: order
         )
         let copy = try #require(split)
-        let minted = ScreenAreaKey(
+        let minted = try #require(
+            ScreenSlotKey(number: 1, areaID: whole.nextID)
+        )
+        #expect(
+            copy
+                == ScreenAreaCopy(
+                    parent: ScreenSlotKey(number: 1)!,
+                    minted: minted
+                )
+        )
+        #expect(config.settings.displayAreas[number: 1]?.areas.count == 2)
+        let mintedKey = ScreenAreaKey(
             fingerprint: screen,
             areaID: whole.nextID
         )
-        #expect(copy == ScreenAreaCopy(parent: parent, minted: minted))
-        #expect(config.settings.displayAreas[screen]?.areas.count == 2)
         #expect(
-            config.settings.appBarStyle.edgeOverride[minted.description]
+            config.settings.appBarStyle.edgeOverride[mintedKey.description]
                 == .left
         )
     }
@@ -237,7 +300,8 @@ struct ScreenAreaSplitCopyParityTests {
             .sideBySide,
             floor: 10_000,
             of: whole,
-            on: screen
+            on: screen,
+            order: order
         )
         #expect(refused == nil)
         #expect(config.settings.displayAreas.isEmpty)

@@ -26,12 +26,12 @@ struct DesktopOverviewAreaTests {
             name: "B",
             frame: CGRect(x: 100, y: 0, width: 3440, height: 1440)
         )
-        let split = ScreenSplit.whole(width: 3440, height: 1440)
-            .splitting(0, .sideBySide)
-        core.state.workspaces.setAreaSplits(
-            split.map { [wide.fingerprint: $0] } ?? [:]
-        )
         connectAuthority(core, [authorityDisplay(1, "A"), wide])
+        if let split = ScreenSplit.whole(width: 3440, height: 1440)
+            .splitting(0, .sideBySide)
+        {
+            core.storeSplit(split, on: wide.fingerprint)
+        }
         let areas = core.state.workspaces.placements(of: wide.id)
             .map(\.id)
         core.state.workspaces.ensureSpace(SpaceID(1))
@@ -91,8 +91,10 @@ struct DesktopOverviewAreaTests {
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
         let hidden = try #require(authoritySnapshot().key(of: 21))
-        let keys = areas.compactMap {
-            core.state.workspaces[placement: $0]?.key.description
+        let keys = areas.compactMap { area in
+            core.state.workspaces[placement: area].flatMap {
+                core.liveScreenOrder.slot(of: $0.key)?.description
+            }
         }
         try #require(keys.count == 2)
         core.desktopMemory.areaSpaces[hidden] = [
@@ -114,8 +116,10 @@ struct DesktopOverviewAreaTests {
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
         let hidden = try #require(authoritySnapshot().key(of: 21))
-        let keys = areas.compactMap {
-            core.state.workspaces[placement: $0]?.key.description
+        let keys = areas.compactMap { area in
+            core.state.workspaces[placement: area].flatMap {
+                core.liveScreenOrder.slot(of: $0.key)?.description
+            }
         }
         try #require(keys.count == 2)
         core.desktopMemory.virtualSpaces[hidden] = SpaceID(5)
@@ -151,8 +155,10 @@ struct DesktopOverviewAreaTests {
         defer { resetAuthorityOverrides() }
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
-        let keys = areas.compactMap {
-            core.state.workspaces[placement: $0]?.key.description
+        let keys = areas.compactMap { area in
+            core.state.workspaces[placement: area].flatMap {
+                core.liveScreenOrder.slot(of: $0.key)?.description
+            }
         }
         try #require(keys.count == 2)
         let other = try #require(authoritySnapshot().key(of: 11))

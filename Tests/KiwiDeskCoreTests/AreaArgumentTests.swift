@@ -24,8 +24,8 @@ struct AreaArgumentTests {
                 .splitting(0, .sideBySide)
         )
         split.areas[1].name = "Calls"
-        core.state.workspaces.setAreaSplits([wide.fingerprint: split])
         core.state.workspaces.upsertDisplay(wide)
+        core.storeSplit(split, on: wide.fingerprint)
         let areas = core.state.workspaces.placements(of: wide.id).map(\.id)
         core.state.workspaces.assign(SpaceID("1"), to: areas[0])
         core.state.workspaces.assign(SpaceID("2"), to: areas[1])

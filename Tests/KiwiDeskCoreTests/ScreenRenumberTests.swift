@@ -117,6 +117,29 @@ struct SessionScreenOrderTests {
         #expect(core.liveScreenOrder != reversed)
     }
 
+    /// A split belongs to its number (#3647 ▸ lane 3): a renumber
+    /// moves Screen 1's split to whichever screen now holds 1.
+    @Test("a renumber moves a number's split with it")
+    func splitFollowsTheNumber() throws {
+        let core = makeCore()
+        try loadWork(core)
+        // Too small to lay out, so read the projection the placement
+        // list is built from.
+        let halves = ScreenSplit(
+            areas: [
+                ScreenArea(id: 0, x: 0, y: 0, w: 50, h: 100),
+                ScreenArea(id: 1, x: 50, y: 0, w: 50, h: 100),
+            ]
+        )
+        core.storeSplit(halves, on: left.fingerprint)
+        let splits = { core.state.workspaces.areaSplits }
+        #expect(splits()[left.fingerprint] != nil)
+        #expect(splits()[right.fingerprint] == nil)
+        core.setSessionScreenOrder(reversed)
+        #expect(splits()[left.fingerprint] == nil)
+        #expect(splits()[right.fingerprint]?.areas.count == 2)
+    }
+
     @Test("a Save stores the order and ends it; a hole outlives it")
     func save() throws {
         let core = makeCore()

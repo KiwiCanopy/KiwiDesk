@@ -46,9 +46,13 @@ struct ScreenShowRowsTests {
         model.config.settings.spaceBarStyle.visibility = .always
         if split {
             model.config.settings.displayAreas = [
-                wide.fingerprint: try #require(
-                    ScreenSplit.whole(width: 3440, height: 1440)
-                        .splitting(0, .sideBySide)
+                "1": ScreenShares(
+                    try #require(
+                        ScreenSplit.whole(width: 3440, height: 1440)
+                            .splitting(0, .sideBySide)
+                    ),
+                    width: 3440,
+                    height: 1440
                 )
             ]
         }

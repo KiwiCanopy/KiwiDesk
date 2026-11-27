@@ -25,7 +25,7 @@ struct AreaDesktopMemoryPersistenceTests {
     }
 
     private var shown: [String: SpaceID] {
-        ["Wide#1": SpaceID("2")]
+        ["1#1": SpaceID("2")]
     }
 
     @Test("machine.json carries the identity entries alone")
@@ -120,18 +120,46 @@ struct AreaDesktopMemoryPersistenceTests {
     func mergeMovesTheEntry() {
         var config = GuiConfig()
         config.desktopAreaSpaces = [
-            .identity(stamp): ["Wide#2": SpaceID("5")]
+            .identity(stamp): ["1#2": SpaceID("5")]
         ]
         config.apply(
             ScreenAreaRemap(
-                vanished: ScreenAreaKey(fingerprint: "Wide", areaID: 2),
-                survivor: ScreenAreaKey(fingerprint: "Wide", areaID: 1)
+                vanished: ScreenSlotKey(number: 1, areaID: 2)!,
+                survivor: ScreenSlotKey(number: 1, areaID: 1)!
             ),
             order: ScreenOrder(["Wide"])
         )
         #expect(
             config.desktopAreaSpaces[.identity(stamp)]
-                == ["Wide#1": SpaceID("5")]
+                == ["1#1": SpaceID("5")]
         )
+    }
+
+    /// A file from before #3647's lane 3 keys the memory by
+    /// fingerprint; its read drops it, as memory the next Desktop
+    /// switch refills, and keeps the Desktop cursor.
+    @Test("an older machine.json's area memory is dropped at read")
+    func olderAreaMemoryIsDropped() throws {
+        let old = """
+            {"format": 1,
+             "desktop_spaces": {"\(stamp.raw)": "1"},
+             "desktop_area_spaces":
+               {"\(stamp.raw)": {"Wide:3440x1440#1": "2"}}}
+            """
+        let read = try JSONDecoder().decode(
+            MachineConfig.self,
+            from: Data(old.utf8)
+        )
+        #expect(read.desktopAreaSpaces.isEmpty)
+        let current = old.replacingOccurrences(
+            of: "\"format\": 1",
+            with: "\"format\": \(MachineConfig.currentFormat)"
+        )
+        let kept = try JSONDecoder().decode(
+            MachineConfig.self,
+            from: Data(current.utf8)
+        )
+        #expect(!kept.desktopAreaSpaces.isEmpty)
+        #expect(kept.desktopSpaces == read.desktopSpaces)
     }
 }

@@ -82,7 +82,10 @@ struct BootDisplayAreaTests {
         #expect(areas(core) == 1)
     }
 
-    @Test("a split by number resolves against the reported screens")
+    /// A number names a split's own key (#3647 ▸ lane 3), so it is
+    /// stored at once as Screen 2's shares, read against its sizes,
+    /// and nothing waits for the report.
+    @Test("a split by number is stored at once, held by nothing")
     func numberSplitApplies() throws {
         try externalMain {
             let core = try makeCore()
@@ -90,9 +93,32 @@ struct BootDisplayAreaTests {
                 core,
                 #"KiwiDesk.set_display_areas(2, "side_by_side", 756, 756)"#
             )
+            #expect(core.heldScreenCalls.isEmpty)
+            #expect(
+                core.tiler.settings.displayAreas[number: 2]?.areas
+                    .map(\.w) == [500, 500]
+            )
             dock(core)
             #expect(areas(core) == 2)
         }
+    }
+
+    /// A fingerprint needs the order at the report to give it a
+    /// number, so it waits now too (#3647 ▸ lane 3).
+    @Test("a split by fingerprint waits for the report")
+    func fingerprintSplitWaits() throws {
+        let core = try makeCore()
+        try load(
+            core,
+            """
+            KiwiDesk.set_display_areas(
+              "\(Self.builtIn.fingerprint)", "side_by_side", 756, 756)
+            """
+        )
+        #expect(core.tiler.settings.displayAreas.isEmpty)
+        #expect(!core.heldScreenCalls.isEmpty)
+        dock(core)
+        #expect(areas(core) == 2)
     }
 
     @Test("a pin on an area of a held split lands in that area")
@@ -115,7 +141,8 @@ struct BootDisplayAreaTests {
             """
         try load(core, Self.split + "\n" + lua)
         dock(core)
-        let split = core.tiler.settings.displayAreas[Self.builtIn.fingerprint]
+        let split = core.tiler.settings.displayAreas
+            .split(on: Self.builtIn.fingerprint, order: core.liveScreenOrder)
         #expect(split?.areas.first { $0.id == 1 }?.name == "Right")
         #expect(core.spacePins["Calls"] == Self.rightArea)
     }

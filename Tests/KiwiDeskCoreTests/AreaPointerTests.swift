@@ -21,12 +21,13 @@ struct AreaPointerTests {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
         if let axis {
-            core.tiler.settings.displayAreas = [
-                wide.fingerprint: try #require(
+            core.storeSplit(
+                try #require(
                     ScreenSplit.whole(width: 3440, height: 1440)
                         .splitting(0, axis)
-                )
-            ]
+                ),
+                on: wide.fingerprint
+            )
         }
         let areas = core.state.workspaces.placements(of: wide.id)
         for (index, area) in areas.enumerated() {

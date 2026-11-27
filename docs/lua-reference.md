@@ -837,6 +837,16 @@ per-screen edge and visibility verbs and a layout's
 `areas[].numbered_key`.
 :::
 
+:::unreleased
+A split belongs to a screen number, not to a screen: it is stored
+under `display_areas` keyed by `"N"`, as shares of the screen, and
+draws on whichever screen holds Screen N, so a renumber moves it and
+another setup of the same count takes it. Sizes are read against
+the screen they name and kept to 1/1000 of it. A fingerprint names
+the number its screen holds now; a number given while no screen is
+known yet is stored at once, its sizes read against their own sum.
+:::
+
 A number or a screen's name names its first area; what it names
 for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
 **Per area**. The screen verbs' directions and last screen reach

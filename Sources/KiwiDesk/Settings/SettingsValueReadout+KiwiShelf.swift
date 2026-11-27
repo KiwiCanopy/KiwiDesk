@@ -7,11 +7,15 @@ extension SettingsValueReadout {
     static func kiwishelfRows(
         _ key: KiwiShelfKey,
         old: GuiConfig,
-        new: GuiConfig
+        new: GuiConfig,
+        order: ScreenOrder? = nil
     ) -> [SettingsDiffRow] {
         let census = SettingKey.kiwishelf(key)
         let o = old.settings.kiwishelf
         let n = new.settings.kiwishelf
+        let splits = new.settings.displayAreas.splits(
+            order: order ?? ScreenOrder([])
+        )
         switch key {
         case .visibility:
             return spaceBarRow(
@@ -45,7 +49,7 @@ extension SettingsValueReadout {
                 bar: .spaceBarEdge,
                 old.settings.spaceBarStyle,
                 new.settings.spaceBarStyle,
-                splits: new.settings.displayAreas
+                splits: splits
             )
         case .appBarScreenEdge:
             return screenEdgeRows(
@@ -53,7 +57,7 @@ extension SettingsValueReadout {
                 bar: .appBarEdge,
                 old.settings.appBarStyle,
                 new.settings.appBarStyle,
-                splits: new.settings.displayAreas
+                splits: splits
             )
         case .spaceBarScreenVisibility:
             return screenShowRows(
@@ -64,7 +68,7 @@ extension SettingsValueReadout {
                     old.settings.spaceBarStyle.visibility,
                     new.settings.spaceBarStyle.visibility
                 ),
-                splits: new.settings.displayAreas
+                splits: splits
             )
         case .monocleAppBarScreenVisibility:
             return screenShowRows(
@@ -72,7 +76,7 @@ extension SettingsValueReadout {
                 old.settings.monocle.appBar.visibilityOverride,
                 new.settings.monocle.appBar.visibilityOverride,
                 own: nil,
-                splits: new.settings.displayAreas
+                splits: splits
             )
         case .scrollingAppBarScreenVisibility:
             return screenShowRows(
@@ -80,7 +84,7 @@ extension SettingsValueReadout {
                 old.settings.scrolling.appBar.visibilityOverride,
                 new.settings.scrolling.appBar.visibilityOverride,
                 own: nil,
-                splits: new.settings.displayAreas
+                splits: splits
             )
         case .alignment:
             return spaceBarChoiceRow(
@@ -109,7 +113,7 @@ extension SettingsValueReadout {
                 bar: .pocketEdge,
                 old.settings.kiwishelf.pocketEdges,
                 new.settings.kiwishelf.pocketEdges,
-                splits: new.settings.displayAreas
+                splits: splits
             )
         case .pocketPosition:
             return [

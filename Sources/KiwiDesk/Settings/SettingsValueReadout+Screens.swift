@@ -32,7 +32,8 @@ extension SettingsValueReadout {
             return screensAreaRows(
                 census,
                 old: old.settings.displayAreas,
-                new: new.settings.displayAreas
+                new: new.settings.displayAreas,
+                orders: orders
             )
         case .orphanPinClear, .fingerprints,
             .placementUnavailable, .screenNumbers:
@@ -68,7 +69,7 @@ extension SettingsValueReadout {
     private static func screenWords(
         _ slot: ScreenSlotKey,
         _ order: ScreenOrder?,
-        _ splits: [String: ScreenSplit]
+        _ shares: [String: ScreenShares]
     ) -> String {
         let screen = L("monitor_card.number_badge", "Screen %1$d", slot.number)
         guard slot.areaID > 0 else { return screen }
@@ -83,7 +84,7 @@ extension SettingsValueReadout {
         return SettingsModel.perScreenName(
             screen: screen,
             key: key.description,
-            splits: splits
+            splits: shares.splits(order: order ?? ScreenOrder([]))
         )
     }
 
@@ -91,24 +92,46 @@ extension SettingsValueReadout {
     /// read as its areas in reading order — id, name and size — so
     /// a re-split that changes only ids, or a rename, never reads
     /// alike on both sides.
+    /// Keyed by screen number (#3647 ▸ lane 3): each side's sizes
+    /// on the screen its own order gives the number, in shares where
+    /// none holds it.
     private static func screensAreaRows(
         _ census: SettingKey,
-        old: [String: ScreenSplit],
-        new: [String: ScreenSplit]
+        old: [String: ScreenShares],
+        new: [String: ScreenShares],
+        orders: (old: ScreenOrder?, new: ScreenOrder?)
     ) -> [SettingsDiffRow] {
         let base = L("monitors.areas.label", "Screen areas")
         let touched = Set(old.keys).union(new.keys)
             .filter { old[$0] != new[$0] }
             .sorted()
-        return touched.map { screen in
-            .change(
+        return touched.map { key in
+            let number = Int(key) ?? 0
+            return .change(
                 census,
-                instance: screen,
-                label: instanceLabel(base, screen),
-                old: old[screen].map(areaSizes) ?? unset,
-                new: new[screen].map(areaSizes) ?? unset
+                instance: key,
+                label: instanceLabel(
+                    base,
+                    L("monitor_card.number_badge", "Screen %1$d", number)
+                ),
+                old: old[key].map { sizes($0, number, orders.old) } ?? unset,
+                new: new[key].map { sizes($0, number, orders.new) } ?? unset
             )
         }
+    }
+
+    private static func sizes(
+        _ shares: ScreenShares,
+        _ number: Int,
+        _ order: ScreenOrder?
+    ) -> String {
+        let fingerprint =
+            order?.fingerprints.indices.contains(number - 1)
+                == true ? order?.fingerprints[number - 1] : nil
+        let split =
+            fingerprint.flatMap { shares.resolved(on: $0) }
+            ?? ScreenSplit(areas: shares.areas, nextID: shares.nextID)
+        return areaSizes(split)
     }
 
     private static func areaSizes(_ split: ScreenSplit) -> String {

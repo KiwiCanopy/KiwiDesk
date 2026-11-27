@@ -29,7 +29,7 @@ struct AreaDesktopSwitchSeamTests {
             "KiwiCore+DesktopSpaces.swift"
         ),
         (
-            "remapAreaSpaces(from: state.workspaces.areaSplits, to: splits)",
+            "remapAreaSpaces(from: old, to: shares)",
             "KiwiCore+ScreenAreas.swift"
         ),
     ]

@@ -164,7 +164,7 @@ extension SettingsModel {
             screen: screenWords { $0.fingerprint == area.fingerprint }
                 ?? Display.fingerprintParts(area.fingerprint).name,
             key: key,
-            splits: config.settings.displayAreas,
+            splits: draftSplits,
             area: label
         )
     }

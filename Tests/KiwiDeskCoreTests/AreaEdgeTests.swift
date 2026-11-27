@@ -33,7 +33,11 @@ struct AreaEdgeTests {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
         var settings = core.tiler.settings
-        settings.displayAreas = [fp: try threeAreas()]
+        settings.displayAreas.store(
+            try threeAreas(),
+            on: fp,
+            order: core.liveScreenOrder
+        )
         settings.spaceBarStyle.setEdge(.top)
         core.tiler.settings = settings
         return core
@@ -45,6 +49,7 @@ struct AreaEdgeTests {
         let keys = ScreenSplit.areaKeys(
             of: fp,
             in: core.tiler.settings.displayAreas
+                .splits(order: core.liveScreenOrder)
         )
         #expect(keys == [fp, "\(fp)#1", "\(fp)#2"])
         #expect(

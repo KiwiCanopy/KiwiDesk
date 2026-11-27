@@ -27,7 +27,11 @@ struct AreaMergeStickyTests {
                 .splitting(0, .sideBySide)?
                 .splitting(1, .sideBySide)
         )
-        core.tiler.settings.displayAreas = [wide.fingerprint: split]
+        core.tiler.settings.displayAreas.store(
+            split,
+            on: wide.fingerprint,
+            order: core.liveScreenOrder
+        )
         let areas = core.state.workspaces.placements(of: wide.id)
         try #require(areas.map(\.area.id) == [0, 1, 2])
         for (space, area) in zip(["1", "2", "3"], areas) {
@@ -41,7 +45,11 @@ struct AreaMergeStickyTests {
         let (core, split) = try core()
         let merged = try #require(split.merging(1, 2))
         #expect(merged.survivor == 1)
-        core.tiler.settings.displayAreas = [wide.fingerprint: merged.split]
+        core.tiler.settings.displayAreas.store(
+            merged.split,
+            on: wide.fingerprint,
+            order: core.liveScreenOrder
+        )
         #expect(core.state.workspaces.placement(of: "3")?.area == 1)
         #expect(core.state.workspaces.placement(of: "1")?.area == 0)
     }

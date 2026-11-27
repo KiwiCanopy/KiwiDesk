@@ -205,17 +205,22 @@ extension KiwiCore {
     /// The ONE scope a per-screen edge write judges its collapse
     /// over (`ScreenEdged.setEdge(_:on:among:)`): the screens of
     /// `monitorSets` and the connected ones, each with every area
-    /// `splits` gives it (#3517) — the write adds the entries' own.
-    /// A writer hands it the monitor sets and splits of the profile
-    /// it writes: the verb the live profile's
-    /// (`liveScreenEdgeScope`), a Settings writer its draft's,
-    /// never an empty list in their place.
+    /// `shares` gives it (#3517), each set numbering its own screens
+    /// and the connected ones numbered as those sets number them
+    /// (#3647) — the write adds the entries' own. A writer hands it
+    /// the monitor sets and shares of the profile it writes: the
+    /// verb the live profile's (`liveScreenEdgeScope`), a Settings
+    /// writer its draft's, never an empty list in their place.
     public func screenEdgeScope(
         monitorSets: [MonitorSet],
-        splits: [String: ScreenSplit]
+        shares: [String: ScreenShares]
     ) -> ScreenEdgeScope {
         let screens = Set(monitorSets.flatMap(\.monitors)).union(
             connectedDisplays().map(\.fingerprint)
+        )
+        let splits = shares.splits(
+            order: screenOrder(holding: monitorSets),
+            sets: monitorSets
         )
         return ScreenEdgeScope(
             screens: screens.union(
@@ -232,7 +237,7 @@ extension KiwiCore {
     var liveScreenEdgeScope: ScreenEdgeScope {
         screenEdgeScope(
             monitorSets: profiles.active?.monitorSets ?? [],
-            splits: tiler.settings.displayAreas
+            shares: tiler.settings.displayAreas
         )
     }
 

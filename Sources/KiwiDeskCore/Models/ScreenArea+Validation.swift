@@ -22,13 +22,15 @@ public enum ScreenAreaProblem: Equatable, Sendable {
 extension ScreenArea {
     /// The first problem with `areas` as the split of a screen
     /// `width` × `height` points, or nil when they tile it exactly:
-    /// every area inside the screen, none below `minimumSide`, no
+    /// every area inside the screen, none below `minimumSide` (the
+    /// points floor unless a caller names its own), no
     /// two overlapping, their sizes adding up to the screen, and
     /// every cut full-span (a nested split is fine, #3541).
     public static func problem(
         with areas: [ScreenArea],
         width: Int,
-        height: Int
+        height: Int,
+        minimumSide: Int = ScreenArea.minimumSide
     ) -> ScreenAreaProblem? {
         guard !areas.isEmpty else { return .empty }
         var seen = Set<Int>()

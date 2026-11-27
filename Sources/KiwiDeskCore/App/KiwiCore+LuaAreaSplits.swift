@@ -29,17 +29,11 @@ extension KiwiCore {
     }
 
     private func makeWhole(_ dropped: [String]) {
-        for fingerprint in dropped {
-            guard let screen = splitScreen(.string(fingerprint))
+        for key in dropped {
+            guard let number = ScreenSlotKey(parsing: key)?.number,
+                let previous = tiler.settings.displayAreas[key]
             else { continue }
-            storeSplit(
-                ScreenSplit.whole(
-                    width: screen.width,
-                    height: screen.height,
-                    after: tiler.settings.displayAreas[fingerprint]
-                ),
-                on: fingerprint
-            )
+            storeShares(.whole(after: previous), number: number)
         }
     }
 }

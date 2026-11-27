@@ -186,9 +186,20 @@ extension TilingSettings: Codable {
         )
         displayAreas =
             try container.decodeIfPresent(
-                [String: ScreenSplit].self,
+                [String: ScreenShares].self,
                 forKey: .displayAreas
             ) ?? [:]
+        // A split belongs to a screen number, never a fingerprint
+        // (#3647 ▸ lane 3).
+        if let key = displayAreas.keys.first(where: {
+            ScreenSlotKey(parsing: $0)?.areaID != 0
+        }) {
+            throw DecodingError.dataCorruptedError(
+                forKey: .displayAreas,
+                in: container,
+                debugDescription: "not a screen number: \(key)"
+            )
+        }
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)

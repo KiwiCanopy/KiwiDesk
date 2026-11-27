@@ -20,9 +20,10 @@ struct PerScreenAreaNameTests {
     )
     private let gone = "Gone:1920x1080"
 
-    /// A draft whose profile holds the wide screen alone, split side
-    /// by side, and a disconnected screen's split, its right area
-    /// named `named` when given.
+    /// A draft whose profile holds the wide screen and, in a second
+    /// setup, a disconnected one, each its setup's Screen 1, so both
+    /// take Screen 1's one split (#3647): side by side, its right
+    /// area named `named` when given.
     private func model(named: String?) throws -> SettingsModel {
         LocalizationManager.shared.select("en")
         let model = makeTestModel()
@@ -36,7 +37,7 @@ struct PerScreenAreaNameTests {
                 name: "Desk",
                 profileID: .legacy(name: "Desk"),
                 count: 1,
-                sets: [[wide.fingerprint]],
+                sets: [[wide.fingerprint], [gone]],
                 isDefault: false,
                 matchesLive: false,
                 matchesConnectedCount: false,
@@ -54,11 +55,7 @@ struct PerScreenAreaNameTests {
             away.areas[right].name = named
         }
         model.config.settings.displayAreas = [
-            wide.fingerprint: try #require(
-                ScreenSplit.whole(width: 3440, height: 1440)
-                    .splitting(0, .sideBySide)
-            ),
-            gone: away,
+            "1": ScreenShares(away, width: 1920, height: 1080)
         ]
         model.config.settings.spaceBarStyle.visibilityOverride = [
             "\(gone)#1": .hidden
@@ -108,9 +105,13 @@ struct PerScreenAreaNameTests {
         defer { LocalizationManager.shared.select(nil) }
         let model = try model(named: nil)
         model.config.settings.displayAreas = [
-            wide.fingerprint: try #require(
-                ScreenSplit.whole(width: 3440, height: 1440)
-                    .splitting(0, .stacked)
+            "1": ScreenShares(
+                try #require(
+                    ScreenSplit.whole(width: 3440, height: 1440)
+                        .splitting(0, .stacked)
+                ),
+                width: 3440,
+                height: 1440
             )
         ]
         let rows = model.screenEdgeRows(\.spaceBarStyle, show: .space)

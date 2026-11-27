@@ -24230,6 +24230,18 @@ The consequences:
 - **Twin screens share one split.** Two screens with one
   fingerprint can hold two numbers, but the runtime keys an area
   by fingerprint, so both draw the lower number's split.
+- **Amended (#3647 lane 3, architect-reviewer for the owner,
+  2026-11-27): edges, not lengths, and one projection.** A split
+  is stored under the bare number `"N"`, its areas' edges in
+  per-mille, so neighbours share an edge value and the resolved
+  points tile any screen exactly; every write quantizes, and an
+  edge the write did not move keeps its stored share. Shares
+  become points in one place, the split sync, which re-runs
+  wherever the order can move. The areas' Desktop memory is keyed
+  `N#id` through the live order, and its crossing drops the
+  stored map rather than guessing an order for it: it refills at
+  the next Desktop switch. The bars' per-screen maps keep their
+  fingerprint keys until #3647's lane 3c moves them.
 - **The crossing is one `ConfigMigration` step**, run through
   `MigrationBackup.migrateInPlace` like every step. Slot k is the
   stored `monitors[k]`; where two setups of one count pin

@@ -23,13 +23,13 @@ struct AreaDesktopMemoryTests {
             name: "B",
             frame: CGRect(x: 100, y: 0, width: 3440, height: 1440)
         )
-        let split = ScreenSplit.whole(width: 3440, height: 1440)
-            .splitting(0, .sideBySide)
-        core.state.workspaces.setAreaSplits(
-            split.map { [wide.fingerprint: $0] } ?? [:]
-        )
         connectAuthority(core, [authorityDisplay(1, "A"), wide])
         pinTwoDisplays()
+        if let split = ScreenSplit.whole(width: 3440, height: 1440)
+            .splitting(0, .sideBySide)
+        {
+            core.storeSplit(split, on: wide.fingerprint)
+        }
         let areas = core.state.workspaces.placements(of: wide.id)
             .map(\.id)
         core.state.workspaces.ensureSpace(SpaceID(1))
@@ -78,9 +78,7 @@ struct AreaDesktopMemoryTests {
         let snapshot = swipe(core, from: 20, to: 21)
         let left = try #require(snapshot.key(of: 20))
         let filed = core.desktopMemory.areaSpaces[left]
-        let keys = areas.compactMap {
-            core.state.workspaces[placement: $0]?.key.description
-        }
+        let keys = areas.compactMap { slot(core, $0) }
         #expect(filed == [keys[0]: SpaceID(3), keys[1]: SpaceID(4)])
     }
 
@@ -110,9 +108,7 @@ struct AreaDesktopMemoryTests {
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
         let arriving = try #require(authoritySnapshot().key(of: 21))
-        let own = try #require(
-            core.state.workspaces[placement: areas[1]]?.key.description
-        )
+        let own = try #require(slot(core, areas[1]))
         core.desktopMemory.areaSpaces[arriving] = [
             own: SpaceID(7), "": SpaceID(5),
         ]
@@ -192,9 +188,7 @@ struct AreaDesktopMemoryTests {
         _ areas: [PlacementID]
     ) throws -> String {
         let first = try #require(areas.first)
-        return try #require(
-            core.state.workspaces[placement: first]?.key.description
-        )
+        return try #require(slot(core, first))
     }
 
     @Test("an unsplit screen files no area memory")
@@ -243,9 +237,7 @@ struct AreaDesktopMemoryTests {
         NativeSpaces.mainDisplayUUIDOverride = "UUID-B"
         let snapshot = authoritySnapshot(secondaryCurrent: 21)
         let arriving = try #require(snapshot.key(of: 21))
-        let key = try #require(
-            core.state.workspaces[placement: areas[1]]?.key.description
-        )
+        let key = try #require(slot(core, areas[1]))
         core.desktopMemory.areaSpaces[arriving] = [key: SpaceID(7)]
         core.activateArriving(SpaceID(6), on: arriving, in: snapshot)
         #expect(core.state.workspaces.activeSpace == SpaceID(6))
@@ -264,19 +256,19 @@ struct AreaDesktopMemoryTests {
         let merged = try #require(three.merging(2, 1)?.split)
         let desktop = DesktopKey.number(3)
         core.desktopMemory.areaSpaces[desktop] = [
-            "Wide#2": SpaceID(5), "Wide#1": SpaceID(4),
+            "1#2": SpaceID(5), "1#1": SpaceID(4),
         ]
-        core.desktopMemory.areaSpaces[.number(4)] = ["Wide#2": SpaceID(5)]
+        core.desktopMemory.areaSpaces[.number(4)] = ["1#2": SpaceID(5)]
         core.remapAreaSpaces(
-            from: ["Wide": three],
-            to: ["Wide": merged]
+            from: ["1": ScreenShares(three, width: 3440, height: 1440)],
+            to: ["1": ScreenShares(merged, width: 3440, height: 1440)]
         )
         #expect(
-            core.desktopMemory.areaSpaces[desktop] == ["Wide#1": SpaceID(4)]
+            core.desktopMemory.areaSpaces[desktop] == ["1#1": SpaceID(4)]
         )
         #expect(
             core.desktopMemory.areaSpaces[.number(4)]
-                == ["Wide#1": SpaceID(5)]
+                == ["1#1": SpaceID(5)]
         )
     }
 
@@ -314,5 +306,12 @@ struct AreaDesktopMemoryTests {
         core.forgetDesktopSpaceMemory()
         #expect(core.desktopMemory.areaSpaces.isEmpty)
         #expect(core.persistedDesktopAreaSpaces() == [:])
+    }
+
+    /// The `N#id` slot an area's Desktop memory is filed under.
+    private func slot(_ core: KiwiCore, _ area: PlacementID) -> String? {
+        core.state.workspaces[placement: area].flatMap {
+            core.liveScreenOrder.slot(of: $0.key)?.description
+        }
     }
 }

@@ -51,7 +51,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var desktopSpaces: [DesktopKey: SpaceID] = [:]
     /// The Space each area of a split screen was last showing on
     /// each Desktop (#3517 ruling 17), keyed by the Desktop, then by
-    /// the area's `ScreenAreaKey`: `desktopSpaces`' twin, with its
+    /// the area's `N#id` slot (#3647): `desktopSpaces`' twin, with its
     /// identity-only encoding and its `machine.json` home. A merge
     /// rewrites its area keys (`apply(_ remap:)`); a write stamps
     /// the session's copy over it, whose read follows a merge by

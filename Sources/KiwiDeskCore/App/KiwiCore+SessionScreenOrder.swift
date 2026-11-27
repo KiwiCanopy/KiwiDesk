@@ -24,9 +24,11 @@ extension KiwiCore {
 
     /// Sets the live profile's numbering of the connected screens for
     /// the session; nil clears it. A Save calls it before its pins
-    /// are projected.
+    /// are projected. A screen's split follows its number (#3647 ▸
+    /// lane 3), so the placements follow the order at once.
     public func setSessionScreenOrder(_ order: ScreenOrder?) {
         profiles.setSessionScreenOrder(order, for: profiles.currentName)
+        syncAreaSplits()
     }
 
     /// Ends the override: an explicit load or pick, a composed apply,

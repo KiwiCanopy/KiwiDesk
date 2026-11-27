@@ -13,6 +13,9 @@ extension KiwiCore {
     func resolveSpaceDisplays(
         mainID: DisplayID = PositionalDisplays.liveMainID
     ) {
+        // The order may have moved, and with it which split each
+        // screen takes (#3647 ▸ lane 3).
+        syncAreaSplits()
         resolveSpaceDisplays(
             of: state.workspaces.allSpaces.map(\.id),
             mainID: mainID

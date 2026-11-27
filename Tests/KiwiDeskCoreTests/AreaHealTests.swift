@@ -23,8 +23,8 @@ struct AreaHealTests {
                 .splitting(0, .sideBySide)?
                 .splitting(1, .sideBySide)
         )
-        core.state.workspaces.setAreaSplits([wide.fingerprint: split])
         core.state.workspaces.upsertDisplay(wide)
+        core.storeSplit(split, on: wide.fingerprint)
         core.state.workspaces.ensureSpace(SpaceID("1"))
         core.resolveSpaceDisplays(mainID: wide.id)
         let areas = core.state.workspaces.placements(of: wide.id)

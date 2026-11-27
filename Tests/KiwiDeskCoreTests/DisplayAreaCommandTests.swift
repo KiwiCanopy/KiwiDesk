@@ -23,7 +23,8 @@ struct DisplayAreaCommandTests {
     }
 
     private func split(_ core: KiwiCore) -> ScreenSplit? {
-        core.tiler.settings.displayAreas[wide.fingerprint]
+        core.tiler.settings.displayAreas
+            .split(on: wide.fingerprint, order: core.liveScreenOrder)
     }
 
     @Test func sizesSplitTheScreen() throws {
@@ -165,7 +166,11 @@ struct DisplayAreaCommandTests {
             ScreenSplit.whole(width: 3440, height: 1440)
                 .splitting(0, .sideBySide)
         )
-        settings.displayAreas[wide.fingerprint] = split
+        settings.displayAreas[number: 1] = ScreenShares(
+            split,
+            width: 3440,
+            height: 1440
+        )
         let data = try JSONEncoder().encode(settings)
         let json = try #require(String(data: data, encoding: .utf8))
         #expect(json.contains("\"display_areas\""))

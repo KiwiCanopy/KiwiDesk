@@ -14,28 +14,32 @@ extension KiwiCore {
         tiler.splitAreaBounds = { [weak self] in
             self?.splitAreaBounds() ?? []
         }
-        tiler.onAreaSplits = { [weak self] in self?.syncAreaSplits() }
+        tiler.onAreaSplits = { [weak self] old in
+            self?.syncAreaSplits(from: old)
+        }
     }
 
-    /// The one door from the stored splits to the placement list
-    /// (#3517), run by every write of `display_areas` through
-    /// `tiler.onAreaSplits` — a config load and a profile apply
-    /// included, since each installs the settings whole.
-    func syncAreaSplits() {
-        let splits = tiler.settings.displayAreas
-        let remaps = Self.areaRemaps(
-            from: state.workspaces.areaSplits,
-            to: splits
-        )
+    /// The one door from the stored shares to the placement list
+    /// (#3517, #3647 ▸ lane 3): each screen takes the split of the
+    /// number `liveScreenOrder` gives it, resolved on its own size.
+    /// Run by every write of `display_areas` through
+    /// `tiler.onAreaSplits`, handed the shares before the write so
+    /// a merge's Spaces follow it, and by the total resolve, which
+    /// runs wherever the order can change, with nothing to follow.
+    func syncAreaSplits(from old: [String: ScreenShares]? = nil) {
+        let order = liveScreenOrder
+        let shares = tiler.settings.displayAreas
+        let remaps = (old.map { Self.areaRemaps(from: $0, to: shares) } ?? [])
+            .compactMap { $0.runtime(in: order) }
         // The live Desktop memory follows a merge (ruling 22).
-        remapAreaSpaces(from: state.workspaces.areaSplits, to: splits)
+        if let old { remapAreaSpaces(from: old, to: shares) }
         let workspaces = state.workspaces
         let before = workspaces.allSpaces.compactMap { space in
             workspaces.placement(of: space.id)
                 .flatMap { workspaces[placement: $0] }
                 .map { (space.id, $0.key) }
         }
-        state.workspaces.setAreaSplits(splits)
+        state.workspaces.setAreaSplits(shares.splits(order: order))
         // A merged-away area's Spaces go to the survivor the
         // memory and the pins take, never area 0 by default.
         for (space, key) in before {
@@ -186,55 +190,67 @@ extension KiwiCore {
 /// The one store door for a split (#3517), shared by
 /// `set_display_areas` and the load's reset (#3573).
 extension KiwiCore {
-    /// Stores `split` for the screen `fingerprint` names. A
-    /// merged-away area's keys move to the survivor in the same
-    /// write as the split, as a Settings merge's do (ruling 22).
-    func storeSplit(_ split: ScreenSplit, on fingerprint: String) {
-        let previous = tiler.settings.displayAreas[fingerprint]
+    /// Stores `split`, laid on the screen `fingerprint` names, as the
+    /// shares of the number it holds now; false where it holds none.
+    @discardableResult
+    func storeSplit(_ split: ScreenSplit, on fingerprint: String) -> Bool {
+        let order = liveScreenOrder
+        guard let number = order.number(of: fingerprint),
+            let size = ScreenShares.size(of: fingerprint)
+        else { return false }
+        storeShares(
+            ScreenShares(
+                split,
+                width: size.width,
+                height: size.height,
+                keeping: tiler.settings.displayAreas[number: number]
+            ),
+            number: number
+        )
+        return true
+    }
+
+    /// Stores `shares` as Screen `number`'s split. A merged-away
+    /// area's keys move to the survivor in the same write as the
+    /// split, as a Settings merge's do (ruling 22).
+    func storeShares(_ shares: ScreenShares, number: Int) {
+        let key = String(number)
+        let previous = tiler.settings.displayAreas[key]
         var settings = tiler.settings
         let remaps =
             previous.map {
-                Self.areaRemaps(
-                    from: [fingerprint: $0],
-                    to: [fingerprint: split]
-                )
+                Self.areaRemaps(from: [key: $0], to: [key: shares])
             } ?? []
+        let order = liveScreenOrder
         for remap in remaps {
-            settings.apply(remap)
+            guard let runtime = remap.runtime(in: order) else { continue }
+            settings.apply(runtime)
             for (space, pin) in spacePins {
-                spacePins[space] = remap.rewrite(pin)
+                spacePins[space] = runtime.rewrite(pin)
             }
         }
         // A whole split stays stored once one existed, so its next id
         // outlives the merge and a later split mints none reused
         // (ruling 21).
-        settings.displayAreas[fingerprint] =
-            split.isWhole && previous == nil ? nil : split
+        settings.displayAreas[key] =
+            shares.isWhole && previous == nil ? nil : shares
         tiler.settings = settings
     }
 
     /// The screen a split names: a connected screen by number,
-    /// fingerprint or name, else a fingerprint whose size it reads.
+    /// fingerprint or name, with the number it holds now.
     func splitScreen(
         _ arg: JSONValue?
     ) -> (fingerprint: String, width: Int, height: Int)? {
-        if let id = resolveDisplayArg(arg),
+        guard let id = resolveDisplayArg(arg),
             let display = state.workspaces.allDisplays.first(where: {
                 $0.id == id
             })
-        {
-            return (
-                display.fingerprint,
-                Int(display.frame.width),
-                Int(display.frame.height)
-            )
-        }
-        guard let raw = arg?.stringValue,
-            ScreenAreaKey.isFingerprint(raw)
         else { return nil }
-        let sides = Display.fingerprintParts(raw).size
-            .split(separator: "x").compactMap { Int($0) }
-        guard sides.count == 2 else { return nil }
-        return (raw, sides[0], sides[1])
+        return (
+            display.fingerprint,
+            Int(display.frame.width),
+            Int(display.frame.height)
+        )
     }
 }

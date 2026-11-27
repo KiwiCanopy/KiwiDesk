@@ -23,13 +23,13 @@ struct AreaDesktopMemoryEdgeTests {
             name: "B",
             frame: CGRect(x: 100, y: 0, width: 3440, height: 1440)
         )
-        let split = ScreenSplit.whole(width: 3440, height: 1440)
-            .splitting(0, .sideBySide)
-        core.state.workspaces.setAreaSplits(
-            split.map { [wide.fingerprint: $0] } ?? [:]
-        )
         connectAuthority(core, [authorityDisplay(1, "A"), wide])
         pinTwoDisplays()
+        if let split = ScreenSplit.whole(width: 3440, height: 1440)
+            .splitting(0, .sideBySide)
+        {
+            core.storeSplit(split, on: wide.fingerprint)
+        }
         let areas = core.state.workspaces.placements(of: wide.id)
             .map(\.id)
         core.state.workspaces.ensureSpace(SpaceID(1))
@@ -75,12 +75,9 @@ struct AreaDesktopMemoryEdgeTests {
         let (core, areas) = makeCore()
         try #require(areas.count == 2)
         let arriving = try #require(authoritySnapshot().key(of: 21))
-        let screen = try #require(
-            core.state.workspaces[placement: areas[1]]?.key.fingerprint
-        )
-        core.desktopMemory.areaSpaces[arriving] = [
-            "\(screen)#9": SpaceID(7)
-        ]
+        let key = try #require(core.state.workspaces[placement: areas[1]]?.key)
+        let number = try #require(core.liveScreenOrder.slot(of: key)?.number)
+        core.desktopMemory.areaSpaces[arriving] = ["\(number)#9": SpaceID(7)]
         _ = swipe(core, from: 20, to: 21)
         // The filed 7, where a free pick would take 5.
         #expect(shown(core, areas[1]) == SpaceID(7))

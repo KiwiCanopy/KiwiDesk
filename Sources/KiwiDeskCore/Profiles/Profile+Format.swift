@@ -58,10 +58,12 @@ extension Profile {
     /// per layer, today's the default layer's (#3535,
     /// `migratingGesturesOntoLayers`), 43 its Screen pins are its
     /// own, keyed by screen number, and a monitor set is an order
-    /// (#3647, `migratingPinsOntoNumbers`).
+    /// (#3647, `migratingPinsOntoNumbers`), 44 its screen splits
+    /// are per-mille shares keyed by screen number (#3647,
+    /// `migratingSplitsOntoNumbers`).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 43
+    public static let currentFormat = 44
 }

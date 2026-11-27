@@ -86,7 +86,10 @@ extension SettingsModel {
     /// (`ScreenSplit.effective`), nil while it is whole.
     func areaSplit(of display: Display) -> ScreenSplit? {
         ScreenSplit.effective(
-            config.settings.displayAreas[display.fingerprint],
+            config.settings.displayAreas.split(
+                on: display.fingerprint,
+                order: screenOrder
+            ),
             for: display
         )
     }
@@ -105,7 +108,10 @@ extension SettingsModel {
     /// effect, else the whole screen as one area 0, keeping the
     /// stored next id (ruling 21).
     func editableSplit(of display: Display) -> ScreenSplit {
-        let stored = config.settings.displayAreas[display.fingerprint]
+        let stored = config.settings.displayAreas.split(
+            on: display.fingerprint,
+            order: screenOrder
+        )
         return areaSplit(of: display)
             ?? ScreenSplit.whole(of: display, after: stored)
     }
@@ -162,7 +168,7 @@ extension SettingsModel {
         return displays.flatMap { display in
             ScreensFamilyRows.areas(
                 of: display,
-                in: config.settings.displayAreas
+                in: draftSplits
             ).map(\.key)
         }
         .filter { seen.insert($0).inserted }
