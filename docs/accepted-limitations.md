@@ -170,7 +170,9 @@ in which every split fits, so a split moves to a screen that holds
 it; where no order fits, the loaded order stands and a screen that
 cannot hold its split draws whole. A minimum window size raised
 later draws a split whole rather than renumbering the screens, and
-the next profile load or screen change numbers them again
+the next profile load or screen change numbers them again. With
+more than six screens, or a setup with a screen left unnumbered,
+no other order is tried
 ([#3647](https://github.com/KiwiCanopy/KiwiDesk/issues/3647)).
 :::
 

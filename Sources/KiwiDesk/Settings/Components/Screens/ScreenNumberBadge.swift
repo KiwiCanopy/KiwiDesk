@@ -78,6 +78,7 @@ struct ScreenNumberItems: View {
 
     var body: some View {
         let current = model.screenNumber(of: display)
+        let anyFits = model.anyScreenOrderFits
         ForEach(1...max(model.screenNumberCount, 1), id: \.self) { number in
             Toggle(
                 L("monitor_card.number.use", "Use as Screen %1$d", number),
@@ -89,7 +90,11 @@ struct ScreenNumberItems: View {
             // A number whose split cannot fit here greys (#3647).
             .disabled(
                 current != number
-                    && !model.screenNumberFits(number, for: display)
+                    && !model.screenNumberFits(
+                        number,
+                        for: display,
+                        anyFits: anyFits
+                    )
             )
         }
         Divider()

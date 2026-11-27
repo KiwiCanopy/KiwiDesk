@@ -231,7 +231,11 @@ editing here:
   shares, so a renumber never reads as a merge, and an apply sets
   its in-flight order before its settings install
   (`SessionScreenOrderTests` ▸ `splitFollowsTheNumber`,
-  `profileSwitchLaysOutItsOwnNumbers`). A per-area reader beside
+  `profileSwitchLaysOutItsOwnNumbers`). A floor change is such a
+  writer too: `TilingEngine` hands `onAreaSplits` nil, and the
+  sync judges each split through `ScreenSplit.verdict` at the
+  floors it installs (`ScreenFitApplyTests` ▸
+  `floorRaiseDrawsWhole`). A per-area reader beside
   the placement
   list — a write's scope, a Settings row — reads the stored splits
   it is handed (`AreaEdgeTests`). A reader asking which Space a

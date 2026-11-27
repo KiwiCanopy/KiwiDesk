@@ -8,8 +8,8 @@ struct ScreenOrderSession: Equatable {
     /// A session renumber and its profile (lane 2b).
     var override: SessionScreenOrder?
     /// The order the fit rule chose for a profile's setup (lane 3),
-    /// kept until the override's clears or another setup.
-    var fitted: SessionScreenOrder?
+    /// answered only while the base it was chosen from stands.
+    var fitted: FittedScreenOrder?
     /// The order an apply installs, set by its two doors alone.
     var inFlight: ScreenOrder?
 
@@ -24,6 +24,13 @@ struct ScreenOrderSession: Equatable {
         if override?.profile == old { override?.profile = new }
         if fitted?.profile == old { fitted?.profile = new }
     }
+}
+
+/// The fit rule's order and the base order it was chosen from.
+struct FittedScreenOrder: Equatable {
+    var profile: String?
+    var base: ScreenOrder
+    var order: ScreenOrder
 }
 
 extension ProfileManager {

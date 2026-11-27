@@ -99,4 +99,49 @@ struct ScreenFitApplyTests {
         #expect(!reply.isSuccess)
         #expect(reply.error?.contains("narrower") == true)
     }
+
+    /// A Settings Save re-applies the live profile; raising the
+    /// floor there keeps the numbers the apply chose.
+    @Test("a re-apply keeps the fit; an explicit load refits")
+    func reapplyKeepsTheFit() throws {
+        let core = makeCore()
+        try loadDesk(core, floor: 300)
+        #expect(core.liveScreenOrder.fingerprints.first == laptop.fingerprint)
+        var raised = try core.profiles.read(name: "Desk")
+        raised.settings.minWindowSizes = MinWindowSizes(all: .square(800))
+        try core.profiles.write(raised)
+        core.apply(profile: raised, cause: .reapply)
+        #expect(core.liveScreenOrder.fingerprints.first == laptop.fingerprint)
+        #expect(core.state.workspaces.areaSplits[laptop.fingerprint] == nil)
+        try core.loadProfile(named: "Desk")
+        #expect(core.liveScreenOrder.fingerprints.first == wide.fingerprint)
+    }
+
+    /// A Space pinned to the wide screen while it holds the fitted
+    /// Screen 1 is stored under 1, so a load of the copy puts it back.
+    @Test("a new profile numbers its pins in the fitted order")
+    func newProfileStoresFittedNumbers() throws {
+        let core = makeCore()
+        try loadDesk(core)
+        core.spacePins["2"] = wide.fingerprint
+        let built = core.buildProfile(name: "Copy", modes: nil)
+        #expect(built.spaceMonitorMap["2"] == ScreenSlotKey(number: 1))
+    }
+
+    @Test("a split by number under the floor is refused")
+    func numberedWriteUnderTheFloorRefuses() throws {
+        let core = makeCore()
+        try loadDesk(core)
+        // Screen 1 is the wide screen in the fitted order; Screen 2,
+        // the laptop, cannot hold halves at this floor.
+        let reply = core.execute(
+            "set_display_areas",
+            args: [
+                .number(2), .string("side_by_side"),
+                .number(756), .number(756),
+            ]
+        )
+        #expect(!reply.isSuccess)
+        #expect(reply.error?.contains("narrower") == true)
+    }
 }

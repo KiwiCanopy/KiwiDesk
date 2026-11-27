@@ -2071,6 +2071,21 @@ loaded with it. The obligations:
   Save hands it to the profile it adopts (`settleSessionScreenOrder`),
   a rename carries it with its owner and a delete of its owner
   drops it (`SessionScreenOrderTests`).
+- **The fit's order sits under that override, chosen only where
+  the setup is decided (#3647 ▸ lane 3b).** `fittedScreenOrder` is
+  the session's for one profile on one set of screens, read under
+  the override by `screenOrder(for:)` and `liveScreenOrder`; choose
+  it at an explicit load, at an apply or screen change that holds
+  none for its profile and screens, never at a re-apply, a Save, a
+  floor or a split edit, and drop it at a composed apply. A Save
+  stores the override or the base set, never the fit, and numbers
+  its pins in the order they were live under, the fit included
+  (`ScreenFitApplyTests` ▸ `reapplyKeepsTheFit`,
+  `newProfileStoresFittedNumbers`). Whether a split fits a screen
+  is `ScreenSplit.verdict`'s alone, which the placements, the
+  Settings picture and greying, the fit search and the
+  `set_display_areas` refusal all read, never `effective` beside
+  it (`ScreenFitTests`, `ScreenNumberFitTests`).
 - **Remove a set from a profile only through
   `ProfileManager.strip`** — a claim's release and
   `forgetMonitorSet` (#3324) — never `Profile.release` beside it,

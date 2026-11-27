@@ -15,7 +15,7 @@ extension KiwiCore {
     public var liveScreenOrder: ScreenOrder {
         profiles.screenOrderInFlight
             ?? sessionScreenOrder
-            ?? fittedScreenOrder(for: profiles.currentName)
+            ?? liveFittedScreenOrder
             ?? screenOrder(holding: profiles.active?.monitorSets ?? [])
     }
 
@@ -26,7 +26,10 @@ extension KiwiCore {
     public func screenOrder(for profile: Profile?) -> ScreenOrder {
         if let profile,
             let order = sessionScreenOrder(for: profile.name)
-                ?? fittedScreenOrder(for: profile.name)
+                ?? fittedScreenOrder(
+                    for: profile.name,
+                    holding: profile.monitorSets
+                )
         {
             return order
         }

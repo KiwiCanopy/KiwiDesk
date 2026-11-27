@@ -24234,15 +24234,17 @@ The consequences:
   screen change, number the setup in the first order in which
   every screen holds its number's split: the one that moves the
   fewest numbers off the saved order, ties to the earlier screen
-  first. That order is the session's, for that profile and setup;
-  a Save still stores the saved order, so a fit never rewrites a
-  profile. Where no order fits, every number stays where the saved
+  first, searched up to six screens and never across a gap. That
+  order is the session's, for that profile and setup, kept through
+  a re-apply; a Save still stores the saved order, so a fit never
+  rewrites a profile, and numbers its pins in the fitted order they
+  were live under. Where no order fits, every number stays where the saved
   order puts it and every item in the pop-up stays enabled, since
   greying all of them would leave no way to renumber. A screen
   whose split still falls under the floor draws whole, and its
   editor names the axis that failed, width before height. A floor
   raised later never renumbers: the split draws whole until the
-  next apply or screen change refits. A Lua or CLI split under the
+  next explicit load or screen change refits. A Lua or CLI split under the
   floor is refused, and one given by fingerprint lands on the
   number that screen holds in the fitted order. Renumbering on
   every floor edit would move Spaces under the user mid-edit; a

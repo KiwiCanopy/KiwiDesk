@@ -54,6 +54,18 @@ struct ScreenNumberFitTests {
         return model
     }
 
+    private func fits(
+        _ model: SettingsModel,
+        _ number: Int,
+        _ display: Display
+    ) -> Bool {
+        model.screenNumberFits(
+            number,
+            for: display,
+            anyFits: model.anyScreenOrderFits
+        )
+    }
+
     @Test("a number that cannot fit greys while another order fits")
     func unfitNumberGreys() {
         let model = makeModel()
@@ -63,12 +75,12 @@ struct ScreenNumberFitTests {
         #expect(model.unsplitAxis(of: laptop) == .sideBySide)
         #expect(model.unsplitAxis(of: wide) == nil)
         // Taking Screen 1 on the wide screen fits.
-        #expect(model.screenNumberFits(1, for: wide))
+        #expect(fits(model, 1, wide))
         model.useScreenNumber(1, for: wide)
         #expect(model.unsplitAxis(of: wide) == nil)
         // Handing it back to the laptop would not.
-        #expect(!model.screenNumberFits(1, for: laptop))
-        #expect(model.screenNumberFits(2, for: laptop))
+        #expect(!fits(model, 1, laptop))
+        #expect(fits(model, 2, laptop))
     }
 
     @Test("where no order fits, every number stays enabled")
@@ -79,8 +91,8 @@ struct ScreenNumberFitTests {
             frame: CGRect(x: 1512, y: 0, width: 1000, height: 900)
         )
         let model = makeModel(narrow)
-        #expect(model.screenNumberFits(1, for: narrow))
-        #expect(model.screenNumberFits(2, for: narrow))
+        #expect(fits(model, 1, narrow))
+        #expect(fits(model, 2, narrow))
         #expect(model.unsplitAxis(of: laptop) == .sideBySide)
     }
 
@@ -88,7 +100,7 @@ struct ScreenNumberFitTests {
     func fittingSplitDrawsSplit() {
         let model = makeModel(floor: 300)
         #expect(model.unsplitAxis(of: laptop) == nil)
-        #expect(model.screenNumberFits(1, for: wide))
+        #expect(fits(model, 1, wide))
     }
 
     /// A floor raised under a selected area draws its screen whole,

@@ -17,19 +17,33 @@ extension SettingsModel {
         return nil
     }
 
+    /// Whether some order of the connected screens fits every split:
+    /// read once per menu, since it names no item.
+    var anyScreenOrderFits: Bool {
+        screenOrder.anyFits(
+            config.settings.displayAreas,
+            floors: config.settings.areaFloors
+        )
+    }
+
     /// Whether `display` may take Screen `number`: false only where
-    /// some order fits every screen and the one this pick makes does
-    /// not, so renumbering never locks when nothing fits.
-    func screenNumberFits(_ number: Int, for display: Display) -> Bool {
-        let shares = config.settings.displayAreas
-        let floors = config.settings.areaFloors
-        guard
+    /// some order fits every screen (`anyFits`, `anyScreenOrderFits`)
+    /// and the one this pick makes does not, so renumbering never
+    /// locks when nothing fits.
+    func screenNumberFits(
+        _ number: Int,
+        for display: Display,
+        anyFits: Bool
+    ) -> Bool {
+        guard anyFits,
             let next = screenOrder.renumbering(
                 display.fingerprint,
                 to: number
-            ),
-            screenOrder.anyFits(shares, floors: floors)
+            )
         else { return true }
-        return next.fits(shares, floors: floors)
+        return next.fits(
+            config.settings.displayAreas,
+            floors: config.settings.areaFloors
+        )
     }
 }

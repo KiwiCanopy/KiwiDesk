@@ -185,6 +185,8 @@ struct SessionScreenOrderTests {
         var work = try core.profiles.read(name: "Work")
         #expect(work.monitorSets.map(\.monitors) == [reversed.fingerprints])
         #expect(core.profiles.sessionScreenOrder == nil)
+        // The stored order answers now; the load's fit was its base's.
+        #expect(core.liveScreenOrder == reversed)
         let holed = try #require(reversed.unnumbering("A:400x400"))
         core.setSessionScreenOrder(holed)
         try core.persistProfile(named: "Work", modes: nil)
