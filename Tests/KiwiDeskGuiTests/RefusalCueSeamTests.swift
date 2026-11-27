@@ -24,11 +24,35 @@ struct RefusalCueSeamTests {
     }
 
     /// `url` through the family's strip cache, whitespace dropped
-    /// (#1894: re-stripping both trees per test cost a CPU).
+    /// (#1894: re-stripping both trees per test cost a CPU). A file
+    /// of either scanned tree answers from `squeezed`, dropped once
+    /// per run (#3712); any other file is dropped on each call.
     static func file(_ url: URL) throws -> String {
+        if let text = try squeezed.get()[url.standardizedFileURL.path] {
+            return text
+        }
+        return try squeeze(url)
+    }
+
+    static func squeeze(_ url: URL) throws -> String {
         try SourceScan.strippedSource(at: url)
             .split(whereSeparator: \.isWhitespace)
             .joined()
+    }
+
+    /// Every file under the Core and GUI trees, whitespace dropped,
+    /// keyed by standardized path. A `static let`, so it is built
+    /// once and every concurrent test waits on that one build.
+    static let squeezed = Result { () throws -> [String: String] in
+        var texts: [String: String] = [:]
+        for target in ["KiwiDeskCore", "KiwiDesk"] {
+            for file in try SourceScan.swiftSources(
+                under: root.appendingPathComponent("Sources/\(target)")
+            ) {
+                texts[file.standardizedFileURL.path] = try squeeze(file)
+            }
+        }
+        return texts
     }
 
     static func core(_ file: String) throws -> String {
