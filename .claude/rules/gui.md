@@ -2265,8 +2265,8 @@ flag through a parameter instead.
 parameter and lands at its end at once under it**, the gate
 spelled at each call, since a layer animation has no argument a
 `withAnimation`-style gate could name. Its spellings are ruled in
-`ReduceMotionCensusTests` ▸ `ruled`, citing the driven test that
-pins the gate (`LookPickerDropTests` ▸ `gatedStepsLand`, #3700).
+`ReduceMotionCensusTests` ▸ `ruled`, citing the test that pins the
+gate (`LookPickerDropTests` ▸ `gatedStepsLand`, #3700).
 Reach for one where a SwiftUI motion over a full-screen surface
 measures as dropping frames: the look picker's SwiftUI drop lost
 about every other frame at 120 Hz, a second `NSHostingView` for it

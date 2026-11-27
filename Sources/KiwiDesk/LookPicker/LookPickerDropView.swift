@@ -33,19 +33,15 @@ final class LookPickerDropView: NSView {
 
     override func isAccessibilityElement() -> Bool { false }
 
-    /// Hand-made layers take no backing scale of their own, so each
-    /// follows the window's, or a 2x screen draws them soft.
     override func viewDidChangeBackingProperties() {
         super.viewDidChangeBackingProperties()
-        let scale = window?.backingScaleFactor ?? 2
-        for layer in [drop, ripple, body, rim, outline] {
-            layer.contentsScale = scale
-        }
+        matchBacking()
     }
 
     /// Places the drop above `point`, the card's centre in the
     /// picker's top-left coordinates, hidden.
     func prepare(landingAt point: CGPoint) {
+        matchBacking()
         // Its bottom, the anchor, sits half its height below the
         // centre, so the drop's middle lands on the card's.
         target = CGPoint(
@@ -121,6 +117,15 @@ final class LookPickerDropView: NSView {
             time
         )
         animate(ripple, "opacity", to: 0, .easeOut, time)
+    }
+
+    /// Hand-made layers take no backing scale of their own, so each
+    /// follows the window's, or a 2x screen draws them soft.
+    private func matchBacking() {
+        let scale = window?.backingScaleFactor ?? 2
+        for layer in [drop, ripple, body, rim, outline] {
+            layer.contentsScale = scale
+        }
     }
 
     private var above: CGPoint {

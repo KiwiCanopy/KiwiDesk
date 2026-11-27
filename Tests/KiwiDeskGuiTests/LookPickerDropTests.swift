@@ -61,6 +61,9 @@ struct LookPickerDropTests {
         try wear(controller)
         #expect(controller.revealing)
         #expect(view.drop.opacity == 1)
+        let backing = try #require(controller.panel?.backingScaleFactor)
+        #expect(view.drop.contentsScale == backing)
+        #expect(view.ripple.contentsScale == backing)
         // It lands with its middle on the card's centre, the anchor at
         // its bottom, in the view's unflipped points.
         let landing = controller.geometry.landing
