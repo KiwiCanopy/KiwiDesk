@@ -31,6 +31,10 @@ struct LookPickerGeometry: Equatable {
         )
     }
 
+    /// Where the wear's drop lands and its wave starts: the card's
+    /// centre (#3700).
+    var landing: CGPoint { CGPoint(x: card.midX, y: card.midY) }
+
     /// The card's frosted frame, `framePad` round the card.
     var frame: CGRect {
         card.insetBy(dx: -Self.framePad, dy: -Self.framePad)

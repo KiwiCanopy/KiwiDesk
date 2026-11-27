@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import QuartzCore
 import SwiftUI
 
 /// The wear and the puddle reveal (#3038 ▸ Ruling 2026-11-23, steps
@@ -10,17 +11,28 @@ import SwiftUI
 extension LookPickerController {
     /// ↩ on a look not worn: Core wears it with the windows placed at
     /// once, then the reveal waits for the desk — at most
-    /// `readyCap` — whichever comes first.
+    /// `readyCap` — whichever comes first. The fall starts after the
+    /// commit of the transaction the wear's call ran in, not inside
+    /// it (#3700); the frame log measures what that buys.
     func wear(_ entry: LookPickerEntry) {
         let current = opening
         let latch = ResumeLatch()
         let resume: @MainActor () -> Void = { [weak self] in
             guard !latch.fired, let self, opening == current else { return }
             latch.fired = true
-            startReveal()
+            afterCommit { [weak self] in
+                guard let self, opening == current else { return }
+                startReveal()
+            }
         }
         announce(LookPickerText.wearing(entry.look.name))
+        let log = LookPickerFrameLog()
+        log.start(on: panel?.screen)
+        _ = frameLog?.stop()
+        frameLog = log
+        let start = CACurrentMediaTime()
         core.wearPickedLook(entry.look, ready: resume)
+        log.wear = CACurrentMediaTime() - start
         after(Self.readyCap, resume)
     }
 
@@ -39,34 +51,17 @@ extension LookPickerController {
             after(LookPickerReveal.crossFade, finish)
             return
         }
-        reveal.drop = .above
-        withAnimation(
-            reduceMotion ? nil : .easeOut(duration: LookPickerReveal.dropFade)
-        ) {
-            reveal.dropIn = true
-        }
-        withAnimation(
-            reduceMotion ? nil : .easeIn(duration: LookPickerReveal.fall)
-        ) {
-            reveal.drop = .landed
-        }
+        let drop = dropView
+        drop?.prepare(landingAt: geometry.landing)
+        drop?.fall(reduceMotion: reduceMotion)
         after(LookPickerReveal.fall) { [weak self] in
             guard self?.opening == current else { return }
-            withAnimation(
-                reduceMotion
-                    ? nil : .spring(response: 0.12, dampingFraction: 0.55)
-            ) {
-                reveal.drop = .squashed
-            }
+            drop?.squash(reduceMotion: reduceMotion)
         }
         let sinkAt = LookPickerReveal.fall + LookPickerReveal.squashHold
         after(sinkAt) { [weak self] in
             guard self?.opening == current else { return }
-            withAnimation(
-                reduceMotion ? nil : .easeOut(duration: LookPickerReveal.sink)
-            ) {
-                reveal.drop = .sunk
-            }
+            drop?.sink(reduceMotion: reduceMotion)
         }
         let reach = Self.reach(of: geometry)
         after(sinkAt + LookPickerReveal.waveLead) { [weak self] in
@@ -91,7 +86,7 @@ extension LookPickerController {
     /// card's centre, its band included.
     static func reach(of geometry: LookPickerGeometry) -> CGFloat {
         let size = geometry.screen
-        let centre = CGPoint(x: geometry.card.midX, y: geometry.card.midY)
+        let centre = geometry.landing
         let corners = [
             CGPoint.zero, CGPoint(x: size.width, y: 0),
             CGPoint(x: 0, y: size.height),

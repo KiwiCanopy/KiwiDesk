@@ -14,9 +14,16 @@ final class LookPickerController: NSObject {
     private(set) var panel: LookPickerPanel?
     private(set) var model: LookPickerModel?
     private(set) var reveal = LookPickerReveal()
+    /// This opening's drop, above the picker (#3700); nil once the
+    /// panel lets its content go.
+    var dropView: LookPickerDropView? {
+        (panel?.contentView as? LookPickerContent)?.drop
+    }
     /// This opening; a timer an earlier opening set finds another.
     var opening = 0
     var revealing = false
+    /// The running wear's frame count, logged at the close (#3700).
+    var frameLog: LookPickerFrameLog?
     /// Seam for KiwiDesk's Reduce Motion (#3252), read once per
     /// opening and handed to the view.
     var reduceMotion: () -> Bool = { ReduceMotion.isOn }
@@ -28,6 +35,14 @@ final class LookPickerController: NSObject {
         delay,
         work in
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            MainActor.assumeIsolated(work)
+        }
+    }
+
+    /// Seam running work once the current transaction has
+    /// committed (#3700).
+    var afterCommit: (@escaping @MainActor () -> Void) -> Void = { work in
+        CATransaction.setCompletionBlock {
             MainActor.assumeIsolated(work)
         }
     }
@@ -63,6 +78,8 @@ final class LookPickerController: NSObject {
         else { return }
         opening += 1
         revealing = false
+        _ = frameLog?.stop()
+        frameLog = nil
         reduceMotionNow = reduceMotion()
         let model = makeModel(on: screen)
         let reveal = LookPickerReveal()
@@ -83,9 +100,12 @@ final class LookPickerController: NSObject {
         .environment(\.kiwiDeskReduceMotion, reduceMotionNow)
         panel.makeFirstResponder(nil)
         panel.alphaValue = 1
-        panel.contentView = NSHostingView(
-            rootView: LocaleScopedRoot { root }
-                .environmentObject(LocalizationManager.shared)
+        panel.contentView = LookPickerContent(
+            picker: NSHostingView(
+                rootView: LocaleScopedRoot { root }
+                    .environmentObject(LocalizationManager.shared)
+            ),
+            drop: LookPickerDropView(frame: .zero)
         )
         panel.setFrame(screen.frame, display: true)
         let current = opening
@@ -95,9 +115,11 @@ final class LookPickerController: NSObject {
         if let spoken = model.spokenSelection { announce(spoken) }
     }
 
-    /// Repaints the cards on a settings change by any door (#2604).
+    /// Repaints the cards on a settings change by any door (#2604),
+    /// save the wear's own write: under the overlay it would re-render
+    /// every card as the drop starts to fall (#3700).
     func settingsChanged(_ settings: TilingSettings) {
-        guard !revealing else { return }
+        guard model?.phase == .browsing else { return }
         model?.settings = settings
     }
 
@@ -106,6 +128,8 @@ final class LookPickerController: NSObject {
     /// of the double-click interval, so a second press lands on it
     /// (#3209).
     func close() {
+        if let line = frameLog?.stop() { core.onLog(line) }
+        frameLog = nil
         let hold = clickHold(panel)
         opening += 1
         revealing = false

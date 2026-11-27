@@ -2261,6 +2261,18 @@ reader beneath: `LayoutStoryWiringTests` ▸
 model, having no environment, is the one caller that reaches the
 flag through a parameter instead.
 
+**A Core Animation step in this tree takes `reduceMotion` as a
+parameter and lands at its end at once under it**, the gate
+spelled at each call, since a layer animation has no argument a
+`withAnimation`-style gate could name. Its spellings are ruled in
+`ReduceMotionCensusTests` ▸ `ruled`, citing the test that pins the
+gate (`LookPickerDropTests` ▸ `gatedStepsLand`, #3700).
+Reach for one where a SwiftUI motion over a full-screen surface
+measures as dropping frames: the look picker's SwiftUI drop lost
+about every other frame at 120 Hz, a second `NSHostingView` for it
+did not help, and the same drop in layers lost almost none
+(device, 2026-11-27; the numbers are on #3700).
+
 `ReduceMotionGateTests` holds it **per call, never per file**:
 one gated call and one ungated call in the same file is exactly
 what a whole-file needle passes, and five sites shipped ungated
