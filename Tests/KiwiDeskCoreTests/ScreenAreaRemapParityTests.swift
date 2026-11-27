@@ -98,6 +98,15 @@ private func probe(
         ? fingerprint.description : number.description
 }
 
+/// Whether `map` holds the fingerprint probe without being a map
+/// lane 3c moves: one left behind beside the numbers.
+private func leftKeyedByFingerprint(
+    _ map: (label: String, text: String)
+) -> Bool {
+    movesInLaneThreeC[map.label] == nil
+        && map.text.contains("\"\(oldKey)\"")
+}
+
 /// (path, description) of every map typed with `String` on either
 /// side, recursing into nested structs.
 private func stringMaps(
@@ -140,12 +149,10 @@ struct ScreenAreaRemapParityTests {
                 "\(map.label) holds no probe: populate or classify it"
             )
             // A map still keyed by fingerprint argues its place.
-            if movesInLaneThreeC[map.label] == nil {
-                #expect(
-                    !map.text.contains("\"\(oldKey)\""),
-                    "\(map.label) is keyed by fingerprint"
-                )
-            }
+            #expect(
+                !leftKeyedByFingerprint(map),
+                "\(map.label) is keyed by fingerprint"
+            )
         }
         let labels = Set(maps.map(\.label))
         for label in notAreaKeyed.keys.sorted()
@@ -172,6 +179,40 @@ struct ScreenAreaRemapParityTests {
             #expect(!map.text.contains("\"\(old)\""), "\(map.label)")
             #expect(map.text.contains("\"\(new)\""), "\(map.label)")
         }
+    }
+
+    /// Twins share one fingerprint, which the runtime keys as the
+    /// lower number's; a merge on the higher number's shares must
+    /// leave the lower one's bar entries alone.
+    @Test("a twin's higher number remaps no runtime key")
+    func twinHigherNumberRemapsNothing() throws {
+        let twins = ScreenOrder([screen, "B:1000x1000", screen])
+        let high = try #require(ScreenSlotKey(number: 3, areaID: 2))
+        let into = try #require(ScreenSlotKey(number: 3, areaID: 1))
+        let remap = ScreenAreaRemap(vanished: high, survivor: into)
+        #expect(remap.runtime(in: twins) == nil)
+        var config = populated()
+        let before = config.settings.appBarStyle.edgeOverride
+        config.apply(remap, order: twins)
+        #expect(config.settings.appBarStyle.edgeOverride == before)
+        // The lower number still remaps.
+        let low = ScreenAreaRemap(vanished: vanished, survivor: survivor)
+        #expect(low.runtime(in: twins) != nil)
+    }
+
+    /// The probe check passes on a map holding both forms; only the
+    /// fingerprint clause refuses the second.
+    @Test("a number-keyed map holding a fingerprint key reds")
+    func fingerprintKeyInANumberMapReds() {
+        var config = populated()
+        let desktop = DesktopKey.identity(DesktopIdentity(raw: "probe"))
+        config.desktopAreaSpaces[desktop]?[oldKey.description] =
+            SpaceID("2")
+        let map = stringMaps(config).first {
+            $0.label == "desktopAreaSpaces"
+        }
+        #expect(map?.text.contains("\"\(vanished)\"") == true)
+        #expect(map.map { !leftKeyedByFingerprint($0) } == false)
     }
 
     @Test("a survivor's own edge outranks the vanished one")

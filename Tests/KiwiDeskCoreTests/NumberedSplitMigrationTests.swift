@@ -135,4 +135,35 @@ struct NumberedSplitMigrationTests {
         let older = try data(root)
         #expect(ConfigMigration.migratingSplitsOntoNumbers(older) != nil)
     }
+
+    /// A backup already at the floor holds number keys no set
+    /// holds; a second run would drop every split in it.
+    @Test("the step stands down for a backup at its format")
+    func bundleStepIsIdempotent() throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        var bundle = try #require(
+            JSONSerialization.jsonObject(
+                with: encoder.encode(
+                    SetupBundle(
+                        writtenBy: "test",
+                        config: GuiConfig(),
+                        profiles: [profile],
+                        palettes: []
+                    )
+                )
+            ) as? [String: Any]
+        )
+        var profiles = try #require(
+            bundle["profiles"] as? [[String: Any]]
+        )
+        oldSplits(&profiles[0], ["B:1000x1000": try halves(1000, 1000)])
+        bundle["profiles"] = profiles
+        bundle["format"] = ConfigMigration.numberedSplitsBundleFormat
+        let current = try data(bundle)
+        #expect(ConfigMigration.migratingSplitsOntoNumbers(current) == nil)
+        bundle["format"] = 55
+        let older = try data(bundle)
+        #expect(ConfigMigration.migratingSplitsOntoNumbers(older) != nil)
+    }
 }
