@@ -144,6 +144,15 @@ struct ReduceMotionCensusTests {
         // for the wear's commit; the hook animates nothing.
         "LookPickerController.swift: CATransaction":
             "a commit's completion block starts no motion",
+        // #3700: the drop falls in Core Animation, so a frame needs
+        // no main-thread commit; the controller plays it only past
+        // its Reduce Motion branch, which takes the cross-fade.
+        "LookPickerDropView.swift: CABasicAnimation":
+            "played only past the controller's Reduce Motion branch",
+        "LookPickerDropView.swift: CASpringAnimation":
+            "played only past the controller's Reduce Motion branch",
+        "LookPickerDropView.swift: CATransaction":
+            "a suppression: the model value set beside its animation",
     ]
 
     @Test("No uncensused way to start motion ships")

@@ -9,14 +9,6 @@ import SwiftUI
 /// values, each through a gated animation; the views only draw them.
 @MainActor
 final class LookPickerReveal: ObservableObject {
-    /// Where the drop is in its fall.
-    enum DropStage {
-        case hidden, above, landed, squashed, sunk
-    }
-
-    @Published var drop: DropStage = .hidden
-    /// The drop has faded in, apart from its fall.
-    @Published var dropIn = false
     /// The picker's own blur, in points.
     @Published var blur: CGFloat = 0
     /// The hole's radius, from the drop's point.
@@ -120,76 +112,4 @@ struct LookPickerWave: View {
         .position(centre)
         .allowsHitTesting(false)
     }
-}
-
-/// The small clear drop: it falls onto the card, squashes as it
-/// lands, then sinks in under a ripple.
-struct LookPickerDrop: View {
-    let stage: LookPickerReveal.DropStage
-    let faded: Bool
-    /// Where it lands.
-    let target: CGPoint
-
-    var body: some View {
-        ZStack {
-            Ellipse()
-                .strokeBorder(
-                    SettingsTheme.plateInk.opacity(stage == .sunk ? 0 : 0.8),
-                    lineWidth: 1.5
-                )
-                .frame(
-                    width: stage == .sunk ? Self.ripple * 2 : 0,
-                    height: stage == .sunk ? Self.ripple * 0.8 : 0
-                )
-                .position(target)
-            drop
-                .scaleEffect(
-                    x: scale.x,
-                    y: scale.y,
-                    anchor: .bottom
-                )
-                .opacity(stage == .sunk || !faded ? 0 : 1)
-                .position(
-                    x: target.x,
-                    y: stage == .above || stage == .hidden
-                        ? target.y - LookPickerReveal.dropHeight : target.y
-                )
-        }
-        .allowsHitTesting(false)
-    }
-
-    private var drop: some View {
-        Ellipse()
-            .fill(
-                RadialGradient(
-                    colors: [
-                        SettingsTheme.plateInk.opacity(0.95),
-                        SettingsTheme.plateInk.opacity(0.25),
-                        SettingsTheme.plateInk.opacity(0.4),
-                    ],
-                    center: UnitPoint(x: 0.34, y: 0.28),
-                    startRadius: 0,
-                    endRadius: Self.size
-                )
-            )
-            .overlay(
-                Ellipse().strokeBorder(
-                    SettingsTheme.plateInk.opacity(0.55),
-                    lineWidth: 1
-                )
-            )
-            .frame(width: Self.size, height: Self.size * 1.3)
-    }
-
-    private var scale: (x: CGFloat, y: CGFloat) {
-        switch stage {
-        case .hidden, .above, .landed: (0.85, 1.15)
-        case .squashed: (1.3, 0.7)
-        case .sunk: (0.2, 0.1)
-        }
-    }
-
-    static let size: CGFloat = 34
-    /// How far the sink's ripple spreads.
-    static let ripple: CGFloat = 46
 }

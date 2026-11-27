@@ -51,34 +51,19 @@ extension LookPickerController {
             after(LookPickerReveal.crossFade, finish)
             return
         }
-        reveal.drop = .above
-        withAnimation(
-            reduceMotion ? nil : .easeOut(duration: LookPickerReveal.dropFade)
-        ) {
-            reveal.dropIn = true
-        }
-        withAnimation(
-            reduceMotion ? nil : .easeIn(duration: LookPickerReveal.fall)
-        ) {
-            reveal.drop = .landed
-        }
+        let drop = dropView
+        drop?.prepare(
+            landingAt: CGPoint(x: geometry.card.midX, y: geometry.card.midY)
+        )
+        drop?.fall()
         after(LookPickerReveal.fall) { [weak self] in
             guard self?.opening == current else { return }
-            withAnimation(
-                reduceMotion
-                    ? nil : .spring(response: 0.12, dampingFraction: 0.55)
-            ) {
-                reveal.drop = .squashed
-            }
+            drop?.squash()
         }
         let sinkAt = LookPickerReveal.fall + LookPickerReveal.squashHold
         after(sinkAt) { [weak self] in
             guard self?.opening == current else { return }
-            withAnimation(
-                reduceMotion ? nil : .easeOut(duration: LookPickerReveal.sink)
-            ) {
-                reveal.drop = .sunk
-            }
+            drop?.sink()
         }
         let reach = Self.reach(of: geometry)
         after(sinkAt + LookPickerReveal.waveLead) { [weak self] in

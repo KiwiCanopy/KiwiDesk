@@ -4,7 +4,8 @@ import SwiftUI
 /// The look picker, full screen (#3038 ▸ Ruling 2026-11-23, style
 /// E): the selected look's backdrop, the other looks as stripes
 /// either side, the card in a frosted frame, its name below — and,
-/// once a look is worn, the puddle that opens the real desk.
+/// once a look is worn, the wave that opens the real desk; the drop
+/// falls above it in its own view (`LookPickerDropView`).
 struct LookPickerView: View {
     @ObservedObject var model: LookPickerModel
     @ObservedObject var reveal: LookPickerReveal
@@ -31,13 +32,6 @@ struct LookPickerView: View {
                     rimOnly: reduceTransparency
                 )
             }
-            // Mounted from the start, so its fall from `.hidden` (drawn
-            // as `.above`) animates rather than appearing landed.
-            LookPickerDrop(
-                stage: reveal.drop,
-                faded: reveal.dropIn,
-                target: dropPoint
-            )
         }
         .frame(width: geometry.screen.width, height: geometry.screen.height)
         .opacity(reveal.opacity)
