@@ -105,6 +105,7 @@ struct LookPickerDropTests {
         #expect(controller.revealing)
         later().forEach { $0.1() }
         #expect(view.drop.animationKeys() == nil)
+        #expect(view.drop.opacity == 0, "never shown, even at once")
     }
 
     @Test("a gated step lands at its end with no animation")
