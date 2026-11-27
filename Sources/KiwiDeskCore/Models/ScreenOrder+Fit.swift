@@ -35,7 +35,7 @@ extension ScreenOrder {
     /// This order where it fits; else the fitting order that changes
     /// the fewest screens' numbers, ties to the one that comes first
     /// number by number against this; none fitting, this. An order
-    /// with a hole, or past `fitLimit` screens, is kept as it is.
+    /// past `fitLimit` screens is kept as it is.
     public func fitting(
         _ shares: [String: ScreenShares],
         floors: AreaFloors
@@ -53,9 +53,9 @@ extension ScreenOrder {
     static let fitLimit = 6
 
     /// Every distinct order of these screens (twins once each way);
-    /// this alone for an order with a hole or past the limit.
+    /// this alone past the limit.
     private var candidates: [ScreenOrder] {
-        guard unnumbered.isEmpty, fingerprints.count <= Self.fitLimit
+        guard fingerprints.count <= Self.fitLimit
         else { return [self] }
         return Self.orders(of: fingerprints).map { ScreenOrder($0) }
     }

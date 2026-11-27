@@ -2054,16 +2054,21 @@ loaded with it. The obligations:
   `KiwiCore.numberedScreens` or its `screen(numbered:)` /
   `screenNumber(of:)`, never `PositionalDisplays`**, which only
   assigns layouts and finds main (the heal leads, `numberedPlan`,
-  `ProfileComposition`, the tour, the starter), and never an array
-  index, so a gap in the order stays a gap (#3647,
-  `NumberedScreenArgumentTests`).
+  `ProfileComposition`, the tour, the starter), and never an index
+  into the displays list (#3647, `NumberedScreenArgumentTests`).
+- **A writer of a screen order hands one covering exactly the
+  connected screens** (#3647 ▸ always-numbered ruling, owner
+  2026-11-27): every connected screen holds a number, 1 through N,
+  and no order leaves one out for a session. A reader may take a
+  connected screen's number as present; a nil answer means a screen
+  outside the order, never a hole.
 - **A session renumber of the connected screens is one override,
   `KiwiCore+SessionScreenOrder`'s (#3647 ▸ lane 2b)**, read by
   `screenOrder(for:)` for the live profile and by `liveScreenOrder`,
   never by `screenOrder(holding:)`, so a stored draft keeps its own
   order. Clear it only at an explicit load (`.explicit`, ahead of
   `loadProfile`'s hand-over), a pick of the connected set, a composed
-  apply, the #634 reset and a Save that stored it with no hole
+  apply, the #634 reset and a Save that stored it
   (`clearSessionScreenOrder(ifStoredIn:)`); a monitor-change, wake or
   edit re-apply keeps it. A Save stores it through
   `upsert(_:reordering:)` on a held profile and through

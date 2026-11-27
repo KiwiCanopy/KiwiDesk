@@ -228,11 +228,10 @@ extension KiwiCore {
     /// (#3647 ▸ lane 3c): every number from 1 to the profile's screen
     /// count, or the connected screens' where `order` holds more,
     /// and the `N#id` of every area `shares` stores — the write adds
-    /// the entries' own. A gap in a setup is a session hole and keeps
-    /// its number. A writer hands it the monitor sets, shares and
-    /// order of the profile it writes: the verb the live profile's
-    /// (`liveScreenEdgeScope`), a Settings writer its draft's, never
-    /// an empty list in their place.
+    /// the entries' own. A writer hands it the monitor sets, shares
+    /// and order of the profile it writes: the verb the live
+    /// profile's (`liveScreenEdgeScope`), a Settings writer its
+    /// draft's, never an empty list in their place.
     public func screenEdgeScope(
         monitorSets: [MonitorSet],
         shares: [String: ScreenShares],
@@ -260,16 +259,13 @@ extension KiwiCore {
 
     /// Screens 1 through `count` that keep bar values, in order:
     /// each save a twin's higher number, whose screen reads the lower
-    /// number's values (`ScreenOrder.number(of:)`). A session hole
-    /// keeps its number. The Settings picker's rows (#3647 ▸ lane
-    /// 3c); never a scope a write or a forget judges, which keeps
-    /// every number.
+    /// number's values (`ScreenOrder.number(of:)`). The Settings
+    /// picker's rows (#3647 ▸ lane 3c); never a scope a write or a
+    /// forget judges, which keeps every number.
     public func barNumbers(count: Int, order: ScreenOrder) -> [Int] {
         guard count > 0 else { return [] }
         return (1...count).filter { number in
-            guard number <= order.fingerprints.count,
-                !order.unnumbered.contains(number)
-            else { return true }
+            guard number <= order.fingerprints.count else { return true }
             return order.number(of: order.fingerprints[number - 1]) == number
         }
     }
@@ -311,14 +307,9 @@ extension KiwiCore {
             holdSettingsCall(split: false, replay: replay)
             return .success([])
         }
-        guard let keys = areaKeys(named: args[1]) else {
+        guard let keys = areaKeys(named: args[1]), !keys.isEmpty else {
             return .failure(
                 AppBarSettingError(stringLiteral: Self.unknownScreen)
-            )
-        }
-        guard !keys.isEmpty else {
-            return .failure(
-                AppBarSettingError(stringLiteral: Self.unnumberedScreen)
             )
         }
         return .success(keys.map { Self.args(args, screen: $0) })

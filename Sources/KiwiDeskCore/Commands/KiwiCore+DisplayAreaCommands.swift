@@ -90,7 +90,7 @@ extension KiwiCore {
     /// The number a split names and the extent its sizes are read
     /// against: a connected screen's own, else for a bare number the
     /// extent the sizes or rects span. Nil for an unknown screen; a
-    /// nil number for a connected screen that holds none.
+    /// nil number for a screen no order numbers.
     private func splitTarget(
         _ arg: JSONValue?,
         _ rest: [JSONValue]

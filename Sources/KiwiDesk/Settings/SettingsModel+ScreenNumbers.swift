@@ -24,45 +24,16 @@ extension SettingsModel {
     /// Whether the draft renumbered the connected screens.
     var screenNumbersEdited: Bool { screenNumbering.draft != nil }
 
-    /// The number `display` holds in the draft, nil when it holds
-    /// none.
+    /// The number `display` holds in the draft, nil for a screen
+    /// outside its order.
     func screenNumber(of display: Display) -> Int? {
         screenOrder.numbers(of: display.fingerprint).first
-    }
-
-    /// Whether a pin to `key`'s screen or area lands: false for a
-    /// connected screen left unnumbered, which a Save drops a pin to.
-    func takesPins(_ key: String) -> Bool {
-        let fingerprint = ScreenAreaKey(parsing: key).fingerprint
-        guard displays.contains(where: { $0.fingerprint == fingerprint })
-        else { return true }
-        return !screenOrder.numbers(of: fingerprint).isEmpty
     }
 
     /// Draft pins to a number no connected screen holds: they wait.
     var waitingPins: [SpaceID: Int] {
         config.spacePins.filter { !screenOrder.holds($0.value) }
             .mapValues(\.number)
-    }
-
-    /// The connected screen left unnumbered at `number`'s place, nil
-    /// where no connected screen holds the number at all (#3688).
-    func unnumberedScreen(at number: Int) -> Display? {
-        guard let fingerprint = screenOrder.unnumberedFingerprint(at: number)
-        else { return nil }
-        return displays.first { $0.fingerprint == fingerprint }
-    }
-
-    /// The waiting numbers whose screen is connected but left
-    /// unnumbered, with that screen's label.
-    var unnumberedWaits: [Int: String] {
-        var result: [Int: String] = [:]
-        for number in Set(waitingPins.values) {
-            if let screen = unnumberedScreen(at: number) {
-                result[number] = screenLabel(screen)
-            }
-        }
-        return result
     }
 
     /// How many numbers the connected setup has.
@@ -75,21 +46,6 @@ extension SettingsModel {
                 display.fingerprint,
                 to: number
             )
-        else { return }
-        setDraftScreenOrder(next)
-    }
-
-    /// Whether `display` may be left unnumbered: on the live target
-    /// alone, a hole being the session's, and never for a twin.
-    func canLeaveUnnumbered(_ display: Display) -> Bool {
-        target == .live
-            && screenOrder.unnumbering(display.fingerprint) != nil
-    }
-
-    /// Leaves `display` unnumbered for the session.
-    func leaveUnnumbered(_ display: Display) {
-        guard canLeaveUnnumbered(display),
-            let next = screenOrder.unnumbering(display.fingerprint)
         else { return }
         setDraftScreenOrder(next)
     }

@@ -5,8 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A renumber of the connected screens (#3647 ▸ lane 2): a pick of a
-/// held number swaps two screens, a screen left unnumbered gives up
-/// its number for the session, and a twin cannot be left unnumbered.
+/// held number swaps two screens, and every screen keeps a number
+/// (#3647 ▸ always-numbered ruling).
 @Suite("Screen renumbering (#3647)")
 struct ScreenRenumberTests {
     private let order = ScreenOrder(["A:1x1", "B:1x1", "C:1x1"])
@@ -15,45 +15,8 @@ struct ScreenRenumberTests {
     func swap() throws {
         let next = try #require(order.renumbering("C:1x1", to: 1))
         #expect(next.fingerprints == ["C:1x1", "B:1x1", "A:1x1"])
-        #expect(next.unnumbered.isEmpty)
         #expect(order.renumbering("C:1x1", to: 4) == nil)
         #expect(order.renumbering("Z:1x1", to: 1) == nil)
-    }
-
-    @Test("an unnumbered screen gives up its own number alone")
-    func hole() throws {
-        let next = try #require(order.unnumbering("B:1x1"))
-        #expect(next.fingerprints == order.fingerprints)
-        #expect(next.unnumbered == [2])
-        #expect(!next.holds(ScreenSlotKey(number: 2)!))
-        #expect(next.holds(ScreenSlotKey(number: 3)!))
-        #expect(next.runtimeKey(of: ScreenSlotKey(number: 2)!) == nil)
-        #expect(
-            next.slot(of: ScreenAreaKey(fingerprint: "B:1x1", areaID: 0))
-                == nil
-        )
-        // Its stored pin waits; a runtime pin to it is dropped.
-        let stored = next.storing(
-            runtime: ["9": "B:1x1"],
-            over: ["2": ScreenSlotKey(number: 2)!]
-        )
-        #expect(stored == ["2": ScreenSlotKey(number: 2)!])
-    }
-
-    @Test("picking a number numbers an unnumbered screen again")
-    func renumberTheHole() throws {
-        let holed = try #require(order.unnumbering("B:1x1"))
-        let own = try #require(holed.renumbering("B:1x1", to: 2))
-        #expect(own == order)
-        let swapped = try #require(holed.renumbering("B:1x1", to: 1))
-        #expect(swapped.fingerprints == ["B:1x1", "A:1x1", "C:1x1"])
-        #expect(swapped.unnumbered.isEmpty)
-    }
-
-    @Test("a twin cannot be left unnumbered")
-    func twins() {
-        let twins = ScreenOrder(["T:1x1", "T:1x1"])
-        #expect(twins.unnumbering("T:1x1") == nil)
     }
 }
 
@@ -176,23 +139,17 @@ struct SessionScreenOrderTests {
         #expect(splits[left.fingerprint] == nil)
     }
 
-    @Test("a Save stores the order and ends it; a hole outlives it")
+    @Test("a Save stores the order and ends it")
     func save() throws {
         let core = makeCore()
         try loadWork(core)
         core.setSessionScreenOrder(reversed)
         try core.persistProfile(named: "Work", modes: nil)
-        var work = try core.profiles.read(name: "Work")
+        let work = try core.profiles.read(name: "Work")
         #expect(work.monitorSets.map(\.monitors) == [reversed.fingerprints])
         #expect(core.profiles.sessionScreenOrder == nil)
         // The stored order answers now; the load's fit was its base's.
         #expect(core.liveScreenOrder == reversed)
-        let holed = try #require(reversed.unnumbering("A:400x400"))
-        core.setSessionScreenOrder(holed)
-        try core.persistProfile(named: "Work", modes: nil)
-        work = try core.profiles.read(name: "Work")
-        #expect(work.monitorSets.map(\.monitors) == [reversed.fingerprints])
-        #expect(core.profiles.sessionScreenOrder?.order == holed)
     }
 
     @Test("an explicit load ends it; a monitor change does not")
@@ -226,38 +183,6 @@ struct SessionScreenOrderTests {
         #expect(core.spacePins["2"] == "B:400x400")
     }
 
-    @Test("an unnumbered screen answers to no number")
-    func holeNamesNothing() throws {
-        let core = makeCore()
-        try loadWork(core)
-        let holed = try #require(
-            ScreenOrder(["A:400x400", "B:400x400"])
-                .unnumbering("B:400x400")
-        )
-        core.setSessionScreenOrder(holed)
-        #expect(core.screen(numbered: 1)?.id == left.id)
-        #expect(core.screen(numbered: 2) == nil)
-        #expect(core.screenNumber(of: right.id) == nil)
-    }
-
-    @Test("a new profile stores no pin to an unnumbered screen")
-    func newProfileDropsTheHolePin() throws {
-        let core = makeCore()
-        try loadWork(core)
-        let holed = try #require(
-            ScreenOrder(["A:400x400", "B:400x400"])
-                .unnumbering("B:400x400")
-        )
-        core.setSessionScreenOrder(holed)
-        core.spacePins = ["2": "B:400x400"]
-        try core.persistProfile(named: "Fresh", modes: nil)
-        let fresh = try core.profiles.read(name: "Fresh")
-        #expect(fresh.spaceMonitorMap.isEmpty)
-        #expect(
-            fresh.monitorSets.map(\.monitors) == [["A:400x400", "B:400x400"]]
-        )
-    }
-
     @Test("a pick of the connected set and the reset end it")
     func pickAndResetClear() throws {
         let core = makeCore()
@@ -288,11 +213,10 @@ struct SessionScreenOrderTests {
     func renameAndDelete() throws {
         let core = makeCore()
         try loadWork(core)
-        let holed = try #require(reversed.unnumbering("A:400x400"))
-        core.setSessionScreenOrder(holed)
+        core.setSessionScreenOrder(reversed)
         try core.profiles.rename(from: "Work", to: "Desk")
         #expect(core.profiles.sessionScreenOrder?.profile == "Desk")
-        #expect(core.liveScreenOrder == holed)
+        #expect(core.liveScreenOrder == reversed)
         try core.profiles.delete(name: "Desk")
         #expect(core.profiles.sessionScreenOrder == nil)
     }
@@ -303,11 +227,42 @@ struct SessionScreenOrderTests {
         try loadWork(core)
         try core.persistProfile(named: "Other", modes: nil)
         try core.loadProfile(named: "Work")
-        let holed = try #require(reversed.unnumbering("A:400x400"))
-        core.setSessionScreenOrder(holed)
+        core.setSessionScreenOrder(reversed)
         try core.persistProfile(named: "Other", modes: nil)
         #expect(core.profiles.currentName == "Other")
+        // Work owns the setup, so Other stores no order to end it.
         #expect(core.profiles.sessionScreenOrder?.profile == "Other")
-        #expect(core.liveScreenOrder == holed)
+        #expect(core.liveScreenOrder == reversed)
+    }
+
+    /// A screen past the profile's numbers takes the next one, its
+    /// heal-seeded Space and pin stored like any other number's
+    /// (#3647 ▸ always-numbered ruling).
+    @Test("an extra screen takes the next number, stored as any other")
+    func extraScreenIsStored() throws {
+        let core = makeCore()
+        try loadWork(core)
+        let extra = Display(
+            id: DisplayID(3),
+            name: "C",
+            frame: CGRect(x: 800, y: 0, width: 400, height: 400)
+        )
+        core.handle(.displaysChanged([left, right, extra]))
+        #expect(core.screenNumber(of: extra.id) == 3)
+        let seed = try #require(
+            core.state.workspaces.spaces(on: extra.id).first
+        )
+        #expect(core.spacePins[seed] == extra.fingerprint)
+        #expect(
+            core.storedPins()[seed] == ScreenSlotKey(number: 3)
+        )
+        try core.persistProfile(named: "Three", modes: nil)
+        let three = try core.profiles.read(name: "Three")
+        #expect(three.spaces.contains(seed))
+        #expect(three.spaceMonitorMap[seed] == ScreenSlotKey(number: 3))
+        #expect(
+            three.monitorSets.map(\.monitors)
+                == [["A:400x400", "B:400x400", "C:400x400"]]
+        )
     }
 }

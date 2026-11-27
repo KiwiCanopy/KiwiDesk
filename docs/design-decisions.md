@@ -24205,21 +24205,19 @@ The consequences:
 - **The user renumbers on the Screens page.** Each card's badge
   always reads "Screen N", never a bare numeral, since Spaces
   default to numeric names and a "1" over a "1" chip reads as one
-  thing. Its pull-down offers each number, then **Don't Number This
-  Screen**; picking a number another screen holds swaps the two,
-  and the card's menu carries the same items for the keyboard and
-  VoiceOver. A screen with no number reads "Gets a new Space" and
-  gets one, as the #1175 heal seeds one. A renumber is a draft until
+  thing. Its pull-down offers each number; picking a number another
+  screen holds swaps the two, and the card's menu carries the same
+  items for the keyboard and VoiceOver. A renumber is a draft until
   Save, and stands for the session, for its profile on the setup it
-  was made on, until a Save stores it. A screen left unnumbered is
-  the session's alone: no stored setup holds a gap, so a Save writes
-  nothing for it and nothing for the heal's pin, and the gap ends at
-  the next explicit load or pick, a composed apply, the reset or a
-  relaunch. Storing it would need a gap in `MonitorSet.monitors`, a
-  format crossing. A stored profile's draft offers renumbering only,
-  and a screen with a twin cannot be left unnumbered, since the two
-  share one fingerprint. Dragging a card to swap is
+  was made on, until a Save stores it. Dragging a card to swap is
   later: cards are already drop targets for Space chips.
+- **Every connected screen holds a number (#3647, owner,
+  2026-11-27).** None is left out for a session: each screen takes
+  its number in the order its setup resolves to, and one the
+  profile has no Spaces for gets one fresh Space, the #1175 heal's,
+  whose pin is captured as that number like any other. A
+  session-only hole is a state no stored setup can hold: its pins
+  wait, a Save drops its Space's pin, and twins cannot take part.
 - **A split is stored as shares of the screen**, per-mille, and
   resolved to points on whichever screen holds the number. A
   screen may not take a number whose split would put an area under
@@ -24234,7 +24232,7 @@ The consequences:
   screen change, number the setup in the first order in which
   every screen holds its number's split: the one that moves the
   fewest numbers off the saved order, ties to the earlier screen
-  first, searched up to six screens and never across a gap. That
+  first, searched up to six screens. That
   order is the session's, for that profile and setup, kept through
   a re-apply; a Save still stores the saved order, so a fit never
   rewrites a profile, and numbers its pins in the fitted order they
@@ -24258,11 +24256,13 @@ The consequences:
   fingerprint stays its physical identity, and nothing bar-shaped
   is keyed by it. A look carries no per-screen path, so a look's
   values need no crossing. `spacePins` stays keyed by fingerprint
-  at runtime: the heal pins a screen with no number, which a
-  number cannot name, and the store is rewritten from the numbered
-  pins. A forget keeps every number up to the profile's count,
-  since a gap in one setup is a session hole and the number is the
-  profile's. Cost: twins cannot hold different bar values.
+  at runtime: its key is the physical screen, while the number can
+  move under it — a renumber, a fit, an apply in flight, twins on
+  one fingerprint — and the store is rewritten from the numbered
+  pins. A forget keeps
+  every number up to the profile's count, since a number one setup
+  lacks is another setup's and the number is the profile's. Cost:
+  twins cannot hold different bar values.
 - **Twin screens share one split.** Two screens with one
   fingerprint can hold two numbers, but the runtime keys an area
   by fingerprint, so both draw the lower number's split.

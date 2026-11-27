@@ -19,14 +19,13 @@ extension SettingsDiffRowSource {
         return [row]
     }
 
-    /// The screens in number order, an unnumbered one last.
+    /// The screens in number order.
     private static func numbering(
         _ order: ScreenOrder,
         _ model: SettingsModel
     ) -> String {
         let screens = model.displays
         var named: [String] = []
-        var left: [String] = []
         for (index, fingerprint) in order.fingerprints.enumerated() {
             guard
                 let display = screens.first(where: {
@@ -34,20 +33,10 @@ extension SettingsDiffRowSource {
                 })
             else { continue }
             let name = model.screenLabel(display)
-            if order.unnumbered.contains(index + 1) {
-                left.append(
-                    L(
-                        "diff.value.screen_unnumbered",
-                        "%1$@ not numbered",
-                        name
-                    )
-                )
-            } else {
-                named.append(
-                    L("diff.value.screen_number", "%1$d %2$@", index + 1, name)
-                )
-            }
+            named.append(
+                L("diff.value.screen_number", "%1$d %2$@", index + 1, name)
+            )
         }
-        return (named + left).joined(separator: " · ")
+        return named.joined(separator: " · ")
     }
 }

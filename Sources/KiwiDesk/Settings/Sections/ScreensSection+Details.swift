@@ -60,25 +60,13 @@ extension ScreensSection {
         }
     }
 
-    /// Formatted status sentence for a waiting pin; one whose
-    /// screen was left unnumbered names that screen (#3688). Names
-    /// no fallback screen, because the runtime does not promise one:
+    /// Formatted status sentence for a waiting pin. Names no
+    /// fallback screen, because the runtime does not promise one:
     /// `SpacePlacement.resolve` answers `.pinnedAbsent` with the
     /// positional default's assignment (docs review 2026-08-04).
     /// "Space %1$@" keeps the noun — a bare numeral opening a
     /// sentence is not writable in ja/ko.
     static func orphanSentence(_ orphan: OrphanPin) -> String {
-        if let number = orphan.number, let left = orphan.unnumberedScreen {
-            return L(
-                "monitors.orphan_pin.sentence_unnumbered",
-                "Space %1$@ is pinned to Screen %2$d and opens "
-                    + "elsewhere for now, because %3$@ isn't numbered "
-                    + "this session.",
-                orphan.space.raw,
-                number,
-                left
-            )
-        }
         if let number = orphan.number {
             return L(
                 "monitors.orphan_pin.sentence_numbered",
