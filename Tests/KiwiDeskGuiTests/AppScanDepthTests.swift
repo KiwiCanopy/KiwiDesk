@@ -45,7 +45,7 @@ struct AppScanDepthTests {
     func scanReachesOneFolderDeepOnly() throws {
         let root = try fixture()
         defer { try? FileManager.default.removeItem(at: root) }
-        let found = KeybindingCatalog.appPathsForTesting(
+        let found = InstalledApps.appPathsForTesting(
             under: root.path
         )
         .map { URL(fileURLWithPath: $0).lastPathComponent }

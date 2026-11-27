@@ -92,101 +92,13 @@ extension KeybindingCatalog {
     }
 
     /// Target application with bundle ID and display name.
-    struct InstalledApp: Hashable, Identifiable {
-        let bundleID: String
-        let name: String
-        var id: String { bundleID }
-    }
+    typealias InstalledApp = InstalledApps.App
 
-    private static let diskScan:
-        (apps: [InstalledApp], iconPaths: [String: String]) = {
-            let manager = FileManager.default
-            let roots = [
-                "/Applications",
-                "/System/Applications",
-                manager.homeDirectoryForCurrentUser
-                    .appendingPathComponent("Applications").path,
-            ]
-            var byID: [String: InstalledApp] = [:]
-            var paths: [String: String] = [:]
-            for root in roots {
-                for path in appPaths(under: root) {
-                    let url = URL(fileURLWithPath: path)
-                    guard
-                        let id = Bundle(url: url)?
-                            .bundleIdentifier?.lowercased()
-                    else { continue }
-                    byID[id] = InstalledApp(
-                        bundleID: id,
-                        name: localizedName(url: url, path: path)
-                    )
-                    paths[id] = path
-                }
-            }
-            return (Array(byID.values), paths)
-        }()
-
-    /// Every `.app` under `root`, one folder deep as well as at
-    /// the top (#1279).
-    ///
-    /// A flat `contentsOfDirectory` skipped any directory that is
-    /// not itself a bundle, which silently cost the picker all 19
-    /// of `/System/Applications/Utilities` — Terminal, Activity
-    /// Monitor, Console, Disk Utility — plus every vendor folder
-    /// (`/Applications/TeX`, an Adobe or Setapp folder). Reaching
-    /// one of those meant knowing its bundle identifier.
-    ///
-    /// A bundle's own contents are skipped: what it nests is its
-    /// implementation, not an app a user binds. Depth stops at
-    /// one folder because that is where vendors put them, and an
-    /// unbounded walk of `/Applications` would read every
-    /// resource of every bundle on a path that runs before the
-    /// picker can open.
-    static func appPaths(under root: String) -> [String] {
-        let manager = FileManager.default
-        var found: [String] = []
-        for entry
-            in (try? manager.contentsOfDirectory(atPath: root))
-            ?? []
-        {
-            let path = "\(root)/\(entry)"
-            if entry.hasSuffix(".app") {
-                found.append(path)
-                continue
-            }
-            var isDirectory: ObjCBool = false
-            guard
-                manager.fileExists(
-                    atPath: path,
-                    isDirectory: &isDirectory
-                ), isDirectory.boolValue
-            else { continue }
-            for nested
-                in (try? manager.contentsOfDirectory(atPath: path))
-                ?? [] where nested.hasSuffix(".app")
-            {
-                found.append("\(path)/\(nested)")
-            }
-        }
-        return found
-    }
-
-    #if DEBUG
-        /// The walk, for `AppScanDepthTests`. `#if DEBUG` so a
-        /// production read reds the release build rather than
-        /// waiting for a reviewer (tests.md).
-        static func appPathsForTesting(
-            under root: String
-        ) -> [String] {
-            appPaths(under: root)
-        }
-    #endif
-
-    private static var diskApps: [InstalledApp] { diskScan.apps }
+    private static var diskApps: [InstalledApp] { InstalledApps.disk }
 
     /// Bundle ID to application file path mapping for disk applications.
     static var diskAppIconPaths: [String: String] {
-        diskScan.iconPaths
+        InstalledApps.iconPaths
     }
 
     /// Installed disk and running regular applications sorted by localized
@@ -203,7 +115,7 @@ extension KeybindingCatalog {
             else { continue }
             let name =
                 app.bundleURL.map {
-                    localizedName(url: $0, path: $0.path)
+                    InstalledApps.localizedName(url: $0, path: $0.path)
                 } ?? app.localizedName ?? id
             byID[id] = InstalledApp(bundleID: id, name: name)
         }
@@ -238,7 +150,7 @@ extension KeybindingCatalog {
         if let url = NSWorkspace.shared.urlForApplication(
             withBundleIdentifier: id
         ) {
-            return localizedName(url: url, path: url.path)
+            return InstalledApps.localizedName(url: url, path: url.path)
         }
         return id
     }
@@ -250,38 +162,5 @@ extension KeybindingCatalog {
     static func snapshotName(forBundleID id: String) -> String? {
         guard snapshotBuilt.withLock({ $0 }) else { return nil }
         return installedNameByID[id.lowercased()]
-    }
-
-    /// Resolves user-language display name via Spotlight metadata
-    /// or FileManager fallback, stripping the soft hyphen some
-    /// localized names carry so it never leaks a line break into
-    /// a label or skews a sort key.
-    private static func localizedName(
-        url: URL,
-        path: String
-    ) -> String {
-        if let item = NSMetadataItem(url: url),
-            let name = item.value(
-                forAttribute: kMDItemDisplayName as String
-            ) as? String
-        {
-            let clean = name.replacingOccurrences(
-                of: "\u{00AD}",
-                with: ""
-            )
-            let base =
-                clean.hasSuffix(".app")
-                ? String(clean.dropLast(4)) : clean
-            if !base.isEmpty { return base }
-        }
-        return appDisplayName(path: path)
-    }
-
-    private static func appDisplayName(path: String) -> String {
-        let shown = FileManager.default.displayName(
-            atPath: path
-        )
-        return shown.hasSuffix(".app")
-            ? String(shown.dropLast(4)) : shown
     }
 }
