@@ -37,9 +37,10 @@ struct ScreenAreaPictureTests {
         #expect(ScreenArrangement.unitAreas(of: nil).count == 1)
     }
 
-    /// Every pane holds the floor's one chip: the narrowest area,
-    /// not the card, is what the scale floors on.
-    @Test func everyPaneHoldsTheMinimumCard() throws {
+    /// Every pane the card draws holds its name and a chip: the
+    /// narrowest area under the band, not the card, is what the
+    /// scale floors on (#3697).
+    @MainActor @Test func everyPaneHoldsTheMinimumCard() throws {
         let screen = display(1)
         let split = try three()
         let layout = ScreenArrangement.layout(
@@ -49,11 +50,13 @@ struct ScreenAreaPictureTests {
             splits: [screen.fingerprint: split]
         )
         let card = try #require(layout.displays.first).rect
-        for unit in ScreenArrangement.unitAreas(of: split) {
-            let pane = ScreenArrangement.paneRect(unit.rect, in: card.size)
+        for pane in ScreenCard.paneRects(of: split, in: card.size) {
             let minimum = ScreenArrangement.minimumCard
-            #expect(pane.width >= minimum.width - 1)
-            #expect(pane.height >= minimum.height - 1)
+            #expect(pane.rect.width >= minimum.width - 1)
+            #expect(
+                pane.rect.height >= ScreenCardChips.splitPaneHeight - 1
+            )
+            #expect(ScreenCardChips.namesArea(in: pane.rect.size))
         }
         let whole = ScreenArrangement.layout(
             displays: [screen],

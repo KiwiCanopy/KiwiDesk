@@ -20,6 +20,12 @@ enum ScreenCardChips {
     /// ellipsis alone names nothing.
     static let areaNameLine: CGFloat = 13
     static let areaNameMinWidth: CGFloat = 28
+    /// A split card's band, where its screen is named (#3697).
+    static let bandHeight: CGFloat = headerHeight
+    /// The shortest split pane that holds its name and a chip row:
+    /// the floor the picture's scale keeps (#3697).
+    static let splitPaneHeight: CGFloat =
+        cardPadding * 2 + areaNameLine + stackSpacing + chipHeight
 
     /// Whether a split pane of `size` writes its area's name: wide
     /// enough to read, and tall enough for the name and a chip row,

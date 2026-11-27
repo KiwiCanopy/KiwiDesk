@@ -31,14 +31,14 @@ struct ScreenCard: View {
             }
             if let stored = model.areaSplit(of: display) {
                 ScreenCardBand(model: model, display: display)
-                    .frame(
-                        width: size.width,
-                        height: ScreenCardChips.headerHeight
-                    )
+                    .frame(width: size.width, height: Self.band(split))
+                    // Read first, as the badge led the first pane.
+                    .accessibilitySortPriority(1)
+                // Laid out in the area under the band, then lowered
+                // onto it.
                 dividers(stored)
                     .offset(y: Self.band(split))
                 capsules(split)
-                    .offset(y: Self.band(split))
             }
         }
         .frame(
@@ -94,7 +94,7 @@ struct ScreenCard: View {
     /// (#3697 ▸ owner, ui-designer 2026-11-27); none on a whole card,
     /// whose one pane carries the header.
     static func band(_ split: ScreenSplit?) -> CGFloat {
-        split == nil ? 0 : ScreenCardChips.headerHeight
+        split == nil ? 0 : ScreenCardChips.bandHeight
     }
 
     /// Where the panes, dividers and capsules lay out on a card of
@@ -259,14 +259,10 @@ struct ScreenCard: View {
                 (moved.leading.prefix(1) + moved.trailing.prefix(1)),
                 id: \.self
             ) { id in
-                if let unit = ScreenArrangement.unitAreas(of: split)
+                if let rect = Self.paneRects(of: split, in: size)
                     .first(where: { $0.id == id })?.rect,
                     let area = split.areas.first(where: { $0.id == id })
                 {
-                    let rect = ScreenArrangement.paneRect(
-                        unit,
-                        in: Self.areaRect(of: size, split: split).size
-                    )
                     AreaSizeCapsule(
                         length: side ? area.w : area.h,
                         snap: drag.snap,

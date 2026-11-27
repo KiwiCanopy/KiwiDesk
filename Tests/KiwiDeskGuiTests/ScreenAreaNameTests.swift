@@ -49,14 +49,7 @@ struct ScreenAreaNameTests {
         #expect(panes.count == (shape == "grid" ? 4 : 2))
         for pane in panes {
             #expect(ScreenCardChips.namesArea(in: pane.rect.size))
-            let line = nameLine(in: pane.rect)
-            #expect(pane.rect.contains(line))
-            // The chips still fit under it.
-            let area = ScreenCardChips.chipArea(
-                in: pane.rect.size,
-                header: ScreenCardChips.areaNameLine
-            )
-            #expect(area.height >= ScreenCardChips.chipHeight)
+            #expect(pane.rect.contains(nameLine(in: pane.rect)))
         }
     }
 
@@ -101,13 +94,21 @@ struct ScreenAreaNameTests {
     @Test("the name is the pane's, never under the card")
     func nameIsThePanes() throws {
         let pane = try source("ScreenAreaPane.swift")
+        #expect(pane.contains("}elseifletlabel=nameLine{"))
         #expect(
             pane.contains(
-                "}elseifnamesArea,letarea,"
-                    + "letlabel=model.areaLabel(area,on:display){"
+                "guardScreenCardChips.namesArea(in:size),letareaelse{"
+                    + "returnnil}returnmodel.areaLabel(area,on:display)"
             )
         )
         #expect(pane.contains("header:chipHeader"))
+        // The pane's label and hover keep the full name.
+        #expect(
+            pane.contains(
+                ".accessibilityLabel(model.areaName(area,on:display))"
+            )
+        )
+        #expect(pane.contains("?model.areaName(area,on:display)+"))
         let picture = try source("ScreensPicture.swift")
         #expect(!picture.contains("Caption"))
         #expect(!picture.contains("areaLabel"))
@@ -120,7 +121,11 @@ struct ScreenAreaNameTests {
         #expect(ScreensPicture.height(holding: 10) == fitted)
         let picture = try source("ScreensPicture.swift")
         #expect(picture.contains("ScrollView(.horizontal){"))
-        #expect(picture.contains(".frame(height:height)"))
+        #expect(
+            picture.contains(
+                ".frame(height:width>0?height:Self.canvasHeight)"
+            )
+        )
         #expect(!picture.contains(".vertical"))
     }
 }

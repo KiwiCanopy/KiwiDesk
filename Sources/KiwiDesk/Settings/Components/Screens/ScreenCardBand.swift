@@ -34,7 +34,13 @@ struct ScreenCardBand: View {
                 Text(model.screenLabel(display))
                     .lineLimit(1)
                     .truncationMode(.middle)
-                    .frame(minWidth: Self.nameFloor, alignment: .leading)
+                    // An ideal at the floor, so the named row fits
+                    // whenever the floor does and the name truncates.
+                    .frame(
+                        minWidth: Self.nameFloor,
+                        idealWidth: Self.nameFloor,
+                        alignment: .leading
+                    )
                     .allowsHitTesting(false)
                     // The card's own label names the screen.
                     .accessibilityHidden(true)

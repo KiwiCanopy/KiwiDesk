@@ -1,6 +1,8 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -57,12 +59,34 @@ struct ScreenCardBandTests {
             )
         ).filter { !$0.isWhitespace }
         #expect(source.contains("dividers(stored).offset(y:Self.band(split))"))
-        #expect(source.contains("capsules(split).offset(y:Self.band(split))"))
+        #expect(source.contains("ifletrect=Self.paneRects(of:split,in:size)"))
         #expect(
             source.contains(
                 "letarea=Self.areaRect(of:size,split:split).size"
             )
         )
         #expect(source.contains("ScreenCardBand(model:model,display:display)"))
+    }
+
+    /// The band's name asks no more than the floor: a long name
+    /// truncates in the middle rather than drop the row, so a twin
+    /// keeps its position (#3697 ▸ review).
+    @Test("a long name truncates rather than leave the band")
+    func longNameTruncates() {
+        let model = makeTestModel()
+        let width = { (name: String) -> CGFloat in
+            let display = Display(
+                id: DisplayID(9),
+                name: name,
+                frame: CGRect(x: 0, y: 0, width: 1512, height: 982)
+            )
+            let host = NSHostingView(
+                rootView: ScreenCardBand(model: model, display: display)
+            )
+            return host.fittingSize.width
+        }
+        let short = width("A")
+        let long = width(String(repeating: "Integriertes Display ", count: 6))
+        #expect(abs(long - short) < 1)
     }
 }

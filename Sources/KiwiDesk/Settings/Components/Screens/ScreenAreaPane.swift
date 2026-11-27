@@ -129,7 +129,7 @@ struct ScreenAreaPane: View {
     /// The room above the chips: the header, the name, or none.
     private var chipHeader: CGFloat {
         if leads { return ScreenCardChips.headerHeight }
-        return namesArea ? ScreenCardChips.areaNameLine : 0
+        return nameLine == nil ? 0 : ScreenCardChips.areaNameLine
     }
 
     /// A whole screen's header, else a split pane's area name,
@@ -144,9 +144,7 @@ struct ScreenAreaPane: View {
                 headerText
             }
             .frame(height: ScreenCardChips.headerHeight)
-        } else if namesArea, let area,
-            let label = model.areaLabel(area, on: display)
-        {
+        } else if let label = nameLine {
             Text(label)
                 .font(.caption2)
                 .fontWeight(isSelected ? .semibold : .regular)
@@ -161,9 +159,13 @@ struct ScreenAreaPane: View {
         }
     }
 
-    /// Whether a split pane names its area (#3697, owner).
-    private var namesArea: Bool {
-        isSplit && ScreenCardChips.namesArea(in: size)
+    /// A split pane's area name where it has room for it (#3697,
+    /// owner); nil on a whole screen, a narrow pane or no name.
+    private var nameLine: String? {
+        guard ScreenCardChips.namesArea(in: size), let area else {
+            return nil
+        }
+        return model.areaLabel(area, on: display)
     }
 
     /// The name and the Main chip, which VoiceOver reads from the
@@ -174,7 +176,7 @@ struct ScreenAreaPane: View {
             Text(model.screenLabel(display))
                 .lineLimit(1)
                 .truncationMode(.tail)
-            if leads && isMain {
+            if isMain {
                 BadgeChip(
                     label: L("monitor_card.main_badge", "main")
                 )

@@ -40,16 +40,18 @@ struct ScreensPicture: View {
             in: canvas
         )
         // Sideways only, for a desk wider than the page; the page
-        // scrolls up and down.
+        // scrolls up and down. Nothing is laid out before the width
+        // is measured.
         ScrollView(.horizontal) {
             picture(layout)
                 .frame(width: content.width, height: content.height)
                 .padding(.leading, origin.x)
                 .padding(.top, origin.y)
                 .padding(Self.inset)
+                .opacity(width > 0 ? 1 : 0)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: height)
+        .frame(height: width > 0 ? height : Self.canvasHeight)
         .onGeometryChange(for: CGFloat.self) {
             $0.size.width
         } action: {
