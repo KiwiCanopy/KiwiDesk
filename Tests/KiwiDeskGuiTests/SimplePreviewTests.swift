@@ -97,9 +97,8 @@ struct SimplePreviewTests {
     /// A pin is stored by screen number (#3647), so a screen not
     /// connected holds no number and a pin cannot wait on it; a
     /// stored number past the connected screens is kept for the
-    /// Save and reads unpinned. The words for such a pin are the
-    /// owner's to rule (#3647 ▸ Lane 1 design rulings, 5).
-    @Test("a pin past the connected screens is kept and reads unpinned")
+    /// Save and reads as that waiting number (#3689).
+    @Test("a pin past the connected screens is kept and reads waiting")
     func pinPastTheScreens() {
         let model = model(["a"])
         let core = model.core
@@ -116,7 +115,10 @@ struct SimplePreviewTests {
         let space = SpaceID("a")
         model.config.spacePins[space] = ScreenSlotKey(number: 2)
         #expect(model.pin(of: space) == nil)
-        #expect(model.screenChoice(of: space) == .auto)
+        #expect(
+            model.screenChoice(of: space)
+                == .waiting(ScreenSlotKey(number: 2)!)
+        )
         #expect(model.config.spacePins[space] == ScreenSlotKey(number: 2))
     }
 
