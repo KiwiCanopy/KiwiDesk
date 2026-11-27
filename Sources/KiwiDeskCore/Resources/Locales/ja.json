@@ -1715,6 +1715,7 @@
   "looks.wallpaper.choose_button": "選択",
   "looks.wallpaper.choose_message": "「%1$@」の壁紙を選択してください。",
   "looks.wallpaper.current.full_screen": "画面%1$dではフルスクリーンのアプリが表示されているため、「%2$@」はその画面について以前の内容を保持します。",
+  "looks.wallpaper.current.missing": "画面%1$dの壁紙は、macOSが把握している場所にもうありません。かわりに「%2$@」を使ってください。",
   "looks.wallpaper.current.not_picture": "画面%1$dの壁紙は画像ファイルではないため、「%2$@」はその画面の壁紙を保持しません。",
   "looks.wallpaper.current.refused": "KiwiDeskには画面%1$dの壁紙を読み取る権限がありませんでした。かわりに「%2$@」を使ってください。",
   "looks.wallpaper.current.unreadable": "画面%1$dの壁紙を読み取れませんでした。かわりに「%2$@」を使ってください。",

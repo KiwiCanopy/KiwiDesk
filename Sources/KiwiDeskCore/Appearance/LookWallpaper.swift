@@ -53,8 +53,11 @@ public enum LookWallpaper: Sendable, Equatable, Codable {
         }
     }
 
-    /// The extensions a library picture may carry (#3478 ▸ 2026-11-24).
-    public static let extensions = ["heic", "jpg", "jpeg", "png", "tiff"]
+    /// The extensions a library picture may carry (#3478 ▸ 2026-11-24,
+    /// #3699).
+    public static let extensions = [
+        "heic", "jpg", "jpeg", "png", "tiff", "webp",
+    ]
 
     /// Whether `name` is `<64 lowercase hex>.<extension>`.
     public static func isLibraryName(_ name: String) -> Bool {

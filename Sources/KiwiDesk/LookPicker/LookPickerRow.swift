@@ -142,7 +142,8 @@ private struct LookPickerRowItem: View {
 }
 
 /// The card speaks for the picker: the look's name, its line and
-/// its place, adjusted by a swipe, worn by the default action.
+/// its place, adjusted by a swipe, worn by the default action and
+/// closed by the escape gesture, since the backdrop is hidden (#3698).
 private struct LookPickerCardSpeech: ViewModifier {
     @ObservedObject var model: LookPickerModel
 
@@ -160,5 +161,8 @@ private struct LookPickerCardSpeech: ViewModifier {
                 }
             }
             .accessibilityAction { model.wearSelected() }
+            .accessibilityAction(.escape) {
+                model.handle(.escape, repeated: false)
+            }
     }
 }

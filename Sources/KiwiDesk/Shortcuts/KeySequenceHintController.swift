@@ -63,10 +63,12 @@ final class KeySequenceHintController {
         guard let progress else { return nil }
         var found: KeySequenceHint?
         let running = core.runningKeySequence(leader: progress.leader)
-        // A step lists its keys alone, never a gesture (#3428).
+        // A step lists its keys alone, never a gesture (#3428),
+        // and every end key, an opener of KiwiHub's too (#3695).
         let reference = JumpPanelController.reference(
             core: core,
-            gestures: false
+            gestures: false,
+            dropsOpeners: false
         ) { layer in
             found = KeySequenceHint.of(progress, in: layer)
             // The snapshot may lack a Lua sequence it could not read

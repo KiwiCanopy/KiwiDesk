@@ -29,7 +29,9 @@ enum ScreenArrangement {
     /// Scale factor threshold below which `isApproximate(_:)` reports true.
     static let perceptibleClamp: CGFloat = 0.9
 
-    /// Minimum card size holding header and at least one chip.
+    /// Minimum size of a whole card, header and one chip; a split
+    /// card's panes keep `ScreenCardChips.splitPaneHeight` under its
+    /// band instead (#3697).
     static let minimumCard = CGSize(
         width: ScreenCardChips.cardPadding * 2
             + ScreenCardChips.minChipWidth,
@@ -154,8 +156,9 @@ enum ScreenArrangement {
     }
 
     /// Step 2 & 3: uniform scale fitted to canvas and floored so
-    /// every AREA of every card holds `minimumCard` (#3517): a split
-    /// card's smallest pane is the one that must fit a chip.
+    /// every AREA of every card holds a chip (#3517): a whole card
+    /// `minimumCard`, a split card's panes, under its band, their
+    /// name and a chip row (#3697).
     private static func scale(
         for sizes: [(size: CGSize, units: [CGRect])],
         bounds: CGSize,
@@ -168,13 +171,18 @@ enum ScreenArrangement {
         )
         guard floored else { return fit }
         let floor =
-            sizes.flatMap { entry in
-                entry.units.map { unit in
+            sizes.flatMap { entry -> [CGFloat] in
+                let split = entry.units.count > 1
+                let band = split ? ScreenCardChips.bandHeight : 0
+                let tall =
+                    split
+                    ? ScreenCardChips.splitPaneHeight : minimumCard.height
+                return entry.units.map { unit in
                     max(
                         minimumCard.width
                             / max(entry.size.width * unit.width, 1),
-                        minimumCard.height
-                            / max(entry.size.height * unit.height, 1)
+                        (tall / max(unit.height, 0.001) + band)
+                            / max(entry.size.height, 1)
                     )
                 }
             }

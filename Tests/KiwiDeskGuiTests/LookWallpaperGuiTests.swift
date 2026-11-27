@@ -7,7 +7,7 @@ import Testing
 /// The GUI half of a look's picture (#3478): the look picker draws a
 /// card's picture for its own screen, and Use Current Wallpaper
 /// narrates every screen it skipped, one line each.
-@Suite("Look wallpaper GUI")
+@Suite("Look wallpaper GUI", .serialized)
 @MainActor
 struct LookWallpaperGuiTests {
     static let a = String(repeating: "a", count: 64) + ".png"
@@ -50,5 +50,34 @@ struct LookWallpaperGuiTests {
         #expect(lines.count == 2)
         #expect(lines.first?.contains("Screen 2") == true)
         #expect(lines.last?.contains("Screen 3") == true)
+    }
+
+    /// A file gone from the path macOS reports says so, apart from
+    /// a read that failed (#3699).
+    @Test("a missing file is told apart from an unreadable one")
+    func missingIsItsOwnLine() {
+        LocalizationManager.shared.select("en")
+        let missing = LooksShelf.narrate([1: .missing], look: "Dusk")
+        let unreadable = LooksShelf.narrate([1: .unreadable], look: "Dusk")
+        #expect(missing?.contains("no longer at the place") == true)
+        #expect(missing != unreadable)
+        // A catalog reader meets the missing key, not the
+        // unreadable one.
+        LocalizationManager.shared.select("de")
+        defer { LocalizationManager.shared.select("en") }
+        let german = LooksShelf.narrate([1: .missing], look: "Dusk")
+        #expect(german?.contains("liegt nicht mehr dort") == true)
+        let gone =
+            testTemporaryDirectory
+            .appendingPathComponent("gone-\(UUID().uuidString).png")
+        let library = WallpaperLibrary(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+        )
+        #expect(
+            KiwiCore.readPicture(at: gone, into: library)
+                == .failure(.missing)
+        )
     }
 }

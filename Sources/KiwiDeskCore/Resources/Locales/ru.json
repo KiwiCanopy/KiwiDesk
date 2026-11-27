@@ -1715,6 +1715,7 @@
   "looks.wallpaper.choose_button": "Выбрать",
   "looks.wallpaper.choose_message": "Выбери обои для облика «%1$@».",
   "looks.wallpaper.current.full_screen": "На экране %1$d открыто полноэкранное приложение, поэтому облик «%2$@» оставляет для него то, что было.",
+  "looks.wallpaper.current.missing": "Обоев экрана %1$d больше нет в том месте, которое для них указано в macOS. Используй вместо этого «%2$@».",
   "looks.wallpaper.current.not_picture": "Обои экрана %1$d — не файл изображения, поэтому облик «%2$@» не сохраняет обоев для него.",
   "looks.wallpaper.current.refused": "KiwiDesk не получил разрешения прочитать обои экрана %1$d. Используй вместо этого «%2$@».",
   "looks.wallpaper.current.unreadable": "Не удалось прочитать обои экрана %1$d. Используй вместо этого «%2$@».",

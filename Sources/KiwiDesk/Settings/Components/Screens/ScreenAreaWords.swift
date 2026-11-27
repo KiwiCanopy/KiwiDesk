@@ -65,12 +65,6 @@ enum ScreenAreaWords {
     static func composed(screen: String, area: String) -> String {
         L("monitors.split.name", "%1$@ – %2$@", screen, area)
     }
-
-    /// The same frame unfilled, for a header that draws its two
-    /// halves apart (`SentenceFrame`).
-    static var nameFrame: String {
-        L("monitors.split.name", "%1$@ – %2$@")
-    }
 }
 
 /// A selection in the Screens picture: a screen, and on a split

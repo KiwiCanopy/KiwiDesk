@@ -1715,6 +1715,7 @@
   "looks.wallpaper.choose_button": "Scegli",
   "looks.wallpaper.choose_message": "Scegli lo sfondo per «%1$@».",
   "looks.wallpaper.current.full_screen": "Lo schermo %1$d mostra un'app a tutto schermo, quindi «%2$@» mantiene ciò che aveva per quello schermo.",
+  "looks.wallpaper.current.missing": "Lo sfondo dello schermo %1$d non si trova più nella posizione indicata da macOS. Usa invece «%2$@».",
   "looks.wallpaper.current.not_picture": "Lo sfondo dello schermo %1$d non è un file immagine, quindi «%2$@» non ne tiene nessuno per quello schermo.",
   "looks.wallpaper.current.refused": "KiwiDesk non ha avuto il permesso di leggere lo sfondo dello schermo %1$d. Usa invece «%2$@».",
   "looks.wallpaper.current.unreadable": "Non è stato possibile leggere lo sfondo dello schermo %1$d. Usa invece «%2$@».",

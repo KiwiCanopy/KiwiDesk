@@ -1715,6 +1715,7 @@
   "looks.wallpaper.choose_button": "Choisir",
   "looks.wallpaper.choose_message": "Choisissez le fond d'écran de « %1$@ ».",
   "looks.wallpaper.current.full_screen": "L'écran %1$d affiche une app en plein écran, donc « %2$@ » garde ce qu'il avait pour lui.",
+  "looks.wallpaper.current.missing": "Le fond d'écran de l'écran %1$d n'est plus à l'emplacement indiqué par macOS. Utilisez plutôt « %2$@ ».",
   "looks.wallpaper.current.not_picture": "Le fond d'écran de l'écran %1$d n'est pas un fichier image, donc « %2$@ » n'en garde aucun pour lui.",
   "looks.wallpaper.current.refused": "KiwiDesk n'a pas été autorisé à lire le fond d'écran de l'écran %1$d. Utilisez plutôt « %2$@ ».",
   "looks.wallpaper.current.unreadable": "Le fond d'écran de l'écran %1$d n'a pas pu être lu. Utilisez plutôt « %2$@ ».",

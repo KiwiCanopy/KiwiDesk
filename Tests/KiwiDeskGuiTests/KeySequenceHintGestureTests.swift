@@ -46,7 +46,11 @@ struct KeySequenceHintGestureTests {
         let core = try core()
         // Positive control: the sheet over this core draws gestures.
         let hub = try #require(
-            JumpPanelController.reference(core: core, gestures: true)
+            JumpPanelController.reference(
+                core: core,
+                gestures: true,
+                dropsOpeners: true
+            )
         )
         #expect(rows(hub).contains { !$0.gestures.isEmpty })
         let controller = KeySequenceHintController(core: core)

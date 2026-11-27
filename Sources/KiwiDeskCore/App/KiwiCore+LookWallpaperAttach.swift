@@ -13,6 +13,9 @@ public enum CurrentWallpaperOutcome: Error, Equatable, Sendable {
     case fullScreenSpace
     /// macOS refused the folder-access prompt.
     case accessRefused
+    /// No file is at the path macOS reports, though its copy may
+    /// still show (#3699).
+    case missing
     /// The file could not be read.
     case unreadable
 }
@@ -108,6 +111,11 @@ extension KiwiCore {
                 outcomes[number] = outcome
             }
         }
+        for (number, outcome) in outcomes.sorted(by: { $0.key < $1.key }) {
+            onLog(
+                "use current wallpaper: \(name) screen \(number): \(outcome)"
+            )
+        }
         if let wallpaper = Self.collapsed(picks) {
             do {
                 try setLookWallpaper(wallpaper, of: name)
@@ -140,6 +148,10 @@ extension KiwiCore {
             where error.code == .fileReadNoPermission
         {
             return .failure(.accessRefused)
+        } catch let error as CocoaError
+            where error.code == .fileReadNoSuchFile
+        {
+            return .failure(.missing)
         } catch {
             return .failure(.unreadable)
         }

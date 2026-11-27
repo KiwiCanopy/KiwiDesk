@@ -16674,6 +16674,15 @@ The Desktop overview's opener, seeded on ⌃⌥O (#1229, #3167), is a fourth
 and is dropped the same way; the side switch prints it beside the
 Desktops title.
 
+:::unreleased
+*Amended (#3695, owner, 2026-11-27): the suppression is the
+Shortcuts side's alone.* Its home is the side switch, which the key
+sequence hint panel lacks, so a step's end key that opens KiwiHub —
+any side, the last-app opener included — is listed there like any
+other end key; dropped, it would be the one end key a step hides
+(`KeySequenceHintOpenerTests`).
+:::
+
 **The side switch draws titles only (#1229, owner ruling
 2026-11-01, amending #2245).** One line, every side always
 visible and clickable; a side's chord stands in for its title —

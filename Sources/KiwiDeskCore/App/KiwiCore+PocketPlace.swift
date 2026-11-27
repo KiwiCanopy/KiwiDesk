@@ -47,13 +47,15 @@ extension KiwiCore {
     }
 
     /// How far in from its frame's edge side the mark stands: the
-    /// outer margin, save inside the strip, whose frame starts past
-    /// it.
+    /// outer margin for the whole mark; none inside the strip, whose
+    /// frame starts past it, nor for the handle, flush on the edge as
+    /// a bar's handle is (#3361, #3696). A section's panel reads no
+    /// outer, so it takes none.
     static func pocketOuter(
         _ place: PocketPlace,
         shelf: KiwiShelf
     ) -> CGFloat {
-        if case .inside = place { return 0 }
-        return shelf.outerMargin
+        if case .whole = place { return shelf.outerMargin }
+        return 0
     }
 }

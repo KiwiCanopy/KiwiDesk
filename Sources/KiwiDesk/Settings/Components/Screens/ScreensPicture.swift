@@ -14,43 +14,59 @@ struct ScreensPicture: View {
     var paneFocus: ScreenSelection? = nil
     var act: (ScreenAreaAction) -> Void = { _ in }
 
+    /// The height the screens are fitted to; the picture itself
+    /// grows past it to hold what the fit puts under the cards, so
+    /// it never scrolls up and down (#3697).
     private static let canvasHeight: CGFloat = 248
     /// Room inside the clip for a risen card's shadow and the main
     /// card's glow.
     private static let inset = SettingsTheme.hoverShadowRadius
     private static let standBand: CGFloat = 16
+    @State private var width: CGFloat = 0
 
     var body: some View {
-        GeometryReader { proxy in
-            let canvas = CGSize(
-                width: proxy.size.width - Self.inset * 2,
-                height: Self.canvasHeight - Self.inset * 2
-                    - Self.standBand
-            )
-            let layout = arrangement(for: canvas)
-            let origin = ScreenArrangement.origin(
-                of: layout.contentSize,
-                in: canvas
-            )
-            ScrollView([.horizontal, .vertical]) {
-                picture(layout)
-                    .frame(
-                        width: layout.contentSize.width,
-                        height: layout.contentSize.height
-                            + Self.standBand
-                    )
-                    .padding(.leading, origin.x)
-                    .padding(.top, origin.y)
-                    .padding(Self.inset)
-            }
-            .frame(
-                width: proxy.size.width,
-                height: proxy.size.height,
-                alignment: .center
-            )
+        let canvas = CGSize(
+            width: max(0, width - Self.inset * 2),
+            height: Self.canvasHeight - Self.inset * 2 - footBand
+        )
+        let layout = arrangement(for: canvas)
+        let content = CGSize(
+            width: layout.contentSize.width,
+            height: layout.contentSize.height + footBand
+        )
+        let height = Self.height(holding: content.height)
+        let origin = ScreenArrangement.origin(
+            of: layout.contentSize,
+            in: canvas
+        )
+        // Sideways only, for a desk wider than the page; the page
+        // scrolls up and down. The content stays hidden until the
+        // width is measured.
+        ScrollView(.horizontal) {
+            picture(layout)
+                .frame(width: content.width, height: content.height)
+                .padding(.leading, origin.x)
+                .padding(.top, origin.y)
+                .padding(Self.inset)
+                .opacity(width > 0 ? 1 : 0)
         }
-        .frame(height: Self.canvasHeight)
+        .frame(maxWidth: .infinity)
+        .frame(height: width > 0 ? height : Self.canvasHeight)
+        .onGeometryChange(for: CGFloat.self) {
+            $0.size.width
+        } action: {
+            width = $0
+        }
     }
+
+    /// The picture's height for content `contentHeight` tall: the
+    /// fitted canvas at least, else all of the content (#3697).
+    static func height(holding contentHeight: CGFloat) -> CGFloat {
+        max(canvasHeight, contentHeight + inset * 2)
+    }
+
+    /// The band under the picture's lowest cards: their stands.
+    private var footBand: CGFloat { Self.standBand }
 
     /// Scaled screen stand footer (#758, owner ruling 2026-08-04,
     /// 2026-08-09).

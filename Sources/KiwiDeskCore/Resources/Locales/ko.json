@@ -1715,6 +1715,7 @@
   "looks.wallpaper.choose_button": "선택",
   "looks.wallpaper.choose_message": "‘%1$@’의 배경화면을 선택하십시오.",
   "looks.wallpaper.current.full_screen": "화면 %1$d에 전체 화면 앱이 표시되어 있어 ‘%2$@’은(는) 해당 화면에 대해 기존 배경화면을 유지합니다.",
+  "looks.wallpaper.current.missing": "화면 %1$d의 배경화면이 macOS가 알고 있는 위치에 더 이상 없습니다. 대신 ‘%2$@’을(를) 사용하십시오.",
   "looks.wallpaper.current.not_picture": "화면 %1$d의 배경화면은 이미지 파일이 아니므로 ‘%2$@’은(는) 해당 화면의 배경화면을 유지하지 않습니다.",
   "looks.wallpaper.current.refused": "KiwiDesk에 화면 %1$d의 배경화면을 읽을 권한이 없습니다. 대신 ‘%2$@’을(를) 사용하십시오.",
   "looks.wallpaper.current.unreadable": "화면 %1$d의 배경화면을 읽을 수 없습니다. 대신 ‘%2$@’을(를) 사용하십시오.",

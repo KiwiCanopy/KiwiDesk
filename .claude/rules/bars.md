@@ -1154,7 +1154,10 @@ Obligations:
   tab, its risen frame's gap and its rise travel take a bar handle's
   `ShelfHandleSpec.depth(of:)` on its screen's shelf, through
   `PocketHandleView.tabDepth(of:)`, never a depth of their own
-  (`HandleThicknessWiringTests`); neither handle reserves anything, only the whole mark
+  (`HandleThicknessWiringTests`), and the handle's band and room
+  stand flush on the edge, taking no outer margin through
+  `KiwiCore.pocketOuter`, which gives one to the whole mark alone
+  (#3696, `PocketHandleFlushTests` ▸ `tabMatchesTheBarHandle`); neither handle reserves anything, only the whole mark
   does (#3349, #3361, `PocketReservationTests` ▸
   `autoEdgeReservesNothing`, `PocketReservationCoreTests` ▸
   `wholeFollowsTheRest`).

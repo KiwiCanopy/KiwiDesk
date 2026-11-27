@@ -1715,6 +1715,7 @@
   "looks.wallpaper.choose_button": "Auswählen",
   "looks.wallpaper.choose_message": "Wähle das Hintergrundbild für „%1$@“.",
   "looks.wallpaper.current.full_screen": "Bildschirm %1$d zeigt eine App im Vollbild, deshalb behält „%2$@“ für ihn, was er bisher hatte.",
+  "looks.wallpaper.current.missing": "Das Hintergrundbild von Bildschirm %1$d liegt nicht mehr dort, wo macOS es erwartet. Nutze stattdessen „%2$@“.",
   "looks.wallpaper.current.not_picture": "Das Hintergrundbild von Bildschirm %1$d ist keine Bilddatei, deshalb behält „%2$@“ für ihn keines.",
   "looks.wallpaper.current.refused": "KiwiDesk durfte das Hintergrundbild von Bildschirm %1$d nicht lesen. Nutze stattdessen „%2$@“.",
   "looks.wallpaper.current.unreadable": "Das Hintergrundbild von Bildschirm %1$d konnte nicht gelesen werden. Nutze stattdessen „%2$@“.",

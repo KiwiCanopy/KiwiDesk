@@ -13,8 +13,6 @@ struct ScreenAreaPane: View {
     let area: Int?
     /// The key a pin to this pane stores.
     let key: String
-    /// The first pane in reading order carries the screen's name.
-    let leads: Bool
     let size: CGSize
     let corners: RectangleCornerRadii
     /// The area giving way in an open Adjust… popover.
@@ -90,7 +88,7 @@ struct ScreenAreaPane: View {
             toggleSelection()
             return .handled
         }
-        // The full name too: a narrow first area truncates it.
+        // The full name too: a narrow pane drops or truncates it.
         .help(
             isSplit
                 ? model.areaName(area, on: display) + "\n" + readout : readout
@@ -124,51 +122,61 @@ struct ScreenAreaPane: View {
         selection == ScreenSelection(display: display.id, area: area)
     }
 
-    /// The pane's header: a whole screen's name, else the area's
-    /// label, the first area in reading order carrying the screen's
-    /// name and badge through the one " – " frame, where the name
-    /// truncates first (ruling 27).
-    private var header: some View {
-        HStack(spacing: 0) {
-            if leads {
+    /// A whole screen's one pane carries its name; a split card
+    /// names it once in its band (`ScreenCardBand`, #3697).
+    private var leads: Bool { !isSplit }
+
+    /// The room above the chips: the header, the name, or none.
+    private var chipHeader: CGFloat {
+        if leads { return ScreenCardChips.headerHeight }
+        return nameLine == nil ? 0 : ScreenCardChips.areaNameLine
+    }
+
+    /// A whole screen's header, else a split pane's area name,
+    /// which a click passes through and VoiceOver hears on the label.
+    @ViewBuilder private var header: some View {
+        if leads {
+            HStack(spacing: 0) {
                 ScreenNumberBadge(model: model, display: display)
                     .font(.caption)
                     .padding(.trailing, 4)
                     .layoutPriority(3)
+                headerText
             }
-            headerText
+            .frame(height: ScreenCardChips.headerHeight)
+        } else if let label = nameLine {
+            Text(label)
+                .font(.caption2)
+                .fontWeight(isSelected ? .semibold : .regular)
+                .foregroundStyle(
+                    isSelected ? SettingsTheme.ink : SettingsTheme.ink2
+                )
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(height: ScreenCardChips.areaNameLine)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
-        .frame(height: ScreenCardChips.headerHeight)
+    }
+
+    /// A split pane's area name where it has room for it (#3697,
+    /// owner); nil on a whole screen, a narrow pane or no name.
+    private var nameLine: String? {
+        guard ScreenCardChips.namesArea(in: size), let area else {
+            return nil
+        }
+        return model.areaLabel(area, on: display)
     }
 
     /// The name and the Main chip, which VoiceOver reads from the
-    /// pane's own label; the badge is its own element.
+    /// pane's own label; the badge is its own element. It takes no
+    /// press, so one over a neighbour reaches that pane.
     private var headerText: some View {
         HStack(spacing: 0) {
-            let screen = model.screenLabel(display)
-            let label = area.flatMap { model.areaLabel($0, on: display) }
-            if leads, let label {
-                ForEach(SentenceFrame(ScreenAreaWords.nameFrame).segments) {
-                    segment in
-                    switch segment.slot {
-                    case .argument(1):
-                        Text(screen)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    case .argument(2):
-                        Text(label).fixedSize().layoutPriority(1)
-                    case .text(let literal):
-                        Text(literal).fixedSize().layoutPriority(1)
-                    case .argument:
-                        EmptyView()
-                    }
-                }
-            } else {
-                Text(label ?? screen)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            }
-            if leads && isMain {
+            Text(model.screenLabel(display))
+                .lineLimit(1)
+                .truncationMode(.tail)
+            if isMain {
                 BadgeChip(
                     label: L("monitor_card.main_badge", "main")
                 )
@@ -179,6 +187,7 @@ struct ScreenAreaPane: View {
         }
         .font(.caption)
         .bold()
+        .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
 
@@ -189,7 +198,11 @@ struct ScreenAreaPane: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
-            let split = ScreenCardChips.split(assignments, in: size)
+            let split = ScreenCardChips.split(
+                assignments,
+                in: size,
+                header: chipHeader
+            )
             HStack(alignment: .top, spacing: ScreenCardChips.spacing) {
                 WrapChips(split.shown) { entry in
                     chip(entry)
