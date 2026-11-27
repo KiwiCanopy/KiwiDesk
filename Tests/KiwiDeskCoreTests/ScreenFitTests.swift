@@ -120,4 +120,98 @@ struct ScreenFitTests {
                 == settings.areaFloor(along: .stacked)
         )
     }
+
+    @Test("a stacked split's widths are not judged")
+    func stackedWidthsAreNotJudged() {
+        let stacked: [String: ScreenShares] = [
+            "1": ScreenShares(
+                areas: [
+                    ScreenArea(id: 0, x: 0, y: 0, w: 1000, h: 500),
+                    ScreenArea(id: 1, x: 0, y: 500, w: 1000, h: 500),
+                ]
+            )
+        ]
+        let wide = AreaFloors(sideBySide: 2000, stacked: 100)
+        let order = ScreenOrder([laptop])
+        #expect(stacked.split(on: laptop, order: order, floors: wide) != nil)
+    }
+
+    /// Each axis gives back its own step: on a 6000 x 800 screen an
+    /// 800-pt width rounds back to 798, inside the width's 6-pt step
+    /// and outside the height's 1-pt one.
+    @Test("each axis's slack is its own")
+    func slackPerAxisOnALongScreen() {
+        let floor = AreaFloors(sideBySide: 800, stacked: 800)
+        let across = ScreenShares(
+            ScreenSplit(
+                areas: [
+                    ScreenArea(id: 0, x: 0, y: 0, w: 800, h: 800),
+                    ScreenArea(id: 1, x: 800, y: 0, w: 5200, h: 800),
+                ]
+            ),
+            width: 6000,
+            height: 800
+        ).resolved(width: 6000, height: 800)
+        let down = ScreenShares(
+            ScreenSplit(
+                areas: [
+                    ScreenArea(id: 0, x: 0, y: 0, w: 800, h: 800),
+                    ScreenArea(id: 1, x: 0, y: 800, w: 800, h: 5200),
+                ]
+            ),
+            width: 800,
+            height: 6000
+        ).resolved(width: 800, height: 6000)
+        #expect(across.areas[0].w == 798)
+        #expect(down.areas[0].h == 798)
+        #expect(
+            ScreenSplit.verdict(
+                across,
+                width: 6000,
+                height: 800,
+                floors: floor
+            )
+            .split != nil
+        )
+        #expect(
+            ScreenSplit.verdict(down, width: 800, height: 6000, floors: floor)
+                .split != nil
+        )
+    }
+
+    @Test("an area failing both cuts names the width")
+    func widthIsNamedFirst() {
+        // The left half is split again top to bottom.
+        let quarters: [String: ScreenShares] = [
+            "1": ScreenShares(
+                areas: [
+                    ScreenArea(id: 0, x: 0, y: 0, w: 500, h: 500),
+                    ScreenArea(id: 1, x: 500, y: 0, w: 500, h: 1000),
+                    ScreenArea(id: 2, x: 0, y: 500, w: 500, h: 500),
+                ]
+            )
+        ]
+        let floors = AreaFloors(sideBySide: 800, stacked: 600)
+        #expect(
+            quarters.verdict(
+                on: laptop,
+                order: ScreenOrder([laptop]),
+                floors: floors
+            ) == .tooSmall(.sideBySide)
+        )
+    }
+
+    /// Fewest moved outranks the first order against the base: here
+    /// the first order moves all three numbers, the winner two.
+    @Test("fewest numbers moved outranks the order")
+    func fewestMovedWins() {
+        let a = "A:3440x1440"
+        let b = "B:3440x1440"
+        var both = halves
+        both["2"] = halves["1"]
+        let base = ScreenOrder([laptop, a, b])
+        #expect(
+            base.fitting(both, floors: floors) == ScreenOrder([b, a, laptop])
+        )
+    }
 }

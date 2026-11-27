@@ -70,6 +70,8 @@ struct ScreenNumberFitTests {
     func unfitNumberGreys() {
         let model = makeModel()
         #expect(model.screenNumber(of: laptop) == 1)
+        // The base cannot hold the split; swapping the screens can.
+        #expect(model.anyScreenOrderFits)
         // The laptop's halves fall under the floor: it draws whole,
         // naming the side-by-side cut.
         #expect(model.unsplitAxis(of: laptop) == .sideBySide)
@@ -124,7 +126,22 @@ struct ScreenNumberFitTests {
         #expect(
             source.contains(
                 ".onChange(of: model.draftSplits) {\n"
-                    + "selection = normalized(selection,"
+                    + "selection = normalized(selection, "
+                    + "rows: model.screenRows)\n}"
+            )
+        )
+        // The badge greys through the model's one predicate.
+        let badge = try SourceScan.normalizedFile(
+            SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Screens/"
+                        + "ScreenNumberBadge.swift"
+                )
+        )
+        #expect(
+            badge.contains(
+                ".disabled(\ncurrent != number\n"
+                    + "&& !model.screenNumberFits("
             )
         )
     }
