@@ -4594,9 +4594,8 @@ to the screen: the bars' and the pocket's `edge_override` and
 setup of the same count takes them. A number or `"N#id"` is stored
 at once, even before a screen is known; a fingerprint names the
 number its screen holds now, a screen that is not connected the
-number the live profile's first setup holding it gives it, and a
-connected screen with no number is refused. Two screens of one
-model read the lower number's values. `forget_monitor_set` keeps
+number the live profile's first setup holding it gives it. Two
+screens of one model read the lower number's values. `forget_monitor_set` keeps
 every number up to the profile's screen count, and drops only an
 area's values the profile's splits no longer hold.
 :::

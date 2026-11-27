@@ -24211,15 +24211,13 @@ The consequences:
   Save, and stands for the session, for its profile on the setup it
   was made on, until a Save stores it. Dragging a card to swap is
   later: cards are already drop targets for Space chips.
-- **Amended (owner, 2026-11-27, after an architect-reviewer
-  consult): always numbered.** Every connected screen holds a
-  number, and **Don't Number This Screen** is gone before the 5.3.0
-  cut. A screen beyond the profile's numbers takes the next free
-  number with one fresh Space, the #1175 heal's, and a Save stores
-  that Space and its pin like any other number's. A session-only
-  hole in the order was the one state no stored setup could hold:
-  its pins waited, a Save dropped its Space's pin, and twins could
-  not take part.
+- **Every connected screen holds a number (#3647, owner,
+  2026-11-27).** None is left out for a session: each screen takes
+  its number in the order its setup resolves to, and one the
+  profile has no Spaces for gets one fresh Space, the #1175 heal's,
+  whose pin is captured as that number like any other. A
+  session-only hole is a state no stored setup can hold: its pins
+  wait, a Save drops its Space's pin, and twins cannot take part.
 - **A split is stored as shares of the screen**, per-mille, and
   resolved to points on whichever screen holds the number. A
   screen may not take a number whose split would put an area under
@@ -24258,10 +24256,13 @@ The consequences:
   fingerprint stays its physical identity, and nothing bar-shaped
   is keyed by it. A look carries no per-screen path, so a look's
   values need no crossing. `spacePins` stays keyed by fingerprint
-  at runtime: the heal pins a screen before its number is stored,
-  and the store is rewritten from the numbered pins. A forget keeps
+  at runtime: its key is the physical screen, while the number can
+  move under it — a renumber, a fit, an apply in flight, twins on
+  one fingerprint — and the store is rewritten from the numbered
+  pins. A forget keeps
   every number up to the profile's count, since a number one setup
-  lacks is another setup's and the number is the profile's. Cost: twins cannot hold different bar values.
+  lacks is another setup's and the number is the profile's. Cost:
+  twins cannot hold different bar values.
 - **Twin screens share one split.** Two screens with one
   fingerprint can hold two numbers, but the runtime keys an area
   by fingerprint, so both draw the lower number's split.

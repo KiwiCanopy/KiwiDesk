@@ -54,16 +54,15 @@ extension KiwiCore {
     /// `displays` that hold a number, in Screen N order, each with
     /// it: what a number in Lua or the CLI, `list_monitors` and
     /// `desktop_change` name (#3647). The number is the screen's
-    /// place in `liveScreenOrder`, so a gap stays a gap; twins take
-    /// theirs left to right, ties top to bottom.
+    /// place in `liveScreenOrder`; twins take theirs left to right,
+    /// ties top to bottom.
     func numberedScreens(
         _ displays: [Display]
     ) -> [(number: Int, display: Display)] {
         var left = displays.sorted(by: ScreenOrder.precedes)
         var result: [(number: Int, display: Display)] = []
         let order = liveScreenOrder
-        for (index, fingerprint) in order.fingerprints.enumerated()
-        where order.holds(ScreenSlotKey(number: index + 1)!) {
+        for (index, fingerprint) in order.fingerprints.enumerated() {
             guard
                 let at = left.firstIndex(where: {
                     $0.fingerprint == fingerprint

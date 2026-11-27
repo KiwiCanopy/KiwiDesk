@@ -228,11 +228,10 @@ extension KiwiCore {
     /// (#3647 ▸ lane 3c): every number from 1 to the profile's screen
     /// count, or the connected screens' where `order` holds more,
     /// and the `N#id` of every area `shares` stores — the write adds
-    /// the entries' own. A gap in a setup is a session hole and keeps
-    /// its number. A writer hands it the monitor sets, shares and
-    /// order of the profile it writes: the verb the live profile's
-    /// (`liveScreenEdgeScope`), a Settings writer its draft's, never
-    /// an empty list in their place.
+    /// the entries' own. A writer hands it the monitor sets, shares
+    /// and order of the profile it writes: the verb the live
+    /// profile's (`liveScreenEdgeScope`), a Settings writer its
+    /// draft's, never an empty list in their place.
     public func screenEdgeScope(
         monitorSets: [MonitorSet],
         shares: [String: ScreenShares],

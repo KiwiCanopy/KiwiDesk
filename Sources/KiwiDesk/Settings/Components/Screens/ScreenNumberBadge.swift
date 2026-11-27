@@ -10,7 +10,13 @@ struct ScreenNumberBadge: View {
     let display: Display
 
     var body: some View {
-        let face = Self.face(model.screenNumber(of: display) ?? 1)
+        // Nil only for a screen outside a stale draft order.
+        if let number = model.screenNumber(of: display) {
+            menu(Self.face(number))
+        }
+    }
+
+    private func menu(_ face: String) -> some View {
         Menu {
             ScreenNumberItems(model: model, display: display)
         } label: {
