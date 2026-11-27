@@ -10,7 +10,8 @@ extension SettingsModel {
         SettingsValueReadout.rows(
             for: key,
             old: config,
-            new: config
+            new: config,
+            screenOrder: screenOrder
         )
         .first?
         .newValue

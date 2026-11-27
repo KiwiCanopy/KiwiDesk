@@ -5,17 +5,23 @@ extension ScreenSplit {
     /// The split a `width` × `height` screen lays out in: `stored`
     /// where it is a valid split into two or more areas, else nil —
     /// the whole screen as one area 0. The one answer the placement
-    /// list and the Settings picture both take (#3517).
+    /// list and the Settings picture both take (#3517). A split
+    /// stored in shares (#3647) may resolve one per-mille step under
+    /// the floor it was made at, so the floor gives that step back.
     public static func effective(
         _ stored: ScreenSplit?,
         width: Int,
         height: Int
     ) -> ScreenSplit? {
+        let step =
+            (max(width, height) + ScreenShares.whole - 1)
+            / ScreenShares.whole
         guard let stored, !stored.isWhole,
             ScreenArea.problem(
                 with: stored.areas,
                 width: width,
-                height: height
+                height: height,
+                minimumSide: ScreenArea.minimumSide - step
             ) == nil
         else { return nil }
         return stored

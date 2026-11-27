@@ -57,22 +57,21 @@ extension KiwiCore {
         )
     }
 
-    /// Whether `key` names an area of its screen's stored split —
-    /// connected or not, so an unplugged screen's memory stays live
-    /// for its return. An unsplit screen holds no area here.
+    /// Whether `key`, an `N#id` slot, names an area of Screen N's
+    /// stored split — connected or not, so an unplugged screen's
+    /// memory stays live for its return. An unsplit number holds no
+    /// area here.
     func isStoredArea(_ key: String) -> Bool {
-        let area = ScreenAreaKey(parsing: key)
-        return state.workspaces.areaSplits[area.fingerprint]?.areas
-            .contains { $0.id == area.areaID } ?? false
+        guard let slot = ScreenSlotKey(parsing: key) else { return false }
+        return tiler.settings.displayAreas[number: slot.number]?.areas
+            .contains { $0.id == slot.areaID } ?? false
     }
 
     /// Moves the areas' memory a merge absorbed onto its survivor,
-    /// read off the splits before and after the change: an area id
-    /// the new split lacks went into the area now covering its
-    /// middle. A screen left unsplit keeps its entries dormant.
+    /// read off the shares before and after the change.
     func remapAreaSpaces(
-        from old: [String: ScreenSplit],
-        to new: [String: ScreenSplit]
+        from old: [String: ScreenShares],
+        to new: [String: ScreenShares]
     ) {
         for remap in Self.areaRemaps(from: old, to: new) {
             for (desktop, var shown) in desktopMemory.areaSpaces {
@@ -82,15 +81,17 @@ extension KiwiCore {
         }
     }
 
-    /// The merges between two sets of splits, by screen.
+    /// The merges between two sets of shares, number by number: an
+    /// area id the new split lacks went into the area now covering
+    /// its middle. A number left unsplit keeps its entries dormant.
     static func areaRemaps(
-        from old: [String: ScreenSplit],
-        to new: [String: ScreenSplit]
+        from old: [String: ScreenShares],
+        to new: [String: ScreenShares]
     ) -> [ScreenAreaRemap] {
-        old.sorted { $0.key < $1.key }.flatMap { fingerprint, before in
-            guard let after = new[fingerprint] else {
-                return [ScreenAreaRemap]()
-            }
+        old.sorted { $0.key < $1.key }.flatMap { key, before in
+            guard let after = new[key],
+                let number = ScreenSlotKey(parsing: key)?.number
+            else { return [ScreenAreaRemap]() }
             let kept = Set(after.areas.map(\.id))
             return before.areas.filter { !kept.contains($0.id) }
                 .compactMap { area -> ScreenAreaRemap? in
@@ -98,18 +99,17 @@ extension KiwiCore {
                     guard
                         let survivor = after.areas.first(where: {
                             $0.rect.contains(middle)
-                        })
-                    else { return nil }
-                    return ScreenAreaRemap(
-                        vanished: ScreenAreaKey(
-                            fingerprint: fingerprint,
+                        }),
+                        let vanished = ScreenSlotKey(
+                            number: number,
                             areaID: area.id
                         ),
-                        survivor: ScreenAreaKey(
-                            fingerprint: fingerprint,
+                        let into = ScreenSlotKey(
+                            number: number,
                             areaID: survivor.id
                         )
-                    )
+                    else { return nil }
+                    return ScreenAreaRemap(vanished: vanished, survivor: into)
                 }
         }
     }
@@ -142,10 +142,12 @@ extension KiwiCore {
         let areas = state.workspaces.placements(of: display)
         guard areas.count > 1 else { return }
         var shown: [String: SpaceID] = [:]
+        let order = liveScreenOrder
         for area in areas {
-            guard let space = state.workspaces.activeSpace(on: area.id)
+            guard let space = state.workspaces.activeSpace(on: area.id),
+                let slot = order.slot(of: area.key)
             else { continue }
-            shown[area.key.description] = space
+            shown[slot.description] = space
         }
         desktopMemory.areaSpaces[desktop] = shown
         desktopMemory.spaceMemoryEstablished = true
@@ -214,7 +216,8 @@ extension KiwiCore {
     ) -> SpaceID? {
         let candidates = state.workspaces.spaces(on: area.id)
         let filed = desktopMemory.areaSpaces[desktop] ?? [:]
-        if let own = filed[area.key.description],
+        if let own = liveScreenOrder.slot(of: area.key)
+            .flatMap({ filed[$0.description] }),
             candidates.contains(own)
         {
             return own

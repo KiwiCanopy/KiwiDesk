@@ -53,7 +53,9 @@ struct LuaAreaSplitReloadTests {
         try load(core, "-- no areas")
         #expect(areas(core) == 1)
         #expect(
-            core.tiler.settings.displayAreas[wide.fingerprint]?.isWhole
+            core.tiler.settings.displayAreas
+                .split(on: wide.fingerprint, order: core.liveScreenOrder)?
+                .isWhole
                 != false
         )
     }
@@ -91,7 +93,11 @@ struct LuaAreaSplitReloadTests {
         let core = try core()
         try load(core, split)
         let profile = core.buildProfile(name: "desk", modes: nil)
-        try #require(profile.settings.displayAreas[wide.fingerprint] != nil)
+        try #require(
+            profile.settings.displayAreas
+                .split(on: wide.fingerprint, order: core.liveScreenOrder)
+                != nil
+        )
         _ = try core.saveProfile(profile)
         core.apply(profile: profile, cause: .explicit)
         try #require(areas(core) == 2)

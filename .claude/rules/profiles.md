@@ -1386,7 +1386,13 @@ once the session adopted the stored one, through the one stamp
 read every writer takes (`persistedDesktopSpaces`,
 `DesktopSpacePersistenceWiringTests` ▸
 `unadoptedMemorySurvivesTheQuit`, `unadoptedSaveKeepsTheMemory`);
-`machine.json` never answers `isGuiManaged`.
+`machine.json` never answers `isGuiManaged`. A leaf born in
+`machine.json` has no `moves` entry and no `ConfigMigration`
+route, so a change of its shape gates on `MachineConfig`'s format
+inside its decoder, dropping the old leaf whole, never reading a
+bad value: `desktop_area_spaces`, keyed `N#id` since format 2
+(#3647, `AreaDesktopMemoryPersistenceTests` ▸
+`olderAreaMemoryIsDropped`).
 
 **A followed sync folder is a mirror, and a change it brings is
 answered with no write (#2324 slice 3).** What crosses is decided
@@ -2431,7 +2437,7 @@ scan cannot see.
 **A verb that writes `display_areas` while `init.lua` runs records
 it in `KiwiCore.luaAreaSplits` (#3573)**, as `set_display_areas`
 and `set_display_area_name` do, and stores a split only through
-`storeSplit`. The load's tail makes whole, once, after the profile
+`storeShares`, by screen number (#3647). The load's tail makes whole, once, after the profile
 re-apply, each screen the last load split and this one does not
 name; a write the ledger never saw stays split across every
 reload (`LuaAreaSplitReloadTests`). A load that holds a split for

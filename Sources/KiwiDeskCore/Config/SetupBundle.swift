@@ -131,7 +131,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 55 = a bundle carries the pictures its looks set (#3478), so
     /// an older build refuses it rather than restoring the looks
     /// without them.
-    public static let currentFormat = 55
+    /// 56 = a profile's screen splits are per-mille shares keyed by
+    /// screen number (#3647), in a bundle's `[Profile]`.
+    public static let currentFormat = 56
 
     public let format: Int
 

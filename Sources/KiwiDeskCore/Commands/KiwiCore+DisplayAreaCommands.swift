@@ -17,23 +17,36 @@ extension KiwiCore {
         return response
     }
 
-    /// `set_display_areas`' write, without the retile: a screen
-    /// named by number or name while none is known waits for the
-    /// first report, whose drain replays this body (#3640).
+    /// `set_display_areas`' write, without the retile. The split is
+    /// stored as the shares of a screen number (#3647 ▸ lane 3): a
+    /// connected screen's by its own size, else a number's by the
+    /// argument's own extent. A screen named by fingerprint or name
+    /// while none is known waits for the first report, whose drain
+    /// replays this body (#3640).
     func storeDisplayAreas(_ args: [JSONValue]) -> CommandResponse {
-        if holdsScreenArg(args.first) {
+        if holdsNumberedScreenArg(args.first) {
             holdSettingsCall(split: true) { [unowned self] in
                 self.storeDisplayAreas(args)
             }
             return .ok()
         }
-        guard let screen = splitScreen(args.first) else {
+        let rest = Array(args.dropFirst())
+        guard let target = splitTarget(args.first, rest) else {
             return .fail("unknown screen: \(args.first?.stringValue ?? "")")
         }
-        let rest = Array(args.dropFirst())
-        let previous = tiler.settings.displayAreas[screen.fingerprint]
+        guard let number = target.number else {
+            return .fail("a screen with no number holds no split")
+        }
+        let previous = tiler.settings.displayAreas[number: number]
         let split: ScreenSplit
-        switch parseAreas(rest, screen: screen, previous: previous) {
+        switch parseAreas(
+            rest,
+            screen: target.size,
+            previous: previous?.resolved(
+                width: target.size.width,
+                height: target.size.height
+            )
+        ) {
         case .refused(let response):
             return response
         case .split(let parsed):
@@ -41,26 +54,97 @@ extension KiwiCore {
         }
         if let problem = ScreenArea.problem(
             with: split.areas,
-            width: screen.width,
-            height: screen.height
+            width: target.size.width,
+            height: target.size.height
         ) {
             return .fail(Self.message(for: problem))
         }
-        storeSplit(split, on: screen.fingerprint)
+        storeShares(
+            ScreenShares(
+                split,
+                width: target.size.width,
+                height: target.size.height,
+                keeping: previous
+            ),
+            number: number
+        )
         luaAreaSplits.note(
-            screen.fingerprint,
-            tiler.settings.displayAreas[screen.fingerprint]
+            String(number),
+            tiler.settings.displayAreas[number: number]
         )
         return .ok()
     }
 
+    /// The number a split names and the extent its sizes are read
+    /// against: a connected screen's own, else for a bare number the
+    /// extent the sizes or rects span. Nil for an unknown screen; a
+    /// nil number for a connected screen that holds none.
+    private func splitTarget(
+        _ arg: JSONValue?,
+        _ rest: [JSONValue]
+    ) -> (number: Int?, size: (width: Int, height: Int))? {
+        if let screen = splitScreen(arg) {
+            return (
+                liveScreenOrder.number(of: screen.fingerprint),
+                (screen.width, screen.height)
+            )
+        }
+        if let raw = arg?.stringValue, Self.isFingerprint(raw),
+            let size = ScreenShares.size(of: raw)
+        {
+            // A screen not connected: the number the live profile's
+            // first setup holding it gives it.
+            let set = profiles.active?.monitorSets.first {
+                $0.monitors.contains(raw)
+            }
+            return (set?.order.number(of: raw), size)
+        }
+        guard let number = arg?.intValue, number >= 1 else { return nil }
+        return (number, Self.extent(of: rest))
+    }
+
+    /// The extent `args` span when no screen gives one: the sizes'
+    /// sum along their direction, the rects' far edges, a share's
+    /// whole on any side they leave open.
+    private static func extent(
+        of args: [JSONValue]
+    ) -> (width: Int, height: Int) {
+        let whole = ScreenShares.whole
+        if case .array(let list)? = args.first, args.count == 1 {
+            var width = 0
+            var height = 0
+            for case .object(let fields) in list {
+                width = max(
+                    width,
+                    (fields["x"]?.intValue ?? 0) + (fields["w"]?.intValue ?? 0)
+                )
+                height = max(
+                    height,
+                    (fields["y"]?.intValue ?? 0) + (fields["h"]?.intValue ?? 0)
+                )
+            }
+            return (max(width, 1), max(height, 1))
+        }
+        let along = max(
+            args.dropFirst().compactMap(\.intValue).reduce(0, +),
+            1
+        )
+        switch args.first?.stringValue.flatMap(ScreenAreaCut.Axis.init) {
+        case .sideBySide?: return (along, whole)
+        case .stacked?: return (whole, along)
+        case nil: return (whole, whole)
+        }
+    }
+
     /// `set_display_area_name(area, name)` names the area its key
-    /// names (as `list_monitors` prints it); an empty name clears
-    /// it back to the positional default. Behind a split a load
-    /// holds for the first screen report, it waits too (#3640).
+    /// names (as `list_monitors` prints it, or `N#id`); an empty name
+    /// clears it back to the positional default. Behind a split a
+    /// load holds for the first screen report, or naming a screen by
+    /// fingerprint while none is known, it waits too (#3640).
     func setDisplayAreaName(_ args: [JSONValue]) -> CommandResponse {
         if luaAreaSplits.isRecording,
             heldScreenCalls.contains(where: \.isSplit)
+                || holdsNumberedScreenArg(args.first)
         {
             holdSettingsCall(split: false) { [unowned self] in
                 self.setDisplayAreaName(args)
@@ -70,18 +154,26 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue,
             let name = args.dropFirst().first?.stringValue
         else { return .fail("expected an area and a name") }
-        let key = numberedArea(raw)?.1 ?? ScreenAreaKey(parsing: raw)
-        guard var split = tiler.settings.displayAreas[key.fingerprint],
-            let at = split.areas.firstIndex(where: {
-                $0.id == key.areaID
+        let order = liveScreenOrder
+        guard
+            let slot = ScreenSlotKey(parsing: raw)
+                ?? order.slot(of: ScreenAreaKey(parsing: raw)),
+            var shares = tiler.settings.displayAreas[number: slot.number],
+            let at = shares.areas.firstIndex(where: {
+                $0.id == slot.areaID
             })
         else { return .fail("unknown area: \(raw)") }
         let trimmed = name.trimmingCharacters(in: .whitespaces)
+        // A number no screen holds has no runtime area to collide
+        // with, so only the name's own shape is judged.
+        let key = order.runtimeKey(of: slot)
         switch ScreenArea.nameProblem(
             trimmed,
             for: key,
-            splits: tiler.settings.displayAreas,
-            screenNames: state.workspaces.allDisplays.map(\.name)
+            splits: key == nil
+                ? [:] : tiler.settings.displayAreas.splits(order: order),
+            screenNames: key == nil
+                ? [] : state.workspaces.allDisplays.map(\.name)
         ) {
         case .number?:
             return .fail("an area name cannot be a number or N#id")
@@ -90,16 +182,16 @@ extension KiwiCore {
         case nil:
             break
         }
-        let old = split
-        split.areas[at].name = trimmed.isEmpty ? nil : trimmed
-        tiler.settings.displayAreas[key.fingerprint] = split
-        luaAreaSplits.rename(key.fingerprint, from: old, to: split)
+        let old = shares
+        shares.areas[at].name = trimmed.isEmpty ? nil : trimmed
+        tiler.settings.displayAreas[number: slot.number] = shares
+        luaAreaSplits.rename(String(slot.number), from: old, to: shares)
         return .ok()
     }
 
     private func parseAreas(
         _ args: [JSONValue],
-        screen: (fingerprint: String, width: Int, height: Int),
+        screen: (width: Int, height: Int),
         previous: ScreenSplit?
     ) -> AreaParse {
         let whole = ScreenSplit.whole(

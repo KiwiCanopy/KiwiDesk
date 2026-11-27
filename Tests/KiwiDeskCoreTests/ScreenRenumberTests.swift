@@ -117,6 +117,62 @@ struct SessionScreenOrderTests {
         #expect(core.liveScreenOrder != reversed)
     }
 
+    /// A split belongs to its number (#3647 ▸ lane 3): a renumber
+    /// moves Screen 1's split to whichever screen now holds 1.
+    @Test("a renumber moves a number's split with it")
+    func splitFollowsTheNumber() throws {
+        let core = makeCore()
+        try loadWork(core)
+        // Too small to lay out, so read the projection the placement
+        // list is built from.
+        let halves = ScreenSplit(
+            areas: [
+                ScreenArea(id: 0, x: 0, y: 0, w: 50, h: 100),
+                ScreenArea(id: 1, x: 50, y: 0, w: 50, h: 100),
+            ]
+        )
+        core.tiler.settings.displayAreas.store(
+            halves,
+            on: left.fingerprint,
+            order: core.liveScreenOrder
+        )
+        let splits = { core.state.workspaces.areaSplits }
+        #expect(splits()[left.fingerprint] != nil)
+        #expect(splits()[right.fingerprint] == nil)
+        core.setSessionScreenOrder(reversed)
+        #expect(splits()[left.fingerprint] == nil)
+        #expect(splits()[right.fingerprint]?.areas.count == 2)
+    }
+
+    /// An apply lays its splits out in its own numbering, as its
+    /// pins, though the name moves last (#3647 ▸ lane 3).
+    @Test("a profile switch lays out its own screen numbers")
+    func profileSwitchLaysOutItsOwnNumbers() throws {
+        let core = makeCore()
+        try loadWork(core)
+        var settings = TilingSettings()
+        settings.displayAreas[number: 1] = ScreenShares(
+            areas: [
+                ScreenArea(id: 0, x: 0, y: 0, w: 500, h: 1000),
+                ScreenArea(id: 1, x: 500, y: 0, w: 500, h: 1000),
+            ]
+        )
+        try core.profiles.write(
+            Profile(
+                name: "Other",
+                monitorSets: [MonitorSet(monitors: reversed.fingerprints)],
+                spaces: ["1", "2"],
+                spaceModes: ["1": .bsp, "2": .bsp],
+                settings: settings
+            )
+        )
+        try core.loadProfile(named: "Other")
+        // B is Other's Screen 1.
+        let splits = core.state.workspaces.areaSplits
+        #expect(splits[right.fingerprint]?.areas.count == 2)
+        #expect(splits[left.fingerprint] == nil)
+    }
+
     @Test("a Save stores the order and ends it; a hole outlives it")
     func save() throws {
         let core = makeCore()

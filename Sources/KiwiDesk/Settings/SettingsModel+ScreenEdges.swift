@@ -61,7 +61,7 @@ extension SettingsModel {
     func areaKeys(of fingerprint: String) -> [String] {
         ScreenSplit.areaKeys(
             of: fingerprint,
-            in: config.settings.displayAreas
+            in: draftSplits
         )
     }
 
@@ -166,7 +166,8 @@ extension SettingsModel {
                     on: screen,
                     among: self.core.screenEdgeScope(
                         monitorSets: self.draftMonitorSets,
-                        splits: self.config.settings.displayAreas
+                        shares: self.config.settings.displayAreas,
+                        order: self.screenOrder
                     )
                 )
                 guard next != self.config.settings else { return }

@@ -152,6 +152,14 @@ lower of their two numbers, and a Space pinned to the second twin
 lands on the first after a Save. On another setup of that count the
 pin follows that lower number
 ([#3647](https://github.com/KiwiCanopy/KiwiDesk/issues/3647)).
+The same holds for a split: both twins draw the lower number's, and
+the higher number's own split shows only on a setup where that
+number has a screen of its own. At the upgrade, a split is kept
+for the number its screen holds in the profile's first setup that
+holds that screen; a split of a screen no setup of the profile
+holds, or one whose number an earlier setup's split already took,
+is not carried over, and that screen is split again in Settings ▸
+Screens.
 :::
 
 For a screen with **no free bottom corner**, Settings ▸ Screens and

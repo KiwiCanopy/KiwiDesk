@@ -21,12 +21,12 @@ struct AreaDragCrossingTests {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
         if let axis {
-            core.tiler.settings.displayAreas = [
-                wide.fingerprint: try #require(
-                    ScreenSplit.whole(width: 3440, height: 1440)
-                        .splitting(0, axis)
-                )
-            ]
+            core.tiler.settings.displayAreas.store(
+                ScreenSplit.whole(width: 3440, height: 1440)
+                    .splitting(0, axis),
+                on: wide.fingerprint,
+                order: core.liveScreenOrder
+            )
         }
         let areas = core.state.workspaces.placements(of: wide.id)
         for (index, area) in areas.enumerated() {

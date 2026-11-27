@@ -37,7 +37,9 @@ extension KiwiCore {
     /// known, and the argument is a number or a name, which only a
     /// known screen resolves. A fingerprint or area key resolves
     /// without one and never waits; a call outside a load answers
-    /// as it always did.
+    /// as it always did. For `pin_space_to_display` and the bars'
+    /// maps, whose runtime stores are still keyed by fingerprint
+    /// (#3647 ▸ lane 3c).
     func holdsScreenArg(_ arg: JSONValue?) -> Bool {
         guard luaAreaSplits.isRecording,
             state.workspaces.allDisplays.isEmpty, let arg
@@ -45,6 +47,20 @@ extension KiwiCore {
         if arg.intValue != nil { return true }
         guard let raw = arg.stringValue else { return false }
         return !Self.isFingerprint(ScreenAreaKey(parsing: raw).fingerprint)
+    }
+
+    /// `holdsScreenArg`'s rule for a verb whose map is keyed by
+    /// screen number (#3647 ▸ lane 3): a number or `N#id` is stored
+    /// directly and never waits; a fingerprint or area key waits
+    /// too, since only the order at the first report gives it a
+    /// number.
+    func holdsNumberedScreenArg(_ arg: JSONValue?) -> Bool {
+        guard luaAreaSplits.isRecording,
+            state.workspaces.allDisplays.isEmpty, let arg
+        else { return false }
+        if arg.intValue != nil { return false }
+        guard let raw = arg.stringValue else { return false }
+        return ScreenSlotKey(parsing: raw) == nil
     }
 
     /// Holds a settings write until a screen is known; `replay` runs

@@ -53,7 +53,7 @@ extension SettingsModel {
             resolutions: resolutions(),
             pins: resolvedPins,
             displays: displays,
-            splits: config.settings.displayAreas,
+            splits: draftSplits,
             waiting: waitingPins,
             unnumbered: unnumberedWaits
         )

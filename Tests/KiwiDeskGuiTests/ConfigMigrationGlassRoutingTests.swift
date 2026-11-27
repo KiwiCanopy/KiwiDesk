@@ -33,6 +33,7 @@ struct ConfigMigrationGlassRoutingTests {
             "Config/ConfigMigration+TrackLimit.swift",
             "Config/ConfigMigration+KiwiShelf.swift",
             "Config/ConfigMigration+BarEdges.swift",
+            "Config/ConfigMigration+NumberedSplits.swift",
             // The keep document's root (#1685), never a file.
             "Commands/KiwiCore+ChangeReport.swift",
             // `kiwivision.current`'s answer key (#2103), never a file.

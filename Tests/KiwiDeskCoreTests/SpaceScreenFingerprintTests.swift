@@ -134,12 +134,12 @@ struct SpaceScreenFingerprintTests {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
         var settings = core.tiler.settings
-        settings.displayAreas = [
-            wide.fingerprint: try #require(
-                ScreenSplit.whole(width: 3440, height: 1440)
-                    .splitting(0, .sideBySide)
-            )
-        ]
+        settings.displayAreas.store(
+            ScreenSplit.whole(width: 3440, height: 1440)
+                .splitting(0, .sideBySide),
+            on: wide.fingerprint,
+            order: core.liveScreenOrder
+        )
         settings.spaceBarStyle.setEdge(.top)
         core.tiler.settings = settings
         let areas = core.state.workspaces.placements(of: wide.id)

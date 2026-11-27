@@ -21,7 +21,11 @@ extension SettingsDiffRowSource {
         }
         let skip = Set(edited)
         guard let unsaved = model.unsavedLive else { return [] }
-        let owners = leafOwners(unsaved, saved: saved)
+        let owners = leafOwners(
+            unsaved,
+            saved: saved,
+            order: model.screenOrder
+        )
         return SettingKey.summarized(
             diff.changedSettings.filter { !skip.contains($0) },
             in: live,
@@ -31,7 +35,8 @@ extension SettingsDiffRowSource {
             SettingsValueReadout.rows(
                 for: key,
                 old: saved,
-                new: live
+                new: live,
+                screenOrder: model.screenOrder
             ).map { row in
                 var row = row
                 row.keepIDs = owners[row.id, default: []].sorted()
@@ -70,7 +75,8 @@ extension SettingsDiffRowSource {
     /// rows (a setting per layout) keep apart.
     private static func leafOwners(
         _ unsaved: UnsavedLiveSettings,
-        saved: GuiConfig
+        saved: GuiConfig,
+        order: ScreenOrder
     ) -> [String: [String]] {
         var owners: [String: [String]] = [:]
         for (id, settings) in unsaved.leaves {
@@ -85,7 +91,8 @@ extension SettingsDiffRowSource {
                 for row in SettingsValueReadout.rows(
                     for: key,
                     old: saved,
-                    new: one
+                    new: one,
+                    screenOrder: order
                 ) {
                     owners[row.id, default: []].append(id)
                 }

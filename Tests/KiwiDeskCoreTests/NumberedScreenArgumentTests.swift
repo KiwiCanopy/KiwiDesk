@@ -146,13 +146,15 @@ struct NumberedScreenArgumentTests {
         let core = makeCore()
         let right = try splitScreenOne(core)
         let stored = core.tiler.settings.displayAreas
-        #expect(stored.keys.sorted() == [right.fingerprint])
+        // Stored as Screen 1's shares, never by fingerprint.
+        #expect(stored.keys.sorted() == ["1"])
         let named = core.execute(
             "set_display_area_name",
             args: [.string("1#1"), .string("Code")]
         )
         #expect(named.isSuccess)
-        let areas = core.tiler.settings.displayAreas[right.fingerprint]?
+        let areas = core.tiler.settings.displayAreas
+            .split(on: right.fingerprint, order: core.liveScreenOrder)?
             .areas
         #expect(areas?.first { $0.id == 1 }?.name == "Code")
         let placed = core.resolveAreaArg(.string("1#1"))

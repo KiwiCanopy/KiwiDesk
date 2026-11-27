@@ -196,8 +196,9 @@ struct BarEdgeWriteCensusTests {
     ])
 
     /// `ScreenEdgeScope`'s memberwise init is module-wide, so its
-    /// one home — `KiwiCore.screenEdgeScope(monitorSets:splits:)`,
-    /// which adds the connected screens — is held here.
+    /// one home —
+    /// `KiwiCore.screenEdgeScope(monitorSets:shares:order:)`, which
+    /// adds the connected screens — is held here.
     @Test("a ScreenEdgeScope is built only by screenEdgeScope")
     func scopeHasOneHome() throws {
         let found = try census(

@@ -20,12 +20,12 @@ struct AreaStepHistoryTests {
     private func core() throws -> KiwiCore {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
-        core.tiler.settings.displayAreas = [
-            wide.fingerprint: try #require(
-                ScreenSplit.whole(width: 3440, height: 1440)
-                    .splitting(0, .sideBySide)
-            )
-        ]
+        core.tiler.settings.displayAreas.store(
+            ScreenSplit.whole(width: 3440, height: 1440)
+                .splitting(0, .sideBySide),
+            on: wide.fingerprint,
+            order: core.liveScreenOrder
+        )
         let areas = core.state.workspaces.placements(of: wide.id)
         try #require(areas.count == 2)
         for (space, area) in [("1", 0), ("2", 0), ("3", 1), ("4", 1)] {

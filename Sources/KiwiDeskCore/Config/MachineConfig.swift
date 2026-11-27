@@ -7,14 +7,20 @@ import Foundation
 /// `GuiConfig` keeps carrying them, and `GuiConfigStore` splits
 /// and composes the two files in one place.
 public struct MachineConfig: Codable, Equatable, Sendable {
-    /// 1 = `desktop_spaces` (#2324).
-    public static let currentFormat = 1
+    /// 1 = `desktop_spaces` (#2324); 2 = `desktop_area_spaces` keyed
+    /// by `N#id` (#3647 ▸ lane 3).
+    public static let currentFormat = 2
+    /// The format whose `desktop_area_spaces` is keyed by screen
+    /// number; an older file's fingerprint keys are dropped at read,
+    /// memory that refills at the next Desktop switch.
+    static let numberedAreaSpacesFormat = 2
 
     public var format = MachineConfig.currentFormat
     /// `GuiConfig.desktopSpaces`.
     public var desktopSpaces: [DesktopKey: SpaceID] = [:]
-    /// `GuiConfig.desktopAreaSpaces` (#3517), a key an older build
-    /// skips and its write drops: a split it cannot lay out.
+    /// `GuiConfig.desktopAreaSpaces` (#3517), keyed by Desktop then
+    /// by `N#id` area slot; a key an older build skips and its write
+    /// drops: a split it cannot lay out.
     public var desktopAreaSpaces: [DesktopKey: [String: SpaceID]] = [:]
 
     public init() {}
@@ -57,6 +63,7 @@ public struct MachineConfig: Codable, Equatable, Sendable {
                 [DesktopKey: SpaceID].self,
                 forKey: .desktopSpaces
             ) ?? [:]
+        guard decoded >= Self.numberedAreaSpacesFormat else { return }
         desktopAreaSpaces =
             try container.decodeIfPresent(
                 [DesktopKey: [String: SpaceID]].self,

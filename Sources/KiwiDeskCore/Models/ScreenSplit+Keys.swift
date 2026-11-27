@@ -12,13 +12,11 @@ extension ScreenSplit {
         of fingerprint: String,
         in splits: [String: ScreenSplit]
     ) -> [String] {
-        let sides = Display.fingerprintParts(fingerprint).size
-            .split(separator: "x").compactMap { Int($0) }
-        guard sides.count == 2,
+        guard let size = ScreenShares.size(of: fingerprint),
             let split = effective(
                 splits[fingerprint],
-                width: sides[0],
-                height: sides[1]
+                width: size.width,
+                height: size.height
             )
         else { return [fingerprint] }
         return ScreenArea.readingOrder(split.areas).map {

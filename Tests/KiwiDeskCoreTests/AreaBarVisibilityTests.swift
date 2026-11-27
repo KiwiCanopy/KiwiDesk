@@ -155,7 +155,11 @@ struct AreaBarVisibilityTests {
         core.tiler.screenFrameAX = { KiwiCore.axFrame(of: $0) }
         core.state.apply(.displaysChanged([display]))
         var settings = core.tiler.settings
-        settings.displayAreas = [display.fingerprint: split]
+        settings.displayAreas.store(
+            split,
+            on: display.fingerprint,
+            order: core.liveScreenOrder
+        )
         settings.spaceBarStyle.visibility = .always
         settings.kiwishelf.liquidGlass = false
         core.tiler.settings = settings

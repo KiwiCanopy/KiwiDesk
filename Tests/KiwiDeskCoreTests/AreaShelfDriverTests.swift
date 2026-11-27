@@ -40,7 +40,11 @@ struct AreaShelfDriverTests {
         core.tiler.screenFrameAX = { KiwiCore.axFrame(of: $0) }
         core.state.apply(.displaysChanged([display]))
         var settings = core.tiler.settings
-        settings.displayAreas = [display.fingerprint: split]
+        settings.displayAreas.store(
+            split,
+            on: display.fingerprint,
+            order: core.liveScreenOrder
+        )
         settings.spaceBarStyle.visibility = .always
         settings.spaceBarStyle.edge = .top
         settings.kiwishelf.liquidGlass = false
@@ -178,7 +182,8 @@ struct AreaShelfDriverTests {
                 $0.kiwishelf.pocketEdges.setEdge(.bottom)
                 // The right area's own edge: read for the screen,
                 // its strip would be the screen's top one.
-                let screen = $0.displayAreas.keys.first ?? ""
+                let screen =
+                    NSScreen.screens.first?.kiwiDisplay?.fingerprint ?? ""
                 $0.spaceBarStyle.edgeOverride["\(screen)#1"] = .left
             }
         )

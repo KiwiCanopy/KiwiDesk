@@ -23,7 +23,8 @@ enum AppBarCommandSetting {
     /// screen resolved to its fingerprint. It needs the screens a
     /// write judges, so `apply(to:)` writes nothing for it and
     /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
-    /// among:)` with `screenEdgeScope(monitorSets:splits:)`.
+    /// among:)` with
+    /// `screenEdgeScope(monitorSets:shares:order:)`.
     case screenEdge(AppBarEdge, screen: String)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case titleCap(Int)

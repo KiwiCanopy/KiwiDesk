@@ -24,10 +24,13 @@ struct ScreenAreaSplitDiffTests {
             .sideBySide,
             floor: 100,
             of: whole,
-            on: screen
+            on: screen,
+            order: ScreenOrder([screen])
         )
         let copy = try #require(split)
-        let minted = copy.minted.description
+        let minted = try #require(
+            copy.runtime(in: ScreenOrder([screen]))
+        ).minted.description
         let edges = SettingsValueReadout.rows(
             for: .kiwishelf(.appBarScreenEdge),
             old: clean,

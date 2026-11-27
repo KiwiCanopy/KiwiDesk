@@ -170,7 +170,8 @@ extension SettingsModel {
             return SettingsValueReadout.rows(
                 for: master,
                 old: other,
-                new: side
+                new: side,
+                screenOrder: screenOrder
             ).first?.newValue ?? ""
         }
         // Only an axis that differs is listed member by member.
@@ -183,7 +184,8 @@ extension SettingsModel {
                 SettingsValueReadout.rows(
                     for: member,
                     old: other,
-                    new: side
+                    new: side,
+                    screenOrder: screenOrder
                 ).first.map {
                     SyncText.memberValue($0.label, $0.newValue ?? "")
                 }

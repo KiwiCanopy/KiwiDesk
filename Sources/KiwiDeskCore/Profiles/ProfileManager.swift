@@ -38,22 +38,22 @@ public final class ProfileManager {
     /// against the adoption state, which is the OUTGOING one until
     /// the apply's last line, so nothing is retired meanwhile.
     var arrangementInFlight = 0
+    /// The order an apply installs, set by its two doors (#3647).
+    var screenOrderInFlight: ScreenOrder?
     /// The live profile's saved layout modes as last adopted or
     /// written (#1245, #1518), tagged so a stale copy never
     /// answers for another profile.
     private var savedModesRecord:
         (profile: String, modes: [SpaceID: LayoutMode])?
 
-    /// The live profile's saved layout modes; nil while none is
-    /// live.
+    /// The live profile's saved layout modes; nil while none is live.
     var liveSpaceModes: [SpaceID: LayoutMode]? {
         guard let name = currentName, let record = savedModesRecord,
             record.profile == name
         else { return nil }
         return record.modes
     }
-    /// Built-in Standard currently resolving (nil if covered by saved
-    /// profile).
+    /// Built-in Standard resolving (nil if a saved profile covers).
     public var currentStandard: String? { standard?.name }
     /// The live Standard's starter title, nil for a workflow (#1662).
     public var currentStandardTitle: StarterTitle? { standard?.title }
