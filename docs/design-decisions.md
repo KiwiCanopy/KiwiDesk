@@ -17348,11 +17348,12 @@ pressed for, and All stays on the same strip: ⌃⌥J and every query
 start there, and ← or a click reaches it from any tile. No window
 is out of reach and none is dropped behind the user's back. Search
 keeps the same guarantee: typing returns the strip to All, so a
-query always covers every window, and a tile with no match dims in
-place rather than leaving the strip. Filtering inside one app was
-rejected, because a query that empties one app's list ("No windows
-match in Xcode") is a dead end the user has to back out of, where
-All with dimmed tiles shows at once which apps hold a match.
+query always covers every window, and on a strip already shown a
+tile with no match dims in place rather than leaving the strip.
+Filtering inside one app was rejected, because a query that empties
+one app's list ("No windows match in Xcode") is a dead end the user
+has to back out of, where a query over All lists every match and ←
+or → narrows it to an app that holds one.
 
 ← → belong to the strip whether or not a query is typed (owner
 amendment on #3135): under a query they step through only the apps
@@ -17374,23 +17375,22 @@ pass through All, and a strip that left on reaching it made the panel
 jump while the user was still stepping. The strip appears under the
 field, which never moves (#2246), and the panel grows downward
 rather than keeping room for it, since a reserved band would be the
-very row the calm opening removes. Under a query ← → still step
-through only the apps with a match.
+very row the calm opening removes.
 
 **A query never brings the strip in (#3704, owner ruling
-2026-11-27, amending #3168's "or the first query").** [Trade-off]
-A strip shown on All by a query answers "which apps hold a match"
-with its dimmed tiles, but it answers on the first keystroke, as a
-band of large tiles that pushes every result down while the user
-is still reading them, and the user typing a name
-is after a row, not an app, so the band was a second thing to read
-past at the moment the list matters most. The rows already carry
-their app's icon, which says which apps match for the rows on
-screen; what is lost is the at-a-glance count of matching apps
-below the fold, and that is the trade. Reach is unchanged: → under
-a query brings the strip in on the first app with a match, as →
-from an empty field does on the next app, and a strip already
-shown stays, dimming its tiles under the query as before. The strip
+2026-11-27, amending #3168).** [Trade-off] A strip shown on All by
+a query would answer "which apps hold a match" with its dimmed
+tiles, but it answers on the first keystroke, as a band of large
+tiles that pushes every result down while the user is still
+reading them, and the user typing a name is after a row, not an
+app, so the band is a second thing to read past at the moment the
+list matters most. The rows carry their app's icon, which says
+which apps match for the rows on screen; what is lost is the
+at-a-glance count of matching apps below the fold, and that is the
+trade. Reach is unchanged: under a query ← → step through only the
+apps with a match, and the first step brings the strip in on one,
+as → from an empty field does on the next app; a strip already
+shown stays, dimming its tiles under the query. The strip
 stays on the Windows side rather than moving to a side or panel of
 its own, because it filters the Windows list and ⌥⇥ must land
 beside the list it filters.

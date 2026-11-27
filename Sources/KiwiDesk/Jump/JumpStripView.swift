@@ -3,8 +3,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The Windows side's app strip (#3135): All, the app you are in,
-/// then the recent apps, under the field, shown off All or under a
-/// query (#3168). It scrolls sideways with fades and follows the
+/// then the recent apps, under the field, shown from a step off
+/// All (#3168, #3704). It scrolls sideways with fades and follows the
 /// selection on KiwiHub's `ViewLine` (#2901); a tile the query
 /// leaves without a match dims in place, so the strip never
 /// reflows.
