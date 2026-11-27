@@ -147,4 +147,26 @@ struct ScreenAreaCaptionsTests {
             )
         )
     }
+
+    /// The picture grows to hold a tall arrangement and scrolls only
+    /// sideways (#3697 ▸ owner eyeball).
+    @MainActor @Test("the picture grows rather than scroll up and down")
+    func pictureGrows() throws {
+        let fitted = ScreensPicture.height(holding: 0)
+        #expect(ScreensPicture.height(holding: fitted + 300) > fitted + 300)
+        #expect(ScreensPicture.height(holding: 10) == fitted)
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/Screens/"
+                            + "ScreensPicture.swift"
+                    ),
+                encoding: .utf8
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(source.contains("ScrollView(.horizontal){"))
+        #expect(source.contains(".frame(height:height)"))
+        #expect(!source.contains(".vertical"))
+    }
 }

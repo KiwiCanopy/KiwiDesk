@@ -39,7 +39,7 @@ struct SidewaysStripTests {
     private static let allowed: [String: (count: Int, why: String)] = [
         "SidewaysStrip.swift": (1, "the container itself"),
         "ScreensPicture.swift": (
-            1, "a two-axis canvas of screens, not a strip of items"
+            1, "a canvas of screens wider than the page, not a strip"
         ),
     ]
 
