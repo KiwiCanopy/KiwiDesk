@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import QuartzCore
 import SwiftUI
 
 /// The wear and the puddle reveal (#3038 ▸ Ruling 2026-11-23, steps
@@ -10,17 +11,27 @@ import SwiftUI
 extension LookPickerController {
     /// ↩ on a look not worn: Core wears it with the windows placed at
     /// once, then the reveal waits for the desk — at most
-    /// `readyCap` — whichever comes first.
+    /// `readyCap` — whichever comes first. The fall starts a turn
+    /// after, so the wear's own commit lands before its first frame
+    /// (#3700).
     func wear(_ entry: LookPickerEntry) {
         let current = opening
         let latch = ResumeLatch()
         let resume: @MainActor () -> Void = { [weak self] in
             guard !latch.fired, let self, opening == current else { return }
             latch.fired = true
-            startReveal()
+            after(0) { [weak self] in
+                guard let self, opening == current else { return }
+                startReveal()
+            }
         }
         announce(LookPickerText.wearing(entry.look.name))
+        let log = LookPickerFrameLog()
+        log.start(on: panel?.screen)
+        frameLog = log
+        let start = CACurrentMediaTime()
         core.wearPickedLook(entry.look, ready: resume)
+        log.wear = CACurrentMediaTime() - start
         after(Self.readyCap, resume)
     }
 

@@ -17,6 +17,8 @@ final class LookPickerController: NSObject {
     /// This opening; a timer an earlier opening set finds another.
     var opening = 0
     var revealing = false
+    /// The running wear's frame count, logged at the close (#3700).
+    var frameLog: LookPickerFrameLog?
     /// Seam for KiwiDesk's Reduce Motion (#3252), read once per
     /// opening and handed to the view.
     var reduceMotion: () -> Bool = { ReduceMotion.isOn }
@@ -95,10 +97,22 @@ final class LookPickerController: NSObject {
         if let spoken = model.spokenSelection { announce(spoken) }
     }
 
-    /// Repaints the cards on a settings change by any door (#2604).
+    /// Repaints the cards on a settings change by any door (#2604),
+    /// save the wear's own write: under the overlay it would re-render
+    /// every card as the drop starts to fall (#3700).
     func settingsChanged(_ settings: TilingSettings) {
-        guard !revealing else { return }
+        guard Self.repaints(revealing: revealing, phase: model?.phase)
+        else { return }
         model?.settings = settings
+    }
+
+    /// Whether a settings change repaints the cards: only while the
+    /// picker browses, never during a wear or its reveal.
+    static func repaints(
+        revealing: Bool,
+        phase: LookPickerModel.Phase?
+    ) -> Bool {
+        !revealing && phase != .wearing
     }
 
     /// Closes at once, the puddle included; nothing is undone. A
@@ -106,6 +120,8 @@ final class LookPickerController: NSObject {
     /// of the double-click interval, so a second press lands on it
     /// (#3209).
     func close() {
+        if let line = frameLog?.stop() { core.onLog(line) }
+        frameLog = nil
         let hold = clickHold(panel)
         opening += 1
         revealing = false
