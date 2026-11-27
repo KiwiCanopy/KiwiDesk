@@ -154,7 +154,7 @@ struct ScreenEdgeVerbTests {
     /// once (`ActiveProfile.refiled(_:)`); one of the same count adds
     /// no number, so every number agreeing still collapses.
     @Test("A claimed set of the same count adds no number")
-    func claimedSetBlocksCollapse() throws {
+    func claimedSetAddsNoNumber() throws {
         let saved = PositionalDisplays.mainIDOverride
         defer { PositionalDisplays.mainIDOverride = saved }
         let core = makeCore()

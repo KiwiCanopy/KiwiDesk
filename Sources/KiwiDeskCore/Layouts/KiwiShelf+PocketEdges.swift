@@ -2,7 +2,7 @@ import Foundation
 
 /// The pocket's edge per screen (#3376), on the bars' `ScreenEdged`
 /// doors (#1948): `kiwishelf.pocket_edge` and its sparse
-/// `pocket_edge_override`, keyed by `Display.fingerprint`.
+/// `pocket_edge_override`, keyed by Screen N or `N#id` (#3647).
 public struct PocketEdges: ScreenEdged, Equatable, Sendable {
     public var edge: AppBarEdge
     public var edgeOverride: [String: AppBarEdge]
@@ -21,7 +21,7 @@ extension KiwiShelf {
         }
     }
 
-    /// This shelf as `screen` (a fingerprint) shows it: the
+    /// This shelf as `screen` (a Screen N key) shows it: the
     /// pocket's edge resolved for that screen, no entry left. Nil
     /// keeps the pocket's own edge.
     public func onScreen(_ screen: String?) -> KiwiShelf {

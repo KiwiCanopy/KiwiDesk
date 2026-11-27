@@ -314,7 +314,7 @@ public final class TilingEngine {
     /// The key `screen`'s bar values resolve under in `settings`
     /// (the live ones unless a draft is handed in) — nil while no
     /// bar has a screen of its own, skipping the read.
-    func barKey(
+    func gatedScreenSlot(
         of screen: NSScreen,
         in settings: TilingSettings? = nil
     ) -> String? {

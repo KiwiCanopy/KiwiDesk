@@ -70,7 +70,8 @@ extension KiwiCore {
     func areaKeys(named arg: JSONValue) -> [String]? {
         let ws = state.workspaces
         let order = liveScreenOrder
-        let slot = { (key: ScreenAreaKey) in order.slot(of: key)?.description }
+        let slot = { (key: ScreenAreaKey) in self.barKey(of: key, order: order)
+        }
         let screenKeys = { (id: DisplayID) -> [String] in
             let areas = ws.placements(of: id).map(\.key)
             guard !areas.isEmpty else {
@@ -91,15 +92,15 @@ extension KiwiCore {
             }
             guard numbered.areaID > 0, let (_, key) = numberedArea(raw)
             else { return screenKeys(screen.id) }
-            return [areaSlot(keyed: key, on: screen, slot)]
+            return areaSlot(keyed: key, on: screen, slot).map { [$0] } ?? []
         }
         let key = ScreenAreaKey(parsing: raw)
         if Self.isFingerprint(key.fingerprint) {
             if let screen = ws.allDisplays.first(where: {
                 $0.fingerprint == key.fingerprint
             }) {
-                return order.number(of: screen.fingerprint) == nil
-                    ? [] : [areaSlot(keyed: key, on: screen, slot)]
+                return areaSlot(keyed: key, on: screen, slot).map { [$0] }
+                    ?? []
             }
             let set = profiles.active?.monitorSets.first {
                 $0.monitors.contains(key.fingerprint)
@@ -117,19 +118,20 @@ extension KiwiCore {
     /// The slot key of `key`'s area on `screen`, a numbered
     /// connected screen, read against the number's stored split so a
     /// call replayed before the placements are built finds it: the
-    /// lead area's where the area is gone (ruling 22).
+    /// lead area's where the area is gone (ruling 22). Nil for a
+    /// screen with no number, which the caller refuses.
     private func areaSlot(
         keyed key: ScreenAreaKey,
         on screen: Display,
         _ slot: (ScreenAreaKey) -> String?
-    ) -> String {
+    ) -> String? {
         let lead = ScreenAreaKey(fingerprint: screen.fingerprint, areaID: 0)
         guard key.areaID > 0,
             let number = liveScreenOrder.number(of: screen.fingerprint),
             tiler.settings.displayAreas[number: number]?.areas
                 .contains(where: { $0.id == key.areaID }) == true
-        else { return slot(lead) ?? "" }
-        return slot(key) ?? ""
+        else { return slot(lead) }
+        return slot(key)
     }
 
     /// The refusal of a connected screen with no number (#3647).

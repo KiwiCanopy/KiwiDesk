@@ -99,6 +99,39 @@ struct NumberedBarMapMigrationTests {
         #expect(s.scrolling.appBar.visibilityOverride == shown)
     }
 
+    /// Each map alone opens the step: maps are written sparse, so a
+    /// profile may carry one and no other.
+    @Test("each map alone crosses")
+    func eachPathAloneCrosses() throws {
+        for path in ConfigMigration.numberedBarMapPaths {
+            var root = try encoded(profile)
+            let isEdge = path.last?.contains("edge") == true
+            put(&root, path, ["B:1000x1000": isEdge ? "left" : "hidden"])
+            root["format"] = 44
+            let out = try #require(
+                ConfigMigration.migrated(data(root)),
+                "\(path)"
+            )
+            let s = try JSONDecoder().decode(Profile.self, from: out).settings
+            let keys: [String] =
+                switch path.joined(separator: ".") {
+                case "space_bar.edge_override":
+                    Array(s.spaceBarStyle.edgeOverride.keys)
+                case "app_bar.edge_override":
+                    Array(s.appBarStyle.edgeOverride.keys)
+                case "kiwishelf.pocket_edge_override":
+                    Array(s.kiwishelf.pocketEdgeOverride.keys)
+                case "space_bar.visibility_override":
+                    Array(s.spaceBarStyle.visibilityOverride.keys)
+                case "layout.monocle.app_bar.visibility_override":
+                    Array(s.monocle.appBar.visibilityOverride.keys)
+                default:
+                    Array(s.scrolling.appBar.visibilityOverride.keys)
+                }
+            #expect(keys == ["2"], "\(path)")
+        }
+    }
+
     @Test("a backup's profiles cross")
     func bundleCrosses() throws {
         let encoder = JSONEncoder()
@@ -156,19 +189,28 @@ struct NumberedBarMapMigrationTests {
 
     @Test("a fingerprint key refuses a current file")
     func fingerprintKeyRefuses() throws {
-        for path in ConfigMigration.numberedBarMapPaths {
-            var root = try encoded(TilingSettings())
-            var wrapper: [String: Any] = ["settings": root]
+        func settings(_ path: [String], key: String) throws -> Data {
+            var wrapper: [String: Any] = [
+                "settings": try encoded(TilingSettings())
+            ]
             let value = path.last?.contains("edge") == true ? "left" : "auto"
-            put(&wrapper, path, ["A:2000x1000": value])
-            root = try #require(wrapper["settings"] as? [String: Any])
-            #expect(
-                throws: DecodingError.self,
-                "\(path)"
-            ) {
+            put(&wrapper, path, [key: value])
+            return try data(
+                try #require(wrapper["settings"] as? [String: Any])
+            )
+        }
+        for path in ConfigMigration.numberedBarMapPaths {
+            // The control: the same root with a number decodes.
+            #expect(throws: Never.self, "\(path)") {
                 try JSONDecoder().decode(
                     TilingSettings.self,
-                    from: data(root)
+                    from: settings(path, key: "1")
+                )
+            }
+            #expect(throws: DecodingError.self, "\(path)") {
+                try JSONDecoder().decode(
+                    TilingSettings.self,
+                    from: settings(path, key: "A:2000x1000")
                 )
             }
         }
@@ -181,13 +223,17 @@ struct NumberedBarMapMigrationTests {
         settings.appBarStyle.edgeOverride = ["1": .top]
         settings.kiwishelf.pocketEdgeOverride = ["1": .right]
         settings.spaceBarStyle.visibilityOverride = ["1": .hidden]
+        settings.monocle.appBar.visibilityOverride = ["1": .hidden]
+        settings.scrolling.appBar.visibilityOverride = ["1": .hidden]
         let body = LookBody(of: settings)
-        for path in [
-            "space_bar.edge_override", "app_bar.edge_override",
-            "kiwishelf.pocket_edge_override",
-            "space_bar.visibility_override",
-        ] {
-            #expect(body.style[path] == nil, "\(path)")
+        #expect(!body.style.isEmpty)
+        for path in ConfigMigration.numberedBarMapPaths {
+            let joined = path.joined(separator: ".")
+            #expect(body.style[joined] == nil, "\(joined)")
+            #expect(
+                !body.style.keys.contains { $0.hasPrefix(joined) },
+                "\(joined)"
+            )
         }
     }
 }

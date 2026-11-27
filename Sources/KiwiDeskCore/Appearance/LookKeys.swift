@@ -102,7 +102,7 @@ public enum LookKeys {
     /// Why a bar's and the pocket's per-screen edges stay out
     /// (#1948, #3376).
     private static let screenEdges =
-        "a screen's own edge names this Mac's screens, and kept "
+        "a screen's own edge names a screen number, and kept "
         + "through a look it stays the strongest"
 
     private static let functionality =

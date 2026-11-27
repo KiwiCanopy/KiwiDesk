@@ -140,8 +140,8 @@ public struct KiwiShelf: Sendable, Equatable {
     /// without an entry in `pocketEdgeOverride`. Written through
     /// `pocketEdges`' `ScreenEdged` doors.
     public var pocketEdge = AppBarEdge.bottom
-    /// A screen's own pocket edge, keyed by `Display.fingerprint`
-    /// (#3376): `kiwishelf.pocket_edge_override`, sparse.
+    /// A screen's own pocket edge, keyed by Screen N or `N#id`
+    /// (#3376, #3647): `kiwishelf.pocket_edge_override`, sparse.
     public var pocketEdgeOverride: [String: AppBarEdge] = [:]
     /// Where along `pocketEdge` the pocket sits, in percent; on a
     /// bar's edge it takes the nearer end (`pocketLeansEnd`).

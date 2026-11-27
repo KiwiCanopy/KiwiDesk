@@ -34,15 +34,14 @@ extension SettingsModel {
         )
     }
 
-    /// The screen numbers the picker lists: each of the draft
-    /// profile's, save a twin's higher number, whose screen reads the
-    /// lower one's values (#3647 ▸ lane 3c).
+    /// The screen numbers the picker lists: Core's
+    /// `barNumbers(count:order:)` over the draft profile's own
+    /// screens (#3647 ▸ lane 3c).
     var draftScreenNumbers: [Int] {
-        let count = draftMonitorSets.map(\.monitors.count).max() ?? 0
-        let held = screenOrder.fingerprints
-        return (0..<count).filter { index in
-            index >= held.count || !held[..<index].contains(held[index])
-        }.map { $0 + 1 }
+        core.barNumbers(
+            count: draftMonitorSets.map(\.monitors.count).max() ?? 0,
+            order: screenOrder
+        )
     }
 
     /// The draft profile's screen combinations: the edit target's
@@ -77,8 +76,8 @@ extension SettingsModel {
         guard let shares = config.settings.displayAreas[number: number],
             !shares.isWhole
         else { return ["\(number)"] }
-        return ScreenArea.readingOrder(shares.areas).map {
-            $0.id == 0 ? "\(number)" : "\(number)#\($0.id)"
+        return ScreenArea.readingOrder(shares.areas).compactMap {
+            ScreenSlotKey(number: number, areaID: $0.id)?.description
         }
     }
 

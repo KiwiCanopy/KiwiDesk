@@ -10,8 +10,9 @@ public struct AppBarStyle: Sendable, Equatable {
     /// a layout's override (`layoutFixedKeys`). The Space Bar on
     /// the same edge shares one shelf with it (#1731).
     public var edge: AppBarEdge = .top
-    /// A screen's own edge, keyed by its fingerprint (#1948); a
-    /// screen with none uses `edge`. Global only, like `edge`.
+    /// A screen's own edge, keyed by its Screen N or an area's
+    /// `N#id` (#1948, #3647); a screen with none uses `edge`. Global
+    /// only, like `edge`.
     public var edgeOverride: [String: AppBarEdge] = [:]
     /// Edge mark by default, where the Space Bar's is Outline:
     /// the indicator's SHAPE is what tells the sections apart

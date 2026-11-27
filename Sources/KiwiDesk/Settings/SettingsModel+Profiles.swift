@@ -134,7 +134,8 @@ extension SettingsModel {
         // (#3647 ▸ lane 2).
         let priorOrder = core.sessionScreenOrder
         if let order = screenNumbering.draft {
-            core.setSessionScreenOrder(order)
+            // The apply below lays it out.
+            core.setSessionScreenOrder(order, retiling: false)
         }
         core.withUserMotion {
             core.applyProfileScopedState(

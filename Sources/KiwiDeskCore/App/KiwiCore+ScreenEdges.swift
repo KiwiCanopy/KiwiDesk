@@ -19,14 +19,18 @@ extension KiwiCore {
     /// engine's `screenSlot` seam is wired to it in
     /// `bootstrapCoreServices`, and `areaKey(of:)` reads it.
     func screenSlot(of display: DisplayID) -> String? {
-        screenFingerprint(of: display)
-            .flatMap { liveScreenOrder.number(of: $0) }
-            .flatMap { ScreenSlotKey(number: $0)?.description }
+        screenFingerprint(of: display).flatMap {
+            barKey(
+                of: ScreenAreaKey(fingerprint: $0, areaID: 0),
+                order: liveScreenOrder
+            )
+        }
     }
 
     /// The key a screen's or area's bar values take in `order`,
     /// `N` or `N#id`, nil for a screen with no number there: the
-    /// door Settings reads a draft through (#3647 ▸ lane 3c).
+    /// one translation every bar reader takes, `screenSlot(of:)`
+    /// and Settings' draft included (#3647 ▸ lane 3c).
     public func barKey(of key: ScreenAreaKey, order: ScreenOrder) -> String? {
         order.slot(of: key)?.description
     }
@@ -113,7 +117,7 @@ extension KiwiCore {
         guard let area = state.workspaces[placement: placement] else {
             return screenSlot(of: placement.display)
         }
-        return liveScreenOrder.slot(of: area.key)?.description
+        return barKey(of: area.key, order: liveScreenOrder)
     }
 
     /// Whether `display` shows a maximized window: a Maximize over
@@ -205,7 +209,7 @@ extension KiwiCore {
                 let lead = state.workspaces.leadPlacement(of: display.id)
                 return [(screenSlot(of: display.id), true)]
                     + areas.filter { $0.id != lead }.map {
-                        (liveScreenOrder.slot(of: $0.key)?.description, false)
+                        (barKey(of: $0.key, order: liveScreenOrder), false)
                     }
             }
         return screens.flatMap { screen in
@@ -238,13 +242,32 @@ extension KiwiCore {
             monitorSets.map(\.monitors.count).max() ?? 0,
             order.fingerprints.count
         )
-        let numbers = (0..<count).compactMap {
-            ScreenSlotKey(number: $0 + 1)?.description
-        }
+        let numbers = barNumbers(count: count, order: order)
+            .compactMap { ScreenSlotKey(number: $0)?.description }
         let areas = shares.flatMap { number, split in
-            split.areas.filter { $0.id != 0 }.map { "\(number)#\($0.id)" }
+            split.areas.filter { $0.id != 0 }.compactMap { area in
+                Int(number).flatMap {
+                    ScreenSlotKey(number: $0, areaID: area.id)?.description
+                }
+            }
         }
         return ScreenEdgeScope(screens: Set(numbers + areas))
+    }
+
+    /// Screens 1 through `count` that keep bar values, in order:
+    /// each save a twin's higher number, whose screen reads the lower
+    /// number's values (`ScreenOrder.number(of:)`). A session hole
+    /// keeps its number. The one twin rule the edge scope and the
+    /// Settings picker read, each counting its own screens (#3647 ▸
+    /// lane 3c).
+    public func barNumbers(count: Int, order: ScreenOrder) -> [Int] {
+        guard count > 0 else { return [] }
+        return (1...count).filter { number in
+            guard number <= order.fingerprints.count,
+                !order.unnumbered.contains(number)
+            else { return true }
+            return order.number(of: order.fingerprints[number - 1]) == number
+        }
     }
 
     /// The scope for a write of the live settings: the adopted

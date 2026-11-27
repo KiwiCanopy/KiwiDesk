@@ -818,7 +818,7 @@ area 0 first, and gives each area past them a new id; with fewer
 sizes the last ids go. A rect without an `id` takes 0 when it is
 the top-left one and no rect names 0, else a new id. An id is never
 given out twice on one screen. The split is stored per profile
-under `display_areas`, keyed by fingerprint; while a profile or
+under `display_areas`, keyed by screen number; while a profile or
 built-in layout is live its split wins (see
 [Profiles & Screens](#profiles--screens)). Otherwise a split
 `init.lua` makes as it loads lasts while the file makes it. Once
@@ -3734,7 +3734,7 @@ that edge on that screen alone. The screens are judged and collapse as
 a bar's are; a call without a screen sets every screen and clears
 their own edges, and a look leaves each screen's own untouched. The
 edges are stored per profile under `kiwishelf.pocket_edge_override`,
-keyed by fingerprint. Settings ▸ Bars & Pocket ▸ KiwiShelf writes them
+keyed by screen number. Settings ▸ Bars & Pocket ▸ KiwiShelf writes them
 as the Pocket's **Position** in **Each bar and Pocket**: under **All
 screens** for every screen at once, and for one screen once the
 **Screen or area** picker picks it; the card's own **Position**
@@ -4323,7 +4323,7 @@ named as [`space_bar.set_edge`](#space_barset_edge) names one: with
 it, the visibility is that layout's on that screen or area alone,
 and the layout's other screens keep its own value. These values
 are stored per profile under `<layout>.app_bar.visibility_override`,
-keyed by fingerprint or area key. Without a screen, it sets the
+keyed by screen number or area key. Without a screen, it sets the
 layout's own visibility and clears that layout's screen values.
 Settings ▸ Bars & Pocket ▸ KiwiShelf writes them as **Show in
 Monocle** and **Show in Scrolling** in **Each bar and Pocket** once
@@ -4501,7 +4501,7 @@ space_bar.set_visibility("auto")
 that screen's alone. Naming the bar's own value returns a screen to
 it; a call without a screen sets every screen and clears their own
 values. The values are stored per profile under
-`space_bar.visibility_override`, keyed by fingerprint. Settings ▸
+`space_bar.visibility_override`, keyed by screen number. Settings ▸
 Bars & Pocket ▸ KiwiShelf writes them as the Space Bar's **Show** in
 **Each bar and Pocket** once its **Screen or area** picker picks a
 screen or area.
@@ -4575,7 +4575,7 @@ call without a screen sets the bar on every screen, clearing
 their own edges. A look sets the bars' edges and leaves each
 screen's own untouched. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
-fingerprint.
+screen number.
 
 **Per area:** on a screen split into areas, each area has its own
 edge. A screen named by number or by name sets every area of it;

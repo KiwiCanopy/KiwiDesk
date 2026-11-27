@@ -69,7 +69,7 @@ extension KiwiCore {
         else { return nil }
         return (
             placement.area.rect,
-            liveScreenOrder.slot(of: placement.key)?.description,
+            barKey(of: placement.key, order: liveScreenOrder),
             id == state.workspaces.leadPlacement(of: id.display)
         )
     }

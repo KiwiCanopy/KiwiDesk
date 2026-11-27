@@ -28,7 +28,7 @@ extension ConfigMigration {
 
     @Sendable
     static func migratingBarMapsOntoNumbers(_ data: Data) -> Data? {
-        let needles = ["edge_override", "visibility_override"]
+        let needles = numberedBarMapPaths.compactMap(\.last)
             .map { Data("\"\($0)\"".utf8) }
         return surgicallyApplying(
             data,

@@ -22,8 +22,8 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// same edge shares one shelf with it; on another, each bar
     /// is its own (#1731).
     public var edge: AppBarEdge = .top
-    /// A screen's own edge, keyed by its fingerprint (#1948); a
-    /// screen with none uses `edge`.
+    /// A screen's own edge, keyed by its Screen N or an area's
+    /// `N#id` (#1948, #3647); a screen with none uses `edge`.
     public var edgeOverride: [String: AppBarEdge] = [:]
     /// Max glyphs per Space item before "+n" badge (#376).
     /// Default 5.

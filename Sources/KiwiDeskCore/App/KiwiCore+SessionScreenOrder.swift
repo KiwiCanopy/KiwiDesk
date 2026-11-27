@@ -25,12 +25,16 @@ extension KiwiCore {
     /// Sets the live profile's numbering of the connected screens for
     /// the session; nil clears it. A Save calls it before its pins
     /// are projected. A screen's split follows its number (#3647 ▸
-    /// lane 3), so the placements follow the order at once.
-    public func setSessionScreenOrder(_ order: ScreenOrder?) {
+    /// lane 3), so the placements follow the order at once, and so
+    /// do the bars' values (lane 3c): `retiling` lays them out, false
+    /// only where an apply's own pass follows.
+    public func setSessionScreenOrder(
+        _ order: ScreenOrder?,
+        retiling: Bool = true
+    ) {
         profiles.setSessionScreenOrder(order, for: profiles.currentName)
-        // The bars' values follow the number too (#3647 ▸ lane 3c).
         syncAreaSplits()
-        retile()
+        if retiling { retile() }
     }
 
     /// Ends the override: an explicit load or pick, a composed apply,
@@ -63,9 +67,12 @@ extension KiwiCore {
     }
 
     /// Ends an apply's in-flight order (#3647 ▸ lane 3) and lays the
-    /// splits out in the order now live, should the two differ.
+    /// splits out in the order now live; where the two differ the
+    /// bars' values move with the numbers, so it retiles (lane 3c).
     func endScreenOrderInFlight() {
+        let inFlight = liveScreenOrder
         profiles.screenOrderInFlight = nil
         syncAreaSplits()
+        if liveScreenOrder != inFlight { retile() }
     }
 }
