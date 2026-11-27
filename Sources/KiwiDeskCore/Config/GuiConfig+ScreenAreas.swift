@@ -3,8 +3,8 @@ import Foundation
 /// The key rewrite one merge owes (#3517 ruling 22): every stored
 /// reference to the area that vanished moves to the area that
 /// absorbed it, which is physically the same place. Keyed by screen
-/// number (#3647 ▸ lane 3); a map still keyed by fingerprint takes
-/// `runtime(in:)`.
+/// number (#3647 ▸ lane 3); the runtime's fingerprint-keyed stores —
+/// the placements and `spacePins` — take `runtime(in:)`.
 public struct ScreenAreaRemap: Equatable, Sendable {
     public let vanished: ScreenSlotKey
     public let survivor: ScreenSlotKey
@@ -27,8 +27,7 @@ public struct ScreenAreaRemap: Equatable, Sendable {
         return Fingerprinted(vanished: old, survivor: new)
     }
 
-    /// A remap keyed by fingerprint, for the runtime and the maps
-    /// that lane 3c moves to numbers.
+    /// A remap keyed by fingerprint, for the runtime's stores.
     public struct Fingerprinted: Equatable, Sendable {
         public let vanished: ScreenAreaKey
         public let survivor: ScreenAreaKey
@@ -93,20 +92,15 @@ extension GuiConfig {
             )
         else { return nil }
         let remap = ScreenAreaRemap(vanished: vanished, survivor: survivor)
-        apply(remap, order: order)
+        apply(remap)
         return remap
     }
 
     /// Rewrites every field that stores an area key: the Screen
     /// pins, the areas' Desktop memory and the per-screen maps in
-    /// the settings and the shared look
-    /// (`ScreenAreaRemapParityTests` finds them by reflection). The
-    /// maps still keyed by fingerprint take the screen `order`
-    /// gives the number.
-    public mutating func apply(
-        _ remap: ScreenAreaRemap,
-        order: ScreenOrder
-    ) {
+    /// the settings (`ScreenAreaRemapParityTests` finds them by
+    /// reflection).
+    public mutating func apply(_ remap: ScreenAreaRemap) {
         for (space, pin) in spacePins where pin == remap.vanished {
             spacePins[space] = remap.survivor
         }
@@ -114,34 +108,14 @@ extension GuiConfig {
             remap.move(in: &shown)
             desktopAreaSpaces[desktop] = shown
         }
-        guard let runtime = remap.runtime(in: order) else { return }
-        settings.apply(runtime)
-        look?.apply(runtime)
-    }
-}
-
-extension LookBody {
-    /// The shared look's half: a per-screen styling value (the bars'
-    /// and the pocket's `edge_override`) is a JSON object keyed by
-    /// screen, its vanished entry moved as `ScreenEdged.moveScreen`
-    /// moves the settings' own.
-    public mutating func apply(_ remap: ScreenAreaRemap.Fingerprinted) {
-        let old = remap.vanished.description
-        let new = remap.survivor.description
-        for (path, value) in style {
-            guard case .object(var entries) = value,
-                let moved = entries.removeValue(forKey: old)
-            else { continue }
-            if entries[new] == nil { entries[new] = moved }
-            style[path] = .object(entries)
-        }
+        settings.apply(remap)
     }
 }
 
 extension TilingSettings {
     /// The per-screen maps' half of a merge's rewrite: both bars'
     /// and the pocket's edges, and both bars' Show.
-    public mutating func apply(_ remap: ScreenAreaRemap.Fingerprinted) {
+    public mutating func apply(_ remap: ScreenAreaRemap) {
         let old = remap.vanished.description
         let new = remap.survivor.description
         spaceBarStyle.moveScreen(old, to: new)

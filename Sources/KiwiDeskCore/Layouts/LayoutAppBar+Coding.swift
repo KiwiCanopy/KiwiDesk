@@ -25,7 +25,7 @@ extension LayoutAppBar: Codable {
                 forKey: .visibility
             ) ?? .always
         visibilityOverride =
-            try container.decodeIfPresent(
+            try container.decodeScreenMap(
                 [String: ShelfVisibility].self,
                 forKey: .visibilityOverride
             ) ?? [:]

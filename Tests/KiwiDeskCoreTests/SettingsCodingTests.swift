@@ -297,12 +297,12 @@ struct SettingsCodingTests {
 
     /// `space_bar.set_edge(edge, screen)` →
     /// `space_bar.edge_override`, a sparse map keyed by the
-    /// screen's fingerprint beside `edge` — the `gap.override`
+    /// screen's number (#3647) beside `edge` — the `gap.override`
     /// shape — and absent while no screen has an edge of its own
     /// (#1948).
     @Test("A bar's per-screen edges sit sparse beside its edge")
     func screenEdgesEncodeSparse() throws {
-        let screen = "Studio Display:5120x2880"
+        let screen = "2"
         var settings = TilingSettings()
         let plain = try object(
             JSONSerialization.jsonObject(

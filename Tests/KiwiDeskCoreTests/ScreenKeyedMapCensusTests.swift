@@ -13,7 +13,7 @@ import Testing
 /// `isScreenKeyed` names by type and a new type joins.
 @Suite("Screen-keyed map census (#3517)")
 struct ScreenKeyedMapCensusTests {
-    private static let gone = "Gone:100x100#1"
+    private static let gone = "3#1"
 
     /// The dotted paths of every screen-keyed map under `value`.
     private func screenKeyedMaps(
@@ -40,8 +40,8 @@ struct ScreenKeyedMapCensusTests {
             || kind == [String: ShelfVisibility].self
     }
 
-    /// An area of a screen in scope, whose entries every map keeps.
-    private static let kept = "Wide:3440x1440#1"
+    /// An area in scope, whose entries every map keeps.
+    private static let kept = "1#1"
 
     /// Settings with every screen-keyed map holding `keys`.
     private func fill(_ keys: [String] = [gone]) -> TilingSettings {
@@ -65,12 +65,12 @@ struct ScreenKeyedMapCensusTests {
         return settings
     }
 
-    @Test("an area's entry survives while its screen is in scope")
+    @Test("an area's entry survives while it is in scope")
     func areaEntriesSurvive() {
         var kept = fill([Self.gone, Self.kept])
         let maps = screenKeyedMaps(in: kept)
         kept.keepScreenEdges(
-            in: ScreenEdgeScope(screens: ["Wide:3440x1440"])
+            in: ScreenEdgeScope(screens: ["1", "1#1"])
         )
         for path in maps {
             #expect(

@@ -67,7 +67,7 @@ extension KiwiCore {
             screen.kiwiDisplayID.flatMap(namedScreenLabel(of:))
             ?? ScreenLabel(name: screen.localizedName)
         let visible = tiler.visibleBounds(screen)
-        let fingerprint = tiler.fingerprint(of: screen, in: settings)
+        let fingerprint = tiler.barKey(of: screen, in: settings)
         var fits: [MinWindowSizes.Layout: MinSizeFit] = [:]
         for (layout, size) in sizes {
             let region = settings.layoutBounds(

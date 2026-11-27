@@ -15,8 +15,8 @@ struct ScreenAreaSplitDiffTests {
     @Test("the minted area's copied edge and Show are rows")
     func copiedEntriesAreRows() throws {
         var clean = GuiConfig()
-        clean.settings.appBarStyle.edgeOverride[screen] = .left
-        clean.settings.spaceBarStyle.visibilityOverride[screen] = .hidden
+        clean.settings.appBarStyle.edgeOverride["1"] = .left
+        clean.settings.spaceBarStyle.visibilityOverride["1"] = .hidden
         var edited = clean
         let whole = ScreenSplit.whole(width: 2560, height: 1440)
         let split = edited.splitArea(
@@ -28,9 +28,7 @@ struct ScreenAreaSplitDiffTests {
             order: ScreenOrder([screen])
         )
         let copy = try #require(split)
-        let minted = try #require(
-            copy.runtime(in: ScreenOrder([screen]))
-        ).minted.description
+        let minted = copy.minted.description
         let edges = SettingsValueReadout.rows(
             for: .kiwishelf(.appBarScreenEdge),
             old: clean,

@@ -1276,7 +1276,6 @@
   "kiwishelf.scope.label": "显示器或分区",
   "kiwishelf.scope.own": "%1$@ — 独有设置",
   "kiwishelf.scope.summary": "独有设置：%1$d",
-  "kiwishelf.scope.twins": "%1$@ × %2$d",
   "kiwishelf.show.app_bar.beside_always": "保持显示：同一边缘上的 Space Bar 设为“%1$@”。",
   "kiwishelf.show.app_bar_in": "在%1$@中显示",
   "kiwishelf.show.differ.help": "目前各栏和 Pocket 的显示方式不同；在此处选择会设置全部。",

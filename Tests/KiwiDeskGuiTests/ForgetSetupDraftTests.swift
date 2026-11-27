@@ -39,14 +39,12 @@ struct ForgetSetupDraftTests {
     }
 
     /// "Desk" on A+B and A+C (connected), a bar edge of its own on
-    /// B and a Desktop bound for A+B, then an open draft wired the
-    /// way `AppDelegate` wires it.
+    /// Screen 2 and a Desktop bound for A+B, then an open draft wired
+    /// the way `AppDelegate` wires it.
     private func seeded() throws -> (SettingsModel, KiwiCore) {
         let core = makeTestCore()
         try core.guiConfigStore.save(GuiConfig())
-        core.tiler.settings.spaceBarStyle.edgeOverride = [
-            "B:100x100": .right
-        ]
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["2": .right]
         connect(core, ["A", "B"])
         try core.persistProfile(named: "Desk", modes: nil)
         connect(core, ["A", "C"])
@@ -67,6 +65,8 @@ struct ForgetSetupDraftTests {
         return (model, core)
     }
 
+    /// The number belongs to the profile, so a forget of one setup
+    /// of its count keeps Screen 2's edge (#3647 ▸ lane 3c).
     @Test("the draft and its baseline drop the forgotten setup's leftovers")
     func draftFollows() throws {
         let (model, core) = try seeded()
@@ -95,7 +95,9 @@ struct ForgetSetupDraftTests {
         )
         #expect(model.cleanConfig.profileBindings[.number(1)] == nil)
         for config in [model.config, model.cleanConfig] {
-            #expect(config.settings.spaceBarStyle.edgeOverride.isEmpty)
+            #expect(
+                config.settings.spaceBarStyle.edgeOverride == ["2": .right]
+            )
         }
         #expect(model.isDirty)
         #expect(model.knownSetups.map(\.monitors) == [Self.ac])
@@ -116,27 +118,29 @@ struct ForgetSetupDraftTests {
         )
         #expect(reply.isSuccess, "\(reply.error ?? "")")
         for config in [model.config, model.cleanConfig] {
-            #expect(config.settings.spaceBarStyle.edgeOverride.isEmpty)
+            #expect(
+                config.settings.spaceBarStyle.edgeOverride == ["2": .right]
+            )
             #expect(config.profileBindings[.number(1)] == nil)
         }
         #expect(!model.isDirty)
     }
 
-    /// Z is on no setup and no connected screen, so only the
-    /// holder gate keeps its edge.
+    /// Screen 5 is past every setup's count, so only the holder gate
+    /// keeps its edge.
     @Test("a draft of another profile keeps its edges")
     func otherDraftKeepsEdges() throws {
         let (model, core) = try seeded()
         model.config.settings.appBarStyle.edgeOverride = [
-            "Z:100x100": .left
+            "5": .left
         ]
         model.cleanConfig.settings.appBarStyle.edgeOverride = [
-            "Z:100x100": .left
+            "5": .left
         ]
         model.adoptForgottenSetup(Self.ab, from: "Elsewhere")
         #expect(
             model.config.settings.appBarStyle.edgeOverride
-                == ["Z:100x100": .left]
+                == ["5": .left]
         )
         #expect(model.cleanConfig.profileBindings[.number(1)] == nil)
         _ = core

@@ -4587,6 +4587,21 @@ edge. Splitting an area in Settings gives the new area the edges
 and visibilities of the area it came from; areas a
 `set_display_areas` list creates start at the bars' own.
 
+:::unreleased
+A screen's own edge and visibility belong to its screen number, not
+to the screen: the bars' and the pocket's `edge_override` and
+`visibility_override` maps are keyed by `"N"`, and an area's by
+`"N#id"`, so a renumber moves them with the number and another
+setup of the same count takes them. A number or `"N#id"` is stored
+at once, even before a screen is known; a fingerprint names the
+number its screen holds now, a screen that is not connected the
+number the live profile's first setup holding it gives it, and a
+connected screen with no number is refused. Two screens of one
+model read the lower number's values. `forget_monitor_set` keeps
+every number up to the profile's screen count, and drops only an
+area's values the profile's splits no longer hold.
+:::
+
 ```lua
 space_bar.set_edge("top")
 space_bar.set_edge("left", "LG HDR 4K:3840x2160")

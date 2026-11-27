@@ -38,6 +38,9 @@ struct ConfigMigrationShelfRoutingTests {
             // parents; its textual edit is kept only where it
             // agrees with that walk.
             "Config/ConfigMigration+AppBarContent.swift",
+            // #3647's bar-map crossing: a walk by path, no
+            // textual edit.
+            "Config/ConfigMigration+NumberedBarMaps.swift",
             "Appearance/ColorPalette+Apply.swift",
             "Appearance/ColorPaletteKeys.swift",
             "Appearance/ShelfLook+Apply.swift",

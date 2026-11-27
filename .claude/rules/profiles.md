@@ -1093,9 +1093,10 @@ The obligations below bind this directory:
   branch, so the one total resolve places it; a config load
   clears what is held (`BootSpacePinTests` ▸ `bootPinApplies`).
   A config load's split or bar per-screen value naming a screen by
-  number or name waits the same way, in call order with the pins in
-  the one `heldScreenCalls`: held at its verb's own body (the split
-  write, the bars' screen seams) through `holdsScreenArg`, an
+  fingerprint or name waits the same way — a number or `N#id` is
+  stored at once (#3647) — in call order with the pins in the one
+  `heldScreenCalls`: held at its verb's own body (the split write,
+  the bars' screen seams) through `holdsNumberedScreenArg`, an
   area's name while a held split stands, and replayed through that
   body, never a copy (#3640, `BootDisplayAreaTests`); a report of
   no screen keeps the list.

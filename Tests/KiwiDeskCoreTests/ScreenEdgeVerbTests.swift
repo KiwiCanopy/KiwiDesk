@@ -7,10 +7,10 @@ import Testing
 
 /// `space_bar.set_edge` / `app_bar.set_edge` with the optional
 /// screen (#1948), through `execute`: a screen is named as
-/// `pin_space_to_display` names one, stored by fingerprint, a
-/// screen-less call clears every screen's own edge, and a write
-/// collapses over the live profile's monitor-set screens and the
-/// connected ones. Also the looks, which keep the per-screen
+/// `pin_space_to_display` names one, stored by its screen number
+/// (#3647 ▸ lane 3c), a screen-less call clears every screen's own
+/// edge, and a write collapses over the live profile's numbers and
+/// the connected screens'. Also the looks, which keep the per-screen
 /// edges, and the layouts, which refuse them naming the one verb
 /// that writes them.
 @Suite("Per-screen bar edge verbs (#1948)", .serialized)
@@ -58,16 +58,15 @@ struct ScreenEdgeVerbTests {
         #expect(
             edge(core, verb, .string("right"), .string("Left")).isSuccess
         )
-        // A screen that is not connected is stored as given.
+        // A screen no setup holds has no number to store under.
         #expect(
-            edge(core, verb, .string("bottom"), .string(Self.away))
+            !edge(core, verb, .string("bottom"), .string(Self.away))
                 .isSuccess
         )
         #expect(
             core.tiler.settings.spaceBarStyle.edgeOverride == [
-                Self.right.fingerprint: .left,
-                Self.left.fingerprint: .right,
-                Self.away: .bottom,
+                "2": .left,
+                "1": .right,
             ]
         )
         #expect(core.tiler.settings.spaceBarStyle.edge == .top)
@@ -79,7 +78,7 @@ struct ScreenEdgeVerbTests {
         // A bad edge answers as one, whatever the screen.
         let badEdge = edge(core, verb, .string("diagonal"), .string("Nope"))
         #expect(badEdge.error?.hasPrefix("expected top") == true)
-        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 3)
+        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
     }
 
     @Test("The bar's own edge follows; a screen-less edge clears all")
@@ -90,10 +89,7 @@ struct ScreenEdgeVerbTests {
         let verb = "app_bar.set_edge"
         let left = JSONValue.string(Self.left.fingerprint)
         #expect(edge(core, verb, .string("bottom"), left).isSuccess)
-        #expect(
-            core.tiler.settings.appBarStyle.edgeOverride
-                == [Self.left.fingerprint: .bottom]
-        )
+        #expect(core.tiler.settings.appBarStyle.edgeOverride == ["1": .bottom])
         #expect(edge(core, verb, .string("top"), left).isSuccess)
         #expect(core.tiler.settings.appBarStyle.edgeOverride.isEmpty)
         #expect(edge(core, verb, .string("bottom"), left).isSuccess)
@@ -119,8 +115,8 @@ struct ScreenEdgeVerbTests {
         #expect(core.tiler.settings.spaceBarStyle.edgeOverride.isEmpty)
     }
 
-    /// A screen of the live profile's monitor set that is not
-    /// connected still follows the bar: collapsing would move it.
+    /// A number of the live profile no connected screen holds still
+    /// follows the bar: collapsing would move it.
     @Test("A monitor-set screen that is away blocks the collapse")
     func awayScreenBlocksCollapse() throws {
         let saved = PositionalDisplays.mainIDOverride
@@ -142,7 +138,7 @@ struct ScreenEdgeVerbTests {
                 settings: TilingSettings()
             )
         )
-        #expect(core.liveScreenEdgeScope.screens.contains(Self.away))
+        #expect(core.liveScreenEdgeScope.screens.contains("3"))
         let verb = "space_bar.set_edge"
         for screen in ["Left", "Right"] {
             #expect(
@@ -154,10 +150,10 @@ struct ScreenEdgeVerbTests {
         #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
     }
 
-    /// A set the live profile claims without an apply joins the
-    /// judged screens at once: the profile's file write re-files
-    /// its sets (`ActiveProfile.refiled(_:)`).
-    @Test("A claimed set's away screen blocks the collapse")
+    /// A set the live profile claims without an apply is judged at
+    /// once (`ActiveProfile.refiled(_:)`); one of the same count adds
+    /// no number, so every number agreeing still collapses.
+    @Test("A claimed set of the same count adds no number")
     func claimedSetBlocksCollapse() throws {
         let saved = PositionalDisplays.mainIDOverride
         defer { PositionalDisplays.mainIDOverride = saved }
@@ -171,12 +167,11 @@ struct ScreenEdgeVerbTests {
                 settings: TilingSettings()
             )
         )
-        #expect(!core.liveScreenEdgeScope.screens.contains(Self.away))
         try core.claimMonitorSet(
             [Self.left.fingerprint, Self.away],
             for: "Desk"
         )
-        #expect(core.liveScreenEdgeScope.screens.contains(Self.away))
+        #expect(core.liveScreenEdgeScope.screens == ["1", "2"])
         let verb = "space_bar.set_edge"
         for screen in ["Left", "Right"] {
             #expect(
@@ -184,45 +179,41 @@ struct ScreenEdgeVerbTests {
                     .isSuccess
             )
         }
-        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
-        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
+        #expect(core.tiler.settings.spaceBarStyle.edge == .left)
+        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.isEmpty)
     }
 
     /// Before the first display is published, outside a config
-    /// load, a screen number names nothing and refuses, while a
-    /// fingerprint needs no screen and lands at once; `init.lua`'s
-    /// own calls wait for a screen (#3640, `BootDisplayAreaTests`).
+    /// load, a screen number is stored at once, while a fingerprint
+    /// no setup holds has no number and refuses; `init.lua`'s own
+    /// fingerprint calls wait for a screen (#3640, #3647,
+    /// `BootDisplayAreaTests`).
     @Test("A screen is named before any display is published")
     func namesAScreenAtBoot() {
         let core = makeTestCore()
         #expect(core.state.workspaces.allDisplays.isEmpty)
         #expect(
-            !edge(core, "space_bar.set_edge", .string("left"), .number(1))
+            edge(core, "space_bar.set_edge", .string("left"), .number(1))
                 .isSuccess
         )
         #expect(
-            edge(
+            !edge(
                 core,
                 "app_bar.set_edge",
                 .string("left"),
                 .string(Self.left.fingerprint)
             ).isSuccess
         )
-        #expect(
-            core.tiler.settings.appBarStyle.edgeOverride
-                == [Self.left.fingerprint: .left]
-        )
+        #expect(core.tiler.settings.spaceBarStyle.edgeOverride == ["1": .left])
+        #expect(core.tiler.settings.appBarStyle.edgeOverride.isEmpty)
         #expect(core.heldScreenCalls.isEmpty)
     }
 
     @Test("A look sets the bars' edges and keeps each screen's own")
     func lookKeepsScreenEdges() {
         var settings = TilingSettings()
-        settings.spaceBarStyle.edgeOverride = [
-            Self.left.fingerprint: .left,
-            Self.right.fingerprint: .bottom,
-        ]
-        settings.appBarStyle.edgeOverride = [Self.left.fingerprint: .right]
+        settings.spaceBarStyle.edgeOverride = ["1": .left, "2": .bottom]
+        settings.appBarStyle.edgeOverride = ["1": .right]
         for bar in ["space_bar", "app_bar"] {
             ShelfLook.apply(
                 path: "\(bar).edge",
@@ -234,15 +225,9 @@ struct ScreenEdgeVerbTests {
         #expect(settings.appBarStyle.edge == .bottom)
         // Untouched, the entry the look's edge now equals too.
         #expect(
-            settings.spaceBarStyle.edgeOverride == [
-                Self.left.fingerprint: .left,
-                Self.right.fingerprint: .bottom,
-            ]
+            settings.spaceBarStyle.edgeOverride == ["1": .left, "2": .bottom]
         )
-        #expect(
-            settings.appBarStyle.edgeOverride
-                == [Self.left.fingerprint: .right]
-        )
+        #expect(settings.appBarStyle.edgeOverride == ["1": .right])
     }
 
     /// The layouts' refusal and the retired per-layout edge verbs

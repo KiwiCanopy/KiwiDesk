@@ -14,7 +14,7 @@ import Testing
 @Suite("Area bar visibility (#3517)", .serialized)
 @MainActor
 struct AreaBarVisibilityTests {
-    private static let key = "Wide:3440x1440#1"
+    private static let key = "1#1"
 
     @Test("an area's entry replaces the bar's visibility there")
     func entryResolvesForItsArea() {
@@ -25,7 +25,7 @@ struct AreaBarVisibilityTests {
         #expect(area.spaceBarStyle.visibility == .hidden)
         #expect(area.spaceBarStyle.visibilityOverride.isEmpty)
         #expect(
-            settings.onScreen("Wide:3440x1440").spaceBarStyle.visibility
+            settings.onScreen("1").spaceBarStyle.visibility
                 == .always
         )
         #expect(settings.onScreen(nil).spaceBarStyle.visibility == .always)
@@ -52,7 +52,7 @@ struct AreaBarVisibilityTests {
         let maps = area.appBarHosts.map(\.visibilityOverride)
         #expect(maps.allSatisfy { $0.isEmpty })
         // Another area takes each layout's own Show.
-        let other = settings.onScreen("Wide:3440x1440")
+        let other = settings.onScreen("1")
         #expect(other.appBarVisibility(in: .monocle) == .always)
         #expect(other.appBarVisibility(in: .scrolling) == .always)
         #expect(area.onScreen(Self.key) == area)
@@ -91,7 +91,7 @@ struct AreaBarVisibilityTests {
         let shown = settings.layoutBounds(
             from: visible,
             mode: .bsp,
-            on: "Wide:3440x1440",
+            on: "1",
             pocketAtRest: false
         )
         #expect(hidden == visible)
@@ -105,7 +105,7 @@ struct AreaBarVisibilityTests {
         var settings = TilingSettings()
         settings.setEveryBarVisibility(.always)
         #expect(settings.uniformBarVisibility == .always)
-        settings.spaceBarStyle.visibilityOverride["Wide:3440x1440#1"] =
+        settings.spaceBarStyle.visibilityOverride["1#1"] =
             .hidden
         #expect(settings.uniformBarVisibility == nil)
     }
@@ -168,8 +168,9 @@ struct AreaBarVisibilityTests {
         for (i, area) in areas.enumerated() {
             core.state.workspaces.assign(SpaceID(i + 1), to: area.id)
         }
+        let rightKey = try #require(core.liveScreenOrder.slot(of: right.key))
         settings.spaceBarStyle.visibilityOverride = [
-            right.key.description: .hidden
+            rightKey.description: .hidden
         ]
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }

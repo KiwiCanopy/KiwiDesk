@@ -65,14 +65,14 @@ struct ScreenShowRowsTests {
         #expect(!whole.offersScreenEdges(\.spaceBarStyle, show: .space))
         let split = try model(split: true)
         let rows = split.screenEdgeRows(\.spaceBarStyle, show: .space)
-        #expect(rows.map(\.id) == [wide.fingerprint, "Wide:3440x1440#1"])
+        #expect(rows.map(\.id) == ["1", "1#1"])
         #expect(split.offersScreenEdges(\.spaceBarStyle, show: .space))
     }
 
     @Test("an entry for an area the draft no longer has keeps a row")
     func leftoverEntryKeepsARow() throws {
         let model = try model(split: false)
-        let area = "Wide:3440x1440#1"
+        let area = "1#1"
         model.config.settings.spaceBarStyle.visibilityOverride = [
             area: .hidden
         ]
@@ -92,14 +92,14 @@ struct ScreenShowRowsTests {
     @Test("an area's Show writes its own value; the bar's stores none")
     func showWritesTheArea() throws {
         let model = try model(split: true)
-        let area = "Wide:3440x1440#1"
+        let area = "1#1"
         model.screenShowBinding(.spaceBar, on: area).wrappedValue = .hidden
         #expect(
             model.config.settings.spaceBarStyle.visibilityOverride
                 == [area: .hidden]
         )
         #expect(
-            model.screenShow(.spaceBar, on: wide.fingerprint) == .always
+            model.screenShow(.spaceBar, on: "1") == .always
         )
         model.screenShowBinding(.spaceBar, on: area).wrappedValue = .always
         #expect(model.config.settings.spaceBarStyle.visibilityOverride.isEmpty)
@@ -128,7 +128,7 @@ struct ScreenShowRowsTests {
     @Test("a bar-level Show pick clears that bar's areas (ruling 32)")
     func barPickClears() throws {
         let model = try model(split: true)
-        let area = "Wide:3440x1440#1"
+        let area = "1#1"
         model.screenShowBinding(.spaceBar, on: area).wrappedValue = .hidden
         model.screenShowBinding(.appBar(.monocle), on: area)
             .wrappedValue = .hidden

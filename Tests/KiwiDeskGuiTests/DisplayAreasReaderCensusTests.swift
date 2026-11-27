@@ -22,10 +22,14 @@ struct DisplayAreasReaderCensusTests {
             "the load's reset, by the number Lua's record holds",
         "KiwiDeskCore/Commands/KiwiCore+DisplayAreaCommands.swift":
             "the verbs, by the number a split or `N#id` names",
+        "KiwiDeskCore/Commands/KiwiCore+ScreenVisibilityArgs.swift":
+            "a bar verb's area, by the number its screen holds",
         "KiwiDeskCore/Profiles/KiwiCore+DesktopAreaSpaces.swift":
             "the Desktop memory, by its `N#id` slot's number",
         "KiwiDesk/Settings/SettingsModel+ScreenAreaEdits.swift":
             "a merge back to whole, by the draft's number",
+        "KiwiDesk/Settings/SettingsModel+ScreenEdges.swift":
+            "the bar picker's area rows, by the number it lists",
         "KiwiDesk/Settings/Census/SettingKey+Screens.swift":
             "the census id's spelling, no read",
     ]

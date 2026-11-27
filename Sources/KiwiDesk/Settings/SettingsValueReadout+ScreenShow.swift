@@ -12,7 +12,8 @@ extension SettingsValueReadout {
         _ old: [String: ShelfVisibility],
         _ new: [String: ShelfVisibility],
         own: (old: ShelfVisibility, new: ShelfVisibility)?,
-        splits: [String: ScreenSplit]
+        order: ScreenOrder?,
+        shares: [String: ScreenShares]
     ) -> [SettingsDiffRow] {
         let base = label(for: census)
         let name: (ShelfVisibility?) -> String = { value in
@@ -25,17 +26,13 @@ extension SettingsValueReadout {
             .filter { before($0) != after($0) }
             .sorted()
             .map { key in
-                let area = ScreenAreaKey(parsing: key)
-                let parts = Display.fingerprintParts(area.fingerprint)
-                let screen = SettingsModel.perScreenName(
-                    screen: "\(parts.name) \(parts.size)",
-                    key: key,
-                    splits: splits
-                )
-                return .change(
+                .change(
                     census,
                     instance: key,
-                    label: instanceLabel(base, screen),
+                    label: instanceLabel(
+                        base,
+                        slotWords(key, order, shares)
+                    ),
                     old: name(before(key)),
                     new: name(after(key))
                 )
@@ -43,15 +40,15 @@ extension SettingsValueReadout {
     }
 
     /// One row per screen or area whose own edge changed (#1948,
-    /// #3517), under its bar's edge label and the screen's whole
-    /// fingerprint — two models of one name differ by size — each
-    /// side the edge that screen or area actually gets.
+    /// #3517), under its bar's edge label and its Screen N (#3647),
+    /// each side the edge that screen or area actually gets.
     static func screenEdgeRows<Bar: ScreenEdged>(
         _ census: SettingKey,
         bar: KiwiShelfKey,
         _ old: Bar,
         _ new: Bar,
-        splits: [String: ScreenSplit]
+        order: ScreenOrder?,
+        shares: [String: ScreenShares]
     ) -> [SettingsDiffRow] {
         let base = label(for: .kiwishelf(bar))
         let name: (AppBarEdge) -> String = { edge in
@@ -64,23 +61,27 @@ extension SettingsValueReadout {
             .filter { old.edge(on: $0) != new.edge(on: $0) }
             .sorted()
             .map { screen in
-                let parts = Display.fingerprintParts(
-                    ScreenAreaKey(parsing: screen).fingerprint
-                )
-                return .change(
+                .change(
                     census,
                     instance: screen,
                     label: instanceLabel(
                         base,
-                        SettingsModel.perScreenName(
-                            screen: "\(parts.name) \(parts.size)",
-                            key: screen,
-                            splits: splits
-                        )
+                        slotWords(screen, order, shares)
                     ),
                     old: name(old.edge(on: screen)),
                     new: name(new.edge(on: screen))
                 )
             }
+    }
+
+    /// A per-screen key's words, "Screen N" or "Screen N – Left"
+    /// (#3647 ▸ lane 3c); a key that is no number reads as stored.
+    static func slotWords(
+        _ key: String,
+        _ order: ScreenOrder?,
+        _ shares: [String: ScreenShares]
+    ) -> String {
+        ScreenSlotKey(parsing: key).map { screenWords($0, order, shares) }
+            ?? key
     }
 }

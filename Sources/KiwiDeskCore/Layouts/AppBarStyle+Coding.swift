@@ -30,7 +30,7 @@ extension AppBarStyle {
                 forKey: .edge
             ) ?? defaults.edge
         edgeOverride =
-            try container.decodeIfPresent(
+            try container.decodeScreenMap(
                 [String: AppBarEdge].self,
                 forKey: .edgeOverride
             ) ?? defaults.edgeOverride

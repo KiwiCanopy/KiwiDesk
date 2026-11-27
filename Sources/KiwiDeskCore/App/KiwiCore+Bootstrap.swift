@@ -229,11 +229,9 @@ extension KiwiCore {
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
         }
-        // One screen identity for the engine and the bars (#1948).
-        tiler.screenFingerprint = { [weak self] screen in
-            screen.kiwiDisplayID.flatMap {
-                self?.screenFingerprint(of: $0)
-            }
+        // One bar key for the engine and the bars (#1948, #3647).
+        tiler.screenSlot = { [weak self] screen in
+            screen.kiwiDisplayID.flatMap { self?.screenSlot(of: $0) }
         }
         wireScreenAreas()  // #3517
         wireLookWallpaper()  // #3478

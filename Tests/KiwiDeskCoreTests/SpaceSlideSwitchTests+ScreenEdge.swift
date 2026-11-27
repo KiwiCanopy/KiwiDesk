@@ -17,9 +17,8 @@ extension SpaceSlideSwitchTests {
         let (core, _) = try makeCore(slide: true)
         let display = try #require(NSScreen.main?.kiwiDisplay)
         core.state.workspaces.upsertDisplay(display)
-        core.tiler.settings.spaceBarStyle.edgeOverride = [
-            display.fingerprint: .left
-        ]
+        let key = try #require(core.screenSlot(of: display.id))
+        core.tiler.settings.spaceBarStyle.edgeOverride = [key: .left]
         #expect(core.tiler.settings.spaceBarStyle.edge == .top)
         core.execute("focus_space", args: [.string("2")])
         defer { core.spaceSlide.end() }

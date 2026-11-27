@@ -45,7 +45,7 @@ struct AreaBarVisibilityVerbTests {
         #expect(set.isSuccess)
         #expect(
             core.tiler.settings.spaceBarStyle.visibilityOverride
-                == [area: .hidden]
+                == ["1#1": .hidden]
         )
         // The bar's own value stores nothing for the area.
         core.execute(
@@ -74,16 +74,16 @@ struct AreaBarVisibilityVerbTests {
         )
         #expect(
             core.tiler.settings.spaceBarStyle.visibilityOverride
-                == [wide.fingerprint: .hidden]
+                == ["1": .hidden]
         )
-        // A screen that is not connected keeps the key it was given.
-        core.execute(
+        // A screen no setup holds has no number to store under.
+        let away = core.execute(
             "space_bar.set_visibility",
             args: [.string("hidden"), .string("Away:1920x1080#2")]
         )
+        #expect(!away.isSuccess)
         #expect(
-            core.tiler.settings.spaceBarStyle
-                .visibilityOverride["Away:1920x1080#2"] == .hidden
+            core.tiler.settings.spaceBarStyle.visibilityOverride.count == 1
         )
     }
 
@@ -101,7 +101,7 @@ struct AreaBarVisibilityVerbTests {
         )
         #expect(
             core.tiler.settings.monocle.appBar.visibilityOverride == [
-                wide.fingerprint: .hidden, "\(wide.fingerprint)#1": .hidden,
+                "1": .hidden, "1#1": .hidden,
             ]
         )
     }
@@ -144,7 +144,7 @@ struct AreaBarVisibilityVerbTests {
         #expect(layout.isSuccess)
         #expect(
             core.tiler.settings.scrolling.appBar.visibilityOverride
-                == [wide.fingerprint: .hidden]
+                == ["1": .hidden]
         )
         #expect(core.tiler.settings.scrolling.appBar.visibility == .always)
         #expect(
@@ -176,7 +176,7 @@ struct AreaBarVisibilityVerbTests {
         )
         #expect(
             core.tiler.settings.monocle.appBar.visibilityOverride
-                == [area: .hidden]
+                == ["1#1": .hidden]
         )
         let set = core.execute(
             "monocle.set_app_bar_visibility",
@@ -190,7 +190,7 @@ struct AreaBarVisibilityVerbTests {
         )
         #expect(
             core.tiler.settings.scrolling.appBar.visibilityOverride
-                == [area: .hidden]
+                == ["1#1": .hidden]
         )
     }
 }

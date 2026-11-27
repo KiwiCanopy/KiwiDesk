@@ -7,9 +7,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// KiwiShelf ▸ Each bar ▸ Per screen (#1948): which screens get a
-/// row, what each picker writes, the bar rows that select nothing
-/// while their screens differ, and the readers that ask every
-/// screen rather than the bars' own edges.
+/// row — one per Screen N since #3647 — what each picker writes, the
+/// bar rows that select nothing while their screens differ, and the
+/// readers that ask every screen rather than the bars' own edges.
 @MainActor
 @Suite("Per screen bar edges (#1948)")
 struct ScreenEdgeRowsTests {
@@ -23,13 +23,11 @@ struct ScreenEdgeRowsTests {
         name: "DELL U2720Q",
         frame: CGRect(x: 1728, y: 0, width: 2560, height: 1440)
     )
-    /// Sorts before every connected name, so only the
-    /// connected-first partition puts it last.
     private let absent = "Acer X32:3840x2160"
 
     /// A draft whose profile holds the main screen, two DELLs and
     /// an Acer that is not connected; the main screen and one DELL
-    /// are.
+    /// are, numbered left to right: the main screen 1, the DELL 2.
     private func model() -> SettingsModel {
         let model = makeTestModel()
         let core = model.core
@@ -65,15 +63,11 @@ struct ScreenEdgeRowsTests {
         return model
     }
 
-    @Test("connected screens first, then the rest, each A–Z")
+    @Test("one row per screen number, the connected ones first")
     func rowsAreOrdered() {
         let rows = model().screenEdgeRows(\.spaceBarStyle)
-        #expect(
-            rows.map(\.id) == [main.fingerprint, dell.fingerprint, absent]
-        )
-        #expect(rows.map(\.present) == [true, true, false])
-        // Identical models share one row, captioned with the count.
-        #expect(rows.map(\.count) == [1, 2, 1])
+        #expect(rows.map(\.id) == ["1", "2", "3", "4"])
+        #expect(rows.map(\.present) == [true, true, false, false])
     }
 
     @Test("the rows hide while the profile holds one screen")
@@ -115,21 +109,29 @@ struct ScreenEdgeRowsTests {
                 shortcutOverrideCount: 0
             )
         ]
-        let lua = "Projector:1920x1080"
-        model.config.settings.spaceBarStyle.edgeOverride = [lua: .left]
+        model.config.settings.spaceBarStyle.edgeOverride = ["3": .left]
         #expect(model.offersScreenEdges(\.spaceBarStyle))
         #expect(!model.offersScreenEdges(\.appBarStyle))
         #expect(
-            model.screenEdgeRows(\.spaceBarStyle).map(\.id)
-                == [main.fingerprint, lua]
+            model.screenEdgeRows(\.spaceBarStyle).map(\.id) == ["1", "3"]
         )
     }
 
-    /// Two identical models are one row, which would only repeat
-    /// the bar row: no drawer for them.
+    /// Connected twins read the lower number's values, so the higher
+    /// number takes no row, and one row would only repeat the bar
+    /// row: no drawer for them.
     @Test("identical models alone offer no drawer")
     func twinsAloneOfferNothing() {
         let model = model()
+        let core = model.core
+        core.state.workspaces.removeDisplay(main.id)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(3),
+                name: dell.name,
+                frame: CGRect(x: 4288, y: 0, width: 2560, height: 1440)
+            )
+        )
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
@@ -149,7 +151,7 @@ struct ScreenEdgeRowsTests {
     @Test("a screen's pick stores its edge; the bar's edge clears it")
     func pickStoresAndClears() {
         let model = model()
-        let dell = dell.fingerprint
+        let dell = "2"
         model.screenEdge(\.spaceBarStyle, on: dell).wrappedValue = .left
         #expect(
             model.config.settings.spaceBarStyle.edgeOverride == [dell: .left]
@@ -161,20 +163,21 @@ struct ScreenEdgeRowsTests {
         #expect(model.config.settings.spaceBarStyle.edgeOverride.isEmpty)
     }
 
-    /// The draft's own screens are the scope: every screen moved
-    /// to one edge — the absent LG included — collapses the map
-    /// into the bar's edge, and leaving the LG out keeps it apart.
+    /// The draft's own screen numbers are the scope: every number
+    /// moved to one edge — the absent screens' included — collapses
+    /// the map into the bar's edge, and leaving one out keeps it
+    /// apart.
     @Test("a pick is judged over the draft's screens, absent ones too")
     func scopeIsTheDraft() {
         let model = model()
-        for screen in [main.fingerprint, dell.fingerprint] {
+        for screen in ["1", "2", "3"] {
             model.screenEdge(\.appBarStyle, on: screen).wrappedValue = .left
         }
         let bar = model.config.settings.appBarStyle
         #expect(bar.edge == .top)
-        #expect(bar.edge(on: absent) == .top)
+        #expect(bar.edge(on: "4") == .top)
         #expect(bar.screensDiffer)
-        model.screenEdge(\.appBarStyle, on: absent).wrappedValue = .left
+        model.screenEdge(\.appBarStyle, on: "4").wrappedValue = .left
         #expect(model.config.settings.appBarStyle.edge == .left)
         #expect(model.config.settings.appBarStyle.edgeOverride.isEmpty)
     }
@@ -183,7 +186,7 @@ struct ScreenEdgeRowsTests {
     func barRowShowsNoSelection() {
         let model = model()
         #expect(model.barEdge(\.spaceBarStyle).wrappedValue == .top)
-        model.screenEdge(\.spaceBarStyle, on: dell.fingerprint)
+        model.screenEdge(\.spaceBarStyle, on: "2")
             .wrappedValue = .left
         #expect(model.barEdge(\.spaceBarStyle).wrappedValue == nil)
         #expect(model.barEdge(\.appBarStyle).wrappedValue == .top)
@@ -202,7 +205,7 @@ struct ScreenEdgeRowsTests {
             BarsGates(settings: model.config.settings).bothBarsReason
                 == .barsSplit
         )
-        model.screenEdge(\.appBarStyle, on: dell.fingerprint)
+        model.screenEdge(\.appBarStyle, on: "2")
             .wrappedValue = .top
         #expect(
             BarsGates(settings: model.config.settings).bothBarsReason
@@ -220,7 +223,7 @@ struct ScreenEdgeRowsTests {
             ColorsAndGlassGates(settings: model.config.settings)
                 .focusedItemInert
         )
-        model.screenEdge(\.spaceBarStyle, on: dell.fingerprint)
+        model.screenEdge(\.spaceBarStyle, on: "2")
             .wrappedValue = .top
         #expect(
             !ColorsAndGlassGates(settings: model.config.settings)
@@ -231,7 +234,7 @@ struct ScreenEdgeRowsTests {
     @Test("the Home cards read the main screen's edges")
     func homeIsTheMainScreen() {
         let model = model()
-        model.screenEdge(\.spaceBarStyle, on: main.fingerprint)
+        model.screenEdge(\.spaceBarStyle, on: "1")
             .wrappedValue = .bottom
         #expect(model.homeSettings.spaceBarStyle.edge == .bottom)
         #expect(model.homeSettings.appBarStyle.edge == .top)

@@ -1276,7 +1276,6 @@
   "kiwishelf.scope.label": "Экран или участок",
   "kiwishelf.scope.own": "%1$@ — собственные настройки",
   "kiwishelf.scope.summary": "Собственные настройки: %1$d",
-  "kiwishelf.scope.twins": "%1$@ × %2$d",
   "kiwishelf.show.app_bar.beside_always": "Остаётся на экране: Space Bar у этого края в режиме «%1$@».",
   "kiwishelf.show.app_bar_in": "Показывать в %1$@",
   "kiwishelf.show.differ.help": "Сейчас твои панели и Pocket показываются по-разному; выбор здесь настраивает их все.",

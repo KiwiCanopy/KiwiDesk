@@ -24250,6 +24250,19 @@ The consequences:
   every floor edit would move Spaces under the user mid-edit; a
   third outcome beside split and whole would be a state the
   placements cannot draw.
+- **Amended (#3647 lane 3c, architect-reviewer for the owner,
+  2026-11-27): the bars' maps are numbers too.** The bars' and the
+  pocket's per-screen edges and visibilities are keyed `"N"` and
+  `"N#id"`, stored and at runtime, and every read keys through one
+  door, the screen's number in the live order; the screen's
+  fingerprint stays its physical identity, and nothing bar-shaped
+  is keyed by it. A look carries no per-screen path, so a look's
+  values need no crossing. `spacePins` stays keyed by fingerprint
+  at runtime: the heal pins a screen with no number, which a
+  number cannot name, and the store is rewritten from the numbered
+  pins. A forget keeps every number up to the profile's count,
+  since a gap in one setup is a session hole and the number is the
+  profile's. Cost: twins cannot hold different bar values.
 - **Twin screens share one split.** Two screens with one
   fingerprint can hold two numbers, but the runtime keys an area
   by fingerprint, so both draw the lower number's split.

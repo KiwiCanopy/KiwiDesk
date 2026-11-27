@@ -99,8 +99,8 @@ extension KiwiCore {
                 "shown": .bool(shown.contains(space.id)),
                 // Its area's key on a split screen, `list_monitors`'
                 // `areas[].key` (#3517); null on an unsplit one.
-                "area": splitArea(of: space.id).map { .string($0.key) }
-                    ?? .null,
+                "area": splitArea(of: space.id) == nil
+                    ? .null : areaKeyValue(of: space.id),
                 "mode": .string(space.mode.rawValue),
                 "windows": .array(
                     space.windows.map {
@@ -242,5 +242,12 @@ extension KiwiCore {
                 Double(exec.runningCount)
             ),
         ])
+    }
+
+    /// `space`'s area as `list_monitors` keys it, `areas[].key`.
+    private func areaKeyValue(of space: SpaceID) -> JSONValue {
+        state.workspaces.placement(of: space)
+            .flatMap { state.workspaces[placement: $0]?.key.description }
+            .map { .string($0) } ?? .null
     }
 }

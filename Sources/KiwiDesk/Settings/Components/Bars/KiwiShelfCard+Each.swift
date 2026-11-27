@@ -138,13 +138,10 @@ extension KiwiShelfCard {
         )
     }
 
-    /// An item's words: its name, its twins, its absence, and
-    /// whether it holds values of its own.
+    /// An item's words: its name, its absence, and whether it holds
+    /// values of its own.
     static func scopeTitle(_ row: ScreenEdgeRow, own: Bool) -> String {
-        var title =
-            row.count > 1
-            ? L("kiwishelf.scope.twins", "%1$@ × %2$d", row.name, row.count)
-            : row.name
+        var title = row.name
         if !row.present {
             title = L(
                 "kiwishelf.edge.screen.absent_name",

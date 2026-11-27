@@ -103,11 +103,11 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.left),
-        .screenEdge(.left, screen: "S:1x1"),
+        .screenEdge(.left, screen: "1"),
         .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
         .visibility(.auto),
-        .screenVisibility(.hidden, screen: "S:1x1#1"),
+        .screenVisibility(.hidden, screen: "1#1"),
     ]
 
     @Test("Each command sets one matching field on style and bar")
@@ -184,7 +184,7 @@ struct AppBarCommandParityTests {
         case .groupAdjacentWindows, .reserve:
             return [.bool(true)]
         case .edge: return [.string("left")]
-        case .edgeOverride: return [.string("left"), .string("S:1x1")]
+        case .edgeOverride: return [.string("left"), .string("1")]
         case .activeIndicator: return [.string("outline")]
         case .titleCap: return [.number(40)]
         }

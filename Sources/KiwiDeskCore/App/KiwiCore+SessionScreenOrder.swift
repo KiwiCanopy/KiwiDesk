@@ -28,7 +28,9 @@ extension KiwiCore {
     /// lane 3), so the placements follow the order at once.
     public func setSessionScreenOrder(_ order: ScreenOrder?) {
         profiles.setSessionScreenOrder(order, for: profiles.currentName)
+        // The bars' values follow the number too (#3647 ▸ lane 3c).
         syncAreaSplits()
+        retile()
     }
 
     /// Ends the override: an explicit load or pick, a composed apply,

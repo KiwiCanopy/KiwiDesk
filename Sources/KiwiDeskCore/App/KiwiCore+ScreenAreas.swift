@@ -56,19 +56,20 @@ extension KiwiCore {
         }
     }
 
-    /// `space`'s area — its rect in its screen's own points — its
-    /// stored key and whether it leads its screen, nil where its
+    /// `space`'s area — its rect in its screen's own points — the
+    /// key its bar values resolve under (nil on an unnumbered
+    /// screen) and whether it leads its screen, nil where its
     /// screen is not split.
     func splitArea(
         of space: SpaceID
-    ) -> (rect: CGRect, key: String, lead: Bool)? {
+    ) -> (rect: CGRect, key: String?, lead: Bool)? {
         guard let id = state.workspaces.placement(of: space),
             state.workspaces.placements(of: id.display).count > 1,
             let placement = state.workspaces[placement: id]
         else { return nil }
         return (
             placement.area.rect,
-            placement.key.description,
+            liveScreenOrder.slot(of: placement.key)?.description,
             id == state.workspaces.leadPlacement(of: id.display)
         )
     }
@@ -205,8 +206,8 @@ extension KiwiCore {
             } ?? []
         let order = liveScreenOrder
         for remap in remaps {
+            settings.apply(remap)
             guard let runtime = remap.runtime(in: order) else { continue }
-            settings.apply(runtime)
             for (space, pin) in spacePins {
                 spacePins[space] = runtime.rewrite(pin)
             }

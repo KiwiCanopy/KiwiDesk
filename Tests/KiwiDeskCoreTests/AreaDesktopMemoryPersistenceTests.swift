@@ -126,8 +126,7 @@ struct AreaDesktopMemoryPersistenceTests {
             ScreenAreaRemap(
                 vanished: ScreenSlotKey(number: 1, areaID: 2)!,
                 survivor: ScreenSlotKey(number: 1, areaID: 1)!
-            ),
-            order: ScreenOrder(["Wide"])
+            )
         )
         #expect(
             config.desktopAreaSpaces[.identity(stamp)]

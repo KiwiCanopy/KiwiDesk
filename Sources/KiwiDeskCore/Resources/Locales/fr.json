@@ -1276,7 +1276,6 @@
   "kiwishelf.scope.label": "Écran ou secteur",
   "kiwishelf.scope.own": "%1$@ — réglages propres",
   "kiwishelf.scope.summary": "Réglages propres : %1$d",
-  "kiwishelf.scope.twins": "%1$@ × %2$d",
   "kiwishelf.show.app_bar.beside_always": "Reste affichée : la Space Bar de son bord est réglée sur « %1$@ ».",
   "kiwishelf.show.app_bar_in": "Afficher en %1$@",
   "kiwishelf.show.differ.help": "Vos barres et la Pocket s'affichent actuellement de façon différente ; choisir ici les règle toutes.",

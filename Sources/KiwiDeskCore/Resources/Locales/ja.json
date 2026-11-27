@@ -1276,7 +1276,6 @@
   "kiwishelf.scope.label": "画面またはエリア",
   "kiwishelf.scope.own": "%1$@ — 独自の設定",
   "kiwishelf.scope.summary": "独自の設定：%1$d",
-  "kiwishelf.scope.twins": "%1$@ × %2$d",
   "kiwishelf.show.app_bar.beside_always": "表示されたままになります：同じ端のSpace Barが「%1$@」に設定されています。",
   "kiwishelf.show.app_bar_in": "%1$@で表示",
   "kiwishelf.show.differ.help": "現在、バーと Pocket の表示のしかたが異なります。ここで選ぶと、すべてに設定されます。",

@@ -40,10 +40,8 @@ struct PocketScreenEdgeWiringTests {
     /// Gives the main screen its own `edge`, the pocket's staying
     /// bottom.
     private func pin(_ core: KiwiCore, _ id: DisplayID, _ edge: AppBarEdge) {
-        let fingerprint = core.screenFingerprint(of: id) ?? ""
-        core.tiler.settings.kiwishelf.pocketEdgeOverride = [
-            fingerprint: edge
-        ]
+        let key = core.screenSlot(of: id) ?? ""
+        core.tiler.settings.kiwishelf.pocketEdgeOverride = [key: edge]
     }
 
     @Test("the handle stands on the screen's own edge")
