@@ -80,6 +80,7 @@ struct ScreenCard: View {
         let rect: CGRect
         let key: String
         let leads: Bool
+        let touchesTop: Bool
     }
 
     private func panes(_ split: ScreenSplit?) -> [Pane] {
@@ -93,7 +94,8 @@ struct ScreenCard: View {
                     fingerprint: display.fingerprint,
                     areaID: split == nil ? 0 : unit.id
                 ).description,
-                leads: index == 0
+                leads: index == 0,
+                touchesTop: unit.rect.minY < 0.001
             )
         }
     }
@@ -106,6 +108,8 @@ struct ScreenCard: View {
             area: split == nil ? nil : pane.id,
             key: pane.key,
             leads: pane.leads,
+            touchesTop: pane.touchesTop,
+            headerWidth: size.width - pane.rect.minX,
             size: pane.rect.size,
             corners: corners(pane.rect),
             givesWay: givingWay.contains(

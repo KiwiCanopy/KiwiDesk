@@ -84,7 +84,7 @@ enum ScreenArrangement {
                     : canvas.height
             )
         )
-        let cards = capped.map { entry in
+        let placed = capped.map { entry in
             Drawn(
                 display: entry.display,
                 rect: canvasRect(
@@ -96,9 +96,10 @@ enum ScreenArrangement {
         }
         guard hostsChips else {
             var bare = Layout()
-            bare.displays = cards
+            bare.displays = placed
             return bare
         }
+        let cards = reservingCaptions(placed, splits: splits)
         let mainSplit = drawable.first { $0.id == mainID }
             .flatMap { splits[$0.fingerprint] }
         return ScreenTray.fold(

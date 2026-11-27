@@ -25,7 +25,7 @@ struct ScreensPicture: View {
             let canvas = CGSize(
                 width: proxy.size.width - Self.inset * 2,
                 height: Self.canvasHeight - Self.inset * 2
-                    - Self.standBand
+                    - footBand
             )
             let layout = arrangement(for: canvas)
             let origin = ScreenArrangement.origin(
@@ -37,7 +37,7 @@ struct ScreensPicture: View {
                     .frame(
                         width: layout.contentSize.width,
                         height: layout.contentSize.height
-                            + Self.standBand
+                            + footBand
                     )
                     .padding(.leading, origin.x)
                     .padding(.top, origin.y)
@@ -50,6 +50,16 @@ struct ScreensPicture: View {
             )
         }
         .frame(height: Self.canvasHeight)
+    }
+
+    /// The band under the picture's lowest cards: the stand, or a
+    /// split card's area names where they reach further (#3697).
+    private var footBand: CGFloat {
+        let reach =
+            model.effectiveSplits.values
+            .map { ScreenArrangement.captionReach(of: $0) }
+            .max() ?? 0
+        return max(Self.standBand, reach)
     }
 
     /// Scaled screen stand footer (#758, owner ruling 2026-08-04,
@@ -119,6 +129,20 @@ struct ScreensPicture: View {
                     }
                 }
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
+                // The area names, under the card (#3697).
+                if let split = model.areaSplit(of: drawn.display) {
+                    ScreenAreaCaptions(
+                        model: model,
+                        display: drawn.display,
+                        split: split,
+                        width: drawn.rect.width,
+                        selection: $selection
+                    )
+                    .offset(
+                        x: drawn.rect.minX,
+                        y: drawn.rect.maxY + ScreenArrangement.captionTop
+                    )
+                }
             }
             if let tray = layout.tray {
                 FollowsMainTray(
