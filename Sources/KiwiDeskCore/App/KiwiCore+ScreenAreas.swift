@@ -57,9 +57,9 @@ extension KiwiCore {
     }
 
     /// `space`'s area — its rect in its screen's own points — the
-    /// key its bar values resolve under (nil on an unnumbered
-    /// screen) and whether it leads its screen, nil where its
-    /// screen is not split.
+    /// key its bar values resolve under (nil on a screen the live
+    /// order does not number) and whether it leads its screen, nil
+    /// where its screen is not split.
     func splitArea(
         of space: SpaceID
     ) -> (rect: CGRect, key: String?, lead: Bool)? {

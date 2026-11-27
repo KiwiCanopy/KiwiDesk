@@ -7,8 +7,8 @@ import Testing
 
 /// The Screens cards' number badge (#3647 ▸ lane 2): a pick renumbers
 /// the draft, the pins follow the number they hold, the pill counts
-/// the renumber as ONE row whose revert takes it all back, and a
-/// screen left unnumbered takes no pin.
+/// the renumber as ONE row whose revert takes it all back, and
+/// every connected screen holds a number.
 @Suite("The Screen N badge (#3647)", .serialized)
 @MainActor
 struct ScreenNumberBadgeTests {
@@ -71,71 +71,32 @@ struct ScreenNumberBadgeTests {
         #expect(model.screenNumbering.draft == nil)
     }
 
-    @Test("an unnumbered screen takes no pin, and its pins wait")
-    func unnumbered() throws {
+    @Test("every connected screen holds a number and takes pins")
+    func alwaysNumbered() throws {
         LocalizationManager.shared.select("en")
         let (_, model) = try makeModel()
-        #expect(model.canLeaveUnnumbered(b))
-        model.leaveUnnumbered(b)
-        #expect(model.screenNumber(of: b) == nil)
-        #expect(ScreenNumberBadge.face(nil) == "Gets a new Space")
-        #expect(!model.takesPins("B:100x100"))
-        // A refused drop leaves the Space's own pin where it was.
-        model.place("1", .screen("A:100x100"))
+        #expect(model.screenNumber(of: b) == 2)
+        #expect(ScreenNumberBadge.face(2) == "Screen 2")
         model.place("1", .screen("B:100x100"))
-        #expect(model.config.spacePins["1"] == ScreenSlotKey(number: 1))
-        #expect(model.waitingPins == ["2": 2])
-        #expect(model.spacePinBadge("2") == .offline)
-        #expect(model.offlinePinLabel("2") == "No Screen 2")
+        #expect(model.config.spacePins["1"] == ScreenSlotKey(number: 2))
     }
 
-    @Test("a pin to an unnumbered screen says so, never offline (#3688)")
-    func unnumberedPinCopy() throws {
+    @Test("a pin to a number no connected screen holds reads offline")
+    func waitingPinCopy() throws {
         LocalizationManager.shared.select("en")
         let (_, model) = try makeModel()
         model.config.spaces = ["1", "2", "3"]
         model.config.spacePins["3"] = ScreenSlotKey(number: 3)!
-        model.leaveUnnumbered(b)
-        #expect(model.unnumberedScreen(at: 2) == b)
-        #expect(model.unnumberedScreen(at: 3) == nil)
-        #expect(model.unnumberedWaits == [2: model.screenLabel(b)])
-        let help = model.offlinePinSentence("2")
-        #expect(help.contains("isn't numbered this session"))
-        #expect(help.contains(model.screenLabel(b)))
-        #expect(!help.contains("connected"))
-        // A number no connected screen holds keeps the offline copy.
+        #expect(model.waitingPins == ["3": 3])
+        #expect(model.spacePinBadge("3") == .offline)
         #expect(model.offlinePinLabel("3") == "Screen 3 offline")
         #expect(model.offlinePinSentence("3").contains("isn't connected"))
-        let orphans = model.screenRows.orphans
-        let two = try #require(orphans.first { $0.space == "2" })
-        let three = try #require(orphans.first { $0.space == "3" })
-        #expect(two.unnumberedScreen == model.screenLabel(b))
-        #expect(three.unnumberedScreen == nil)
-        let sentence = ScreensSection.orphanSentence(two)
-        #expect(sentence.contains("isn't numbered this session"))
-        #expect(!sentence.contains("connected"))
+        let three = try #require(
+            model.screenRows.orphans.first { $0.space == "3" }
+        )
         #expect(
             ScreensSection.orphanSentence(three).contains("isn't connected")
         )
-    }
-
-    @Test("a stored target cannot leave a screen unnumbered")
-    func storedTargetHasNoHole() throws {
-        let (core, model) = try makeModel()
-        try core.profiles.write(
-            Profile(
-                name: "Other",
-                monitorSets: [
-                    MonitorSet(monitors: ["A:100x100", "B:100x100"])
-                ],
-                spaces: ["1"],
-                spaceModes: ["1": .bsp],
-                settings: TilingSettings()
-            )
-        )
-        model.target = .storedProfile("Other")
-        model.reload()
-        #expect(!model.canLeaveUnnumbered(b))
     }
 
     @Test("a stored target's Save stores the renumber")

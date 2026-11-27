@@ -43,11 +43,9 @@ extension KiwiCore {
         profiles.setSessionScreenOrder(nil, for: nil)
     }
 
-    /// Clears the override once a Save stored `profile` in its order:
-    /// a hole is never stored, so it outlives the Save.
+    /// Clears the override once a Save stored `profile` in its order.
     func clearSessionScreenOrder(ifStoredIn profile: Profile) {
         guard let order = sessionScreenOrder(for: profile.name),
-            order.unnumbered.isEmpty,
             profile.monitorSets.contains(where: { $0.order == order })
         else { return }
         clearSessionScreenOrder()

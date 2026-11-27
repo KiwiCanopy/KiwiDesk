@@ -432,8 +432,7 @@ synonym:
   for every entry ("1 LG UltraWide · 2 Studio Display"). A sentence
   naming a pinned number says "Screen N"; one naming the physical
   screen says its name. Where every setup has its own Screen 1 —
-  Known screen setups — copy names screens by name alone. A screen
-  holding no number is *not numbered*, never *off* or *disabled*.
+  Known screen setups — copy names screens by name alone.
 - **duration** vs **speed** vs **rate** vs **delay** — name the
   quantity you STORE. A time a thing takes is a **duration**
   (`animations.set_duration`,

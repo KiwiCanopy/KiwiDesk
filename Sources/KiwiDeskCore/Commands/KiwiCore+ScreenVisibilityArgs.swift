@@ -35,14 +35,9 @@ extension KiwiCore {
             holdSettingsCall(split: false, replay: replay)
             return .success([])
         }
-        guard let keys = areaKeys(named: args[1]) else {
+        guard let keys = areaKeys(named: args[1]), !keys.isEmpty else {
             return .failure(
                 AppBarSettingError(stringLiteral: Self.unknownArea)
-            )
-        }
-        guard !keys.isEmpty else {
-            return .failure(
-                AppBarSettingError(stringLiteral: Self.unnumberedScreen)
             )
         }
         return .success(keys.map { Self.args(args, screen: $0) })
@@ -65,8 +60,8 @@ extension KiwiCore {
     /// gone falls back to the screen's lead area (ruling 22), and in
     /// the live profile's first setup holding it for a screen not
     /// connected. Last, an area's own name, refused where two share
-    /// it. An empty answer names a connected screen with no number,
-    /// which holds no per-screen value (`unnumberedScreen`).
+    /// it. An empty answer names a screen the live order does not
+    /// number, which the caller refuses as unknown.
     func areaKeys(named arg: JSONValue) -> [String]? {
         let ws = state.workspaces
         let order = liveScreenOrder
@@ -119,7 +114,7 @@ extension KiwiCore {
     /// connected screen, read against the number's stored split so a
     /// call replayed before the placements are built finds it: the
     /// lead area's where the area is gone (ruling 22). Nil for a
-    /// screen with no number, which the caller refuses.
+    /// screen the live order does not number.
     private func areaSlot(
         keyed key: ScreenAreaKey,
         on screen: Display,
@@ -133,10 +128,6 @@ extension KiwiCore {
         else { return slot(lead) }
         return slot(key)
     }
-
-    /// The refusal of a connected screen with no number (#3647).
-    static let unnumberedScreen =
-        "a screen with no number has no per-screen value"
 
     /// The refusal of a screen argument that names no screen or
     /// area.

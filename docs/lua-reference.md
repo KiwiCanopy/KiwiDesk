@@ -743,10 +743,9 @@ screen's fingerprint (as printed by `list_monitors`) or name.
 A number names **Screen N**, as `list_monitors` reports it in
 `screen`: the live profile's numbering for the connected screens,
 else left to right, ties top to bottom. A renumber saved in
-Settings ▸ Screens counts at once. A screen left unnumbered there
-holds no number while that profile stays live, until a profile is
-loaded by hand or KiwiDesk quits. A script that must name one
-screen whatever the numbering passes its fingerprint. A number a
+Settings ▸ Screens counts at once, and every connected screen holds
+a number. A script that must name one screen whatever the numbering
+passes its fingerprint. A number a
 held `init.lua` call names before any screen is known —
 `pin_space_to_display`, a split, a bar's per-screen value — is
 numbered at the first screen report, by the profile live then; on a
@@ -4595,9 +4594,8 @@ to the screen: the bars' and the pocket's `edge_override` and
 setup of the same count takes them. A number or `"N#id"` is stored
 at once, even before a screen is known; a fingerprint names the
 number its screen holds now, a screen that is not connected the
-number the live profile's first setup holding it gives it, and a
-connected screen with no number is refused. Two screens of one
-model read the lower number's values. `forget_monitor_set` keeps
+number the live profile's first setup holding it gives it. Two
+screens of one model read the lower number's values. `forget_monitor_set` keeps
 every number up to the profile's screen count, and drops only an
 area's values the profile's splits no longer hold.
 :::
@@ -9385,8 +9383,8 @@ end)
 :::unreleased
 `desktop_change`'s `screen` is the switched screen's
 [Screen N](#move_space_to_display), and `main` says whether it is the
-main screen; the Lua callback receives the number second (`nil` on
-an unnumbered screen) and `main` third. Test `main`, not the number, for the main screen.
+main screen; the Lua callback receives the number second and `main`
+third. Test `main`, not the number, for the main screen.
 :::
 
 The window lifecycle events fire even when focus does not change
@@ -11046,8 +11044,7 @@ its shown Space lays windows out in.
 
 :::unreleased
 It lists the screens as Screen 1 onwards, each with its number in
-`screen` and `main: true` on the main screen; a screen left
-unnumbered in Settings ▸ Screens comes last, with `screen` `null`.
+`screen` and `main: true` on the main screen.
 :::
 
 It also reports `space_id`, the Space that screen shows (`null`

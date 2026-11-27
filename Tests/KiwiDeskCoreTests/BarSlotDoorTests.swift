@@ -16,20 +16,20 @@ struct BarSlotDoorTests {
 
     @Test("a twin's areas read the number its screen reads")
     func twinAreasAgree() throws {
-        // The lower place is a hole, so the twin answers to 3.
-        let order = ScreenOrder([twin, other, twin], unnumbered: [1])
-        #expect(order.number(of: twin) == 3)
+        // The twins hold 2 and 3; both answer to the lower.
+        let order = ScreenOrder([other, twin, twin])
+        #expect(order.number(of: twin) == 2)
         let lead = ScreenAreaKey(fingerprint: twin, areaID: 0)
         let area = ScreenAreaKey(fingerprint: twin, areaID: 2)
-        #expect(order.slot(of: lead) == ScreenSlotKey(number: 3))
-        #expect(order.slot(of: area) == ScreenSlotKey(number: 3, areaID: 2))
+        #expect(order.slot(of: lead) == ScreenSlotKey(number: 2))
+        #expect(order.slot(of: area) == ScreenSlotKey(number: 2, areaID: 2))
         let core = makeTestCore()
-        #expect(core.barKey(of: area, order: order) == "3#2")
+        #expect(core.barKey(of: area, order: order) == "2#2")
         // A runtime pin to the twin is stored under the number it
         // reads, never dropped.
         #expect(
             order.storing(runtime: ["9": twin], over: [:])
-                == ["9": ScreenSlotKey(number: 3)!]
+                == ["9": ScreenSlotKey(number: 2)!]
         )
     }
 
@@ -41,14 +41,6 @@ struct BarSlotDoorTests {
                 count: 3,
                 order: ScreenOrder([twin, other, twin])
             ) == [1, 2]
-        )
-        // With the lower place a hole, the hole keeps its number and
-        // the twin answers to the higher one.
-        #expect(
-            core.barNumbers(
-                count: 3,
-                order: ScreenOrder([twin, other, twin], unnumbered: [1])
-            ) == [1, 2, 3]
         )
         // Numbers past the order are the profile's own.
         #expect(

@@ -35,16 +35,6 @@ extension SettingsModel {
         if let number = waitingPins[space],
             let fallback = spacePlacement(of: space)?.display
         {
-            if let left = unnumberedScreen(at: number) {
-                return L(
-                    "spaces.pin_offline_badge.help_unnumbered",
-                    "Pinned to Screen %1$d, but %2$@ isn't numbered "
-                        + "this session. Opens on %3$@ for now.",
-                    number,
-                    screenLabel(left),
-                    screenLabel(fallback)
-                )
-            }
             return L(
                 "spaces.pin_offline_badge.help_numbered",
                 "Pinned to Screen %1$d, which isn't connected. Opens "
@@ -97,8 +87,7 @@ extension SettingsModel {
     }
 
     /// The offline chip's label: "Screen N offline" for a pin to a
-    /// number no connected screen holds (#3647), "No Screen N" where
-    /// its screen is connected but left unnumbered (#3688).
+    /// number no connected screen holds (#3647).
     func offlinePinLabel(_ space: SpaceID) -> String {
         guard let number = waitingPins[space] else {
             return L("spaces.pin_offline_badge", "Pin offline")
@@ -109,14 +98,7 @@ extension SettingsModel {
     /// The chip's and the Screen menu's words for a pin waiting on
     /// `number` (#3689).
     func offlinePinLabel(number: Int) -> String {
-        if unnumberedScreen(at: number) != nil {
-            return L(
-                "spaces.pin_offline_badge.unnumbered",
-                "No Screen %1$d",
-                number
-            )
-        }
-        return L(
+        L(
             "spaces.pin_offline_badge.numbered",
             "Screen %1$d offline",
             number

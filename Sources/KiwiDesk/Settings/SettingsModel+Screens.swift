@@ -54,8 +54,7 @@ extension SettingsModel {
             pins: resolvedPins,
             displays: displays,
             splits: draftSplits,
-            waiting: waitingPins,
-            unnumbered: unnumberedWaits
+            waiting: waitingPins
         )
     }
 

@@ -2631,13 +2631,6 @@ which the card's header names, takes the bare
 `SettingsModel.areaLabel(_:on:)` that `areaName` builds on (#3697,
 `ScreenAreaCaptionsTests`).
 
-**Copy narrating a waiting Screen pin asks
-`SettingsModel.unnumberedScreen(at:)` first** (#3688): a number
-whose connected screen was left unnumbered this session names that
-screen as *not numbered*, and only a number no connected screen
-holds says *isn't connected* or *offline* (`ScreenNumberBadgeTests`
-▸ `unnumberedPinCopy`; a new narrator is review's).
-
 ## SwiftUI traps
 
 - **Every child of a `ViewThatFits` carries an id distinct from its

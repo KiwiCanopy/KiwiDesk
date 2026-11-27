@@ -311,7 +311,6 @@ struct ScreenAreaPane: View {
 
     /// Pins dropped Spaces to this pane's key (#36, #3517).
     private func pin(_ items: [DraggableSpace]) -> Bool {
-        guard model.takesPins(key) else { return false }
         var assigned = false
         for item in items {
             let space = SpaceID(item.raw)

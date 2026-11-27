@@ -33,9 +33,8 @@ extension KiwiCore {
         var existing = try profiles.read(name: name)
         let stored = existing
         applyProfileEdits(from: config, onto: &existing)
-        // A renumber of the connected setup it holds (#3647 ▸ lane 2);
-        // a hole is the session's and never stored.
-        if let screenOrder, screenOrder.unnumbered.isEmpty,
+        // A renumber of the connected setup it holds (#3647 ▸ lane 2).
+        if let screenOrder,
             existing.set(matching: liveFingerprints) != nil,
             MonitorSet(monitors: screenOrder.fingerprints)
                 .matches(liveFingerprints)
