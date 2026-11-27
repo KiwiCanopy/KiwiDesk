@@ -106,7 +106,11 @@ extension LooksShelf {
     func noticeBinding(_ look: String) -> Binding<WallpaperNotice?> {
         Binding(
             get: { wallpaperNotice?.look == look ? wallpaperNotice : nil },
-            set: { if $0 == nil { wallpaperNotice = nil } }
+            set: {
+                if $0 == nil, wallpaperNotice?.look == look {
+                    wallpaperNotice = nil
+                }
+            }
         )
     }
 

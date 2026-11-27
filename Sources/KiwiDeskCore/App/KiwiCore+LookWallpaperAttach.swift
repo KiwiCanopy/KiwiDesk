@@ -108,6 +108,11 @@ extension KiwiCore {
                 outcomes[number] = outcome
             }
         }
+        for (number, outcome) in outcomes.sorted(by: { $0.key < $1.key }) {
+            onLog(
+                "use current wallpaper: \(name) screen \(number): \(outcome)"
+            )
+        }
         if let wallpaper = Self.collapsed(picks) {
             do {
                 try setLookWallpaper(wallpaper, of: name)
@@ -115,11 +120,6 @@ extension KiwiCore {
                 onLog("use current wallpaper: \(name) not saved: \(error)")
                 return outcomes.mapValues { _ in .unreadable }
             }
-        }
-        for (number, outcome) in outcomes.sorted(by: { $0.key < $1.key }) {
-            onLog(
-                "use current wallpaper: \(name) screen \(number): \(outcome)"
-            )
         }
         return outcomes
     }
