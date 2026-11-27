@@ -225,9 +225,11 @@ editing here:
   (`AreaSplitSyncTests`). A split is a screen NUMBER's shares
   (#3647), crossing to a screen's points only through
   `ScreenShares+Order`, so the placements also depend on the
-  order: a writer of the order — the total resolve, the session
-  renumber, an apply's in-flight order — re-runs `syncAreaSplits()`
-  with no previous shares, so a renumber never reads as a merge
+  order: a writer of the order that installs no settings — the
+  total resolve, the session renumber, the end of an apply's
+  in-flight order — re-runs `syncAreaSplits()` with no previous
+  shares, so a renumber never reads as a merge, and an apply sets
+  its in-flight order before its settings install
   (`SessionScreenOrderTests` ▸ `splitFollowsTheNumber`,
   `profileSwitchLaysOutItsOwnNumbers`). A per-area reader beside
   the placement

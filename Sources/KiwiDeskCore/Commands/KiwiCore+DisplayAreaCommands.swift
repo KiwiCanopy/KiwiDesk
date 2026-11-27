@@ -169,7 +169,7 @@ extension KiwiCore {
         let key = order.runtimeKey(of: slot)
         switch ScreenArea.nameProblem(
             trimmed,
-            for: key ?? ScreenAreaKey(parsing: ""),
+            for: key,
             splits: key == nil
                 ? [:] : tiler.settings.displayAreas.splits(order: order),
             screenNames: key == nil

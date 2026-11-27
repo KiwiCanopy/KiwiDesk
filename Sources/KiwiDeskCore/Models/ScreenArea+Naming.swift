@@ -13,10 +13,11 @@ extension ScreenArea {
     /// The rule a name for the area `key` breaks, nil when it may
     /// take it: never all digits, never a name another area of
     /// `splits` or a screen in `screenNames` already has. An empty
-    /// name clears and breaks none.
+    /// name clears and breaks none; a nil `key`, an area no screen
+    /// shows, is judged against every area in `splits`.
     public static func nameProblem(
         _ name: String,
-        for key: ScreenAreaKey,
+        for key: ScreenAreaKey?,
         splits: [String: ScreenSplit],
         screenNames: [String]
     ) -> ScreenAreaNameProblem? {

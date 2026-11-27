@@ -845,6 +845,9 @@ another setup of the same count takes it. Sizes are read against
 the screen they name and kept to 1/1000 of it. A fingerprint names
 the number its screen holds now; a number given while no screen is
 known yet is stored at once, its sizes read against their own sum.
+A screen that is not connected names the number the live profile's
+first setup holding it gives it, so its split is the one the
+screen holding that number now draws.
 :::
 
 A number or a screen's name names its first area; what it names

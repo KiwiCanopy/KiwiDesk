@@ -44,9 +44,10 @@ extension KiwiCore {
             arrangement: .profile(profile.name),
             switching: switching
         )
-        // Its splits lay out in its own numbering, as its pins do.
+        // Its splits lay out in its own numbering, as its pins do; a
+        // read of the outgoing numbering comes before this line.
         profiles.screenOrderInFlight = screenOrder(for: profile)
-        defer { profiles.screenOrderInFlight = nil }
+        defer { endScreenOrderInFlight() }
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
         let outgoingIcons = tiler.settings.spaceIcons
@@ -209,7 +210,7 @@ extension KiwiCore {
         desktopMemory.installing =
             .init(arrangement: standard, switching: switching)
         profiles.screenOrderInFlight = screenOrder(holding: [])
-        defer { profiles.screenOrderInFlight = nil }
+        defer { endScreenOrderInFlight() }
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)

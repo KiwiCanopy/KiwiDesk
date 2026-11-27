@@ -59,4 +59,11 @@ extension KiwiCore {
         }
         clearSessionScreenOrder(ifStoredIn: profile)
     }
+
+    /// Ends an apply's in-flight order (#3647 ▸ lane 3) and lays the
+    /// splits out in the order now live, should the two differ.
+    func endScreenOrderInFlight() {
+        profiles.screenOrderInFlight = nil
+        syncAreaSplits()
+    }
 }
