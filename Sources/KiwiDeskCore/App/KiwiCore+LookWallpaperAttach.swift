@@ -13,6 +13,9 @@ public enum CurrentWallpaperOutcome: Error, Equatable, Sendable {
     case fullScreenSpace
     /// macOS refused the folder-access prompt.
     case accessRefused
+    /// No file is at the path macOS reports, though its copy may
+    /// still show (#3699).
+    case missing
     /// The file could not be read.
     case unreadable
 }
@@ -145,6 +148,10 @@ extension KiwiCore {
             where error.code == .fileReadNoPermission
         {
             return .failure(.accessRefused)
+        } catch let error as CocoaError
+            where error.code == .fileReadNoSuchFile
+        {
+            return .failure(.missing)
         } catch {
             return .failure(.unreadable)
         }

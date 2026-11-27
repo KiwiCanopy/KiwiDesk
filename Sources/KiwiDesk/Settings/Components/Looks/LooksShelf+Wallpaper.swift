@@ -158,6 +158,14 @@ extension LooksShelf {
                 screen,
                 chooseLabel
             )
+        case .missing:
+            return L(
+                "looks.wallpaper.current.missing",
+                "Screen %1$d's wallpaper is no longer at the place macOS "
+                    + "has for it. Use %2$@ instead.",
+                screen,
+                chooseLabel
+            )
         case .unreadable:
             return L(
                 "looks.wallpaper.current.unreadable",

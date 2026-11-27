@@ -51,4 +51,27 @@ struct LookWallpaperGuiTests {
         #expect(lines.first?.contains("Screen 2") == true)
         #expect(lines.last?.contains("Screen 3") == true)
     }
+
+    /// A file gone from the path macOS reports says so, apart from
+    /// a read that failed (#3699).
+    @Test("a missing file is told apart from an unreadable one")
+    func missingIsItsOwnLine() {
+        LocalizationManager.shared.select("en")
+        let missing = LooksShelf.narrate([1: .missing], look: "Dusk")
+        let unreadable = LooksShelf.narrate([1: .unreadable], look: "Dusk")
+        #expect(missing?.contains("no longer at the place") == true)
+        #expect(missing != unreadable)
+        let gone =
+            testTemporaryDirectory
+            .appendingPathComponent("gone-\(UUID().uuidString).png")
+        let library = WallpaperLibrary(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+        )
+        #expect(
+            KiwiCore.readPicture(at: gone, into: library)
+                == .failure(.missing)
+        )
+    }
 }
