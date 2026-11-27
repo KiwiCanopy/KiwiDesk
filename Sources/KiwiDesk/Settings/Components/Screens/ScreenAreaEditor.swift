@@ -31,6 +31,7 @@ struct ScreenAreaEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             heading
+            unsplitCaption
             splitRow
             if let area {
                 mergeRow(area)
@@ -43,6 +44,15 @@ struct ScreenAreaEditor: View {
     }
 
     private var id: Int { area ?? 0 }
+
+    /// Under the heading while the screen's number draws whole.
+    @ViewBuilder private var unsplitCaption: some View {
+        if area == nil, let number = model.screenNumber(of: display),
+            let axis = model.unsplitAxis(of: display)
+        {
+            ScreenUnsplitCaption(number: number, axis: axis)
+        }
+    }
 
     private var heading: some View {
         HStack(alignment: .firstTextBaseline) {

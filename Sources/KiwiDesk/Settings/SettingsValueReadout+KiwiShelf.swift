@@ -14,7 +14,8 @@ extension SettingsValueReadout {
         let o = old.settings.kiwishelf
         let n = new.settings.kiwishelf
         let splits = new.settings.displayAreas.splits(
-            order: order ?? ScreenOrder([])
+            order: order ?? ScreenOrder([]),
+            floors: .unfloored
         )
         switch key {
         case .visibility:

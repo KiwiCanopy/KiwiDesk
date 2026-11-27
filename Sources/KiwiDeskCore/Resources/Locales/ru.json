@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "Номер экрана",
   "monitor_card.number.none": "Не нумеровать этот экран",
   "monitor_card.number.unnumbered": "Получает новое пространство",
+  "monitor_card.number.unsplit.side_by_side": "Экран %1$d здесь не разделён: его участки оказались бы уже минимального размера окна.",
+  "monitor_card.number.unsplit.stacked": "Экран %1$d здесь не разделён: его участки оказались бы ниже минимального размера окна.",
   "monitor_card.number.use": "Использовать как Экран %1$d",
   "monitor_card.number_badge": "Экран %1$d",
   "monitor_card.split.nested.ax": "Участков: %1$d",

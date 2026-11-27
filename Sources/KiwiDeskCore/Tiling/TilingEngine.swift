@@ -31,6 +31,8 @@ public final class TilingEngine {
             }
             if settings.displayAreas != oldValue.displayAreas {
                 onAreaSplits?(oldValue.displayAreas)
+            } else if settings.areaFloors != oldValue.areaFloors {
+                onAreaSplits?(settings.displayAreas)
             }
             if settings.lookWallpaper != oldValue.lookWallpaper {
                 onLookWallpaper?(settings.lookWallpaper)
@@ -44,8 +46,8 @@ public final class TilingEngine {
     var onMouseSettings: (@MainActor (MouseSettings) -> Void)?
     /// Told when `settings.tiling` changes: the start mirror (#3008).
     var onTilingToggleSettings: (@MainActor () -> Void)?
-    /// Told when `settings.displayAreas` changes, at the write and
-    /// so before any pin resolves against the placements (#3517).
+    /// Told when `settings.displayAreas` or its floors change, at the
+    /// write, before any pin resolves against the placements (#3517).
     var onAreaSplits: (@MainActor ([String: ScreenShares]) -> Void)?
     /// Told when `settings.lookWallpaper` changes, by whichever
     /// install (#3478): the one trigger of a look's wallpaper set.

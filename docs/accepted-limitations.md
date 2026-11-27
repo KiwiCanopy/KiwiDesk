@@ -162,6 +162,18 @@ is not carried over, and that screen is split again in Settings ▸
 Screens.
 :::
 
+:::unreleased
+A screen whose number's split would put an area under the minimum
+window size there draws whole, and Settings ▸ Screens says so under
+its name. Loading a profile numbers its screens in the first order
+in which every split fits, so a split moves to a screen that holds
+it; where no order fits, the loaded order stands and a screen that
+cannot hold its split draws whole. A minimum window size raised
+later draws a split whole rather than renumbering the screens, and
+the next profile load or screen change numbers them again
+([#3647](https://github.com/KiwiCanopy/KiwiDesk/issues/3647)).
+:::
+
 For a screen with **no free bottom corner**, Settings ▸ Screens and
 the Mac Checklist offer to move one or more screens in your macOS
 screen arrangement so every screen has one, after you say yes

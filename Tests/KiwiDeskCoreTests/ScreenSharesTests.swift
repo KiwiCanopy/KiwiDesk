@@ -88,7 +88,7 @@ struct ScreenSharesTests {
         )
         var shares: [String: ScreenShares] = [:]
         shares[number: 1] = ScreenShares(split, width: 1000, height: 1000)
-        let splits = shares.splits(order: order)
+        let splits = shares.splits(order: order, floors: .unfloored)
         #expect(splits["A:2000x1000"]?.areas.map(\.w) == [1000, 1000])
         #expect(splits["B:1000x1000"] == nil)
         #expect(shares.store(nil, on: "C:1x1", order: order) == false)

@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "螢幕編號",
   "monitor_card.number.none": "不為此螢幕編號",
   "monitor_card.number.unnumbered": "取得新空間",
+  "monitor_card.number.unsplit.side_by_side": "在這裡，螢幕 %1$d 的分區會比最小視窗尺寸更窄，因此不分割此螢幕。",
+  "monitor_card.number.unsplit.stacked": "在這裡，螢幕 %1$d 的分區會比最小視窗尺寸更矮，因此不分割此螢幕。",
   "monitor_card.number.use": "用作螢幕 %1$d",
   "monitor_card.number_badge": "螢幕 %1$d",
   "monitor_card.split.nested.ax": "分區數：%1$d",

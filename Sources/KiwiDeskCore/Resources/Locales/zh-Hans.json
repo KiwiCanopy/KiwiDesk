@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "显示器编号",
   "monitor_card.number.none": "不为此显示器编号",
   "monitor_card.number.unnumbered": "获得新空间",
+  "monitor_card.number.unsplit.side_by_side": "在这里，显示器 %1$d 的分区会比最小窗口尺寸更窄，因此不分割此显示器。",
+  "monitor_card.number.unsplit.stacked": "在这里，显示器 %1$d 的分区会比最小窗口尺寸更矮，因此不分割此显示器。",
   "monitor_card.number.use": "用作显示器 %1$d",
   "monitor_card.number_badge": "显示器 %1$d",
   "monitor_card.split.nested.ax": "分区数：%1$d",

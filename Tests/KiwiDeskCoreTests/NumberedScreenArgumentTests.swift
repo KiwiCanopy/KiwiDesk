@@ -104,6 +104,13 @@ struct NumberedScreenArgumentTests {
         #expect(core.numberedArea("1") == nil)
     }
 
+    /// A floor 200-pt halves clear.
+    private var narrowFloor: TilingSettings {
+        var settings = TilingSettings()
+        settings.minWindowSizes = MinWindowSizes(all: .square(100))
+        return settings
+    }
+
     /// Two screens wide enough to split, numbered right to left,
     /// with Screen 1 (the right one, "R") split in two.
     private func splitScreenOne(_ core: KiwiCore) throws -> Display {
@@ -126,7 +133,7 @@ struct NumberedScreenArgumentTests {
                 ],
                 spaces: ["1"],
                 spaceModes: ["1": .bsp],
-                settings: TilingSettings()
+                settings: narrowFloor
             )
         )
         try core.loadProfile(named: "Wide")
@@ -154,7 +161,11 @@ struct NumberedScreenArgumentTests {
         )
         #expect(named.isSuccess)
         let areas = core.tiler.settings.displayAreas
-            .split(on: right.fingerprint, order: core.liveScreenOrder)?
+            .split(
+                on: right.fingerprint,
+                order: core.liveScreenOrder,
+                floors: .unfloored
+            )?
             .areas
         #expect(areas?.first { $0.id == 1 }?.name == "Code")
         let placed = core.resolveAreaArg(.string("1#1"))

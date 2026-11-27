@@ -142,7 +142,11 @@ struct BootDisplayAreaTests {
         try load(core, Self.split + "\n" + lua)
         dock(core)
         let split = core.tiler.settings.displayAreas
-            .split(on: Self.builtIn.fingerprint, order: core.liveScreenOrder)
+            .split(
+                on: Self.builtIn.fingerprint,
+                order: core.liveScreenOrder,
+                floors: .unfloored
+            )
         #expect(split?.areas.first { $0.id == 1 }?.name == "Right")
         #expect(core.spacePins["Calls"] == Self.rightArea)
     }

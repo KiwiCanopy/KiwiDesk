@@ -24227,6 +24227,27 @@ The consequences:
   in the pop-up, with "Screen 1's areas would be narrower than the
   minimum window size here." ("shorter" for a top-to-bottom
   split).
+- **Amended (#3647 lane 3b, architect-reviewer for the owner,
+  2026-11-27): a split that does not fit draws whole.** The
+  greyed number stands, but a setup the user did not number can
+  still meet a split its screen cannot hold. So an apply, and a
+  screen change, number the setup in the first order in which
+  every screen holds its number's split: the one that moves the
+  fewest numbers off the saved order, ties to the earlier screen
+  first. That order is the session's, for that profile and setup;
+  a Save still stores the saved order, so a fit never rewrites a
+  profile. Where no order fits, every number stays where the saved
+  order puts it and every item in the pop-up stays enabled, since
+  greying all of them would leave no way to renumber. A screen
+  whose split still falls under the floor draws whole, and its
+  editor names the axis that failed, width before height. A floor
+  raised later never renumbers: the split draws whole until the
+  next apply or screen change refits. A Lua or CLI split under the
+  floor is refused, and one given by fingerprint lands on the
+  number that screen holds in the fitted order. Renumbering on
+  every floor edit would move Spaces under the user mid-edit; a
+  third outcome beside split and whole would be a state the
+  placements cannot draw.
 - **Twin screens share one split.** Two screens with one
   fingerprint can hold two numbers, but the runtime keys an area
   by fingerprint, so both draw the lower number's split.

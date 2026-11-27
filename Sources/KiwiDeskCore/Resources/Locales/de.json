@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "Bildschirmnummer",
   "monitor_card.number.none": "Diesen Bildschirm nicht nummerieren",
   "monitor_card.number.unnumbered": "Bekommt einen neuen Space",
+  "monitor_card.number.unsplit.side_by_side": "Die Abschnitte von Bildschirm %1$d wären hier schmaler als die minimale Fenstergröße, daher wird dieser Bildschirm nicht geteilt.",
+  "monitor_card.number.unsplit.stacked": "Die Abschnitte von Bildschirm %1$d wären hier niedriger als die minimale Fenstergröße, daher wird dieser Bildschirm nicht geteilt.",
   "monitor_card.number.use": "Als Bildschirm %1$d verwenden",
   "monitor_card.number_badge": "Bildschirm %1$d",
   "monitor_card.split.nested.ax": "Abschnitte: %1$d",

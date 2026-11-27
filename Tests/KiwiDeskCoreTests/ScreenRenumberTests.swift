@@ -66,14 +66,14 @@ struct SessionScreenOrderTests {
     private let left = Display(
         id: DisplayID(1),
         name: "A",
-        frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        frame: CGRect(x: 0, y: 0, width: 400, height: 400)
     )
     private let right = Display(
         id: DisplayID(2),
         name: "B",
-        frame: CGRect(x: 100, y: 0, width: 100, height: 100)
+        frame: CGRect(x: 400, y: 0, width: 400, height: 400)
     )
-    private let reversed = ScreenOrder(["B:100x100", "A:100x100"])
+    private let reversed = ScreenOrder(["B:400x400", "A:400x400"])
 
     private func makeCore() -> KiwiCore {
         makeTestCore(
@@ -90,7 +90,7 @@ struct SessionScreenOrderTests {
             Profile(
                 name: "Work",
                 monitorSets: [
-                    MonitorSet(monitors: ["A:100x100", "B:100x100"])
+                    MonitorSet(monitors: ["A:400x400", "B:400x400"])
                 ],
                 spaceMonitorMap: ["2": ScreenSlotKey(number: 2)!],
                 spaces: ["1", "2"],
@@ -99,7 +99,7 @@ struct SessionScreenOrderTests {
             )
         )
         try core.loadProfile(named: "Work")
-        #expect(core.spacePins["2"] == "B:100x100")
+        #expect(core.spacePins["2"] == "B:400x400")
     }
 
     @Test("the live profile reads it; a stored order never does")
@@ -111,7 +111,7 @@ struct SessionScreenOrderTests {
         let work = try core.profiles.read(name: "Work")
         #expect(core.screenOrder(for: work) == reversed)
         #expect(core.screenOrder(holding: work.monitorSets) != reversed)
-        #expect(core.runtimePins(of: work)["2"] == "A:100x100")
+        #expect(core.runtimePins(of: work)["2"] == "A:400x400")
         // Another setup: inert.
         core.handle(.displaysChanged([left]))
         #expect(core.liveScreenOrder != reversed)
@@ -123,12 +123,14 @@ struct SessionScreenOrderTests {
     func splitFollowsTheNumber() throws {
         let core = makeCore()
         try loadWork(core)
-        // Too small to lay out, so read the projection the placement
-        // list is built from.
+        // Halves of a 400-pt screen, under a floor they clear.
+        core.tiler.settings.minWindowSizes = MinWindowSizes(
+            all: .square(100)
+        )
         let halves = ScreenSplit(
             areas: [
-                ScreenArea(id: 0, x: 0, y: 0, w: 50, h: 100),
-                ScreenArea(id: 1, x: 50, y: 0, w: 50, h: 100),
+                ScreenArea(id: 0, x: 0, y: 0, w: 200, h: 400),
+                ScreenArea(id: 1, x: 200, y: 0, w: 200, h: 400),
             ]
         )
         core.tiler.settings.displayAreas.store(
@@ -151,6 +153,7 @@ struct SessionScreenOrderTests {
         let core = makeCore()
         try loadWork(core)
         var settings = TilingSettings()
+        settings.minWindowSizes = MinWindowSizes(all: .square(100))
         settings.displayAreas[number: 1] = ScreenShares(
             areas: [
                 ScreenArea(id: 0, x: 0, y: 0, w: 500, h: 1000),
@@ -182,7 +185,7 @@ struct SessionScreenOrderTests {
         var work = try core.profiles.read(name: "Work")
         #expect(work.monitorSets.map(\.monitors) == [reversed.fingerprints])
         #expect(core.profiles.sessionScreenOrder == nil)
-        let holed = try #require(reversed.unnumbering("A:100x100"))
+        let holed = try #require(reversed.unnumbering("A:400x400"))
         core.setSessionScreenOrder(holed)
         try core.persistProfile(named: "Work", modes: nil)
         work = try core.profiles.read(name: "Work")
@@ -208,7 +211,7 @@ struct SessionScreenOrderTests {
         core.setSessionScreenOrder(reversed)
         let home = Profile(
             name: "Home",
-            monitorSets: [MonitorSet(monitors: ["A:100x100", "B:100x100"])],
+            monitorSets: [MonitorSet(monitors: ["A:400x400", "B:400x400"])],
             spaceMonitorMap: ["2": ScreenSlotKey(number: 2)!],
             spaces: ["1", "2"],
             spaceModes: ["1": .bsp, "2": .bsp],
@@ -217,8 +220,8 @@ struct SessionScreenOrderTests {
         try core.profiles.write(home)
         core.apply(profile: home, cause: .event)
         #expect(core.profiles.currentName == "Home")
-        #expect(core.liveScreenOrder.fingerprints.first == "A:100x100")
-        #expect(core.spacePins["2"] == "B:100x100")
+        #expect(core.liveScreenOrder.fingerprints.first == "A:400x400")
+        #expect(core.spacePins["2"] == "B:400x400")
     }
 
     @Test("an unnumbered screen answers to no number")
@@ -226,8 +229,8 @@ struct SessionScreenOrderTests {
         let core = makeCore()
         try loadWork(core)
         let holed = try #require(
-            ScreenOrder(["A:100x100", "B:100x100"])
-                .unnumbering("B:100x100")
+            ScreenOrder(["A:400x400", "B:400x400"])
+                .unnumbering("B:400x400")
         )
         core.setSessionScreenOrder(holed)
         #expect(core.screen(numbered: 1)?.id == left.id)
@@ -240,16 +243,16 @@ struct SessionScreenOrderTests {
         let core = makeCore()
         try loadWork(core)
         let holed = try #require(
-            ScreenOrder(["A:100x100", "B:100x100"])
-                .unnumbering("B:100x100")
+            ScreenOrder(["A:400x400", "B:400x400"])
+                .unnumbering("B:400x400")
         )
         core.setSessionScreenOrder(holed)
-        core.spacePins = ["2": "B:100x100"]
+        core.spacePins = ["2": "B:400x400"]
         try core.persistProfile(named: "Fresh", modes: nil)
         let fresh = try core.profiles.read(name: "Fresh")
         #expect(fresh.spaceMonitorMap.isEmpty)
         #expect(
-            fresh.monitorSets.map(\.monitors) == [["A:100x100", "B:100x100"]]
+            fresh.monitorSets.map(\.monitors) == [["A:400x400", "B:400x400"]]
         )
     }
 
@@ -258,7 +261,7 @@ struct SessionScreenOrderTests {
         let core = makeCore()
         try loadWork(core)
         core.setSessionScreenOrder(reversed)
-        try core.claimMonitorSet(["A:100x100", "B:100x100"], for: "Work")
+        try core.claimMonitorSet(["A:400x400", "B:400x400"], for: "Work")
         #expect(core.profiles.sessionScreenOrder == nil)
         core.setSessionScreenOrder(reversed)
         _ = core.resetAllSettings(trash: { _ in })
@@ -276,14 +279,14 @@ struct SessionScreenOrderTests {
         #expect(core.profiles.sessionScreenOrder == nil)
         let work = try core.profiles.read(name: "Work")
         core.apply(profile: work, cause: .event)
-        #expect(core.liveScreenOrder.fingerprints.first == "A:100x100")
+        #expect(core.liveScreenOrder.fingerprints.first == "A:400x400")
     }
 
     @Test("a rename keeps it with its profile; a delete drops it")
     func renameAndDelete() throws {
         let core = makeCore()
         try loadWork(core)
-        let holed = try #require(reversed.unnumbering("A:100x100"))
+        let holed = try #require(reversed.unnumbering("A:400x400"))
         core.setSessionScreenOrder(holed)
         try core.profiles.rename(from: "Work", to: "Desk")
         #expect(core.profiles.sessionScreenOrder?.profile == "Desk")
@@ -298,7 +301,7 @@ struct SessionScreenOrderTests {
         try loadWork(core)
         try core.persistProfile(named: "Other", modes: nil)
         try core.loadProfile(named: "Work")
-        let holed = try #require(reversed.unnumbering("A:100x100"))
+        let holed = try #require(reversed.unnumbering("A:400x400"))
         core.setSessionScreenOrder(holed)
         try core.persistProfile(named: "Other", modes: nil)
         #expect(core.profiles.currentName == "Other")

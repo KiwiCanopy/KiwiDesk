@@ -44,8 +44,9 @@ extension KiwiCore {
             arrangement: .profile(profile.name),
             switching: switching
         )
-        // Its splits lay out in its own numbering, as its pins do; a
-        // read of the outgoing numbering comes before this line.
+        // Its splits lay out in its own numbering, fitted, as its
+        // pins do; a read of the outgoing numbering comes before this.
+        refitScreenOrder(for: profile)
         profiles.screenOrderInFlight = screenOrder(for: profile)
         defer { endScreenOrderInFlight() }
         // A held Space keeps the icon it had where it lived (#1507),

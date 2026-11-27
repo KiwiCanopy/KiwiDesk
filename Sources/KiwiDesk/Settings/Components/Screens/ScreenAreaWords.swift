@@ -88,7 +88,8 @@ extension SettingsModel {
         ScreenSplit.effective(
             config.settings.displayAreas.split(
                 on: display.fingerprint,
-                order: screenOrder
+                order: screenOrder,
+                floors: config.settings.areaFloors
             ),
             for: display
         )
@@ -110,7 +111,8 @@ extension SettingsModel {
     func editableSplit(of display: Display) -> ScreenSplit {
         let stored = config.settings.displayAreas.split(
             on: display.fingerprint,
-            order: screenOrder
+            order: screenOrder,
+            floors: .unfloored
         )
         return areaSplit(of: display)
             ?? ScreenSplit.whole(of: display, after: stored)

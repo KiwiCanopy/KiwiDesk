@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "Numero dello schermo",
   "monitor_card.number.none": "Non numerare questo schermo",
   "monitor_card.number.unnumbered": "Riceve un nuovo spazio",
+  "monitor_card.number.unsplit.side_by_side": "Qui le aree dello Schermo %1$d sarebbero più strette della dimensione minima della finestra, quindi questo schermo non è diviso.",
+  "monitor_card.number.unsplit.stacked": "Qui le aree dello Schermo %1$d sarebbero più basse della dimensione minima della finestra, quindi questo schermo non è diviso.",
   "monitor_card.number.use": "Usa come Schermo %1$d",
   "monitor_card.number_badge": "Schermo %1$d",
   "monitor_card.split.nested.ax": "Aree: %1$d",

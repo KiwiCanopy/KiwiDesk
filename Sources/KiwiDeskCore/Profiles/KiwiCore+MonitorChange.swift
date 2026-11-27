@@ -15,6 +15,8 @@ extension KiwiCore {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return nil }
         supersedeMonitorSettle()
+        // A new setup is numbered by the fit rule (#3647 ▸ lane 3).
+        refitLiveScreenOrder()
         // No exit may leave a space orphaned (#676): the state
         // fold already ran, and any display id churn (sleep,
         // dock/undock — #676's report was an AirPlay connect
