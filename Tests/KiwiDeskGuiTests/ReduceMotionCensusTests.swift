@@ -140,6 +140,10 @@ struct ReduceMotionCensusTests {
         // the argument itself, `animated && !presence.reduceMotion`.
         "JumpPanelController+Sizing.swift: animate:":
             "gated in its own argument",
+        // #3700: a completion hook — the look picker's fall waits
+        // for the wear's commit; the hook animates nothing.
+        "LookPickerController.swift: CATransaction":
+            "a commit's completion block starts no motion",
     ]
 
     @Test("No uncensused way to start motion ships")
