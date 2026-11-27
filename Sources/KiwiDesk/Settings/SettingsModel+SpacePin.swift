@@ -103,6 +103,12 @@ extension SettingsModel {
         guard let number = waitingPins[space] else {
             return L("spaces.pin_offline_badge", "Pin offline")
         }
+        return offlinePinLabel(number: number)
+    }
+
+    /// The chip's and the Screen menu's words for a pin waiting on
+    /// `number` (#3689).
+    func offlinePinLabel(number: Int) -> String {
         if unnumberedScreen(at: number) != nil {
             return L(
                 "spaces.pin_offline_badge.unnumbered",
