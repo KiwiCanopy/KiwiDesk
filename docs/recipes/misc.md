@@ -1,7 +1,7 @@
 ---
 title: Miscellaneous Integrations
-description: Shell scripts, event streaming, Hammerspoon, and
-  per-Desktop keybindings.
+description: Shell scripts, event streaming, Hammerspoon,
+  per-Desktop keybindings, and square window corners.
 ---
 
 # Miscellaneous Integrations
@@ -143,3 +143,31 @@ KiwiDesk.switch_layer("desk1")
 Pair this with `bind_profile_to_desktop` (see
 [configuration](../lua-reference.md)) and each Desktop gets
 its own layouts *and* its own keybinds.
+
+## Square window corners
+
+The square focus border (`border.set_corner_style("square")`,
+or Square under Settings ▸ Gaps & Borders) squares the ring, not
+the windows inside it. macOS has an undocumented setting that
+squares the windows too:
+
+```bash
+defaults write -g NSConvolutionOverride1 -float 0.01
+```
+
+- **Relaunch each app.** An app reads the value once, at launch:
+  its open windows, new windows and a minimize and restore keep
+  their old corners until the app restarts. KiwiDesk's own
+  windows square after KiwiDesk restarts.
+- **The value is the corner radius.** `0.01` is square, `4`
+  slightly rounded; the window's shadow follows the corner.
+  Measured on macOS 27.2 with standard app windows; a window
+  that draws its own frame keeps its shape.
+- **Pair it with the square border.** The rounded border keeps
+  the standard macOS radius, so it draws a rounded outline around
+  a square corner.
+- **Undo** with `defaults delete -g NSConvolutionOverride1`, then
+  relaunch the apps again.
+
+The setting is not documented by Apple, so a macOS update may
+stop honouring it. KiwiDesk never writes it for you.
