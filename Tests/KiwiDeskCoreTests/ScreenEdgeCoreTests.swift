@@ -127,7 +127,7 @@ struct ScreenEdgeCoreTests {
         .enabled(if: NSScreen.main != nil)
     )
     func floatRegionPerScreen() throws {
-        let (core, display, _) = try #require(makeCore(mode: .floating))
+        let (core, _, _) = try #require(makeCore(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         core.tiler.settings.spaceBarStyle.edgeOverride = ["1": .left]
         core.updateBars()
