@@ -146,8 +146,18 @@ extension SettingsModel {
         theirs: GuiConfig,
         base: GuiConfig
     ) -> SyncConflict {
-        let mine = SettingsValueReadout.rows(for: key, old: base, new: yours)
-        let other = SettingsValueReadout.rows(for: key, old: base, new: theirs)
+        let mine = SettingsValueReadout.rows(
+            for: key,
+            old: base,
+            new: yours,
+            screenOrder: screenOrder
+        )
+        let other = SettingsValueReadout.rows(
+            for: key,
+            old: base,
+            new: theirs,
+            screenOrder: screenOrder
+        )
         return SyncConflict(
             key: key,
             label: SettingsValueReadout.label(for: key),
@@ -170,7 +180,8 @@ extension SettingsModel {
         let lost = SettingsValueReadout.rows(
             for: key,
             old: theirs,
-            new: config
+            new: config,
+            screenOrder: screenOrder
         )
         let mine =
             owner == key
@@ -179,10 +190,16 @@ extension SettingsModel {
                 of: SettingsValueReadout.rows(
                     for: owner,
                     old: base,
-                    new: yours
+                    new: yours,
+                    screenOrder: screenOrder
                 ).first
             )
-        let other = SettingsValueReadout.rows(for: key, old: base, new: theirs)
+        let other = SettingsValueReadout.rows(
+            for: key,
+            old: base,
+            new: theirs,
+            screenOrder: screenOrder
+        )
         return SyncConflict(
             key: owner,
             label: SettingsValueReadout.label(for: owner),

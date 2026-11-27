@@ -21,12 +21,13 @@ struct AreaPointerTests {
         let core = makeTestCore()
         core.state.workspaces.upsertDisplay(wide)
         if let axis {
-            core.storeSplit(
+            core.tiler.settings.displayAreas.store(
                 try #require(
                     ScreenSplit.whole(width: 3440, height: 1440)
                         .splitting(0, axis)
                 ),
-                on: wide.fingerprint
+                on: wide.fingerprint,
+                order: core.liveScreenOrder
             )
         }
         let areas = core.state.workspaces.placements(of: wide.id)

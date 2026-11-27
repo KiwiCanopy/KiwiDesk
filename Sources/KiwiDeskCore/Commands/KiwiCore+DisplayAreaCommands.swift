@@ -89,6 +89,16 @@ extension KiwiCore {
                 (screen.width, screen.height)
             )
         }
+        if let raw = arg?.stringValue, Self.isFingerprint(raw),
+            let size = ScreenShares.size(of: raw)
+        {
+            // A screen not connected: the number the live profile's
+            // first setup holding it gives it.
+            let set = profiles.active?.monitorSets.first {
+                $0.monitors.contains(raw)
+            }
+            return (set?.order.number(of: raw), size)
+        }
         guard let number = arg?.intValue, number >= 1 else { return nil }
         return (number, Self.extent(of: rest))
     }
@@ -154,14 +164,16 @@ extension KiwiCore {
             })
         else { return .fail("unknown area: \(raw)") }
         let trimmed = name.trimmingCharacters(in: .whitespaces)
-        let key =
-            order.runtimeKey(of: slot)
-            ?? ScreenAreaKey(fingerprint: slot.description, areaID: 0)
+        // A number no screen holds has no runtime area to collide
+        // with, so only the name's own shape is judged.
+        let key = order.runtimeKey(of: slot)
         switch ScreenArea.nameProblem(
             trimmed,
-            for: key,
-            splits: tiler.settings.displayAreas.splits(order: order),
-            screenNames: state.workspaces.allDisplays.map(\.name)
+            for: key ?? ScreenAreaKey(parsing: ""),
+            splits: key == nil
+                ? [:] : tiler.settings.displayAreas.splits(order: order),
+            screenNames: key == nil
+                ? [] : state.workspaces.allDisplays.map(\.name)
         ) {
         case .number?:
             return .fail("an area name cannot be a number or N#id")

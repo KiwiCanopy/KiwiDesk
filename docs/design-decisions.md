@@ -24241,7 +24241,12 @@ The consequences:
   `N#id` through the live order, and its crossing drops the
   stored map rather than guessing an order for it: it refills at
   the next Desktop switch. The bars' per-screen maps keep their
-  fingerprint keys until #3647's lane 3c moves them.
+  fingerprint keys until #3647's lane 3c moves them. The crossing
+  keeps one split per number, the first stored setup's, and drops
+  a split no setup of its profile holds: a number has one split,
+  and a dormant screen's has no number to keep it under. The cost
+  is a second setup's split on a number the first already split,
+  which the user makes again.
 - **The crossing is one `ConfigMigration` step**, run through
   `MigrationBackup.migrateInPlace` like every step. Slot k is the
   stored `monitors[k]`; where two setups of one count pin

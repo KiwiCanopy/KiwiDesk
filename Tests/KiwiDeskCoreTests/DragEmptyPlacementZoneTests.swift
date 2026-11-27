@@ -50,7 +50,11 @@ struct DragEmptyPlacementZoneTests {
         let core = pinned(makeTestCore(), id: id)
         let display = Display(id: id, name: "Wide", frame: Self.whole)
         core.state.workspaces.upsertDisplay(display)
-        core.storeSplit(split, on: display.fingerprint)
+        core.tiler.settings.displayAreas.store(
+            split,
+            on: display.fingerprint,
+            order: core.liveScreenOrder
+        )
         let areas = core.state.workspaces.placements(of: id).map(\.id)
         core.state.workspaces.assign(SpaceID("1"), to: areas[0])
         core.state.workspaces.assign(SpaceID("2"), to: areas[1])

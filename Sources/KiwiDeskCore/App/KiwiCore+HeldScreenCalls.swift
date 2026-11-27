@@ -37,8 +37,9 @@ extension KiwiCore {
     /// known, and the argument is a number or a name, which only a
     /// known screen resolves. A fingerprint or area key resolves
     /// without one and never waits; a call outside a load answers
-    /// as it always did. For the bars' maps, still keyed by
-    /// fingerprint until #3647's lane 3c.
+    /// as it always did. For `pin_space_to_display` and the bars'
+    /// maps, whose runtime stores are still keyed by fingerprint
+    /// (#3647 ▸ lane 3c).
     func holdsScreenArg(_ arg: JSONValue?) -> Bool {
         guard luaAreaSplits.isRecording,
             state.workspaces.allDisplays.isEmpty, let arg

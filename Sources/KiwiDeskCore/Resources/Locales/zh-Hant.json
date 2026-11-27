@@ -583,6 +583,8 @@
   "diff.value.points": "%1$@ pt",
   "diff.value.screen_area": "#%1$d %2$d×%3$d",
   "diff.value.screen_area.named": "#%1$d 「%2$@」 %3$d×%4$d",
+  "diff.value.screen_area_share": "#%1$d %2$d‰×%3$d‰",
+  "diff.value.screen_area_share.named": "#%1$d 「%2$@」 %3$d‰×%4$d‰",
   "diff.value.screen_number": "%1$d %2$@",
   "diff.value.screen_unnumbered": "%1$@ 未編號",
   "diff.value.seconds": "%1$@ 秒",

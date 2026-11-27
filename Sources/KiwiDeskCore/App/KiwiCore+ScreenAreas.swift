@@ -190,26 +190,6 @@ extension KiwiCore {
 /// The one store door for a split (#3517), shared by
 /// `set_display_areas` and the load's reset (#3573).
 extension KiwiCore {
-    /// Stores `split`, laid on the screen `fingerprint` names, as the
-    /// shares of the number it holds now; false where it holds none.
-    @discardableResult
-    func storeSplit(_ split: ScreenSplit, on fingerprint: String) -> Bool {
-        let order = liveScreenOrder
-        guard let number = order.number(of: fingerprint),
-            let size = ScreenShares.size(of: fingerprint)
-        else { return false }
-        storeShares(
-            ScreenShares(
-                split,
-                width: size.width,
-                height: size.height,
-                keeping: tiler.settings.displayAreas[number: number]
-            ),
-            number: number
-        )
-        return true
-    }
-
     /// Stores `shares` as Screen `number`'s split. A merged-away
     /// area's keys move to the survivor in the same write as the
     /// split, as a Settings merge's do (ruling 22).

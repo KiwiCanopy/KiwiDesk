@@ -222,7 +222,15 @@ editing here:
   `display_areas` runs through `TilingEngine.onAreaSplits` — a
   config load and a profile apply included, since each installs
   the settings whole — never a call beside a settings install
-  (`AreaSplitSyncTests`). A per-area reader beside the placement
+  (`AreaSplitSyncTests`). A split is a screen NUMBER's shares
+  (#3647), crossing to a screen's points only through
+  `ScreenShares+Order`, so the placements also depend on the
+  order: a writer of the order — the total resolve, the session
+  renumber, an apply's in-flight order — re-runs `syncAreaSplits()`
+  with no previous shares, so a renumber never reads as a merge
+  (`SessionScreenOrderTests` ▸ `splitFollowsTheNumber`,
+  `profileSwitchLaysOutItsOwnNumbers`). A per-area reader beside
+  the placement
   list — a write's scope, a Settings row — reads the stored splits
   it is handed (`AreaEdgeTests`). A reader asking which Space a
   screen shows names the placement it means: the area a window,

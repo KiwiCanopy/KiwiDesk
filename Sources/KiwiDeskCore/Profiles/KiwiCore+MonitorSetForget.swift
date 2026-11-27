@@ -165,7 +165,8 @@ extension KiwiCore {
             holder.settings.keepScreenEdges(
                 in: screenEdgeScope(
                     monitorSets: holder.monitorSets,
-                    shares: holder.settings.displayAreas
+                    shares: holder.settings.displayAreas,
+                    order: screenOrder(holding: holder.monitorSets)
                 )
             )
             try profiles.write(holder)

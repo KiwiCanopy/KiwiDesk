@@ -16,10 +16,13 @@ public struct ScreenAreaRemap: Equatable, Sendable {
     }
 
     /// This remap on the screen `order` gives its number, keyed by
-    /// fingerprint; nil where no screen holds it.
+    /// fingerprint; nil where no screen holds it, or where it is a
+    /// twin's higher number, whose areas the runtime keys as the
+    /// lower one's.
     public func runtime(in order: ScreenOrder) -> Fingerprinted? {
         guard let old = order.runtimeKey(of: vanished),
-            let new = order.runtimeKey(of: survivor)
+            let new = order.runtimeKey(of: survivor),
+            order.number(of: old.fingerprint) == vanished.number
         else { return nil }
         return Fingerprinted(vanished: old, survivor: new)
     }

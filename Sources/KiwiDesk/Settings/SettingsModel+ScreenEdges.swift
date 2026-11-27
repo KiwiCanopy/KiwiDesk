@@ -166,7 +166,8 @@ extension SettingsModel {
                     on: screen,
                     among: self.core.screenEdgeScope(
                         monitorSets: self.draftMonitorSets,
-                        shares: self.config.settings.displayAreas
+                        shares: self.config.settings.displayAreas,
+                        order: self.screenOrder
                     )
                 )
                 guard next != self.config.settings else { return }

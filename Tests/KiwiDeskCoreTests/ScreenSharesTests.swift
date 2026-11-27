@@ -94,6 +94,22 @@ struct ScreenSharesTests {
         #expect(shares.store(nil, on: "C:1x1", order: order) == false)
     }
 
+    /// 100 pt of 4096 stores as 24‰, which resolves to 98 pt: the
+    /// floor gives that per-mille step back, so the split stands.
+    @Test("a split made at the floor still lays out after rounding")
+    func floorSurvivesRounding() throws {
+        let split = ScreenSplit(
+            areas: [
+                ScreenArea(id: 0, x: 0, y: 0, w: 100, h: 1000),
+                ScreenArea(id: 1, x: 100, y: 0, w: 3996, h: 1000),
+            ]
+        )
+        let back = ScreenShares(split, width: 4096, height: 1000)
+            .resolved(width: 4096, height: 1000)
+        #expect(back.areas[0].w < ScreenArea.minimumSide)
+        #expect(ScreenSplit.effective(back, width: 4096, height: 1000) != nil)
+    }
+
     @Test("a fingerprint-keyed split refuses to decode")
     func fingerprintKeyRefuses() throws {
         var settings = TilingSettings()

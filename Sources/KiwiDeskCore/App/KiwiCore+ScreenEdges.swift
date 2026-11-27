@@ -205,23 +205,21 @@ extension KiwiCore {
     /// The ONE scope a per-screen edge write judges its collapse
     /// over (`ScreenEdged.setEdge(_:on:among:)`): the screens of
     /// `monitorSets` and the connected ones, each with every area
-    /// `shares` gives it (#3517), each set numbering its own screens
-    /// and the connected ones numbered as those sets number them
-    /// (#3647) — the write adds the entries' own. A writer hands it
-    /// the monitor sets and shares of the profile it writes: the
-    /// verb the live profile's (`liveScreenEdgeScope`), a Settings
-    /// writer its draft's, never an empty list in their place.
+    /// `shares` gives it (#3517), the connected ones numbered by
+    /// `order` and each set's by its own (#3647) — the write adds
+    /// the entries' own. A writer hands it the monitor sets, shares
+    /// and order of the profile it writes: the verb the live
+    /// profile's (`liveScreenEdgeScope`), a Settings writer its
+    /// draft's, never an empty list in their place.
     public func screenEdgeScope(
         monitorSets: [MonitorSet],
-        shares: [String: ScreenShares]
+        shares: [String: ScreenShares],
+        order: ScreenOrder
     ) -> ScreenEdgeScope {
         let screens = Set(monitorSets.flatMap(\.monitors)).union(
             connectedDisplays().map(\.fingerprint)
         )
-        let splits = shares.splits(
-            order: screenOrder(holding: monitorSets),
-            sets: monitorSets
-        )
+        let splits = shares.splits(order: order, sets: monitorSets)
         return ScreenEdgeScope(
             screens: screens.union(
                 screens.flatMap {
@@ -237,7 +235,8 @@ extension KiwiCore {
     var liveScreenEdgeScope: ScreenEdgeScope {
         screenEdgeScope(
             monitorSets: profiles.active?.monitorSets ?? [],
-            shares: tiler.settings.displayAreas
+            shares: tiler.settings.displayAreas,
+            order: liveScreenOrder
         )
     }
 

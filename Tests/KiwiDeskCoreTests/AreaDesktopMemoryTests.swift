@@ -28,7 +28,11 @@ struct AreaDesktopMemoryTests {
         if let split = ScreenSplit.whole(width: 3440, height: 1440)
             .splitting(0, .sideBySide)
         {
-            core.storeSplit(split, on: wide.fingerprint)
+            core.tiler.settings.displayAreas.store(
+                split,
+                on: wide.fingerprint,
+                order: core.liveScreenOrder
+            )
         }
         let areas = core.state.workspaces.placements(of: wide.id)
             .map(\.id)

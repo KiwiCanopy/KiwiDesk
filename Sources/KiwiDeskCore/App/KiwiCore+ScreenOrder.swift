@@ -9,9 +9,11 @@ extension KiwiCore {
     /// Which connected screen holds which number: the live
     /// profile's set covering the screens, in its stored order, else
     /// left to right, ties top to bottom. Read from adoption state,
-    /// never the file (#1245).
+    /// never the file (#1245); while an apply installs another
+    /// arrangement, that arrangement's order.
     public var liveScreenOrder: ScreenOrder {
-        sessionScreenOrder
+        profiles.screenOrderInFlight
+            ?? sessionScreenOrder
             ?? screenOrder(holding: profiles.active?.monitorSets ?? [])
     }
 

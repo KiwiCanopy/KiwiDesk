@@ -27,9 +27,9 @@ public protocol ScreenEdged {
 
 /// The screens and areas a per-screen edge write judges its
 /// collapse over — made only by
-/// `KiwiCore.screenEdgeScope(monitorSets:splits:)`, which adds the
-/// connected screens and every area of each, so no write can judge
-/// fewer.
+/// `KiwiCore.screenEdgeScope(monitorSets:shares:order:)`, which
+/// adds the connected screens and every area of each, so no write
+/// can judge fewer.
 public struct ScreenEdgeScope: Sendable, Equatable {
     let screens: Set<String>
 

@@ -42,7 +42,11 @@ struct AreaLayoutBoundsTests {
             frame: CGRect(x: 0, y: 0, width: 3440, height: 1440)
         )
         core.state.workspaces.upsertDisplay(display)
-        core.storeSplit(split, on: display.fingerprint)
+        core.tiler.settings.displayAreas.store(
+            split,
+            on: display.fingerprint,
+            order: core.liveScreenOrder
+        )
         let areas = core.state.workspaces.placements(of: id).map(\.id)
         for (i, area) in areas.enumerated() {
             core.state.workspaces.assign(SpaceID(i + 1), to: area)

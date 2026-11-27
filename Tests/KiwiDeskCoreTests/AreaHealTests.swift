@@ -24,7 +24,11 @@ struct AreaHealTests {
                 .splitting(1, .sideBySide)
         )
         core.state.workspaces.upsertDisplay(wide)
-        core.storeSplit(split, on: wide.fingerprint)
+        core.tiler.settings.displayAreas.store(
+            split,
+            on: wide.fingerprint,
+            order: core.liveScreenOrder
+        )
         core.state.workspaces.ensureSpace(SpaceID("1"))
         core.resolveSpaceDisplays(mainID: wide.id)
         let areas = core.state.workspaces.placements(of: wide.id)

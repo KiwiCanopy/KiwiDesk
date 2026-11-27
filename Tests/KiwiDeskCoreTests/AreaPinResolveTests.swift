@@ -23,7 +23,11 @@ struct AreaPinResolveTests {
                 .splitting(0, .sideBySide)
         )
         core.state.workspaces.upsertDisplay(wide)
-        core.storeSplit(split, on: wide.fingerprint)
+        core.tiler.settings.displayAreas.store(
+            split,
+            on: wide.fingerprint,
+            order: core.liveScreenOrder
+        )
         for id in 1...3 { core.state.workspaces.ensureSpace(SpaceID(id)) }
         return core
     }

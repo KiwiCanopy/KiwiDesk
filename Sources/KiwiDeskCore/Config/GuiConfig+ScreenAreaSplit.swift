@@ -11,11 +11,14 @@ public struct ScreenAreaCopy: Equatable, Sendable {
     public let minted: ScreenSlotKey
 
     /// This copy on the screen `order` gives its number, keyed by
-    /// fingerprint; nil where no screen holds it.
+    /// fingerprint; nil where no screen holds it, or for a twin's
+    /// higher number, as `ScreenAreaRemap.runtime(in:)`.
     public func runtime(in order: ScreenOrder) -> Fingerprinted? {
-        guard let parent = order.runtimeKey(of: parent),
-            let minted = order.runtimeKey(of: minted)
+        guard let parentKey = order.runtimeKey(of: parent),
+            let minted = order.runtimeKey(of: minted),
+            order.number(of: parentKey.fingerprint) == parent.number
         else { return nil }
+        let parent = parentKey
         return Fingerprinted(parent: parent, minted: minted)
     }
 

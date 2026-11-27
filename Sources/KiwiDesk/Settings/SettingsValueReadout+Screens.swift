@@ -120,18 +120,42 @@ extension SettingsValueReadout {
         }
     }
 
+    /// Each side read on the screen its own order gives the number;
+    /// where none holds it, in shares of the screen (‰).
     private static func sizes(
         _ shares: ScreenShares,
         _ number: Int,
         _ order: ScreenOrder?
     ) -> String {
-        let fingerprint =
-            order?.fingerprints.indices.contains(number - 1)
-                == true ? order?.fingerprints[number - 1] : nil
-        let split =
-            fingerprint.flatMap { shares.resolved(on: $0) }
-            ?? ScreenSplit(areas: shares.areas, nextID: shares.nextID)
+        guard let slot = ScreenSlotKey(number: number),
+            let key = order?.runtimeKey(of: slot),
+            let split = shares.resolved(on: key.fingerprint)
+        else { return shareSizes(shares) }
         return areaSizes(split)
+    }
+
+    private static func shareSizes(_ shares: ScreenShares) -> String {
+        ScreenArea.readingOrder(shares.areas)
+            .map { area in
+                if let name = area.name {
+                    return L(
+                        "diff.value.screen_area_share.named",
+                        "#%1$d “%2$@” %3$d‰×%4$d‰",
+                        area.id,
+                        name,
+                        area.w,
+                        area.h
+                    )
+                }
+                return L(
+                    "diff.value.screen_area_share",
+                    "#%1$d %2$d‰×%3$d‰",
+                    area.id,
+                    area.w,
+                    area.h
+                )
+            }
+            .joined(separator: " · ")
     }
 
     private static func areaSizes(_ split: ScreenSplit) -> String {

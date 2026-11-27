@@ -184,7 +184,7 @@ twice, was a question the user answered twice. The argument is
   edge naming its reason too (▸ `guiReadersAreCensused`).
   **Write a bar's edge through the `ScreenEdged` doors** —
   `setEdge(_:)` for every screen, `setEdge(_:on:among:)` for one,
-  judged over the one `KiwiCore.screenEdgeScope(monitorSets:splits:)`
+  judged over the one `KiwiCore.screenEdgeScope(monitorSets:shares:order:)`
   handed the written profile's monitor sets and splits, which adds
   every area of each screen (#3517, `AreaEdgeTests` ▸
   `scopeHoldsTheAreas`), and
@@ -198,7 +198,7 @@ twice, was a question the user answered twice. The argument is
   (`ScreenEdgeTests` ▸ `judgementsReadDrawnEdges`), and no
   caller collapses by hand (`BarEdgeWriteCensusTests` ▸
   `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
-  `screenEdgeScope(monitorSets:splits:)` (`BarEdgeWriteCensusTests`
+  `screenEdgeScope(monitorSets:shares:order:)` (`BarEdgeWriteCensusTests`
   ▸ `scopeHasOneHome`). **A per-area map is read exactly and
   fanned out on write (#3517 rulings 7, 14, 16, 22, 30)** — every
   `edge_override`, `pocket_edge_override` and `visibility_override`:
