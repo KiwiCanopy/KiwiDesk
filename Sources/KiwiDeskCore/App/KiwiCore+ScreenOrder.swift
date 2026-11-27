@@ -8,7 +8,8 @@ import Foundation
 extension KiwiCore {
     /// Which connected screen holds which number: the live
     /// profile's set covering the screens, in its stored order, else
-    /// left to right, ties top to bottom; the session's renumber,
+    /// a set they contain continued, else left to right, ties top to
+    /// bottom (`screenOrder(holding:)`); the session's renumber,
     /// else the fit rule's order, over either. Read from adoption
     /// state, never the file (#1245); while an apply installs another
     /// arrangement, that arrangement's order.
@@ -21,7 +22,7 @@ extension KiwiCore {
 
     /// The order `profile`'s pins are numbered in on the connected
     /// screens: the session's renumber for the live profile, else its
-    /// set covering them, else left to right. A draft of a stored
+    /// fit, else `screenOrder(holding:)`. A draft of a stored
     /// profile reads its own, never the live one's.
     public func screenOrder(for profile: Profile?) -> ScreenOrder {
         if let profile,
@@ -36,17 +37,21 @@ extension KiwiCore {
         return screenOrder(holding: profile?.monitorSets ?? [])
     }
 
-    /// The order `sets` number the connected screens in; read on each
-    /// call, so it follows a screen change.
+    /// The order `sets` number the connected screens in: the set
+    /// covering them, else one they contain continued, else left to
+    /// right (#3648); read on each call, so it follows a screen
+    /// change. The one door a base order is decided at.
     public func screenOrder(holding sets: [MonitorSet]) -> ScreenOrder {
-        sets.order(matching: liveFingerprints)
-            ?? .leftToRight(state.workspaces.allDisplays)
+        let displays = state.workspaces.allDisplays
+        return sets.order(matching: liveFingerprints)
+            ?? .continuing(sets, displays: displays)
+            ?? .leftToRight(displays)
     }
 
     /// `profile`'s pins as the runtime keys them on the connected
     /// screens, through its order: a setup it does not hold is
-    /// numbered left to right, so its pins apply there too (#3647
-    /// ▸ lane 2). The one door every apply takes.
+    /// numbered by `screenOrder(holding:)`, so its pins apply there
+    /// too (#3647 ▸ lane 2). The one door every apply takes.
     func runtimePins(of profile: Profile) -> [SpaceID: String] {
         screenOrder(for: profile).runtime(profile.spaceMonitorMap)
     }

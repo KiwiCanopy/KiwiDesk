@@ -21,6 +21,40 @@ public struct ScreenOrder: Equatable, Sendable {
         ScreenOrder(displays.sorted(by: precedes).map(\.fingerprint))
     }
 
+    /// The numbering that keeps a known setup's numbers (#3648 ▸
+    /// known-screens ruling): the first of `sets` whose every screen
+    /// is connected keeps its order, and the other `displays` take
+    /// the next numbers left to right, ties top to bottom. A twin
+    /// past a set's copies is a newcomer. Nil where no set is a
+    /// strict part of `displays`.
+    public static func continuing(
+        _ sets: [MonitorSet],
+        displays: [Display]
+    ) -> ScreenOrder? {
+        let sorted = displays.sorted(by: precedes)
+        for set in sets
+        where !set.monitors.isEmpty
+            && set.monitors.count < sorted.count
+        {
+            var rest = sorted
+            let known = set.monitors.allSatisfy { fingerprint in
+                guard
+                    let at = rest.firstIndex(where: {
+                        $0.fingerprint == fingerprint
+                    })
+                else { return false }
+                rest.remove(at: at)
+                return true
+            }
+            if known {
+                return ScreenOrder(
+                    set.monitors + rest.map(\.fingerprint)
+                )
+            }
+        }
+        return nil
+    }
+
     /// Whether `a` comes before `b` left to right, ties top to
     /// bottom: the one geometric order numbers are suggested and
     /// twins told apart in.

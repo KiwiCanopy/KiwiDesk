@@ -153,8 +153,15 @@ per-screen edge and Show belong to the number, not to the
 physical screen, so they go to whichever screen holds that
 number.
 
-A setup the profile has not saved is numbered **left to right**
-by each screen's left edge. Two screens whose left edges line up
+:::unreleased
+When the connected screens include every screen of a setup the
+profile has saved, those screens keep their numbers and each other
+screen takes the next number, left to right. With several such
+setups, the first saved one counts.
+:::
+
+Any other setup the profile has not saved is numbered **left to
+right** by each screen's left edge. Two screens whose left edges line up
 exactly take the higher one first. For example:
 
 - a 2×2 grid: top-left 1, bottom-left 2, top-right 3,

@@ -24204,6 +24204,22 @@ The consequences:
 - **A setup the profile has not met is numbered left to right**,
   ties top to bottom, for the session. Main-first was refused: it
   settles only Screen 1 and repeats the Main role.
+- **Amended (#3648, owner, 2026-11-27): known screens keep their
+  numbers.** When the connected screens include every screen of
+  one of the profile's stored setups, the first such setup if
+  several, those screens keep their numbers and the others take
+  the next ones, left to right, ties top to bottom; otherwise the
+  whole setup is numbered left to right. Numbering the whole
+  setup left to right moved every known Space to another physical
+  screen when a screen joined on the left, where macOS Displays
+  keeps the existing arrangement. "Known" reads only the applied
+  profile's own stored setups: the live session order, "last
+  used" or another profile would each be a second source of truth.
+  It is one pure step at the one door a base order is decided at
+  (`ScreenOrder.continuing`); the fit ranks against it, a session
+  renumber stays on top, and a twin past a setup's copies is a
+  newcomer. A stand-in screen at the same count, replacing one
+  known screen, still numbers left to right until its own ruling.
 - **The Main role stays as it is and outranks a Screen pin**, a
   number's pin included.
 - **The user renumbers on the Screens page.** Each card's badge

@@ -235,6 +235,25 @@ struct SessionScreenOrderTests {
         #expect(core.liveScreenOrder == reversed)
     }
 
+    /// A screen joining on the LEFT of a held setup takes the next
+    /// number, the held screens keeping theirs (#3648 ▸
+    /// known-screens ruling).
+    @Test("a newcomer on the left keeps the known numbers")
+    func newcomerOnTheLeft() throws {
+        let core = makeCore()
+        try loadWork(core)
+        let newcomer = Display(
+            id: DisplayID(3),
+            name: "C",
+            frame: CGRect(x: -400, y: 0, width: 400, height: 400)
+        )
+        core.handle(.displaysChanged([newcomer, left, right]))
+        #expect(core.screenNumber(of: left.id) == 1)
+        #expect(core.screenNumber(of: right.id) == 2)
+        #expect(core.screenNumber(of: newcomer.id) == 3)
+        #expect(core.spacePins["2"] == "B:400x400")
+    }
+
     /// A screen past the profile's numbers takes the next one, its
     /// heal-seeded Space and pin stored like any other number's
     /// (#3647 ▸ always-numbered ruling).
