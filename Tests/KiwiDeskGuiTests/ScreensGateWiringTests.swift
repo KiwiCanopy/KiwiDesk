@@ -191,8 +191,13 @@ struct ScreensGateWiringTests {
                 // needle two entries down, and the same fix.
                 "split.overflow>0",
                 "overflowChip(assignments,split.overflow)",
-                // The number badge leads the first pane (#3647).
-                "ifleads{ScreenNumberBadge(model:model,display:display)",
+                // The number badge leads a whole screen's pane
+                // (#3647), a split card's band (#3697).
+                "ifleads{HStack(spacing:0){"
+                    + "ScreenNumberBadge(model:model,display:display)",
+            ],
+            "Components/Screens/ScreenCardBand.swift": [
+                "ScreenNumberBadge(model:model,display:display)"
             ],
             "Components/Screens/ScreenAreaMenu.swift": [
                 // The badge's items on the keyboard and VoiceOver

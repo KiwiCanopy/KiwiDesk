@@ -36,8 +36,8 @@ struct ScreensPicture: View {
         )
         let height = Self.height(holding: content.height)
         let origin = ScreenArrangement.origin(
-            of: content,
-            in: CGSize(width: canvas.width, height: height - Self.inset * 2)
+            of: layout.contentSize,
+            in: canvas
         )
         // Sideways only, for a desk wider than the page; the page
         // scrolls up and down.
@@ -63,17 +63,8 @@ struct ScreensPicture: View {
         max(canvasHeight, contentHeight + inset * 2)
     }
 
-    /// The band under the picture's lowest cards: the stand, or a
-    /// split card's area names where they reach further (#3697). A
-    /// split card stacked above another pushes it down by its names'
-    /// reach after the fit, so such a picture grows, not shrinks.
-    private var footBand: CGFloat {
-        let reach =
-            model.effectiveSplits.values
-            .map { ScreenArrangement.captionReach(of: $0) }
-            .max() ?? 0
-        return max(Self.standBand, reach)
-    }
+    /// The band under the picture's lowest cards: their stands.
+    private var footBand: CGFloat { Self.standBand }
 
     /// Scaled screen stand footer (#758, owner ruling 2026-08-04,
     /// 2026-08-09).
@@ -142,20 +133,6 @@ struct ScreensPicture: View {
                     }
                 }
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
-                // The area names, under the card (#3697).
-                if let split = model.areaSplit(of: drawn.display) {
-                    ScreenAreaCaptions(
-                        model: model,
-                        display: drawn.display,
-                        split: split,
-                        width: drawn.rect.width,
-                        selection: $selection
-                    )
-                    .offset(
-                        x: drawn.rect.minX,
-                        y: drawn.rect.maxY + ScreenArrangement.captionTop
-                    )
-                }
             }
             if let tray = layout.tray {
                 FollowsMainTray(

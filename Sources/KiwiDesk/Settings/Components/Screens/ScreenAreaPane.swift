@@ -13,14 +13,6 @@ struct ScreenAreaPane: View {
     let area: Int?
     /// The key a pin to this pane stores.
     let key: String
-    /// The first pane in reading order carries the screen's name.
-    let leads: Bool
-    /// Whether the pane meets the card's top edge, where the
-    /// screen's header row runs.
-    let touchesTop: Bool
-    /// How wide the screen's header may run: the card's inner
-    /// width, past this pane over its neighbours (#3697).
-    let headerWidth: CGFloat
     let size: CGSize
     let corners: RectangleCornerRadii
     /// The area giving way in an open Adjust… popover.
@@ -96,8 +88,7 @@ struct ScreenAreaPane: View {
             toggleSelection()
             return .handled
         }
-        // The full name too: the area names sit under the card,
-        // and a column too narrow for its name draws none there.
+        // The full name too: a narrow pane drops or truncates it.
         .help(
             isSplit
                 ? model.areaName(area, on: display) + "\n" + readout : readout
@@ -131,34 +122,48 @@ struct ScreenAreaPane: View {
         selection == ScreenSelection(display: display.id, area: area)
     }
 
-    /// Whether the pane keeps the header row: the screen's own
-    /// header, or room level with it beside the leading pane.
-    private var hasHeaderRow: Bool { leads || touchesTop }
+    /// A whole screen's one pane carries its name; a split card
+    /// names it once in its band (`ScreenCardBand`, #3697).
+    private var leads: Bool { !isSplit }
 
-    /// The header row: the screen's badge, name and Main on the
-    /// first pane, run across the card; the area names sit under
-    /// the card (`ScreenAreaCaptions`, #3697), so other panes draw
-    /// none.
+    /// The room above the chips: the header, the name, or none.
+    private var chipHeader: CGFloat {
+        if leads { return ScreenCardChips.headerHeight }
+        return namesArea ? ScreenCardChips.areaNameLine : 0
+    }
+
+    /// A whole screen's header, else a split pane's area name,
+    /// which a click passes through and VoiceOver hears on the label.
     @ViewBuilder private var header: some View {
-        if hasHeaderRow {
+        if leads {
             HStack(spacing: 0) {
-                if leads {
-                    ScreenNumberBadge(model: model, display: display)
-                        .font(.caption)
-                        .padding(.trailing, 4)
-                        .layoutPriority(3)
-                    headerText
-                }
+                ScreenNumberBadge(model: model, display: display)
+                    .font(.caption)
+                    .padding(.trailing, 4)
+                    .layoutPriority(3)
+                headerText
             }
-            .frame(
-                width: leads
-                    ? max(headerWidth, size.width)
-                        - ScreenCardChips.cardPadding * 2
-                    : nil,
-                height: ScreenCardChips.headerHeight,
-                alignment: .leading
-            )
+            .frame(height: ScreenCardChips.headerHeight)
+        } else if namesArea, let area,
+            let label = model.areaLabel(area, on: display)
+        {
+            Text(label)
+                .font(.caption2)
+                .fontWeight(isSelected ? .semibold : .regular)
+                .foregroundStyle(
+                    isSelected ? SettingsTheme.ink : SettingsTheme.ink2
+                )
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(height: ScreenCardChips.areaNameLine)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
+    }
+
+    /// Whether a split pane names its area (#3697, owner).
+    private var namesArea: Bool {
+        isSplit && ScreenCardChips.namesArea(in: size)
     }
 
     /// The name and the Main chip, which VoiceOver reads from the
@@ -194,7 +199,7 @@ struct ScreenAreaPane: View {
             let split = ScreenCardChips.split(
                 assignments,
                 in: size,
-                header: hasHeaderRow ? ScreenCardChips.headerHeight : 0
+                header: chipHeader
             )
             HStack(alignment: .top, spacing: ScreenCardChips.spacing) {
                 WrapChips(split.shown) { entry in

@@ -2626,10 +2626,11 @@ a stored screen or area key takes `SettingsModel.perScreenName(key:)`,
 and a surface with no model `perScreenName(screen:key:splits:area:)`
 — its stored name, else its stored split's position — never "Area
 n" of its own (#3612; `PerScreenAreaNameTests` holds the picker, a
-new surface is review's). A caption under its own screen's card,
-which the card's header names, takes the bare
-`SettingsModel.areaLabel(_:on:)` that `areaName` builds on (#3697,
-`ScreenAreaCaptionsTests`).
+new surface is review's). A split pane's own name line, inside a
+card whose band names the screen, takes the bare
+`SettingsModel.areaLabel(_:on:)` that `areaName` builds on, and the
+pane's label and hover keep `areaName` (#3697,
+`ScreenAreaNameTests`).
 
 ## SwiftUI traps
 

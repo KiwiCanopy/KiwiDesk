@@ -30,8 +30,15 @@ struct ScreenCard: View {
                 paneView(pane, split: split)
             }
             if let stored = model.areaSplit(of: display) {
+                ScreenCardBand(model: model, display: display)
+                    .frame(
+                        width: size.width,
+                        height: ScreenCardChips.headerHeight
+                    )
                 dividers(stored)
+                    .offset(y: Self.band(split))
                 capsules(split)
+                    .offset(y: Self.band(split))
             }
         }
         .frame(
@@ -54,6 +61,8 @@ struct ScreenCard: View {
         .onHover { hovering = $0 }
         // Over the next card, which would cover the shadow.
         .zIndex(risen ? 1 : 0)
+        // The band may drop a narrow card's name; hover still has it.
+        .help(split == nil ? "" : model.screenLabel(display))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(model.screenLabel(display))
         .accessibilityValue(splitValue)
@@ -79,23 +88,51 @@ struct ScreenCard: View {
         let id: Int
         let rect: CGRect
         let key: String
-        let leads: Bool
-        let touchesTop: Bool
+    }
+
+    /// The height of the band a split card names its screen in
+    /// (#3697 ▸ owner, ui-designer 2026-11-27); none on a whole card,
+    /// whose one pane carries the header.
+    static func band(_ split: ScreenSplit?) -> CGFloat {
+        split == nil ? 0 : ScreenCardChips.headerHeight
+    }
+
+    /// Where the panes, dividers and capsules lay out on a card of
+    /// `size`: all of it under the band.
+    static func areaRect(of size: CGSize, split: ScreenSplit?) -> CGRect {
+        let band = band(split)
+        return CGRect(
+            x: 0,
+            y: band,
+            width: size.width,
+            height: max(0, size.height - band)
+        )
+    }
+
+    /// Each pane's rect on a card of `size`, below its band.
+    static func paneRects(
+        of split: ScreenSplit?,
+        in size: CGSize
+    ) -> [(id: Int, rect: CGRect)] {
+        let area = areaRect(of: size, split: split)
+        return ScreenArrangement.unitAreas(of: split).map { unit in
+            (
+                unit.id,
+                ScreenArrangement.paneRect(unit.rect, in: area.size)
+                    .offsetBy(dx: 0, dy: area.minY)
+            )
+        }
     }
 
     private func panes(_ split: ScreenSplit?) -> [Pane] {
-        ScreenArrangement.unitAreas(of: split).enumerated().map {
-            index,
-            unit in
+        Self.paneRects(of: split, in: size).map { unit in
             Pane(
                 id: unit.id,
-                rect: ScreenArrangement.paneRect(unit.rect, in: size),
+                rect: unit.rect,
                 key: ScreenAreaKey(
                     fingerprint: display.fingerprint,
                     areaID: split == nil ? 0 : unit.id
-                ).description,
-                leads: index == 0,
-                touchesTop: unit.rect.minY < 0.001
+                ).description
             )
         }
     }
@@ -107,9 +144,6 @@ struct ScreenCard: View {
             rows: rows,
             area: split == nil ? nil : pane.id,
             key: pane.key,
-            leads: pane.leads,
-            touchesTop: pane.touchesTop,
-            headerWidth: size.width - pane.rect.minX,
             size: pane.rect.size,
             corners: corners(pane.rect),
             givesWay: givingWay.contains(
@@ -144,11 +178,13 @@ struct ScreenCard: View {
         )
     }
 
-    /// Card points per screen point along each axis.
+    /// Card points per screen point along each axis, in the area
+    /// under the band.
     private func scale(_ split: ScreenSplit) -> CGSize {
+        let area = Self.areaRect(of: size, split: split).size
         let width = CGFloat(max(split.extent.width, 1))
         let height = CGFloat(max(split.extent.height, 1))
-        return CGSize(width: size.width / width, height: size.height / height)
+        return CGSize(width: area.width / width, height: area.height / height)
     }
 
     /// Each divider is handed the STORED cut, which its drag starts
@@ -227,7 +263,10 @@ struct ScreenCard: View {
                     .first(where: { $0.id == id })?.rect,
                     let area = split.areas.first(where: { $0.id == id })
                 {
-                    let rect = ScreenArrangement.paneRect(unit, in: size)
+                    let rect = ScreenArrangement.paneRect(
+                        unit,
+                        in: Self.areaRect(of: size, split: split).size
+                    )
                     AreaSizeCapsule(
                         length: side ? area.w : area.h,
                         snap: drag.snap,

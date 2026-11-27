@@ -15,6 +15,20 @@ enum ScreenCardChips {
     /// both ends sat the same distance in (owner eyeball, #2065).
     static let cardPadding: CGFloat = 8
     static let headerHeight: CGFloat = 16
+    /// A split pane's area-name line (#3697 ▸ owner, ui-designer
+    /// 2026-11-27), and the narrowest pane that draws one: an
+    /// ellipsis alone names nothing.
+    static let areaNameLine: CGFloat = 13
+    static let areaNameMinWidth: CGFloat = 28
+
+    /// Whether a split pane of `size` writes its area's name: wide
+    /// enough to read, and tall enough for the name and a chip row,
+    /// since a chip outranks the name.
+    static func namesArea(in size: CGSize) -> Bool {
+        size.width - cardPadding * 2 >= areaNameMinWidth
+            && chipArea(in: size, header: areaNameLine).height
+                >= chipHeight
+    }
     static let trayHeaderHeight: CGFloat = 14
     /// Child spacing for chip stacks pinned in `ScreensGateWiringTests`.
     static let stackSpacing: CGFloat = 2

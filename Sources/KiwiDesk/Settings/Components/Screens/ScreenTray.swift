@@ -12,8 +12,7 @@ enum ScreenTray {
         cards: [ScreenArrangement.Drawn],
         main: DisplayID?,
         trayHeight: CGFloat = ScreenArrangement.trayHeight,
-        mainArea: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1),
-        captionBands: [CGRect] = []
+        mainArea: CGRect = CGRect(x: 0, y: 0, width: 1, height: 1)
     ) -> ScreenArrangement.Layout {
         guard !cards.isEmpty else {
             return ScreenArrangement.Layout()
@@ -25,12 +24,10 @@ enum ScreenTray {
             // the card's own edges for the bands above and below.
             rect(
                 anchoredTo: span(of: anchored.rect, area: mainArea),
-                // A split card's area names too, its own included
-                // (#3697).
                 avoiding: cards.filter { card in
                     card.id != anchored.id
                 }
-                .map(\.rect) + captionBands,
+                .map(\.rect),
                 height: trayHeight
             )
         }
