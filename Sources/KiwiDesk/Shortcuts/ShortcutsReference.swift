@@ -17,7 +17,8 @@ enum ShortcutsReferenceBuilder {
         layerNames: [String],
         layerIcons: [String: String] = [:],
         lenses: [String] = [],
-        unread: [UnreadChord] = []
+        unread: [UnreadChord] = [],
+        dropsOpeners: Bool = true
     ) -> ShortcutsReference {
         // Drop the key panel's openers from the working set
         // BEFORE any band builds, so the suppression holds by
@@ -26,10 +27,13 @@ enum ShortcutsReferenceBuilder {
         // split cost the band builders `private`, so a caller
         // invoking one directly would re-leak the seeded ⌃⌥K row
         // `ShortcutsSelfRowTests` pins — a band builder is
-        // `build`'s to call.
+        // `build`'s to call. The key sequence hint panel has no
+        // side switch, so it keeps an opener end key (#3695).
         var layer = layer
-        let openers = KeybindingCatalog.kiwiHubOpenerLuas
-        layer.bindings.removeAll { openers.contains($0.lua) }
+        if dropsOpeners {
+            let openers = KeybindingCatalog.kiwiHubOpenerLuas
+            layer.bindings.removeAll { openers.contains($0.lua) }
+        }
         // A key sequence is no press row: its end keys are listed
         // under their action by path, its leader not at all (#1871).
         let sequences = layer.sequences

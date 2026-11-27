@@ -27,17 +27,20 @@ extension JumpPanelController {
     /// Builds the shortcuts reference for the active key layer
     /// (`ShortcutsReferenceBuilder`, #820).
     func buildReference() -> ShortcutsReference? {
-        Self.reference(core: core, gestures: true)
+        Self.reference(core: core, gestures: true, dropsOpeners: true)
     }
 
     /// The reference for what `stepping` makes of the active layer —
     /// the layer itself, or the step of a key sequence the hint
     /// panel lists (#1871) — nil where it makes nothing. `gestures`
     /// adds the gesture badges and rows, which KiwiHub's sheet draws
-    /// and the hint panel never does (#3380, #3428).
+    /// and the hint panel never does (#3380, #3428). `dropsOpeners`
+    /// leaves out KiwiHub's openers, which the Shortcuts side's
+    /// switch already names and the hint panel lists (#2246, #3695).
     static func reference(
         core: KiwiCore,
         gestures: Bool,
+        dropsOpeners: Bool,
         stepping: (KeyLayer) -> KeyLayer? = { $0 }
     ) -> ShortcutsReference? {
         var layers: [KeyLayer]
@@ -104,7 +107,8 @@ extension JumpPanelController {
             layerNames: layers.map(\.name),
             layerIcons: KeyLayer.icons(of: layers),
             lenses: core.kiwiVisionLensChoices.map(\.name),
-            unread: unread
+            unread: unread,
+            dropsOpeners: dropsOpeners
         )
         var gestured = reference
         if gestures {
