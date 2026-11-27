@@ -17,9 +17,10 @@ struct JumpList {
     /// The apps holding a match for `query`; every app while it is
     /// empty. A tile outside it dims and takes no pick.
     private(set) var matchedApps: Set<pid_t>
-    /// Whether the strip shows (#3168): from a step off All or a
-    /// query until the panel closes, All included, so ⌃⌥J opens on
-    /// the list alone and the panel never jumps once it showed.
+    /// Whether the strip shows (#3168): from a step off All until
+    /// the panel closes, All included, so ⌃⌥J opens on the list
+    /// alone and the panel never jumps once it showed. A query
+    /// alone never shows it (#3704).
     private(set) var stripShown = false
 
     /// Results that take a ⌘ number.
@@ -46,7 +47,6 @@ struct JumpList {
             ? Set(snapshot.apps.map(\.pid)) : Set(all.map(\.entry.pid))
         results = all
         selection = results.isEmpty ? nil : 0
-        if !text.isEmpty { stripShown = true }
     }
 
     /// Moves the selection by `delta` rows, clamped at both ends;

@@ -6,9 +6,10 @@ import Testing
 @testable import KiwiDesk
 
 /// When KiwiHub's app strip and the current window show (#3168):
-/// the strip from its first step off All or query until the panel
-/// closes; the current window greyed atop All and its own app's
-/// tile with nothing typed; a strip that appears slides the panel.
+/// the strip from its first step off All until the panel closes,
+/// never from a query alone (#3704); the current window greyed
+/// atop All and its own app's tile with nothing typed; a strip
+/// that appears slides the panel.
 /// The footer names ← → and the last-app opener on Windows (#3159).
 @Suite("KiwiHub strip visibility (#3168)")
 @MainActor
@@ -60,14 +61,19 @@ struct JumpStripShownTests {
         #expect(list.selection == 0)
     }
 
-    @Test("a query shows the strip on All and hides the current window")
-    func typingShowsTheStrip() {
+    @Test("a query hides the current window and shows no strip")
+    func typingKeepsTheStripOut() {
         var list = JumpList(snapshot: Self.snapshot())
         list.setQuery("i")
         #expect(list.tile == 0)
-        #expect(list.stripShown)
+        #expect(!list.stripShown)
         #expect(list.yours == nil)
         #expect(list.drawnRows == list.results.count)
+        // → under the query brings it in on the first app with a
+        // match (#3704): Notes, Claude holding no match.
+        list.stepTile(1, wrap: false)
+        #expect(list.stripApp?.name == "Notes")
+        #expect(list.stripShown)
     }
 
     @Test("its own app's tile shows it; another app's does not")
@@ -92,10 +98,11 @@ struct JumpStripShownTests {
         stepped.pickTile(0)
         #expect(stepped.tile == 0)
         #expect(stepped.stripShown)
-        var typed = JumpList(snapshot: Self.snapshot())
-        typed.setQuery("i")
-        typed.setQuery("")
-        #expect(typed.stripShown)
+        // A query keeps a shown strip, dimming its tiles.
+        stepped.setQuery("i")
+        #expect(stepped.stripShown)
+        stepped.setQuery("")
+        #expect(stepped.stripShown)
         // A side switch lands on All and keeps it too.
         let model = model()
         model.handle(.side(1), repeated: false)
@@ -150,13 +157,13 @@ struct JumpStripShownTests {
         #expect(slides == 1 && snaps == 3)
         model.query = "i"
         #expect(slides == 1)
-        // A query is the first showing in its own opening.
+        // A query alone never slides the strip in (#3704).
         let typed = self.model()
         var typedSlides = 0
         typed.onStripToggle = { typedSlides += 1 }
         typed.query = "i"
         typed.query = ""
-        #expect(typedSlides == 1 && typed.list.stripShown)
+        #expect(typedSlides == 0 && !typed.list.stripShown)
     }
 
     @Test("the row reads as a list row, named on the right")
