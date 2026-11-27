@@ -8290,19 +8290,23 @@ selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 
+:::unreleased
 Under the field sits the **app strip**, shown from the first step
-off **All** or the first letter typed until KiwiHub closes, **All**
-included; KiwiHub opens on the list alone. It holds
-**All** first, then one tile per app with a window in the list, the
-app you are in first, then most recently used, with a count on an
-app with two windows or more. **←** and **→** move along it and a
-click picks a tile; the list then holds that app's windows alone,
-its most recent window selected. Typing puts the strip back on
-**All** and dims each app with no match; **←** and **→** then step
-through the apps with a match, never the text, and narrow the
-matches to that app. [kiwihub.show_last_app](#kiwihubshow_last_app)
-opens this side with the strip on the app of the window you used
-last.
+off **All** until KiwiHub closes, **All** included; KiwiHub opens
+on the list alone, and typing alone never shows it: under a query,
+**←** or **→** brings it in on an app with a match.
+:::
+
+The strip holds **All** first, then one tile per app with a window
+in the list, the app you are in first, then most recently used,
+with a count on an app with two windows or more. **←** and **→**
+move along it and a click picks a tile; the list then holds that
+app's windows alone, its most recent window selected. Typing puts a
+strip already shown back on **All** and dims each app with no
+match; **←** and **→** then step through the apps with a match,
+never the text, and narrow the matches to that app.
+[kiwihub.show_last_app](#kiwihubshow_last_app) opens this side with
+the strip on the app of the window you used last.
 
 With nothing typed, the window you are in sits greyed at the top
 of **All** and of its app's tile, marked **Current window**. It is
