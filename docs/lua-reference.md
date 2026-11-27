@@ -5611,9 +5611,9 @@ hide ▸ KiwiDesk as **Show look picker**.
   placed at once. With no profile live it lasts the session.
   **Return** on the look already worn closes the picker.
 - A click on a look at the side selects it.
-- **Esc**, **⌘W**, `⌃⌥⇧L`, a click outside the cards, or another
-  app taking the keyboard closes the picker; closing never undoes
-  a look it wore.
+- **Esc**, **⌘W**, `⌃⌥⇧L`, VoiceOver's escape, a click outside the
+  cards, or another app taking the keyboard closes the picker;
+  closing never undoes a look it wore.
 - When the worn look matches no look in the library, it comes
   first as **Current**, and **⌘S** saves it under a quick name, a
   fruit for its focus colour and the date ("Kiwi · Nov 24"). The
