@@ -2359,7 +2359,11 @@ hint panel's branch rows (`ShortcutGestureColumnsTests` ▸
 `withGestures`, behind `JumpPanelController.reference`'s
 `gestures:`, which the key sequence hint panel passes `false`: a
 step lists its branches and end keys alone (#3428,
-`KeySequenceHintGestureTests` ▸ `hintHasNoGesture`). A Gestures row's label and mark come from one
+`KeySequenceHintGestureTests` ▸ `hintHasNoGesture`), and its
+`dropsOpeners:`, which the hint panel passes `false` too, so a
+step lists an end key that opens KiwiHub; only KiwiHub's own
+Shortcuts side leaves the openers to its side switch (#3695,
+`KeySequenceHintOpenerTests` ▸ `hintListsTheOpener`). A Gestures row's label and mark come from one
 catalogue lookup handed to `withGestures`, never a closure per
 field.
 
@@ -2622,7 +2626,10 @@ a stored screen or area key takes `SettingsModel.perScreenName(key:)`,
 and a surface with no model `perScreenName(screen:key:splits:area:)`
 — its stored name, else its stored split's position — never "Area
 n" of its own (#3612; `PerScreenAreaNameTests` holds the picker, a
-new surface is review's).
+new surface is review's). A caption under its own screen's card,
+which the card's header names, takes the bare
+`SettingsModel.areaLabel(_:on:)` that `areaName` builds on (#3697,
+`ScreenAreaCaptionsTests`).
 
 **Copy narrating a waiting Screen pin asks
 `SettingsModel.unnumberedScreen(at:)` first** (#3688): a number

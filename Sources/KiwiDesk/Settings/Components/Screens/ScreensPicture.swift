@@ -53,7 +53,9 @@ struct ScreensPicture: View {
     }
 
     /// The band under the picture's lowest cards: the stand, or a
-    /// split card's area names where they reach further (#3697).
+    /// split card's area names where they reach further (#3697). A
+    /// split card stacked above another pushes it down by its names'
+    /// reach after the fit, so such a picture scrolls, not shrinks.
     private var footBand: CGFloat {
         let reach =
             model.effectiveSplits.values

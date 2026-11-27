@@ -96,7 +96,8 @@ struct ScreenAreaPane: View {
             toggleSelection()
             return .handled
         }
-        // The full name too: the card names no area.
+        // The full name too: the area names sit under the card,
+        // and a column too narrow for its name draws none there.
         .help(
             isSplit
                 ? model.areaName(area, on: display) + "\n" + readout : readout

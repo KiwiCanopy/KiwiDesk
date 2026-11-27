@@ -106,7 +106,8 @@ enum ScreenArrangement {
             cards: cards,
             main: mainID,
             trayHeight: band,
-            mainArea: unitAreas(of: mainSplit)[0].rect
+            mainArea: unitAreas(of: mainSplit)[0].rect,
+            captionBands: captionBands(cards, splits: splits)
         )
     }
 

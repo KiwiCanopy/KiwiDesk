@@ -42,10 +42,12 @@ struct ScreenAreaCaptions: View {
             entry.rect,
             in: CGSize(width: width, height: 1)
         )
-        if span.width >= ScreenArrangement.captionMinWidth {
+        if span.width >= ScreenArrangement.captionMinWidth,
+            let label = model.areaLabel(entry.id, on: display)
+        {
             let mine = ScreenSelection(display: display.id, area: entry.id)
             let selected = selection == mine
-            Text(model.areaLabel(entry.id, on: display) ?? "")
+            Text(label)
                 .font(.caption2)
                 .fontWeight(selected ? .semibold : .regular)
                 .foregroundStyle(

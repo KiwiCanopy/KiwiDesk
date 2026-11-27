@@ -72,6 +72,29 @@ struct ScreenAreaCaptionsTests {
         #expect(abs(b.rect.minY - a.rect.maxY) < 0.5)
     }
 
+    /// The tray drops below a split Main with a screen above it:
+    /// it clears that card's names too.
+    @Test("the tray clears a split card's names")
+    func trayClearsTheNames() throws {
+        let main = display(1)
+        let above = display(2, y: 1440)
+        let split = try #require(whole().splitting(0, .sideBySide))
+        let layout = ScreenArrangement.layout(
+            displays: [main, above],
+            mainID: main.id,
+            canvas: CGSize(width: 700, height: 300),
+            trayChips: 1,
+            splits: [main.fingerprint: split]
+        )
+        let card = try #require(
+            layout.displays.first { $0.id == main.id }
+        ).rect
+        let tray = try #require(layout.tray)
+        #expect(tray.minY >= card.maxY)
+        let reach = ScreenArrangement.captionReach(of: split)
+        #expect(tray.minY >= card.maxY + reach)
+    }
+
     @Test("cards side by side keep their places")
     func rowKeepsItsPlaces() throws {
         let left = display(1)

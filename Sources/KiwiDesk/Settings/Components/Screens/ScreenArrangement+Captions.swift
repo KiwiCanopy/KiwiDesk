@@ -10,21 +10,18 @@ extension ScreenArrangement {
 
     /// The caption lines of `split`, top to bottom: the areas
     /// sharing a top edge on one line, left to right. Empty for a
-    /// whole screen, whose header already names it; at most
-    /// `captionLineCap` lines.
+    /// whole screen, whose header already names it.
     static func captionLines(of split: ScreenSplit?) -> [[Caption]] {
         guard let split, !split.isWhole else { return [] }
         let units = unitAreas(of: split)
         let tops = Set(units.map { ($0.rect.minY * 1000).rounded() })
             .sorted()
-            .prefix(captionLineCap)
         return tops.map { top in
             units.filter { ($0.rect.minY * 1000).rounded() == top }
                 .sorted { $0.rect.minX < $1.rect.minX }
         }
     }
 
-    static let captionLineCap = 3
     /// One caption line's height.
     static let captionLine: CGFloat = 13
     static let captionSpacing: CGFloat = 2
@@ -42,6 +39,23 @@ extension ScreenArrangement {
         guard lines > 0 else { return 0 }
         return captionTop + lines * captionLine
             + (lines - 1) * captionSpacing
+    }
+
+    /// The band each split card's names take under it.
+    static func captionBands(
+        _ cards: [Drawn],
+        splits: [String: ScreenSplit]
+    ) -> [CGRect] {
+        cards.compactMap { card in
+            let reach = captionReach(of: splits[card.display.fingerprint])
+            guard reach > 0 else { return nil }
+            return CGRect(
+                x: card.rect.minX,
+                y: card.rect.maxY,
+                width: card.rect.width,
+                height: reach
+            )
+        }
     }
 
     /// `cards` with every card under a split card moved down past
