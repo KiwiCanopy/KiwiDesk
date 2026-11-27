@@ -39,7 +39,9 @@ extension KiwiCore {
                 .flatMap { workspaces[placement: $0] }
                 .map { (space.id, $0.key) }
         }
-        state.workspaces.setAreaSplits(shares.splits(order: order))
+        state.workspaces.setAreaSplits(
+            shares.splits(order: order, floors: tiler.settings.areaFloors)
+        )
         // A merged-away area's Spaces go to the survivor the
         // memory and the pins take, never area 0 by default.
         for (space, key) in before {

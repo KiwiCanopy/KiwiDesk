@@ -36,7 +36,9 @@ struct ScreensSection: View {
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()
         }
-        .onChange(of: model.config.settings.displayAreas) {
+        // The splits as drawn, so a floor or renumber that draws a
+        // screen whole also lets go of its area (#3647).
+        .onChange(of: model.draftSplits) {
             selection = normalized(selection, rows: model.screenRows)
         }
     }

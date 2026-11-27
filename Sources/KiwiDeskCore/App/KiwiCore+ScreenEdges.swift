@@ -219,7 +219,12 @@ extension KiwiCore {
         let screens = Set(monitorSets.flatMap(\.monitors)).union(
             connectedDisplays().map(\.fingerprint)
         )
-        let splits = shares.splits(order: order, sets: monitorSets)
+        // Every stored area, drawn or not, so a write never judges fewer.
+        let splits = shares.splits(
+            order: order,
+            sets: monitorSets,
+            floors: .unfloored
+        )
         return ScreenEdgeScope(
             screens: screens.union(
                 screens.flatMap {

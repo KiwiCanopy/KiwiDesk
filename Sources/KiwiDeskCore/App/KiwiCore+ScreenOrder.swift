@@ -8,12 +8,14 @@ import Foundation
 extension KiwiCore {
     /// Which connected screen holds which number: the live
     /// profile's set covering the screens, in its stored order, else
-    /// left to right, ties top to bottom. Read from adoption state,
-    /// never the file (#1245); while an apply installs another
+    /// left to right, ties top to bottom; the session's renumber,
+    /// else the fit rule's order, over either. Read from adoption
+    /// state, never the file (#1245); while an apply installs another
     /// arrangement, that arrangement's order.
     public var liveScreenOrder: ScreenOrder {
         profiles.screenOrderInFlight
             ?? sessionScreenOrder
+            ?? liveFittedScreenOrder
             ?? screenOrder(holding: profiles.active?.monitorSets ?? [])
     }
 
@@ -22,7 +24,13 @@ extension KiwiCore {
     /// set covering them, else left to right. A draft of a stored
     /// profile reads its own, never the live one's.
     public func screenOrder(for profile: Profile?) -> ScreenOrder {
-        if let profile, let order = sessionScreenOrder(for: profile.name) {
+        if let profile,
+            let order = sessionScreenOrder(for: profile.name)
+                ?? fittedScreenOrder(
+                    for: profile.name,
+                    holding: profile.monitorSets
+                )
+        {
             return order
         }
         return screenOrder(holding: profile?.monitorSets ?? [])
@@ -98,10 +106,15 @@ extension KiwiCore {
         liveScreenOrder.runtime(stored)
     }
 
-    /// The connected screens as a set a write adds stores them: in
-    /// the order the live pins were numbered in.
+    /// The connected screens as a set a write adds stores them: the
+    /// session's renumber, else the order the setup is held in or
+    /// numbered by, never the fit rule's (#3647 ▸ no-fit ruling 4).
     var liveMonitorSet: MonitorSet {
-        MonitorSet(monitors: liveScreenOrder.fingerprints)
+        MonitorSet(
+            monitors: (sessionScreenOrder
+                ?? screenOrder(holding: profiles.active?.monitorSets ?? []))
+                .fingerprints
+        )
     }
 
     /// The connected screens' set as a profile already holds it, in

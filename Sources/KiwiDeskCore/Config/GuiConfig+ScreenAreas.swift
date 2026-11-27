@@ -74,7 +74,7 @@ extension GuiConfig {
     ) -> ScreenAreaRemap? {
         guard let number = order.number(of: fingerprint),
             let merged = settings.displayAreas
-                .split(on: fingerprint, order: order)?
+                .split(on: fingerprint, order: order, floors: .unfloored)?
                 .merging(a, b)
         else { return nil }
         settings.displayAreas.store(

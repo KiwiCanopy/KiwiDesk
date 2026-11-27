@@ -12,25 +12,49 @@ extension Dictionary where Key == String, Value == ScreenShares {
         set { self[String(number)] = newValue }
     }
 
-    /// The split the screen `fingerprint` takes under `order`, in
-    /// its own points; nil where it holds no number or its number
-    /// holds no split.
-    public func split(
+    /// The verdict on the split the screen `fingerprint` takes under
+    /// `order`, in its own points; `.whole` where it holds no number
+    /// or its number holds no split.
+    public func verdict(
         on fingerprint: String,
-        order: ScreenOrder
-    ) -> ScreenSplit? {
-        guard let number = order.number(of: fingerprint) else {
-            return nil
-        }
-        return self[number: number]?.resolved(on: fingerprint)
+        order: ScreenOrder,
+        floors: AreaFloors
+    ) -> ScreenSplit.Verdict {
+        guard let number = order.number(of: fingerprint),
+            let size = ScreenShares.size(of: fingerprint),
+            let shares = self[number: number]
+        else { return .whole }
+        return ScreenSplit.verdict(
+            shares.resolved(width: size.width, height: size.height),
+            width: size.width,
+            height: size.height,
+            floors: floors
+        )
     }
 
-    /// Every split of `order`'s screens, keyed by fingerprint.
-    public func splits(order: ScreenOrder) -> [String: ScreenSplit] {
+    /// The split the screen `fingerprint` draws under `order` and
+    /// `floors`; nil where it draws whole.
+    public func split(
+        on fingerprint: String,
+        order: ScreenOrder,
+        floors: AreaFloors
+    ) -> ScreenSplit? {
+        verdict(on: fingerprint, order: order, floors: floors).split
+    }
+
+    /// Every split `order`'s screens draw, keyed by fingerprint.
+    public func splits(
+        order: ScreenOrder,
+        floors: AreaFloors
+    ) -> [String: ScreenSplit] {
         var result: [String: ScreenSplit] = [:]
         for fingerprint in order.fingerprints
         where result[fingerprint] == nil {
-            result[fingerprint] = split(on: fingerprint, order: order)
+            result[fingerprint] = split(
+                on: fingerprint,
+                order: order,
+                floors: floors
+            )
         }
         return result
     }
@@ -41,11 +65,15 @@ extension Dictionary where Key == String, Value == ScreenShares {
     /// set in turn.
     public func splits(
         order: ScreenOrder,
-        sets: [MonitorSet]
+        sets: [MonitorSet],
+        floors: AreaFloors
     ) -> [String: ScreenSplit] {
-        var result = splits(order: order)
+        var result = splits(order: order, floors: floors)
         for set in sets {
-            result.merge(splits(order: set.order)) { kept, _ in kept }
+            result.merge(splits(order: set.order, floors: floors)) {
+                kept,
+                _ in kept
+            }
         }
         return result
     }

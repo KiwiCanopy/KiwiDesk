@@ -24,7 +24,11 @@ struct DisplayAreaCommandTests {
 
     private func split(_ core: KiwiCore) -> ScreenSplit? {
         core.tiler.settings.displayAreas
-            .split(on: wide.fingerprint, order: core.liveScreenOrder)
+            .split(
+                on: wide.fingerprint,
+                order: core.liveScreenOrder,
+                floors: .unfloored
+            )
     }
 
     @Test func sizesSplitTheScreen() throws {
@@ -84,7 +88,7 @@ struct DisplayAreaCommandTests {
         )
         #expect(reply.isSuccess)
         // Kept whole, so its next id outlives the merge (ruling 21).
-        #expect(split(core)?.isWhole == true)
+        #expect(core.tiler.settings.displayAreas["1"]?.isWhole == true)
     }
 
     @Test func brokenSplitsAreRefused() {

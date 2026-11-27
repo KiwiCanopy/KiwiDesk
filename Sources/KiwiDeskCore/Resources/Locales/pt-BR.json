@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "Número da tela",
   "monitor_card.number.none": "Não numerar esta tela",
   "monitor_card.number.unnumbered": "Recebe um novo espaço",
+  "monitor_card.number.unsplit.side_by_side": "Aqui, as áreas da Tela %1$d ficariam mais estreitas que o tamanho mínimo da janela, então esta tela não é dividida.",
+  "monitor_card.number.unsplit.stacked": "Aqui, as áreas da Tela %1$d ficariam mais baixas que o tamanho mínimo da janela, então esta tela não é dividida.",
   "monitor_card.number.use": "Usar como Tela %1$d",
   "monitor_card.number_badge": "Tela %1$d",
   "monitor_card.split.nested.ax": "Áreas: %1$d",

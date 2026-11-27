@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "Numéro d'écran",
   "monitor_card.number.none": "Ne pas numéroter cet écran",
   "monitor_card.number.unnumbered": "Reçoit un nouvel espace",
+  "monitor_card.number.unsplit.side_by_side": "Ici, les secteurs de l'Écran %1$d seraient plus étroits que la taille minimale de fenêtre, donc cet écran n'est pas divisé.",
+  "monitor_card.number.unsplit.stacked": "Ici, les secteurs de l'Écran %1$d seraient moins hauts que la taille minimale de fenêtre, donc cet écran n'est pas divisé.",
   "monitor_card.number.use": "Utiliser comme Écran %1$d",
   "monitor_card.number_badge": "Écran %1$d",
   "monitor_card.split.nested.ax": "Secteurs : %1$d",

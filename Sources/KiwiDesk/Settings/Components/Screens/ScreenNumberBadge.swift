@@ -33,6 +33,42 @@ struct ScreenNumberBadge: View {
     }
 }
 
+/// Why a screen holding a number draws whole: the number's split
+/// would put an area under the minimum window size there (#3647 ▸
+/// no-fit ruling). Its own element, outside any dim.
+struct ScreenUnsplitCaption: View {
+    let number: Int
+    let axis: ScreenAreaCut.Axis
+
+    var body: some View {
+        Text(Self.text(number: number, axis: axis))
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    static func text(number: Int, axis: ScreenAreaCut.Axis) -> String {
+        switch axis {
+        case .sideBySide:
+            L(
+                "monitor_card.number.unsplit.side_by_side",
+                "Screen %1$d\u{2019}s areas would be narrower than the "
+                    + "minimum window size here, so this screen isn\u{2019}t "
+                    + "split.",
+                number
+            )
+        case .stacked:
+            L(
+                "monitor_card.number.unsplit.stacked",
+                "Screen %1$d\u{2019}s areas would be shorter than the "
+                    + "minimum window size here, so this screen isn\u{2019}t "
+                    + "split.",
+                number
+            )
+        }
+    }
+}
+
 /// The badge's items, which the card's menu ends with too: a number
 /// for each screen, checkmarked where it is this screen's, then
 /// Don't Number This Screen.
@@ -42,6 +78,7 @@ struct ScreenNumberItems: View {
 
     var body: some View {
         let current = model.screenNumber(of: display)
+        let anyFits = model.anyScreenOrderFits
         ForEach(1...max(model.screenNumberCount, 1), id: \.self) { number in
             Toggle(
                 L("monitor_card.number.use", "Use as Screen %1$d", number),
@@ -49,6 +86,15 @@ struct ScreenNumberItems: View {
                     get: { current == number },
                     set: { _ in model.useScreenNumber(number, for: display) }
                 )
+            )
+            // A number whose split cannot fit here greys (#3647).
+            .disabled(
+                current != number
+                    && !model.screenNumberFits(
+                        number,
+                        for: display,
+                        anyFits: anyFits
+                    )
             )
         }
         Divider()

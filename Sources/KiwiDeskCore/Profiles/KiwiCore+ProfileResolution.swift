@@ -44,8 +44,9 @@ extension KiwiCore {
             arrangement: .profile(profile.name),
             switching: switching
         )
-        // Its splits lay out in its own numbering, as its pins do; a
-        // read of the outgoing numbering comes before this line.
+        // Its splits lay out in its own numbering, fitted, as its
+        // pins do; a read of the outgoing numbering comes before this.
+        refitScreenOrder(for: profile, cause: cause)
         profiles.screenOrderInFlight = screenOrder(for: profile)
         defer { endScreenOrderInFlight() }
         // A held Space keeps the icon it had where it lived (#1507),
@@ -192,6 +193,7 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         clearSessionScreenOrder()
+        profiles.screenOrders.fitted = nil
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }

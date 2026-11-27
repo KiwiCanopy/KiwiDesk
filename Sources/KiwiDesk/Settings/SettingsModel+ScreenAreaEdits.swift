@@ -152,7 +152,8 @@ extension SettingsModel {
     var draftSplits: [String: ScreenSplit] {
         config.settings.displayAreas.splits(
             order: screenOrder,
-            sets: draftMonitorSets
+            sets: draftMonitorSets,
+            floors: config.settings.areaFloors
         )
     }
 }

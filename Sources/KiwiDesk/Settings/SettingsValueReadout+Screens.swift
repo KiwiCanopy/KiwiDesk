@@ -84,7 +84,10 @@ extension SettingsValueReadout {
         return SettingsModel.perScreenName(
             screen: screen,
             key: key.description,
-            splits: shares.splits(order: order ?? ScreenOrder([]))
+            splits: shares.splits(
+                order: order ?? ScreenOrder([]),
+                floors: .unfloored
+            )
         )
     }
 

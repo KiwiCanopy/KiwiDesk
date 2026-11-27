@@ -1860,6 +1860,8 @@
   "monitor_card.number.ax": "画面番号",
   "monitor_card.number.none": "この画面に番号を付けない",
   "monitor_card.number.unnumbered": "新しいスペースが割り当てられます",
+  "monitor_card.number.unsplit.side_by_side": "ここでは画面%1$dのエリアが最小ウインドウサイズより狭くなるため、この画面は分割されません。",
+  "monitor_card.number.unsplit.stacked": "ここでは画面%1$dのエリアが最小ウインドウサイズより低くなるため、この画面は分割されません。",
   "monitor_card.number.use": "画面%1$dとして使う",
   "monitor_card.number_badge": "画面%1$d",
   "monitor_card.split.nested.ax": "エリア数：%1$d",

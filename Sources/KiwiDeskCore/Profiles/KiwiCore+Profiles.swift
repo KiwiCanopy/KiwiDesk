@@ -156,10 +156,13 @@ extension KiwiCore {
         let set =
             sessionScreenOrder == nil
             ? heldLiveSet ?? liveMonitorSet : liveMonitorSet
+        // The pins are numbered as they were live, the fit included.
+        let pinOrder =
+            sessionScreenOrder ?? liveFittedScreenOrder ?? set.order
         return Profile(
             name: name,
             monitorSets: [set],
-            spaceMonitorMap: (sessionScreenOrder ?? set.order).storing(
+            spaceMonitorMap: pinOrder.storing(
                 runtime: capturedPins(alsoOf: extra),
                 over: [:]
             ),

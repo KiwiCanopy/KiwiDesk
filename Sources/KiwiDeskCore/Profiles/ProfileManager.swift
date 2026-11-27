@@ -38,8 +38,6 @@ public final class ProfileManager {
     /// against the adoption state, which is the OUTGOING one until
     /// the apply's last line, so nothing is retired meanwhile.
     var arrangementInFlight = 0
-    /// The order an apply installs, set by its two doors (#3647).
-    var screenOrderInFlight: ScreenOrder?
     /// The live profile's saved layout modes as last adopted or
     /// written (#1245, #1518), tagged so a stale copy never
     /// answers for another profile.
@@ -62,12 +60,9 @@ public final class ProfileManager {
     /// The resolving Standard as one value, `currentStandard`'s
     /// source (#1509).
     private(set) var standard: ActiveStandard?
-    /// A session renumber and its profile (#3647; nil: none live),
-    /// read through `KiwiCore+SessionScreenOrder`.
-    private(set) var sessionScreenOrder: SessionScreenOrder?
-    func setSessionScreenOrder(_ order: ScreenOrder?, for name: String?) {
-        sessionScreenOrder = order.map { .init(profile: name, order: $0) }
-    }
+    /// The session's screen orders (#3647), read through
+    /// `ProfileManager+ScreenOrders`.
+    var screenOrders = ScreenOrderSession()
     /// True when live state diverged from saved profile.
     public private(set) var isDirty = false
 
@@ -168,7 +163,7 @@ public final class ProfileManager {
             at: url(for: validated(name))
         )
         updateIndex(stampBefore: stamp) { $0.remove(file: name) }
-        if sessionScreenOrder?.profile == name { sessionScreenOrder = nil }
+        screenOrders.forget(name)
         if currentName == name {
             active = nil
             isDirty = true
@@ -213,9 +208,7 @@ public final class ProfileManager {
         updateIndex(stampBefore: stamp) { $0.remove(file: old) }
         profile.name = new
         try write(profile)
-        if sessionScreenOrder?.profile == old {
-            sessionScreenOrder?.profile = new
-        }
+        screenOrders.rename(old, to: new)
         if currentName == old {
             active = active?.renamed(to: new)
             savedModesRecord = (new, profile.spaceModes)

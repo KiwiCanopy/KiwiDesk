@@ -49,7 +49,7 @@ struct AreaEdgeTests {
         let keys = ScreenSplit.areaKeys(
             of: fp,
             in: core.tiler.settings.displayAreas
-                .splits(order: core.liveScreenOrder)
+                .splits(order: core.liveScreenOrder, floors: .unfloored)
         )
         #expect(keys == [fp, "\(fp)#1", "\(fp)#2"])
         #expect(

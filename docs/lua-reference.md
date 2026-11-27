@@ -850,6 +850,14 @@ first setup holding it gives it, so its split is the one the
 screen holding that number now draws.
 :::
 
+:::unreleased
+A split whose areas would be narrower or shorter than the minimum
+window size on the screen it names is refused. A screen that
+cannot hold its number's split draws whole; a profile load numbers
+its screens so that every split fits where it can, and a
+fingerprint then names the number that screen holds in that order.
+:::
+
 A number or a screen's name names its first area; what it names
 for the bars' verbs is [`space_bar.set_edge`](#space_barset_edge)'s
 **Per area**. The screen verbs' directions and last screen reach

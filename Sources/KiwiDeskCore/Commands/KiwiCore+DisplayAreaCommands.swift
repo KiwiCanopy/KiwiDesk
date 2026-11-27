@@ -59,6 +59,18 @@ extension KiwiCore {
         ) {
             return .fail(Self.message(for: problem))
         }
+        // A connected screen draws a split under the floor whole, so
+        // the write that would make one is refused (#3647 ▸ lane 3).
+        if target.connected,
+            case .tooSmall(let axis) = ScreenSplit.verdict(
+                split,
+                width: target.size.width,
+                height: target.size.height,
+                floors: tiler.settings.areaFloors
+            )
+        {
+            return .fail(Self.floorMessage(axis))
+        }
         storeShares(
             ScreenShares(
                 split,
@@ -82,11 +94,12 @@ extension KiwiCore {
     private func splitTarget(
         _ arg: JSONValue?,
         _ rest: [JSONValue]
-    ) -> (number: Int?, size: (width: Int, height: Int))? {
+    ) -> (number: Int?, size: (width: Int, height: Int), connected: Bool)? {
         if let screen = splitScreen(arg) {
             return (
                 liveScreenOrder.number(of: screen.fingerprint),
-                (screen.width, screen.height)
+                (screen.width, screen.height),
+                true
             )
         }
         if let raw = arg?.stringValue, Self.isFingerprint(raw),
@@ -97,10 +110,10 @@ extension KiwiCore {
             let set = profiles.active?.monitorSets.first {
                 $0.monitors.contains(raw)
             }
-            return (set?.order.number(of: raw), size)
+            return (set?.order.number(of: raw), size, false)
         }
         guard let number = arg?.intValue, number >= 1 else { return nil }
-        return (number, Self.extent(of: rest))
+        return (number, Self.extent(of: rest), false)
     }
 
     /// The extent `args` span when no screen gives one: the sizes'
@@ -171,7 +184,11 @@ extension KiwiCore {
             trimmed,
             for: key,
             splits: key == nil
-                ? [:] : tiler.settings.displayAreas.splits(order: order),
+                ? [:]
+                : tiler.settings.displayAreas.splits(
+                    order: order,
+                    floors: .unfloored
+                ),
             screenNames: key == nil
                 ? [] : state.workspaces.allDisplays.map(\.name)
         ) {
@@ -248,6 +265,12 @@ extension KiwiCore {
             entries.append((fields["id"]?.intValue, area))
         }
         return .split(ScreenSplit.adopting(entries, after: previous))
+    }
+
+    /// The refusal for a split a screen would draw whole.
+    static func floorMessage(_ axis: ScreenAreaCut.Axis) -> String {
+        let side = axis == .sideBySide ? "narrower" : "shorter"
+        return "areas would be \(side) than the minimum window size"
     }
 
     /// The refusal for a broken split, naming the rule it breaks.
