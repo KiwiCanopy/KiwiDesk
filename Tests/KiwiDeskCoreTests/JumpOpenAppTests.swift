@@ -28,14 +28,26 @@ struct JumpOpenAppTests {
             recorder.opened.append((id, mode))
             return found
         }
-        core.openOrFocus.resolves = { _ in found }
+        core.openOrFocus.resolves = { found && $0 == Self.mail }
         core.eventLoop.activationPolicy = { _ in .regular }
         core.eventLoop.runningApplications = {
             [
+                // Notes' first process holds no row; its second does.
+                RunningApp(
+                    pid: 900_005,
+                    activationPolicy: .regular,
+                    ref: AppRef(bundleID: Self.notes, name: "Notes")
+                ),
                 RunningApp(
                     pid: 900_001,
                     activationPolicy: .regular,
                     ref: AppRef(bundleID: Self.notes, name: "Notes")
+                ),
+                // KiwiDesk itself is never a row.
+                RunningApp(
+                    pid: getpid(),
+                    activationPolicy: .regular,
+                    ref: AppRef(bundleID: "app.test.kiwi", name: "Kiwi")
                 ),
                 RunningApp(
                     pid: 900_002,
@@ -109,7 +121,7 @@ struct JumpOpenAppTests {
     @Test("↩ reopens through the launcher and owes the follow")
     func opens() {
         let (core, recorder) = makeCore()
-        #expect(core.openAppRefusal(Self.mail) == nil)
+        #expect(core.openAppRefusal("App.Test.Mail") == nil)
         #expect(core.openApp("App.Test.Mail"))
         #expect(recorder.opened.map(\.0) == [Self.mail])
         #expect(recorder.opened.map(\.1) == [.reopen])
@@ -130,6 +142,7 @@ struct JumpOpenAppTests {
         #expect(start.tier == 0)
         let inside = try #require(JumpSearch.nameMatch("fa", in: "Safari"))
         #expect(inside.tier == 1)
+        #expect(JumpSearch.nameMatch(" sa", in: "Safari")?.tier == 0)
         #expect(String("Safari"[inside.range]) == "fa")
         #expect(JumpSearch.nameMatch(" ", in: "Safari") == nil)
         #expect(JumpSearch.nameMatch("x", in: "Safari") == nil)

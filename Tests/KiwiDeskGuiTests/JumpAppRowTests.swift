@@ -96,6 +96,11 @@ struct JumpAppRowTests {
         #expect(list.appResults.isEmpty)
         list.pickTile(0)
         #expect(!list.appResults.isEmpty)
+        // Apps alone: row 1 is the first app, selected.
+        list.setQuery("maps")
+        #expect(list.results.isEmpty)
+        #expect(list.selection == 0)
+        #expect(list.selectedApp?.app.name == "Maps")
     }
 
     private func model() -> JumpModel {
@@ -119,8 +124,11 @@ struct JumpAppRowTests {
         model.onOpenApp = { opened.append($0) }
         model.onDeadKey = { dead += 1 }
         model.onRefuse = { refused.append($0) }
+        #expect(!model.selectionOpens)
         model.query = "safari"
+        // No window matches: row 1 is Safari's, and the footer opens.
         let row = model.list.results.count
+        #expect(row == 0 && model.selectionOpens)
         model.pick(row, .moveHere)
         model.pick(row, .swapHere)
         #expect(dead == 2 && opened.isEmpty && refused.isEmpty)
@@ -183,6 +191,17 @@ struct JumpAppRowTests {
         let apps = try squash("JumpPanelController+Apps.swift")
         #expect(
             apps.contains(
+                "model.onOpenApp={[weakself]inself?.openApp($0)}"
+            )
+        )
+        #expect(apps.contains("running:snapshot.running"))
+        #expect(apps.contains("own:Bundle.main.bundleIdentifier"))
+        #expect(apps.contains("guarddismiss(distrusting:true)else{return}"))
+        let footer = try squash("JumpPanelView+Footer.swift")
+        #expect(footer.contains("letopens=model.selectionOpens"))
+        #expect(footer.contains("selectionOpens:opens"))
+        #expect(
+            apps.contains(
                 "model.openRefusal={[weakself]inself?.core.openAppRefusal($0)}"
             )
         )
@@ -204,6 +223,8 @@ struct JumpAppRowTests {
             #expect(!source.contains("KeybindingCatalog.installed"), "\(file)")
         }
         let list = try squash("JumpPanelView+List.swift")
+        #expect(list.contains("ForEach(0..<list.rowCount,id:\\.self)"))
+        #expect(list.contains("ids:Array(0..<model.list.rowCount)"))
         #expect(
             list.contains("ifletapp=list.appRow(index){appRow(index,app)}")
         )

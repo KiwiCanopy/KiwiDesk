@@ -7,7 +7,7 @@ extension JumpPanelView {
     var footer: some View {
         let selected = model.list.selected?.entry
         // An app row has no window to move or swap (#3704).
-        let opens = model.list.selectedApp != nil
+        let opens = model.selectionOpens
         return JumpFooterRow(
             footer: JumpFooter(
                 scope: model.scope,
