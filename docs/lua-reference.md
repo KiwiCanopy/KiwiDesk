@@ -748,7 +748,8 @@ passes its fingerprint. A number a
 held `init.lua` call names before any screen is known —
 `pin_space_to_display`, a split, a bar's per-screen value — is
 numbered at the first screen report, by the profile live then; on a
-setup that profile does not hold, left to right.
+setup that profile does not hold, as
+[Profile Screen Setups](#profile-screen-setups) numbers it.
 
 **Does:** moves the whole space to that screen **now** and
 shows it there (each screen shows one space at a time). A

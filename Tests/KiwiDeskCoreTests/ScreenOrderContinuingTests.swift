@@ -108,14 +108,16 @@ struct ScreenOrderContinuingTests {
                 == ["A", "C"]
         )
         #expect(names(.leftToRight(displays)) == ["C", "A"])
+        // B, known as Screen 2, sits leftmost.
         let three = [
-            screen("D", x: -100), screen("B", x: 0), screen("E", x: 100),
+            screen("B", x: -200), screen("D", x: 0), screen("E", x: 100),
         ]
         #expect(
             names(
                 ScreenOrder.continuing([set("A", "B", "C")], displays: three)
             ) == ["D", "B", "E"]
         )
+        #expect(names(.leftToRight(three)) == ["B", "D", "E"])
     }
 
     @Test("the set sharing the most screens wins, the first on a tie")

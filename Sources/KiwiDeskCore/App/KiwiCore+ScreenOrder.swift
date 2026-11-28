@@ -8,11 +8,11 @@ import Foundation
 extension KiwiCore {
     /// Which connected screen holds which number: the live
     /// profile's set covering the screens, in its stored order, else
-    /// a set they contain continued, else left to right, ties top to
-    /// bottom (`screenOrder(holding:)`); the session's renumber,
-    /// else the fit rule's order, over either. Read from adoption
-    /// state, never the file (#1245); while an apply installs another
-    /// arrangement, that arrangement's order.
+    /// a set they contain or share screens with continued, else left
+    /// to right, ties top to bottom (`screenOrder(holding:)`); the
+    /// session's renumber, else the fit rule's order, over either.
+    /// Read from adoption state, never the file (#1245); while an
+    /// apply installs another arrangement, that arrangement's order.
     public var liveScreenOrder: ScreenOrder {
         profiles.screenOrderInFlight
             ?? sessionScreenOrder
@@ -38,9 +38,10 @@ extension KiwiCore {
     }
 
     /// The order `sets` number the connected screens in: the set
-    /// covering them, else one they contain continued, else left to
-    /// right (#3648); read on each call, so it follows a screen
-    /// change. The one door a base order is decided at.
+    /// covering them, else one they contain or share screens with
+    /// continued, else left to right (#3648); read on each call, so
+    /// it follows a screen change. The one door a base order is
+    /// decided at.
     public func screenOrder(holding sets: [MonitorSet]) -> ScreenOrder {
         let displays = state.workspaces.allDisplays
         return sets.order(matching: liveFingerprints)
