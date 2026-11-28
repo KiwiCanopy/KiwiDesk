@@ -908,7 +908,7 @@
   "jump.ax.results": "Resultados: %1$d",
   "jump.ax.swap_refused": "Não é possível trocar: %1$@",
   "jump.empty.no_match": "Nenhuma janela aberta corresponde",
-  "jump.empty.no_results": "Sem resultados",
+  "jump.empty.no_results": "Nenhum resultado",
   "jump.empty.other": "Nenhuma outra janela",
   "jump.field.label": "Ir para a janela",
   "jump.footer.apps": "%1$@ Apps",

@@ -224,7 +224,7 @@ struct SequenceNodeRow: View {
         }
     }
 
-    private func pickApp(_ app: KeybindingCatalog.InstalledApp) {
+    private func pickApp(_ app: InstalledApps.App) {
         editing.update(node.id) {
             $0 = SequenceTree.appKey(
                 $0,

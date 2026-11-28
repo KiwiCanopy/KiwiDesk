@@ -143,6 +143,9 @@ final class JumpModel: ObservableObject {
     var moveRefusal: (JumpEntry) -> JumpMoveBlock? = { $0.moveBlock }
     /// Core's answer for an Applications row's ↩ (#3704).
     var openRefusal: (String) -> JumpOpenBlock? = { _ in nil }
+    /// Why the refused Applications row would not open, which it
+    /// shows while `revealedRow` is that row.
+    @Published var appRefusal: JumpOpenBlock?
     /// Opens an Applications row's app; the panel closes first.
     var onOpenApp: (String) -> Void = { _ in }
     /// The row whose refused press swells its reason, for a beat.

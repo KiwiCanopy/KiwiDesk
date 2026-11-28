@@ -33,7 +33,9 @@ public struct JumpRunningApp: Sendable, Equatable {
     /// Lowercased, as every app verb takes it.
     public let bundleID: String
     public let name: String
-    /// Whether a row of the list, or the current window, is its.
+    /// Whether a row of the list, or the current window, is its, or
+    /// KiwiDesk ignores the app: either way the section leaves it
+    /// out.
     public let listed: Bool
 
     public init(bundleID: String, name: String, listed: Bool) {

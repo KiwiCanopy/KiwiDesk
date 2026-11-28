@@ -9,7 +9,8 @@ struct JumpList {
     let snapshot: JumpSnapshot
     private(set) var query = ""
     private(set) var results: [JumpSearch.Match]
-    /// Index into `results`; nil only while there are none.
+    /// Index into the rows `rowCount` counts, the windows' then the
+    /// apps'; nil only while there are none.
     private(set) var selection: Int?
     /// The app strip's tile (#3135): 0 is All, `n` the snapshot's
     /// app `n − 1`, whose rows alone the list then shows.
@@ -97,16 +98,8 @@ struct JumpList {
         }
     }
 
-    /// The window match a ⌘ digit picks — by result, never by
-    /// scroll; nil past the windows.
-    func quick(_ index: Int) -> JumpSearch.Match? {
-        guard index < Self.numbered, index < results.count else {
-            return nil
-        }
-        return results[index]
-    }
-
-    /// Whether a ⌘ digit reaches row `index`, an app row included.
+    /// Whether a ⌘ digit reaches row `index` — by result, never by
+    /// scroll, an app row included.
     func digitReaches(_ index: Int) -> Bool {
         index < Self.numbered && index < rowCount
     }

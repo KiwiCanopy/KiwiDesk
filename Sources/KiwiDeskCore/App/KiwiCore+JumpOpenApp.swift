@@ -6,20 +6,28 @@ import AppKit
 extension KiwiCore {
     /// The running regular apps by bundle id, in LaunchServices'
     /// order, each listed where a pid in `listed` is one of its
-    /// processes (#3704).
-    func jumpRunningApps(listed: Set<pid_t>) -> [JumpRunningApp] {
+    /// processes or KiwiDesk ignores the app, whose windows have no
+    /// row by rule, so the section never offers to reopen one
+    /// (#3704).
+    /// `live` is the snapshot's one read of the running apps, whose
+    /// own policy filters them: no LaunchServices round trip per
+    /// process on the hotkey path (#1936).
+    func jumpRunningApps(
+        _ live: [RunningApp],
+        listed: Set<pid_t>
+    ) -> [JumpRunningApp] {
         var order: [String] = []
         var apps: [String: JumpRunningApp] = [:]
-        for app in eventLoop.liveApps(owners: []) {
+        for app in live where app.activationPolicy == .regular {
             guard let id = app.ref.bundleID?.lowercased(),
-                !EventLoop.isOwnProcess(app.pid),
-                eventLoop.policy(of: app.pid) == .regular
+                !EventLoop.isOwnProcess(app.pid)
             else { continue }
             if apps[id] == nil { order.append(id) }
             apps[id] = JumpRunningApp(
                 bundleID: id,
                 name: apps[id]?.name ?? app.ref.name,
                 listed: apps[id]?.listed == true || listed.contains(app.pid)
+                    || eventLoop.shouldIgnoreApp(app.ref)
             )
         }
         return order.compactMap { apps[$0] }

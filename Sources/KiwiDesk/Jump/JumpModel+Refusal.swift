@@ -35,8 +35,9 @@ extension JumpModel {
             onDeadKey()
             return
         }
-        guard openRefusal(app.bundleID) == nil else {
-            refuse(index, spoken: JumpAppText.refusedSpoken(app))
+        if let block = openRefusal(app.bundleID) {
+            appRefusal = block
+            refuse(index, spoken: JumpAppText.refusedSpoken(app, block))
             return
         }
         onOpenApp(app.bundleID)

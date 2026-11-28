@@ -91,10 +91,7 @@ extension KeybindingCatalog {
         return nil
     }
 
-    /// Target application with bundle ID and display name.
-    typealias InstalledApp = InstalledApps.App
-
-    private static var diskApps: [InstalledApp] { InstalledApps.disk }
+    private static var diskApps: [InstalledApps.App] { InstalledApps.disk }
 
     /// Bundle ID to application file path mapping for disk applications.
     static var diskAppIconPaths: [String: String] {
@@ -103,7 +100,7 @@ extension KeybindingCatalog {
 
     /// Installed disk and running regular applications sorted by localized
     /// display name.
-    static var installedApps: [InstalledApp] {
+    static var installedApps: [InstalledApps.App] {
         var byID = Dictionary(
             diskApps.map { ($0.bundleID, $0) },
             uniquingKeysWith: { first, _ in first }
@@ -117,7 +114,7 @@ extension KeybindingCatalog {
                 app.bundleURL.map {
                     InstalledApps.localizedName(url: $0, path: $0.path)
                 } ?? app.localizedName ?? id
-            byID[id] = InstalledApp(bundleID: id, name: name)
+            byID[id] = InstalledApps.App(bundleID: id, name: name)
         }
         return byID.values.sorted {
             $0.name.localizedCaseInsensitiveCompare($1.name)
@@ -126,7 +123,7 @@ extension KeybindingCatalog {
     }
 
     /// Process-lifetime cached snapshot of installed applications.
-    static let installedAppsSnapshot: [InstalledApp] = installedApps
+    static let installedAppsSnapshot: [InstalledApps.App] = installedApps
 
     /// Process-lifetime dictionary mapping bundle ID to localized name (#333).
     static let installedNameByID: [String: String] = {

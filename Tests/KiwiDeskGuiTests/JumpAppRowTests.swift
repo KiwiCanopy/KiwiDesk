@@ -82,6 +82,9 @@ struct JumpAppRowTests {
         #expect(list.section(at: windows) == .applications)
         #expect(list.rowCount == windows + 4)
         #expect(list.digitReaches(windows))
+        // The header and the rows are sized in.
+        #expect(list.drawnRows == windows + 4)
+        #expect(list.sectionCount == 1)
         list.select(windows + 1)
         #expect(list.selected == nil)
         #expect(list.selectedApp?.app.name == "Safari")
@@ -123,6 +126,11 @@ struct JumpAppRowTests {
         #expect(dead == 2 && opened.isEmpty && refused.isEmpty)
         model.pick(row, .jump)
         #expect(opened == ["a.safari"])
+        // A ⌘ digit and a click reach an app row through the keys'
+        // and the row's own doors.
+        model.handle(.quick(row, moveHere: false), repeated: false)
+        model.clickRow(row, pick: .jump)
+        #expect(opened == ["a.safari", "a.safari", "a.safari"])
     }
 
     @Test("an app Core cannot find refuses in its row")
@@ -180,6 +188,21 @@ struct JumpAppRowTests {
         )
         #expect(apps.contains("core.openApp(bundleID)"))
         #expect(apps.contains("installed:InstalledApps.scanned??[]"))
+        // Core's one matcher ranks the rows; no Jump file starts
+        // the scan on the hotkey path (#3276).
+        let apps2 = try squash("JumpList+Apps.swift")
+        #expect(apps2.contains("JumpSearch.nameMatch(query,in:app.name)"))
+        #expect(!apps2.contains("range(of:"))
+        let jump = try FileManager.default.contentsOfDirectory(
+            atPath: root.path
+        ).filter { $0.hasSuffix(".swift") }
+        #expect(jump.count > 10)
+        for file in jump {
+            let source = try squash(file)
+            #expect(!source.contains("InstalledApps.disk"), "\(file)")
+            #expect(!source.contains("InstalledApps.iconPaths"), "\(file)")
+            #expect(!source.contains("KeybindingCatalog.installed"), "\(file)")
+        }
         let list = try squash("JumpPanelView+List.swift")
         #expect(
             list.contains("ifletapp=list.appRow(index){appRow(index,app)}")

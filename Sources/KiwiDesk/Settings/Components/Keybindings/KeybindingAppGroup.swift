@@ -22,7 +22,7 @@ struct ApplicationsGroup: View {
     /// The last pick that created nothing: WHICH app to ask
     /// about. Never the sentence, which `allBoundNotice` derives
     /// live (#1235).
-    @State var refusal: KeybindingCatalog.InstalledApp?
+    @State var refusal: InstalledApps.App?
 
     /// The pending announcement, cancelled by the next pick so a
     /// post cannot land after its sentence stopped being true —

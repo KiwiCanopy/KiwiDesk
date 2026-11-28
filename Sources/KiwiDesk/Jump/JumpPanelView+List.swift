@@ -133,7 +133,8 @@ extension JumpPanelView {
             ),
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
-            refused: model.revealedRow == index,
+            refusal: model.revealedRow == index
+                ? model.appRefusal.map(JumpAppText.refused) : nil,
             pulsing: model.refusedRow == index,
             onActivate: { pick in model.clickRow(index, pick: pick) },
             pickModifiers: { model.pickModifiers(NSEvent.modifierFlags) },

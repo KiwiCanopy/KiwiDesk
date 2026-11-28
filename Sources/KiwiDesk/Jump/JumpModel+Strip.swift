@@ -20,7 +20,8 @@ extension JumpModel {
 
     /// The line an empty list shows.
     var emptyText: String {
-        if !list.query.isEmpty, !list.candidates.isEmpty {
+        // A query on All searched the apps too (#3704).
+        if !list.query.isEmpty, list.tile == 0 {
             return JumpAppText.noResults
         }
         return list.snapshot.entries.isEmpty
@@ -65,6 +66,7 @@ extension JumpModel {
         let name = list.stripApp.map(\.name) ?? JumpStripText.allName
         let row =
             list.selected.map { JumpRowText.spoken($0.entry) }
+            ?? list.selectedApp.map { JumpAppText.spoken($0.app) }
             ?? list.yours.map(JumpStripText.yoursSpoken)
         onAnnounce(JumpStripText.moved(tile: name, row: row ?? emptyText))
     }

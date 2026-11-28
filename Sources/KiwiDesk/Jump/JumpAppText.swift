@@ -5,7 +5,7 @@ import KiwiDeskCore
 /// a row's state, what VoiceOver hears and a refused open.
 @MainActor
 enum JumpAppText {
-    /// The section's header, Spotlight's word.
+    /// The section's header.
     static var header: String {
         L("jump.section.applications", "Applications")
     }
@@ -33,13 +33,21 @@ enum JumpAppText {
     }
 
     /// The reason a refused open shows in the row.
-    static var refused: String {
-        L("jump.app.not_found", "Not found")
+    static func refused(_ block: JumpOpenBlock) -> String {
+        switch block {
+        case .notFound: L("jump.app.not_found", "Not found")
+        }
     }
 
     /// What VoiceOver hears for a refused open.
-    static func refusedSpoken(_ app: JumpAppCandidate) -> String {
-        L("jump.app.ax.not_found", "Can't open: %1$@", app.name)
+    static func refusedSpoken(
+        _ app: JumpAppCandidate,
+        _ block: JumpOpenBlock
+    ) -> String {
+        switch block {
+        case .notFound:
+            L("jump.app.ax.not_found", "Can't open: %1$@", app.name)
+        }
     }
 
     /// The list's line where neither a window nor an app matches.

@@ -96,7 +96,7 @@ struct JumpModelTests {
             heard == [
                 "Mail, Inbox, Space 1",
                 "Notes, Ideas, Space 1",
-                "No open windows match",
+                "No Results",
                 "Results: 1",
             ]
         )

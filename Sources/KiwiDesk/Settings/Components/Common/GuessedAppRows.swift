@@ -6,7 +6,7 @@ import SwiftUI
 /// titles as a caption. Picking is the add (#1172).
 struct GuessedAppRows: View {
     let apps: [GuessedFloatApp]
-    let onPick: (KeybindingCatalog.InstalledApp) -> Void
+    let onPick: (InstalledApps.App) -> Void
     /// The bundle id the picker's cursor sits on (`DropdownCursor`).
     var cursor: String?
     /// Every pointer event over a row, for `DropdownCursor.hover`.

@@ -13,6 +13,7 @@ import Testing
 struct JumpOpenAppTests {
     static let notes = "app.test.notes"
     static let mail = "app.test.mail"
+    static let ignored = "com.apple.controlcenter"
 
     final class Recorder {
         var opened: [(String, OpenAppMode)] = []
@@ -41,6 +42,21 @@ struct JumpOpenAppTests {
                     activationPolicy: .regular,
                     ref: AppRef(bundleID: "App.Test.Mail", name: "Mail")
                 ),
+                // An accessory app is no Applications row.
+                RunningApp(
+                    pid: 900_004,
+                    activationPolicy: .accessory,
+                    ref: AppRef(bundleID: "app.test.agent", name: "Agent")
+                ),
+                // An app KiwiDesk ignores by its built-in table.
+                RunningApp(
+                    pid: 900_003,
+                    activationPolicy: .regular,
+                    ref: AppRef(
+                        bundleID: Self.ignored,
+                        name: "Control Center"
+                    )
+                ),
             ]
         }
         core.state.workspaces.ensureSpace(SpaceID("1"))
@@ -60,7 +76,9 @@ struct JumpOpenAppTests {
         core.state.workspaces.add(WindowID(1), to: SpaceID("1"))
     }
 
-    @Test("the snapshot names running apps, listed where a row is theirs")
+    @Test(
+        "running apps are listed where a row is theirs or they are ignored"
+    )
     func runningApps() {
         let (core, _) = makeCore()
         track(core, pid: 900_001)
@@ -77,6 +95,12 @@ struct JumpOpenAppTests {
                         bundleID: Self.mail,
                         name: "Mail",
                         listed: false
+                    ),
+                    // Its windows have no row by rule: left out.
+                    JumpRunningApp(
+                        bundleID: Self.ignored,
+                        name: "Control Center",
+                        listed: true
                     ),
                 ]
         )

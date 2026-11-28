@@ -99,10 +99,10 @@ struct JumpListTests {
         #expect(JumpList.number(ofRow: 0) == 1)
         #expect(JumpList.number(ofRow: 8) == 9)
         #expect(JumpList.number(ofRow: 9) == nil)
-        #expect(list.quick(0)?.entry.app == "App 1")
-        #expect(list.quick(8)?.entry.app == "App 9")
-        #expect(list.quick(9) == nil)
-        #expect(self.list(three).quick(3) == nil)
+        #expect(list.digitReaches(0))
+        #expect(list.digitReaches(8))
+        #expect(!list.digitReaches(9))
+        #expect(!self.list(three).digitReaches(3))
     }
 
     @Test("a hidden app among the first nine takes its number")
@@ -110,7 +110,8 @@ struct JumpListTests {
         let entries = three + [Self.row(9, "Spotify", hidden: true)]
         let list = list(entries)
         #expect(list.hiddenStart == 3)
-        #expect(list.quick(3)?.entry.isHiddenApp == true)
+        #expect(list.digitReaches(3))
+        #expect(list.results[3].entry.isHiddenApp)
         #expect(self.list(three).hiddenStart == nil)
     }
 

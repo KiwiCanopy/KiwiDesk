@@ -908,7 +908,7 @@
   "jump.ax.results": "Resultados: %1$d",
   "jump.ax.swap_refused": "No se puede intercambiar: %1$@",
   "jump.empty.no_match": "Ninguna ventana abierta coincide",
-  "jump.empty.no_results": "Ningún resultado",
+  "jump.empty.no_results": "Sin resultados",
   "jump.empty.other": "No hay otras ventanas",
   "jump.field.label": "Saltar a la ventana",
   "jump.footer.apps": "%1$@ Apps",

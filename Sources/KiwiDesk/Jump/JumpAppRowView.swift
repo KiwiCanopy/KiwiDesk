@@ -13,8 +13,8 @@ struct JumpAppRowView: View {
     /// The ⌘ number this row takes, nil from row 10 on.
     let number: Int?
     let commandHeld: Bool
-    /// A refused open showed its reason on this row.
-    var refused = false
+    /// The reason a refused open showed on this row, nil otherwise.
+    var refusal: String?
     var pulsing = false
     let onActivate: (JumpPick) -> Void
     let pickModifiers: () -> NSEvent.ModifierFlags
@@ -100,9 +100,9 @@ struct JumpAppRowView: View {
     }
 
     @ViewBuilder private var trailing: some View {
-        if refused {
+        if let refusal {
             JumpRefusalView(
-                text: JumpAppText.refused,
+                text: refusal,
                 pulsing: pulsing && !reduceMotion
             )
         } else {

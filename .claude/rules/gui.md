@@ -2491,9 +2491,9 @@ a refusal (`JumpChordTableTests`). **An Applications row (#3704)
 takes the same door**: its ↩ asks Core's `openAppRefusal` and opens
 through `KiwiCore.openApp`, its other picks are dead chords, and
 its rows rank through Core's `JumpSearch.nameMatch` alone, never a
-matcher of the GUI's own (`JumpAppRowTests`). KiwiHub reads the
-installed apps only through `InstalledApps.scanned`, which never
-starts the scan (#3276).
+matcher of the GUI's own (`JumpAppRowTests`). Read the installed
+apps on a KiwiHub path only through `InstalledApps.scanned`, which
+never starts the scan (#3276, `JumpAppRowTests` ▸ `wiring`).
 
 **A KiwiHub pick — ↩, a ⌘ digit or a click, on any side — reads its
 modifiers through `JumpModel.pickModifiers`, never

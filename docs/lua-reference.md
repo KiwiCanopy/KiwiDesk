@@ -8309,13 +8309,14 @@ never the text, and narrow the matches to that app.
 the strip on the app of the window you used last.
 
 :::unreleased
-Under a query, below the windows, **Applications** lists up to
-five installed apps with no window in the list whose name matches,
-each marked **Not open** or **Open, no windows**. **Return** (or a
+Under a query on **All**, below the windows, **Applications** lists
+up to five apps whose name matches, installed or running, with no
+window in the list, each marked **Not open** or **Open, no
+windows**. **Return** (or a
 click) opens the app, or has a running one open a window; the ⌘
 digits count on through these rows, and **⇧Return** and
-**⌥Return** do nothing on them. Where nothing matches, the list
-says **No Results**.
+**⌥Return** do nothing on them. Where nothing on **All** matches,
+the list says **No Results**.
 :::
 
 With nothing typed, the window you are in sits greyed at the top
