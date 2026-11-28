@@ -4,14 +4,10 @@ import AppKit
 /// listed window opens from its row. Core names the running apps for
 /// the snapshot and answers the press; the GUI ranks the rows.
 extension KiwiCore {
-    /// The running regular apps by bundle id, in LaunchServices'
-    /// order, each listed where a pid in `listed` is one of its
-    /// processes or KiwiDesk ignores the app, whose windows have no
-    /// row by rule, so the section never offers to reopen one
-    /// (#3704).
-    /// `live` is the snapshot's one read of the running apps, whose
-    /// own policy filters them: no LaunchServices round trip per
-    /// process on the hotkey path (#1936).
+    /// The regular apps in `live`, the snapshot's one read, by
+    /// bundle id in LaunchServices' order, filtered by their own
+    /// policy (#1936); listed where a pid in `listed` is theirs or
+    /// KiwiDesk ignores the app (#3704).
     func jumpRunningApps(
         _ live: [RunningApp],
         listed: Set<pid_t>
