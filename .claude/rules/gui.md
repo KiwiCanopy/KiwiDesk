@@ -2090,7 +2090,9 @@ Obligations:
   2026-11-27, a native `.menu` bezel adapts with the glass while
   its label does not, and a chip's translucent face greys with it.
   A new kind of control on that glass extends that suite in the
-  same change. A second `glassWindowGround` surface that needs the
+  same change, and so does a control the glass composes from a
+  file outside `Updates/` that calls neither modifier, which the
+  suite's file scan cannot see. A second `glassWindowGround` surface that needs the
   ground asks the owner before it is lifted out of Updates into a
   `docs/ui-patterns.md` convention (#3666 ruling).
 - **A tinted panel's text takes the hierarchical styles `panelGlassChrome`

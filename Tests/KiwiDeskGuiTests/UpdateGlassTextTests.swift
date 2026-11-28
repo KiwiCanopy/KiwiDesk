@@ -124,9 +124,15 @@ struct UpdateGlassTextTests {
                 #expect(!body.contains(hierarchical))
                 text = text.replacingOccurrences(of: body, with: "")
             }
+            // A `Label` draws text in the ambient ink; matched at an
+            // identifier boundary so `.accessibilityLabel(` and
+            // `neutralMenuLabel(` do not count. Trades a `Label`
+            // spelled through a typealias, which no file here has.
+            let label = /(?:^|[^\w.])Label\s*\(/
+            let own = ["Text(", ".foregroundStyle(", ".foregroundColor("]
             #expect(
-                !text.contains("Text(")
-                    && !text.contains(".foregroundStyle("),
+                !own.contains(where: text.contains)
+                    && !text.contains(label),
                 "\(file) draws text of its own beside its controls"
             )
         }
