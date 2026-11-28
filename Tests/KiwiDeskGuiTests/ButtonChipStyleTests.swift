@@ -121,8 +121,20 @@ struct ButtonChipStyleTests {
         #expect(face.contains(":AnyShape(bezel)"))
         #expect(face.contains("shape.fill("))
         #expect(face.contains("bezel.strokeBorder("))
+        // One home for the shape, read by the face and the update
+        // window's ground (#3666).
         #expect(
-            face.contains("privatevarbezel:RoundedRectangle{RoundedRectangle(")
+            face.contains(
+                "privatevarbezel:RoundedRectangle{"
+                    + "ButtonChipStyle.bezel(for:controlSize)}"
+            )
+        )
+        let flatStyle = style.split(whereSeparator: \.isWhitespace)
+            .joined()
+        #expect(
+            flatStyle.contains(
+                "->RoundedRectangle{RoundedRectangle(cornerRadius:"
+            )
         )
         #expect(
             face.contains(".contentShape([.interaction,.focusEffect],shape)")

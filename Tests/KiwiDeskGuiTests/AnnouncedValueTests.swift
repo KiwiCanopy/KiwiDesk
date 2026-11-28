@@ -68,8 +68,9 @@ struct AnnouncedValueTests {
         // #1209: the export row's range menu, named by the range
         // key because the button beside it names the export.
         "GeneralSection+LogExport.swift": 1,
-        // #2308: What's new's release menu, named "Release".
-        "WhatsNewReleasePicker.swift": 1,
+        // #2308: What's new's release menu and the tab strip's
+        // fallback, one pop-up named by each caller (#3666).
+        "UpdatePopUp.swift": 1,
         // #2544: a Lua binding's shortcut group menu, named for its
         // row.
         "ShortcutGroupField.swift": 1,

@@ -132,6 +132,7 @@ struct StandardFallbackFooter: View {
             Spacer(minLength: 0)
             Button(L("standard_fallback.ok", "OK"), action: onOK)
                 .settingsActionButton()
+                .updateActionGround()
                 .keyboardShortcut(.defaultAction)
                 .focused($focused)
         }

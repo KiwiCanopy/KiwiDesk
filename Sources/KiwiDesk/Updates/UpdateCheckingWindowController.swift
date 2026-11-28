@@ -112,6 +112,7 @@ struct UpdateCheckingFooter: View {
             Spacer(minLength: 0)
             Button(L("update.window.cancel", "Cancel"), action: cancel)
                 .settingsActionButton()
+                .updateActionGround()
                 .keyboardShortcut(.cancelAction)
         }
         .updateFooterBar()

@@ -27,6 +27,16 @@ struct ButtonChipStyle: ButtonStyle {
         return hovered ? SettingsTheme.chipHover : SettingsTheme.chipRest
     }
 
+    /// The action chip's shape at a control size: the system
+    /// bezel's rounded rectangle, never a capsule (owner,
+    /// 2026-10-17). One home for every reader of the shape.
+    static func bezel(for controlSize: ControlSize) -> RoundedRectangle {
+        RoundedRectangle(
+            cornerRadius: metrics(for: controlSize).radius,
+            style: .continuous
+        )
+    }
+
     /// The system font and the bezel's room per control size —
     /// shared with `PopUpTriggerStyle`, so the two read one height.
     static func metrics(for controlSize: ControlSize) -> Metrics {

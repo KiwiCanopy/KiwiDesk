@@ -11,6 +11,9 @@ import Testing
 /// apart; the guard is a scan of the Updates files that draw text
 /// or name an ink, each of which is ruled into one list below.
 ///
+/// A control draws its label on a face of its own, so it sits on
+/// the opaque control ground instead (#3666).
+///
 /// Ruled per file, so a file holding both kinds is ruled by its
 /// card text: `UpdateNotesScroll.swift`'s links sit on the glass,
 /// and a fixed ink added to them would pass both scans.
@@ -35,13 +38,13 @@ struct UpdateGlassTextTests {
         "UpdateNotesScroll.swift",
     ]
 
-    /// Files whose text a control draws on a bezel of its own, in
-    /// the ink its seal sets. A menu picker's seal is a fixed ink
-    /// and its bezel adapts with the glass: weak in light over a
-    /// dark backdrop, a defect of its own (#3666).
-    private static let exempt: [String: String] = [
-        "UpdateNotesTabStrip.swift": "segments; menu under its seal",
-        "WhatsNewReleasePicker.swift": "menu picker under its seal",
+    /// Files whose text a control draws on the opaque control
+    /// ground (#3666): its face's fixed ink on `card`, which the
+    /// contrast suite measures, and no text of their own.
+    private static let onControlGround: Set<String> = [
+        "UpdateNotesTabStrip.swift",
+        "WhatsNewReleasePicker.swift",
+        "UpdatePopUp.swift",
     ]
 
     private static var updates: URL {
@@ -67,6 +70,9 @@ struct UpdateGlassTextTests {
         /(?:foregroundStyle\(|foregroundColor = )SettingsTheme\.ink\d?\b/
     }
 
+    /// The controls that draw a label of their own.
+    private static let controls = ["SegmentedPicker(", "UpdatePopUp("]
+
     /// Every Updates file that draws text or names an ink is ruled
     /// into exactly one list, so a new one cannot go unseen.
     @Test("every text-drawing Updates file is ruled")
@@ -75,13 +81,15 @@ struct UpdateGlassTextTests {
         #expect(files.count >= 20, "scanned \(files.count) files")
         var drawing: Set<String> = []
         for file in files {
-            let text = try String(contentsOf: file, encoding: .utf8)
-            if text.contains("Text(") || text.contains(Self.fixedInk) {
+            let text = try SourceScan.strippedSource(at: file)
+            if text.contains("Text(") || text.contains(Self.fixedInk)
+                || Self.controls.contains(where: text.contains)
+            {
                 drawing.insert(file.lastPathComponent)
             }
         }
         let lists = [
-            Set(Self.onGlass.keys), Self.onCards, Set(Self.exempt.keys),
+            Set(Self.onGlass.keys), Self.onCards, Self.onControlGround,
         ]
         let ruled = lists.reduce(Set<String>()) { $0.union($1) }
         let unruled = drawing.subtracting(ruled).sorted()
@@ -91,6 +99,43 @@ struct UpdateGlassTextTests {
             lists.map(\.count).reduce(0, +) == ruled.count,
             "a file is ruled twice"
         )
+    }
+
+    /// A file on the control ground draws text only through a
+    /// control: `UpdatePopUp`'s label, in a concrete ink, while
+    /// a `Text` or a style beside the controls would sit on the
+    /// glass unruled.
+    @Test("text on the control ground is a control's")
+    func controlGroundTextIsAControls() throws {
+        let hierarchical = /\.foregroundStyle\(\.(?:primary|secondary)\)/
+        for file in Self.onControlGround {
+            var text = try SourceScan.strippedSource(
+                at: Self.updates.appendingPathComponent(file)
+            )
+            if file == "UpdatePopUp.swift" {
+                let body = try #require(
+                    SourceScan.declarationBody(
+                        after: "struct UpdatePopUp",
+                        in: text
+                    ),
+                    "UpdatePopUp is gone"
+                )
+                #expect(body.contains(Self.drawnInk))
+                #expect(!body.contains(hierarchical))
+                text = text.replacingOccurrences(of: body, with: "")
+            }
+            // A `Label` draws text in the ambient ink; matched at an
+            // identifier boundary so `.accessibilityLabel(` and
+            // `neutralMenuLabel(` do not count. Trades a `Label`
+            // spelled through a typealias, which no file here has.
+            let label = /(?:^|[^\w.])Label\s*\(/
+            let own = ["Text(", ".foregroundStyle(", ".foregroundColor("]
+            #expect(
+                !own.contains(where: text.contains)
+                    && !text.contains(label),
+                "\(file) draws text of its own beside its controls"
+            )
+        }
     }
 
     @Test("text on the glass takes the hierarchical styles")

@@ -11,7 +11,8 @@ import Testing
 extension SettingsThemeContrastTests {
     /// A segmented control's unselected label over its track, and
     /// over the hover lift above it, on every ground a picker
-    /// stands on — the update window's tab strip on the page.
+    /// stands on — the update window's tab strip on its control
+    /// ground, `card` (#3666).
     private static let segments: [Pairing] =
         [
             ("card", SettingsTheme.card),
@@ -158,6 +159,14 @@ extension SettingsThemeContrastTests {
             SettingsTheme.ink2,
             on: SettingsTheme.card,
             layers: [SettingsTheme.chipHover]
+        ),
+        // The update window's pop-up chevron held down (#3666).
+        Pairing(
+            "ink2 on a pressed pop-up trigger on card",
+            SettingsTheme.ink2,
+            on: SettingsTheme.card,
+            layers: [SettingsTheme.chipPressed],
+            floor: 3.0
         ),
     ]
 
