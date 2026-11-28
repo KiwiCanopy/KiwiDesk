@@ -2487,7 +2487,13 @@ never a gate re-spelled in the GUI (`JumpRefusalRowTests` ▸
 click, a ⌘ digit — is read from `JumpPick.of` alone (#2931)**, never
 a modifier test beside it; a ↩ chord it answers nil for is
 `JumpKey.dead`, the system beep wired in the controller, and never
-a refusal (`JumpChordTableTests`).
+a refusal (`JumpChordTableTests`). **An Applications row (#3704)
+takes the same door**: its ↩ asks Core's `openAppRefusal` and opens
+through `KiwiCore.openApp`, its other picks are dead chords, and
+its rows rank through Core's `JumpSearch.nameMatch` alone, never a
+matcher of the GUI's own (`JumpAppRowTests`). Read the installed
+apps on a KiwiHub path only through `InstalledApps.scanned`, which
+never starts the scan (#3276, `JumpAppRowTests` ▸ `wiring`).
 
 **A KiwiHub pick — ↩, a ⌘ digit or a click, on any side — reads its
 modifiers through `JumpModel.pickModifiers`, never

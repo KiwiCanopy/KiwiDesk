@@ -18,7 +18,7 @@ extension JumpPanelView {
             // cue that it scrolls (#3249).
             FadingColumn(
                 selected: model.list.selection,
-                ids: Array(model.list.results.indices),
+                ids: Array(0..<model.list.rowCount),
                 inset: Self.listPadding
             ) {
                 VStack(spacing: 0) {
@@ -47,10 +47,7 @@ extension JumpPanelView {
         // Eager: a lazy stack left a row below the fold unbuilt, so
         // the selection's scroll found no row to reach.
         return VStack(spacing: 0) {
-            ForEach(
-                Array(list.results.enumerated()),
-                id: \.offset
-            ) { index, match in
+            ForEach(0..<list.rowCount, id: \.self) { index in
                 // One scroll target with its header, so a selection
                 // landing on a section's first row brings the header
                 // into view with it.
@@ -58,12 +55,16 @@ extension JumpPanelView {
                     if let section = list.section(at: index) {
                         sectionHeader(section)
                     }
-                    row(
-                        index,
-                        match,
-                        here: here,
-                        acted: acted
-                    )
+                    if let app = list.appRow(index) {
+                        appRow(index, app)
+                    } else {
+                        row(
+                            index,
+                            list.results[index],
+                            here: here,
+                            acted: acted
+                        )
+                    }
                 }
                 .id(index)
             }
@@ -108,6 +109,34 @@ extension JumpPanelView {
             onActivate: { pick in
                 model.clickRow(index, pick: pick)
             },
+            pickModifiers: { model.pickModifiers(NSEvent.modifierFlags) },
+            onHover: {
+                model.hoverRow(index, pointer: model.currentPointer())
+            },
+            onHoverEnd: { model.endHover(.row(index)) }
+        )
+    }
+
+    /// An Applications row (#3704): its ⌘ number runs on from the
+    /// windows', and ↩ or a click opens the app.
+    func appRow(_ index: Int, _ app: JumpAppMatch) -> some View {
+        let list = model.list
+        return JumpAppRowView(
+            match: app,
+            icon: AppIconCache.shared.icon(forBundleID: app.app.bundleID),
+            isSelected: index == list.selection,
+            isLifted: JumpHover.lifts(
+                .row(index),
+                hover: model.hover,
+                selected: index == list.selection,
+                clickable: true
+            ),
+            number: JumpList.number(ofRow: index),
+            commandHeld: model.commandHeld,
+            refusal: model.revealedRow == index
+                ? model.appRefusal.map(JumpAppText.refused) : nil,
+            pulsing: model.refusedRow == index,
+            onActivate: { pick in model.clickRow(index, pick: pick) },
             pickModifiers: { model.pickModifiers(NSEvent.modifierFlags) },
             onHover: {
                 model.hoverRow(index, pointer: model.currentPointer())

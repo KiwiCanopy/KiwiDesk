@@ -67,8 +67,7 @@ public enum JumpSearch {
         _ needle: String
     ) -> (Int, Match)? {
         let floor = section(entry) * 4
-        if let range = find(needle, in: entry.app) {
-            let tier = range.lowerBound == entry.app.startIndex ? 0 : 1
+        if let (tier, range) = nameMatch(needle, in: entry.app) {
             return (
                 floor + tier,
                 Match(entry: entry, appRange: range, titleRange: nil)
@@ -83,6 +82,21 @@ public enum JumpSearch {
             floor + (word == nil ? 3 : 2),
             Match(entry: entry, appRange: nil, titleRange: word ?? range)
         )
+    }
+
+    /// How an app name matches `query`: tier 0 where it starts the
+    /// name, 1 where it is inside it, with the matched range; nil
+    /// for no match or a blank query. KiwiHub's Applications rows
+    /// rank by it (#3704), so one matcher ranks every name.
+    public static func nameMatch(
+        _ query: String,
+        in name: String
+    ) -> (tier: Int, range: Range<String.Index>)? {
+        let needle = query.trimmingCharacters(in: .whitespaces)
+        guard !needle.isEmpty, let range = find(needle, in: name) else {
+            return nil
+        }
+        return (range.lowerBound == name.startIndex ? 0 : 1, range)
     }
 
     private static let options: String.CompareOptions = [

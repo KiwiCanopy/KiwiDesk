@@ -17,16 +17,22 @@ extension KiwiCore {
         let hub =
             area?.display
             ?? here.flatMap { state.workspaces.display(of: $0) }
-        let entries = jumpEntries(here: here, hub: hub)
+        // One read of the running apps for the hidden rows and the
+        // Applications section (#3704).
+        let live = eventLoop.liveApps(owners: [])
+        let entries = jumpEntries(here: here, hub: hub, live: live)
         let yours = jumpYours(here: here, hub: hub)
+        let apps = jumpApps(for: entries, first: yours)
         return JumpSnapshot(
             entries: entries,
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon),
             swapsInHere: jumpHereFocus(in: here) != nil,
-            apps: jumpApps(for: entries, first: yours),
+            apps: apps,
             lastUsed: jumpLastUsed(in: entries),
-            yours: yours
+            yours: yours,
+            // The strip's own apps, so the two never disagree.
+            running: jumpRunningApps(live, listed: Set(apps.map(\.pid)))
         )
     }
 
@@ -45,9 +51,12 @@ extension KiwiCore {
         return trackedJumpEntry(window, here: here, hub: hub, partner: id)
     }
 
+    /// `live` is a read of the running apps the caller already made,
+    /// read here where none is handed in.
     func jumpEntries(
         here: SpaceID? = nil,
-        hub: DisplayID? = nil
+        hub: DisplayID? = nil,
+        live: [RunningApp]? = nil
     ) -> [JumpEntry] {
         let here = here ?? state.workspaces.activeSpace
         let partner = jumpSwapPartner(in: here)
@@ -74,7 +83,10 @@ extension KiwiCore {
         // The pocket after Hidden (#2446).
         let rows =
             listed.filter { !$0.isPocketed }
-            + hiddenAppJumpEntries(yours: yours)
+            + hiddenAppJumpEntries(
+                live ?? eventLoop.liveApps(owners: []),
+                yours: yours
+            )
             + listed.filter(\.isPocketed)
         return lensOrdered(rows)
     }
@@ -244,9 +256,10 @@ extension KiwiCore {
     /// No window owners handed in: a hidden app is always on
     /// LaunchServices' list, so the census read would buy nothing.
     private func hiddenAppJumpEntries(
+        _ live: [RunningApp],
         yours: JumpSwapBlock?
     ) -> [JumpEntry] {
-        eventLoop.liveApps(owners: [])
+        live
             .filter { app in
                 app.isHidden && !EventLoop.isOwnProcess(app.pid)
                     && eventLoop.policy(of: app.pid) == .regular

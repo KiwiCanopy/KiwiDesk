@@ -106,7 +106,13 @@ extension JumpFooter {
     func windowsSlots(held: NSEvent.ModifierFlags) -> [JumpFooterSlot] {
         let worded = windowsPick(held)
         let own: [(WindowsHint, String, String?)] = [
-            (.jump, L("jump.footer.jump", "%1$@ Jump", "↩"), nil),
+            (
+                .jump,
+                selectionOpens
+                    ? JumpAppText.footerOpen
+                    : L("jump.footer.jump", "%1$@ Jump", "↩"),
+                nil
+            ),
             (
                 .moveHere,
                 L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),

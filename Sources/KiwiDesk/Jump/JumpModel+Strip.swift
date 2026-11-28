@@ -8,11 +8,11 @@ import KiwiDeskCore
 extension JumpModel {
     /// What VoiceOver hears when the results change.
     var resultsSpoken: String {
-        guard list.results.isEmpty else {
+        guard list.rowCount == 0 else {
             return L(
                 "jump.ax.results",
                 "Results: %1$d",
-                list.results.count
+                list.rowCount
             )
         }
         return emptyText
@@ -20,7 +20,11 @@ extension JumpModel {
 
     /// The line an empty list shows.
     var emptyText: String {
-        list.snapshot.entries.isEmpty
+        // A query on All searched the apps too (#3704).
+        if !list.query.isEmpty, list.tile == 0 {
+            return JumpAppText.noResults
+        }
+        return list.snapshot.entries.isEmpty
             ? L("jump.empty.other", "No other windows")
             : L("jump.empty.no_match", "No open windows match")
     }

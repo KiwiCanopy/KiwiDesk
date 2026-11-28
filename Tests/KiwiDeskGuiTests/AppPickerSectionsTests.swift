@@ -7,7 +7,7 @@ import Testing
 /// app is listed there only, a listed app is left out of both,
 /// the search filters both, and "Open apps" is sorted.
 struct AppPickerSectionsTests {
-    private typealias App = KeybindingCatalog.InstalledApp
+    private typealias App = InstalledApps.App
 
     private let installed: [App] = [
         .init(bundleID: "com.apple.Safari", name: "Safari"),

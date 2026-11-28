@@ -59,6 +59,14 @@ struct OpenOrFocusSeams {
         AXHelper.activateThenRaise($0, window: $1, pid: $2)
     }
 
+    /// Whether LaunchServices finds the app — read at a KiwiHub
+    /// press, so a row whose app left refuses in the panel (#3704).
+    var resolves: @MainActor (String) -> Bool = { bundleID in
+        NSWorkspace.shared.urlForApplication(
+            withBundleIdentifier: bundleID
+        ) != nil
+    }
+
     /// Launches the app — the branch taken when it is not running,
     /// or when `spawn_new` asks for a fresh instance — and, on a
     /// running app with no window at all, reopens it so it opens

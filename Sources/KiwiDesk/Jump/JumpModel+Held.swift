@@ -13,10 +13,14 @@ extension JumpModel {
         return flags
     }
 
+    /// Whether the selection is an Applications row: the footer's ↩
+    /// opens and Move here and Swap here light for none (#3704).
+    var selectionOpens: Bool { list.selectedApp != nil }
+
     /// Whether the side shown has a selection a pick acts on.
     var hasSelection: Bool {
         switch scope {
-        case .windows: return list.selected != nil
+        case .windows: return list.selection != nil
         case .shortcuts: return false
         case .view: return view?.selected?.isApplicable == true
         case .desktops: return desktops?.place != nil

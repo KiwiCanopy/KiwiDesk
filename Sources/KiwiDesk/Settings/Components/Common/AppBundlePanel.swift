@@ -18,7 +18,7 @@ enum AppBundlePanel {
     /// saying no, but a bundle with no identifier is a pick that
     /// silently does nothing — a residue no caller covers.
     @MainActor static func pick()
-        -> KeybindingCatalog.InstalledApp?
+        -> InstalledApps.App?
     {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.application]

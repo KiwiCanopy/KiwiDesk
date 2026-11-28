@@ -11,11 +11,11 @@ struct AppPickerTests {
     private func app(
         _ id: String,
         _ name: String
-    ) -> KeybindingCatalog.InstalledApp {
+    ) -> InstalledApps.App {
         .init(bundleID: id, name: name)
     }
 
-    private var sample: [KeybindingCatalog.InstalledApp] {
+    private var sample: [InstalledApps.App] {
         [
             app("com.google.chrome", "Google Chrome"),
             app("com.apple.safari", "Safari"),

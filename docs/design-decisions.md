@@ -17377,24 +17377,6 @@ field, which never moves (#2246), and the panel grows downward
 rather than keeping room for it, since a reserved band would be the
 very row the calm opening removes.
 
-**A query never brings the strip in (#3704, owner ruling
-2026-11-27, amending #3168).** [Trade-off] A strip shown on All by
-a query would answer "which apps hold a match" with its dimmed
-tiles, but it answers on the first keystroke, as a band of large
-tiles that pushes every result down while the user is still
-reading them, and the user typing a name is after a row, not an
-app, so the band is a second thing to read past at the moment the
-list matters most. The rows carry their app's icon, which says
-which apps match for the rows on screen; what is lost is the
-at-a-glance count of matching apps below the fold, and that is the
-trade. Reach is unchanged: under a query ← → step through only the
-apps with a match, and the first step brings the strip in on one,
-as → from an empty field does on the next app; a strip already
-shown stays, dimming its tiles under the query. The strip
-stays on the Windows side rather than moving to a side or panel of
-its own, because it filters the Windows list and ⌥⇥ must land
-beside the list it filters.
-
 The opener is its own verb, `kiwihub.show_last_app`, rather than an
 option on `kiwihub.show`: a side and an opening are two questions,
 and an option would put a second meaning on a call every existing
@@ -17449,7 +17431,8 @@ hold breaks the promise that every tile is a slice of All. Its one
 row was the dead end #3135 rejected for search, it sat dimmed under
 every query, it put ⌥⇥ on a row ↩ could not pick when the app used
 before had closed its window, and it was one more VoiceOver stop
-that led nowhere. Reopening such an app stays with Open or Focus
+that led nowhere. Reopening such an app takes KiwiHub's
+Applications section under a query (#3704), beside Open or Focus
 (#1840), ⌘⇥ and the Dock.
 
 A modifier still held from the chord that opened KiwiHub or stepped
@@ -17465,6 +17448,69 @@ opener to ⌃⇥ was rejected, since it is every browser's and
 terminal's tab key, and so was a heavier swap chord, which would
 change #2885's chords for everyone to fix one path. Taking over ⌘⇥
 itself stays the opt-in #3136.
+
+**A query never brings the strip in (#3704, owner ruling
+2026-11-27, amending #3168).** [Trade-off] A strip shown on All by
+a query would answer "which apps hold a match" with its dimmed
+tiles, but it answers on the first keystroke, as a band of large
+tiles that pushes every result down while the user is still
+reading them, and the user typing a name is after a row, not an
+app, so the band is a second thing to read past at the moment the
+list matters most. The rows carry their app's icon, which says
+which apps match for the rows on screen; what is lost is the
+at-a-glance count of matching apps below the fold, and that is the
+trade. Reach is unchanged: under a query ← → step through only the
+apps with a match, and the first step brings the strip in on one,
+as → from an empty field does on the next app; a strip already
+shown stays, dimming its tiles under the query. The strip
+stays on the Windows side rather than moving to a side or panel of
+its own, because it filters the Windows list and ⌥⇥ must land
+beside the list it filters.
+
+**KiwiHub's search reaches apps that are not open (#3704, owner
+ruling 2026-11-27, amending #3168's "reopening such an app stays
+with Open or Focus, ⌘⇥ and the Dock").** [Rationale] A user typing
+an app's name into the switcher wants that app, and an empty list
+for an installed app with no window sends them to a second tool
+for the same intent. So under a query, below the window rows, an
+**Applications** section lists installed apps with no row here,
+ranked by Core's own name matcher (`JumpSearch.nameMatch`, the
+tiers the window rows' app names rank by), a running app first on
+a tie, at most five rows, each labelled "Not open" or "Open, no
+windows". It shows under a query only, never at rest, because the
+calm opening is a list of windows to go back to, and an app the
+user did not name is not one. The ⌘ digits run on through these
+rows, since a digit numbers what is drawn. App rows never become
+strip tiles, so every tile stays a slice of All, and the strip on
+another app's tile lists none, being a filter of that app's
+windows.
+
+↩ on an app row opens it: a launch, or for a running app with no
+window a reopen, which has it open one as a Dock click does
+(#1840), its window followed to its App Rule's Space as any launch
+is (#1599). Core answers at the press (#2885), so an app removed
+since the panel opened refuses in the row, "Not found", and keeps
+the panel open; nothing else is knowable before the app answers.
+Move here and Swap here stay drawn and dimmed for these rows, and
+their chords beep as a chord that picks nothing does (#2931 ▸
+Ruling 4): with no window there is nothing to refuse, so no
+refusal sound and no reason word. Where neither a window nor an
+app matches, the list says "No Results".
+
+The installed-app index is the GUI's (`InstalledApps`), shared with
+Settings' app pickers, because the disk scan builds display names,
+which are narration; Core names only which apps run and which of
+them already hold a row or are ignored by rule, whose windows have
+no row on purpose. The scan is slow, so it is warmed at launch and
+KiwiHub reads only a finished one: an opening before the scan ends
+lists only the running apps rather than scanning on the hotkey path
+(#3276).
+
+↩ lands the app's window where a launch lands it, its App Rule's
+Space else the active one, and takes no "here": it opens the app as
+the Dock would. ⌘↩'s new window (#3704's third part) files into the
+"here" Space KiwiHub opened over, so on a split or second screen the
+two land apart on purpose.
 
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**

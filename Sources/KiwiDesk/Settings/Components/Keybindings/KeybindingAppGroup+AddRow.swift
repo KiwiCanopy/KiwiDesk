@@ -76,7 +76,7 @@ extension ApplicationsGroup {
     /// announcement never round-trips through the `@State` its
     /// own caller has just written in the same tick.
     func allBoundNotice(
-        about app: KeybindingCatalog.InstalledApp
+        about app: InstalledApps.App
     ) -> String? {
         guard firstAvailableAction(for: app.bundleID) == nil
         else { return nil }
@@ -96,7 +96,7 @@ extension ApplicationsGroup {
     /// that list entirely, so the "Other…" route can still name
     /// one. The greyed Add button used to be the only thing
     /// standing there, and a dim is not a sentence (#1235).
-    func add(_ app: KeybindingCatalog.InstalledApp) {
+    func add(_ app: InstalledApps.App) {
         // Seed the first action not already bound for this app,
         // so re-adding it lands on a distinct action instead of
         // a duplicate default.
@@ -124,7 +124,7 @@ extension ApplicationsGroup {
     /// `SettingsFooter`'s measured one, taken FROM it rather than
     /// restated: a post landing in the same instant as a
     /// control's own announcement was dropped on device (#812).
-    func refuse(_ app: KeybindingCatalog.InstalledApp) {
+    func refuse(_ app: InstalledApps.App) {
         refusal = app
         refusalAnnouncement?.cancel()
         guard let sentence = allBoundNotice(about: app) else {

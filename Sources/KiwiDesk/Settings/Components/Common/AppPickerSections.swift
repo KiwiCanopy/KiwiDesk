@@ -5,7 +5,7 @@ import KiwiDeskCore
 /// optional "Open apps" section, then "All apps". Pure, so the
 /// rules the owner ruled are held without a view.
 enum AppPickerSections {
-    typealias App = KeybindingCatalog.InstalledApp
+    typealias App = InstalledApps.App
 
     /// The two lists for `query`: the search filters both — never
     /// hides "Open apps", where a bundle-less process exists
@@ -52,7 +52,7 @@ enum AppPickerSlot: Hashable {
 
     typealias Lists = (
         openApps: [OpenApp],
-        all: [KeybindingCatalog.InstalledApp]
+        all: [InstalledApps.App]
     )
 
     /// The cursor's sequence over `lists`, in drawn order: open

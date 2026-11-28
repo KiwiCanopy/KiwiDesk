@@ -10,12 +10,42 @@ extension JumpModel {
     /// 4, 7). A row the snapshot refused that now goes ahead reaches
     /// the verb, which stays the authority.
     func pick(_ index: Int, _ pick: JumpPick) {
+        if let app = list.appRow(index) {
+            pickApp(index, app.app, pick)
+            return
+        }
         guard list.results.indices.contains(index) else { return }
         let entry = list.results[index].entry
         guard let spoken = refusalSpoken(entry, pick) else {
             onPick(entry, pick)
             return
         }
+        refuse(index, spoken: spoken)
+    }
+
+    /// An Applications row (#3704): ↩ opens its app where Core lets
+    /// it; Move here and Swap here have no window to act on, so their
+    /// chords beep as a dead chord does (#2931 ▸ Ruling 4).
+    private func pickApp(
+        _ index: Int,
+        _ app: JumpAppCandidate,
+        _ pick: JumpPick
+    ) {
+        guard pick == .jump else {
+            onDeadKey()
+            return
+        }
+        if let block = openRefusal(app.bundleID) {
+            appRefusal = block
+            refuse(index, spoken: JumpAppText.refusedSpoken(app, block))
+            return
+        }
+        onOpenApp(app.bundleID)
+    }
+
+    /// Shows and swells the refused row's reason, the panel kept
+    /// open (Ruling 4, 7).
+    private func refuse(_ index: Int, spoken: String) {
         refusedRow = index
         // A key acts on the selection while the pointer may lift
         // another row: the refused row says why until let go.

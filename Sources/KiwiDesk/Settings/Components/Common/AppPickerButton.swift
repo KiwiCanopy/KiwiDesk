@@ -3,7 +3,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Searchable app picker button and popover (#263, `IconPicker`,
-/// `AppSelector`, `appMenu`, `AppRef`, `AppIconCache`, `InstalledApp`).
+/// `AppSelector`, `appMenu`, `AppRef`, `AppIconCache`,
+/// `InstalledApps.App`).
 /// ↑/↓ and real pointer motion move one cursor over the rows and
 /// the escape (`DropdownCursor`, `AppPickerButton+Cursor`); Return
 /// picks it.
@@ -13,7 +14,7 @@ struct AppPickerButton: View {
     /// The current selection's display name, or nil for none.
     let selection: String?
     var minWidth: CGFloat = 110
-    let onPick: (KeybindingCatalog.InstalledApp) -> Void
+    let onPick: (InstalledApps.App) -> Void
     let escapeLabel: String
     let onEscape: () -> Void
     /// Bundle IDs to omit from the picker list (#334).
@@ -141,7 +142,7 @@ struct AppPickerButton: View {
         )
     }
 
-    typealias InstalledApp = KeybindingCatalog.InstalledApp
+    typealias InstalledApp = InstalledApps.App
 
     @ViewBuilder private func sectionsBody(
         _ lists: (openApps: [OpenApp], all: [InstalledApp])
@@ -273,9 +274,9 @@ struct AppPickerButton: View {
 /// `searchMatches`.
 enum AppPickerFilter {
     static func matching(
-        _ apps: [KeybindingCatalog.InstalledApp],
+        _ apps: [InstalledApps.App],
         query: String
-    ) -> [KeybindingCatalog.InstalledApp] {
+    ) -> [InstalledApps.App] {
         let query = query.trimmed
         guard !query.isEmpty else { return apps }
         return apps.filter {

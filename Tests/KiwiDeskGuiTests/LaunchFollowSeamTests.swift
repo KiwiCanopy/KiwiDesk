@@ -43,15 +43,15 @@ struct LaunchFollowSeamTests {
             "KiwiCore+BootSeams.swift", 1
         ),
         ("launchFollow.pressBefore(", followFile, 1),
-        // The ONE door that owes, and its owers: the activation
-        // judged a launch, Open or Focus's launch and pull
-        // branches, New Window (#1518), and Jump to window's
-        // un-minimize, an open by the same rule (#1875).
+        // The ONE door that owes, and its owers: a launch-judged
+        // activation, Open or Focus's launch and pull, New Window
+        // (#1518), Jump's un-minimize (#1875), KiwiHub's app (#3704).
         ("launchFollow.record(", followFile, 1),
         ("oweLaunchFollow(bundleID, at: now)", followFile, 1),
         ("oweLaunchFollow(bundleID)", "KiwiCore+Launch.swift", 2),
         ("oweLaunchFollow(app)", "KiwiCore+WindowActions.swift", 1),
         ("oweLaunchFollow(unminimized)", "KiwiCore+JumpActions.swift", 1),
+        ("oweLaunchFollow(id)", "KiwiCore+JumpOpenApp.swift", 1),
         // The claim at the arrival, the switch in place of its
         // retile, and the arrival's #45 start-at-target carried
         // into the switch's own pass.

@@ -59,7 +59,7 @@ struct GestureActionDoors<Menu: View>: View {
 
     /// The action opening `app`.
     private static func app(
-        _ app: KeybindingCatalog.InstalledApp
+        _ app: InstalledApps.App
     ) -> LuaAction {
         LuaAction(
             lua: KeybindingCatalog.appCommand(app.bundleID),
