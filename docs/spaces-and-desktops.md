@@ -153,6 +153,19 @@ per-screen edge and Show belong to the number, not to the
 physical screen, so they go to whichever screen holds that
 number.
 
+:::unreleased
+When the connected screens include every screen of a setup the
+profile has saved, those screens keep their numbers and each other
+screen takes the next number, left to right. With several such
+setups, the first saved one counts.
+
+With as many screens as the profile's setups, the screens a saved
+setup shares keep their numbers and each new screen takes a number
+none of them holds, left to right. Where several saved setups
+share screens, the one sharing the most counts, then the first
+saved.
+:::
+
 A setup the profile has not saved is numbered **left to right**
 by each screen's left edge. Two screens whose left edges line up
 exactly take the higher one first. For example:
