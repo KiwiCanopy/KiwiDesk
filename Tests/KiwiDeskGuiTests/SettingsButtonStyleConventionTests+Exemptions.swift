@@ -197,7 +197,7 @@ extension SettingsButtonStyleConventionTests {
             ),
             // The update window's pop-up, the same shape on its
             // opaque ground (#3666).
-            "UpdateControlGround.swift": (
+            "UpdatePopUp.swift": (
                 1, ".settingsPopUpTrigger()",
                 "The update window's pop-up Menu taking the pop-up "
                     + "trigger seal, so the capsule is its hit area"

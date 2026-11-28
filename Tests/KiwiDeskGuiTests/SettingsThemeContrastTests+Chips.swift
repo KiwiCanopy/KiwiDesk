@@ -160,6 +160,14 @@ extension SettingsThemeContrastTests {
             on: SettingsTheme.card,
             layers: [SettingsTheme.chipHover]
         ),
+        // The update window's pop-up chevron held down (#3666).
+        Pairing(
+            "ink2 on a pressed pop-up trigger on card",
+            SettingsTheme.ink2,
+            on: SettingsTheme.card,
+            layers: [SettingsTheme.chipPressed],
+            floor: 3.0
+        ),
     ]
 
     private static func icon(

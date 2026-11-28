@@ -70,7 +70,7 @@ struct AnnouncedValueTests {
         "GeneralSection+LogExport.swift": 1,
         // #2308: What's new's release menu and the tab strip's
         // fallback, one pop-up named by each caller (#3666).
-        "UpdateControlGround.swift": 1,
+        "UpdatePopUp.swift": 1,
         // #2544: a Lua binding's shortcut group menu, named for its
         // row.
         "ShortcutGroupField.swift": 1,

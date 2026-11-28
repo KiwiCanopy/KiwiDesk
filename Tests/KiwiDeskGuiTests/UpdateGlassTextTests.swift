@@ -40,11 +40,11 @@ struct UpdateGlassTextTests {
 
     /// Files whose text a control draws on the opaque control
     /// ground (#3666): its face's fixed ink on `card`, which the
-    /// contrast suite measures.
+    /// contrast suite measures, and no text of their own.
     private static let onControlGround: Set<String> = [
         "UpdateNotesTabStrip.swift",
         "WhatsNewReleasePicker.swift",
-        "UpdateControlGround.swift",
+        "UpdatePopUp.swift",
     ]
 
     private static var updates: URL {
@@ -81,7 +81,7 @@ struct UpdateGlassTextTests {
         #expect(files.count >= 20, "scanned \(files.count) files")
         var drawing: Set<String> = []
         for file in files {
-            let text = try String(contentsOf: file, encoding: .utf8)
+            let text = try SourceScan.strippedSource(at: file)
             if text.contains("Text(") || text.contains(Self.fixedInk)
                 || Self.controls.contains(where: text.contains)
             {
@@ -99,6 +99,37 @@ struct UpdateGlassTextTests {
             lists.map(\.count).reduce(0, +) == ruled.count,
             "a file is ruled twice"
         )
+    }
+
+    /// A file on the control ground draws text only through a
+    /// control: `UpdatePopUp`'s label, in a concrete ink, while
+    /// a `Text` or a style beside the controls would sit on the
+    /// glass unruled.
+    @Test("text on the control ground is a control's")
+    func controlGroundTextIsAControls() throws {
+        let hierarchical = /\.foregroundStyle\(\.(?:primary|secondary)\)/
+        for file in Self.onControlGround {
+            var text = try SourceScan.strippedSource(
+                at: Self.updates.appendingPathComponent(file)
+            )
+            if file == "UpdatePopUp.swift" {
+                let body = try #require(
+                    SourceScan.declarationBody(
+                        after: "struct UpdatePopUp",
+                        in: text
+                    ),
+                    "UpdatePopUp is gone"
+                )
+                #expect(body.contains(Self.drawnInk))
+                #expect(!body.contains(hierarchical))
+                text = text.replacingOccurrences(of: body, with: "")
+            }
+            #expect(
+                !text.contains("Text(")
+                    && !text.contains(".foregroundStyle("),
+                "\(file) draws text of its own beside its controls"
+            )
+        }
     }
 
     @Test("text on the glass takes the hierarchical styles")
