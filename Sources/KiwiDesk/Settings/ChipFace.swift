@@ -75,10 +75,8 @@ struct ChipFace: View {
         popUp ? AnyShape(Capsule()) : AnyShape(bezel)
     }
 
-    /// The action chip keeps the system bezel's rounded rectangle,
-    /// never a capsule (owner, 2026-10-17).
     private var bezel: RoundedRectangle {
-        RoundedRectangle(cornerRadius: metrics.radius, style: .continuous)
+        ButtonChipStyle.bezel(for: controlSize)
     }
 
     private var metrics: ButtonChipStyle.Metrics {

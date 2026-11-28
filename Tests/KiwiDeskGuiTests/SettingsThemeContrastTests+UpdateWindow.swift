@@ -6,9 +6,11 @@ import SwiftUI
 /// contrast suite and kept here for its length: the inks over
 /// the Highlights panel's gold-washed card; a tab's list and Next
 /// sit on a plain card, measured by the main list's `on card`
-/// rows; the tab strip's track is a segmented track, measured with
-/// the chips (`chips`). The header and the footer sit on the
-/// glass and draw `.primary` / `.secondary` (#3650): on the glass
+/// rows. Every control on the glass stands on `card` (#3666): the
+/// tab strip's track, the pop-up and the footer's action buttons
+/// are measured there with the chips (`chips`). The header's and
+/// the footer's text sits on the glass and draws `.primary` /
+/// `.secondary` (#3650): on the glass
 /// those are the system's adaptive styles, which no fixed pairing
 /// can measure, and on the page fallback `glassWindowGround`
 /// resolves them to `ink` / `ink2`, which the main list's

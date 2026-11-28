@@ -2080,6 +2080,21 @@ Obligations:
   fallback the concrete inks the contrast suite measures on it;
   the update window's ground is the instance
   (`UpdateGlassTextTests`, `GlassWindowGroundInksTests`).
+- **A control on the update window's glass stands on the opaque
+  control ground** (#3666) — any view drawn on
+  `updateWindowGround()` or `updateFooterBar()`: a pop-up is
+  `UpdatePopUp`, an action button adds `updateActionGround()`,
+  and the tab strip's segments sit on `updateControlGround`, whose
+  `card` the contrast suite measures the faces on
+  (`UpdateControlGroundTests`). As measured on macOS 27.2,
+  2026-11-27, a native `.menu` bezel adapts with the glass while
+  its label does not, and a chip's translucent face greys with it.
+  A new kind of control on that glass extends that suite in the
+  same change, and so does a control the glass composes from a
+  file outside `Updates/` that calls neither modifier, which the
+  suite's file scan cannot see. A second `glassWindowGround` surface that needs the
+  ground asks the owner before it is lifted out of Updates into a
+  `docs/ui-patterns.md` convention (#3666 ruling).
 - **A tinted panel's text takes the hierarchical styles `panelGlassChrome`
   sets, never an ink by name.** While the panel wears the Fill, on
   glass or over its material (`PanelGlass.shelf`), it sets

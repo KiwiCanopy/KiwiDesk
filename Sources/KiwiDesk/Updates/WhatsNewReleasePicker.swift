@@ -56,24 +56,18 @@ struct WhatsNewBrowser: View {
     }
 }
 
-/// The menu itself: a pop-up picker, named for VoiceOver and
-/// valued with its choice (#812).
+/// The menu itself: the window's pop-up (`UpdatePopUp`), named
+/// for VoiceOver and valued with its choice (#812).
 struct ReleasePicker: View {
     let picking: ReleasePicking
 
     var body: some View {
-        Picker(Self.label, selection: picking.selection) {
-            ForEach(picking.releases.options, id: \.self) { option in
-                Text(Self.title(option, in: picking.releases)).tag(option)
+        UpdatePopUp(
+            label: Self.label,
+            selection: picking.selection,
+            options: picking.releases.options.map {
+                (Self.title($0, in: picking.releases), $0)
             }
-        }
-        .pickerStyle(.menu)
-        .labelsHidden()
-        .neutralMenuLabel()
-        .fixedSize()
-        .accessibilityLabel(Self.label)
-        .accessibilityValue(
-            Self.title(picking.selection.wrappedValue, in: picking.releases)
         )
     }
 

@@ -157,6 +157,7 @@ struct UpdateWindowFooter: View {
         case .downloading, .preparing, .installing:
             Button(L("update.window.cancel", "Cancel"), action: session.cancel)
                 .settingsActionButton()
+                .updateActionGround()
                 .keyboardShortcut(.cancelAction)
                 .disabled(!session.canCancel)
                 .accessibilityFocused($answerFocused)
@@ -172,6 +173,7 @@ struct UpdateWindowFooter: View {
     private var later: some View {
         Button(L("update.window.later", "Later"), action: session.later)
             .settingsActionButton()
+            .updateActionGround()
             .keyboardShortcut(.cancelAction)
     }
 
